@@ -26,7 +26,7 @@ interface Props {
   dataViews?: DataView[];
 }
 
-export function EntitiesAppSearchBar({
+export function StreamsAppSearchBar({
   dateRangeFrom,
   dateRangeTo,
   onQueryChange,
@@ -47,7 +47,7 @@ export function EntitiesAppSearchBar({
   return (
     <div className={parentClassName}>
       <unifiedSearch.ui.SearchBar
-        appName="entitiesApp"
+        appName="streamsApp"
         onQuerySubmit={({ dateRange, query: nextQuery }) => {
           onQuerySubmit({ dateRange, query: (nextQuery?.query as string | undefined) ?? '' });
         }}

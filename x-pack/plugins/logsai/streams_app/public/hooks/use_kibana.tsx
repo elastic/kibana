@@ -8,19 +8,19 @@
 import type { CoreStart } from '@kbn/core/public';
 import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { EntitiesAppStartDependencies } from '../types';
-import type { EntitiesAppServices } from '../services/types';
+import type { StreamsAppStartDependencies } from '../types';
+import type { StreamsAppServices } from '../services/types';
 
-export interface EntitiesAppKibanaContext {
+export interface StreamsAppKibanaContext {
   core: CoreStart;
   dependencies: {
-    start: EntitiesAppStartDependencies;
+    start: StreamsAppStartDependencies;
   };
-  services: EntitiesAppServices;
+  services: StreamsAppServices;
 }
 
-const useTypedKibana = (): EntitiesAppKibanaContext => {
-  const context = useKibana<CoreStart & Omit<EntitiesAppKibanaContext, 'core'>>();
+const useTypedKibana = (): StreamsAppKibanaContext => {
+  const context = useKibana<CoreStart & Omit<StreamsAppKibanaContext, 'core'>>();
 
   return useMemo(() => {
     const { dependencies, services, ...core } = context.services;

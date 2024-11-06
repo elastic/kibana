@@ -7,8 +7,8 @@
 import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { getGlobalEntitiesAPIServerRouteRepository } from './get_global_entities_api_route_repository';
-import type { EntitiesAPIRouteHandlerResources } from './types';
+import { getGlobalStreamsAPIServerRouteRepository } from './get_global_streams_api_route_repository';
+import type { StreamsAPIRouteHandlerResources } from './types';
 
 export function registerServerRoutes({
   core,
@@ -17,12 +17,12 @@ export function registerServerRoutes({
 }: {
   core: CoreSetup;
   logger: Logger;
-  dependencies: Omit<EntitiesAPIRouteHandlerResources, 'request' | 'context' | 'logger' | 'params'>;
+  dependencies: Omit<StreamsAPIRouteHandlerResources, 'request' | 'context' | 'logger' | 'params'>;
 }) {
   registerRoutes({
     core,
     logger,
-    repository: getGlobalEntitiesAPIServerRouteRepository(),
+    repository: getGlobalStreamsAPIServerRouteRepository(),
     dependencies,
   });
 }

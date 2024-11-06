@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EntityHealthStatus } from '@kbn/entities-api-plugin/common';
+import { EntityHealthStatus } from '@kbn/streams-api-plugin/common';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

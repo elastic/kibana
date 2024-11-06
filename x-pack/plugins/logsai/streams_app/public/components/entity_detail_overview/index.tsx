@@ -19,13 +19,13 @@ import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_ab
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { take, uniqueId } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import { Entity, entitySourceQuery } from '@kbn/entities-api-plugin/public';
-import { EntityTypeDefinition } from '@kbn/entities-api-plugin/common/entities';
+import { Entity, entitySourceQuery } from '@kbn/streams-api-plugin/public';
+import { EntityTypeDefinition } from '@kbn/streams-api-plugin/common/entities';
 import { useKibana } from '../../hooks/use_kibana';
 import { getInitialColumnsForLogs } from '../../util/get_initial_columns_for_logs';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
 import { ControlledEsqlGrid } from '../esql_grid/controlled_esql_grid';
-import { EntitiesAppSearchBar } from '../entities_app_search_bar';
+import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { useEsqlQueryResult } from '../../hooks/use_esql_query_result';
 
 export function EntityDetailOverview({
@@ -42,7 +42,7 @@ export function EntityDetailOverview({
       start: {
         dataViews,
         data,
-        entitiesAPI: { entitiesAPIClient },
+        streamsAPI: { streamsAPIClient },
       },
     },
   } = useKibana();
@@ -102,7 +102,7 @@ export function EntityDetailOverview({
         return undefined;
       }
 
-      return entitiesAPIClient.fetch('POST /internal/entities_api/esql', {
+      return streamsAPIClient.fetch('POST /internal/streams_api/esql', {
         signal,
         params: {
           body: {
@@ -122,7 +122,7 @@ export function EntityDetailOverview({
       start,
       end,
       queries?.baseDslFilter,
-      entitiesAPIClient,
+      streamsAPIClient,
     ]
   );
 
@@ -165,7 +165,7 @@ export function EntityDetailOverview({
       <EuiFlexGroup direction="column">
         <EuiFlexGroup direction="row" gutterSize="s">
           <EuiFlexItem grow>
-            <EntitiesAppSearchBar
+            <StreamsAppSearchBar
               query={displayedKqlFilter}
               onQueryChange={({ query }) => {
                 setDisplayedKqlFilter(query);
@@ -195,7 +195,7 @@ export function EntityDetailOverview({
             `}
           >
             <EuiSuperSelect
-              data-test-subj="entitiesAppEntityDetailOverviewSelect"
+              data-test-subj="streamsAppEntityDetailOverviewSelect"
               itemClassName={css`
                 white-space: nowrap;
                 display: inline-block;

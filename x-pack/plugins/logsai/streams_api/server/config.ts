@@ -11,4 +11,4 @@ export const config = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 });
 
-export type EntitiesAPIConfig = TypeOf<typeof config>;
+export type StreamsAPIConfig = TypeOf<typeof config>;

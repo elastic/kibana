@@ -6,25 +6,21 @@
  */
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 
-import { EntitiesAPIPlugin } from './plugin';
+import { StreamsAPIPlugin } from './plugin';
 import type {
-  EntitiesAPIPublicSetup,
-  EntitiesAPIPublicStart,
-  EntitiesAPISetupDependencies,
-  EntitiesAPIStartDependencies,
+  StreamsAPIPublicSetup,
+  StreamsAPIPublicStart,
+  StreamsAPISetupDependencies,
+  StreamsAPIStartDependencies,
   ConfigSchema,
 } from './types';
 
-export type { EntitiesAPIPublicSetup, EntitiesAPIPublicStart };
+export type { StreamsAPIPublicSetup, StreamsAPIPublicStart };
 
 export const plugin: PluginInitializer<
-  EntitiesAPIPublicSetup,
-  EntitiesAPIPublicStart,
-  EntitiesAPISetupDependencies,
-  EntitiesAPIStartDependencies
+  StreamsAPIPublicSetup,
+  StreamsAPIPublicStart,
+  StreamsAPISetupDependencies,
+  StreamsAPIStartDependencies
 > = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) =>
-  new EntitiesAPIPlugin(pluginInitializerContext);
-
-export { getIndexPatternsForFilters, entitySourceQuery } from '../common';
-
-export type { Entity } from '../common';
+  new StreamsAPIPlugin(pluginInitializerContext);

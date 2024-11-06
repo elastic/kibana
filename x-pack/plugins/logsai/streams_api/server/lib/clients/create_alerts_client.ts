@@ -6,10 +6,10 @@
  */
 
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
-import type { EntitiesAPIRouteHandlerResources } from '../../routes/types';
+import type { StreamsAPIRouteHandlerResources } from '../../routes/types';
 
 export async function createAlertsClient(
-  resources: Pick<EntitiesAPIRouteHandlerResources, 'request' | 'plugins'>
+  resources: Pick<StreamsAPIRouteHandlerResources, 'request' | 'plugins'>
 ): Promise<AlertsClient> {
   return await resources.plugins.ruleRegistry
     .start()

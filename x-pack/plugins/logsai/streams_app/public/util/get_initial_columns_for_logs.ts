@@ -7,7 +7,7 @@
 
 import { isArray } from 'lodash';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { Pivot } from '@kbn/entities-api-plugin/common';
+import { Pivot } from '@kbn/streams-api-plugin/common';
 
 type Column = ESQLSearchResponse['columns'][number];
 

@@ -6,6 +6,6 @@
  */
 
 import { createUseBreadcrumbs } from '@kbn/typed-react-router-config';
-import { EntitiesAppRoutes } from '../routes/config';
+import { StreamsAppRoutes } from '../routes/config';
 
-export const useEntitiesAppBreadcrumbs = createUseBreadcrumbs<EntitiesAppRoutes>();
+export const useStreamsAppBreadcrumbs = createUseBreadcrumbs<StreamsAppRoutes>();

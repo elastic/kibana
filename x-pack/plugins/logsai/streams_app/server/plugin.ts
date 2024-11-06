@@ -9,19 +9,19 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type {
   ConfigSchema,
-  EntitiesAppServerSetup,
-  EntitiesAppServerStart,
-  EntitiesAppSetupDependencies,
-  EntitiesAppStartDependencies,
+  StreamsAppServerSetup,
+  StreamsAppServerStart,
+  StreamsAppSetupDependencies,
+  StreamsAppStartDependencies,
 } from './types';
 
-export class EntitiesAppPlugin
+export class StreamsAppPlugin
   implements
     Plugin<
-      EntitiesAppServerSetup,
-      EntitiesAppServerStart,
-      EntitiesAppSetupDependencies,
-      EntitiesAppStartDependencies
+      StreamsAppServerSetup,
+      StreamsAppServerStart,
+      StreamsAppSetupDependencies,
+      StreamsAppStartDependencies
     >
 {
   logger: Logger;
@@ -30,13 +30,13 @@ export class EntitiesAppPlugin
     this.logger = context.logger.get();
   }
   setup(
-    coreSetup: CoreSetup<EntitiesAppStartDependencies, EntitiesAppServerStart>,
-    pluginsSetup: EntitiesAppSetupDependencies
-  ): EntitiesAppServerSetup {
+    coreSetup: CoreSetup<StreamsAppStartDependencies, StreamsAppServerStart>,
+    pluginsSetup: StreamsAppSetupDependencies
+  ): StreamsAppServerSetup {
     return {};
   }
 
-  start(core: CoreStart, pluginsStart: EntitiesAppStartDependencies): EntitiesAppServerStart {
+  start(core: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppServerStart {
     return {};
   }
 }

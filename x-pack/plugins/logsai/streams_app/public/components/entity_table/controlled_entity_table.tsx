@@ -18,10 +18,10 @@ import { css } from '@emotion/css';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { EntityWithSignalStatus } from '@kbn/entities-api-plugin/common';
+import type { EntityWithSignalStatus } from '@kbn/streams-api-plugin/common';
 import React, { useMemo } from 'react';
-import { useEntitiesAppRouter } from '../../hooks/use_entities_app_router';
-import { EntitiesAppSearchBar } from '../entities_app_search_bar';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { EntityHealthStatusBadge } from '../entity_health_status_badge';
 
 export function ControlledEntityTable({
@@ -63,7 +63,7 @@ export function ControlledEntityTable({
   sort?: { field: string; order: 'asc' | 'desc' };
   onSortChange?: (nextSort: { field: string; order: 'asc' | 'desc' }) => void;
 }) {
-  const router = useEntitiesAppRouter();
+  const router = useStreamsAppRouter();
 
   const displayedColumns = useMemo<Array<EuiBasicTableColumn<EntityWithSignalStatus>>>(() => {
     return [
@@ -140,7 +140,7 @@ export function ControlledEntityTable({
     <EuiFlexGroup direction="column">
       <EuiFlexGroup direction="row">
         <EuiFlexItem grow>
-          <EntitiesAppSearchBar
+          <StreamsAppSearchBar
             query={kqlFilter}
             onQueryChange={({ query }) => {
               onKqlFilterChange(query);

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EntitiesAPIClient } from '../api';
+import type { StreamsAPIClient } from '../api';
 
-export interface EntitiesAPIServices {
-  entitiesAPIClient: EntitiesAPIClient;
+export interface StreamsAPIServices {
+  streamsAPIClient: StreamsAPIClient;
 }

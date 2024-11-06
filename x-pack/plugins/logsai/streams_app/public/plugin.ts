@@ -19,20 +19,20 @@ import type { Logger } from '@kbn/logging';
 import { ENTITY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import type {
   ConfigSchema,
-  EntitiesAppPublicSetup,
-  EntitiesAppPublicStart,
-  EntitiesAppSetupDependencies,
-  EntitiesAppStartDependencies,
+  StreamsAppPublicSetup,
+  StreamsAppPublicStart,
+  StreamsAppSetupDependencies,
+  StreamsAppStartDependencies,
 } from './types';
-import { EntitiesAppServices } from './services/types';
+import { StreamsAppServices } from './services/types';
 
-export class EntitiesAppPlugin
+export class StreamsAppPlugin
   implements
     Plugin<
-      EntitiesAppPublicSetup,
-      EntitiesAppPublicStart,
-      EntitiesAppSetupDependencies,
-      EntitiesAppStartDependencies
+      StreamsAppPublicSetup,
+      StreamsAppPublicStart,
+      StreamsAppSetupDependencies,
+      StreamsAppStartDependencies
     >
 {
   logger: Logger;
@@ -41,9 +41,9 @@ export class EntitiesAppPlugin
     this.logger = context.logger.get();
   }
   setup(
-    coreSetup: CoreSetup<EntitiesAppStartDependencies, EntitiesAppPublicStart>,
-    pluginsSetup: EntitiesAppSetupDependencies
-  ): EntitiesAppPublicSetup {
+    coreSetup: CoreSetup<StreamsAppStartDependencies, StreamsAppPublicStart>,
+    pluginsSetup: StreamsAppSetupDependencies
+  ): StreamsAppPublicSetup {
     pluginsSetup.observabilityShared.navigation.registerSections(
       from(coreSetup.getStartServices()).pipe(
         map(([coreStart, pluginsStart]) => {
@@ -53,7 +53,7 @@ export class EntitiesAppPlugin
               sortKey: 101,
               entries: [
                 {
-                  label: i18n.translate('xpack.entities.entitiesAppLinkTitle', {
+                  label: i18n.translate('xpack.entities.streamsAppLinkTitle', {
                     defaultMessage: 'Entities',
                   }),
                   app: ENTITY_APP_ID,
@@ -82,7 +82,7 @@ export class EntitiesAppPlugin
       deepLinks: [
         {
           id: 'entities',
-          title: i18n.translate('xpack.entities.entitiesAppDeepLinkTitle', {
+          title: i18n.translate('xpack.entities.streamsAppDeepLinkTitle', {
             defaultMessage: 'Entities',
           }),
           path: '/',
@@ -95,7 +95,7 @@ export class EntitiesAppPlugin
           coreSetup.getStartServices(),
         ]);
 
-        const services: EntitiesAppServices = {};
+        const services: StreamsAppServices = {};
 
         return renderApp({
           coreStart,
@@ -109,7 +109,7 @@ export class EntitiesAppPlugin
     return {};
   }
 
-  start(coreStart: CoreStart, pluginsStart: EntitiesAppStartDependencies): EntitiesAppPublicStart {
+  start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
     return {};
   }
 }

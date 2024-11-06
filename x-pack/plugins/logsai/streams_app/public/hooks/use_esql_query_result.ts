@@ -27,7 +27,7 @@ export function useEsqlQueryResult({
   const {
     dependencies: {
       start: {
-        entitiesAPI: { entitiesAPIClient },
+        streamsAPI: { streamsAPIClient },
       },
     },
   } = useKibana();
@@ -37,7 +37,7 @@ export function useEsqlQueryResult({
       if (!query) {
         return undefined;
       }
-      return entitiesAPIClient.fetch('POST /internal/entities_api/esql', {
+      return streamsAPIClient.fetch('POST /internal/streams_api/esql', {
         signal,
         params: {
           body: {
@@ -51,6 +51,6 @@ export function useEsqlQueryResult({
         },
       });
     },
-    [entitiesAPIClient, query, start, end, kuery, operationName, dslFilter]
+    [streamsAPIClient, query, start, end, kuery, operationName, dslFilter]
   );
 }

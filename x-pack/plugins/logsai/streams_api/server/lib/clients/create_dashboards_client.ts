@@ -7,7 +7,7 @@
 
 import type { SavedObject, SavedObjectsFindResult } from '@kbn/core/server';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/common';
-import { EntitiesAPIRouteHandlerResources } from '../../routes/types';
+import { StreamsAPIRouteHandlerResources } from '../../routes/types';
 
 interface DashboardsClient {
   getAllDashboards: () => Promise<Array<SavedObjectsFindResult<DashboardAttributes>>>;
@@ -15,7 +15,7 @@ interface DashboardsClient {
 }
 
 export async function createDashboardsClient(
-  resources: Pick<EntitiesAPIRouteHandlerResources, 'request' | 'context'>
+  resources: Pick<StreamsAPIRouteHandlerResources, 'request' | 'context'>
 ): Promise<DashboardsClient> {
   const soClient = (await resources.context.core).savedObjects.client;
   async function getDashboards(

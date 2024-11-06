@@ -6,21 +6,21 @@
  */
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 
-import { EntitiesAppPlugin } from './plugin';
+import { StreamsAppPlugin } from './plugin';
 import type {
-  EntitiesAppPublicSetup,
-  EntitiesAppPublicStart,
-  EntitiesAppSetupDependencies,
-  EntitiesAppStartDependencies,
+  StreamsAppPublicSetup,
+  StreamsAppPublicStart,
+  StreamsAppSetupDependencies,
+  StreamsAppStartDependencies,
   ConfigSchema,
 } from './types';
 
-export type { EntitiesAppPublicSetup, EntitiesAppPublicStart };
+export type { StreamsAppPublicSetup, StreamsAppPublicStart };
 
 export const plugin: PluginInitializer<
-  EntitiesAppPublicSetup,
-  EntitiesAppPublicStart,
-  EntitiesAppSetupDependencies,
-  EntitiesAppStartDependencies
+  StreamsAppPublicSetup,
+  StreamsAppPublicStart,
+  StreamsAppSetupDependencies,
+  StreamsAppStartDependencies
 > = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) =>
-  new EntitiesAppPlugin(pluginInitializerContext);
+  new StreamsAppPlugin(pluginInitializerContext);

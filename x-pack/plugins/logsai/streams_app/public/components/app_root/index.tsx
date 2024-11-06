@@ -11,10 +11,10 @@ import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { EntitiesAppContextProvider } from '../entities_app_context_provider';
-import { entitiesAppRouter } from '../../routes/config';
-import { EntitiesAppStartDependencies } from '../../types';
-import { EntitiesAppServices } from '../../services/types';
+import { StreamsAppContextProvider } from '../streams_app_context_provider';
+import { streamsAppRouter } from '../../routes/config';
+import { StreamsAppStartDependencies } from '../../types';
+import { StreamsAppServices } from '../../services/types';
 
 export function AppRoot({
   coreStart,
@@ -23,8 +23,8 @@ export function AppRoot({
   appMountParameters,
 }: {
   coreStart: CoreStart;
-  pluginsStart: EntitiesAppStartDependencies;
-  services: EntitiesAppServices;
+  pluginsStart: StreamsAppStartDependencies;
+  services: StreamsAppServices;
 } & { appMountParameters: AppMountParameters }) {
   const { history } = appMountParameters;
 
@@ -37,18 +37,18 @@ export function AppRoot({
   };
 
   return (
-    <EntitiesAppContextProvider context={context}>
+    <StreamsAppContextProvider context={context}>
       <RedirectAppLinks coreStart={coreStart}>
-        <RouterProvider history={history} router={entitiesAppRouter}>
+        <RouterProvider history={history} router={streamsAppRouter}>
           <RouteRenderer />
-          <EntitiesAppHeaderActionMenu appMountParameters={appMountParameters} />
+          <StreamsAppHeaderActionMenu appMountParameters={appMountParameters} />
         </RouterProvider>
       </RedirectAppLinks>
-    </EntitiesAppContextProvider>
+    </StreamsAppContextProvider>
   );
 }
 
-export function EntitiesAppHeaderActionMenu({
+export function StreamsAppHeaderActionMenu({
   appMountParameters,
 }: {
   appMountParameters: AppMountParameters;

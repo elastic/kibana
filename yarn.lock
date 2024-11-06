@@ -6908,6 +6908,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/streams-api-plugin@link:x-pack/plugins/logsai/streams_api":
+  version "0.0.0"
+  uid ""
+
+"@kbn/streams-app-plugin@link:x-pack/plugins/logsai/streams_app":
+  version "0.0.0"
+  uid ""
+
 "@kbn/streams-plugin@link:x-pack/plugins/streams":
   version "0.0.0"
   uid ""

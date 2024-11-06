@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { PathsOf, useRoutePath } from '@kbn/typed-react-router-config';
-import type { EntitiesAppRoutes } from '../routes/config';
-
-export function useEntitiesAppRoutePath() {
-  const path = useRoutePath();
-
-  return path as PathsOf<EntitiesAppRoutes>;
+export function getGlobalStreamsAPIServerRouteRepository() {
+  return {};
 }
+
+export type StreamsAPIServerRouteRepository = ReturnType<
+  typeof getGlobalStreamsAPIServerRouteRepository
+>;

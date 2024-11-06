@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Entity } from '@kbn/entities-api-plugin/common';
+import { Entity } from '@kbn/streams-api-plugin/common';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
@@ -17,14 +17,14 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useEntitiesAppParams } from '../../hooks/use_entities_app_params';
+import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useKibana } from '../../hooks/use_kibana';
-import { useEntitiesAppRouter } from '../../hooks/use_entities_app_router';
-import { useEntitiesAppFetch } from '../../hooks/use_entities_app_fetch';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { LoadingPanel } from '../loading_panel';
-import { useEntitiesAppBreadcrumbs } from '../../hooks/use_entities_app_breadcrumbs';
-import { EntitiesAppPageHeader } from '../entities_app_page_header';
-import { EntitiesAppPageHeaderTitle } from '../entities_app_page_header/entities_app_page_header_title';
+import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
+import { StreamsAppPageHeader } from '../streams_app_page_header';
+import { StreamsAppPageHeaderTitle } from '../streams_app_page_header/streams_app_page_header_title';
 import { EntityDetailViewHeaderSection } from '../entity_detail_view_header_section';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
 import { EntityDetailOverview } from '../entity_detail_overview';
@@ -55,7 +55,7 @@ export function EntityDetailViewWithoutParams({
     dependencies: {
       start: {
         data,
-        entitiesAPI: { entitiesAPIClient },
+        streamsAPI: { streamsAPIClient },
       },
     },
     services: {},
@@ -65,13 +65,13 @@ export function EntityDetailViewWithoutParams({
     absoluteTimeRange: { start, end },
   } = useDateRange({ data });
 
-  const router = useEntitiesAppRouter();
+  const router = useStreamsAppRouter();
 
   const theme = useEuiTheme().euiTheme;
 
-  const entityFetch = useEntitiesAppFetch(
+  const entityFetch = useStreamsAppFetch(
     ({ signal }) => {
-      return entitiesAPIClient.fetch('GET /internal/entities_api/entity/{type}/{key}', {
+      return streamsAPIClient.fetch('GET /internal/streams_api/entity/{type}/{key}', {
         signal,
         params: {
           path: {
@@ -81,14 +81,14 @@ export function EntityDetailViewWithoutParams({
         },
       });
     },
-    [type, key, entitiesAPIClient]
+    [type, key, streamsAPIClient]
   );
 
   const typeDefinition = entityFetch.value?.typeDefinition;
 
   const entity = entityFetch.value?.entity;
 
-  useEntitiesAppBreadcrumbs(() => {
+  useStreamsAppBreadcrumbs(() => {
     if (!typeDefinition || !entity) {
       return [];
     }
@@ -107,10 +107,10 @@ export function EntityDetailViewWithoutParams({
     ];
   }, [type, key, entity?.displayName, typeDefinition]);
 
-  const entityDataStreamsFetch = useEntitiesAppFetch(
+  const entityDataStreamsFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      return entitiesAPIClient.fetch(
-        'GET /internal/entities_api/entity/{type}/{key}/data_streams',
+      return streamsAPIClient.fetch(
+        'GET /internal/streams_api/entity/{type}/{key}/data_streams',
         {
           signal,
           params: {
@@ -126,7 +126,7 @@ export function EntityDetailViewWithoutParams({
         }
       );
     },
-    [key, type, entitiesAPIClient, start, end]
+    [key, type, streamsAPIClient, start, end]
   );
 
   const dataStreams = entityDataStreamsFetch.value?.dataStreams;
@@ -175,8 +175,8 @@ export function EntityDetailViewWithoutParams({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EntitiesAppPageHeader>
-        <EntitiesAppPageHeaderTitle title={entity.displayName}>
+      <StreamsAppPageHeader>
+        <StreamsAppPageHeaderTitle title={entity.displayName}>
           <EuiHorizontalRule margin="s" />
           <EuiPanel
             hasBorder={false}
@@ -217,8 +217,8 @@ export function EntityDetailViewWithoutParams({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
-        </EntitiesAppPageHeaderTitle>
-      </EntitiesAppPageHeader>
+        </StreamsAppPageHeaderTitle>
+      </StreamsAppPageHeader>
       <EntityOverviewTabList
         tabs={Object.entries(tabs).map(([tabKey, { label, href }]) => {
           return {
@@ -237,7 +237,7 @@ export function EntityDetailViewWithoutParams({
 export function EntityDetailView() {
   const {
     path: { type, key, tab },
-  } = useEntitiesAppParams('/{type}/{key}/{tab}');
+  } = useStreamsAppParams('/{type}/{key}/{tab}');
 
   return <EntityDetailViewWithoutParams type={type} entityKey={key} tab={tab} />;
 }

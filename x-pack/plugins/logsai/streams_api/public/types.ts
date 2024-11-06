@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EntitiesAPIClient } from './api';
+import { StreamsAPIClient } from './api';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
 
-export interface EntitiesAPISetupDependencies {}
+export interface StreamsAPISetupDependencies {}
 
-export interface EntitiesAPIStartDependencies {}
+export interface StreamsAPIStartDependencies {}
 
-export interface EntitiesAPIPublicSetup {
-  entitiesAPIClient: EntitiesAPIClient;
+export interface StreamsAPIPublicSetup {
+  streamsAPIClient: StreamsAPIClient;
 }
 
-export interface EntitiesAPIPublicStart {
-  entitiesAPIClient: EntitiesAPIClient;
+export interface StreamsAPIPublicStart {
+  streamsAPIClient: StreamsAPIClient;
 }

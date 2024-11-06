@@ -5,14 +5,14 @@
  * 2.0.
  */
 import React, { ComponentType, useMemo } from 'react';
-import { EntitiesAppContextProvider } from '../public/components/entities_app_context_provider';
-import { getMockEntitiesAppContext } from './get_mock_entities_app_context';
+import { StreamsAppContextProvider } from '../public/components/streams_app_context_provider';
+import { getMockStreamsAppContext } from './get_mock_streams_app_context';
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {
-  const context = useMemo(() => getMockEntitiesAppContext(), []);
+  const context = useMemo(() => getMockStreamsAppContext(), []);
   return (
-    <EntitiesAppContextProvider context={context}>
+    <StreamsAppContextProvider context={context}>
       <Story />
-    </EntitiesAppContextProvider>
+    </StreamsAppContextProvider>
   );
 }

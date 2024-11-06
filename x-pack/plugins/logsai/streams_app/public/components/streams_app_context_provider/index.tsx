@@ -6,13 +6,13 @@
  */
 import React, { useMemo } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { EntitiesAppKibanaContext } from '../../hooks/use_kibana';
+import type { StreamsAppKibanaContext } from '../../hooks/use_kibana';
 
-export function EntitiesAppContextProvider({
+export function StreamsAppContextProvider({
   context,
   children,
 }: {
-  context: EntitiesAppKibanaContext;
+  context: StreamsAppKibanaContext;
   children: React.ReactNode;
 }) {
   const servicesForContext = useMemo(() => {

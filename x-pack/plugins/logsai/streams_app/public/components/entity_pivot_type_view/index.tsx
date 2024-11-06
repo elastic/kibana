@@ -7,29 +7,29 @@
 import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import { EntityTable } from '../entity_table';
-import { EntitiesAppPageHeader } from '../entities_app_page_header';
-import { EntitiesAppPageHeaderTitle } from '../entities_app_page_header/entities_app_page_header_title';
-import { useEntitiesAppParams } from '../../hooks/use_entities_app_params';
+import { StreamsAppPageHeader } from '../streams_app_page_header';
+import { StreamsAppPageHeaderTitle } from '../streams_app_page_header/streams_app_page_header_title';
+import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useKibana } from '../../hooks/use_kibana';
-import { useEntitiesAppFetch } from '../../hooks/use_entities_app_fetch';
-import { useEntitiesAppBreadcrumbs } from '../../hooks/use_entities_app_breadcrumbs';
+import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 
 export function EntityPivotTypeView() {
   const {
     path: { type },
-  } = useEntitiesAppParams('/{type}');
+  } = useStreamsAppParams('/{type}');
 
   const {
     dependencies: {
       start: {
-        entitiesAPI: { entitiesAPIClient },
+        streamsAPI: { streamsAPIClient },
       },
     },
   } = useKibana();
 
-  const typeDefinitionsFetch = useEntitiesAppFetch(
+  const typeDefinitionsFetch = useStreamsAppFetch(
     ({ signal }) => {
-      return entitiesAPIClient.fetch('GET /internal/entities_api/types/{type}', {
+      return streamsAPIClient.fetch('GET /internal/streams_api/types/{type}', {
         signal,
         params: {
           path: {
@@ -38,14 +38,14 @@ export function EntityPivotTypeView() {
         },
       });
     },
-    [entitiesAPIClient, type]
+    [streamsAPIClient, type]
   );
 
   const typeDefinition = typeDefinitionsFetch.value?.typeDefinition;
 
   const title = typeDefinition?.displayName ?? '';
 
-  useEntitiesAppBreadcrumbs(() => {
+  useStreamsAppBreadcrumbs(() => {
     if (!title) {
       return [];
     }
@@ -60,9 +60,9 @@ export function EntityPivotTypeView() {
 
   return (
     <EuiFlexGroup direction="column">
-      <EntitiesAppPageHeader>
-        <EntitiesAppPageHeaderTitle title={title} />
-      </EntitiesAppPageHeader>
+      <StreamsAppPageHeader>
+        <StreamsAppPageHeaderTitle title={title} />
+      </StreamsAppPageHeader>
       <EntityTable type={type} />
     </EuiFlexGroup>
   );

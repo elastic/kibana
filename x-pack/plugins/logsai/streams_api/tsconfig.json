@@ -14,23 +14,5 @@
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
-    "@kbn/core",
-    "@kbn/server-route-repository",
-    "@kbn/server-route-repository-client",
-    "@kbn/logging",
-    "@kbn/config-schema",
-    "@kbn/rule-registry-plugin",
-    "@kbn/observability-utils-server",
-    "@kbn/dashboard-plugin",
-    "@kbn/alerting-plugin",
-    "@kbn/apm-utils",
-    "@kbn/slo-plugin",
-    "@kbn/licensing-plugin",
-    "@kbn/zod",
-    "@kbn/es-types",
-    "@kbn/observability-utils-common",
-    "@kbn/data-views-plugin",
-    "@kbn/entityManager-plugin",
-    "@kbn/spaces-plugin",
   ]
 }

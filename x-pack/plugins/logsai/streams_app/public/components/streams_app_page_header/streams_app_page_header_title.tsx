@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
-export function EntitiesAppPageHeaderTitle({
+export function StreamsAppPageHeaderTitle({
   title,
   children,
 }: {

@@ -9,22 +9,22 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import { mapValues } from 'lodash';
 import { registerServerRoutes } from './routes/register_routes';
-import { EntitiesAPIRouteHandlerResources } from './routes/types';
+import { StreamsAPIRouteHandlerResources } from './routes/types';
 import type {
   ConfigSchema,
-  EntitiesAPIServerSetup,
-  EntitiesAPIServerStart,
-  EntitiesAPISetupDependencies,
-  EntitiesAPIStartDependencies,
+  StreamsAPIServerSetup,
+  StreamsAPIServerStart,
+  StreamsAPISetupDependencies,
+  StreamsAPIStartDependencies,
 } from './types';
 
-export class EntitiesAPIPlugin
+export class StreamsAPIPlugin
   implements
     Plugin<
-      EntitiesAPIServerSetup,
-      EntitiesAPIServerStart,
-      EntitiesAPISetupDependencies,
-      EntitiesAPIStartDependencies
+      StreamsAPIServerSetup,
+      StreamsAPIServerStart,
+      StreamsAPISetupDependencies,
+      StreamsAPIStartDependencies
     >
 {
   logger: Logger;
@@ -33,9 +33,9 @@ export class EntitiesAPIPlugin
     this.logger = context.logger.get();
   }
   setup(
-    coreSetup: CoreSetup<EntitiesAPIStartDependencies, EntitiesAPIServerStart>,
-    pluginsSetup: EntitiesAPISetupDependencies
-  ): EntitiesAPIServerSetup {
+    coreSetup: CoreSetup<StreamsAPIStartDependencies, StreamsAPIServerStart>,
+    pluginsSetup: StreamsAPISetupDependencies
+  ): StreamsAPIServerSetup {
     const startServicesPromise = coreSetup
       .getStartServices()
       .then(([_coreStart, pluginsStart]) => pluginsStart);
@@ -52,13 +52,13 @@ export class EntitiesAPIPlugin
               ),
             setup: () => value,
           };
-        }) as unknown as EntitiesAPIRouteHandlerResources['plugins'],
+        }) as unknown as StreamsAPIRouteHandlerResources['plugins'],
       },
     });
     return {};
   }
 
-  start(core: CoreStart, pluginsStart: EntitiesAPIStartDependencies): EntitiesAPIServerStart {
+  start(core: CoreStart, pluginsStart: StreamsAPIStartDependencies): StreamsAPIServerStart {
     return {};
   }
 }

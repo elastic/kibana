@@ -7,11 +7,11 @@
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import React, { useMemo, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import { getIndexPatternsForFilters } from '@kbn/entities-api-plugin/public';
-import { DefinitionEntity } from '@kbn/entities-api-plugin/common/entities';
+import { getIndexPatternsForFilters } from '@kbn/streams-api-plugin/public';
+import { DefinitionEntity } from '@kbn/streams-api-plugin/common/entities';
 import { useKibana } from '../../hooks/use_kibana';
 import { ControlledEntityTable } from './controlled_entity_table';
-import { useEntitiesAppFetch } from '../../hooks/use_entities_app_fetch';
+import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 
 export function EntityTable({ type }: { type: 'all' | string }) {
   const {
@@ -19,7 +19,7 @@ export function EntityTable({ type }: { type: 'all' | string }) {
       start: {
         dataViews,
         data,
-        entitiesAPI: { entitiesAPIClient },
+        streamsAPI: { streamsAPIClient },
       },
     },
   } = useKibana();
@@ -40,18 +40,18 @@ export function EntityTable({ type }: { type: 'all' | string }) {
     order: 'desc',
   });
 
-  const typeDefinitionsFetch = useEntitiesAppFetch(
+  const typeDefinitionsFetch = useStreamsAppFetch(
     ({
       signal,
     }): Promise<{
       definitionEntities: DefinitionEntity[];
     }> => {
       if (selectedType === 'all') {
-        return entitiesAPIClient.fetch('GET /internal/entities_api/types', {
+        return streamsAPIClient.fetch('GET /internal/streams_api/types', {
           signal,
         });
       }
-      return entitiesAPIClient.fetch('GET /internal/entities_api/types/{type}', {
+      return streamsAPIClient.fetch('GET /internal/streams_api/types/{type}', {
         signal,
         params: {
           path: {
@@ -60,12 +60,12 @@ export function EntityTable({ type }: { type: 'all' | string }) {
         },
       });
     },
-    [entitiesAPIClient, selectedType]
+    [streamsAPIClient, selectedType]
   );
 
-  const queryFetch = useEntitiesAppFetch(
+  const queryFetch = useStreamsAppFetch(
     ({ signal }) => {
-      return entitiesAPIClient.fetch('POST /internal/entities_api/entities', {
+      return streamsAPIClient.fetch('POST /internal/streams_api/entities', {
         signal,
         params: {
           body: {
@@ -79,7 +79,7 @@ export function EntityTable({ type }: { type: 'all' | string }) {
         },
       });
     },
-    [entitiesAPIClient, selectedType, persistedKqlFilter, start, end, sort.field, sort.order]
+    [streamsAPIClient, selectedType, persistedKqlFilter, start, end, sort.field, sort.order]
   );
 
   const [pagination, setPagination] = useState<{ pageSize: number; pageIndex: number }>({

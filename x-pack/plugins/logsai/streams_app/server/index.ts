@@ -9,27 +9,27 @@ import type {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { EntitiesAppConfig } from './config';
-import { EntitiesAppPlugin } from './plugin';
+import type { StreamsAppConfig } from './config';
+import { StreamsAppPlugin } from './plugin';
 import type {
-  EntitiesAppServerSetup,
-  EntitiesAppServerStart,
-  EntitiesAppSetupDependencies,
-  EntitiesAppStartDependencies,
+  StreamsAppServerSetup,
+  StreamsAppServerStart,
+  StreamsAppSetupDependencies,
+  StreamsAppStartDependencies,
 } from './types';
 
-export type { EntitiesAppServerSetup, EntitiesAppServerStart };
+export type { StreamsAppServerSetup, StreamsAppServerStart };
 
 import { config as configSchema } from './config';
 
-export const config: PluginConfigDescriptor<EntitiesAppConfig> = {
+export const config: PluginConfigDescriptor<StreamsAppConfig> = {
   schema: configSchema,
 };
 
 export const plugin: PluginInitializer<
-  EntitiesAppServerSetup,
-  EntitiesAppServerStart,
-  EntitiesAppSetupDependencies,
-  EntitiesAppStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<EntitiesAppConfig>) =>
-  new EntitiesAppPlugin(pluginInitializerContext);
+  StreamsAppServerSetup,
+  StreamsAppServerStart,
+  StreamsAppSetupDependencies,
+  StreamsAppStartDependencies
+> = async (pluginInitializerContext: PluginInitializerContext<StreamsAppConfig>) =>
+  new StreamsAppPlugin(pluginInitializerContext);

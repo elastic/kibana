@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type { EntityFilter } from '../entities';
+import { createRouterBreadcrumbComponent } from '@kbn/typed-react-router-config';
+import type { StreamsAppRoutes } from '../../routes/config';
 
-export function getIndexPatternsForFilters(filters: EntityFilter[]) {
-  return filters.flatMap((filter) => {
-    if ('index' in filter) {
-      return filter.index.flat();
-    }
-    return [];
-  });
-}
+export const StreamsAppRouterBreadcrumb = createRouterBreadcrumbComponent<StreamsAppRoutes>();

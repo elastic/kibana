@@ -1,14 +1,14 @@
 {
   "type": "plugin",
-  "id": "@kbn/entities-app-plugin",
+  "id": "@kbn/streams-app-plugin",
   "owner": "@elastic/observability-ui",
   "plugin": {
-    "id": "entitiesApp",
+    "id": "streamsApp",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "entitiesApp"],
+    "configPath": ["xpack", "streamsApp"],
     "requiredPlugins": [
-      "entitiesAPI",
+      "streamsAPI",
       "observabilityShared",
       "data",
       "dataViews",

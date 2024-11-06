@@ -9,14 +9,14 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
   roots: [
-    '<rootDir>/x-pack/plugins/logsai/entities_api/public',
-    '<rootDir>/x-pack/plugins/logsai/entities_api/common',
-    '<rootDir>/x-pack/plugins/logsai/entities_api/server',
+    '<rootDir>/x-pack/plugins/logsai/streams_api/public',
+    '<rootDir>/x-pack/plugins/logsai/streams_api/common',
+    '<rootDir>/x-pack/plugins/logsai/streams_api/server',
   ],
   setupFiles: [],
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/logsai/entities_api/{public,common,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/plugins/logsai/streams_api/{public,common,server}/**/*.{js,ts,tsx}',
   ],
 
   coverageReporters: ['html'],

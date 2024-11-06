@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { createServerRouteFactory } from '@kbn/server-route-repository';
-import type { EntitiesAPIRouteCreateOptions, EntitiesAPIRouteHandlerResources } from './types';
+import type { StreamsAPIRouteCreateOptions, StreamsAPIRouteHandlerResources } from './types';
 
-export const createEntitiesAPIServerRoute = createServerRouteFactory<
-  EntitiesAPIRouteHandlerResources,
-  EntitiesAPIRouteCreateOptions
+export const createStreamsAPIServerRoute = createServerRouteFactory<
+  StreamsAPIRouteHandlerResources,
+  StreamsAPIRouteCreateOptions
 >();

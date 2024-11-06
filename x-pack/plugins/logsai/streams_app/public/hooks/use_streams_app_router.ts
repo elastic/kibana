@@ -7,22 +7,22 @@
 
 import { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
 import { useMemo } from 'react';
-import type { EntitiesAppRouter, EntitiesAppRoutes } from '../routes/config';
-import { entitiesAppRouter } from '../routes/config';
+import type { StreamsAppRouter, StreamsAppRoutes } from '../routes/config';
+import { streamsAppRouter } from '../routes/config';
 import { useKibana } from './use_kibana';
 
-interface StatefulEntitiesAppRouter extends EntitiesAppRouter {
-  push<T extends PathsOf<EntitiesAppRoutes>>(
+interface StatefulStreamsAppRouter extends StreamsAppRouter {
+  push<T extends PathsOf<StreamsAppRoutes>>(
     path: T,
-    ...params: TypeAsArgs<TypeOf<EntitiesAppRoutes, T>>
+    ...params: TypeAsArgs<TypeOf<StreamsAppRoutes, T>>
   ): void;
-  replace<T extends PathsOf<EntitiesAppRoutes>>(
+  replace<T extends PathsOf<StreamsAppRoutes>>(
     path: T,
-    ...params: TypeAsArgs<TypeOf<EntitiesAppRoutes, T>>
+    ...params: TypeAsArgs<TypeOf<StreamsAppRoutes, T>>
   ): void;
 }
 
-export function useEntitiesAppRouter(): StatefulEntitiesAppRouter {
+export function useStreamsAppRouter(): StatefulStreamsAppRouter {
   const {
     core: {
       http,
@@ -32,12 +32,12 @@ export function useEntitiesAppRouter(): StatefulEntitiesAppRouter {
 
   const link = (...args: any[]) => {
     // @ts-expect-error
-    return entitiesAppRouter.link(...args);
+    return streamsAppRouter.link(...args);
   };
 
-  return useMemo<StatefulEntitiesAppRouter>(
+  return useMemo<StatefulStreamsAppRouter>(
     () => ({
-      ...entitiesAppRouter,
+      ...streamsAppRouter,
       push: (...args) => {
         const next = link(...args);
         navigateToApp('entities', { path: next, replace: false });

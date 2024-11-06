@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { createRouterBreadcrumbComponent } from '@kbn/typed-react-router-config';
-import type { EntitiesAppRoutes } from '../../routes/config';
+import { PathsOf, useRoutePath } from '@kbn/typed-react-router-config';
+import type { StreamsAppRoutes } from '../routes/config';
 
-export const EntitiesAppRouterBreadcrumb = createRouterBreadcrumbComponent<EntitiesAppRoutes>();
+export function useStreamsAppRoutePath() {
+  const path = useRoutePath();
+
+  return path as PathsOf<StreamsAppRoutes>;
+}

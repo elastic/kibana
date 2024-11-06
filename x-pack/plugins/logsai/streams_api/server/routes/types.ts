@@ -8,28 +8,28 @@
 import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server/types';
 import type { Logger } from '@kbn/logging';
-import type { EntitiesAPISetupDependencies, EntitiesAPIStartDependencies } from '../types';
+import type { StreamsAPISetupDependencies, StreamsAPIStartDependencies } from '../types';
 
-export type EntitiesAPIRequestHandlerContext = CustomRequestHandlerContext<{
+export type StreamsAPIRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: Pick<LicensingApiRequestHandlerContext, 'license' | 'featureUsage'>;
 }>;
 
-export interface EntitiesAPIRouteHandlerResources {
+export interface StreamsAPIRouteHandlerResources {
   request: KibanaRequest;
-  context: EntitiesAPIRequestHandlerContext;
+  context: StreamsAPIRequestHandlerContext;
   logger: Logger;
   plugins: {
-    [key in keyof EntitiesAPISetupDependencies]: {
-      setup: Required<EntitiesAPISetupDependencies>[key];
+    [key in keyof StreamsAPISetupDependencies]: {
+      setup: Required<StreamsAPISetupDependencies>[key];
     };
   } & {
-    [key in keyof EntitiesAPIStartDependencies]: {
-      start: () => Promise<Required<EntitiesAPIStartDependencies>[key]>;
+    [key in keyof StreamsAPIStartDependencies]: {
+      start: () => Promise<Required<StreamsAPIStartDependencies>[key]>;
     };
   };
 }
 
-export interface EntitiesAPIRouteCreateOptions {
+export interface StreamsAPIRouteCreateOptions {
   options: {
     timeout?: {
       idleSocket?: number;

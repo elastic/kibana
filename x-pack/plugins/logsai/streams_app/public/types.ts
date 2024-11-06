@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type {
-  EntitiesAPIPublicSetup,
-  EntitiesAPIPublicStart,
-} from '@kbn/entities-api-plugin/public';
+  StreamsAPIPublicSetup,
+  StreamsAPIPublicStart,
+} from '@kbn/streams-api-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
@@ -26,22 +26,22 @@ import type {
 
 export interface ConfigSchema {}
 
-export interface EntitiesAppSetupDependencies {
+export interface StreamsAppSetupDependencies {
   observabilityShared: ObservabilitySharedPluginSetup;
-  entitiesAPI: EntitiesAPIPublicSetup;
+  streamsAPI: StreamsAPIPublicSetup;
   data: DataPublicPluginSetup;
   dataViews: DataViewsPublicPluginSetup;
   unifiedSearch: UnifiedSearchPluginSetup;
 }
 
-export interface EntitiesAppStartDependencies {
+export interface StreamsAppStartDependencies {
   observabilityShared: ObservabilitySharedPluginStart;
-  entitiesAPI: EntitiesAPIPublicStart;
+  streamsAPI: StreamsAPIPublicStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
-export interface EntitiesAppPublicSetup {}
+export interface StreamsAppPublicSetup {}
 
-export interface EntitiesAppPublicStart {}
+export interface StreamsAppPublicStart {}

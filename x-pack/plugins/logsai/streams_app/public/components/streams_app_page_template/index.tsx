@@ -9,7 +9,7 @@ import { css } from '@emotion/css';
 import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 
-export function EntitiesAppPageTemplate({ children }: { children: React.ReactNode }) {
+export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
   const {
     dependencies: {
       start: { observabilityShared },

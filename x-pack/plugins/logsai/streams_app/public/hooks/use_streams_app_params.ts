@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { type PathsOf, type TypeOf, useParams } from '@kbn/typed-react-router-config';
-import type { EntitiesAppRoutes } from '../routes/config';
+import type { StreamsAppRoutes } from '../routes/config';
 
-export function useEntitiesAppParams<TPath extends PathsOf<EntitiesAppRoutes>>(
+export function useStreamsAppParams<TPath extends PathsOf<StreamsAppRoutes>>(
   path: TPath
-): TypeOf<EntitiesAppRoutes, TPath> {
-  return useParams(path)! as TypeOf<EntitiesAppRoutes, TPath>;
+): TypeOf<StreamsAppRoutes, TPath> {
+  return useParams(path)! as TypeOf<StreamsAppRoutes, TPath>;
 }

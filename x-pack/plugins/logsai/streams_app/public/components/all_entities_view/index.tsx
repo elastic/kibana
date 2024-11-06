@@ -8,19 +8,19 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EntityTable } from '../entity_table';
-import { EntitiesAppPageHeader } from '../entities_app_page_header';
-import { EntitiesAppPageHeaderTitle } from '../entities_app_page_header/entities_app_page_header_title';
+import { StreamsAppPageHeader } from '../streams_app_page_header';
+import { StreamsAppPageHeaderTitle } from '../streams_app_page_header/streams_app_page_header_title';
 
 export function AllEntitiesView() {
   return (
     <EuiFlexGroup direction="column">
-      <EntitiesAppPageHeader>
-        <EntitiesAppPageHeaderTitle
+      <StreamsAppPageHeader>
+        <StreamsAppPageHeaderTitle
           title={i18n.translate('xpack.entities.allEntitiesView.pageHeaderTitle', {
             defaultMessage: 'All entities',
           })}
         />
-      </EntitiesAppPageHeader>
+      </StreamsAppPageHeader>
       <EntityTable type="all" />
     </EuiFlexGroup>
   );

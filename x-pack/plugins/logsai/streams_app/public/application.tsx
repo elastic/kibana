@@ -9,8 +9,8 @@ import ReactDOM from 'react-dom';
 import { APP_WRAPPER_CLASS, type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { css } from '@emotion/css';
-import type { EntitiesAppStartDependencies } from './types';
-import { EntitiesAppServices } from './services/types';
+import type { StreamsAppStartDependencies } from './types';
+import { StreamsAppServices } from './services/types';
 import { AppRoot } from './components/app_root';
 
 export const renderApp = ({
@@ -20,8 +20,8 @@ export const renderApp = ({
   appMountParameters,
 }: {
   coreStart: CoreStart;
-  pluginsStart: EntitiesAppStartDependencies;
-  services: EntitiesAppServices;
+  pluginsStart: StreamsAppStartDependencies;
+  services: StreamsAppServices;
 } & { appMountParameters: AppMountParameters }) => {
   const { element } = appMountParameters;
 

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { EntitiesAPIRouteHandlerResources } from '../../routes/types';
+import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import { StreamsAPIRouteHandlerResources } from '../../routes/types';
 
-export async function createEntitiesAPIEsClient({
+export async function createStreamsAPIEsClient({
   context,
   logger,
-}: Pick<EntitiesAPIRouteHandlerResources, 'context' | 'logger'>) {
+}: Pick<StreamsAPIRouteHandlerResources, 'context' | 'logger'>) {
   const esClient = createObservabilityEsClient({
     client: (await context.core).elasticsearch.client.asCurrentUser,
     logger,
-    plugin: 'entitiesApi',
+    plugin: 'streamsApi',
   });
 
   return esClient;

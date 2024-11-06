@@ -10,8 +10,8 @@ import * as t from 'io-ts';
 import React from 'react';
 import { AllEntitiesView } from '../components/all_entities_view';
 import { EntityDetailView } from '../components/entity_detail_view';
-import { EntitiesAppPageTemplate } from '../components/entities_app_page_template';
-import { EntitiesAppRouterBreadcrumb } from '../components/entities_app_router_breadcrumb';
+import { StreamsAppPageTemplate } from '../components/streams_app_page_template';
+import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_breadcrumb';
 import { RedirectTo } from '../components/redirect_to';
 import { DataStreamDetailView } from '../components/data_stream_detail_view';
 import { EntityPivotTypeView } from '../components/entity_pivot_type_view';
@@ -20,31 +20,31 @@ import { EntityPivotTypeView } from '../components/entity_pivot_type_view';
  * The array of route definitions to be used when the application
  * creates the routes.
  */
-const entitiesAppRoutes = {
+const streamsAppRoutes = {
   '/': {
     element: (
-      <EntitiesAppRouterBreadcrumb
+      <StreamsAppRouterBreadcrumb
         title={i18n.translate('xpack.entities.appBreadcrumbTitle', {
           defaultMessage: 'Entities',
         })}
         path="/"
       >
-        <EntitiesAppPageTemplate>
+        <StreamsAppPageTemplate>
           <Outlet />
-        </EntitiesAppPageTemplate>
-      </EntitiesAppRouterBreadcrumb>
+        </StreamsAppPageTemplate>
+      </StreamsAppRouterBreadcrumb>
     ),
     children: {
       '/all': {
         element: (
-          <EntitiesAppRouterBreadcrumb
+          <StreamsAppRouterBreadcrumb
             title={i18n.translate('xpack.entities.allEntitiesView.breadcrumbTitle', {
               defaultMessage: 'All',
             })}
             path="/all"
           >
             <AllEntitiesView />
-          </EntitiesAppRouterBreadcrumb>
+          </StreamsAppRouterBreadcrumb>
         ),
       },
       '/data_stream/{key}': {
@@ -107,8 +107,8 @@ const entitiesAppRoutes = {
   },
 } satisfies RouteMap;
 
-export type EntitiesAppRoutes = typeof entitiesAppRoutes;
+export type StreamsAppRoutes = typeof streamsAppRoutes;
 
-export const entitiesAppRouter = createRouter(entitiesAppRoutes);
+export const streamsAppRouter = createRouter(streamsAppRoutes);
 
-export type EntitiesAppRouter = typeof entitiesAppRouter;
+export type StreamsAppRouter = typeof streamsAppRouter;

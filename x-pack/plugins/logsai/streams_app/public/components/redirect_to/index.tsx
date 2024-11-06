@@ -8,16 +8,16 @@ import React, { useLayoutEffect } from 'react';
 import { PathsOf, TypeOf } from '@kbn/typed-react-router-config';
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
-import { EntitiesAppRoutes } from '../../routes/config';
-import { useEntitiesAppRouter } from '../../hooks/use_entities_app_router';
-import { useEntitiesAppParams } from '../../hooks/use_entities_app_params';
+import { StreamsAppRoutes } from '../../routes/config';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 
 export function RedirectTo<
-  TPath extends PathsOf<EntitiesAppRoutes>,
-  TParams extends TypeOf<EntitiesAppRoutes, TPath, false>
+  TPath extends PathsOf<StreamsAppRoutes>,
+  TParams extends TypeOf<StreamsAppRoutes, TPath, false>
 >({ path, params }: { path: TPath; params?: DeepPartial<TParams> }) {
-  const router = useEntitiesAppRouter();
-  const currentParams = useEntitiesAppParams('/*');
+  const router = useStreamsAppRouter();
+  const currentParams = useStreamsAppParams('/*');
   useLayoutEffect(() => {
     router.replace(path, ...([merge({}, currentParams, params)] as any));
     // eslint-disable-next-line react-hooks/exhaustive-deps

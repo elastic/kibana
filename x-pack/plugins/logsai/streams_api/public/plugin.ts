@@ -7,44 +7,44 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { EntitiesAPIClient, createEntitiesAPIClient } from './api';
+import { StreamsAPIClient, createStreamsAPIClient } from './api';
 import type {
   ConfigSchema,
-  EntitiesAPIPublicSetup,
-  EntitiesAPIPublicStart,
-  EntitiesAPISetupDependencies,
-  EntitiesAPIStartDependencies,
+  StreamsAPIPublicSetup,
+  StreamsAPIPublicStart,
+  StreamsAPISetupDependencies,
+  StreamsAPIStartDependencies,
 } from './types';
 
-export class EntitiesAPIPlugin
+export class StreamsAPIPlugin
   implements
     Plugin<
-      EntitiesAPIPublicSetup,
-      EntitiesAPIPublicStart,
-      EntitiesAPISetupDependencies,
-      EntitiesAPIStartDependencies
+      StreamsAPIPublicSetup,
+      StreamsAPIPublicStart,
+      StreamsAPISetupDependencies,
+      StreamsAPIStartDependencies
     >
 {
   logger: Logger;
-  entitiesAPIClient!: EntitiesAPIClient;
+  streamsAPIClient!: StreamsAPIClient;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
   }
   setup(
-    coreSetup: CoreSetup<EntitiesAPIStartDependencies, EntitiesAPIPublicStart>,
-    pluginsSetup: EntitiesAPISetupDependencies
-  ): EntitiesAPIPublicSetup {
-    const entitiesAPIClient = (this.entitiesAPIClient = createEntitiesAPIClient(coreSetup));
+    coreSetup: CoreSetup<StreamsAPIStartDependencies, StreamsAPIPublicStart>,
+    pluginsSetup: StreamsAPISetupDependencies
+  ): StreamsAPIPublicSetup {
+    const streamsAPIClient = (this.streamsAPIClient = createStreamsAPIClient(coreSetup));
 
     return {
-      entitiesAPIClient,
+      streamsAPIClient,
     };
   }
 
-  start(coreStart: CoreStart, pluginsStart: EntitiesAPIStartDependencies): EntitiesAPIPublicStart {
+  start(coreStart: CoreStart, pluginsStart: StreamsAPIStartDependencies): StreamsAPIPublicStart {
     return {
-      entitiesAPIClient: this.entitiesAPIClient,
+      streamsAPIClient: this.streamsAPIClient,
     };
   }
 }

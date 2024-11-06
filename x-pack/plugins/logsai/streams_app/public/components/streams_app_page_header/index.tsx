@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiPageHeader } from '@elastic/eui';
 import React from 'react';
 
-export function EntitiesAppPageHeader({ children }: { children: React.ReactNode }) {
+export function StreamsAppPageHeader({ children }: { children: React.ReactNode }) {
   return (
     <EuiPageHeader>
       <EuiFlexGroup direction="row">{children}</EuiFlexGroup>

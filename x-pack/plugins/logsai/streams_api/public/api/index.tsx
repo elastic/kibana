@@ -12,39 +12,39 @@ import type {
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
-import type { EntitiesAPIServerRouteRepository as EntitiesAPIServerRouteRepository } from '../../server';
+import type { StreamsAPIServerRouteRepository as StreamsAPIServerRouteRepository } from '../../server';
 
 type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
   body?: any;
 };
 
-export type EntitiesAPIClientOptions = Omit<
+export type StreamsAPIClientOptions = Omit<
   FetchOptions,
   'query' | 'body' | 'pathname' | 'signal'
 > & {
   signal: AbortSignal | null;
 };
 
-export type EntitiesAPIClient = RouteRepositoryClient<
-  EntitiesAPIServerRouteRepository,
-  EntitiesAPIClientOptions
+export type StreamsAPIClient = RouteRepositoryClient<
+  StreamsAPIServerRouteRepository,
+  StreamsAPIClientOptions
 >;
 
-export type AutoAbortedEntitiesAPIClient = RouteRepositoryClient<
-  EntitiesAPIServerRouteRepository,
-  Omit<EntitiesAPIClientOptions, 'signal'>
+export type AutoAbortedStreamsAPIClient = RouteRepositoryClient<
+  StreamsAPIServerRouteRepository,
+  Omit<StreamsAPIClientOptions, 'signal'>
 >;
 
-export type EntitiesAPIEndpoint = keyof EntitiesAPIServerRouteRepository;
+export type StreamsAPIEndpoint = keyof StreamsAPIServerRouteRepository;
 
-export type APIReturnType<TEndpoint extends EntitiesAPIEndpoint> = ReturnOf<
-  EntitiesAPIServerRouteRepository,
+export type APIReturnType<TEndpoint extends StreamsAPIEndpoint> = ReturnOf<
+  StreamsAPIServerRouteRepository,
   TEndpoint
 >;
 
-export type EntitiesAPIClientRequestParamsOf<TEndpoint extends EntitiesAPIEndpoint> =
-  ClientRequestParamsOf<EntitiesAPIServerRouteRepository, TEndpoint>;
+export type StreamsAPIClientRequestParamsOf<TEndpoint extends StreamsAPIEndpoint> =
+  ClientRequestParamsOf<StreamsAPIServerRouteRepository, TEndpoint>;
 
-export function createEntitiesAPIClient(core: CoreStart | CoreSetup): EntitiesAPIClient {
+export function createStreamsAPIClient(core: CoreStart | CoreSetup): StreamsAPIClient {
   return createRepositoryClient(core);
 }

@@ -13,7 +13,7 @@ import {
 import { omit } from 'lodash';
 import { useKibana } from './use_kibana';
 
-export const useEntitiesAppFetch: UseAbortableAsync<{}, { disableToastOnError?: boolean }> = (
+export const useStreamsAppFetch: UseAbortableAsync<{}, { disableToastOnError?: boolean }> = (
   callback,
   deps,
   options

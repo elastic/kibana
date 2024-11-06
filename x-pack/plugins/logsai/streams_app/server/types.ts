@@ -8,10 +8,10 @@
 
 export interface ConfigSchema {}
 
-export interface EntitiesAppSetupDependencies {}
+export interface StreamsAppSetupDependencies {}
 
-export interface EntitiesAppStartDependencies {}
+export interface StreamsAppStartDependencies {}
 
-export interface EntitiesAppServerSetup {}
+export interface StreamsAppServerSetup {}
 
-export interface EntitiesAppServerStart {}
+export interface StreamsAppServerStart {}

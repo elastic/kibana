@@ -9,29 +9,29 @@ import type {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { EntitiesAPIConfig } from './config';
+import type { StreamsAPIConfig } from './config';
 import type {
-  EntitiesAPIServerStart,
-  EntitiesAPIServerSetup,
-  EntitiesAPISetupDependencies,
-  EntitiesAPIStartDependencies,
+  StreamsAPIServerStart,
+  StreamsAPIServerSetup,
+  StreamsAPISetupDependencies,
+  StreamsAPIStartDependencies,
 } from './types';
 
-export type { EntitiesAPIServerRouteRepository } from './routes/get_global_entities_api_route_repository';
+export type { StreamsAPIServerRouteRepository } from './routes/get_global_streams_api_route_repository';
 
-export type { EntitiesAPIServerSetup, EntitiesAPIServerStart };
+export type { StreamsAPIServerSetup, StreamsAPIServerStart };
 
 import { config as configSchema } from './config';
-import { EntitiesAPIPlugin } from './plugin';
+import { StreamsAPIPlugin } from './plugin';
 
-export const config: PluginConfigDescriptor<EntitiesAPIConfig> = {
+export const config: PluginConfigDescriptor<StreamsAPIConfig> = {
   schema: configSchema,
 };
 
 export const plugin: PluginInitializer<
-  EntitiesAPIServerSetup,
-  EntitiesAPIServerStart,
-  EntitiesAPISetupDependencies,
-  EntitiesAPIStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<EntitiesAPIConfig>) =>
-  new EntitiesAPIPlugin(pluginInitializerContext);
+  StreamsAPIServerSetup,
+  StreamsAPIServerStart,
+  StreamsAPISetupDependencies,
+  StreamsAPIStartDependencies
+> = async (pluginInitializerContext: PluginInitializerContext<StreamsAPIConfig>) =>
+  new StreamsAPIPlugin(pluginInitializerContext);

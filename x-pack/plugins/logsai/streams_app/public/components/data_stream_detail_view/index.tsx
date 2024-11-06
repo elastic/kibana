@@ -7,12 +7,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EntityDetailViewWithoutParams } from '../entity_detail_view';
-import { useEntitiesAppParams } from '../../hooks/use_entities_app_params';
+import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 
 export function DataStreamDetailView() {
   const {
     path: { key, tab },
-  } = useEntitiesAppParams('/data_stream/{key}/{tab}');
+  } = useStreamsAppParams('/data_stream/{key}/{tab}');
   return (
     <EntityDetailViewWithoutParams
       type="data_stream"
