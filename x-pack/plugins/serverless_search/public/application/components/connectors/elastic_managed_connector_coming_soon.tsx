@@ -13,23 +13,20 @@ import {
   EuiIcon,
   EuiTitle,
   EuiText,
-  EuiButton,
   EuiToolTip,
   EuiBadge,
   EuiStepsHorizontal,
   EuiStepsHorizontalProps,
   EuiButtonEmpty,
-  EuiFormRow,
-  EuiTextArea,
-  EuiLink,
-  EuiForm,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import { css } from '@emotion/react';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+// import { FeedbackForm } from '../coming_soon/feedback_form';
 
 import { BACK_LABEL } from '../../../../common/i18n_string';
 
@@ -229,104 +226,7 @@ export const ElasticManagedConnectorComingSoon: React.FC = () => {
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiText textAlign="center" color="subdued">
-                <p>
-                  {i18n.translate(
-                    'xpack.serverlessSearch.elasticManagedConnectorEmpty.subDescription',
-                    {
-                      defaultMessage:
-                        'We value your feedback! Please share your ideas and suggestions as we develop this new feature.',
-                    }
-                  )}
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiForm component="form" fullWidth>
-              <EuiFormRow
-                label={i18n.translate(
-                  'xpack.serverlessSearch.elasticManagedConnectorEmpty.additionalFeedback.Label',
-                  {
-                    defaultMessage:
-                      'Would you like to share any ideas or suggestions about Elastic managed connectors?',
-                  }
-                )}
-              >
-                <EuiFlexGroup direction="column" gutterSize="s">
-                  <EuiFlexItem>
-                    <EuiTextArea
-                      data-test-subj="serverlessSearchElasticManagedConnectorCommingSoonTextArea"
-                      onChange={(e) => {
-                        // setAdditionalFeedback(e.target.value);
-                      }}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText color="subdued" size="xs">
-                      <FormattedMessage
-                        id="xpack.serverlessSearch.elasticManagedConnectorEmpty.additionalFeedback.description"
-                        defaultMessage=" By submitting feedback you acknowledge that you've read and agree to our {termsOfService}, and that Elastic may {contact} about our related products and services,
-                      using the details you provide above. See {privacyStatementLink} for more
-                      details or to opt-out at any time."
-                        values={{
-                          contact: (
-                            <EuiLink
-                              data-test-subj="serverlessSearchElasticManagedConnectorCommingSoonContactYouLink"
-                              href={'docLinks.workplaceSearchGatedFormDataUse'}
-                            >
-                              <FormattedMessage
-                                id="xpack.serverlessSearch.elasticManagedConnectorEmpty.additionalFeedback.contact"
-                                defaultMessage="contact you"
-                              />
-                            </EuiLink>
-                          ),
-                          privacyStatementLink: (
-                            <EuiLink
-                              data-test-subj="serverlessSearchElasticManagedConnectorCommingSoonElasticsPrivacyStatementLink"
-                              href={'docLinks.workplaceSearchGatedFormPrivacyStatement'}
-                            >
-                              <FormattedMessage
-                                id="xpack.serverlessSearch.elasticManagedConnectorEmpty.additionalFeedback.readDataPrivacyStatementLink"
-                                defaultMessage="Elastic’s Privacy Statement"
-                              />
-                            </EuiLink>
-                          ),
-                          termsOfService: (
-                            <EuiLink
-                              data-test-subj="serverlessSearchElasticManagedConnectorCommingSoonTermsOfServiceLink"
-                              href={'docLinks.workplaceSearchGatedFormTermsOfService'}
-                            >
-                              <FormattedMessage
-                                id="xpack.serverlessSearch.elasticManagedConnectorEmpty.additionalFeedback.readTermsOfService"
-                                defaultMessage="Terms of Service"
-                              />
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFormRow>
-            </EuiForm>
-            <EuiFlexGroup direction="row" gutterSize="m">
-              <EuiFlexItem>
-                <EuiButton
-                  data-test-subj="serverlessSearchElasticManagedConnectorEmptysubmitFormButton"
-                  fill
-                  type="submit"
-                  // onClick={() => {}}
-                >
-                  {i18n.translate(
-                    'xpack.serverlessSearch.elasticManagedConnectorEmpty.submitFormButton',
-                    {
-                      defaultMessage: 'Submit',
-                    }
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            {/* <EuiSpacer size="m" /> */}
+            {/* <FeedbackForm /> */}
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexItem>
