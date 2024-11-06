@@ -52,7 +52,7 @@ export function LensRenderer({
 
   const searchApi = useSearchApi(props);
 
-  const showPanelChrome = Boolean(withDefaultActions) || (extraActions && extraActions?.length > 0);
+  const showPanelChrome = Boolean(withDefaultActions) || (extraActions?.length || 0) > 0;
 
   // Re-render on changes
   // internally the embeddable will evaluate whether it is worth to actual render or not
