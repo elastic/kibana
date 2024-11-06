@@ -9,14 +9,13 @@ import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 
 import { APIClientRequestParamsOf } from '@kbn/dataset-quality-plugin/common/rest';
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials, SupertestWithRoleScopeType } from '../../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const synthtrace = getService('synthtrace');
+  const synthtrace = getService('logsSynthtraceEsClient');
   const from = '2024-09-20T11:00:00.000Z';
   const to = '2024-09-20T11:01:00.000Z';
   const dataStreamType = 'logs';
@@ -50,10 +49,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('DataStream total docs', function () {
     let adminRoleAuthc: RoleCredentials;
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
-    let synthtraceLogsEsClient: LogsSynthtraceEsClient;
 
     before(async () => {
-      synthtraceLogsEsClient = await synthtrace.createLogsSynthtraceEsClient();
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
         'admin',
@@ -63,7 +60,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
       );
 
-      await synthtraceLogsEsClient.index([
+      await synthtrace.index([
         timerange(from, to)
           .interval('1m')
           .rate(1)
@@ -95,7 +92,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
-      await synthtraceLogsEsClient.clean();
+      await synthtrace.clean();
       await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
     });
 
