@@ -16,8 +16,6 @@ import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { EqlQueryEdit } from '../../../../../detection_engine/rule_creation_ui/components/eql_query_edit';
-import { debounceAsync } from '../../../../../detection_engine/rule_creation_ui/validators/debounce_async';
-import { eqlQueryValidatorFactory } from '../../../../../detection_engine/rule_creation_ui/validators/eql_query_validator_factory';
 import type { FieldValueQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/query_bar';
 
 import type { FormSchema } from '../../../../../shared_imports';
@@ -48,21 +46,6 @@ const schema: FormSchema<TimelineEqlQueryBar> = {
   },
   eqlOptions: {
     fieldsToValidateOnChange: ['eqlOptions', 'eqlQueryBar'],
-  },
-  eqlQueryBar: {
-    validations: [
-      {
-        validator: (...args) => {
-          const [{ formData }] = args;
-          const { index, eqlOptions } = formData;
-
-          return debounceAsync(
-            eqlQueryValidatorFactory({ indexPatterns: index, eqlOptions }),
-            300
-          )(...args);
-        },
-      },
-    ],
   },
 };
 
@@ -201,6 +184,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
         path="eqlQueryBar"
         eqlFieldsComboBoxOptions={eqlFieldsComboBoxOptions}
         eqlOptions={optionsSelected}
+        showEqlSizeOption
         dataView={sourcererDataView as unknown as DataViewBase}
         loading={indexPatternsLoading}
         disabled={indexPatternsLoading}
