@@ -26,6 +26,7 @@ interface EqlQueryEditProps {
   eqlFieldsComboBoxOptions?: EqlFieldsComboBoxOptions;
   eqlOptions?: EqlOptions;
   showEqlSizeOption?: boolean;
+  showFilterBar?: boolean;
   dataView: DataViewBase;
   required?: boolean;
   loading?: boolean;
@@ -40,6 +41,7 @@ export function EqlQueryEdit({
   eqlFieldsComboBoxOptions,
   eqlOptions,
   showEqlSizeOption = false,
+  showFilterBar = false,
   dataView,
   required,
   loading,
@@ -57,7 +59,7 @@ export function EqlQueryEdit({
       isDisabled: disabled,
       isLoading: loading,
       indexPattern: dataView,
-      showFilterBar: true,
+      showFilterBar,
       idAria: 'ruleEqlQueryBar',
       dataTestSubj: 'ruleEqlQueryBar',
       onValidityChange,
@@ -67,6 +69,7 @@ export function EqlQueryEdit({
       eqlFieldsComboBoxOptions,
       eqlOptions,
       showEqlSizeOption,
+      showFilterBar,
       onEqlOptionsChange,
       onValidityChange,
       onValiditingChange,

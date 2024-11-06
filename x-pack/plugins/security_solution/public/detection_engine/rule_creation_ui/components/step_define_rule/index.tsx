@@ -798,6 +798,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     key="eqlQueryBar"
                     path="queryBar"
                     required
+                    showFilterBar
                     eqlFieldsComboBoxOptions={optionsData}
                     eqlOptions={optionsSelected}
                     dataView={indexPattern}
