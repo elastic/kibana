@@ -46,16 +46,11 @@ export class CreateSLO {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
+    await this.assertSLOInexistant(slo);
+    await this.assertExpectedIndicatorSourceIndexPrivileges(slo);
+
     const rollbackOperations = [];
-
-    const sloAlreadyExists = await this.repository.checkIfSLOExists(slo);
-
-    if (sloAlreadyExists) {
-      throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
-    }
-
     const createPromise = this.repository.create(slo);
-
     rollbackOperations.push(() => this.repository.deleteById(slo.id, true));
 
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
@@ -121,6 +116,24 @@ export class CreateSLO {
     }
 
     return this.toResponse(slo);
+  }
+
+  private async assertSLOInexistant(slo: SLODefinition) {
+    const exists = await this.repository.exists(slo.id);
+    if (exists) {
+      throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
+    }
+  }
+
+  private async assertExpectedIndicatorSourceIndexPrivileges(slo: SLODefinition) {
+    const privileges = await this.esClient.security.hasPrivileges({
+      index: [{ names: slo.indicator.params.index, privileges: ['read', 'view_index_metadata'] }],
+    });
+    if (!privileges.has_all_requested) {
+      throw new SecurityException(
+        `Missing ['read', 'view_index_metadata'] privileges on the source index [${slo.indicator.params.index}]`
+      );
+    }
   }
 
   async createTempSummaryDocument(slo: SLODefinition) {
