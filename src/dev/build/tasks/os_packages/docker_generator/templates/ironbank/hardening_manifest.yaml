@@ -67,7 +67,7 @@ maintainers:
     cht_member: false
   - email: 'arsalan.khan@elastic.co'
     name: 'Arsalan Khan'
-    username: 'kharsalan'
+    username: 'khanarsalan'
     cht_member: false
   - email: 'iaroslava.zhomir@elastic.co'
     name: 'Slava Zhomir'
@@ -75,7 +75,7 @@ maintainers:
     cht_member: false
   - email: 'ryan.kam@elastic.co'
     name: 'Ryan Kam'
-    username: <TODO>
+    username: 'ryankam'
     cht_member: false
   - email: 'saumya.shree@elastic.co'
     name: 'Saumya Shree'
