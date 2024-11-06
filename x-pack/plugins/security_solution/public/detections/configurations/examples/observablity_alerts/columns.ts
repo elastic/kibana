@@ -9,7 +9,7 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 import { ALERT_DURATION, ALERT_REASON, ALERT_STATUS } from '@kbn/rule-data-utils';
 
 import type { ColumnHeaderOptions } from '../../../../../common/types';
-import { defaultColumnHeaderType } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
+import { defaultColumnHeaderType } from '../../../../timelines/components/timeline/unified_components/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../../timelines/components/timeline/body/constants';
 
 import * as i18n from '../../../components/alerts_table/translations';

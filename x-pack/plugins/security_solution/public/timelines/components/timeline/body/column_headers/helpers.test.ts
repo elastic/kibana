@@ -9,7 +9,6 @@ import { mockBrowserFields } from '../../../../../common/containers/source/mock'
 import type { BrowserFields } from '../../../../../../common/search_strategy';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
-import { defaultHeaders } from './default_headers';
 import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import {
   getColumnWidthFromType,
@@ -88,7 +87,7 @@ describe('helpers', () => {
       });
     });
 
-    test('should return the expected metadata in case of unified header', () => {
+    test('should return the expected metadata in case of default header', () => {
       const inputHeaders = defaultUdtHeaders;
       expect(getColumnHeader('@timestamp', inputHeaders)).toEqual({
         columnHeaderType: 'not-filtered',
@@ -135,7 +134,7 @@ describe('helpers', () => {
           initialWidth: 180,
         },
       ];
-      const mockHeader = defaultHeaders.filter((h) =>
+      const mockHeader = defaultUdtHeaders.filter((h) =>
         ['@timestamp', 'source.ip', 'destination.ip'].includes(h.id)
       );
       expect(getColumnHeaders(mockHeader, mockBrowserFields)).toEqual(expectedData);

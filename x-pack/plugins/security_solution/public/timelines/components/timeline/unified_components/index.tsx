@@ -31,7 +31,6 @@ import { withDataView } from '../../../../common/components/with_data_view';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
-import { defaultHeaders } from '../body/column_headers/default_headers';
 import type {
   ColumnHeaderOptions,
   OnChangePage,
@@ -291,7 +290,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     (columnId: string) => {
       dispatch(
         timelineActions.upsertColumn({
-          column: getColumnHeader(columnId, defaultHeaders),
+          column: getColumnHeader(columnId, defaultUdtHeaders),
           id: timelineId,
           index: 1,
         })

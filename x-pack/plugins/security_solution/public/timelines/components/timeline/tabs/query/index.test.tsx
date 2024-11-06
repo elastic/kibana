@@ -30,8 +30,10 @@ import { useDispatch } from 'react-redux';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import { allowedExperimentalValues } from '../../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { defaultUdtHeaders } from '../../unified_components/default_headers';
-import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
+import {
+  defaultUdtHeaders,
+  defaultColumnHeaderType,
+} from '../../unified_components/default_headers';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import * as timelineActions from '../../../../store/actions';

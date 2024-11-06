@@ -35,7 +35,10 @@ import { useUpdateTimeline } from './use_update_timeline';
 import type { TimelineModel } from '../../store/model';
 import { timelineDefaults } from '../../store/defaults';
 
-import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
+import {
+  defaultColumnHeaderType,
+  defaultUdtHeaders,
+} from '../timeline/unified_components/default_headers';
 
 import type { OpenTimelineResult, TimelineErrorCallback } from './types';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
@@ -46,7 +49,6 @@ import {
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
 import { resolveTimeline } from '../../containers/api';
-import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
 import { timelineActions } from '../../store';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';

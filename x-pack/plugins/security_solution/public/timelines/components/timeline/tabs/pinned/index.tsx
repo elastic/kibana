@@ -21,7 +21,6 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../../containers';
-import { defaultHeaders } from '../../body/column_headers/default_headers';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
@@ -37,6 +36,7 @@ import { useTimelineControlColumn } from '../shared/use_timeline_control_columns
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { NotesFlyout } from '../../properties/notes_flyout';
+import { defaultUdtHeaders } from '../../unified_components/default_headers';
 
 interface PinnedFilter {
   bool: {
@@ -111,7 +111,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   }, [pinnedEventIds]);
 
   const timelineQueryFields = useMemo(() => {
-    const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
+    const columnsHeader = isEmpty(columns) ? defaultUdtHeaders : columns;
     const columnFields = columnsHeader.map((c) => c.id);
 
     return [...columnFields, ...requiredFieldsForActions];
