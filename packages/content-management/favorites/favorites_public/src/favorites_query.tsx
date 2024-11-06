@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-
 import { useFavoritesClient, useFavoritesContext } from './favorites_context';
 
 const favoritesKeys = {

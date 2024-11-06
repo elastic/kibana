@@ -13,6 +13,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 export let core: CoreStart;
 
@@ -22,6 +23,7 @@ interface ServiceDeps {
   expressions: ExpressionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
@@ -42,7 +44,8 @@ export const setKibanaServices = (
   dataViews: DataViewsPublicPluginStart,
   expressions: ExpressionsStart,
   indexManagement?: IndexManagementPluginSetup,
-  fieldsMetadata?: FieldsMetadataPublicStart
+  fieldsMetadata?: FieldsMetadataPublicStart,
+  usageCollection?: UsageCollectionStart
 ) => {
   core = kibanaCore;
   servicesReady$.next({
@@ -51,5 +54,6 @@ export const setKibanaServices = (
     expressions,
     indexManagementApiService: indexManagement?.apiService,
     fieldsMetadata,
+    usageCollection,
   });
 };

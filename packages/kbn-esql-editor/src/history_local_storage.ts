@@ -10,7 +10,7 @@
 import moment from 'moment';
 import 'moment-timezone';
 const QUERY_HISTORY_ITEM_KEY = 'QUERY_HISTORY_ITEM_KEY';
-const dateFormat = 'MMM. D, YY HH:mm:ss.SSS';
+export const dateFormat = 'MMM. D, YY HH:mm:ss.SSS';
 
 /**
  * We show maximum 20 ES|QL queries in the Query history component
@@ -24,13 +24,13 @@ export interface QueryHistoryItem {
   timeZone?: string;
 }
 
-const MAX_QUERIES_NUMBER = 20;
+export const MAX_HISTORY_QUERIES_NUMBER = 20;
 
-const getKey = (queryString: string) => {
+export const getTrimmedQuery = (queryString: string) => {
   return queryString.replaceAll('\n', '').trim().replace(/\s\s+/g, ' ');
 };
 
-const getMomentTimeZone = (timeZone?: string) => {
+export const getMomentTimeZone = (timeZone?: string) => {
   return !timeZone || timeZone === 'Browser' ? moment.tz.guess() : timeZone;
 };
 
@@ -58,17 +58,17 @@ export const getCachedQueries = (): QueryHistoryItem[] => {
 // Adding the maxQueriesAllowed here for testing purposes
 export const addQueriesToCache = (
   item: QueryHistoryItem,
-  maxQueriesAllowed = MAX_QUERIES_NUMBER
+  maxQueriesAllowed = MAX_HISTORY_QUERIES_NUMBER
 ) => {
   // if the user is working on multiple tabs
   // the cachedQueries Map might not contain all
   // the localStorage queries
   const queries = getHistoryItems('desc');
   queries.forEach((queryItem) => {
-    const trimmedQueryString = getKey(queryItem.queryString);
+    const trimmedQueryString = getTrimmedQuery(queryItem.queryString);
     cachedQueries.set(trimmedQueryString, queryItem);
   });
-  const trimmedQueryString = getKey(item.queryString);
+  const trimmedQueryString = getTrimmedQuery(item.queryString);
 
   if (item.queryString) {
     const tz = getMomentTimeZone(item.timeZone);

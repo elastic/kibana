@@ -8,13 +8,15 @@
     "browser": true,
     "optionalPlugins": [
       "indexManagement",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "usageCollection"
     ],
     "requiredPlugins": [
       "data",
       "expressions",
       "dataViews",
       "uiActions",
+      "contentManagement"
     ],
     "requiredBundles": [
       "kibanaReact",
