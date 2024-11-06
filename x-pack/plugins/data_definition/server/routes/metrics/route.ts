@@ -8,6 +8,8 @@
 import { z } from '@kbn/zod';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
+import { badRequest } from '@hapi/boom';
+import kbnDatemath from '@kbn/datemath';
 import { createDataDefinitionServerRoute } from '..';
 import type { GetMetricDefinitionResult } from '../../../../data_definition_registry/server/data_definition_registry/types';
 
@@ -15,8 +17,8 @@ const getMetricsRoute = createDataDefinitionServerRoute({
   endpoint: 'POST /internal/data_definition/metrics',
   params: z.object({
     body: z.object({
-      start: z.number(),
-      end: z.number(),
+      start: z.union([z.string(), z.number()]),
+      end: z.union([z.string(), z.number()]),
       kuery: z.string().optional(),
       types: z
         .array(z.union([z.literal('slo'), z.literal('rule'), z.literal('visualization')]))
@@ -43,9 +45,16 @@ const getMetricsRoute = createDataDefinitionServerRoute({
       await dataDefinitionRegistry.start()
     ).getClientWithRequest(request);
 
+    const startAsNumber = typeof start === 'string' ? kbnDatemath.parse(start)?.valueOf() : start;
+    const endAsNumber = typeof end === 'string' ? kbnDatemath.parse(end)?.valueOf() : end;
+
+    if (startAsNumber === undefined || endAsNumber === undefined) {
+      throw badRequest(`Start/end not valid: ${JSON.stringify({ start, end })}`);
+    }
+
     const results = await registryClient.getMetricDefinitions({
-      start,
-      end,
+      start: startAsNumber,
+      end: endAsNumber,
       index: ['*', '*:*'],
       query: kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} },
     });

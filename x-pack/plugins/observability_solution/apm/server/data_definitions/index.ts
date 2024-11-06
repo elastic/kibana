@@ -18,28 +18,7 @@ export function registerDataDefinitions({
 }) {
   plugins.dataDefinitionRegistry?.registerStaticDataDefinition(
     { id: 'apm' },
-    async ({
-      dataStreams,
-      soClient,
-    }): Promise<
-      | {
-          readonly transaction_duration: {
-            readonly label: string;
-            readonly properties: {};
-            readonly schema: {
-              readonly type: 'object';
-              readonly properties: {
-                readonly serviceName: { readonly type: 'string' };
-                readonly aggregationType: {
-                  readonly type: 'string';
-                  readonly enum: readonly ['avg', 'p90', 'p99'];
-                };
-              };
-            };
-          };
-        }
-      | { readonly transaction_duration?: undefined }
-    > => {
+    async ({ dataStreams, soClient }) => {
       const apmIndices = await plugins.apmDataAccess.getApmIndices(soClient);
 
       if (dataStreams.matches(apmIndices.metric)) {

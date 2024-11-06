@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { badRequest } from '@hapi/boom';
 import type { GetDataScopeResult } from '@kbn/data-definition-registry-plugin/server';
+import kbnDatemath from '@kbn/datemath';
+import { z } from '@kbn/zod';
 import { createDataDefinitionServerRoute } from '..';
 
 const getDataScopesRoute = createDataDefinitionServerRoute({
   endpoint: 'POST /internal/data_definition/data_scopes',
   params: z.object({
     body: z.object({
-      start: z.number(),
-      end: z.number(),
+      start: z.union([z.string(), z.number()]),
+      end: z.union([z.string(), z.number()]),
       types: z
         .array(z.union([z.literal('slo'), z.literal('rule'), z.literal('visualization')]))
         .optional(),
@@ -40,9 +42,16 @@ const getDataScopesRoute = createDataDefinitionServerRoute({
       await dataDefinitionRegistry.start()
     ).getClientWithRequest(request);
 
+    const startAsNumber = typeof start === 'string' ? kbnDatemath.parse(start)?.valueOf() : start;
+    const endAsNumber = typeof end === 'string' ? kbnDatemath.parse(end)?.valueOf() : end;
+
+    if (startAsNumber === undefined || endAsNumber === undefined) {
+      throw badRequest(`Start/end not valid: ${JSON.stringify({ start, end })}`);
+    }
+
     const results = await registryClient.getScopes({
-      start,
-      end,
+      start: startAsNumber,
+      end: endAsNumber,
       query: {
         match_all: {},
       },
