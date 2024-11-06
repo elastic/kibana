@@ -184,6 +184,10 @@ export interface IntegrationCallbacks extends LensApiProps {
   updateOverrides: (newOverrides: LensOverrides['overrides']) => void;
 }
 
+/**
+ * Public Callbacks are function who are exposed thru the Lens custom renderer component,
+ * so not directly exposed in the Lens API, rather passed down as parentApi to the Lens Embeddable
+ */
 export interface LensPublicCallbacks extends LensApiProps {
   onBrushEnd?: (data: Simplify<BrushTriggerEvent['data'] & PreventableEvent>) => void;
   onLoad?: (
@@ -203,6 +207,9 @@ export interface LensPublicCallbacks extends LensApiProps {
   onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
 }
 
+/**
+ * API callbacks are function who are used by direct Embeddable consumers (i.e. Dashboard or our own Lens custom renderer)
+ */
 export type LensApiCallbacks = Simplify<ViewInDiscoverCallbacks & IntegrationCallbacks>;
 
 export interface LensUnifiedSearchContext {
