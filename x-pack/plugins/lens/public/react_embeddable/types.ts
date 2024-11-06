@@ -90,9 +90,6 @@ import type { MetricVisualizationState } from '../visualizations/metric/types';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface LensApiProps {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface LensStateProps {}
-
 export type LensSavedObjectAttributes = Omit<LensDocument, 'savedObjectId' | 'type'>;
 
 export interface VisualizationContext {
@@ -269,8 +266,7 @@ export type LensSerializedState = Simplify<
  */
 export type LensComponentProps = Simplify<
   LensRequestHandlersProps &
-    LensSharedProps &
-    LensStateProps & {
+    LensSharedProps & {
       /**
        * When enabled the Lens component will render as a dashboard panel
        */
