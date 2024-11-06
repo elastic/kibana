@@ -13,6 +13,9 @@ import { mockCase } from '../../../public/containers/mock';
 describe('similar', () => {
   describe('find similar cases', () => {
     const clientArgs = createCasesClientMockArgs();
+
+    jest.mocked(clientArgs.services.caseService.getCase).mockResolvedValue(mockCases[0]);
+
     clientArgs.services.caseService.findCases.mockResolvedValue({
       page: 1,
       per_page: 10,
@@ -37,7 +40,22 @@ describe('similar', () => {
 
       const call = clientArgs.services.caseService.findCases.mock.calls[0][0];
 
-      expect(call).toMatchInlineSnapshot();
+      expect(call).toMatchInlineSnapshot(`
+        Object {
+          "filter": Object {
+            "arguments": Array [],
+            "function": "or",
+            "type": "function",
+          },
+          "page": 2,
+          "perPage": 10,
+          "rootSearchFields": Array [
+            "_id",
+          ],
+          "search": "-\\"cases:mock-id\\"",
+          "sortField": "created_at",
+        }
+      `);
     });
   });
 });
