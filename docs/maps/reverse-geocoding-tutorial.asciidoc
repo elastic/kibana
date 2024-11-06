@@ -46,7 +46,7 @@ To get the CSA boundary data:
 
 . Go to the https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html[Census Bureau’s website] and download the `cb_2018_us_csa_500k.zip` file.
 . Uncompress the zip file.
-. In Kibana, open the main menu, and click *Maps*.
+. In Kibana, go to *Maps*.
 . Click *Create map*.
 . Click *Add layer*.
 . Click *Upload file*.
@@ -71,7 +71,8 @@ image::maps/images/reverse-geocoding-tutorial/csa_regions.png[Map showing metro 
 === Step 3: Reverse geocoding
 To visualize CSA regions by web log traffic, the web log traffic must contain a CSA region identifier. You'll use {es} {ref}/enrich-processor.html[enrich processor] to add CSA region identifiers to the web logs sample data set. You can skip this step if your source data already contains region identifiers.
 
-. Open the main menu, and then click *Dev Tools*.
+. Go to *Developer Tools* using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 . In *Console*, create a {ref}/geo-match-enrich-policy-type.html[geo_match enrichment policy]:
 +
 [source,js]
@@ -142,7 +143,7 @@ PUT kibana_sample_data_logs/_settings
 }
 ----------------------------------
 
-. Open the main menu, and click *Discover*.
+. Go to *Discover*.
 . Set the data view to *Kibana Sample Data Logs*.
 . Open the <<set-time-filter, time filter>>, and set the time range to the last 30 days.
 . Scan through the list of *Available fields* until you find the `csa.GEOID` field. You can also search for the field by name.
@@ -158,7 +159,7 @@ image::maps/images/reverse-geocoding-tutorial/discover_enriched_web_log.png[View
 === Step 4: Visualize Combined Statistical Area (CSA) regions by web traffic
 Now that our web traffic contains CSA region identifiers, you'll visualize CSA regions by web traffic.
 
-. Open the main menu, and click *Maps*.
+. Go to *Maps*.
 . Click *Create map*.
 . Click *Add layer*.
 . Click *Choropleth*.

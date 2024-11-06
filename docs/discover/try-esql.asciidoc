@@ -17,10 +17,8 @@ To be able to select **Language {esql}** from the Data views menu the `enableESQ
 
 To load the sample data:
 
-. On the home page, click **Try sample data**.
-. Click **Other sample data sets**.
-. On the Sample web logs card, click **Add data**.
-. Open the main menu and select *Discover*.
+. <<gs-get-data-into-kibana,Install the web logs sample data>>.
+. Go to *Discover*.
 . From the Data views menu, select *Language {esql}*.
 
 Let's say we want to find out what operating system users have and how much RAM is on their machine.  

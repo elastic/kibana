@@ -146,7 +146,7 @@ Add the sample web logs data that you'll use to create the bar chart, then creat
 
 . On the *Sample web logs* card, click *Add data*.
 
-. Open the main menu, then click *Dashboard*.
+. Go to *Dashboard*.
 
 . On the *Dashboards* page, click *Create dashboard*.
 

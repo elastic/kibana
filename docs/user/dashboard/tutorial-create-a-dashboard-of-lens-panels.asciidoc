@@ -26,7 +26,7 @@ Add the sample web logs data, and create and set up the dashboard.
 
 Create the dashboard where you'll display the visualization panels.
 
-. Open the main menu, then click *Dashboards*.
+. Go to *Dashboards*.
 
 . Click *Create dashboard*.
 

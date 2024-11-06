@@ -46,7 +46,7 @@ Before starting, add the eCommerce sample data that you'll use in your spec, the
 
 . On the *Sample eCommerce orders* card, click *Add data*.
 
-. Open the main menu, then click *Dashboard*.
+. Go to *Dashboard*.
 
 . On the *Dashboards* page, click *Create dashboard*.
 
@@ -90,7 +90,8 @@ To check your work, open and use the <<console-kibana,*Console*>> on a separate 
 
 . Open {kib} on a new tab. 
 
-. Open the main menu, then click *Dev Tools*.
+. Go to the *Developer Tools* page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 . On the *Console* editor, enter the aggregation, then click *Click to send request*:
 
