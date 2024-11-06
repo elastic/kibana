@@ -132,7 +132,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
 
   const [roleSpacePrivilege, setRoleSpacePrivilege] = useState<KibanaRolePrivilege>(
     !selectedRoles.length || !selectedRolesCombinedPrivileges.length
-      ? FEATURE_PRIVILEGES_ALL
+      ? FEATURE_PRIVILEGES_CUSTOM
       : selectedRolesCombinedPrivileges[0]
   );
 
