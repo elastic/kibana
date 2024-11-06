@@ -269,9 +269,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   public setupKnowledgeBase = async ({
     soClient,
     v2KnowledgeBaseEnabled = true,
+    ignoreSecurityLabs = false,
   }: {
     soClient: SavedObjectsClientContract;
     v2KnowledgeBaseEnabled?: boolean;
+    ignoreSecurityLabs?: boolean;
   }): Promise<void> => {
     if (this.options.getIsKBSetupInProgress()) {
       this.options.logger.debug('Knowledge Base setup already in progress');
@@ -366,7 +368,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
 
-      if (v2KnowledgeBaseEnabled) {
+      if (v2KnowledgeBaseEnabled && !ignoreSecurityLabs) {
         const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
         if (!labsDocsLoaded) {
           this.options.logger.debug(`Loading Security Labs KB docs...`);
