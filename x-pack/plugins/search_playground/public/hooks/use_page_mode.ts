@@ -11,7 +11,7 @@ import { PlaygroundPageMode } from '../types';
 export const usePageMode = ({
   hasSelectedIndices,
   hasConnectors,
-  initialPageMode = PlaygroundPageMode.chat,
+  initialPageMode = 'chat',
 }: {
   hasSelectedIndices: boolean;
   hasConnectors: boolean;
@@ -21,7 +21,7 @@ export const usePageMode = ({
   const [pageMode, setPageMode] = useState<PlaygroundPageMode>(initialPageMode);
 
   useEffect(() => {
-    if (pageMode === PlaygroundPageMode.chat) {
+    if (pageMode === 'chat') {
       if (showSetupPage && hasConnectors && hasSelectedIndices) {
         setShowSetupPage(false);
       } else if (!showSetupPage && (!hasConnectors || !hasSelectedIndices)) {

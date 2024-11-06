@@ -47,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
     {
       id: ViewMode.chat,
       label:
-        selectedPageMode === PlaygroundPageMode.chat
+        selectedPageMode === 'chat'
           ? i18n.translate('xpack.searchPlayground.header.view.chat', {
               defaultMessage: 'Chat',
             })

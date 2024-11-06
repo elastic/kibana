@@ -11,7 +11,7 @@ import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { NotFound } from './components/not_found';
-import { PageMode, Playground } from './components/playground/playground';
+import { Playground } from './components/playground/playground';
 import { SearchApplicationsRouter } from './components/search_applications/search_applications_router';
 import {
   PLAYGROUND_CHAT_PATH,
@@ -30,10 +30,10 @@ export const Applications = () => {
       </Route>
       <Redirect exact from={PLAYGROUND_PATH} to={PLAYGROUND_CHAT_PATH} />
       <Route path={PLAYGROUND_CHAT_PATH}>
-        <Playground pageMode={PageMode.chat} />
+        <Playground pageMode={'chat'} />
       </Route>
       <Route path={PLAYGROUND_SEARCH_PATH}>
-        <Playground pageMode={PageMode.search} />
+        <Playground pageMode={'search'} />
       </Route>
       <Route>
         <NotFound />

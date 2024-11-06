@@ -16,9 +16,7 @@ import { App } from './components/app';
 interface PlaygroundOverviewProps {
   pageMode?: PlaygroundPageMode;
 }
-export const PlaygroundOverview: React.FC<PlaygroundOverviewProps> = ({
-  pageMode = PlaygroundPageMode.chat,
-}) => {
+export const PlaygroundOverview: React.FC<PlaygroundOverviewProps> = ({ pageMode = 'chat' }) => {
   const {
     services: { console: consolePlugin },
   } = useKibana();
