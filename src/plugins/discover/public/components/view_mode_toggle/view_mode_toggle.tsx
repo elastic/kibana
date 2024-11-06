@@ -50,8 +50,12 @@ export const DocumentViewModeToggle = ({
   const [showPatternAnalysisTab, setShowPatternAnalysisTab] = useState<boolean | null>(null);
   const showFieldStatisticsTab = useMemo(
     () =>
-      !isEsqlMode && uiSettings.get(SHOW_FIELD_STATISTICS) && dataVisualizerService !== undefined,
-    [dataVisualizerService, uiSettings, isEsqlMode]
+      // If user opens saved search with field stats in ES|QL,
+      // we show the toggle with the mode disabled so user can switch to document view
+      // instead of auto-directing
+      (viewMode === VIEW_MODE.AGGREGATED_LEVEL && isEsqlMode) ||
+      (!isEsqlMode && uiSettings.get(SHOW_FIELD_STATISTICS) && dataVisualizerService !== undefined),
+    [dataVisualizerService, uiSettings, isEsqlMode, viewMode]
   );
   const isMounted = useMountedState();
 
