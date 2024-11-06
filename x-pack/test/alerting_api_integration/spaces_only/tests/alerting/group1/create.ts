@@ -480,6 +480,20 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should create a rule with a predefined non random ID', async () => {
+      const ruleId = 'my_id';
+
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData())
+        .expect(200);
+
+      objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+      expect(response.body.id).to.eql(ruleId);
+    });
+
     describe('system actions', () => {
       const systemAction = {
         id: 'system-connector-test.system-action',
