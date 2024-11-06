@@ -119,9 +119,9 @@ describe('WHERE <expression>', () => {
           ...getFieldNamesByType('any'),
           ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }),
         ]);
-        // await assertSuggestions(`from a | where keywordField >= keywordField ${op} doubleField /`, [
-        //   ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['double']),
-        // ]);
+        await assertSuggestions(`from a | where keywordField >= keywordField ${op} doubleField /`, [
+          ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['double']),
+        ]);
         await assertSuggestions(
           `from a | where keywordField >= keywordField ${op} doubleField == /`,
           [
@@ -132,6 +132,11 @@ describe('WHERE <expression>', () => {
           ]
         );
       }
+
+      await assertSuggestions(
+        'from a | WHERE doubleField != doubleField AND dateField < ?_tend /',
+        ['!= $0', '== $0', 'AND $0', 'IN $0', 'IS NOT NULL', 'IS NULL', 'NOT', 'OR $0', '| ']
+      );
     });
 
     test('suggests operators after a field name', async () => {
@@ -211,7 +216,10 @@ describe('WHERE <expression>', () => {
       ]);
       await assertSuggestions('from index | WHERE not /', [
         ...getFieldNamesByType('boolean').map((name) => attachTriggerCommand(`${name} `)),
-        ...getFunctionSignaturesByReturnType('eval', 'boolean', { scalar: true }),
+        ...getFunctionSignaturesByReturnType('where', 'boolean', { scalar: true }),
+      ]);
+      await assertSuggestions('FROM index | WHERE NOT ENDS_WITH(keywordField, "foo") /', [
+        ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['boolean']),
       ]);
     });
 
@@ -241,5 +249,37 @@ describe('WHERE <expression>', () => {
         ...getFunctionSignaturesByReturnType('where', 'double', { scalar: true }),
       ]);
     });
+  });
+
+  test('suggestions after IS (NOT) NULL', async () => {
+    const { assertSuggestions } = await setup();
+
+    await assertSuggestions('FROM index | WHERE tags.keyword IS NULL /', ['AND $0', 'OR $0', '| ']);
+
+    await assertSuggestions('FROM index | WHERE tags.keyword IS NOT NULL /', [
+      'AND $0',
+      'OR $0',
+      '| ',
+    ]);
+  });
+
+  test('suggestions after an arithmetic expression', async () => {
+    const { assertSuggestions } = await setup();
+
+    await assertSuggestions('FROM index | WHERE doubleField + doubleField /', [
+      '+ $0',
+      '- $0',
+      'IS NOT NULL',
+      'IS NULL',
+    ]);
+  });
+
+  test('pipe suggestion after complete expression', async () => {
+    const { suggest } = await setup();
+    expect(await suggest('from index | WHERE doubleField != doubleField /')).toContainEqual(
+      expect.objectContaining({
+        label: '|',
+      })
+    );
   });
 });

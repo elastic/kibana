@@ -28,7 +28,7 @@ export async function suggest(
   innerText: string,
   command: ESQLCommand<'where'>,
   getColumnsByType: GetColumnsByTypeFn,
-  columnExists: (column: string) => boolean,
+  _columnExists: (column: string) => boolean,
   _getSuggestedVariableName: () => string,
   getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown',
   _getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
@@ -45,13 +45,11 @@ export async function suggest(
       return [];
     }
 
-    // skip assign operator if the column exists so as not to promote shadowing
-    const ignoredOperators = columnExists(lastArg.parts.join('.')) ? ['='] : [];
-
     return getOperatorSuggestions({
       command: 'where',
       leftParamType: columnType,
-      ignored: ignoredOperators,
+      // no assignments allowed in WHERE
+      ignored: ['='],
     });
   }
 
