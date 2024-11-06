@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getTimeZone } from './src/get_timezone';
-export { getLensAttributesFromSuggestion } from './src/get_lens_attributes';
-export { TooltipWrapper } from './src/tooltip_wrapper';
-export { useDebouncedValue } from './src/debounced_value';
-export { ChartType } from './src/types';
-export { getDatasourceId } from './src/get_datasource_id';
-export { mapVisToChartType } from './src/map_vis_to_chart_type';
+import { createContext, useContext } from 'react';
+
+const exampleContext = createContext<{
+  currentMessage: string | undefined;
+  setCurrentMessage: (message: string | undefined) => void;
+}>({
+  currentMessage: undefined,
+  setCurrentMessage: () => {},
+});
+
+export const ExampleContextProvider = exampleContext.Provider;
+
+export const useExampleContext = () => useContext(exampleContext);
