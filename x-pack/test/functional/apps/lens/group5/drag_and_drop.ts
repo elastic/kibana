@@ -9,20 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, header, timePicker } = getPageObjects([
-    'visualize',
-    'lens',
-    'header',
-    'timePicker',
-  ]);
+  const { visualize, lens, header } = getPageObjects(['visualize', 'lens', 'header']);
 
   const listingTable = getService('listingTable');
   const xyChartContainer = 'xyVisChart';
 
   describe('lens drag and drop tests', () => {
-    before(async () => {
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-    });
     describe('basic drag and drop', () => {
       it('should construct a bar chart when dropping a field to create top values chart', async () => {
         await visualize.navigateToNewVisualization();
@@ -34,13 +26,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         expect(await lens.getChartTypeFromChartSwitcher()).to.eql('Bar');
       });
-      it('should construct a line chart when dropping a time field to create a date histogram chart', async () => {
+      it('should construct a bar chart when dropping a time field to create a date histogram chart', async () => {
         await visualize.navigateToNewVisualization();
         await visualize.clickVisType('lens');
         await header.waitUntilLoadingHasFinished();
         await lens.dragFieldToWorkspace('@timestamp', xyChartContainer);
         expect(await lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql('@timestamp');
-        expect(await lens.getChartTypeFromChartSwitcher()).to.eql('Line');
+        expect(await lens.getChartTypeFromChartSwitcher()).to.eql('Bar');
       });
 
       it('should allow dropping fields to existing and empty dimension triggers', async () => {

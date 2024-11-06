@@ -9,15 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { lens, visualize, timePicker } = getPageObjects(['lens', 'visualize', 'timePicker']);
+  const { lens, visualize } = getPageObjects(['lens', 'visualize']);
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
   describe('lens disable auto-apply tests', () => {
-    before(async () => {
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-    });
     it('should persist auto-apply setting across page refresh', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');

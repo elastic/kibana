@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const browser = getService('browser');
   const filterBarService = getService('filterBar');
   const queryBar = getService('queryBar');
@@ -17,7 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens share tests', () => {
     before(async () => {
       await visualize.gotoVisualizationLandingPage();
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     afterEach(async () => {

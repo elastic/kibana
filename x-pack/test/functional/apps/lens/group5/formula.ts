@@ -9,12 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, common, timePicker } = getPageObjects([
-    'visualize',
-    'lens',
-    'common',
-    'timePicker',
-  ]);
+  const { visualize, lens, common } = getPageObjects(['visualize', 'lens', 'common']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const browser = getService('browser');
@@ -24,9 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
 
   describe('lens formula', () => {
-    before(async () => {
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-    });
     it('should transition from count to formula', async () => {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');

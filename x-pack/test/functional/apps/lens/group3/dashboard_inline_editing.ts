@@ -7,12 +7,11 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, visualize, lens, timeToVisualize, timePicker } = getPageObjects([
+  const { dashboard, visualize, lens, timeToVisualize } = getPageObjects([
     'dashboard',
     'visualize',
     'lens',
     'timeToVisualize',
-    'timePicker',
   ]);
   const find = getService('find');
   const log = getService('log');
@@ -43,9 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('lens inline editing tests', () => {
-    before(async () => {
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-    });
     it('should allow inline editing of a by value visualization', async () => {
       await createNewLens();
       await lens.save('New Lens from Modal', false, false, false, 'new');

@@ -8,12 +8,9 @@ import { ElasticBrandPalette } from '@kbn/coloring';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
 
   describe('lens color palette tests', () => {
-    before(async () => {
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-    });
     it('should allow to pick legacy color palette in xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');

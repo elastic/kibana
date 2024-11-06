@@ -10,12 +10,7 @@ import moment from 'moment';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, common, timePicker } = getPageObjects([
-    'visualize',
-    'lens',
-    'common',
-    'timePicker',
-  ]);
+  const { visualize, lens, common } = getPageObjects(['visualize', 'lens', 'common']);
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
@@ -26,9 +21,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
 
   describe('lens terms', () => {
-    before(async () => {
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-    });
     describe('lens multi terms suite', () => {
       it('should allow creation of lens xy chart with multi terms categories', async () => {
         await visualize.navigateToNewVisualization();

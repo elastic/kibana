@@ -9,12 +9,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, dashboard, lens, reporting, timePicker, visualize } = getPageObjects([
+  const { common, dashboard, lens, reporting, visualize } = getPageObjects([
     'common',
     'dashboard',
     'lens',
     'reporting',
-    'timePicker',
     'visualize',
   ]);
   const es = getService('es');
@@ -29,7 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/reporting'
       );
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await security.testUser.setRoles(
         [
           'test_logstash_reader',
@@ -43,7 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
@@ -78,6 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualize.gotoVisualizationLandingPage();
           await visualize.navigateToNewVisualization();
           await visualize.clickVisType('lens');
+          await lens.goToTimeRange();
 
           await lens.configureDimension({
             dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

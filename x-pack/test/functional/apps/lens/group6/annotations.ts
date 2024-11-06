@@ -9,12 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, timePicker, tagManagement } = getPageObjects([
-    'visualize',
-    'lens',
-    'timePicker',
-    'tagManagement',
-  ]);
+  const { visualize, lens, tagManagement } = getPageObjects(['visualize', 'lens', 'tagManagement']);
   const find = getService('find');
   const retry = getService('retry');
   const toastsService = getService('toasts');
@@ -22,13 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
 
   describe('lens annotations tests', () => {
-    before(async () => {
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-    });
-    after(async () => {
-      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
-    });
-
     it('should show a disabled annotation layer button if there is no date histogram in data layer', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');

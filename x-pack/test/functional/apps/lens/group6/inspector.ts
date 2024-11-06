@@ -8,14 +8,13 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const elasticChart = getService('elasticChart');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
 
   describe('lens inspector', () => {
     before(async () => {
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);

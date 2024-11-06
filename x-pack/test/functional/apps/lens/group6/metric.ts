@@ -9,12 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, common, timePicker } = getPageObjects([
-    'visualize',
-    'lens',
-    'common',
-    'timePicker',
-  ]);
+  const { visualize, lens, common } = getPageObjects(['visualize', 'lens', 'common']);
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const retry = getService('retry');
@@ -78,9 +73,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('lens metric', () => {
-    before(async () => {
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-    });
     it('should render a metric', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
