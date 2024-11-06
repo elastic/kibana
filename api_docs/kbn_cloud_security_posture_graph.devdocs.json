@@ -373,7 +373,7 @@
             "section": "def-public.NodeViewModel",
             "text": "NodeViewModel"
           },
-          ", string>, \"id\" | \"draggable\" | \"data\" | \"width\" | \"height\" | \"selectable\" | \"selected\" | \"parentId\" | \"sourcePosition\" | \"targetPosition\" | \"dragHandle\" | \"deletable\"> & Required<Pick<",
+          ", string>, \"id\" | \"data\" | \"draggable\" | \"width\" | \"height\" | \"selectable\" | \"selected\" | \"parentId\" | \"sourcePosition\" | \"targetPosition\" | \"dragHandle\" | \"deletable\"> & Required<Pick<",
           "Node",
           "<",
           {
