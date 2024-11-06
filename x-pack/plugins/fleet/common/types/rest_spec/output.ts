@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentPolicy, NewOutput, Output } from '../models';
+import type { NewOutput, Output } from '../models';
 
 import type { ListResult } from './common';
 
@@ -50,6 +50,11 @@ export interface GetOutputHealthResponse {
   timestamp: string;
 }
 
+export interface GetListAgentPolicyByOutputsRequest {
+  body: {
+    ids: string[];
+  }
+}
 export interface GetListAgentPolicyByOutputsResponse {
   items: string[];
 }

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { GetOutputHealthResponse } from '../../../common/types';
-
 import { outputRoutesService } from '../../services';
 import type {
   PutOutputRequest,
   GetOutputsResponse,
   PostOutputRequest,
   PostLogstashApiKeyResponse,
+  GetListAgentPolicyByOutputsRequest,
+  GetListAgentPolicyByOutputsResponse, GetOutputHealthResponse
 } from '../../types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -83,3 +83,12 @@ export function sendGetOutputHealth(outputId: string) {
     version: API_VERSIONS.public.v1,
   });
 }
+
+export const useListPoliciesByOutputs = (body?: GetListAgentPolicyByOutputsRequest['body']) => {
+  return useRequest<GetListAgentPolicyByOutputsResponse>({
+    path: outputRoutesService.getListPoliciesByOutputsPath(),
+    method: 'post',
+    body: JSON.stringify(body),
+    version: API_VERSIONS.public.v1,
+  });
+};

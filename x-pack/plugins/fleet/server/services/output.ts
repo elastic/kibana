@@ -1183,7 +1183,7 @@ class OutputService {
   public async getAgentPoliciesPerOutputs(outputIds?: string[]) {
     let agentPoliciesKuery: string;
     let packagePoliciesKuery: string;
-    if (outputIds) {
+    if (outputIds && outputIds.length > 0) {
       packagePoliciesKuery = outputIds
         .map((id) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id: "${id}"`)
         .join(' or ');

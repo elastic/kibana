@@ -213,6 +213,7 @@ export const useGetListOutputsForPolicies = (body?: GetListAgentPolicyOutputsReq
     version: API_VERSIONS.public.v1,
   });
 };
+
 export const sendGetListOutputsForPolicies = (body?: GetListAgentPolicyOutputsRequest['body']) => {
   return sendRequest<GetListAgentPolicyOutputsResponse>({
     path: agentPolicyRouteService.getListOutputsPath(),

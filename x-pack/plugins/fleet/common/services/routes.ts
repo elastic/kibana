@@ -267,6 +267,7 @@ export const outputRoutesService = {
   getCreateLogstashApiKeyPath: () => OUTPUT_API_ROUTES.LOGSTASH_API_KEY_PATTERN,
   getOutputHealthPath: (outputId: string) =>
     OUTPUT_API_ROUTES.GET_OUTPUT_HEALTH_PATTERN.replace('{outputId}', outputId),
+  getListPoliciesByOutputsPath: () => OUTPUT_API_ROUTES.GET_AGENT_POLICIES
 };
 
 export const fleetProxiesRoutesService = {
