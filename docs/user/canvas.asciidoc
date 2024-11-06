@@ -176,7 +176,7 @@ To share workpads with a larger audience, click *Share* in the toolbar. For deta
 [[export-single-workpad]]
 == Export workpads
 
-Want to export multiple workpads? Go to the *Canvas* home page, select the workpads you want to export, then click *Export*.
+Want to export multiple workpads? Go to the *Canvas* page, select the workpads you want to export, then click *Export*.
 
 --
 

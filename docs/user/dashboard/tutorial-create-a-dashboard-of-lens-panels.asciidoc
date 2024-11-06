@@ -18,13 +18,7 @@ Before you begin, you should be familiar with the <<kibana-concepts-analysts>>.
 
 Add the sample web logs data, and create and set up the dashboard.
 
-. On the home page, click *Try sample data*.
-
-. Expand *Other sample data sets*. 
-
-. On the *Sample web logs* card, click *Add data*.
-
-Create the dashboard where you'll display the visualization panels.
+. <<gs-get-data-into-kibana,Install the web logs sample data set>>.
 
 . Go to *Dashboards*.
 

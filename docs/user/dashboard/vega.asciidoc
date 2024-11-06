@@ -40,11 +40,7 @@ As you edit the specs, work in small steps, and frequently save your work. Small
 
 Before starting, add the eCommerce sample data that you'll use in your spec, then create the dashboard.
 
-. On the home page, click *Try sample data*.
-
-. Click *Other sample data sets*. 
-
-. On the *Sample eCommerce orders* card, click *Add data*.
+. <<gs-get-data-into-kibana,Install the eCommerce sample data set>>.
 
 . Go to *Dashboard*.
 
