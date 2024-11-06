@@ -19,7 +19,7 @@ import { getColumnRenderer } from './get_column_renderer';
 import { getValues, findItem, deleteItemIdx } from './helpers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { TimelineId } from '../../../../../../common/types/timeline';
-import { defaultUdtHeaders } from '../../unified_components/default_headers';
+import { defaultUdtHeaders } from '../column_headers/default_headers';
 
 jest.mock('../../../../../common/lib/kibana');
 

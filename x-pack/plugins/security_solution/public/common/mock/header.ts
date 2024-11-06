@@ -6,7 +6,7 @@
  */
 
 import type { ColumnHeaderOptions } from '../../../common/types';
-import { defaultColumnHeaderType } from '../../timelines/components/timeline/unified_components/default_headers';
+import { defaultColumnHeaderType } from '../../timelines/components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,

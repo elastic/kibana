@@ -38,7 +38,7 @@ import { timelineDefaults } from '../../store/defaults';
 import {
   defaultColumnHeaderType,
   defaultUdtHeaders,
-} from '../timeline/unified_components/default_headers';
+} from '../timeline/body/column_headers/default_headers';
 
 import type { OpenTimelineResult, TimelineErrorCallback } from './types';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';

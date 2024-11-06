@@ -46,7 +46,7 @@ import { TimelineResizableLayout } from './resizable_layout';
 import TimelineDataTable from './data_table';
 import { timelineActions } from '../../../store';
 import { getFieldsListCreationOptions } from './get_fields_list_creation_options';
-import { defaultUdtHeaders } from './default_headers';
+import { defaultUdtHeaders } from '../body/column_headers/default_headers';
 import { getTimelineShowStatusByIdSelector } from '../../../store/selectors';
 
 const TimelineBodyContainer = styled.div.attrs(({ className = '' }) => ({

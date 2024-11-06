@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ColumnHeaderOptions, ColumnHeaderType } from '../../../../../common/types';
+import type { ColumnHeaderOptions, ColumnHeaderType } from '../../../../../../common/types';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_UNIFIED_TABLE_DATE_COLUMN_MIN_WIDTH,
-} from '../body/constants';
+} from '../constants';
 
 export const defaultColumnHeaderType: ColumnHeaderType = 'not-filtered';
 

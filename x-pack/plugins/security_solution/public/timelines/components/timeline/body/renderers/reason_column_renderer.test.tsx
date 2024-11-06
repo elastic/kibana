@@ -18,7 +18,7 @@ import { RowRendererIdEnum } from '../../../../../../common/api/timeline';
 import { render } from '@testing-library/react';
 import { cloneDeep } from 'lodash';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { defaultColumnHeaderType } from '../../unified_components/default_headers';
+import { defaultColumnHeaderType } from '../column_headers/default_headers';
 jest.mock('./plain_column_renderer');
 
 jest.mock('../../../../../common/components/link_to', () => {

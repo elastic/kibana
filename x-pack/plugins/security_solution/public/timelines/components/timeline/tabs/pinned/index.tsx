@@ -36,7 +36,7 @@ import { useTimelineControlColumn } from '../shared/use_timeline_control_columns
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { NotesFlyout } from '../../properties/notes_flyout';
-import { defaultUdtHeaders } from '../../unified_components/default_headers';
+import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 
 interface PinnedFilter {
   bool: {

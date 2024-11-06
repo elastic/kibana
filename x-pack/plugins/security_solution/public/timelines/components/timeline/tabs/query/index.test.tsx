@@ -33,7 +33,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import {
   defaultUdtHeaders,
   defaultColumnHeaderType,
-} from '../../unified_components/default_headers';
+} from '../../body/column_headers/default_headers';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import * as timelineActions from '../../../../store/actions';

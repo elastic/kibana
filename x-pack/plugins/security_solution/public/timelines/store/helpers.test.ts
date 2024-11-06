@@ -21,7 +21,7 @@ import { IS_OPERATOR } from '../components/timeline/data_providers/data_provider
 import {
   defaultUdtHeaders,
   defaultColumnHeaderType,
-} from '../components/timeline/unified_components/default_headers';
+} from '../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   RESIZED_COLUMN_MIN_WITH,

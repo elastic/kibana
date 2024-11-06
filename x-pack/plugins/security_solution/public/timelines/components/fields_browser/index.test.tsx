@@ -19,7 +19,7 @@ import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { defaultColumnHeaderType } from '../timeline/unified_components/default_headers';
+import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { BrowserFieldItem } from '@kbn/triggers-actions-ui-plugin/public/types';
