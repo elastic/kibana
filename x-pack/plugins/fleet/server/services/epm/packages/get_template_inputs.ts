@@ -51,19 +51,30 @@ type PackageWithInputAndStreamIndexed = Record<
 
 // Function based off storedPackagePolicyToAgentInputs, it only creates the `streams` section instead of the FullAgentPolicyInput
 export const templatePackagePolicyToFullInputStreams = (
-  packagePolicyInputs: PackagePolicyInput[]
+  packagePolicyInputs: PackagePolicyInput[],
+  inputAndStreamsIdsMap?: Map<string, { originalId: string; streams: Map<string, string> }>
 ): TemplateAgentPolicyInput[] => {
   const fullInputsStreams: TemplateAgentPolicyInput[] = [];
 
   if (!packagePolicyInputs || packagePolicyInputs.length === 0) return fullInputsStreams;
 
   packagePolicyInputs.forEach((input) => {
+    const streamsIdsMap = new Map();
+
+    const inputId = input.policy_template
+      ? `${input.policy_template}-${input.type}`
+      : `${input.type}`;
     const fullInputStream = {
       // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
-      id: input.policy_template ? `${input.policy_template}-${input.type}` : `${input.type}`,
+      id: inputId,
       type: input.type,
-      ...getFullInputStreams(input, true),
+      ...getFullInputStreams(input, true, streamsIdsMap),
     };
+
+    inputAndStreamsIdsMap?.set(fullInputStream.id, {
+      originalId: inputId,
+      streams: streamsIdsMap,
+    });
 
     // deeply merge the input.config values with the full policy input stream
     merge(
@@ -167,8 +178,13 @@ export async function getTemplateInputs(
     ...emptyPackagePolicy,
     inputs: compiledInputs,
   };
+  const inputIdsDestinationMap = new Map<
+    string,
+    { originalId: string; streams: Map<string, string> }
+  >();
   const inputs = templatePackagePolicyToFullInputStreams(
-    packagePolicyWithInputs.inputs as PackagePolicyInput[]
+    packagePolicyWithInputs.inputs as PackagePolicyInput[],
+    inputIdsDestinationMap
   );
 
   if (format === 'json') {
@@ -181,7 +197,7 @@ export async function getTemplateInputs(
         sortKeys: _sortYamlKeys,
       }
     );
-    return addCommentsToYaml(yaml, buildIndexedPackage(packageInfo));
+    return addCommentsToYaml(yaml, buildIndexedPackage(packageInfo), inputIdsDestinationMap);
   }
 
   return { inputs: [] };
@@ -247,7 +263,8 @@ function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStrea
 
 function addCommentsToYaml(
   yaml: string,
-  packageIndexInputAndStreams: PackageWithInputAndStreamIndexed
+  packageIndexInputAndStreams: PackageWithInputAndStreamIndexed,
+  inputIdsDestinationMap: Map<string, { originalId: string; streams: Map<string, string> }>
 ) {
   const doc = yamlDoc.parseDocument(yaml);
   // Add input and streams comments
@@ -261,7 +278,9 @@ function addCommentsToYaml(
       if (!yamlDoc.isScalar(inputIdNode)) {
         return;
       }
-      const inputId = inputIdNode.value as string;
+      const inputId =
+        inputIdsDestinationMap.get(inputIdNode.value as string)?.originalId ??
+        (inputIdNode.value as string);
       const pkgInput = packageIndexInputAndStreams[inputId];
       if (pkgInput) {
         inputItem.commentBefore = ` ${pkgInput.title}${
@@ -280,7 +299,10 @@ function addCommentsToYaml(
           }
           const streamIdNode = streamItem.get('id', true);
           if (yamlDoc.isScalar(streamIdNode)) {
-            const streamId = streamIdNode.value as string;
+            const streamId =
+              inputIdsDestinationMap
+                .get(inputIdNode.value as string)
+                ?.streams?.get(streamIdNode.value as string) ?? (streamIdNode.value as string);
             const pkgStream = pkgInput.streams[streamId];
             if (pkgStream) {
               streamItem.commentBefore = ` ${pkgStream.title}${

@@ -58,3 +58,24 @@ exports[`Fleet - getTemplateInputs should work for integration package 1`] = `
         #  - <TAGS_STREAMS> # Tags in streams
 "
 `;
+
+exports[`Fleet - getTemplateInputs should work for package with dynamic ids 1`] = `
+"inputs:
+  # Collect Docker container logs: Collecting docker container logs
+  - id: docker-filestream
+    type: filestream
+    streams:
+      # Collect Docker container logs: Collect Docker container logs
+      - id: docker-container-logs-\${docker.container.name}-\${docker.container.id}
+        data_stream:
+          dataset: docker.container_logs
+          type: logs
+        paths:
+          - /var/lib/docker/containers/\${docker.container.id}/*-json.log
+        parsers:
+          - container:
+              stream: all
+              format: docker
+        # condition: <CONDITION> # Condition: Condition to filter when to apply this datastream. Refer to [Docker provider](https://www.elastic.co/guide/en/fleet/current/docker-provider.html) to find the available keys and to [Conditions](https://www.elastic.co/guide/en/fleet/current/dynamic-input-configuration.html#conditions) on how to use the available keys in conditions.
+"
+`;
