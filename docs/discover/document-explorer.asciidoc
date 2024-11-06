@@ -2,7 +2,6 @@
 == Customize the Discover view
 
 Fine tune your explorations by customizing *Discover* to bring out the the best view of your documents.
-Adjust what is displayed in Discover, and how each element is displayed.
 
 [role="screenshot"]
 image::images/hello-field.png[A view of the Discover app]
