@@ -120,14 +120,10 @@ export function DiscoverMainRoute({
         const { dataSource } = stateContainer.appState.getState();
         const isEsqlQuery = isDataSourceType(dataSource, DataSourceType.Esql);
 
-        // ES|QL should work without data views
-        // Given we have a saved search id, we can skip the data/data view check, too
-        // A given nextDataView is provided by the user, and therefore we can skip the data/data view check
-
         if (savedSearchId || isEsqlQuery || nextDataView) {
-          if (!isEsqlQuery) {
-            await stateContainer.actions.loadDataViewList();
-          }
+          // even ES|QL doesn't need a data view, we still need to load the data view list to
+          // ensure the data view is available for the user to switch to classic mode
+          await stateContainer.actions.loadDataViewList();
           return true;
         }
 
