@@ -31,12 +31,12 @@ import {
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { ConfigEntryView } from '../../../common/dynamic_config/types';
 import { InferenceTaskType } from '../../../common/inference/types';
 import { ServiceProviderKeys } from '../../../common/inference/constants';
 import { ConnectorConfigurationFormItems } from '../lib/dynamic_config/connector_configuration_form_items';
 import * as i18n from './translations';
 import { DEFAULT_TASK_TYPE } from './constants';
-import { ConfigEntryView } from '../lib/dynamic_config/types';
 import { SelectableProvider } from './providers/selectable';
 import { Config, Secrets } from './types';
 import { generateInferenceEndpointId, getTaskTypeOptions, TaskTypeOption } from './helpers';
