@@ -7,7 +7,6 @@
 
 import {
   EuiButtonEmpty,
-  EuiButton,
   EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -19,6 +18,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../../common/api/entity_analytics';
 import { buildAnnotationsFromError } from '../helpers';
 import { ScheduleRiskEngineCallout } from './schedule_risk_engine_callout';
@@ -75,14 +75,14 @@ export const AssetCriticalityResultStep: React.FC<{
             id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successMessage"
           />
           <EuiSpacer size="s" />
-          <EuiButton href={SecurityPageName.entityAnalytics} color="success" isDisabled={false}>
+          <SecuritySolutionLinkButton deepLinkId={SecurityPageName.entityAnalytics} color="success">
             {
               <FormattedMessage
                 defaultMessage="View asset criticality assignments."
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.viewAssetCriticalityAssignments"
               />
             }
-          </EuiButton>
+          </SecuritySolutionLinkButton>
         </EuiCallOut>
         <EuiSpacer size="s" />
         <ScheduleRiskEngineCallout />
