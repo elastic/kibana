@@ -590,5 +590,41 @@ describe('case transforms', () => {
         transformSavedObjectToExternalModel(CaseSOResponseWithoutObservables).attributes.observables
       ).toEqual([]);
     });
+
+    it('returns observables array when it is defined', () => {
+      const CaseSOResponseWithoutObservables = createCaseSavedObjectResponse({
+        overrides: {
+          observables: [
+            {
+              id: '27318f00-334b-44b1-b29c-0cfaefbeeb8a',
+              isIoc: false,
+              hasBeenSighted: false,
+              value: 'test',
+              typeKey: 'c661b01e-24f5-44aa-a172-d5d219cd1bd4',
+              createdAt: '2024-11-07',
+              updatedAt: '2024-11-07',
+              description: '',
+            },
+          ],
+        },
+      });
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithoutObservables).attributes.observables
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "createdAt": "2024-11-07",
+            "description": "",
+            "hasBeenSighted": false,
+            "id": "27318f00-334b-44b1-b29c-0cfaefbeeb8a",
+            "isIoc": false,
+            "typeKey": "c661b01e-24f5-44aa-a172-d5d219cd1bd4",
+            "updatedAt": "2024-11-07",
+            "value": "test",
+          },
+        ]
+      `);
+    });
   });
 });
