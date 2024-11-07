@@ -95,7 +95,9 @@ export const buildAlertGroupFromSequence = ({
   alertTimestampOverride,
   publicBaseUrl,
   intendedTimestamp,
-}: BuildAlertGroupFromSequence): BuildAlertGroupFromSequenceReturnType => {
+}: BuildAlertGroupFromSequence): Array<
+  WrappedFieldsLatest<EqlBuildingBlockFieldsLatest | EqlShellFieldsLatest>
+> => {
   const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
   if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
     return [];
@@ -188,10 +190,7 @@ export const buildAlertGroupFromSequence = ({
   );
 
   // sequence alert guaranteed to be first
-  return [sequenceAlert, ...wrappedBuildingBlocks] as [
-    WrappedFieldsLatest<EqlShellFieldsLatest>?,
-    ...Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>
-  ];
+  return [sequenceAlert, ...wrappedBuildingBlocks];
 };
 
 export interface BuildAlertRootParams {

@@ -15,7 +15,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import type { RuleWithInMemorySuppression } from '../utils/utils';
-import { sequenceSuppressionTermsAndFieldsFactory } from '../utils/utils';
+import { buildShellAlertSuppressionTermsAndFields } from '../utils/utils';
 import type {
   BuildAlertGroupFromSequenceReturnType,
   WrappedEqlShellOptionalSubAlertsType,
@@ -52,10 +52,9 @@ export interface IEqlUtils {
     sequence: EqlHitsSequence<SignalSource>,
     buildReasonMessage: BuildReasonMessage
   ): BuildAlertGroupFromSequenceReturnType;
-  addSequenceSuppressionTermsAndFields(
+  getShellAlertWithSuppressionTermsAndFields(
     shellAlert: WrappedEqlShellOptionalSubAlertsType,
-    buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>,
-    buildReasonMessage: BuildReasonMessage
+    buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>
   ): WrappedFieldsLatest<EqlShellFieldsLatest & SuppressionFieldsLatest> & {
     subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
   };
@@ -131,22 +130,17 @@ export class EqlUtils implements IEqlUtils {
     });
   }
 
-  public addSequenceSuppressionTermsAndFields(
+  public getShellAlertWithSuppressionTermsAndFields(
     shellAlert: WrappedEqlShellOptionalSubAlertsType,
-    buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>,
-    buildReasonMessage: BuildReasonMessage
+    buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>
   ) {
-    return sequenceSuppressionTermsAndFieldsFactory({
+    return buildShellAlertSuppressionTermsAndFields({
       shellAlert,
       buildingBlockAlerts,
       spaceId: this.#spaceId,
       completeRule: this.#completeRule,
-      mergeStrategy: this.#mergeStrategy,
       indicesToQuery: this.#indicesToQuery,
-      buildReasonMessage,
       alertTimestampOverride: this.#alertTimestampOverride,
-      ruleExecutionLogger: this.#ruleExecutionLogger,
-      publicBaseUrl: this.#publicBaseUrl,
       primaryTimestamp: this.#primaryTimestamp,
       secondaryTimestamp: this.#secondaryTimestamp,
     });

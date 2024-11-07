@@ -18,6 +18,12 @@ import {
   ALERT_RULE_UUID,
   ALERT_RULE_PARAMETERS,
   ALERT_BUILDING_BLOCK_TYPE,
+  TIMESTAMP,
+  ALERT_INSTANCE_ID,
+  ALERT_SUPPRESSION_DOCS_COUNT,
+  ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_TERMS,
 } from '@kbn/rule-data-utils';
 import type {
   ListArray,
@@ -88,9 +94,9 @@ import type {
   ExtraFieldsForShellAlert,
   WrappedEqlShellOptionalSubAlertsType,
 } from '../eql/build_alert_group_from_sequence';
-import type { ConfigType } from '../../../../config';
 import type { BuildReasonMessage } from './reason_formatters';
-import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
+import { getSuppressionTerms } from './suppression_utils';
+import { robustGet } from './source_fields_merging/utils/robust_field_access';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
@@ -1066,16 +1072,12 @@ export type RuleWithInMemorySuppression =
   | MachineLearningRuleParams;
 
 export interface SequenceSuppressionTermsAndFieldsParams {
-  shellAlert: WrappedEqlShellOptionalSubAlertsType;
+  shellAlert: WrappedFieldsLatest<EqlShellFieldsLatest>;
   buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
   spaceId: string;
   completeRule: CompleteRule<RuleWithInMemorySuppression>;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
   indicesToQuery: string[];
-  buildReasonMessage: BuildReasonMessage;
   alertTimestampOverride: Date | undefined;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  publicBaseUrl: string | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
 }
@@ -1088,7 +1090,7 @@ export type SequenceSuppressionTermsAndFieldsFactory = (
   subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
 };
 
-export const sequenceSuppressionTermsAndFieldsFactory = ({
+export const buildShellAlertSuppressionTermsAndFields = ({
   shellAlert,
   buildingBlockAlerts,
   spaceId,
@@ -1107,21 +1109,37 @@ export const sequenceSuppressionTermsAndFieldsFactory = ({
   });
   const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
-  const suppressionFields = getSuppressionAlertFields({
-    primaryTimestamp,
-    secondaryTimestamp,
-    // as casting should work because the alert fields are flattened (hopefully?)
-    fields: shellAlert?._source as Record<string, string | number | null> | undefined,
-    suppressionTerms,
-    fallbackTimestamp: alertTimestampOverride?.toISOString() ?? new Date().toISOString(),
-    instanceId,
-  });
-  const theFields = Object.keys(suppressionFields) as Array<keyof ExtraFieldsForShellAlert>;
-  // mutates shell alert to contain values from suppression fields
-  theFields.forEach((field) => (shellAlert._source[field] = suppressionFields[field]));
-  shellAlert.subAlerts = buildingBlockAlerts;
+  const primarySuppressionTime = robustGet({
+    key: primaryTimestamp,
+    document: shellAlert._source,
+  }) as string | undefined;
 
-  return shellAlert as WrappedFieldsLatest<EqlShellFieldsLatest & SuppressionFieldsLatest> & {
-    subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+  const secondarySuppressionTime =
+    secondaryTimestamp &&
+    (robustGet({
+      key: secondaryTimestamp,
+      document: shellAlert._source,
+    }) as string | undefined);
+
+  const suppressionTime = new Date(
+    primarySuppressionTime ??
+      secondarySuppressionTime ??
+      alertTimestampOverride ??
+      shellAlert._source[TIMESTAMP]
+  );
+
+  const suppressionFields: ExtraFieldsForShellAlert = {
+    [ALERT_INSTANCE_ID]: instanceId,
+    [ALERT_SUPPRESSION_TERMS]: suppressionTerms,
+    [ALERT_SUPPRESSION_START]: suppressionTime,
+    [ALERT_SUPPRESSION_END]: suppressionTime,
+    [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+  };
+
+  return {
+    _id: shellAlert._id,
+    _index: shellAlert._index,
+    _source: { ...shellAlert._source, ...suppressionFields },
+    subAlerts: buildingBlockAlerts,
   };
 };

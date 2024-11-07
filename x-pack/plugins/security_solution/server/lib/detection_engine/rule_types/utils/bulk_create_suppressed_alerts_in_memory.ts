@@ -182,6 +182,12 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
       buildReasonMessage
     );
     const shellAlert = alertGroupFromSequence?.[0];
+    const buildingBlocks = alertGroupFromSequence
+      .slice(1)
+      .filter(
+        (alertGroup): alertGroup is WrappedFieldsLatest<EqlBuildingBlockFieldsLatest> =>
+          alertGroup != null
+      );
     if (shellAlert != null) {
       if (!suppressOnMissingFields) {
         // does the shell alert have all the suppression fields?
@@ -189,33 +195,19 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
           (suppressionPath) =>
             robustGet({ key: suppressionPath, document: shellAlert._source }) != null
         );
-
         if (!hasEverySuppressionField) {
-          // unsuppressible sequence alert
-          // directly push alertGroup because these docs are wrapped already
-          unsuppressibleWrappedDocs.push(
-            ...(alertGroupFromSequence as Array<
-              | WrappedFieldsLatest<EqlShellFieldsLatest>
-              | WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>
-            >)
-          );
+          unsuppressibleWrappedDocs.push(...[shellAlert, ...buildingBlocks]);
         } else {
-          const wrappedWithSuppressionTerms = eqlUtils.addSequenceSuppressionTermsAndFields(
+          const wrappedWithSuppressionTerms = eqlUtils.getShellAlertWithSuppressionTermsAndFields(
             shellAlert,
-            alertGroupFromSequence.slice(1) as Array<
-              WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>
-            >,
-            buildReasonMessage
+            buildingBlocks
           );
           suppressibleWrappedSequences.push(wrappedWithSuppressionTerms);
         }
       } else {
-        const wrappedWithSuppressionTerms = eqlUtils.addSequenceSuppressionTermsAndFields(
+        const wrappedWithSuppressionTerms = eqlUtils.getShellAlertWithSuppressionTermsAndFields(
           shellAlert,
-          alertGroupFromSequence.slice(1) as Array<
-            WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>
-          >,
-          buildReasonMessage
+          buildingBlocks
         );
         suppressibleWrappedSequences.push(wrappedWithSuppressionTerms);
       }

@@ -70,11 +70,11 @@ export const getSuppressionTerms = ({
   alertSuppression: AlertSuppressionCamel | undefined;
 }): SuppressionTerm[] => {
   const suppressedBy = alertSuppression?.groupBy ?? [];
-
   const suppressedProps = pick(fields, suppressedBy) as Record<
     string,
     string[] | number[] | undefined
   >;
+
   const suppressionTerms = suppressedBy.map((field) => {
     const value = get(suppressedProps, field) ?? null;
     const sortedValue = Array.isArray(value) ? (sortBy(value) as string[] | number[]) : value;
