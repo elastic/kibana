@@ -100,19 +100,6 @@ export function UnifiedInventory() {
     });
   }
 
-  function handleTypeFilter(type: string) {
-    const { pagination: _, ...rest } = query;
-    // TODO: caue check it
-    inventoryRoute.push('/', {
-      path: {},
-      query: {
-        ...rest,
-        // Override the current entity types
-        // entityTypes: [type],
-      },
-    });
-  }
-
   return (
     <>
       <InventorySummary />
@@ -124,7 +111,6 @@ export function UnifiedInventory() {
         onChangePage={handlePageChange}
         onChangeSort={handleSortChange}
         pageIndex={pageIndex}
-        onFilterByType={handleTypeFilter}
       />
     </>
   );
