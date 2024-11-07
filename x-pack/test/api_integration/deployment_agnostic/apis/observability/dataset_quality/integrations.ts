@@ -47,6 +47,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Integrations', () => {
     let adminRoleAuthc: RoleCredentials;
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
+    let preExistingIntegrations: List<string>;
+    let preExistingCustomIntegrations: List<string>;
 
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
@@ -56,6 +58,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           useCookieHeader: true,
           withInternalHeaders: true,
         }
+      );
+      const body = await callApiAs({
+        roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
+      });
+      preExistingIntegrations = body.integrations.map(
+        (integration: Integration) => integration.name
       );
     });
 
@@ -80,10 +88,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
         });
 
-        expect(body.integrations.map((integration: Integration) => integration.name)).to.eql([
-          'synthetics',
-          'system',
-        ]);
+        expect(body.integrations.map((integration: Integration) => integration.name)).to.eql(
+          preExistingIntegrations.concat(['synthetics', 'system'])
+        );
 
         expect(body.integrations[0].datasets).not.empty();
         expect(body.integrations[1].datasets).not.empty();
@@ -113,11 +120,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
         });
 
-        expect(body.integrations.map((integration: Integration) => integration.name)).to.eql([
-          'my.custom.integration',
-        ]);
+        expect(body.integrations.map((integration: Integration) => integration.name)).to.eql(
+          preExistingIntegrations.concat('my.custom.integration')
+        );
 
-        expect(body.integrations[0].datasets).to.eql({
+        expect(
+          body.integrations.find(
+            (integration: Integration) => integration.name === 'my.custom.integration'
+          ).datasets
+        ).to.eql({
           'my.custom.integration': 'My.custom.integration',
         });
       });
