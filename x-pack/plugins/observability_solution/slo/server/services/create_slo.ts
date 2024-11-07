@@ -29,6 +29,7 @@ import { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { TransformManager } from './transform_manager';
 import { getTransformQueryComposite } from './utils/get_transform_compite_query';
+import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 
 export class CreateSLO {
   constructor(
@@ -47,7 +48,7 @@ export class CreateSLO {
     validateSLO(slo);
 
     await this.assertSLOInexistant(slo);
-    await this.assertExpectedIndicatorSourceIndexPrivileges(slo);
+    await assertExpectedIndicatorSourceIndexPrivileges(slo, this.esClient);
 
     const rollbackOperations = [];
     const createPromise = this.repository.create(slo);
@@ -124,18 +125,6 @@ export class CreateSLO {
       throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
     }
   }
-
-  private async assertExpectedIndicatorSourceIndexPrivileges(slo: SLODefinition) {
-    const privileges = await this.esClient.security.hasPrivileges({
-      index: [{ names: slo.indicator.params.index, privileges: ['read', 'view_index_metadata'] }],
-    });
-    if (!privileges.has_all_requested) {
-      throw new SecurityException(
-        `Missing ['read', 'view_index_metadata'] privileges on the source index [${slo.indicator.params.index}]`
-      );
-    }
-  }
-
   async createTempSummaryDocument(slo: SLODefinition) {
     return await retryTransientEsErrors(
       () =>
