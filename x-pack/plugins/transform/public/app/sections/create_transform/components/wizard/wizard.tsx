@@ -111,7 +111,7 @@ export const CreateTransformWizardContext = createContext<{
 export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
   const { showNodeInfo } = useEnabledFeatures();
   const appDependencies = useAppDependencies();
-  const { uiSettings, data, fieldFormats, charts } = appDependencies;
+  const { uiSettings, data, fieldFormats, charts, theme } = appDependencies;
   const { dataView } = searchItems;
 
   // The current WIZARD_STEP
@@ -247,6 +247,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
       fieldStatsServices={fieldStatsServices}
       timeRangeMs={stepDefineState.timeRangeMs}
       dslQuery={transformConfig.source.query}
+      theme={theme}
     >
       <CreateTransformWizardContext.Provider
         value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}

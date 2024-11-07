@@ -10,8 +10,8 @@ import { createSelector } from '@reduxjs/toolkit';
 import type { RootState } from './store';
 import { useAppSelector } from './hooks';
 
-const selectSelectedGroup = (s: RootState) => s.logRateAnalysisTableRow.selectedGroup;
-const selectPinnedGroup = (s: RootState) => s.logRateAnalysisTableRow.pinnedGroup;
+const selectSelectedGroup = (s: RootState) => s.logRateAnalysisTable.selectedGroup;
+const selectPinnedGroup = (s: RootState) => s.logRateAnalysisTable.pinnedGroup;
 const selectCurrentSelectedGroup = createSelector(
   selectSelectedGroup,
   selectPinnedGroup,
