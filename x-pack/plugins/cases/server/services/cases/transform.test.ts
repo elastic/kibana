@@ -582,5 +582,13 @@ describe('case transforms', () => {
         transformSavedObjectToExternalModel(CaseSOResponseWithoutCategory).attributes.category
       ).toBe('foobar');
     });
+
+    it('returns empty observables array when it is not defined', () => {
+      const CaseSOResponseWithoutObservables = createCaseSavedObjectResponse({});
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithoutObservables).attributes.observables
+      ).toEqual([]);
+    });
   });
 });
