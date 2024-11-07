@@ -39,13 +39,7 @@ import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/us
 import { actionExecutorMock } from '../lib/action_executor.mock';
 import { v4 as uuidv4 } from 'uuid';
 import { ActionsAuthorization } from '../authorization/actions_authorization';
-import {
-  getAuthorizationModeBySource,
-  AuthorizationMode,
-  bulkGetAuthorizationModeBySource,
-} from '../authorization/get_authorization_mode_by_source';
 import { actionsAuthorizationMock } from '../authorization/actions_authorization.mock';
-import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { SavedObject } from '@kbn/core/server';
@@ -57,6 +51,7 @@ import { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
 import { estypes } from '@elastic/elasticsearch';
+import { DEFAULT_USAGE_API_URL } from '../config';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -64,25 +59,6 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
     ...actual,
     SavedObjectsUtils: {
       generateId: () => 'mock-saved-object-id',
-    },
-  };
-});
-
-jest.mock('../lib/track_legacy_rbac_exemption', () => ({
-  trackLegacyRBACExemption: jest.fn(),
-}));
-
-jest.mock('../authorization/get_authorization_mode_by_source', () => {
-  return {
-    getAuthorizationModeBySource: jest.fn(() => {
-      return 1;
-    }),
-    bulkGetAuthorizationModeBySource: jest.fn(() => {
-      return 1;
-    }),
-    AuthorizationMode: {
-      Legacy: 0,
-      RBAC: 1,
     },
   };
 });
@@ -599,8 +575,6 @@ describe('create()', () => {
       allowedHosts: ['*'],
       preconfiguredAlertHistoryEsIndex: false,
       preconfigured: {},
-      proxyRejectUnauthorizedCertificates: true, // legacy
-      rejectUnauthorized: true, // legacy
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
       maxResponseContentLength: new ByteSizeValue(1000000),
@@ -613,6 +587,9 @@ describe('create()', () => {
       microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
       microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
       microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+      usage: {
+        url: DEFAULT_USAGE_API_URL,
+      },
     });
 
     const localActionTypeRegistryParams = {
@@ -2745,9 +2722,6 @@ describe('update()', () => {
 describe('execute()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to excecute actions', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
       await actionsClient.execute({
         actionId: 'action-id',
@@ -2764,9 +2738,6 @@ describe('execute()', () => {
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
       authorization.ensureAuthorized.mockRejectedValue(
         new Error(`Unauthorized to execute all actions`)
       );
@@ -2790,28 +2761,7 @@ describe('execute()', () => {
       });
     });
 
-    test('tracks legacy RBAC', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.Legacy;
-      });
-
-      await actionsClient.execute({
-        actionId: 'action-id',
-        params: {
-          name: 'my name',
-        },
-        source: asHttpRequestExecutionSource(request),
-      });
-
-      expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith('execute', mockUsageCounter);
-      expect(authorization.ensureAuthorized).not.toHaveBeenCalled();
-    });
-
     test('ensures that system actions privileges are being authorized correctly', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
-
       actionsClient = new ActionsClient({
         inMemoryConnectors: [
           {
@@ -2872,10 +2822,6 @@ describe('execute()', () => {
     });
 
     test('does not authorize kibana privileges for non system actions', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
-
       actionsClient = new ActionsClient({
         inMemoryConnectors: [
           {
@@ -2939,10 +2885,6 @@ describe('execute()', () => {
     });
 
     test('pass the params to the actionTypeRegistry when authorizing system actions', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
-
       const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);
 
       actionsClient = new ActionsClient({
@@ -3106,9 +3048,6 @@ describe('execute()', () => {
 describe('bulkEnqueueExecution()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to execute actions', async () => {
-      (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return { [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 };
-      });
       await actionsClient.bulkEnqueueExecution([
         {
           id: uuidv4(),
@@ -3136,9 +3075,6 @@ describe('bulkEnqueueExecution()', () => {
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
-      (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return { [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 };
-      });
       authorization.ensureAuthorized.mockRejectedValue(
         new Error(`Unauthorized to execute all actions`)
       );
@@ -3170,45 +3106,9 @@ describe('bulkEnqueueExecution()', () => {
         operation: 'execute',
       });
     });
-
-    test('tracks legacy RBAC', async () => {
-      (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return { [AuthorizationMode.RBAC]: 0, [AuthorizationMode.Legacy]: 2 };
-      });
-
-      await actionsClient.bulkEnqueueExecution([
-        {
-          id: uuidv4(),
-          params: {},
-          spaceId: 'default',
-          executionId: '123abc',
-          apiKey: null,
-          source: asHttpRequestExecutionSource(request),
-          actionTypeId: 'my-action-type',
-        },
-        {
-          id: uuidv4(),
-          params: {},
-          spaceId: 'default',
-          executionId: '456def',
-          apiKey: null,
-          source: asHttpRequestExecutionSource(request),
-          actionTypeId: 'my-action-type',
-        },
-      ]);
-
-      expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith(
-        'bulkEnqueueExecution',
-        mockUsageCounter,
-        2
-      );
-    });
   });
 
   test('calls the bulkExecutionEnqueuer with the appropriate parameters', async () => {
-    (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-      return { [AuthorizationMode.RBAC]: 0, [AuthorizationMode.Legacy]: 0 };
-    });
     const opts = [
       {
         id: uuidv4(),
@@ -3504,17 +3404,11 @@ describe('getGlobalExecutionLogWithAuth()', () => {
     test('ensures user is authorised to access logs', async () => {
       eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
 
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
       await actionsClient.getGlobalExecutionLogWithAuth(opts);
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to access logs', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
       authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to access logs`));
 
       await expect(actionsClient.getGlobalExecutionLogWithAuth(opts)).rejects.toMatchInlineSnapshot(
@@ -3563,17 +3457,11 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
     test('ensures user is authorised to access kpi', async () => {
       eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
 
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
       await actionsClient.getGlobalExecutionKpiWithAuth(opts);
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to access kpi', async () => {
-      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
-        return AuthorizationMode.RBAC;
-      });
       authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to access kpi`));
 
       await expect(actionsClient.getGlobalExecutionKpiWithAuth(opts)).rejects.toMatchInlineSnapshot(
