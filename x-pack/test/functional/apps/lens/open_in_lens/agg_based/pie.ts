@@ -106,7 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(sliceByText).to.be('machine.os.raw: Descending');
       expect(sizeByText).to.be('Count');
 
-      await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
+      await pieChart.expectPieChartLabels(expectedTableData);
     });
 
     it('should convert types correctly', async () => {

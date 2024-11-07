@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show 10 slices in pie chart', async function () {
-      await pieChart.expectPieSliceCount(10, isNewChartsLibraryEnabled);
+      await pieChart.expectPieSliceCount(10);
     });
 
     it('should show correct data', async function () {
@@ -107,8 +107,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.toggleOtherBucket(2);
         await visEditor.toggleMissingBucket(2);
         log.debug('clickGo');
-        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
         await visEditor.clickGo();
+        await pieChart.expectPieChartLabels(expectedTableData);
       });
 
       it('should apply correct filter on other bucket', async () => {
@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await pieChart.filterOnPieSlice('Other');
         await visChart.waitForVisualization();
-        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
+        await pieChart.expectPieChartLabels(expectedTableData);
         await filterBar.removeFilter('machine.os.raw');
         await visChart.waitForVisualization();
       });
@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await visChart.filterLegend('Other');
         await visChart.waitForVisualization();
-        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
+        await pieChart.expectPieChartLabels(expectedTableData);
         await filterBar.removeFilter('machine.os.raw');
         await visChart.waitForVisualization();
       });
@@ -185,8 +185,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.toggleOtherBucket(3);
         await visEditor.toggleMissingBucket(3);
         log.debug('clickGo');
-        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
         await visEditor.clickGo();
+        await pieChart.expectPieChartLabels(expectedTableData);
       });
     });
 
@@ -205,7 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.toggleDisabledAgg(2);
         await visEditor.clickGo();
 
-        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
+        await pieChart.expectPieChartLabels(expectedTableData);
       });
 
       it('should correctly save disabled agg', async () => {
@@ -215,7 +215,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visChart.waitForRenderingCount();
 
         const expectedTableData = ['ios', 'osx', 'win 7', 'win 8', 'win xp'];
-        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
+        await pieChart.expectPieChartLabels(expectedTableData);
       });
 
       it('should show correct result when agg is re-enabled', async () => {
@@ -285,7 +285,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'osx',
         ].sort();
 
-        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
+        await pieChart.expectPieChartLabels(expectedTableData);
       });
     });
 
@@ -313,7 +313,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await timePicker.setAbsoluteRange(emptyFromTime, emptyToTime);
         await visChart.waitForVisualization();
-        await visChart.expectError();
       });
     });
     describe('multi series slice', () => {
@@ -396,7 +395,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ['360,000', '47', 'BR', '2'],
         ].map((row) =>
           // the count of records is not shown for every split level in the new charting library
-          isNewChartsLibraryEnabled ? [row[0], ...row.slice(2)] : row
+          [row[0], ...row.slice(2)]
         );
 
         await inspector.open();
@@ -437,17 +436,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await visChart.filterLegend('CN');
         await visChart.waitForVisualization();
-        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
+        await pieChart.expectPieChartLabels(expectedTableData);
         await filterBar.removeFilter('geo.dest');
         await visChart.waitForVisualization();
       });
 
-      it('should still showing pie chart when a subseries have zero data', async function () {
-        if (isNewChartsLibraryEnabled) {
-          // TODO: it seems that adding a filter agg which has no results to a pie chart breaks it and instead it shows "no data"
-          return;
-        }
-
+      // TODO: it seems that adding a filter agg which has no results to a pie chart breaks it and instead it shows "no data"
+      it.skip('should still showing pie chart when a subseries have zero data', async function () {
         await visualize.navigateToNewAggBasedVisualization();
         log.debug('clickPieChart');
         await visualize.clickPieChart();
@@ -519,7 +514,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ['osx', '1,322', 'BR', '30'],
         ].map((row) =>
           // the count of records is not shown for every split level in the new charting library
-          isNewChartsLibraryEnabled ? [row[0], ...row.slice(2)] : row
+          [row[0], ...row.slice(2)]
         );
         await inspector.open();
         await inspector.setTablePageSize(50);
@@ -536,7 +531,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ['osx', '228', 'CN', '228'],
         ].map((row) =>
           // the count of records is not shown for every split level in the new charting library
-          isNewChartsLibraryEnabled ? [row[0], ...row.slice(2)] : row
+          [row[0], ...row.slice(2)]
         );
         await visChart.filterLegend('CN');
         await header.waitUntilLoadingHasFinished();

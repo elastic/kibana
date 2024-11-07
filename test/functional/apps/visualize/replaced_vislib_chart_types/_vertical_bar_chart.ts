@@ -324,7 +324,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should correctly filter by legend', async () => {
-        await visChart.filterLegend('200', true);
+        await visChart.filterLegend('200');
         await visChart.waitForVisualization();
         const legendEntries = await visChart.getLegendEntriesXYCharts(xyChartSelector);
         const expectedEntries = ['200'];
