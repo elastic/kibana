@@ -459,27 +459,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const historyItem = await esql.getHistoryItem(0);
         await historyItem.findByTestSubject('ESQLEditor-queryHistory-error');
       });
-
-      // it('should add a query history item in the starred queries tab', async () => {
-      //   await discover.selectTextBaseLang();
-      //   await header.waitUntilLoadingHasFinished();
-      //   await discover.waitUntilSearchingHasFinished();
-      //   await unifiedFieldList.waitUntilSidebarHasLoaded();
-
-      //   await testSubjects.click('ESQLEditor-toggle-query-history-button');
-      //   const historyItem = await esql.getHistoryItem(0);
-      //   await historyItem.findByTestSubject('ESQLEditor-queryHistory-error');
-      //   (await historyItem.findByTestSubject('ESQLFavoriteButton')).click();
-
-      //   await testSubjects.click('starred-queries-tab');
-
-      //   const starredItems = await esql.getStarredItems();
-
-      //   await esql.isQueryPresentInTable(
-      //     'from logstash-* | limit 100 | drop @timestamp',
-      //     starredItems
-      //   );
-      // });
     });
 
     describe('sorting', () => {
