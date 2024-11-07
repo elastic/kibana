@@ -88,7 +88,7 @@ const registerCustomThresholdRuleAction = (
       iconType: 'visGauge',
       testId: 'discoverAppMenuCustomThresholdRule',
       onClick: ({ onFinishAction }) => {
-        const index = dataView?.getIndexPattern();
+        const index = dataView?.toMinimalSpec();
         const { filters, query } = data.query.getState();
 
         return triggersActionsUi.getAddRuleFlyout({
