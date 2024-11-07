@@ -36,14 +36,6 @@ import { registerLegacyExportRoute } from './legacy_import_export/export';
 import { registerBulkResolveRoute } from './bulk_resolve';
 import { registerDeleteUnknownTypesRoute } from './deprecations';
 
-// export interface RouteDeprecationInfo {
-//   documentationUrl: string;
-//   severity: 'warning';
-//   reason: {
-//     type: 'deprecate' | 'remove';
-//   };
-// }
-
 export function registerRoutes({
   http,
   coreUsageData,

@@ -20,7 +20,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from '../routes_test_utils';
+import { deprecationMock, setupConfig } from '../routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -60,13 +60,7 @@ describe('POST /api/saved_objects/_bulk_delete with allowApiAccess as true', () 
 
     const config = setupConfig(true);
     const access = 'public';
-    const deprecationMock = {
-      documentationUrl: 'http://elastic.co',
-      severity: 'warning' as const,
-      reason: {
-        type: 'deprecate' as const,
-      },
-    };
+
     registerBulkDeleteRoute(router, {
       config,
       coreUsageData,

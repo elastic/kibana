@@ -25,7 +25,7 @@ import {
 } from '@kbn/core-saved-objects-server-internal';
 import { createHiddenTypeVariants } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from './routes_test_utils';
+import { deprecationMock, setupConfig } from './routes_test_utils';
 
 const coreId = Symbol('core');
 
@@ -42,6 +42,7 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
   let loggerWarnSpy: jest.SpyInstance;
+  let registrationSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     const coreContext = createCoreContext({ coreId });
@@ -79,15 +80,11 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    registrationSpy = jest.spyOn(router, 'get');
+
     const config = setupConfig();
     const access = 'public';
-    const deprecationMock = {
-      documentationUrl: 'http://elastic.co',
-      severity: 'warning' as const,
-      reason: {
-        type: 'deprecate' as const,
-      },
-    };
+
     registerResolveRoute(router, {
       config,
       coreUsageData,
@@ -153,5 +150,15 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
       .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes deprecation configuration to the router arguments', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/resolve/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
+      .expect(200);
+    expect(registrationSpy.mock.calls[0][0]).toMatchObject({
+      options: { deprecated: deprecationMock },
+    });
   });
 });

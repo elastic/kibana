@@ -21,7 +21,7 @@ import {
 } from '@kbn/core-saved-objects-server-internal';
 import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from '../routes_test_utils';
+import { deprecationMock, setupConfig } from '../routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -56,13 +56,7 @@ describe('POST /api/saved_objects/_bulk_create with allowApiAccess true', () => 
     const logger = loggerMock.create();
     const config = setupConfig(true);
     const access = 'public';
-    const deprecationMock = {
-      documentationUrl: 'http://elastic.co',
-      severity: 'warning' as const,
-      reason: {
-        type: 'deprecate' as const,
-      },
-    };
+
     registerBulkCreateRoute(router, {
       config,
       coreUsageData,
