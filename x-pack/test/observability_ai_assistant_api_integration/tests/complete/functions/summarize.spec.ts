@@ -35,7 +35,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await clearKnowledgeBase(es);
       await createKnowledgeBaseModel(ml);
       await observabilityAIAssistantAPIClient
-        .editorUser({
+        .editor({
           endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
         })
         .expect(200);
