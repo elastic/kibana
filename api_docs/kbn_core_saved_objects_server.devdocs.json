@@ -10756,12 +10756,12 @@
                 "path": "x-pack/plugins/maps/server/saved_objects/setup_saved_objects.ts"
               },
               {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
-              },
-              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/observability_solution/infra/server/lib/sources/saved_object_type.ts"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
               },
               {
                 "plugin": "apmDataAccess",

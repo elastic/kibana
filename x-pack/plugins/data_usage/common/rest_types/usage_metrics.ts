@@ -123,6 +123,13 @@ export const UsageMetricsAutoOpsResponseSchema = {
       ),
     }),
 };
-export type UsageMetricsAutoOpsResponseSchemaBody = TypeOf<
+export type UsageMetricsAutoOpsResponseMetricSeries = TypeOf<
   typeof UsageMetricsAutoOpsResponseSchema.body
->;
+>['metrics'][MetricTypes][number];
+
+export type UsageMetricsAutoOpsResponseSchemaBody = Omit<
+  TypeOf<typeof UsageMetricsAutoOpsResponseSchema.body>,
+  'metrics'
+> & {
+  metrics: Partial<Record<MetricTypes, UsageMetricsAutoOpsResponseMetricSeries[]>>;
+};
