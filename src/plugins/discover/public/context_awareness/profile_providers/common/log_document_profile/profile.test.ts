@@ -101,10 +101,13 @@ describe('logDocumentProfileProvider', () => {
 
   describe('getDocViewer', () => {
     it('adds a log overview doc view to the registry', () => {
-      const getDocViewer = logDocumentProfileProvider.profile.getDocViewer!(() => ({
-        title: 'test title',
-        docViewsRegistry: (registry) => registry,
-      }));
+      const getDocViewer = logDocumentProfileProvider.profile.getDocViewer!(
+        () => ({
+          title: 'test title',
+          docViewsRegistry: (registry) => registry,
+        }),
+        { context: { type: DocumentType.Log } }
+      );
       const docViewer = getDocViewer({
         record: buildDataTableRecord({}),
       });
