@@ -109,6 +109,7 @@ export function initializeEditApi(
   };
 
   const openInlineEditor = prepareInlineEditPanel(
+    initialState,
     getState,
     updateState,
     internalApi,
@@ -178,7 +179,10 @@ export function initializeEditApi(
         }
         const rootEmbeddable = parentApi;
         const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-        const ConfigPanel = await openInlineEditor();
+        const ConfigPanel = await openInlineEditor({
+          onApply: (attributes: LensRuntimeState['attributes']) =>
+            updateState({ ...getState(), attributes }),
+        });
         if (ConfigPanel) {
           mountInlineEditPanel(ConfigPanel, startDependencies.coreStart, overlayTracker, uuid);
         }

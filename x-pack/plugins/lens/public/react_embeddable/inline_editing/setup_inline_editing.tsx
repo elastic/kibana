@@ -23,6 +23,7 @@ import { PanelManagementApi } from './panel_management';
 import { getStateManagementForInlineEditing } from './state_management';
 
 export function prepareInlineEditPanel(
+  initialState: LensRuntimeState,
   getState: GetStateType,
   updateState: (newState: Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>) => void,
   { dataLoading$ }: Pick<LensInternalApi, 'dataLoading$'>,
@@ -125,7 +126,7 @@ export function prepareInlineEditPanel(
             // DSL/form based charts are created via the full editor, so there's
             // an initial state to preserve. ES|QL charts are created inline, so it needs to pass an empty state
             // and the panelManagementApi will decide whether to remove the panel or not
-            isTextBasedLanguage(currentState) ? undefined : currentState
+            isTextBasedLanguage(currentState) ? undefined : initialState
           );
           onCancel?.();
         }}
