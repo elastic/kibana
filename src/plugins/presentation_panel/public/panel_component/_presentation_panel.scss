@@ -103,46 +103,9 @@
   }
 }
 
-// OPTIONS MENU
-
-/**
-  * 1. Use opacity to make this element accessible to screen readers and keyboard.
-  * 2. Show on focus to enable keyboard accessibility.
-  * 3. Always show in editing mode
-  */
-
-.embPanel__optionsMenuButton {
-  background-color: transparentize($euiColorLightShade, .5);
-  border-bottom-right-radius: 0;
-  border-top-left-radius: 0;
-
-  &:focus {
-    background-color: transparentize($euiColorLightestShade, .5);
-  }
-}
-
-.embPanel__optionsMenuPopover-loading {
-  width: $euiSizeS * 32;
-}
-
-.embPanel__optionsMenuPopover-notification::after {
-  position: absolute;
-  top: 0;
-  right: 0;
-  content: '•';
-  transform: translate(50%, -50%);
-  color: $euiColorAccent;
-  font-size: $euiSizeL;
-}
-
 // EDITING MODE
-
 .embPanel--editing {
-  transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
-
   .embPanel--dragHandle {
-    transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
-
     .embPanel--dragHandle:hover {
       background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
       cursor: move;

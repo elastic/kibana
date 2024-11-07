@@ -16,10 +16,13 @@ import {
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useMemo, useState } from 'react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelError } from './presentation_panel_error';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
+import { DASHED_OUTLINE, SOLID_OUTLINE } from '../../common';
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,

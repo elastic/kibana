@@ -43,6 +43,7 @@ import { Subscription } from 'rxjs';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css, CSSObject } from '@emotion/react';
 import { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
+import { DASHED_OUTLINE, SOLID_OUTLINE } from '../../../common';
 import { uiActions } from '../../kibana_services';
 import {
   contextMenuTrigger,
@@ -77,9 +78,6 @@ const TOP_ROUNDED_CORNERS: CSSObject = {
   borderWidth: '1px',
   borderBottom: '0px',
 };
-
-const DASHED_OUTLINE = `1px dashed ${euiThemeVars.euiColorMediumShade}`;
-const SOLID_OUTLINE = `1px solid ${euiThemeVars.euiBorderColor}`;
 
 const createClickHandler =
   (action: AnyApiAction, context: ActionExecutionContext<EmbeddableApiContext>) =>
@@ -473,14 +471,18 @@ export const PresentationPanelHoverActions = ({
         ''
       )}`}
       css={css`
-        ${showBorder ? `outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};` : ''}
         border-radius: ${euiThemeVars.euiBorderRadius};
 
-        ${hasHoverActions
-          ? `&:hover {
-          outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
-        }`
-          : ''}
+        .embPanel {
+          ${showBorder ? `outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};` : ''}
+        }
+
+        &:hover {
+          .embPanel {
+            outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
+            z-index: ${euiThemeVars.euiZLevel2};
+          }
+        }
       `}
     >
       {children}
