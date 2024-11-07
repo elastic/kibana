@@ -46,10 +46,10 @@ describe('similar', () => {
 
     it('search by uuid calls case service correctly', async () => {
       await similar(
+        mockCase.id,
         {
-          case_id: mockCase.id,
-          pageIndex: 1,
-          pageSize: 10,
+          page: 1,
+          perPage: 10,
         },
         clientArgs
       );

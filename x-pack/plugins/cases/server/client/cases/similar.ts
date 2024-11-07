@@ -22,6 +22,7 @@ import { combineFilterWithAuthorizationFilter } from '../../authorization/utils'
  * @ignore
  */
 export const similar = async (
+  caseId: string,
   params: SimilarCasesSearchRequest,
   clientArgs: CasesClientArgs
 ): Promise<CasesSimilarResponse> => {
@@ -33,13 +34,13 @@ export const similar = async (
 
   try {
     const paramArgs = decodeWithExcessOrThrow(SimilarCasesSearchRequestRt)(params);
-    const retrievedCase = await caseService.getCase({ id: paramArgs.case_id });
+    const retrievedCase = await caseService.getCase({ id: caseId });
 
     if (!retrievedCase.attributes.observables.length) {
       return {
         cases: [],
         page: 1,
-        per_page: params.pageSize,
+        per_page: paramArgs.perPage ?? 0,
         total: 0,
       };
     }
@@ -67,10 +68,10 @@ export const similar = async (
     const cases = await caseService.findCases({
       filter: finalCasesFilter,
       sortField: defaultSortField,
-      search: `-"cases:${paramArgs.case_id}"`,
+      search: `-"cases:${caseId}"`,
       rootSearchFields: ['_id'],
-      page: params.pageIndex + 1,
-      perPage: params.pageSize,
+      page: paramArgs.page,
+      perPage: paramArgs.perPage,
     });
 
     ensureSavedObjectsAreAuthorized(

@@ -65,6 +65,7 @@ import {
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
+  INTERNAL_CASE_SIMILAR_CASES_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -664,15 +665,11 @@ export const getSimilarCases = async ({
   pageSize,
   pageIndex,
 }: SimilarCasesProps): Promise<CasesSimilarResponseUI> => {
-  const body = {
-    case_id: caseId,
-  };
-
   const response = await KibanaServices.get().http.fetch<CasesSimilarResponse>(
-    `${CASES_INTERNAL_URL}/_similar`,
+    INTERNAL_CASE_SIMILAR_CASES_URL.replace('{case_id}', caseId),
     {
       method: 'POST',
-      body: JSON.stringify({ ...body, pageSize, pageIndex }),
+      body: JSON.stringify({ pageSize, pageIndex }),
       signal,
     }
   );

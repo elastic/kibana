@@ -111,7 +111,7 @@ export interface CasesSubClient {
   /**
    * Returns cases that are similar to given case (by observables)
    */
-  similar(params: SimilarCasesSearchRequest): Promise<CasesSimilarResponse>;
+  similar(caseId: string, params: SimilarCasesSearchRequest): Promise<CasesSimilarResponse>;
   /**
    * Adds observable to the case
    */
@@ -156,7 +156,8 @@ export const createCasesSubClient = (
     getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
     replaceCustomField: (params: ReplaceCustomFieldArgs) =>
       replaceCustomField(params, clientArgs, casesClient),
-    similar: (params: SimilarCasesSearchRequest) => similar(params, clientArgs),
+    similar: (caseId: string, params: SimilarCasesSearchRequest) =>
+      similar(caseId, params, clientArgs),
     addObservable: (caseId: string, params: AddObservableRequest) =>
       addObservable(caseId, params, clientArgs, casesClient),
     updateObservable: (caseId: string, observableId: string, params: UpdateObservableRequest) =>

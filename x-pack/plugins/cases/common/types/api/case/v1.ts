@@ -529,11 +529,7 @@ export const CasesByAlertIDRequestRt = rt.exact(
 
 export const GetRelatedCasesByAlertResponseRt = rt.array(RelatedCaseRt);
 
-export const SimilarCasesSearchRequestRt = rt.strict({
-  case_id: rt.string,
-  pageSize: rt.number,
-  pageIndex: rt.number,
-});
+export const SimilarCasesSearchRequestRt = paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE });
 
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
