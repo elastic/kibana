@@ -23,8 +23,6 @@ export default createTestConfig({
     `--xpack.cloud.serverless.project_id=fakeprojectid`,
     `--xpack.cloud.base_url=https://fake-cloud.elastic.co`,
     `--xpack.cloud.projects_url=/projects/`,
-    `--xpack.cloud.serverless.project_name=ES3_FTR_TESTS`,
-    `--xpack.cloud.deployment_url=/projects/elasticsearch/fakeprojectid`,
     '--xpack.dataUsage.enabled=true',
     // dataUsage.autoops* config is set in kibana controller
     '--xpack.dataUsage.autoops.enabled=true',
