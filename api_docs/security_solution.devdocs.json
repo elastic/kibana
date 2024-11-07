@@ -2780,6 +2780,29 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getDataViewsService",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataViewsService",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewsService",
+                "text": "DataViewsService"
+              }
+            ],
+            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-server.SecuritySolutionApiRequestHandlerContext.getExceptionListClient",
             "type": "Function",
             "tags": [],
@@ -2889,14 +2912,37 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getSiemMigrationsClient",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getSiemRuleMigrationsClient",
             "type": "Function",
             "tags": [],
-            "label": "getSiemMigrationsClient",
+            "label": "getSiemRuleMigrationsClient",
             "description": [],
             "signature": [
               "() => ",
-              "SiemMigrationsClient"
+              "SiemRuleMigrationsClient"
+            ],
+            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getInferenceClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getInferenceClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "inference",
+                "scope": "server",
+                "docId": "kibInferencePluginApi",
+                "section": "def-server.InferenceClient",
+                "text": "InferenceClient"
+              }
             ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,

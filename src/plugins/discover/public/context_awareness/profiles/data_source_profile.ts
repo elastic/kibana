@@ -59,17 +59,13 @@ export interface DataSourceContext {
   category: DataSourceCategory;
 }
 
-export type DataSourceProfileProvider = AsyncProfileProvider<
+export type DataSourceProfileProvider<TProviderContext = {}> = AsyncProfileProvider<
   DataSourceProfile,
   DataSourceProfileProviderParams,
-  DataSourceContext
+  DataSourceContext & TProviderContext
 >;
 
-export class DataSourceProfileService extends AsyncProfileService<
-  DataSourceProfile,
-  DataSourceProfileProviderParams,
-  DataSourceContext
-> {
+export class DataSourceProfileService extends AsyncProfileService<DataSourceProfileProvider> {
   constructor() {
     super({
       profileId: 'default-data-source-profile',
