@@ -62,7 +62,7 @@ export default function DiscardStarredQueryModal({ onClose }: DiscardStarredQuer
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiCheckbox
-              id="dismiss-text-based-languages-transition-modal"
+              id="dismiss-discard-starred-query-modal"
               label={i18n.translate('esqlEditor.discardStarredQueryModal.dismissButtonLabel', {
                 defaultMessage: "Don't ask me again",
               })}

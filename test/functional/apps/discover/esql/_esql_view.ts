@@ -389,7 +389,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('query history', () => {
+    describe('query history-meow', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
         await timePicker.setDefaultAbsoluteRange();
@@ -403,12 +403,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
-        log.debug(historyItems);
-        const queryAdded = historyItems.some((item) => {
-          return item[1] === 'FROM logstash-* | LIMIT 10';
-        });
-
-        expect(queryAdded).to.be(true);
+        await esql.isQueryPresentInTable('FROM logstash-* | LIMIT 10', historyItems);
       });
 
       it('updating the query should add this to the history', async () => {
@@ -425,12 +420,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
-        log.debug(historyItems);
-        const queryAdded = historyItems.some((item) => {
-          return item[1] === 'from logstash-* | limit 100 | drop @timestamp';
-        });
-
-        expect(queryAdded).to.be(true);
+        await esql.isQueryPresentInTable(
+          'from logstash-* | limit 100 | drop @timestamp',
+          historyItems
+        );
       });
 
       it('should select a query from the history and submit it', async () => {
@@ -444,12 +437,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esql.clickHistoryItem(1);
 
         const historyItems = await esql.getHistoryItems();
-        log.debug(historyItems);
-        const queryAdded = historyItems.some((item) => {
-          return item[1] === 'from logstash-* | limit 100 | drop @timestamp';
-        });
-
-        expect(queryAdded).to.be(true);
+        await esql.isQueryPresentInTable(
+          'from logstash-* | limit 100 | drop @timestamp',
+          historyItems
+        );
       });
 
       it('should add a failed query to the history', async () => {
@@ -468,6 +459,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const historyItem = await esql.getHistoryItem(0);
         await historyItem.findByTestSubject('ESQLEditor-queryHistory-error');
       });
+
+      // it('should add a query history item in the starred queries tab', async () => {
+      //   await discover.selectTextBaseLang();
+      //   await header.waitUntilLoadingHasFinished();
+      //   await discover.waitUntilSearchingHasFinished();
+      //   await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+      //   await testSubjects.click('ESQLEditor-toggle-query-history-button');
+      //   const historyItem = await esql.getHistoryItem(0);
+      //   await historyItem.findByTestSubject('ESQLEditor-queryHistory-error');
+      //   (await historyItem.findByTestSubject('ESQLFavoriteButton')).click();
+
+      //   await testSubjects.click('starred-queries-tab');
+
+      //   const starredItems = await esql.getStarredItems();
+
+      //   await esql.isQueryPresentInTable(
+      //     'from logstash-* | limit 100 | drop @timestamp',
+      //     starredItems
+      //   );
+      // });
     });
 
     describe('sorting', () => {

@@ -72,8 +72,8 @@ export interface ESQLEditorDeps {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
+  storage: Storage;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
-  storage: Storage;
 }
