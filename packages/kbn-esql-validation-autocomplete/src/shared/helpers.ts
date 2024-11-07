@@ -449,7 +449,10 @@ export function checkFunctionArgMatchesDefinition(
   parentCommand?: string
 ) {
   const argType = parameterDefinition.type;
-  if (argType === 'any' || isParam(arg)) {
+  if (argType === 'any') {
+    return true;
+  }
+  if (isParam(arg)) {
     return true;
   }
   if (arg.type === 'literal') {
@@ -476,7 +479,8 @@ export function checkFunctionArgMatchesDefinition(
     const wrappedTypes: Array<(typeof validHit)['type']> = Array.isArray(validHit.type)
       ? validHit.type
       : [validHit.type];
-    return wrappedTypes.some((ct) => ct === argType || ct === 'null');
+
+    return wrappedTypes.some((ct) => ct === argType || ct === 'null' || ct === 'unknown');
   }
   if (arg.type === 'inlineCast') {
     const lowerArgType = argType?.toLowerCase();
