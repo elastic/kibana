@@ -15,7 +15,6 @@ import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiCallOut,
-  // EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -251,6 +250,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
 
     return (
       <div data-test-subj="control-editor-custom-settings">
+        <EuiSpacer size="m"/>
         <CustomSettings
           initialState={initialState}
           field={fieldRegistry[editorState.fieldName].field}
@@ -265,7 +265,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="xs">
+        <EuiTitle size="s">
           <h2>
             {!controlId // if no ID, then we are creating a new control
               ? DataControlEditorStrings.manageControl.getFlyoutCreateTitle()
@@ -441,7 +441,6 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             <EuiButtonEmpty
               aria-label={`cancel-${editorState.title ?? editorState.fieldName}`}
               data-test-subj="control-editor-cancel"
-              iconType="cross"
               onClick={() => {
                 onCancel(editorState);
               }}

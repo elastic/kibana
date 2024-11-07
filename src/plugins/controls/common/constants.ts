@@ -10,7 +10,7 @@
 import { ControlLabelPosition, ControlWidth } from './types';
 
 export const DEFAULT_CONTROL_WIDTH: ControlWidth = 'medium';
-export const DEFAULT_CONTROL_GROW: boolean = true;
+export const DEFAULT_CONTROL_GROW: boolean = false;
 export const DEFAULT_CONTROL_LABEL_POSITION: ControlLabelPosition = 'oneLine';
 
 export const TIME_SLIDER_CONTROL = 'timeSlider';
