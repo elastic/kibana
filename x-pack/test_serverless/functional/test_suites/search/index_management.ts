@@ -16,11 +16,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'header',
     'indexManagement',
+    'svlSearchCreateIndexPage',
   ]);
   const security = getService('security');
+  const es = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   const testIndexName = `test-index-ftr-${Math.random()}`;
+  const testAPIIndexName = `test-api-index-ftr-${Math.random()}`;
   describe('index management', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
@@ -32,23 +35,64 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
     after(async () => {
-      await esDeleteAllIndices(testIndexName);
+      await esDeleteAllIndices([testIndexName, testAPIIndexName]);
     });
 
     it('has embedded dev console', async () => {
       await testHasEmbeddedConsole(pageObjects);
     });
 
-    it('can create an index', async () => {
-      await pageObjects.indexManagement.clickCreateIndexButton();
-      await pageObjects.indexManagement.setCreateIndexName(testIndexName);
-      await pageObjects.indexManagement.clickCreateIndexSaveButton();
-      await pageObjects.indexManagement.expectIndexToExist(testIndexName);
-    });
+    describe('create index', function () {
+      it('can create an index', async () => {
+        await pageObjects.indexManagement.clickCreateIndexButton();
+        await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
+        await pageObjects.svlSearchCreateIndexPage.expectCreateIndexUIView();
+        await pageObjects.svlSearchCreateIndexPage.expectCreateIndexButtonToBeEnabled();
+        await pageObjects.svlSearchCreateIndexPage.setIndexNameValue(testIndexName);
+        await pageObjects.svlSearchCreateIndexPage.clickCreateIndexButton();
+        await pageObjects.svlSearchCreateIndexPage.expectToBeOnIndexDetailsPage();
+        await pageObjects.common.navigateToApp('indexManagement');
+        await pageObjects.indexManagement.changeTabs('indicesTab');
+        await pageObjects.indexManagement.expectIndexToExist(testIndexName);
+      });
+      it('should redirect to index details when index is created via API and on the code view', async () => {
+        await pageObjects.common.navigateToApp('indexManagement');
+        await pageObjects.indexManagement.changeTabs('indicesTab');
+        await pageObjects.indexManagement.clickCreateIndexButton();
 
-    it('can view index details - index with no documents', async () => {
-      await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
-      await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
+        await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
+        await pageObjects.svlSearchCreateIndexPage.expectCreateIndexUIView();
+        await pageObjects.svlSearchCreateIndexPage.clickCodeViewButton();
+        await pageObjects.svlSearchCreateIndexPage.expectCreateIndexCodeView();
+        await es.indices.create({ index: testAPIIndexName });
+        await pageObjects.svlSearchCreateIndexPage.expectToBeOnIndexDetailsPage();
+      });
+      it('should have file upload link', async () => {
+        await pageObjects.common.navigateToApp('indexManagement');
+        await pageObjects.indexManagement.changeTabs('indicesTab');
+        await pageObjects.indexManagement.clickCreateIndexButton();
+
+        await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
+        await pageObjects.svlSearchCreateIndexPage.clickFileUploadLink();
+        await pageObjects.svlSearchCreateIndexPage.expectToBeOnMLFileUploadPage();
+      });
+      it('should support closing create index page', async () => {
+        await pageObjects.common.navigateToApp('indexManagement');
+        await pageObjects.indexManagement.changeTabs('indicesTab');
+        await pageObjects.indexManagement.clickCreateIndexButton();
+
+        await pageObjects.svlSearchCreateIndexPage.expectCloseCreateIndexButtonExists();
+        await pageObjects.svlSearchCreateIndexPage.clickCloseCreateIndexButton();
+        await pageObjects.svlSearchCreateIndexPage.expectToBeOnIndexListPage();
+      });
+      it('should have the embedded console', async () => {
+        await pageObjects.common.navigateToApp('indexManagement');
+        await pageObjects.indexManagement.changeTabs('indicesTab');
+        await pageObjects.indexManagement.expectIndexToExist(testIndexName);
+        await pageObjects.indexManagement.clickCreateIndexButton();
+
+        await testHasEmbeddedConsole(pageObjects);
+      });
     });
   });
 }

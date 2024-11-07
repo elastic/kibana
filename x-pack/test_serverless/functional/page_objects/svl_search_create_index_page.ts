@@ -8,15 +8,15 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProviderContext) {
+export function SvlSearchCreateIndexPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
 
   return {
-    async expectToBeOnStartPage() {
-      expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/start');
-      await testSubjects.existOrFail('elasticsearchStartPage', { timeout: 2000 });
+    async expectToBeOnCreateIndexPage() {
+      expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/indices/create');
+      await testSubjects.existOrFail('elasticsearchCreateIndexPage', { timeout: 2000 });
     },
     async expectToBeOnIndexDetailsPage() {
       await retry.tryForTime(60 * 1000, async () => {
@@ -48,13 +48,6 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
     async clickCloseCreateIndexButton() {
       await testSubjects.existOrFail('closeCreateIndex');
       await testSubjects.click('closeCreateIndex');
-    },
-    async expectSkipButtonExists() {
-      await testSubjects.existOrFail('createIndexSkipBtn');
-    },
-    async clickSkipButton() {
-      await testSubjects.existOrFail('createIndexSkipBtn');
-      await testSubjects.click('createIndexSkipBtn');
     },
     async expectCreateIndexButtonToExist() {
       await testSubjects.existOrFail('createIndexBtn');
