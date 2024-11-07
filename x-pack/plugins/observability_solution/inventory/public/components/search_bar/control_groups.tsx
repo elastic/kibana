@@ -13,8 +13,20 @@ import {
 } from '@kbn/controls-plugin/public';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { skip, Subscription } from 'rxjs';
-import { useUnifiedSearchContext } from '../../../hooks/use_unified_search_context';
-import { useControlPanels } from './use_control_panels';
+import { ControlPanels, useControlPanels } from '@kbn/observability-shared-plugin/public';
+import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
+
+const controlPanelDefinitions: ControlPanels = {
+  [ENTITY_TYPE]: {
+    order: 0,
+    type: 'optionsListControl',
+    fieldName: ENTITY_TYPE,
+    width: 'small',
+    grow: false,
+    title: 'Type',
+  },
+};
 
 export function ControlGroups() {
   const {
@@ -22,9 +34,9 @@ export function ControlGroups() {
     setIsControlPanelsInitiated,
     dataView,
     searchState,
-    onControlFiltersChange,
+    onPanelFiltersChange,
   } = useUnifiedSearchContext();
-  const { controlPanels, setControlPanels } = useControlPanels(dataView);
+  const [controlPanels, setControlPanels] = useControlPanels(controlPanelDefinitions, dataView);
   const subscriptions = useRef<Subscription>(new Subscription());
 
   const getInitialInput = useCallback(
@@ -46,7 +58,7 @@ export function ControlGroups() {
 
       subscriptions.current.add(
         controlGroup.filters$.pipe(skip(1)).subscribe((newFilters = []) => {
-          onControlFiltersChange(newFilters);
+          onPanelFiltersChange(newFilters);
         })
       );
 
@@ -59,12 +71,7 @@ export function ControlGroups() {
         })
       );
     },
-    [
-      isControlPanelsInitiated,
-      onControlFiltersChange,
-      setControlPanels,
-      setIsControlPanelsInitiated,
-    ]
+    [isControlPanelsInitiated, onPanelFiltersChange, setControlPanels, setIsControlPanelsInitiated]
   );
 
   useEffect(() => {

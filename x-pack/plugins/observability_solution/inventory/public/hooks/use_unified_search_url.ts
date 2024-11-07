@@ -45,7 +45,7 @@ const QueryStateRT = t.type({
 });
 
 const SearchStateRT = t.type({
-  controlFilters: FiltersRT,
+  panelFilters: FiltersRT,
   filters: FiltersRT,
   query: QueryStateRT,
 });
@@ -59,14 +59,14 @@ type SearchState = t.TypeOf<typeof SearchStateRT>;
 
 const INITIAL_VALUE: SearchState = {
   query: { language: 'kuery', query: '' },
-  controlFilters: [],
+  panelFilters: [],
   filters: [],
 };
 
 export type HostsStateAction =
   | { type: 'SET_FILTERS'; filters: SearchState['filters'] }
   | { type: 'SET_QUERY'; query: SearchState['query'] }
-  | { type: 'SET_PANEL_FILTERS'; controlFilters: SearchState['controlFilters'] };
+  | { type: 'SET_PANEL_FILTERS'; panelFilters: SearchState['panelFilters'] };
 
 const reducer = (state: SearchState, action: HostsStateAction): SearchState => {
   switch (action.type) {
@@ -75,7 +75,7 @@ const reducer = (state: SearchState, action: HostsStateAction): SearchState => {
     case 'SET_QUERY':
       return { ...state, query: action.query };
     case 'SET_PANEL_FILTERS':
-      return { ...state, controlFilters: action.controlFilters };
+      return { ...state, panelFilters: action.panelFilters };
     default:
       return state;
   }

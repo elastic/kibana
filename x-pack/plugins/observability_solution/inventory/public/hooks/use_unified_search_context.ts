@@ -99,9 +99,9 @@ function useUnifiedSearch() {
     [validateQuery, setSearchState, notifications.toasts]
   );
 
-  const onControlFiltersChange = useCallback(
-    (controlFilters: Filter[]) => {
-      setSearchState({ type: 'SET_PANEL_FILTERS', controlFilters });
+  const onPanelFiltersChange = useCallback(
+    (panelFilters: Filter[]) => {
+      setSearchState({ type: 'SET_PANEL_FILTERS', panelFilters });
     },
     [setSearchState]
   );
@@ -141,12 +141,12 @@ function useUnifiedSearch() {
     if (dataView) {
       return JSON.stringify(
         buildEsQuery(dataView, searchState.query, [
-          ...searchState.controlFilters,
+          ...searchState.panelFilters,
           ...searchState.filters,
         ])
       );
     }
-  }, [dataView, searchState.controlFilters, searchState.filters, searchState.query]);
+  }, [dataView, searchState.panelFilters, searchState.filters, searchState.query]);
 
   return {
     isControlPanelsInitiated,
@@ -157,7 +157,7 @@ function useUnifiedSearch() {
     addFilter,
     stringifiedEsQuery,
     onQueryChange,
-    onControlFiltersChange,
+    onPanelFiltersChange,
     onFiltersChange,
   };
 }

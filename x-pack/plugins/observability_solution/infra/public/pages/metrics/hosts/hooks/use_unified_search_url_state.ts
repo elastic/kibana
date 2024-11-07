@@ -14,7 +14,7 @@ import { constant, identity } from 'fp-ts/lib/function';
 import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { FilterStateStore } from '@kbn/es-query';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useUrlState } from '../../../../hooks/use_url_state';
+import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
@@ -79,11 +79,9 @@ export const useHostsUrlState = (): [HostsState, Dispatch<HostsStateAction>] => 
     urlStateKey: '_a',
     writeDefaultState: true,
   });
-  console.log('### caue  useHostsUrlState  urlState:', urlState);
 
   const [search, setSearch] = useReducer(reducer, urlState);
   if (!deepEqual(search, urlState)) {
-    console.log('################################:', search);
     setUrlState(search);
     if (localStorageHostLimit !== search.limit) {
       setLocalStorageHostLimit(search.limit);

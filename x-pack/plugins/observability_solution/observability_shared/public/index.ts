@@ -106,3 +106,4 @@ export { FieldValueSelection, FieldValueSuggestions } from './components';
 export { AddDataPanel, type AddDataPanelProps } from './components/add_data_panel';
 
 export { useUrlState } from './hooks/use_url_state';
+export { type ControlPanels, useControlPanels } from './hooks/use_control_panels_url_state';
