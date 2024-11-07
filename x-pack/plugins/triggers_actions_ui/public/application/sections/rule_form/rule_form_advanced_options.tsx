@@ -19,7 +19,7 @@ import {
 import { RuleSpecificFlappingProperties } from '@kbn/alerting-types/rule_settings';
 import { RuleSettingsFlappingForm } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_form';
 import { RuleSettingsFlappingTitleTooltip } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_title_tooltip';
-import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared';
+import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';
 import { useKibana } from '../../../common/lib/kibana';
 
 const alertDelayFormRowLabel = i18n.translate(

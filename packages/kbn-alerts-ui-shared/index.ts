@@ -23,6 +23,3 @@ export * from './src/common/i18n';
 export * from './src/rule_settings';
 export * from './src/common/type_registry';
 export * from './src/check_action_type_enabled';
-
-export { useFetchFlappingSettings } from './src/common/hooks/use_fetch_flapping_settings';
-export { fetchConnectors, fetchConnectorTypes } from './src/common/apis';

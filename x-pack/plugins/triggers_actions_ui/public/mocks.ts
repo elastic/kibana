@@ -7,7 +7,7 @@
 
 import { RuleAction } from '@kbn/alerting-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { TypeRegistry } from '@kbn/alerts-ui-shared';
+import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
