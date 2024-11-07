@@ -52,9 +52,9 @@ const schema: RootSchema<RecallRanking> = {
   },
 };
 
-export const RecallRankingEventType = 'observability_ai_assistant_recall_ranking';
+export const recallRankingEventType = 'observability_ai_assistant_recall_ranking';
 
 export const recallRankingEvent: EventTypeOpts<RecallRanking> = {
-  eventType: RecallRankingEventType,
+  eventType: recallRankingEventType,
   schema,
 };
