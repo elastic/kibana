@@ -7,16 +7,18 @@
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiPageTemplate,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { docLinks } from '../../../common/doc_links';
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
@@ -27,6 +29,10 @@ import { useKibanaServices } from '../hooks/use_kibana';
 import { EmptyConnectorsPrompt } from './connectors/empty_connectors_prompt';
 import { ConnectorsTable } from './connectors/connectors_table';
 import { ConnectorPrivilegesCallout } from './connectors/connector_config/connector_privileges_callout';
+
+import { BASE_CONNECTORS_PATH, CONNECTORS, ELASTIC_MANAGED_CONNECTOR_PATH } from '../constants';
+
+const CALLOUT_KEY = 'search.connectors.ElasticManaged.ComingSoon.feedbackCallout';
 
 export const ConnectorsOverview = () => {
   const { data, isLoading: connectorsLoading } = useConnectors();
@@ -39,6 +45,17 @@ export const ConnectorsOverview = () => {
 
   const canManageConnectors = !data || data.canManageConnectors;
 
+  const {
+    application: { navigateToUrl },
+  } = useKibanaServices();
+
+  const [showCallOut, setShowCallOut] = useState(sessionStorage.getItem(CALLOUT_KEY) !== 'hidden');
+
+  const onDismiss = () => {
+    setShowCallOut(false);
+    sessionStorage.setItem(CALLOUT_KEY, 'hidden');
+  };
+
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchConnectorsPage">
       <EuiPageTemplate.Header
@@ -47,52 +64,56 @@ export const ConnectorsOverview = () => {
         })}
         data-test-subj="serverlessSearchConnectorsTitle"
         restrictWidth
-        rightSideItems={[
-          <EuiFlexGroup direction="row" alignItems="flexStart" justifyContent="center">
-            <EuiFlexItem>
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="xs"
-                justifyContent="flexEnd"
-                direction="row"
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    size="s"
-                    type={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/github.svg`)}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <EuiLink
-                      data-test-subj="serverlessSearchConnectorsOverviewElasticConnectorsLink"
-                      target="_blank"
-                      href="https://github.com/elastic/connectors"
+        rightSideItems={
+          connectorsLoading || (data?.connectors || []).length > 0
+            ? [
+                <EuiFlexGroup direction="row" alignItems="center" justifyContent="center">
+                  <EuiFlexItem>
+                    <EuiFlexGroup
+                      alignItems="center"
+                      gutterSize="xs"
+                      justifyContent="flexEnd"
+                      direction="row"
                     >
-                      {i18n.translate('xpack.serverlessSearch.connectorsPythonLink', {
-                        defaultMessage: 'elastic/connectors',
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon
+                          size="s"
+                          type={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/github.svg`)}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s">
+                          <EuiLink
+                            data-test-subj="serverlessSearchConnectorsOverviewElasticConnectorsLink"
+                            target="_blank"
+                            href={CONNECTORS.github_repo}
+                          >
+                            {i18n.translate('xpack.serverlessSearch.connectorsPythonLink', {
+                              defaultMessage: 'elastic/connectors',
+                            })}
+                          </EuiLink>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiButton
+                      data-test-subj="serverlessSearchConnectorsOverviewCreateConnectorButton"
+                      disabled={!canManageConnectors}
+                      isLoading={isLoading}
+                      fill
+                      iconType="plusInCircleFilled"
+                      onClick={() => createConnector()}
+                    >
+                      {i18n.translate('xpack.serverlessSearch.connectors.createConnector', {
+                        defaultMessage: 'Create connector',
                       })}
-                    </EuiLink>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButton
-                data-test-subj="serverlessSearchConnectorsOverviewCreateConnectorButton"
-                disabled={!canManageConnectors}
-                isLoading={isLoading}
-                fill
-                iconType="plusInCircleFilled"
-                onClick={() => createConnector()}
-              >
-                {i18n.translate('xpack.serverlessSearch.connectors.createConnector', {
-                  defaultMessage: 'Create connector',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-        ]}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>,
+              ]
+            : undefined
+        }
       >
         <EuiText>
           <p>
@@ -118,7 +139,39 @@ export const ConnectorsOverview = () => {
       <EuiPageTemplate.Section restrictWidth color="subdued">
         <ConnectorPrivilegesCallout />
         {connectorsLoading || (data?.connectors || []).length > 0 ? (
-          <ConnectorsTable />
+          <>
+            {showCallOut && (
+              <>
+                <EuiCallOut
+                  size="m"
+                  title="Coming soon Elastic managed connectors."
+                  iconType="pin"
+                  onDismiss={onDismiss}
+                >
+                  <p>
+                    {i18n.translate(
+                      'xpack.serverlessSearch.connectorsOverview.calloutDescription',
+                      {
+                        defaultMessage:
+                          "We're actively developing Elastic managed connectors, that won't require any self-managed infrastructure. You'll be able to handle all configuration in the UI. This will simplify syncing your data into a serverless Elasticsearch project.",
+                      }
+                    )}
+                  </p>
+                  <EuiButton
+                    data-test-subj="serverlessSearchConnectorsOverviewLinkButtonButton"
+                    color="primary"
+                    onClick={() =>
+                      navigateToUrl(`${BASE_CONNECTORS_PATH}/${ELASTIC_MANAGED_CONNECTOR_PATH}`)
+                    }
+                  >
+                    {LEARN_MORE_LABEL}
+                  </EuiButton>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
+            <ConnectorsTable />
+          </>
         ) : (
           <EmptyConnectorsPrompt />
         )}
