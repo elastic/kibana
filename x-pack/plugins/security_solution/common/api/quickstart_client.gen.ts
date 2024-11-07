@@ -365,7 +365,7 @@ import type {
 import type {
   CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
-  GetAllStatsRuleMigrationResponse,
+  GetAll../siem_migrations/model/api/rules/rule_migration.gen
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
   GetRuleMigrationStatsRequestParamsInput,

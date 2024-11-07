@@ -9,12 +9,12 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
-import type { StartRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
 import {
   StartRuleMigrationRequestBody,
   StartRuleMigrationRequestParams,
-} from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
-import { SIEM_RULE_MIGRATIONS_START_PATH } from '../../../../../common/siem_migrations/constants';
+  type StartRuleMigrationResponse,
+} from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { SIEM_RULE_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 export const registerSiemRuleMigrationsStartRoute = (
@@ -23,7 +23,7 @@ export const registerSiemRuleMigrationsStartRoute = (
 ) => {
   router.versioned
     .put({
-      path: SIEM_RULE_MIGRATIONS_START_PATH,
+      path: SIEM_RULE_MIGRATION_START_PATH,
       access: 'internal',
       security: { authz: { requiredPrivileges: ['securitySolution'] } },
     })

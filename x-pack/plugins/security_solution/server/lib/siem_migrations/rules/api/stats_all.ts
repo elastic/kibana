@@ -6,7 +6,7 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import type { GetAllStatsRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
+import type { GetAllStatsRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATIONS_ALL_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
@@ -21,7 +21,10 @@ export const registerSiemRuleMigrationsStatsAllRoute = (
       security: { authz: { requiredPrivileges: ['securitySolution'] } },
     })
     .addVersion(
-      { version: '1', validate: {} },
+      {
+        version: '1',
+        validate: {},
+      },
       async (context, req, res): Promise<IKibanaResponse<GetAllStatsRuleMigrationResponse>> => {
         try {
           const ctx = await context.resolve(['securitySolution']);

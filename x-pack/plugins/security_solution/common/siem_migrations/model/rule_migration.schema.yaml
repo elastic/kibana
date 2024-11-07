@@ -181,17 +181,16 @@ components:
                 type: string
                 description: The migration id
 
-    RuleMigrationResource:
+## Rule migration resources
+
+    RuleMigrationResourceData:
       type: object
-      description: The rule migration resource document object.
+      description: The rule migration resource data provided by the vendor.
       required:
-        - migration_id
         - type
         - name
+        - content
       properties:
-        migration_id:
-          type: string
-          description: The migration id for with the resource is associated.
         type:
           type: string
           description: The type of the resource.
@@ -207,9 +206,21 @@ components:
         metadata:
           type: object
           description: The resource arbitrary metadata.
-        updated_at:
-          type: string
-          description: The moment of the last update
-        updated_by:
-          type: string
-          description: The user who last updated the resource
+
+    RuleMigrationResource:
+      description: The rule migration resource document object.
+      allOf:
+        - $ref: '#/components/schemas/RuleMigrationResourceData'
+        - type: object
+          required:
+            - migration_id
+          properties:
+            migration_id:
+              type: string
+              description: The migration id
+            updated_at:
+              type: string
+              description: The moment of the last update
+            updated_by:
+              type: string
+              description: The user who last updated the resource

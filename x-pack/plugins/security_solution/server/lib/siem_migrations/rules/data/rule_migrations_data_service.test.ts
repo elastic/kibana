@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleMigrationsDataStream } from './rule_migrations_data_stream';
+import { RuleMigrationsDataService } from './rule_migrations_data_service';
 import { Subject } from 'rxjs';
 import type { InstallParams } from '@kbn/data-stream-adapter';
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
@@ -30,7 +30,7 @@ const MockedDataStreamSpacesAdapter = DataStreamSpacesAdapter as unknown as jest
 
 const esClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 
-describe('SiemRuleMigrationsDataStream', () => {
+describe('SiemRuleMigrationsDataService', () => {
   const kibanaVersion = '8.16.0';
   const logger = loggingSystemMock.createLogger();
 
@@ -40,12 +40,12 @@ describe('SiemRuleMigrationsDataStream', () => {
 
   describe('constructor', () => {
     it('should create DataStreamSpacesAdapter', () => {
-      new RuleMigrationsDataStream(logger, kibanaVersion);
+      new RuleMigrationsDataService(logger, kibanaVersion);
       expect(MockedDataStreamSpacesAdapter).toHaveBeenCalledTimes(1);
     });
 
     it('should create component templates', () => {
-      new RuleMigrationsDataStream(logger, kibanaVersion);
+      new RuleMigrationsDataService(logger, kibanaVersion);
       const [dataStreamSpacesAdapter] = MockedDataStreamSpacesAdapter.mock.instances;
       expect(dataStreamSpacesAdapter.setComponentTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: '.kibana.siem-rule-migrations' })
@@ -53,7 +53,7 @@ describe('SiemRuleMigrationsDataStream', () => {
     });
 
     it('should create index templates', () => {
-      new RuleMigrationsDataStream(logger, kibanaVersion);
+      new RuleMigrationsDataService(logger, kibanaVersion);
       const [dataStreamSpacesAdapter] = MockedDataStreamSpacesAdapter.mock.instances;
       expect(dataStreamSpacesAdapter.setIndexTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: '.kibana.siem-rule-migrations' })
@@ -63,7 +63,7 @@ describe('SiemRuleMigrationsDataStream', () => {
 
   describe('install', () => {
     it('should install data stream', async () => {
-      const dataStream = new RuleMigrationsDataStream(logger, kibanaVersion);
+      const dataStream = new RuleMigrationsDataService(logger, kibanaVersion);
       const params: Omit<InstallParams, 'logger'> = {
         esClient,
         pluginStop$: new Subject(),
@@ -74,7 +74,7 @@ describe('SiemRuleMigrationsDataStream', () => {
     });
 
     it('should log error', async () => {
-      const dataStream = new RuleMigrationsDataStream(logger, kibanaVersion);
+      const dataStream = new RuleMigrationsDataService(logger, kibanaVersion);
       const params: Omit<InstallParams, 'logger'> = {
         esClient,
         pluginStop$: new Subject(),
@@ -93,7 +93,7 @@ describe('SiemRuleMigrationsDataStream', () => {
     const createClientParams = { spaceId: 'space1', currentUser, esClient };
 
     it('should install space data stream', async () => {
-      const dataStream = new RuleMigrationsDataStream(logger, kibanaVersion);
+      const dataStream = new RuleMigrationsDataService(logger, kibanaVersion);
       const params: InstallParams = {
         esClient,
         logger: loggerMock.create(),
@@ -111,7 +111,7 @@ describe('SiemRuleMigrationsDataStream', () => {
     });
 
     it('should not install space data stream if install not executed', async () => {
-      const dataStream = new RuleMigrationsDataStream(logger, kibanaVersion);
+      const dataStream = new RuleMigrationsDataService(logger, kibanaVersion);
       await expect(async () => {
         dataStream.createClient(createClientParams);
         await mockDataStreamNamePromise();
@@ -119,7 +119,7 @@ describe('SiemRuleMigrationsDataStream', () => {
     });
 
     it('should throw error if main install had error', async () => {
-      const dataStream = new RuleMigrationsDataStream(logger, kibanaVersion);
+      const dataStream = new RuleMigrationsDataService(logger, kibanaVersion);
       const params: InstallParams = {
         esClient,
         logger: loggerMock.create(),

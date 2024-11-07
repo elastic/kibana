@@ -3,6 +3,9 @@ info:
   title: SIEM Rules Migration API
   version: '1'
 paths:
+
+  # Rule migrations APIs
+
   /internal/siem_migrations/rules:
     post:
       summary: Creates a new rule migration
@@ -48,6 +51,8 @@ paths:
             application/json:
               schema:
                 $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationAllTaskStats'
+
+  ## Specific rule migration APIs
 
   /internal/siem_migrations/rules/{migration_id}:
     get:
@@ -175,3 +180,43 @@ paths:
                     description: Indicates the migration has been stopped.
         204:
           description: Indicates the migration id was not found running.
+
+  # Rule migration resources APIs
+
+  /internal/siem_migrations/rules/{migration_id}/resources:
+    post:
+      summary: Creates or updates rule migration resources for a migration
+      operationId: UpsertRuleMigrationResources
+      x-codegen-enabled: true
+      description: Creates or updates resources for an existing SIEM rules migration
+      tags:
+        - SIEM Rule Migrations
+        - Resources
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            type: string
+            description: The migration id to attach the resources
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceData'
+      responses:
+        200:
+          description: Indicates migration have been created correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - acknowledged
+                properties:
+                  acknowledged:
+                    type: boolean
+                    description: The request has been processed correctly.

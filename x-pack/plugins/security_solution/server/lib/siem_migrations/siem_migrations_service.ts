@@ -8,9 +8,12 @@
 import type { LoggerFactory } from '@kbn/core/server';
 import { ReplaySubject, type Subject } from 'rxjs';
 import type { ConfigType } from '../../config';
-import { SiemRuleMigrationsService } from './rules/siem_rule_migrations_service';
-import type { SiemMigrationsSetupParams, SiemMigrationsCreateClientParams } from './types';
-import type { SiemRuleMigrationsClient } from './rules/types';
+import {
+  SiemRuleMigrationsService,
+  type SiemRuleMigrationsClient,
+  type SiemRuleMigrationsCreateClientParams,
+} from './rules/siem_rule_migrations_service';
+import type { SiemMigrationsSetupParams } from './types';
 
 export class SiemMigrationsService {
   private pluginStop$: Subject<void>;
@@ -27,7 +30,7 @@ export class SiemMigrationsService {
     }
   }
 
-  createRulesClient(params: SiemMigrationsCreateClientParams): SiemRuleMigrationsClient {
+  createRulesClient(params: SiemRuleMigrationsCreateClientParams): SiemRuleMigrationsClient {
     return this.rules.createClient(params);
   }
 

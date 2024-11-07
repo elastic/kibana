@@ -8,11 +8,13 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { v4 as uuidV4 } from 'uuid';
-import type { CreateRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
-import { CreateRuleMigrationRequestBody } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
+import {
+  CreateRuleMigrationRequestBody,
+  type CreateRuleMigrationResponse,
+} from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATIONS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import type { CreateRuleMigrationInput } from '../data_stream/rule_migrations_data_client';
+import type { CreateRuleMigrationInput } from '../data/rule_migrations_data_client';
 
 export const registerSiemRuleMigrationsCreateRoute = (
   router: SecuritySolutionPluginRouter,
@@ -44,7 +46,7 @@ export const registerSiemRuleMigrationsCreateRoute = (
             original_rule: originalRule,
           }));
 
-          await ruleMigrationsClient.data.create(ruleMigrations);
+          await ruleMigrationsClient.data.rules.create(ruleMigrations);
 
           return res.ok({ body: { migration_id: migrationId } });
         } catch (err) {

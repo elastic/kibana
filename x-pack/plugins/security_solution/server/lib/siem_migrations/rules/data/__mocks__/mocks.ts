@@ -9,7 +9,7 @@ export const mockIndexName = 'mocked_data_stream_name';
 export const mockInstall = jest.fn().mockResolvedValue(undefined);
 export const mockCreateClient = jest.fn().mockReturnValue({});
 
-export const MockRuleMigrationsDataStream = jest.fn().mockImplementation(() => ({
+export const MockRuleMigrationsDataService = jest.fn().mockImplementation(() => ({
   install: mockInstall,
   createClient: mockCreateClient,
 }));

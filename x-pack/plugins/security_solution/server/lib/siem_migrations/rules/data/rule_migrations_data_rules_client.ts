@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import assert from 'assert';
 import type {
   AggregationsFilterAggregate,
   AggregationsMaxAggregate,
   AggregationsStringTermsAggregate,
   AggregationsStringTermsBucket,
   QueryDslQueryContainer,
-  SearchHit,
-  SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { StoredRuleMigration } from '../types';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
@@ -22,53 +18,51 @@ import type {
   RuleMigration,
   RuleMigrationTaskStats,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
 export type CreateRuleMigrationInput = Omit<RuleMigration, '@timestamp' | 'status' | 'created_by'>;
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
 export type RuleMigrationAllDataStats = Array<RuleMigrationDataStats & { migration_id: string }>;
 
-export class RuleMigrationsDataClient {
-  constructor(
-    private indexNamePromises: Record<'rules' | 'resources', Promise<string>>,
-    private currentUser: AuthenticatedUser,
-    private esClient: ElasticsearchClient,
-    private logger: Logger
-  ) {}
-
+export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient {
   /** Indexes an array of rule migrations to be processed */
   async create(ruleMigrations: CreateRuleMigrationInput[]): Promise<void> {
-    const index = await this.indexNamePromises.rules;
-    await this.esClient
-      .bulk({
-        refresh: 'wait_for',
-        operations: ruleMigrations.flatMap((ruleMigration) => [
-          { create: { _index: index } },
-          {
-            ...ruleMigration,
-            '@timestamp': new Date().toISOString(),
-            status: SiemMigrationStatus.PENDING,
-            created_by: this.currentUser.username,
-          },
-        ]),
-      })
-      .catch((error) => {
-        this.logger.error(`Error creating rule migrations: ${error.message}`);
-        throw error;
-      });
+    const index = await this.indexNamePromise;
+
+    let ruleMigrationsSlice: CreateRuleMigrationInput[];
+    while ((ruleMigrationsSlice = ruleMigrations.splice(0, 500)).length) {
+      await this.esClient
+        .bulk({
+          refresh: 'wait_for',
+          operations: ruleMigrationsSlice.flatMap((ruleMigration) => [
+            { create: { _index: index } },
+            {
+              ...ruleMigration,
+              '@timestamp': new Date().toISOString(),
+              status: SiemMigrationStatus.PENDING,
+              created_by: this.currentUser.username,
+            },
+          ]),
+        })
+        .catch((error) => {
+          this.logger.error(`Error creating rule migrations: ${error.message}`);
+          throw error;
+        });
+    }
   }
 
   /** Retrieves an array of rule documents of a specific migrations */
-  async getRules(migrationId: string): Promise<StoredRuleMigration[]> {
-    const index = await this.indexNamePromises.rules;
+  async get(migrationId: string): Promise<StoredRuleMigration[]> {
+    const index = await this.indexNamePromise;
     const query = this.getFilterQuery(migrationId);
 
     const storedRuleMigrations = await this.esClient
       .search<RuleMigration>({ index, query, sort: '_doc' })
+      .then((response) => this.processResponse(response))
       .catch((error) => {
         this.logger.error(`Error searching getting rule migrations: ${error.message}`);
         throw error;
-      })
-      .then((response) => this.processHits(response.hits.hits));
+      });
     return storedRuleMigrations;
   }
 
@@ -79,18 +73,18 @@ export class RuleMigrationsDataClient {
    * - Multiple tasks should not process the same migration simultaneously.
    */
   async takePending(migrationId: string, size: number): Promise<StoredRuleMigration[]> {
-    const index = await this.indexNamePromises.rules;
+    const index = await this.indexNamePromise;
     const query = this.getFilterQuery(migrationId, SiemMigrationStatus.PENDING);
 
     const storedRuleMigrations = await this.esClient
       .search<RuleMigration>({ index, query, sort: '_doc', size })
+      .then((response) =>
+        this.processHits(response.hits.hits, { status: SiemMigrationStatus.PROCESSING })
+      )
       .catch((error) => {
         this.logger.error(`Error searching for rule migrations: ${error.message}`);
         throw error;
-      })
-      .then((response) =>
-        this.processHits(response.hits.hits, { status: SiemMigrationStatus.PROCESSING })
-      );
+      });
 
     await this.esClient
       .bulk({
@@ -150,7 +144,7 @@ export class RuleMigrationsDataClient {
 
   /** Updates all the rule migration with the provided id with status `processing` back to `pending` */
   async releaseProcessing(migrationId: string): Promise<void> {
-    const index = await this.indexNamePromises.rules;
+    const index = await this.indexNamePromise;
     const query = this.getFilterQuery(migrationId, SiemMigrationStatus.PROCESSING);
     const script = { source: `ctx._source['status'] = '${SiemMigrationStatus.PENDING}'` };
     await this.esClient.updateByQuery({ index, query, script, refresh: false }).catch((error) => {
@@ -161,7 +155,7 @@ export class RuleMigrationsDataClient {
 
   /** Updates all the rule migration with the provided id with status `processing` or `failed` back to `pending` */
   async releaseProcessable(migrationId: string): Promise<void> {
-    const index = await this.indexNamePromises.rules;
+    const index = await this.indexNamePromise;
     const query = this.getFilterQuery(migrationId, [
       SiemMigrationStatus.PROCESSING,
       SiemMigrationStatus.FAILED,
@@ -175,7 +169,7 @@ export class RuleMigrationsDataClient {
 
   /** Retrieves the stats for the rule migrations with the provided id */
   async getStats(migrationId: string): Promise<RuleMigrationDataStats> {
-    const index = await this.indexNamePromises.rules;
+    const index = await this.indexNamePromise;
     const query = this.getFilterQuery(migrationId);
     const aggregations = {
       pending: { filter: { term: { status: SiemMigrationStatus.PENDING } } },
@@ -206,7 +200,7 @@ export class RuleMigrationsDataClient {
 
   /** Retrieves the stats for all the rule migrations aggregated by migration id */
   async getAllStats(): Promise<RuleMigrationAllDataStats> {
-    const index = await this.indexNamePromises.rules;
+    const index = await this.indexNamePromise;
     const aggregations = {
       migrationIds: {
         terms: { field: 'migration_id' },
@@ -254,22 +248,5 @@ export class RuleMigrationsDataClient {
       }
     }
     return { bool: { filter } };
-  }
-
-  private processHits(
-    hits: Array<SearchHit<RuleMigration>>,
-    override: Partial<RuleMigration> = {}
-  ): StoredRuleMigration[] {
-    return hits.map(({ _id, _index, _source }) => {
-      assert(_id, 'RuleMigration document should have _id');
-      assert(_source, 'RuleMigration document should have _source');
-      return { ..._source, ...override, _id, _index };
-    });
-  }
-
-  private getTotalHits(response: SearchResponse) {
-    return typeof response.hits.total === 'number'
-      ? response.hits.total
-      : response.hits.total?.value ?? 0;
   }
 }

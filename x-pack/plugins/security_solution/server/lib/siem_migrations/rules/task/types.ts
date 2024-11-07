@@ -10,7 +10,7 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { RuleMigrationsDataClient } from '../data_stream/rule_migrations_data_client';
+import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { getRuleMigrationAgent } from './agent';
 
 export type MigrationAgent = ReturnType<typeof getRuleMigrationAgent>;

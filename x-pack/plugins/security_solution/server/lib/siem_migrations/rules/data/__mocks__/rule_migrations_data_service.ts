@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-import { MockRuleMigrationsDataStream } from './mocks';
-export const RuleMigrationsDataStream = MockRuleMigrationsDataStream;
+import { MockRuleMigrationsDataService } from './mocks';
+export const RuleMigrationsDataService = MockRuleMigrationsDataService;

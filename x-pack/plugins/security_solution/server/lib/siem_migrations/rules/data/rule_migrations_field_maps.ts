@@ -42,7 +42,7 @@ export const ruleMigrationResourcesFieldMap: FieldMap<SchemaFieldMapKeys<RuleMig
   migration_id: { type: 'keyword', required: true },
   type: { type: 'keyword', required: true },
   name: { type: 'keyword', required: true },
-  content: { type: 'text', required: true },
+  content: { type: 'text', required: false },
   metadata: { type: 'object', required: false },
   updated_at: { type: 'date', required: false },
   updated_by: { type: 'keyword', required: false },

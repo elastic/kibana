@@ -21,6 +21,7 @@ import {
   RuleMigrationAllTaskStats,
   RuleMigration,
   RuleMigrationTaskStats,
+  RuleMigrationResourceData,
 } from '../../rule_migration.gen';
 import { ConnectorId, LangSmithOptions } from '../common.gen';
 
@@ -92,4 +93,32 @@ export const StopRuleMigrationResponse = z.object({
    * Indicates the migration has been stopped.
    */
   stopped: z.boolean(),
+});
+
+export type UpsertRuleMigrationResourcesRequestParams = z.infer<
+  typeof UpsertRuleMigrationResourcesRequestParams
+>;
+export const UpsertRuleMigrationResourcesRequestParams = z.object({
+  migration_id: z.string(),
+});
+export type UpsertRuleMigrationResourcesRequestParamsInput = z.input<
+  typeof UpsertRuleMigrationResourcesRequestParams
+>;
+
+export type UpsertRuleMigrationResourcesRequestBody = z.infer<
+  typeof UpsertRuleMigrationResourcesRequestBody
+>;
+export const UpsertRuleMigrationResourcesRequestBody = z.array(RuleMigrationResourceData);
+export type UpsertRuleMigrationResourcesRequestBodyInput = z.input<
+  typeof UpsertRuleMigrationResourcesRequestBody
+>;
+
+export type UpsertRuleMigrationResourcesResponse = z.infer<
+  typeof UpsertRuleMigrationResourcesResponse
+>;
+export const UpsertRuleMigrationResourcesResponse = z.object({
+  /**
+   * The request has been processed correctly.
+   */
+  acknowledged: z.boolean(),
 });

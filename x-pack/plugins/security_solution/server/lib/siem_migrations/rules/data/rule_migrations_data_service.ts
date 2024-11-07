@@ -23,7 +23,7 @@ interface CreateClientParams {
   esClient: ElasticsearchClient;
 }
 
-export class RuleMigrationsDataStream {
+export class RuleMigrationsDataService {
   private readonly rulesDataStream: DataStreamSpacesAdapter;
   private readonly resourcesDataStream: DataStreamSpacesAdapter;
 

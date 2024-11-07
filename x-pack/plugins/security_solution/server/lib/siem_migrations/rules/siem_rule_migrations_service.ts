@@ -6,24 +6,45 @@
  */
 
 import assert from 'assert';
-import type { IClusterClient, LoggerFactory, Logger } from '@kbn/core/server';
-import { RuleMigrationsDataStream } from './data_stream/rule_migrations_data_stream';
+import type { Subject } from 'rxjs';
 import type {
-  SiemRulesMigrationsSetupParams,
-  SiemRuleMigrationsCreateClientParams,
-  SiemRuleMigrationsClient,
-} from './types';
+  AuthenticatedUser,
+  LoggerFactory,
+  IClusterClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
+import { RuleMigrationsDataService } from './data/rule_migrations_data_service';
+import type { RuleMigrationsDataClient } from './data/rule_migrations_data_client';
+import type { RuleMigrationsTaskClient } from './task/rule_migrations_task_client';
 import { RuleMigrationsTaskService } from './task/rule_migrations_task_service';
 
+export interface SiemRulesMigrationsSetupParams {
+  esClusterClient: IClusterClient;
+  pluginStop$: Subject<void>;
+  tasksTimeoutMs?: number;
+}
+
+export interface SiemRuleMigrationsCreateClientParams {
+  request: KibanaRequest;
+  currentUser: AuthenticatedUser | null;
+  spaceId: string;
+}
+
+export interface SiemRuleMigrationsClient {
+  data: RuleMigrationsDataClient;
+  task: RuleMigrationsTaskClient;
+}
+
 export class SiemRuleMigrationsService {
-  private rulesDataStream: RuleMigrationsDataStream;
+  private rulesDataStream: RuleMigrationsDataService;
   private esClusterClient?: IClusterClient;
   private taskRunner: RuleMigrationsTaskService;
   private logger: Logger;
 
   constructor(logger: LoggerFactory, kibanaVersion: string) {
     this.logger = logger.get('siemRuleMigrations');
-    this.rulesDataStream = new RuleMigrationsDataStream(this.logger, kibanaVersion);
+    this.rulesDataStream = new RuleMigrationsDataService(this.logger, kibanaVersion);
     this.taskRunner = new RuleMigrationsTaskService(this.logger);
   }
 

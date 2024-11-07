@@ -7,9 +7,11 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { GetRuleMigrationStatsResponse } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
-import { GetRuleMigrationStatsRequestParams } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
-import { SIEM_RULE_MIGRATIONS_STATS_PATH } from '../../../../../common/siem_migrations/constants';
+import {
+  GetRuleMigrationStatsRequestParams,
+  type GetRuleMigrationStatsResponse,
+} from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { SIEM_RULE_MIGRATION_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 export const registerSiemRuleMigrationsStatsRoute = (
@@ -18,7 +20,7 @@ export const registerSiemRuleMigrationsStatsRoute = (
 ) => {
   router.versioned
     .get({
-      path: SIEM_RULE_MIGRATIONS_STATS_PATH,
+      path: SIEM_RULE_MIGRATION_STATS_PATH,
       access: 'internal',
       security: { authz: { requiredPrivileges: ['securitySolution'] } },
     })

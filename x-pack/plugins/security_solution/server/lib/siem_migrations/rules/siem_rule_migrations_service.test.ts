@@ -10,16 +10,18 @@ import {
   httpServerMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
-import { SiemRuleMigrationsService } from './siem_rule_migrations_service';
+import {
+  SiemRuleMigrationsService,
+  type SiemRuleMigrationsCreateClientParams,
+} from './siem_rule_migrations_service';
 import { Subject } from 'rxjs';
 import {
-  MockRuleMigrationsDataStream,
+  MockRuleMigrationsDataService,
   mockInstall,
   mockCreateClient,
-} from './data_stream/__mocks__/mocks';
-import type { SiemRuleMigrationsCreateClientParams } from './types';
+} from './data/__mocks__/mocks';
 
-jest.mock('./data_stream/rule_migrations_data_stream');
+jest.mock('./data/rule_migrations_data_service');
 jest.mock('./task/rule_migrations_task_service', () => ({
   RuleMigrationsTaskService: jest.fn(),
 }));
@@ -39,7 +41,7 @@ describe('SiemRuleMigrationsService', () => {
   });
 
   it('should instantiate the rule migrations data stream adapter', () => {
-    expect(MockRuleMigrationsDataStream).toHaveBeenCalledWith(logger, kibanaVersion);
+    expect(MockRuleMigrationsDataService).toHaveBeenCalledWith(logger, kibanaVersion);
   });
 
   describe('when setup is called', () => {

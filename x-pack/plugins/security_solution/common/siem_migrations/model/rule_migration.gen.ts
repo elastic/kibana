@@ -180,14 +180,10 @@ export const RuleMigrationAllTaskStats = z.array(
 );
 
 /**
- * The rule migration resource document object.
+ * The rule migration resource data provided by the vendor.
  */
-export type RuleMigrationResource = z.infer<typeof RuleMigrationResource>;
-export const RuleMigrationResource = z.object({
-  /**
-   * The migration id for with the resource is associated.
-   */
-  migration_id: z.string(),
+export type RuleMigrationResourceData = z.infer<typeof RuleMigrationResourceData>;
+export const RuleMigrationResourceData = z.object({
   /**
    * The type of the resource.
    */
@@ -199,17 +195,30 @@ export const RuleMigrationResource = z.object({
   /**
    * The resource content value.
    */
-  content: z.string().optional(),
+  content: z.string(),
   /**
    * The resource arbitrary metadata.
    */
   metadata: z.object({}).optional(),
-  /**
-   * The moment of the last update
-   */
-  updated_at: z.string().optional(),
-  /**
-   * The user who last updated the resource
-   */
-  updated_by: z.string().optional(),
 });
+
+/**
+ * The rule migration resource document object.
+ */
+export type RuleMigrationResource = z.infer<typeof RuleMigrationResource>;
+export const RuleMigrationResource = RuleMigrationResourceData.merge(
+  z.object({
+    /**
+     * The migration id
+     */
+    migration_id: z.string(),
+    /**
+     * The moment of the last update
+     */
+    updated_at: z.string().optional(),
+    /**
+     * The user who last updated the resource
+     */
+    updated_by: z.string().optional(),
+  })
+);

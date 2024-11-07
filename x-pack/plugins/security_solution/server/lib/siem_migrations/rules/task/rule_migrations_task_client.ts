@@ -15,7 +15,7 @@ import type {
 import type {
   RuleMigrationDataStats,
   RuleMigrationsDataClient,
-} from '../data_stream/rule_migrations_data_client';
+} from '../data/rule_migrations_data_client';
 import type {
   RuleMigrationTaskStartParams,
   RuleMigrationTaskStartResult,
@@ -38,7 +38,7 @@ export class RuleMigrationsTaskClient {
   constructor(
     private migrationsRunning: MigrationsRunning,
     private logger: Logger,
-    private dataClient: RuleMigrationsDataClient,
+    private data: RuleMigrationsDataClient,
     private currentUser: AuthenticatedUser
   ) {}
 
@@ -49,9 +49,9 @@ export class RuleMigrationsTaskClient {
       return { exists: true, started: false };
     }
     // Just in case some previous execution was interrupted without releasing
-    await this.dataClient.releaseProcessable(migrationId);
+    await this.data.rules.releaseProcessable(migrationId);
 
-    const { rules } = await this.dataClient.getStats(migrationId);
+    const { rules } = await this.data.rules.getStats(migrationId);
     if (rules.total === 0) {
       return { exists: false, started: false };
     }
@@ -130,7 +130,7 @@ export class RuleMigrationsTaskClient {
 
       let isDone: boolean = false;
       do {
-        const ruleMigrations = await this.dataClient.takePending(migrationId, ITERATION_BATCH_SIZE);
+        const ruleMigrations = await this.data.rules.takePending(migrationId, ITERATION_BATCH_SIZE);
         this.logger.debug(
           `Processing ${ruleMigrations.length} rules for migration ID:${migrationId}`
         );
@@ -151,7 +151,7 @@ export class RuleMigrationsTaskClient {
                 `Migration of rule "${ruleMigration.original_rule.title}" finished in ${duration}s`
               );
 
-              await this.dataClient.saveCompleted({
+              await this.data.rules.saveCompleted({
                 ...ruleMigration,
                 elastic_rule: ruleMigrationResult.elastic_rule,
                 translation_result: ruleMigrationResult.translation_result,
@@ -165,7 +165,7 @@ export class RuleMigrationsTaskClient {
                 `Error migrating rule "${ruleMigration.original_rule.title}"`,
                 error
               );
-              await this.dataClient.saveError({
+              await this.data.rules.saveError({
                 ...ruleMigration,
                 comments: [`Error migrating rule: ${error.message}`],
               });
@@ -175,7 +175,7 @@ export class RuleMigrationsTaskClient {
 
         this.logger.debug(`Batch processed successfully for migration ID:${migrationId}`);
 
-        const { rules } = await this.dataClient.getStats(migrationId);
+        const { rules } = await this.data.rules.getStats(migrationId);
         isDone = rules.pending === 0;
         if (!isDone) {
           await sleep(ITERATION_SLEEP_SECONDS);
@@ -184,7 +184,7 @@ export class RuleMigrationsTaskClient {
 
       this.logger.info(`Finished migration ID:${migrationId}`);
     } catch (error) {
-      await this.dataClient.releaseProcessing(migrationId);
+      await this.data.rules.releaseProcessing(migrationId);
 
       if (error instanceof AbortError) {
         this.logger.info(`Abort signal received, stopping migration ID:${migrationId}`);
@@ -200,14 +200,14 @@ export class RuleMigrationsTaskClient {
 
   /** Returns the stats of a migration */
   public async getStats(migrationId: string): Promise<RuleMigrationTaskStats> {
-    const dataStats = await this.dataClient.getStats(migrationId);
+    const dataStats = await this.data.rules.getStats(migrationId);
     const status = this.getTaskStatus(migrationId, dataStats.rules);
     return { status, ...dataStats };
   }
 
   /** Returns the stats of all migrations */
   async getAllStats(): Promise<RuleMigrationAllTaskStats> {
-    const allDataStats = await this.dataClient.getAllStats();
+    const allDataStats = await this.data.rules.getAllStats();
     return allDataStats.map((dataStats) => {
       const status = this.getTaskStatus(dataStats.migration_id, dataStats.rules);
       return { status, ...dataStats };
@@ -239,7 +239,7 @@ export class RuleMigrationsTaskClient {
         return { exists: true, stopped: true };
       }
 
-      const { rules } = await this.dataClient.getStats(migrationId);
+      const { rules } = await this.data.rules.getStats(migrationId);
       if (rules.total > 0) {
         return { exists: true, stopped: false };
       }
