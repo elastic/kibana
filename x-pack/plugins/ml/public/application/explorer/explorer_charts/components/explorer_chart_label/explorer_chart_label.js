@@ -9,7 +9,15 @@ import './_explorer_chart_label.scss';
 import PropTypes from 'prop-types';
 import React, { useCallback } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTextColor } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiText,
+  EuiTextColor,
+  EuiTextTruncate,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { ExplorerChartLabelBadge } from './explorer_chart_label_badge';
 import { ExplorerChartInfoTooltip } from '../../explorer_chart_info_tooltip';
@@ -50,13 +58,18 @@ export function ExplorerChartLabel({
     const key = `${infoTooltip.chartFunction}-${entity.fieldName}-${entity.fieldType}-${entity.fieldValue}`;
     return (
       <EuiFlexGroup gutterSize="none" alignItems="center" key={`badge-wrapper-${key}`}>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           {mode === 'embeddable' ? (
-            <EuiText size="xs">
-              <EuiTextColor color={'success'} component={'span'}>
-                {`(${entity.fieldName}: ${entity.fieldValue})`}
-              </EuiTextColor>
-            </EuiText>
+            <EuiToolTip content={`${entity.fieldName}: ${entity.fieldValue}`}>
+              <EuiText size="xs">
+                <EuiTextColor color={'success'} component={'span'}>
+                  <EuiTextTruncate
+                    text={`${entity.fieldName}: ${entity.fieldValue}`}
+                    truncation="end"
+                  />
+                </EuiTextColor>
+              </EuiText>
+            </EuiToolTip>
           ) : (
             <ExplorerChartLabelBadge entity={entity} />
           )}

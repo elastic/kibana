@@ -120,7 +120,7 @@ export const SingleMetricViewerTitle: FC<SingleMetricViewerTitleProps> = ({
                 <EuiFlexGroup gutterSize="none" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiTextColor color={'success'} component={'span'}>
-                      {`(${entity.fieldName}: ${entity.fieldValue})`}
+                      {`${entity.fieldName}: ${entity.fieldValue}`}
                     </EuiTextColor>
                   </EuiFlexItem>
                   {api !== undefined ? (
