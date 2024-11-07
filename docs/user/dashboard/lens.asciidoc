@@ -120,7 +120,7 @@ Assign a color to each term in a table with color mapping.
 
 . Click the *Edit colors* icon.
 
-. Toggle the button to use the new Color Mapping feature.
+. Toggle the button to use the Color Mapping feature.
 
 . Select a color palette and mode.
 
