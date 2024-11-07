@@ -21,8 +21,8 @@ import {
   Metadata,
 } from '@kbn/elastic-assistant-common';
 import {
-  KNOWLEDGE_BASE_ENTRY_ERROR_EVENT,
-  KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT,
+  CREATE_KNOWLEDGE_BASE_ENTRY_ERROR_EVENT,
+  CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT,
 } from '../../lib/telemetry/event_based_telemetry';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
 import { CreateKnowledgeBaseEntrySchema, UpdateKnowledgeBaseEntrySchema } from './types';
@@ -67,7 +67,6 @@ export const createKnowledgeBaseEntry = async ({
         global,
       });
   const telemetryPayload = {
-    eventAction: 'create',
     entryType: body.type,
     required: body.required ?? false,
     sharing: body.users.length ? 'private' : 'global',
@@ -89,13 +88,13 @@ export const createKnowledgeBaseEntry = async ({
       user,
     });
 
-    telemetry.reportEvent(KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT.eventType, telemetryPayload);
+    telemetry.reportEvent(CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT.eventType, telemetryPayload);
     return newKnowledgeBaseEntry;
   } catch (err) {
     logger.error(
       `Error creating Knowledge Base Entry: ${err} with kbResource: ${knowledgeBaseEntry.name}`
     );
-    telemetry.reportEvent(KNOWLEDGE_BASE_ENTRY_ERROR_EVENT.eventType, {
+    telemetry.reportEvent(CREATE_KNOWLEDGE_BASE_ENTRY_ERROR_EVENT.eventType, {
       ...telemetryPayload,
       errorMessage: err.message ?? 'Unknown error',
     });

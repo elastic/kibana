@@ -459,6 +459,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
           })
         : undefined;
+    // Intentionally no telemetry here - this path only used to install security docs
+    // Plans to make this function private in a different PR so no user entry ever is created in this path
     this.options.logger.debug(`created: ${created?.data.hits.hits.length ?? '0'}`);
     this.options.logger.debug(() => `errors: ${JSON.stringify(errors, null, 2)}`);
 
