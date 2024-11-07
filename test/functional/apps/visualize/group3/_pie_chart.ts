@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('setNumericInterval 4000');
       await visEditor.setInterval('40000', { type: 'numeric' });
       log.debug('clickGo');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
     });
 
     after(async () => {
@@ -107,8 +107,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.toggleOtherBucket(2);
         await visEditor.toggleMissingBucket(2);
         log.debug('clickGo');
-        await visEditor.clickGo(isNewChartsLibraryEnabled);
         await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
+        await visEditor.clickGo();
       });
 
       it('should apply correct filter on other bucket', async () => {
@@ -185,8 +185,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.toggleOtherBucket(3);
         await visEditor.toggleMissingBucket(3);
         log.debug('clickGo');
-        await visEditor.clickGo(isNewChartsLibraryEnabled);
         await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
+        await visEditor.clickGo();
       });
     });
 
@@ -203,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectAggregation('Terms');
         await visEditor.selectField('machine.os.raw');
         await visEditor.toggleDisabledAgg(2);
-        await visEditor.clickGo(isNewChartsLibraryEnabled);
+        await visEditor.clickGo();
 
         await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
       });
@@ -220,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show correct result when agg is re-enabled', async () => {
         await visEditor.toggleDisabledAgg(2);
-        await visEditor.clickGo(isNewChartsLibraryEnabled);
+        await visEditor.clickGo();
 
         const expectedTableData = [
           '0',
@@ -305,7 +305,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.addNewFilterAggregation();
         log.debug('Set the 2nd filter value');
         await visEditor.setFilterAggregationValue('geo.dest:"CN"', 1);
-        await visEditor.clickGo(isNewChartsLibraryEnabled);
+        await visEditor.clickGo();
         const emptyFromTime = 'Sep 19, 2016 @ 06:31:44.000';
         const emptyToTime = 'Sep 23, 2016 @ 18:31:44.000';
         log.debug(
@@ -339,7 +339,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.clickBucket('Split slices');
         await visEditor.selectAggregation('Terms');
         await visEditor.selectField('geo.dest');
-        await visEditor.clickGo(isNewChartsLibraryEnabled);
+        await visEditor.clickGo();
       });
 
       it('should show correct chart', async () => {
@@ -428,13 +428,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '360,000',
           'CN',
         ].sort();
-        if (isNewChartsLibraryEnabled) {
-          await visEditor.clickOptionsTab();
-          await visEditor.togglePieLegend();
-          await visEditor.togglePieNestedLegend();
-          await visEditor.clickDataTab();
-          await visEditor.clickGo(isNewChartsLibraryEnabled);
-        }
+
+        await visEditor.clickOptionsTab();
+        await visEditor.togglePieLegend();
+        await visEditor.togglePieNestedLegend();
+        await visEditor.clickDataTab();
+        await visEditor.clickGo();
+
         await visChart.filterLegend('CN');
         await visChart.waitForVisualization();
         await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
@@ -466,7 +466,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectAggregation('Filters');
         log.debug('Set the 1st filter value of the aggregation id 3');
         await visEditor.setFilterAggregationValue('geo.dest:"UX"', 0, 3);
-        await visEditor.clickGo(isNewChartsLibraryEnabled);
+        await visEditor.clickGo();
         const legends = await visChart.getLegendEntries();
         const expectedLegends = ['geo.dest:"US"', 'geo.dest:"UX"'];
         expect(legends).to.eql(expectedLegends);
@@ -487,7 +487,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.clickBucket('Split slices');
         await visEditor.selectAggregation('Terms');
         await visEditor.selectField('geo.src');
-        await visEditor.clickGo(isNewChartsLibraryEnabled);
+        await visEditor.clickGo();
       });
 
       it('shows correct split chart', async () => {
