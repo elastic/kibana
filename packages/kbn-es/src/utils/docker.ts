@@ -178,6 +178,7 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
   ['ES_LOG_STYLE', 'file'],
 
   ['cluster.name', 'stateless'],
+  ['cluster.logsdb.enabled', 'true'],
 
   ['ingest.geoip.downloader.enabled', 'false'],
 
