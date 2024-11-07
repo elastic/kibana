@@ -8,10 +8,16 @@
 import type { FC, PropsWithChildren } from 'react';
 import React, { memo, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiHorizontalRule,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { SplitField } from '@kbn/ml-anomaly-utils';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
-import './style.scss';
 
 interface Props {
   fieldValues: string[];
@@ -28,7 +34,13 @@ interface Panel {
 
 export const SplitCards: FC<PropsWithChildren<Props>> = memo(
   ({ fieldValues, splitField, children, numberOfDetectors, jobType, animate = false }) => {
+    const { euiTheme } = useEuiTheme();
     const panels: Panel[] = [];
+
+    const splitCardStyle = {
+      border: euiTheme.border.thin,
+      paddingTop: euiTheme.size.xs,
+    };
 
     function storePanels(panel: HTMLDivElement | null, marginBottom: number) {
       if (panel !== null) {
@@ -70,14 +82,10 @@ export const SplitCards: FC<PropsWithChildren<Props>> = memo(
           ...(animate ? { transition: 'margin 0.5s' } : {}),
         };
         return (
-          <div key={fieldName} ref={(ref) => storePanels(ref, marginBottom)} style={style}>
-            <EuiPanel
-              paddingSize="m"
-              className="mlPickFields__splitCard"
-              data-test-subj="mlSplitCard back"
-            >
+          <div key={fieldName} ref={(ref) => storePanels(ref, marginBottom)} css={style}>
+            <EuiPanel paddingSize="m" css={splitCardStyle} data-test-subj="mlSplitCard back">
               <div
-                style={{ fontWeight: 'bold', fontSize: 'small' }}
+                css={{ fontWeight: 'bold', fontSize: 'small' }}
                 data-test-subj="mlSplitCardTitle"
               >
                 {fieldName}
@@ -97,7 +105,7 @@ export const SplitCards: FC<PropsWithChildren<Props>> = memo(
               {(jobType === JOB_TYPE.MULTI_METRIC || jobType === JOB_TYPE.GEO) && (
                 <Fragment>
                   <div
-                    style={{ fontSize: 'small' }}
+                    css={{ fontSize: 'small' }}
                     data-test-subj={`mlDataSplitTitle ${splitField.name}`}
                   >
                     <FormattedMessage
@@ -111,13 +119,9 @@ export const SplitCards: FC<PropsWithChildren<Props>> = memo(
               )}
 
               {getBackPanels()}
-              <EuiPanel
-                paddingSize="m"
-                className="mlPickFields__splitCard"
-                data-test-subj="mlSplitCard front"
-              >
+              <EuiPanel paddingSize="m" css={splitCardStyle} data-test-subj="mlSplitCard front">
                 <div
-                  style={{ fontWeight: 'bold', fontSize: 'small' }}
+                  css={{ fontWeight: 'bold', fontSize: 'small' }}
                   data-test-subj="mlSplitCardTitle"
                 >
                   {fieldValues[0]}

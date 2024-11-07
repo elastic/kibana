@@ -18,7 +18,7 @@ export const useSetupTechnology = ({
 }: {
   input: NewPackagePolicyInput;
   isAgentlessEnabled?: boolean;
-  handleSetupTechnologyChange?: (value: SetupTechnology) => void;
+  handleSetupTechnologyChange?: (value: SetupTechnology, policyTemplateName?: string) => void;
   isEditPage?: boolean;
 }) => {
   const isCspmAws = input.type === CLOUDBEAT_AWS;
@@ -34,7 +34,7 @@ export const useSetupTechnology = ({
   const updateSetupTechnology = (value: SetupTechnology) => {
     setSetupTechnology(value);
     if (handleSetupTechnologyChange) {
-      handleSetupTechnologyChange(value);
+      handleSetupTechnologyChange(value, input.policy_template);
     }
   };
 

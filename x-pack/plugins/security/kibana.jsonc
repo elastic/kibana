@@ -1,17 +1,20 @@
 {
   "type": "plugin",
   "id": "@kbn/security-plugin",
-  "owner": "@elastic/kibana-security",
+  "owner": [
+    "@elastic/kibana-security"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "description": "This plugin provides authentication and authorization features, and exposes functionality to understand the capabilities of the currently authenticated user.",
   "plugin": {
     "id": "security",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "security"
     ],
-    "enabledOnAnonymousPages": true,
     "requiredPlugins": [
       "features",
       "licensing",
@@ -31,6 +34,7 @@
       "spaces",
       "esUiShared",
       "remoteClusters"
-    ]
+    ],
+    "enabledOnAnonymousPages": true
   }
 }

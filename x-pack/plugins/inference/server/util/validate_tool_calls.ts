@@ -6,15 +6,12 @@
  */
 import Ajv from 'ajv';
 import {
-  createToolNotFoundError,
-  createToolValidationError,
-} from '../../common/chat_complete/errors';
-import {
   ToolCallsOf,
   ToolChoiceType,
   ToolOptions,
   UnvalidatedToolCall,
-} from '../../common/chat_complete/tools';
+} from '@kbn/inference-common';
+import { createToolNotFoundError, createToolValidationError } from '../chat_complete/errors';
 
 export function validateToolCalls<TToolOptions extends ToolOptions>({
   toolCalls,

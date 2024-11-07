@@ -8,6 +8,7 @@
 import { omit, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import { hasNoParams } from '../../formatters/formatting_utils';
 import { formatLocation } from '../../../../common/utils/location_formatter';
 import {
   BrowserFields,
@@ -408,6 +409,10 @@ export const getOptionalListField = (value?: string[] | string): string[] => {
  * @returns `true` if `new URL` does not throw an error, `false` otherwise
  */
 export const isValidURL = (url: string): boolean => {
+  if (!hasNoParams(url)) {
+    // this is done to avoid parsing urls with variables
+    return true;
+  }
   try {
     new URL(url);
     return true;

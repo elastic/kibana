@@ -19,6 +19,8 @@ import {
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
   AppDeepLink,
+  type AppUpdater,
+  AppStatus,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
@@ -53,8 +55,8 @@ import {
   SEARCH_RELEVANCE_PLUGIN,
 } from '../common/constants';
 import { registerLocators } from '../common/locators';
-
 import { ClientConfigType, InitialAppData } from '../common/types';
+import { hasEnterpriseLicense } from '../common/utils/licensing';
 
 import { ENGINES_PATH } from './applications/app_search/routes';
 import { SEARCH_APPLICATIONS_PATH, PLAYGROUND_PATH } from './applications/applications/routes';
@@ -134,7 +136,7 @@ const contentLinks: AppDeepLink[] = [
 
 const relevanceLinks: AppDeepLink[] = [
   {
-    id: 'searchInferenceEndpoints',
+    id: 'inferenceEndpoints',
     path: `/${INFERENCE_ENDPOINTS_PATH}`,
     title: i18n.translate(
       'xpack.enterpriseSearch.navigation.relevanceInferenceEndpointsLinkLabel',
@@ -180,6 +182,7 @@ const appSearchLinks: AppDeepLink[] = [
 
 export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
+  private enterpriseLicenseAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
@@ -440,6 +443,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       deepLinks: relevanceLinks,
       euiIconType: SEARCH_RELEVANCE_PLUGIN.LOGO,
       id: SEARCH_RELEVANCE_PLUGIN.ID,
+      status: AppStatus.inaccessible,
+      updater$: this.enterpriseLicenseAppUpdater$,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
@@ -613,6 +618,18 @@ export class EnterpriseSearchPlugin implements Plugin {
           dynamicItems$: this.sideNavDynamicItems$,
         })
       );
+    });
+
+    plugins.licensing?.license$.subscribe((license) => {
+      if (hasEnterpriseLicense(license)) {
+        this.enterpriseLicenseAppUpdater$.next(() => ({
+          status: AppStatus.accessible,
+        }));
+      } else {
+        this.enterpriseLicenseAppUpdater$.next(() => ({
+          status: AppStatus.inaccessible,
+        }));
+      }
     });
 
     // Return empty start contract rather than void in order for plugins

@@ -23,6 +23,7 @@ import {
   LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
   VULNERABILITY_GROUPING_OPTIONS,
   VULNERABILITY_FIELDS,
+  CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import {
@@ -102,41 +103,18 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
 const getRuntimeMappingsByGroupField = (
   field: string
 ): Record<string, { type: 'keyword' }> | undefined => {
-  switch (field) {
-    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
-      return {
-        [VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]: {
+  if (CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS?.[field]) {
+    return CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS[field].reduce(
+      (acc, runtimeField) => ({
+        ...acc,
+        [runtimeField]: {
           type: 'keyword',
         },
-        [VULNERABILITY_FIELDS.CLOUD_PROVIDER]: {
-          type: 'keyword',
-        },
-      };
-    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME:
-      return {
-        [VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME]: {
-          type: 'keyword',
-        },
-        [VULNERABILITY_FIELDS.RESOURCE_ID]: {
-          type: 'keyword',
-        },
-      };
-    case VULNERABILITY_GROUPING_OPTIONS.CVE:
-      return {
-        [VULNERABILITY_GROUPING_OPTIONS.CVE]: {
-          type: 'keyword',
-        },
-        [VULNERABILITY_FIELDS.DESCRIPTION]: {
-          type: 'keyword',
-        },
-      };
-    default:
-      return {
-        [field]: {
-          type: 'keyword',
-        },
-      };
+      }),
+      {}
+    );
   }
+  return {};
 };
 
 /**

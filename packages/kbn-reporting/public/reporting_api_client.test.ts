@@ -214,32 +214,6 @@ describe('ReportingAPIClient', () => {
     });
   });
 
-  describe('createImmediateReport', () => {
-    beforeEach(() => {
-      httpClient.post.mockResolvedValueOnce({ job: { payload: {} } });
-    });
-
-    it('should send a post request', async () => {
-      await apiClient.createImmediateReport({
-        browserTimezone: 'UTC',
-        objectType: 'something',
-        title: 'some title',
-        version: 'some version',
-      });
-
-      expect(httpClient.post).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          body: JSON.stringify({
-            browserTimezone: 'UTC',
-            title: 'some title',
-            version: 'some version',
-          }),
-        })
-      );
-    });
-  });
-
   describe('getDecoratedJobParams', () => {
     beforeEach(() => {
       jest.spyOn(tz, 'guess').mockReturnValue('UTC');

@@ -30,12 +30,19 @@ interface CreateHrefDeps {
 }
 export interface CreateHrefOptions {
   shouldNotCreateHref?: boolean;
+  shouldNotPrepend?: boolean;
 }
 
 export const createHref = (
   path: string,
   { history, http }: CreateHrefDeps,
-  { shouldNotCreateHref }: CreateHrefOptions = {}
+  { shouldNotCreateHref, shouldNotPrepend }: CreateHrefOptions = {}
 ): string => {
-  return shouldNotCreateHref ? http.basePath.prepend(path) : history.createHref({ pathname: path });
+  if (shouldNotCreateHref) {
+    if (shouldNotPrepend) {
+      return path;
+    }
+    return http.basePath.prepend(path);
+  }
+  return history.createHref({ pathname: path });
 };
