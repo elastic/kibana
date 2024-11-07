@@ -17,7 +17,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens serverless - group 1', function () {
+  describe('lens serverless - group 4', function () {
     this.tags(['esGate']);
 
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
