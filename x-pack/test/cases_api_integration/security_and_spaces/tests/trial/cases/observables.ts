@@ -10,9 +10,7 @@ import expect from '@kbn/expect';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   createCase,
-  updateCase,
   deleteAllCaseItems,
-  generateFakeAssignees,
   addObservable,
   similarCases,
   updateObservable,
@@ -114,7 +112,9 @@ export default ({ getService }: FtrProviderContext): void => {
           description: '',
         };
 
-        const createdObservable = await addObservable({
+        const {
+          observables: [observable],
+        } = await addObservable({
           supertest,
           caseId: postedCase.id,
           params: {
@@ -126,30 +126,10 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           params: { observable: { ...newObservableData, value: 'updated' } },
           caseId: postedCase.id,
-          observableId: createdObservable.id,
+          observableId: observable.id as string,
         });
 
         expect(updatedObservable.observables[0].value).to.be('updated');
-      });
-    });
-
-    describe('validation', () => {
-      it('validates correctly the number of assignees when updating a case', async () => {
-        const postedCase = await createCase(supertest, getPostCaseRequest());
-
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                assignees: generateFakeAssignees(11),
-              },
-            ],
-          },
-          expectedHttpCode: 400,
-        });
       });
     });
   });

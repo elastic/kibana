@@ -116,6 +116,14 @@ export const updateObservable = async (
       (observable) => observable.id === observableId
     );
 
+    if (observableIndex === -1) {
+      throw createCaseError({
+        message: `Failed to update observable: ${JSON.stringify(params)}: observable not found`,
+        error,
+        logger,
+      });
+    }
+
     const updatedObservables = [...currentObservables];
     updatedObservables[observableIndex] = {
       ...updatedObservables[observableIndex],
