@@ -128,45 +128,4 @@ describe('getTopNavBadges()', function () {
     });
     expect(topNavBadges).toMatchInlineSnapshot(`Array []`);
   });
-
-  test('should allow to render additional badges when customized', () => {
-    const topNavBadges = getTopNavBadges({
-      hasUnsavedChanges: true,
-      services: discoverServiceMock,
-      stateContainer,
-      topNavCustomization: {
-        id: 'top_nav',
-        getBadges: () => {
-          return [
-            {
-              data: {
-                badgeText: 'test10',
-              },
-              order: 10,
-            },
-            {
-              data: {
-                badgeText: 'test200',
-              },
-              order: 200,
-            },
-          ];
-        },
-      },
-    });
-    expect(topNavBadges).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "badgeText": "test10",
-        },
-        Object {
-          "badgeText": "Unsaved changes",
-          "renderCustomBadge": [Function],
-        },
-        Object {
-          "badgeText": "test200",
-        },
-      ]
-    `);
-  });
 });

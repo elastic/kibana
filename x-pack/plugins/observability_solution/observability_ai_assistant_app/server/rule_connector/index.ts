@@ -230,7 +230,7 @@ If available, include the link of the conversation at the end of your answer.`
               availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
               applicationInstructions: functionClient.getInstructions(),
               userInstructions: [],
-              adHocInstructions: [],
+              adHocInstructions: functionClient.getAdhocInstructions(),
             }),
           },
         },
