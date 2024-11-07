@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await lens.clickVisualizeListItemTitle('lnsXYvis');
+      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
@@ -42,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should update and delete a formula', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-
+      await lens.goToTimeRange();
       await lens.switchToVisualization('lnsDatatable');
 
       await lens.configureDimension({
@@ -63,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should insert single quotes and escape when needed to create valid KQL', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-
+      await lens.goToTimeRange();
       await lens.switchToVisualization('lnsDatatable');
 
       await lens.configureDimension({
@@ -95,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should insert single quotes and escape when needed to create valid field name', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-
+      await lens.goToTimeRange();
       await lens.switchToVisualization('lnsDatatable');
       await dataViews.clickAddFieldFromSearchBar();
       await fieldEditor.setName(`ab' "'`, true, true);
@@ -144,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should keep the formula when entering expanded mode', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-
+      await lens.goToTimeRange();
       await lens.switchToVisualization('lnsDatatable');
 
       await lens.configureDimension({
@@ -163,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow an empty formula combined with a valid formula', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-
+      await lens.goToTimeRange();
       await lens.switchToVisualization('lnsDatatable');
 
       await lens.configureDimension({
@@ -183,7 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should duplicate a moving average formula and be a valid table with conditional coloring', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-
+      await lens.goToTimeRange();
       await lens.switchToVisualization('lnsDatatable');
 
       await lens.configureDimension({
@@ -218,7 +219,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should keep the formula if the user does not fully transition to a quick function', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-
+      await lens.goToTimeRange();
       await lens.switchToVisualization('lnsDatatable');
 
       await lens.configureDimension({
@@ -267,7 +268,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow numeric only formulas', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-
+      await lens.goToTimeRange();
       await lens.switchToVisualization('lnsDatatable');
 
       await lens.configureDimension({
@@ -287,7 +288,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should apply a global filter to the current formula', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-
+      await lens.goToTimeRange();
       await lens.switchToVisualization('lnsDatatable');
 
       await lens.configureDimension({
