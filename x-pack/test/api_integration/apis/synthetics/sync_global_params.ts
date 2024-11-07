@@ -287,8 +287,9 @@ export default function ({ getService }: FtrProviderContext) {
       const deleteResponse = await supertestAPI
         .delete(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
-        .send({ ids })
-        .expect(200);
+        .send({ ids });
+
+      expect(deleteResponse.status).eql(200);
 
       expect(deleteResponse.body).to.have.length(2);
 
