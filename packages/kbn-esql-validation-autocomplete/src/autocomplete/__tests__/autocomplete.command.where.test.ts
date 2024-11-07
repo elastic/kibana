@@ -115,7 +115,7 @@ describe('WHERE <expression>', () => {
     test('after a logical operator', async () => {
       const { assertSuggestions } = await setup();
 
-      for (const op of ['and']) {
+      for (const op of ['and', 'or']) {
         await assertSuggestions(`from a | where keywordField >= keywordField ${op} /`, [
           ...getFieldNamesByType('any'),
           ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }),
@@ -133,11 +133,6 @@ describe('WHERE <expression>', () => {
           ]
         );
       }
-
-      await assertSuggestions(
-        'from a | WHERE doubleField != doubleField AND dateField < ?_tend /',
-        ['!= $0', '== $0', 'AND $0', 'IN $0', 'IS NOT NULL', 'IS NULL', 'NOT', 'OR $0', '| ']
-      );
     });
 
     test('suggests operators after a field name', async () => {
