@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AlertingKibanaPrivilege } from './alerting_kibana_privilege';
 import { FeatureKibanaPrivilegesReference } from './feature_kibana_privileges_reference';
 
 /**
@@ -105,7 +106,7 @@ export interface FeatureKibanaPrivileges {
        *  }
        * ```
        */
-      all?: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>;
+      all?: AlertingKibanaPrivilege;
       /**
        * List of rule types and consumers for which users should have read-only access to when granted this privilege.
        * @example
@@ -115,7 +116,7 @@ export interface FeatureKibanaPrivileges {
        *  }
        * ```
        */
-      read?: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>;
+      read?: AlertingKibanaPrivilege;
     };
     alert?: {
       /**
@@ -127,7 +128,7 @@ export interface FeatureKibanaPrivileges {
        *  }
        * ```
        */
-      all?: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>;
+      all?: AlertingKibanaPrivilege;
       /**
        * List of rule types and consumers for which users should have read-only access to their alert data when granted this privilege.
        * @example
@@ -137,7 +138,7 @@ export interface FeatureKibanaPrivileges {
        *  }
        * ```
        */
-      read?: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>;
+      read?: AlertingKibanaPrivilege;
     };
   };
 

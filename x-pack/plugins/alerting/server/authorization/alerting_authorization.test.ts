@@ -18,6 +18,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { WriteOperations, AlertingAuthorizationEntity, ReadOperations } from './types';
+import { AlertingKibanaPrivilege } from '@kbn/features-plugin/common/alerting_kibana_privilege';
 
 const mockAuthorizationAction = (
   ruleType: string,
@@ -28,7 +29,7 @@ const mockAuthorizationAction = (
 
 function mockFeatureWithConsumers(
   appName: string,
-  alertingFeatures?: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>,
+  alertingFeatures?: AlertingKibanaPrivilege,
   subFeature?: boolean
 ) {
   return new KibanaFeature({

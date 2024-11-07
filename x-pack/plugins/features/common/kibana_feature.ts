@@ -11,6 +11,7 @@ import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 import { SubFeatureConfig, SubFeature as KibanaSubFeature } from './sub_feature';
 import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
+import { AlertingKibanaPrivilege } from './alerting_kibana_privilege';
 
 /**
  * Enum for allowed feature scope values.
@@ -112,7 +113,7 @@ export interface KibanaFeatureConfig {
    * rule types and rule types provided by other features to which you wish to grant access. For each rule type
    * you can specify the consumers the feature has access to.
    */
-  alerting?: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>;
+  alerting?: AlertingKibanaPrivilege;
 
   /**
    * If your feature grants access to specific case types, you can specify them here to control visibility based on the current space.

@@ -8,6 +8,7 @@
 import _ from 'lodash';
 
 import type { LicenseType } from '@kbn/licensing-plugin/server';
+import { AlertingKibanaPrivilege } from '../../common/alerting_kibana_privilege';
 import type { FeatureKibanaPrivileges, KibanaFeature } from '..';
 import { subFeaturePrivilegeIterator } from './sub_feature_privilege_iterator';
 
@@ -113,9 +114,7 @@ function mergeWithSubFeatures(
      * from features and sub features.
      * Removes duplicated values.
      */
-    const mergeAlertingEntries = (
-      entries: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>
-    ): ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }> => {
+    const mergeAlertingEntries = (entries: AlertingKibanaPrivilege): AlertingKibanaPrivilege => {
       const alertingMap = new Map<string, Set<string>>();
 
       for (const entry of entries) {

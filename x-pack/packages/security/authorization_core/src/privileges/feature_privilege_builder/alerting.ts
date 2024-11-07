@@ -7,6 +7,7 @@
 
 import { get, uniq } from 'lodash';
 
+import type { AlertingKibanaPrivilege } from '@kbn/features-plugin/common/alerting_kibana_privilege';
 import type { FeatureKibanaPrivileges, KibanaFeature } from '@kbn/features-plugin/server';
 
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
@@ -67,7 +68,7 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
   ): string[] {
     const getAlertingPrivilege = (
       operations: string[],
-      privileges: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>,
+      privileges: AlertingKibanaPrivilege,
       alertingEntity: string
     ) =>
       privileges.flatMap(({ ruleTypeId, consumers }) =>
