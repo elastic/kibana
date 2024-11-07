@@ -359,11 +359,13 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
             name={hostName}
             direction="column"
             data-test-subj={HOST_DETAILS_MISCONFIGURATIONS_TEST_ID}
+            telemetrySuffix={'host-details'}
           />
           <VulnerabilitiesInsight
             hostName={hostName}
             direction="column"
             data-test-subj={HOST_DETAILS_VULNERABILITIES_TEST_ID}
+            telemetrySuffix={'host-details'}
           />
         </EuiFlexGrid>
         <EuiSpacer size="l" />
