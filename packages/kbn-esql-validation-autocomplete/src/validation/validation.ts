@@ -316,15 +316,120 @@ function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
   }
   return arg;
 }
+const NO_MESSAGE: ESQLMessage[] = [];
 
-function validateFunction(
-  astFunction: ESQLFunction,
-  parentCommand: string,
-  parentOption: string | undefined,
-  references: ReferenceMaps,
-  forceConstantOnly: boolean = false,
-  isNested?: boolean
-): ESQLMessage[] {
+function validateMatchFunction({
+  astFunction,
+  parentCommand,
+  parentOption,
+  references,
+  forceConstantOnly = false,
+  isNested,
+  parentAst,
+  currentCommandIndex,
+}: {
+  astFunction: ESQLFunction;
+  parentCommand: string;
+  parentOption?: string;
+  references: ReferenceMaps;
+  forceConstantOnly?: boolean;
+  isNested?: boolean;
+  parentAst?: ESQLCommand[];
+  currentCommandIndex?: number;
+}): ESQLMessage[] {
+  if (astFunction.name === 'match') {
+    const hasLimitClausePrior =
+      parentAst.filter((cmd, idx) => idx <= currentCommandIndex && cmd.name === 'limit').length > 0;
+
+    if (hasLimitClausePrior) {
+      return [
+        getMessageFromId({
+          messageId: 'fnUnsupportedAfterCommand',
+          values: {
+            function: astFunction.name.toUpperCase(),
+            command: 'LIMIT',
+          },
+          locations: astFunction.location,
+        }),
+      ];
+    }
+  }
+  return NO_MESSAGE;
+}
+function validateQSTRFunction({
+  astFunction,
+  parentCommand,
+  parentOption,
+  references,
+  forceConstantOnly = false,
+  isNested,
+  parentAst,
+  currentCommandIndex,
+}: {
+  astFunction: ESQLFunction;
+  parentCommand: string;
+  parentOption?: string;
+  references: ReferenceMaps;
+  forceConstantOnly?: boolean;
+  isNested?: boolean;
+  parentAst?: ESQLCommand[];
+  currentCommandIndex?: number;
+}): ESQLMessage[] {
+  const messages: ESQLMessage[] = [];
+  if (astFunction.name === 'qstr') {
+    const notSupported = parentAst.find(
+      (cmd, idx) =>
+        idx <= currentCommandIndex &&
+        [
+          'show',
+          'row',
+          'dissect',
+          'enrich',
+          'eval',
+          'grok',
+          'keep',
+          'mv_expand',
+          'rename',
+          'stats',
+          'limit',
+        ].includes(cmd.name)
+    );
+
+    if (notSupported) {
+      return [
+        getMessageFromId({
+          messageId: 'fnUnsupportedAfterCommand',
+          values: {
+            function: astFunction.name.toUpperCase(),
+            command: notSupported.name.toUpperCase(),
+          },
+          locations: astFunction.location,
+        }),
+      ];
+    }
+  }
+  return NO_MESSAGE;
+}
+
+function validateFunction({
+  astFunction,
+  parentCommand,
+  parentOption,
+  references,
+  forceConstantOnly = false,
+  isNested,
+  parentAst,
+  currentCommandIndex,
+}: {
+  astFunction: ESQLFunction;
+  parentCommand: string;
+  parentOption?: string;
+  references: ReferenceMaps;
+  forceConstantOnly?: boolean;
+  isNested?: boolean;
+  parentAst?: ESQLCommand[];
+  currentCommandIndex?: number;
+}): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
 
   if (astFunction.incomplete) {
@@ -333,6 +438,17 @@ function validateFunction(
   const fnDefinition = getFunctionDefinition(astFunction.name)!;
 
   const isFnSupported = isSupportedFunction(astFunction.name, parentCommand, parentOption);
+
+  messages.push(
+    ...validateMatchFunction({
+      astFunction,
+      parentCommand,
+      parentOption,
+      references,
+      parentAst,
+      currentCommandIndex,
+    })
+  );
 
   if (!isFnSupported.supported) {
     if (isFnSupported.reason === 'unknownFunction') {
@@ -423,8 +539,8 @@ function validateFunction(
       const subArg = removeInlineCasts(_subArg);
 
       if (isFunctionItem(subArg)) {
-        const messagesFromArg = validateFunction(
-          subArg,
+        const messagesFromArg = validateFunction({
+          astFunction: subArg,
           parentCommand,
           parentOption,
           references,
@@ -443,13 +559,14 @@ function validateFunction(
            * Because of this, the abs function's arguments inherit the constraint
            * and each should be validated as if each were constantOnly.
            */
-          allMatchingArgDefinitionsAreConstantOnly || forceConstantOnly,
+          forceConstantOnly: allMatchingArgDefinitionsAreConstantOnly || forceConstantOnly,
           // use the nesting flag for now just for stats and metrics
           // TODO: revisit this part later on to make it more generic
-          ['stats', 'inlinestats', 'metrics'].includes(parentCommand)
+          isNested: ['stats', 'inlinestats', 'metrics'].includes(parentCommand)
             ? isNested || !isAssignment(astFunction)
-            : false
-        );
+            : false,
+          parentAst,
+        });
 
         if (messagesFromArg.some(({ code }) => code === 'expectedConstant')) {
           const consolidatedMessage = getMessageFromId({
@@ -660,7 +777,14 @@ const validateAggregates = (
 
   for (const aggregate of aggregates) {
     if (isFunctionItem(aggregate)) {
-      messages.push(...validateFunction(aggregate, command.name, undefined, references));
+      messages.push(
+        ...validateFunction({
+          astFunction: aggregate,
+          parentCommand: command.name,
+          parentOption: undefined,
+          references,
+        })
+      );
 
       let hasAggregationFunction = false;
 
@@ -734,7 +858,14 @@ const validateByGrouping = (
           messages.push(...validateColumnForCommand(field, commandName, referenceMaps));
         }
         if (isFunctionItem(field)) {
-          messages.push(...validateFunction(field, commandName, 'by', referenceMaps));
+          messages.push(
+            ...validateFunction({
+              astFunction: field,
+              parentCommand: commandName,
+              parentOption: 'by',
+              references: referenceMaps,
+            })
+          );
         }
       }
     }
@@ -780,7 +911,14 @@ function validateOption(
             messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
           }
           if (isFunctionItem(arg)) {
-            messages.push(...validateFunction(arg, command.name, option.name, referenceMaps));
+            messages.push(
+              ...validateFunction({
+                astFunction: arg,
+                parentCommand: command.name,
+                parentOption: option.name,
+                references: referenceMaps,
+              })
+            );
           }
         }
       }
@@ -979,58 +1117,16 @@ function validateCommand(
         const wrappedArg = Array.isArray(commandArg) ? commandArg : [commandArg];
         for (const arg of wrappedArg) {
           if (isFunctionItem(arg)) {
-            if (arg.name === 'match') {
-              const hasLimitClausePrior =
-                ast.filter((cmd, idx) => idx <= currentCommandIndex && cmd.name === 'limit')
-                  .length > 0;
-
-              if (hasLimitClausePrior) {
-                messages.push(
-                  getMessageFromId({
-                    messageId: 'fnUnsupportedAfterCommand',
-                    values: {
-                      function: arg.name.toUpperCase(),
-                      command: 'LIMIT',
-                    },
-                    locations: arg.location,
-                  })
-                );
-              }
-            }
-            if (arg.name === 'qstr') {
-              const notSupported = ast.find(
-                (cmd, idx) =>
-                  idx <= currentCommandIndex &&
-                  [
-                    'show',
-                    'row',
-                    'dissect',
-                    'enrich',
-                    'eval',
-                    'grok',
-                    'keep',
-                    'mv_expand',
-                    'rename',
-                    'stats',
-                    'limit',
-                  ].includes(cmd.name)
-              );
-
-              if (notSupported) {
-                messages.push(
-                  getMessageFromId({
-                    messageId: 'fnUnsupportedAfterCommand',
-                    values: {
-                      function: arg.name.toUpperCase(),
-                      command: notSupported.name.toUpperCase(),
-                    },
-                    locations: arg.location,
-                  })
-                );
-              }
-            }
-
-            messages.push(...validateFunction(arg, command.name, undefined, references));
+            messages.push(
+              ...validateFunction({
+                astFunction: arg,
+                parentCommand: command.name,
+                parentOption: undefined,
+                references,
+                parentAst: ast,
+                currentCommandIndex,
+              })
+            );
           }
 
           if (isSettingItem(arg)) {
@@ -1041,7 +1137,7 @@ function validateCommand(
             messages.push(
               ...validateOption(
                 arg,
-                commandDef.options.find(({ name }) => name === arg.name),
+                commandDef.options.find(({ name }) => name === astFunction.name),
                 command,
                 references
               )
@@ -1061,7 +1157,7 @@ function validateCommand(
                 values: {
                   command: command.name.toUpperCase(),
                   type: 'date_period',
-                  value: arg.name,
+                  value: astFunction.name,
                 },
                 locations: arg.location,
               })

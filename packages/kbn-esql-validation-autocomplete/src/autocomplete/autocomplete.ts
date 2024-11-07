@@ -1359,8 +1359,8 @@ async function getFunctionArgsSuggestions(
           command: command.name,
           option: option?.name,
           returnTypes: canBeBooleanCondition
-          ? ['any']
-          : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
+            ? ['any']
+            : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
           ignored: fnToIgnore,
         }).map((suggestion) => ({
           ...suggestion,
