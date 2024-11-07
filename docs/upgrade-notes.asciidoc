@@ -1433,6 +1433,35 @@ The `/agent_status` Fleet API now returns the following statuses:
 ====
 
 [discrete]
+[[kibana-150267]]
+.Deprecated Saved objects APIs. (8.7)
+[%collapsible]
+====
+*Details* +
+The following saved objects APIs have been deprecated.
+
+[source,text]
+--
+/api/saved_objects/{type}/{id}
+/api/saved_objects/resolve/{type}/{id}
+/api/saved_objects/{type}/{id?}
+/api/saved_objects/{type}/{id}
+/api/saved_objects/_find
+/api/saved_objects/{type}/{id}
+/api/saved_objects/_bulk_get
+/api/saved_objects/_bulk_create
+/api/saved_objects/_bulk_resolve
+/api/saved_objects/_bulk_update
+/api/saved_objects/_bulk_delete
+--
+
+For more information, refer to ({kibana-pull}150267[#150267]).
+
+*Impact* +
+Use dedicated public APIs instead, for example use <<data-views-api>> to manage Data Views.
+====
+
+[discrete]
 [[deprecation-119494]]
 .Updates Fleet API to improve consistency. (8.0)
 [%collapsible]
@@ -1693,6 +1722,30 @@ When you create *Lens* visualization, the default for the *Legend width* is now 
 
 [float]
 ==== Elastic Observability solution
+
+[discrete]
+[[deprecation-192003]]
+* Deprecated the Observability AI Assistant specific advanced setting `observability:aiAssistantLogsIndexPattern`. (8.16)
+[%collapsible]
+====
+*Details* +
+The Observability AI Assistant specific advanced setting for Logs index patterns `observability:aiAssistantLogsIndexPattern` is deprecated and no longer used. The AI Assistant will now use the existing **Log sources** setting `observability:logSources` instead. For more information, refer to ({kibana-pull}192003[#192003]).
+
+//*Impact* +
+//!!TODO!!
+====
+
+[discrete]
+[[deprecation-194519]]
+* The Logs Stream was hidden by default in favor of the Logs Explorer app. (8.16)
+[%collapsible]
+====
+*Details* +
+You can find the Logs Explorer app in the navigation menu under Logs > Explorer, or as a separate tab in Discover. For more information, refer to ({kibana-pull}194519[#194519]).
+
+*Impact* +
+You can still show the Logs Stream app again by navigating to Stack Management > Advanced Settings and by enabling the `observability:enableLogsStream` setting.
+====
 
 
 [discrete]

@@ -61,7 +61,7 @@ describe('fetchAvailableIndices', () => {
     const esClientMock = getEsClientMock();
 
     await fetchAvailableIndices(esClientMock, {
-      indexPattern: 'logs-*',
+      indexNameOrPattern: 'logs-*',
       startDate: startDateString,
       endDate: endDateString,
     });
@@ -101,7 +101,7 @@ describe('fetchAvailableIndices', () => {
     const esClientMock = getEsClientMock();
 
     await fetchAvailableIndices(esClientMock, {
-      indexPattern: 'logs-*',
+      indexNameOrPattern: 'logs-*',
       startDate: startDateString,
       endDate: endDateString,
     });
@@ -133,7 +133,7 @@ describe('fetchAvailableIndices', () => {
       ]);
 
       const result = await fetchAvailableIndices(esClientMock, {
-        indexPattern: 'logs-*',
+        indexNameOrPattern: 'logs-*',
         startDate: startDateString,
         endDate: endDateString,
       });
@@ -164,7 +164,7 @@ describe('fetchAvailableIndices', () => {
       ]);
 
       const result = await fetchAvailableIndices(esClientMock, {
-        indexPattern: 'logs-*',
+        indexNameOrPattern: 'logs-*',
         startDate: startDateString,
         endDate: endDateString,
       });
@@ -180,7 +180,7 @@ describe('fetchAvailableIndices', () => {
       esClientMock.cat.indices.mockResolvedValue([]);
 
       const result = await fetchAvailableIndices(esClientMock, {
-        indexPattern: 'nonexistent-*',
+        indexNameOrPattern: 'nonexistent-*',
         startDate: startDateString,
         endDate: endDateString,
       });
@@ -209,7 +209,7 @@ describe('fetchAvailableIndices', () => {
       });
 
       const result = await fetchAvailableIndices(esClientMock, {
-        indexPattern: 'logs-*',
+        indexNameOrPattern: 'logs-*',
         startDate: startDateString,
         endDate: endDateString,
       });
@@ -243,7 +243,7 @@ describe('fetchAvailableIndices', () => {
       });
 
       const result = await fetchAvailableIndices(esClientMock, {
-        indexPattern: 'logs-*',
+        indexNameOrPattern: 'logs-*',
         startDate: startDateString,
         endDate: endDateString,
       });
@@ -268,7 +268,7 @@ describe('fetchAvailableIndices', () => {
       ]);
 
       const result = await fetchAvailableIndices(esClientMock, {
-        indexPattern: 'logs-*',
+        indexNameOrPattern: 'logs-*',
         startDate: startDateString,
         endDate: endDateString,
       });
@@ -285,7 +285,7 @@ describe('fetchAvailableIndices', () => {
 
       await expect(
         fetchAvailableIndices(esClientMock, {
-          indexPattern: 'logs-*',
+          indexNameOrPattern: 'logs-*',
           startDate: startDateString,
           endDate: endDateString,
         })
@@ -307,7 +307,7 @@ describe('fetchAvailableIndices', () => {
       });
 
       const result = await fetchAvailableIndices(esClientMock, {
-        indexPattern: 'logs-*',
+        indexNameOrPattern: 'logs-*',
         startDate: startDateString,
         endDate: endDateString,
       });
@@ -336,7 +336,7 @@ describe('fetchAvailableIndices', () => {
       });
 
       const result = await fetchAvailableIndices(esClientMock, {
-        indexPattern: 'logs-*',
+        indexNameOrPattern: 'logs-*',
         startDate: startDateString,
         endDate: endDateString,
       });
@@ -371,7 +371,7 @@ describe('fetchAvailableIndices', () => {
         ]);
 
         const results = await fetchAvailableIndices(esClientMock, {
-          indexPattern: 'logs-*',
+          indexNameOrPattern: 'logs-*',
           startDate: 'now-7d/d',
           endDate: 'now/d',
         });
@@ -390,7 +390,7 @@ describe('fetchAvailableIndices', () => {
         ]);
 
         const results = await fetchAvailableIndices(esClientMock, {
-          indexPattern: 'logs-*',
+          indexNameOrPattern: 'logs-*',
           startDate: 'now-7d/d',
           endDate: 'now-1d/d',
         });
@@ -415,7 +415,7 @@ describe('fetchAvailableIndices', () => {
 
         await expect(
           fetchAvailableIndices(esClientMock, {
-            indexPattern: 'logs-*',
+            indexNameOrPattern: 'logs-*',
             startDate: startDateString,
             endDate: endDateString,
           })
@@ -429,7 +429,7 @@ describe('fetchAvailableIndices', () => {
 
         await expect(
           fetchAvailableIndices(esClientMock, {
-            indexPattern: 'logs-*',
+            indexNameOrPattern: 'logs-*',
             startDate: 'invalid-date',
             endDate: endDateString,
           })
@@ -443,7 +443,7 @@ describe('fetchAvailableIndices', () => {
 
         await expect(
           fetchAvailableIndices(esClientMock, {
-            indexPattern: 'logs-*',
+            indexNameOrPattern: 'logs-*',
             startDate: startDateString,
             endDate: 'invalid-date',
           })

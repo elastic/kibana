@@ -79,7 +79,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       width: '5%',
     },
     {
-      field: 'entity.name.text',
+      field: 'entity.name',
       name: (
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.entityStore.entitiesList.nameColumn.title"

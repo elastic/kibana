@@ -32,15 +32,15 @@ const getParsedDateMs = (dateStr: string, roundUp = false) => {
 
 export const fetchAvailableIndices = async (
   esClient: ElasticsearchClient,
-  params: { indexPattern: string; startDate: string; endDate: string }
+  params: { indexNameOrPattern: string; startDate: string; endDate: string }
 ): Promise<string[]> => {
-  const { indexPattern, startDate, endDate } = params;
+  const { indexNameOrPattern, startDate, endDate } = params;
 
   const startDateMs = getParsedDateMs(startDate);
   const endDateMs = getParsedDateMs(endDate, true);
 
   const indicesCats = (await esClient.cat.indices({
-    index: indexPattern,
+    index: indexNameOrPattern,
     format: 'json',
     h: 'index,creation.date',
   })) as FetchAvailableCatIndicesResponseRequired;
