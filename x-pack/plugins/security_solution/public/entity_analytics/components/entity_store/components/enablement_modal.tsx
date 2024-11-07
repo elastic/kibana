@@ -28,6 +28,8 @@ import {
   ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY,
   ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY,
 } from '../translations';
+import { useEntityEnginePrivileges } from '../hooks/use_entity_engine_privileges';
+import { MissingPrivilegesCallout } from './missing_privileges_callout';
 
 export interface Enablements {
   riskScore: boolean;
@@ -59,6 +61,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
     riskScore: !!riskScore.checked,
     entityStore: !!entityStore.checked,
   });
+  const { data: privileges, isLoading: isLoadingPrivileges } = useEntityEnginePrivileges();
 
   if (!visible) {
     return null;
@@ -104,7 +107,9 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
                   />
                 }
                 checked={enablements.entityStore}
-                disabled={entityStore.disabled || false}
+                disabled={
+                  entityStore.disabled || (!isLoadingPrivileges && !privileges?.has_all_required)
+                }
                 onChange={() =>
                   setEnablements((prev) => ({ ...prev, entityStore: !prev.entityStore }))
                 }
@@ -114,6 +119,11 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
               </EuiToolTip>
             </EuiFlexGroup>
           </EuiFlexItem>
+          {!privileges || privileges.has_all_required ? null : (
+            <EuiFlexItem>
+              <MissingPrivilegesCallout privileges={privileges} />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <EuiText>{ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY}</EuiText>
           </EuiFlexItem>
