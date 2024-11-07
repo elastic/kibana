@@ -44,7 +44,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       this.buildDestination(slo),
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo),
-      this.buildSettings(slo, 'event.ingested'),
+      this.buildSettings(slo, '@timestamp'),
       slo
     );
   }

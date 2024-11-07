@@ -109,7 +109,7 @@ Object {
   "sync": Object {
     "time": Object {
       "delay": "1m",
-      "field": "event.ingested",
+      "field": "@timestamp",
     },
   },
   "transform_id": "slo-irrelevant-1",
