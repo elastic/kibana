@@ -846,7 +846,7 @@ export function Detail() {
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_policies}>
             {canReadIntegrationPolicies ? (
-              <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />
+              <PackagePoliciesPage packageInfo={packageInfo} />
             ) : (
               <PermissionsError
                 error="MISSING_PRIVILEGES"
