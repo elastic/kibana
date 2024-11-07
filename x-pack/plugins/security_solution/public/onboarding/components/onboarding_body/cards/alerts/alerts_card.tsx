@@ -6,16 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-  COLOR_MODES_STANDARD,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
@@ -23,7 +14,7 @@ import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
 import { CardCallOut } from '../common/card_callout';
 import * as i18n from './translations';
-import { StepSelector } from '../common/step_selector';
+import { Selector } from '../common/selector';
 import { alertsIntroSteps } from './constants';
 
 export const AlertsCard: OnboardingCardComponent = ({
@@ -31,7 +22,6 @@ export const AlertsCard: OnboardingCardComponent = ({
   setExpandedCardId,
   setComplete,
 }) => {
-  const { colorMode } = useEuiTheme();
   const [selectedStep, setSelectedStep] = useState(alertsIntroSteps[0]);
 
   const isIntegrationsCardComplete = useMemo(
@@ -51,16 +41,16 @@ export const AlertsCard: OnboardingCardComponent = ({
         justifyContent="flexStart"
         alignItems="flexStart"
       >
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem style={{ width: '100%' }}>
           <EuiText data-test-subj="alertsCardDescription" size="s">
             {i18n.ALERTS_CARD_DESCRIPTION}
           </EuiText>
           <EuiSpacer />
-          <StepSelector
+          <Selector
             title={i18n.ALERTS_CARD_STEP_SELECTOR_TITLE}
-            steps={alertsIntroSteps}
+            items={alertsIntroSteps}
             onSelect={setSelectedStep}
-            selectedStep={selectedStep}
+            selectedItem={selectedStep}
           />
           {!isIntegrationsCardComplete && (
             <>

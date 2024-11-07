@@ -8,11 +8,11 @@
 import alertTimelineImageSrc from './images/alert_timeline.png';
 import eventAnalyzerImageSrc from './images/event_analyzer.png';
 import sessionViewImageSrc from './images/session_view.png';
-import type { Step } from '../common/step_selector';
+import type { SelectorItem } from '../common/selector';
 
 const VIDEO_SOURCE = '//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?autoplay=1';
 
-export const alertsIntroSteps: Step[] = [
+export const alertsIntroSteps: SelectorItem[] = [
   {
     id: 'details',
     title: 'Alert list and details',

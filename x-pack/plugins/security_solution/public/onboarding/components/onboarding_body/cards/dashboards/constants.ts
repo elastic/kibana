@@ -6,9 +6,9 @@
  */
 
 import dashboardImageSrc from './images/dashboard_step.png';
-import type { Step } from '../common/step_selector';
+import type { SelectorItem } from '../common/selector';
 
-export const dashboardIntroSteps: Step[] = [
+export const dashboardIntroSteps: SelectorItem[] = [
   {
     id: 'details',
     title: 'Intro to Elastic Discover',

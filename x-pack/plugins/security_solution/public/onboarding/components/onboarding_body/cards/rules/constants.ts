@@ -6,11 +6,11 @@
  */
 
 import installRulesImageSrc from './images/install_rule.png';
-import type { Step } from '../common/step_selector';
+import type { SelectorItem } from '../common/selector';
 
 const VIDEO_SOURCE = '//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?autoplay=1';
 
-export const rulesIntroSteps: Step[] = [
+export const rulesIntroSteps: SelectorItem[] = [
   {
     id: 'install',
     title: 'Install Elastic rules',

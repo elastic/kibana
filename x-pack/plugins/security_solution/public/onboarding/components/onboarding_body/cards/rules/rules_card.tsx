@@ -15,7 +15,7 @@ import { OnboardingCardContentImagePanel } from '../common/card_content_image_pa
 import { CardCallOut } from '../common/card_callout';
 
 import * as i18n from './translations';
-import { StepSelector } from '../common/step_selector';
+import { Selector } from '../common/selector';
 import { rulesIntroSteps } from './constants';
 
 export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpandedCardId }) => {
@@ -43,16 +43,12 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
             {i18n.RULES_CARD_DESCRIPTION}
           </EuiText>
           <EuiSpacer />
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <StepSelector
-                title={i18n.RULES_CARD_STEP_SELECTOR_TITLE}
-                steps={rulesIntroSteps}
-                onSelect={setSelectedStep}
-                selectedStep={selectedStep}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <Selector
+            title={i18n.RULES_CARD_STEP_SELECTOR_TITLE}
+            items={rulesIntroSteps}
+            onSelect={setSelectedStep}
+            selectedItem={selectedStep}
+          />
           {!isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />

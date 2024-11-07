@@ -14,7 +14,7 @@ import { OnboardingCardContentImagePanel } from '../common/card_content_image_pa
 import { CardCallOut } from '../common/card_callout';
 import { CardLinkButton } from '../common/card_link_button';
 import * as i18n from './translations';
-import { StepSelector } from '../common/step_selector';
+import { Selector } from '../common/selector';
 import { dashboardIntroSteps } from './constants';
 
 export const DashboardsCard: OnboardingCardComponent = ({
@@ -46,10 +46,10 @@ export const DashboardsCard: OnboardingCardComponent = ({
             {i18n.DASHBOARDS_CARD_DESCRIPTION}
           </EuiText>
           <EuiSpacer />
-          <StepSelector
-            steps={dashboardIntroSteps}
+          <Selector
+            items={dashboardIntroSteps}
             onSelect={setSelectedStep}
-            selectedStep={selectedStep}
+            selectedItem={selectedStep}
           />
           {!isIntegrationsCardComplete && (
             <>
