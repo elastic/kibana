@@ -11,8 +11,8 @@ import {
   ALERT_SUPPRESSION_DURATION_TYPE,
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_MISSING_FIELDS,
-  THRESHOLD_ALERT_SUPPRESSION_ENABLED,
 } from '../../../../detection_engine/rule_creation/components/alert_suppression_edit/fields';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit/fields';
 import { ALERT_SUPPRESSION_DEFAULT_DURATION } from '../../../../detection_engine/rule_creation/components/alert_suppression_edit/default_duration';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';

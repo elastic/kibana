@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { CheckBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField, useFormData } from '../../../../shared_imports';
-import { ThresholdSuppressionDurationSelector } from './threshold_suppression_duration_selector';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from './fields';
+import { SuppressionDurationSelector } from '../alert_suppression_edit/suppression_duration_selector';
 import * as i18n from './translations';
 
 interface ThresholdAlertSuppressionEditProps {
@@ -19,7 +19,7 @@ interface ThresholdAlertSuppressionEditProps {
   disabledText?: string;
 }
 
-export function ThresholdAlertSuppressionEdit({
+export const ThresholdAlertSuppressionEdit = memo(function ThresholdAlertSuppressionEdit({
   suppressionFieldNames,
   disabled,
   disabledText,
@@ -44,7 +44,11 @@ export function ThresholdAlertSuppressionEdit({
         }}
       />
       <EuiPanel paddingSize="m" hasShadow={false}>
-        <ThresholdSuppressionDurationSelector disabled={!suppressionEnabled || disabled} />
+        <SuppressionDurationSelector
+          onlyPerTimePeriod
+          onlyPerTimePeriodReasonMessage={i18n.THRESHOLD_SUPPRESSION_PER_RULE_EXECUTION_WARNING}
+          disabled={!suppressionEnabled || disabled}
+        />
       </EuiPanel>
     </>
   );
@@ -56,4 +60,4 @@ export function ThresholdAlertSuppressionEdit({
   ) : (
     content
   );
-}
+});

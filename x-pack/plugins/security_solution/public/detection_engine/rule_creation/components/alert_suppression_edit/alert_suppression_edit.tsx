@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { EuiPanel, EuiText, EuiToolTip } from '@elastic/eui';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { useFormData } from '../../../../shared_imports';
@@ -22,7 +22,7 @@ interface AlertSuppressionEditProps {
   warningText?: string;
 }
 
-export function AlertSuppressionEdit({
+export const AlertSuppressionEdit = memo(function AlertSuppressionEdit({
   suppressibleFields,
   labelAppend,
   disabled,
@@ -61,4 +61,4 @@ export function AlertSuppressionEdit({
   ) : (
     content
   );
-}
+});

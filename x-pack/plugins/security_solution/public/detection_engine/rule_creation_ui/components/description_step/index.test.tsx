@@ -37,8 +37,8 @@ import {
   ALERT_SUPPRESSION_DURATION_VALUE,
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_MISSING_FIELDS,
-  THRESHOLD_ALERT_SUPPRESSION_ENABLED,
 } from '../../../rule_creation/components/alert_suppression_edit/fields';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit/fields';
 
 jest.mock('../../../../common/lib/kibana');
 

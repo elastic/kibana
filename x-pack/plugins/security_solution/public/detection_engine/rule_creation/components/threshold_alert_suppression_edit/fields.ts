@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './alert_suppression_edit';
+export const THRESHOLD_ALERT_SUPPRESSION_ENABLED = 'thresholdAlertSuppressionEnabled' as const;

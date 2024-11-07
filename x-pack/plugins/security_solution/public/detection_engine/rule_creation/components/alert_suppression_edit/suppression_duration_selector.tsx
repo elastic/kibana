@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import { EuiFormRow, EuiRadioGroup, EuiToolTip } from '@elastic/eui';
 import { UseMultiFields } from '../../../../shared_imports';
 import { AlertSuppressionDurationType } from '../../../../detections/pages/detection_engine/rules/types';
 import { DurationInput } from '../duration_input';
@@ -19,10 +19,14 @@ import {
 import * as i18n from './translations';
 
 interface AlertSuppressionDurationProps {
+  onlyPerTimePeriod?: boolean;
+  onlyPerTimePeriodReasonMessage?: string;
   disabled?: boolean;
 }
 
 export function SuppressionDurationSelector({
+  onlyPerTimePeriod = false,
+  onlyPerTimePeriodReasonMessage,
   disabled,
 }: AlertSuppressionDurationProps): JSX.Element {
   return (
@@ -51,8 +55,14 @@ export function SuppressionDurationSelector({
             options={[
               {
                 id: AlertSuppressionDurationType.PerRuleExecution,
-                label: i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION,
-                disabled,
+                label: onlyPerTimePeriod ? (
+                  <EuiToolTip content={onlyPerTimePeriodReasonMessage}>
+                    <> {i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION}</>
+                  </EuiToolTip>
+                ) : (
+                  i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION
+                ),
+                disabled: onlyPerTimePeriod ? true : disabled,
               },
               {
                 id: AlertSuppressionDurationType.PerTimePeriod,

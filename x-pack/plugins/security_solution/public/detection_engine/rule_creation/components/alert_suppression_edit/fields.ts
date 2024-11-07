@@ -11,4 +11,3 @@ export const ALERT_SUPPRESSION_DURATION = 'alertSuppressionDuration' as const;
 export const ALERT_SUPPRESSION_DURATION_VALUE = 'value' as const;
 export const ALERT_SUPPRESSION_DURATION_UNIT = 'unit' as const;
 export const ALERT_SUPPRESSION_MISSING_FIELDS = 'alertSuppressionMissingFields' as const;
-export const THRESHOLD_ALERT_SUPPRESSION_ENABLED = 'thresholdAlertSuppressionEnabled' as const;
