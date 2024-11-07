@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { LensDatasourceId } from '@kbn/lens-common';
-
+import { isEqual } from 'lodash';
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { EMPTY } from 'rxjs';
 import { useObservable } from '@kbn/use-observable';
+import { BehaviorSubject } from 'rxjs';
+import { css } from '@emotion/react';
+
 import {
   EuiSpacer,
   EuiFlexGroup,
@@ -21,24 +23,23 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
+
+import type {
+  LayerAction,
+  LensDatasourceId,
+  VisualizationDimensionGroupConfig,
+} from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import type { VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { ESQLLangEditor } from '@kbn/esql/public';
+
 import { isOperation } from '../../../types_guards';
-import { LayerHeader } from './layer_header';
-import type { LayerPanelProps } from './types';
-import { DimensionContainer } from './dimension_container';
-import { EmptyDimensionButton } from './buttons/empty_dimension_button';
-import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
-import { useFocusUpdate } from './use_focus_update';
 import {
   useLensSelector,
   useLensDispatch,
@@ -51,10 +52,19 @@ import {
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
-import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
-import { ESQLEditor } from './esql_editor';
+import { ESQLDataGridAccordion } from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
+import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
+
 import { useEditorFrameService } from '../../editor_frame_service_context';
+
+import { LayerHeader } from './layer_header';
+import type { LayerPanelProps } from './types';
+import { DimensionContainer } from './dimension_container';
+import { EmptyDimensionButton } from './buttons/empty_dimension_button';
+import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
+import { useFocusUpdate } from './use_focus_update';
+import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getOpenLayerSettingsAction } from './layer_actions/open_layer_settings';
 import { getRemoveLayerAction } from './layer_actions/remove_layer_action';
 import { getCloneLayerAction } from './layer_actions/clone_layer_action';
@@ -397,6 +407,132 @@ export function LayerPanel(props: LayerPanelProps) {
     [activeVisualization]
   );
 
+  const compatibleActions = useMemo<LayerAction[]>(
+    () =>
+      [
+        ...(activeVisualization.getLayerType(layerId, visualizationState) === 'data'
+          ? [
+              {
+                execute: () => {
+                  updateDataLayerState({
+                    ...layerDatasourceState,
+                    layers: {
+                      ...layerDatasourceState.layers,
+                      [layerId]: {
+                        indexPatternId: layerDatasourceState.layers[layerId].indexPatternId,
+                        linkToLayers: [],
+                        columns: [],
+                        columnOrder: [],
+                        sampling: 1,
+                        ignoreGlobalFilters: false,
+                        query: {
+                          esql: datasourceMap[datasourceId].toExpression(
+                            layerDatasourceState,
+                            layerId,
+                            [],
+                            dateRange,
+                            Date.now()
+                          ),
+                        },
+                      },
+                    },
+                  });
+                },
+                displayName: i18n.translate('xpack.lens.convert', {
+                  defaultMessage: 'Convert to ESQL',
+                }),
+                icon: 'gear',
+                'data-test-subj': 'lnsConvertLayer',
+                order: 0,
+                isCompatible: true,
+              },
+            ]
+          : []),
+        ...(activeVisualization
+          .getSupportedActionsForLayer?.(
+            layerId,
+            visualizationState,
+            updateVisualization,
+            props.registerLibraryAnnotationGroup,
+            isSaveable
+          )
+          .map((action) => ({
+            ...action,
+            execute: () => {
+              action.execute(layerActionsFlyoutRef.current);
+            },
+          })) || []),
+
+        ...getSharedActions({
+          layerId,
+          activeVisualization,
+          core,
+          layerIndex,
+          layerType: activeVisualization.getLayerType(layerId, visualizationState),
+          isOnlyLayer,
+          isTextBasedLanguage,
+          hasLayerSettings: Boolean(
+            (Object.values(visualizationLayerSettings).some(Boolean) &&
+              activeVisualization.LayerSettingsComponent) ||
+              layerDatasource?.LayerSettingsComponent
+          ),
+          openLayerSettings: () => setPanelSettingsOpen(true),
+          onCloneLayer,
+          onRemoveLayer: () => onRemoveLayer(layerId),
+          customRemoveModalText: activeVisualization.getCustomRemoveLayerText?.(
+            layerId,
+            visualizationState
+          ),
+        }),
+      ].filter((i) => i.isCompatible),
+    [
+      activeVisualization,
+      layerId,
+      visualizationState,
+      updateVisualization,
+      props.registerLibraryAnnotationGroup,
+      isSaveable,
+      core,
+      layerIndex,
+      isOnlyLayer,
+      isTextBasedLanguage,
+      visualizationLayerSettings,
+      layerDatasource?.LayerSettingsComponent,
+      onCloneLayer,
+      onRemoveLayer,
+    ]
+  );
+
+  const prevQuery = useRef<AggregateQuery | Query>(layerDatasourceState.layers[layerId].query);
+  const [query, setQuery] = useState<AggregateQuery | Query>(
+    layerDatasourceState?.layers[layerId]?.query ? layerDatasourceState.layers[layerId].query : ''
+  );
+  const [errors, setErrors] = useState<Error[] | undefined>();
+  const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
+  const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
+  const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
+  const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
+  const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
+  const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
+
+  const adHocDataViews = Object.values(framePublicAPI.dataViews.indexPatterns ?? {});
+  const hideTimeFilterInfo = false;
+
+  const runQuery = useCallback(
+    async (q: AggregateQuery, abortController?: AbortController) => {
+      updateDatasource(datasourceId, {
+        ...layerDatasourceState,
+        layers: {
+          ...layerDatasourceState.layers,
+          [layerId]: { ...layerDatasourceState.layers[layerId], query: q },
+        },
+      });
+      prevQuery.current = q;
+      setIsVisualizationLoading(false);
+    },
+    [datasourceMap, visualizationMap, adHocDataViews]
+  );
+
   return (
     <>
       <section
@@ -511,16 +647,56 @@ export function LayerPanel(props: LayerPanelProps) {
                 }}
               />
             )}
-            {shouldRenderESQLEditor ? (
-              <ESQLEditor
-                uiSettings={core.uiSettings}
-                http={core.http}
-                isTextBasedLanguage={isTextBasedLanguage}
-                framePublicAPI={framePublicAPI}
-                layerId={layerId}
-                {...editorProps}
+            {shouldRenderESQLEditor && (
+              <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
+                <ESQLLangEditor
+                  query={query}
+                  onTextLangQueryChange={(q) => {
+                    setQuery(q);
+                  }}
+                  // detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
+                  hideTimeFilterInfo={hideTimeFilterInfo}
+                  errors={errors}
+                  warning={
+                    suggestsLimitedColumns
+                      ? i18n.translate('xpack.lens.config.configFlyoutCallout', {
+                          defaultMessage:
+                            'Displaying a limited portion of the available fields. Add more from the configuration panel.',
+                        })
+                      : undefined
+                  }
+                  editorIsInline={true}
+                  hideRunQueryText
+                  onTextLangQuerySubmit={async (q, a) => {
+                    // do not run the suggestions if the query is the same as the previous one
+                    if (q && !isEqual(q, prevQuery.current)) {
+                      // setIsVisualizationLoading(true);
+                      await runQuery(q, a);
+                    }
+                  }}
+                  isDisabled={false}
+                  allowQueryCancellation
+                  isLoading={isVisualizationLoading}
+                />
+              </EuiFlexItem>
+            )}
+            {shouldRenderESQLEditor && dataGridAttrs && (
+              <ESQLDataGridAccordion
+                dataGridAttrs={dataGridAttrs}
+                isAccordionOpen={isESQLResultsAccordionOpen}
+                setIsAccordionOpen={setIsESQLResultsAccordionOpen}
+                query={query}
+                // isTableView={attributes.visualizationType !== 'lnsDatatable'}
+                onAccordionToggleCb={(status) => {
+                  if (status && isSuggestionsAccordionOpen) {
+                    setIsSuggestionsAccordionOpen(!status);
+                  }
+                  if (status && isLayerAccordionOpen) {
+                    setIsLayerAccordionOpen(!status);
+                  }
+                }}
               />
-            ) : null}
+            )}
             {activeVisualization.LayerPanelComponent && (
               <activeVisualization.LayerPanelComponent
                 {...{
