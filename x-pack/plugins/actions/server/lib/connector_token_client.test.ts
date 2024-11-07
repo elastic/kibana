@@ -37,6 +37,7 @@ beforeAll(() => {
 beforeEach(() => {
   clock.reset();
   jest.resetAllMocks();
+  jest.restoreAllMocks();
   connectorTokenClient = new ConnectorTokenClient({
     unsecuredSavedObjectsClient,
     encryptedSavedObjectsClient,

@@ -142,23 +142,25 @@ export async function findRules<Params extends RuleParams = never>(
       context.auditLogger?.log(
         ruleAuditEvent({
           action: RuleAuditAction.FIND,
-          savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+          savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
           error,
         })
       );
       throw error;
     }
 
-    const rule = getAlertFromRaw<Params>(
-      context,
-      id,
-      attributes.alertTypeId,
-      (fields ? pick(attributes, fields) : attributes) as RawRule,
-      references,
-      false,
+    const rule = getAlertFromRaw<Params>({
       excludeFromPublicApi,
-      includeSnoozeData
-    );
+      id,
+      includeLegacyId: false,
+      includeSnoozeData,
+      isSystemAction: context.isSystemAction,
+      logger: context.logger,
+      rawRule: (fields ? pick(attributes, fields) : attributes) as RawRule,
+      references,
+      ruleTypeId: attributes.alertTypeId,
+      ruleTypeRegistry: context.ruleTypeRegistry,
+    });
 
     // collect SIEM rule for further formatting legacy actions
     if (attributes.consumer === AlertConsumers.SIEM) {
@@ -168,11 +170,11 @@ export async function findRules<Params extends RuleParams = never>(
     return rule;
   });
 
-  authorizedData.forEach(({ id }) =>
+  authorizedData.forEach(({ id, name }) =>
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.FIND,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name },
       })
     )
   );

@@ -8,8 +8,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { CreateTagModal } from './create_modal';
-import { IToasts, NotificationsStart } from '@kbn/core-notifications-browser';
-import { ITagsClient, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
+import type { IToasts, NotificationsStart } from '@kbn/core-notifications-browser';
+import type { ITagsClient, Tag } from '../../../common/types';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import { duplicateTagNameErrorMessage, managedTagConflictMessage } from './utils';
@@ -36,7 +36,7 @@ describe('create modal', () => {
     } as Partial<NotificationsStart> as NotificationsStart,
   };
 
-  it('should prevent submission if there is a duplicate name error (unmanaged)', () => {
+  it('should prevent submission if there is a duplicate name error (unmanaged)', async () => {
     const tagClientUnmanaged = getMockTagClient({
       id: '1',
       name: 'tag1',
@@ -52,18 +52,18 @@ describe('create modal', () => {
     );
 
     const nameInput = screen.getByRole('textbox', { name: /name/i });
-    userEvent.type(nameInput, 'tag1');
+    await userEvent.type(nameInput, 'tag1');
 
     screen.findByText(duplicateTagNameErrorMessage);
 
     const submitButton = screen.getByRole('button', { name: /create/i });
 
-    userEvent.click(submitButton);
+    await userEvent.click(submitButton);
 
     expect(tagClientUnmanaged.create).not.toHaveBeenCalled();
   });
 
-  it('should prevent submission if there is a duplicate name error (managed)', () => {
+  it('should prevent submission if there is a duplicate name error (managed)', async () => {
     const tagClientUnmanaged = getMockTagClient({
       id: '1',
       name: 'tag1',
@@ -79,13 +79,13 @@ describe('create modal', () => {
     );
 
     const nameInput = screen.getByRole('textbox', { name: /name/i });
-    userEvent.type(nameInput, 'tag1');
+    await userEvent.type(nameInput, 'tag1');
 
     screen.findByText(managedTagConflictMessage);
 
     const submitButton = screen.getByRole('button', { name: /create/i });
 
-    userEvent.click(submitButton);
+    await userEvent.click(submitButton);
 
     expect(tagClientUnmanaged.create).not.toHaveBeenCalled();
   });

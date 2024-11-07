@@ -24,7 +24,7 @@ describe('ValueWithSpaceWarning', () => {
   });
   it('should not render if value is falsy', () => {
     const container = render(<ValueWithSpaceWarning value="" />);
-    expect(container).toMatchSnapshot();
+    expect(container.container).toMatchSnapshot();
   });
   it('should not render if showSpaceWarning is falsy', () => {
     // @ts-ignore
@@ -33,7 +33,7 @@ describe('ValueWithSpaceWarning', () => {
       .mockReturnValue({ showSpaceWarningIcon: false, warningText: '' });
 
     const container = render(<ValueWithSpaceWarning value="Test" />);
-    expect(container).toMatchSnapshot();
+    expect(container.container).toMatchSnapshot();
   });
   it('should render if showSpaceWarning is truthy', () => {
     const container = render(
@@ -41,7 +41,7 @@ describe('ValueWithSpaceWarning', () => {
         <ValueWithSpaceWarning value="Test" />
       </ThemeProvider>
     );
-    expect(container).toMatchSnapshot();
+    expect(container.container).toMatchSnapshot();
   });
   it('should show the tooltip when the icon is clicked', async () => {
     const container = render(

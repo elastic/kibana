@@ -16,7 +16,7 @@ export function replaceVarsWithParams(vars: ParsedVars, params: Record<string, s
       if (v.type === 'nonvar') {
         return v.content;
       }
-      return params[v.content.name]?.trim() || v.content.default;
+      return params[v.content.name]?.trim() || v.content.default || '${' + v.content.name + '}';
     })
     .join('');
 }

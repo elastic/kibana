@@ -25,6 +25,11 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.existOrFail(`infraAssetDetailsHostChartsSection${metric}`);
     },
 
+    // Add metrics callout
+    async addMetricsCalloutExists() {
+      return testSubjects.existOrFail('infraAddMetricsCallout');
+    },
+
     // Overview
     async clickOverviewTab() {
       return testSubjects.click('infraAssetDetailsOverviewTab');
@@ -32,6 +37,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
     async getOverviewTab() {
       return testSubjects.find('infraAssetDetailsOverviewTab');
+    },
+
+    async assetDetailsKPITileMissing(type: string) {
+      return testSubjects.missingOrFail(`infraAssetDetailsKPI${type}`);
     },
 
     async getAssetDetailsKPITileValue(type: string) {
@@ -180,7 +189,9 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     async clickAddMetadataFilter() {
-      return testSubjects.click('infraAssetDetailsMetadataAddFilterButton');
+      // Make this selector tied to the field to avoid flakiness
+      // https://github.com/elastic/kibana/issues/191565
+      return testSubjects.click('infraAssetDetailsMetadataField.host.name');
     },
 
     async clickRemoveMetadataFilter() {
@@ -202,8 +213,8 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     async getMetadataAppliedFilter() {
       const filter = await testSubjects.find(
         `filter-badge-${stringHash(
-          'host.architecture: arm64'
-        )} filter filter-enabled filter-key-host.architecture filter-value-arm64 filter-unpinned filter-id-0`
+          'host.name: host-1'
+        )} filter filter-enabled filter-key-host.name filter-value-host-1 filter-unpinned filter-id-0`
       );
       return filter.getVisibleText();
     },
@@ -261,6 +272,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
         'infraAssetDetailsProcessesSummaryTableItem'
       );
       return processesListElements[index].findByCssSelector('dt');
+    },
+
+    async processesContentExist() {
+      return testSubjects.existOrFail('infraAssetDetailsProcessesTabContent');
     },
 
     async getProcessesTabContentTotalValue() {

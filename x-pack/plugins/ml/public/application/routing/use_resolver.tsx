@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import useMount from 'react-use/lib/useMount';
 import { AccessDeniedCallout } from '../access_denied';
 import { PLUGIN_ID } from '../../../common/constants/app';
-import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
+import { useMlApi, useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
 import { type MlCapabilitiesKey } from '../../../common/types/capabilities';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import type { ResolverResults, Resolvers } from './resolvers';
@@ -54,7 +54,7 @@ export const useRouteResolver = (
       },
     },
   } = useMlKibana();
-
+  const mlApi = useMlApi();
   const mlLicenseInfo = useMlLicenseInfo();
 
   useMount(function refreshCapabilitiesOnMount() {
@@ -119,10 +119,12 @@ export const useRouteResolver = (
       p[c] = {};
       return p;
     }, {} as Exclude<ResolverResults, undefined>);
-    const res = await Promise.all(funcs.map((r) => r()));
+    const res = await Promise.all(funcs.map((r) => r(mlApi)));
     res.forEach((r, i) => (tempResults[funcNames[i]] = r));
 
     return tempResults;
+    // skip mlApi from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(

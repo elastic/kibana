@@ -12,12 +12,13 @@
     ],
     "requiredPlugins": [
       "actions",
+      "features",
+      "ml",
       "share",
     ],
     "optionalPlugins": [
-      "cloud", 
-      "console", 
-      "ml"
+      "cloud",
+      "console",
     ],
     "requiredBundles": [
       "kibanaReact"

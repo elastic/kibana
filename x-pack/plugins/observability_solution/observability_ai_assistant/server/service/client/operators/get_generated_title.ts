@@ -25,13 +25,11 @@ type ChatFunctionWithoutConnectorAndTokenCount = (
 ) => Observable<ChatEvent>;
 
 export function getGeneratedTitle({
-  responseLanguage,
   messages,
   chat,
   logger,
   tracer,
 }: {
-  responseLanguage?: string;
   messages: Message[];
   chat: ChatFunctionWithoutConnectorAndTokenCount;
   logger: Pick<Logger, 'debug' | 'error'>;
@@ -44,7 +42,7 @@ export function getGeneratedTitle({
           '@timestamp': new Date().toString(),
           message: {
             role: MessageRole.System,
-            content: `You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. Please create the title in ${responseLanguage}.`,
+            content: `You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.`,
           },
         },
         {

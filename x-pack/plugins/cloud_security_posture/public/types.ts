@@ -6,26 +6,12 @@
  */
 
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ComponentType, ReactNode } from 'react';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CoreStart, ToastsStart } from '@kbn/core/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
-import type { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
-import type {
-  UsageCollectionSetup,
-  UsageCollectionStart,
-} from '@kbn/usage-collection-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import type { FleetSetup } from '@kbn/fleet-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
 
@@ -51,28 +37,6 @@ export interface CspClientPluginSetupDeps {
   uiActions: UiActionsSetup;
   // optional
   usageCollection?: UsageCollectionSetup;
-}
-
-export interface CspClientPluginStartDeps {
-  // required
-  data: DataPublicPluginStart;
-  dataViews: DataViewsServicePublic;
-  dataViewFieldEditor: IndexPatternFieldEditorStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  uiActions: UiActionsStart;
-  fieldFormats: FieldFormatsStart;
-  toastNotifications: ToastsStart;
-  charts: ChartsPluginStart;
-  discover: DiscoverStart;
-  fleet: FleetStart;
-  licensing: LicensingPluginStart;
-  share: SharePluginStart;
-  storage: Storage;
-  spaces: SpacesPluginStart;
-  cloud: CloudSetup;
-
-  // optional
-  usageCollection?: UsageCollectionStart;
 }
 
 /**

@@ -72,7 +72,7 @@ describe('NewChatByTitle', () => {
     expect(newChatButton.textContent).not.toContain('Chat');
   });
 
-  it('calls showAssistantOverlay on click', () => {
+  it('calls showAssistantOverlay on click', async () => {
     const conversationTitle = 'test-conversation-id';
     const promptContextId = 'test-prompt-context-id';
 
@@ -81,7 +81,7 @@ describe('NewChatByTitle', () => {
     );
     const newChatButton = screen.getByTestId('newChatByTitle');
 
-    userEvent.click(newChatButton);
+    await userEvent.click(newChatButton);
 
     expect(mockUseAssistantContext.showAssistantOverlay).toHaveBeenCalledWith({
       conversationTitle,

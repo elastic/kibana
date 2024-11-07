@@ -32,12 +32,13 @@ export const ExecuteActionResult = memo<
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendExecuteEndpoint();
   const actionRequestBody = useMemo<undefined | ExecuteActionRequestBody>(() => {
-    const endpointId = command.commandDefinition?.meta?.endpointId;
+    const { endpointId, agentType } = command.commandDefinition?.meta ?? {};
 
     if (!endpointId) {
       return;
     }
     return {
+      agent_type: agentType,
       endpoint_ids: [endpointId],
       parameters: {
         command: command.args.args.command[0],
@@ -46,7 +47,7 @@ export const ExecuteActionResult = memo<
       comment: command.args.args?.comment?.[0],
     };
   }, [
-    command.commandDefinition?.meta?.endpointId,
+    command.commandDefinition?.meta,
     command.args.args.command,
     command.args.args.timeout,
     command.args.args?.comment,

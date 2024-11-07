@@ -6,6 +6,12 @@ exports[`Table prevents hidden saved objects from being deleted 1`] = `
     box={
       Object {
         "data-test-subj": "savedObjectSearchBar",
+        "schema": Object {
+          "recognizedFields": Array [
+            "type",
+            "tag",
+          ],
+        },
       }
     }
     filters={
@@ -75,17 +81,12 @@ exports[`Table prevents hidden saved objects from being deleted 1`] = `
           repositionToCrossAxis={true}
         >
           <EuiFormRow
-            describedByIds={Array []}
-            display="row"
-            hasChildLabel={true}
-            hasEmptyLabelSpace={false}
             label={
               <Memo(MemoizedFormattedMessage)
                 defaultMessage="Options"
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
               />
             }
-            labelType="label"
           >
             <EuiSwitch
               checked={true}
@@ -99,13 +100,7 @@ exports[`Table prevents hidden saved objects from being deleted 1`] = `
               onChange={[Function]}
             />
           </EuiFormRow>
-          <EuiFormRow
-            describedByIds={Array []}
-            display="row"
-            hasChildLabel={true}
-            hasEmptyLabelSpace={false}
-            labelType="label"
-          >
+          <EuiFormRow>
             <EuiButton
               fill={true}
               iconType="exportAction"
@@ -121,9 +116,7 @@ exports[`Table prevents hidden saved objects from being deleted 1`] = `
       ]
     }
   />
-  <EuiSpacer
-    size="s"
-  />
+  <EuiSpacer />
   <div
     data-test-subj="savedObjectsTable"
   >
@@ -247,6 +240,12 @@ exports[`Table should render normally 1`] = `
     box={
       Object {
         "data-test-subj": "savedObjectSearchBar",
+        "schema": Object {
+          "recognizedFields": Array [
+            "type",
+            "tag",
+          ],
+        },
       }
     }
     filters={
@@ -309,17 +308,12 @@ exports[`Table should render normally 1`] = `
           repositionToCrossAxis={true}
         >
           <EuiFormRow
-            describedByIds={Array []}
-            display="row"
-            hasChildLabel={true}
-            hasEmptyLabelSpace={false}
             label={
               <Memo(MemoizedFormattedMessage)
                 defaultMessage="Options"
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
               />
             }
-            labelType="label"
           >
             <EuiSwitch
               checked={true}
@@ -333,13 +327,7 @@ exports[`Table should render normally 1`] = `
               onChange={[Function]}
             />
           </EuiFormRow>
-          <EuiFormRow
-            describedByIds={Array []}
-            display="row"
-            hasChildLabel={true}
-            hasEmptyLabelSpace={false}
-            labelType="label"
-          >
+          <EuiFormRow>
             <EuiButton
               fill={true}
               iconType="exportAction"
@@ -355,9 +343,7 @@ exports[`Table should render normally 1`] = `
       ]
     }
   />
-  <EuiSpacer
-    size="s"
-  />
+  <EuiSpacer />
   <div
     data-test-subj="savedObjectsTable"
   >

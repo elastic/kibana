@@ -9,11 +9,11 @@ import { omit } from 'lodash/fp';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
 import type {
-  ExportedTimelines,
   ExportedNotes,
   ExportTimelineNotFoundError,
   Note,
   PinnedEvent,
+  TimelineResponse,
 } from '../../../../../../common/api/timeline';
 
 import type { FrameworkRequest } from '../../../../framework';
@@ -45,7 +45,7 @@ const getPinnedEventsIdsByTimelineId = (currentPinnedEvents: PinnedEvent[]): str
 const getTimelinesFromObjects = async (
   request: FrameworkRequest,
   ids?: string[] | null
-): Promise<Array<ExportedTimelines | ExportTimelineNotFoundError>> => {
+): Promise<Array<TimelineResponse | ExportTimelineNotFoundError>> => {
   const { timelines, errors } = await getSelectedTimelines(request, ids);
   const exportedIds = timelines.map((t) => t.savedObjectId);
 
@@ -65,7 +65,7 @@ const getTimelinesFromObjects = async (
     []
   );
 
-  const myResponse = exportedIds.reduce<ExportedTimelines[]>((acc, timelineId) => {
+  const myResponse = exportedIds.reduce<TimelineResponse[]>((acc, timelineId) => {
     const myTimeline = timelines.find((t) => t.savedObjectId === timelineId);
     if (myTimeline != null) {
       const timelineNotes = myNotes.filter((n) => n.timelineId === timelineId);

@@ -205,6 +205,9 @@ export function createAlertingUsageCollector(
           count_rules_with_tags: 0,
           count_rules_snoozed: 0,
           count_rules_muted: 0,
+          count_mw_total: 0,
+          count_mw_with_repeat_toggle_on: 0,
+          count_mw_with_filter_alert_toggle_on: 0,
           count_rules_with_muted_alerts: 0,
           count_connector_types_by_consumers: {},
           count_rules_by_execution_status_per_day: {},
@@ -234,6 +237,8 @@ export function createAlertingUsageCollector(
             p90: {},
             p99: {},
           },
+          count_alerts_total: 0,
+          count_alerts_by_rule_type: {},
         };
       }
     },
@@ -289,6 +294,9 @@ export function createAlertingUsageCollector(
       count_rules_by_notify_when: byNotifyWhenSchema,
       count_rules_snoozed: { type: 'long' },
       count_rules_muted: { type: 'long' },
+      count_mw_total: { type: 'long' },
+      count_mw_with_repeat_toggle_on: { type: 'long' },
+      count_mw_with_filter_alert_toggle_on: { type: 'long' },
       count_rules_with_muted_alerts: { type: 'long' },
       count_connector_types_by_consumers: { DYNAMIC_KEY: { DYNAMIC_KEY: { type: 'long' } } },
       count_rules_by_execution_status_per_day: byStatusPerDaySchema,
@@ -302,6 +310,8 @@ export function createAlertingUsageCollector(
       percentile_num_generated_actions_by_type_per_day: byPercentileSchemaByType,
       percentile_num_alerts_per_day: byPercentileSchema,
       percentile_num_alerts_by_type_per_day: byPercentileSchemaByType,
+      count_alerts_total: { type: 'long' },
+      count_alerts_by_rule_type: byTypeSchema,
     },
   });
 }

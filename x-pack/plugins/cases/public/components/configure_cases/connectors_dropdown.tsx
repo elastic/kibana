@@ -6,7 +6,6 @@
  */
 
 import React, { Suspense, useMemo } from 'react';
-import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,7 +19,7 @@ import { css } from '@emotion/react';
 
 import type { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
-import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
+import { useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon, isDeprecatedConnector } from '../utils';
 
 export interface Props {
@@ -29,7 +28,6 @@ export interface Props {
   isLoading: boolean;
   onChange: (id: string) => void;
   selectedConnector: string;
-  appendAddConnectorButton?: boolean;
 }
 
 const suspendedComponentWithProps = (ComponentToSuspend: React.ComponentType) => {
@@ -65,37 +63,14 @@ const noConnectorOption = {
   'data-test-subj': 'dropdown-connector-no-connector',
 };
 
-const addNewConnector = (euiTheme: EuiThemeComputed<{}>) => ({
-  value: 'add-connector',
-  inputDisplay: (
-    <span
-      css={css`
-        font-size: ${euiTheme.font.scale.xs};
-        font-weight: ${euiTheme.font.weight.medium};
-        line-height: ${euiTheme.size.l};
-
-        &:hover {
-          text-decoration: underline;
-        }
-      `}
-    >
-      {i18n.ADD_NEW_CONNECTOR}
-    </span>
-  ),
-  'data-test-subj': 'dropdown-connector-add-connector',
-});
-
 const ConnectorsDropdownComponent: React.FC<Props> = ({
   connectors,
   disabled,
   isLoading,
   onChange,
   selectedConnector,
-  appendAddConnectorButton = false,
 }) => {
   const { triggersActionsUi } = useKibana().services;
-  const { actions } = useApplicationCapabilities();
-  const canSave = actions.crud;
   const { euiTheme } = useEuiTheme();
   const connectorsAsOptions = useMemo(() => {
     const connectorsFormatted = connectors.reduce(
@@ -151,10 +126,6 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
       },
       [noConnectorOption]
     );
-
-    if (appendAddConnectorButton && canSave) {
-      return [...connectorsFormatted, addNewConnector(euiTheme)];
-    }
 
     return connectorsFormatted;
     // eslint-disable-next-line react-hooks/exhaustive-deps

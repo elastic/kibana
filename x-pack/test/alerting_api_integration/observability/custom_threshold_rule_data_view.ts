@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
       await deleteDataView({
         supertest,
         id: DATA_VIEW_ID,

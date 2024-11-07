@@ -137,7 +137,7 @@ export const RemoveIndexSettingsFlyout = ({
               iconType="warning"
               data-test-subj="deleteSettingsError"
             >
-              {statusDetails!.message}
+              {statusDetails!.message as string}
             </EuiCallOut>
             <EuiSpacer />
           </>

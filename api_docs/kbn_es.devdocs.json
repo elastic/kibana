@@ -711,7 +711,7 @@
         "label": "readRolesDescriptorsFromResource",
         "description": [],
         "signature": [
-          "(resourcePath: string) => any"
+          "(resourcePath: string) => object"
         ],
         "path": "packages/kbn-es/src/utils/read_roles_from_resource.ts",
         "deprecated": false,

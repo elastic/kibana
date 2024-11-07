@@ -4,7 +4,7 @@
     "outDir": "target/types",
     "isolatedModules": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts", ".storybook/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-views-plugin",

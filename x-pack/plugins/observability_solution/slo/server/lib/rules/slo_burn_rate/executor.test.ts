@@ -25,9 +25,7 @@ import {
 import { ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
-import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { Rule } from '@kbn/alerting-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { sloDefinitionSchema } from '@kbn/slo-schema';
 import { get } from 'lodash';
@@ -148,13 +146,6 @@ describe('BurnRateRuleExecutor', () => {
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   let loggerMock: jest.Mocked<MockedLogger>;
   const basePathMock = { publicBaseUrl: 'https://kibana.dev' } as IBasePath;
-  const alertsLocatorMock = {
-    getLocation: jest.fn().mockImplementation(() => ({
-      path: 'mockedAlertsLocator > getLocation',
-    })),
-  } as any as LocatorPublic<AlertsLocatorParams>;
-  const ISO_DATE_REGEX =
-    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)((-(\d{2}):(\d{2})|Z)?)$/;
 
   let searchSourceClientMock: jest.Mocked<ISearchStartSearchSource>;
   let uiSettingsClientMock: jest.Mocked<IUiSettingsClient>;
@@ -190,6 +181,7 @@ describe('BurnRateRuleExecutor', () => {
       shouldStopExecution: jest.fn(),
       share: {} as SharePluginStart,
       getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+      getMaintenanceWindowIds: jest.fn().mockResolvedValue([]),
     };
   });
 
@@ -375,7 +367,6 @@ describe('BurnRateRuleExecutor', () => {
 
       const executor = getRuleExecutor({
         basePath: basePathMock,
-        alertsLocator: alertsLocatorMock,
       });
 
       await executor({
@@ -456,7 +447,7 @@ describe('BurnRateRuleExecutor', () => {
           burnRateThreshold: 2,
           reason:
             'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo,asia. Alert when above 2 for both windows',
-          alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+          alertDetailsUrl: 'https://kibana.dev/s/irrelevant/app/observability/alerts/uuid-foo,asia',
         }),
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(2, {
@@ -467,22 +458,8 @@ describe('BurnRateRuleExecutor', () => {
           burnRateThreshold: 2,
           reason:
             'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar,asia. Alert when above 2 for both windows',
-          alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+          alertDetailsUrl: 'https://kibana.dev/s/irrelevant/app/observability/alerts/uuid-bar,asia',
         }),
-      });
-
-      expect(alertsLocatorMock.getLocation).toHaveBeenCalledTimes(2);
-      expect(alertsLocatorMock.getLocation).toHaveBeenNthCalledWith(1, {
-        baseUrl: 'https://kibana.dev',
-        kuery: 'kibana.alert.uuid: "uuid-foo,asia"',
-        rangeFrom: expect.stringMatching(ISO_DATE_REGEX),
-        spaceId: 'irrelevant',
-      });
-      expect(alertsLocatorMock.getLocation).toHaveBeenNthCalledWith(2, {
-        baseUrl: 'https://kibana.dev',
-        kuery: 'kibana.alert.uuid: "uuid-bar,asia"',
-        rangeFrom: expect.stringMatching(ISO_DATE_REGEX),
-        spaceId: 'irrelevant',
       });
     });
 
@@ -539,7 +516,6 @@ describe('BurnRateRuleExecutor', () => {
 
       const executor = getRuleExecutor({
         basePath: basePathMock,
-        alertsLocator: alertsLocatorMock,
       });
 
       await executor({
@@ -609,7 +585,7 @@ describe('BurnRateRuleExecutor', () => {
           burnRateThreshold: 2,
           reason:
             'SUPPRESSED - CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo. Alert when above 2 for both windows',
-          alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+          alertDetailsUrl: 'https://kibana.dev/s/irrelevant/app/observability/alerts/uuid-foo',
         }),
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(2, {
@@ -620,15 +596,8 @@ describe('BurnRateRuleExecutor', () => {
           burnRateThreshold: 2,
           reason:
             'SUPPRESSED - CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar. Alert when above 2 for both windows',
-          alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+          alertDetailsUrl: 'https://kibana.dev/s/irrelevant/app/observability/alerts/uuid-bar',
         }),
-      });
-
-      expect(alertsLocatorMock.getLocation).toBeCalledWith({
-        baseUrl: 'https://kibana.dev',
-        kuery: 'kibana.alert.uuid: "uuid-foo"',
-        rangeFrom: expect.stringMatching(ISO_DATE_REGEX),
-        spaceId: 'irrelevant',
       });
     });
 

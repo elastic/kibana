@@ -5,39 +5,40 @@
  * 2.0.
  */
 
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let roleAuthc: RoleCredentials;
-  let internalReqHeader: InternalRequestHeader;
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('security/anonymous', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'admin',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        }
+      );
     });
-    after(async () => {
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-    });
+
     describe('route access', () => {
       describe('disabled', () => {
         it('get access capabilities', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .get('/internal/security/anonymous_access/capabilities')
-            .set(internalReqHeader)
-            .set(roleAuthc.apiKeyHeader);
+          const { body, status } = await supertestAdminWithCookieCredentials.get(
+            '/internal/security/anonymous_access/capabilities'
+          );
+
           svlCommonApi.assertApiNotFound(body, status);
         });
 
         it('get access state', async () => {
-          const { body, status } = await supertestWithoutAuth
-            .get('/internal/security/anonymous_access/state')
-            .set(internalReqHeader)
-            .set(roleAuthc.apiKeyHeader);
+          const { body, status } = await supertestAdminWithCookieCredentials.get(
+            '/internal/security/anonymous_access/state'
+          );
+
           svlCommonApi.assertApiNotFound(body, status);
         });
       });

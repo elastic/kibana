@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SetupPlugins } from '../../../plugin_contract';
 import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import { osqueryResponseAction } from './osquery_response_action';
 import { endpointResponseAction } from './endpoint_response_action';
 import type { ScheduleNotificationActions } from '../rule_types/types';
-import type { AlertWithAgent, Alert } from './types';
+import type { Alert, AlertWithAgent } from './types';
 
 interface ScheduleNotificationResponseActionsService {
   endpointAppContextService: EndpointAppContextService;
@@ -23,10 +24,18 @@ export const getScheduleNotificationResponseActionsService =
     osqueryCreateActionService,
     endpointAppContextService,
   }: ScheduleNotificationResponseActionsService) =>
-  async ({ signals, responseActions }: ScheduleNotificationActions) => {
-    const alerts = (signals as Alert[]).filter((alert) => alert.agent?.id) as AlertWithAgent[];
+  async ({ signals, signalsCount, responseActions }: ScheduleNotificationActions) => {
+    if (!signalsCount || !responseActions?.length) {
+      return;
+    }
+    // expandDottedObject is needed eg in ESQL rule because it's alerts come without nested agent, host etc data but everything is dotted
+    const nestedAlerts = signals.map((signal) => expandDottedObject(signal as object)) as Alert[];
+    const alerts = nestedAlerts.filter((alert) => alert.agent?.id) as AlertWithAgent[];
 
-    await Promise.all(
+    if (!alerts.length) {
+      return;
+    }
+    return Promise.all(
       responseActions.map(async (responseAction) => {
         if (
           responseAction.actionTypeId === ResponseActionTypesEnum['.osquery'] &&

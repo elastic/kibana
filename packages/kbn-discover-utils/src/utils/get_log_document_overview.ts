@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -16,7 +17,7 @@ export function getLogDocumentOverview(
 ): LogDocumentOverview {
   const formatField = <T extends keyof LogDocumentOverview>(field: T) => {
     return (
-      field in doc.flattened
+      doc.flattened[field] !== undefined && doc.flattened[field] !== null
         ? formatFieldValue(
             doc.flattened[field],
             doc.raw,
@@ -31,19 +32,9 @@ export function getLogDocumentOverview(
   const levelArray = doc.flattened[fieldConstants.LOG_LEVEL_FIELD];
   const level =
     Array.isArray(levelArray) && levelArray.length ? levelArray[0].toLowerCase() : levelArray;
-  const messageArray = doc.flattened[fieldConstants.MESSAGE_FIELD];
-  const message =
-    Array.isArray(messageArray) && messageArray.length ? messageArray[0] : messageArray;
-  const errorMessageArray = doc.flattened[fieldConstants.ERROR_MESSAGE_FIELD];
-  const errorMessage =
-    Array.isArray(errorMessageArray) && errorMessageArray.length
-      ? errorMessageArray[0]
-      : errorMessageArray;
-  const eventOriginalArray = doc.flattened[fieldConstants.EVENT_ORIGINAL_FIELD];
-  const eventOriginal =
-    Array.isArray(eventOriginalArray) && eventOriginalArray.length
-      ? eventOriginalArray[0]
-      : eventOriginalArray;
+  const message = formatField(fieldConstants.MESSAGE_FIELD);
+  const errorMessage = formatField(fieldConstants.ERROR_MESSAGE_FIELD);
+  const eventOriginal = formatField(fieldConstants.EVENT_ORIGINAL_FIELD);
   const timestamp = formatField(fieldConstants.TIMESTAMP_FIELD);
 
   // Service

@@ -104,7 +104,7 @@ describe('Connector', () => {
     );
 
     expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
-    userEvent.click(await screen.findByTestId('dropdown-connectors'));
+    await userEvent.click(await screen.findByTestId('dropdown-connectors'));
 
     await waitForEuiPopoverOpen();
 
@@ -124,11 +124,11 @@ describe('Connector', () => {
     );
 
     expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
-    userEvent.click(await screen.findByTestId('dropdown-connectors'));
+    await userEvent.click(await screen.findByTestId('dropdown-connectors'));
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(await screen.findByTestId('dropdown-connector-resilient-2'));
+    await userEvent.click(await screen.findByTestId('dropdown-connector-resilient-2'));
 
     expect(await screen.findByTestId('connector-fields-resilient')).toBeInTheDocument();
   });

@@ -22,7 +22,7 @@ import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '@kbn/maps-plugin/common
 import { type MLAnomalyDoc, ML_SEVERITY_COLOR_RAMP } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import type { MlApiServices } from '../application/services/ml_api_service';
+import type { MlApi } from '../application/services/ml_api_service';
 import { tabColor } from '../../common/util/group_color_utils';
 import { getIndexPattern } from '../application/explorer/reducers/explorer_reducer/get_index_pattern';
 import { AnomalySource } from './anomaly_source';
@@ -162,7 +162,7 @@ export function getInitialSourceIndexFieldLayers(sourceIndexWithGeoFields: Sourc
 }
 
 export async function getResultsForJobId(
-  mlResultsService: MlApiServices['results'],
+  mlResultsService: MlApi['results'],
   jobId: string,
   locationType: MlAnomalyLayersType,
   searchFilters: VectorSourceRequestMeta

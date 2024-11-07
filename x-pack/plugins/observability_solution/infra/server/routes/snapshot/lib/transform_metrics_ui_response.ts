@@ -6,15 +6,17 @@
  */
 
 import { get, max, sum, last, isNumber } from 'lodash';
-import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import {
-  MetricsAPIResponse,
-  SnapshotNodeResponse,
+import type {
   MetricsAPIRequest,
+  MetricsAPIResponse,
   MetricsAPIRow,
+  MetricsAPISeries,
+  SnapshotMetricType,
+} from '@kbn/metrics-data-access-plugin/common';
+import {
+  SnapshotNodeResponse,
   SnapshotRequest,
   SnapshotNode,
-  MetricsAPISeries,
   SnapshotNodeMetric,
 } from '../../../../common/http_api';
 import { META_KEY } from './constants';

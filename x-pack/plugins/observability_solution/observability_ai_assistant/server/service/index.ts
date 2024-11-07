@@ -12,20 +12,15 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
-import {
-  KnowledgeBaseEntryRole,
-  ObservabilityAIAssistantScreenContextRequest,
-} from '../../common/types';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ChatFunctionClient } from './chat_function_client';
 import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
 import { kbComponentTemplate } from './kb_component_template';
-import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './knowledge_base_service';
-import { registerMigrateKnowledgeBaseEntriesTask } from './task_manager_definitions/register_migrate_knowledge_base_entries_task';
-import { registerIndexQueuedDocumentsTask } from './task_manager_definitions/register_index_queued_documents_task';
+import { KnowledgeBaseService } from './knowledge_base_service';
 import type { RegistrationCallback, RespondFunctionResources } from './types';
-import { splitKbText } from './util/split_kb_text';
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -50,24 +45,12 @@ export const resourceNames = {
   },
 };
 
-export const INDEX_QUEUED_DOCUMENTS_TASK_ID = 'observabilityAIAssistant:indexQueuedDocumentsTask';
-
-export const INDEX_QUEUED_DOCUMENTS_TASK_TYPE = INDEX_QUEUED_DOCUMENTS_TASK_ID + 'Type';
-
-type KnowledgeBaseEntryRequest = { id: string; labels?: Record<string, string> } & (
-  | {
-      text: string;
-    }
-  | {
-      texts: string[];
-    }
-);
-
 export class ObservabilityAIAssistantService {
   private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   private readonly logger: Logger;
   private readonly getSearchConnectorModelId: () => Promise<string>;
   private kbService?: KnowledgeBaseService;
+  private enableKnowledgeBase: boolean;
 
   private readonly registrations: RegistrationCallback[] = [];
 
@@ -76,6 +59,7 @@ export class ObservabilityAIAssistantService {
     core,
     taskManager,
     getSearchConnectorModelId,
+    enableKnowledgeBase,
   }: {
     logger: Logger;
     core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -85,20 +69,9 @@ export class ObservabilityAIAssistantService {
     this.core = core;
     this.logger = logger;
     this.getSearchConnectorModelId = getSearchConnectorModelId;
+    this.enableKnowledgeBase = enableKnowledgeBase;
 
     this.registerInit();
-
-    const getTaskManagerStart = async () => {
-      const [, pluginsStart] = await core.getStartServices();
-      return pluginsStart.taskManager;
-    };
-
-    registerIndexQueuedDocumentsTask({
-      taskManager,
-      logger,
-      getKbService: () => this.kbService,
-      getTaskManagerStart,
-    });
 
     registerMigrateKnowledgeBaseEntriesTask({
       taskManager,
@@ -212,6 +185,7 @@ export class ObservabilityAIAssistantService {
         esClient,
         taskManagerStart: pluginsStart.taskManager,
         getSearchConnectorModelId: this.getSearchConnectorModelId,
+        enabled: this.enableKnowledgeBase,
       });
 
       this.logger.info('Successfully set up index assets');
@@ -224,8 +198,10 @@ export class ObservabilityAIAssistantService {
 
   async getClient({
     request,
+    scopes,
   }: {
     request: KibanaRequest;
+    scopes?: AssistantScope[];
   }): Promise<ObservabilityAIAssistantClient> {
     const controller = new AbortController();
 
@@ -264,6 +240,7 @@ export class ObservabilityAIAssistantService {
           }
         : undefined,
       knowledgeBaseService: this.kbService!,
+      scopes: scopes || ['all'],
     });
   }
 
@@ -272,11 +249,13 @@ export class ObservabilityAIAssistantService {
     signal,
     resources,
     client,
+    scopes,
   }: {
     screenContexts: ObservabilityAIAssistantScreenContextRequest[];
     signal: AbortSignal;
     resources: RespondFunctionResources;
     client: ObservabilityAIAssistantClient;
+    scopes: AssistantScope[];
   }): Promise<ChatFunctionClient> {
     const fnClient = new ChatFunctionClient(screenContexts);
 
@@ -285,6 +264,7 @@ export class ObservabilityAIAssistantService {
       functions: fnClient,
       resources,
       client,
+      scopes,
     };
 
     await Promise.all(
@@ -297,61 +277,6 @@ export class ObservabilityAIAssistantService {
     );
 
     return fnClient;
-  }
-
-  addToKnowledgeBaseQueue(entries: KnowledgeBaseEntryRequest[]): void {
-    this.init()
-      .then(() => {
-        this.kbService!.queue(
-          entries.flatMap((entry) => {
-            const entryWithSystemProperties = {
-              ...entry,
-              '@timestamp': new Date().toISOString(),
-              doc_id: entry.id,
-              public: true,
-              confidence: 'high' as const,
-              type: 'contextual' as const,
-              is_correction: false,
-              labels: {
-                ...entry.labels,
-              },
-              role: KnowledgeBaseEntryRole.Elastic,
-            };
-
-            const operations =
-              'texts' in entryWithSystemProperties
-                ? splitKbText(entryWithSystemProperties)
-                : [
-                    {
-                      type: KnowledgeBaseEntryOperationType.Index,
-                      document: entryWithSystemProperties,
-                    },
-                  ];
-
-            return operations;
-          })
-        );
-      })
-      .catch((error) => {
-        this.logger.error(
-          `Could not index ${entries.length} entries because of an initialisation error`
-        );
-        this.logger.error(error);
-      });
-  }
-
-  addCategoryToKnowledgeBase(categoryId: string, entries: KnowledgeBaseEntryRequest[]) {
-    this.addToKnowledgeBaseQueue(
-      entries.map((entry) => {
-        return {
-          ...entry,
-          labels: {
-            ...entry.labels,
-            category: categoryId,
-          },
-        };
-      })
-    );
   }
 
   register(cb: RegistrationCallback) {

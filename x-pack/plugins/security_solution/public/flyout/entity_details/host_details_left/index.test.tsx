@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { RISK_INPUTS_TAB_TEST_ID } from '../../../entity_analytics/components/entity_details_flyout';
+import {
+  RISK_INPUTS_TAB_TEST_ID,
+  INSIGHTS_TAB_TEST_ID,
+} from '../../../entity_analytics/components/entity_details_flyout';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { HostDetailsPanel } from '.';
@@ -58,5 +61,35 @@ describe('HostDetailsPanel', () => {
       }
     );
     expect(queryByTestId(RISK_INPUTS_TAB_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it("doesn't render insights panel when there no misconfiguration findings", () => {
+    const { queryByTestId } = render(
+      <HostDetailsPanel
+        name="elastic"
+        isRiskScoreExist={false}
+        scopeId={'scopeId'}
+        hasMisconfigurationFindings={false}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
+    expect(queryByTestId(INSIGHTS_TAB_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('render insights panel when there are misconfiguration findings', () => {
+    const { queryByTestId } = render(
+      <HostDetailsPanel
+        name="elastic"
+        isRiskScoreExist={false}
+        scopeId={'scopeId'}
+        hasMisconfigurationFindings={true}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
+    expect(queryByTestId(INSIGHTS_TAB_TEST_ID)).toBeInTheDocument();
   });
 });

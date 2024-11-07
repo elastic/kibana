@@ -7,7 +7,6 @@
 
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { resolve } from 'path';
-// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT } from '@kbn/repo-info';
 import Fs from 'fs';
 import { createFlagError } from '@kbn/dev-cli-errors';

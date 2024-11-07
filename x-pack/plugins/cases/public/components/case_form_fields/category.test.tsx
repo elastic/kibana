@@ -98,8 +98,8 @@ describe('Category', () => {
       </FormComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), `${category}{enter}`);
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.type(screen.getByRole('combobox'), `${category}{enter}`);
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import './source.scss';
 
 import React, { useEffect, useState } from 'react';
@@ -16,6 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { isLegacyTableEnabled, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
+import { omit } from 'lodash';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { useEsDocSearch } from '../../hooks';
 import { getHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
@@ -68,7 +71,7 @@ export const DocViewerSource = ({
 
   useEffect(() => {
     if (requestState === ElasticRequestState.Found && hit) {
-      setJsonValue(JSON.stringify(hit.raw, undefined, 2));
+      setJsonValue(JSON.stringify(omit(hit.raw, '_score'), undefined, 2));
     }
   }, [requestState, hit]);
 

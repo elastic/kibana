@@ -54,6 +54,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       message: {
         role: MessageRole.User,
         content: 'Good morning, bot!',
+        // make sure it doesn't 400 on `data` being set
+        data: '{}',
       },
     },
   ];
@@ -82,13 +84,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             connectorId,
             persist: true,
             screenContexts: params.screenContexts || [],
+            scopes: ['all'],
           })
-          .end((err, response) => {
-            if (err) {
-              return reject(err);
-            }
-            return resolve(response);
-          });
+          .then((response) => resolve(response))
+          .catch((err) => reject(err));
       });
 
       const [conversationSimulator, titleSimulator] = await Promise.all([
@@ -138,6 +137,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           connectorId,
           persist: false,
           screenContexts: [],
+          scopes: ['all'],
         })
         .pipe(passThrough);
 
@@ -222,7 +222,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when creating a new conversation', async () => {
+    describe('when creating a new conversation', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
@@ -290,7 +290,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         )[0]?.conversation.id;
 
         await observabilityAIAssistantAPIClient
-          .adminUser({
+          .admin({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -302,7 +302,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('after executing a screen context action', async () => {
+    describe('after executing a screen context action', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
@@ -366,7 +366,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).to.eql(0);
 
         const conversations = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/conversations',
           })
           .expect(200);
@@ -375,12 +375,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when updating an existing conversation', async () => {
+    describe('when updating an existing conversation', () => {
       let conversationCreatedEvent: ConversationCreateEvent;
       let conversationUpdatedEvent: ConversationUpdateEvent;
 
       before(async () => {
-        proxy
+        void proxy
           .intercept('conversation_title', (body) => isFunctionTitleRequest(body), [
             {
               function_call: {
@@ -391,12 +391,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ])
           .completeAfterIntercept();
 
-        proxy
+        void proxy
           .intercept('conversation', (body) => !isFunctionTitleRequest(body), 'Good morning, sir!')
           .completeAfterIntercept();
 
         const createResponse = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
             params: {
               body: {
@@ -404,6 +404,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 connectorId,
                 persist: true,
                 screenContexts: [],
+                scopes: ['observability'],
               },
             },
           })
@@ -414,7 +415,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
 
         const conversationId = conversationCreatedEvent.conversation.id;
-        const fullConversation = await observabilityAIAssistantAPIClient.editorUser({
+        const fullConversation = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
           params: {
             path: {
@@ -423,12 +424,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
 
-        proxy
+        void proxy
           .intercept('conversation', (body) => !isFunctionTitleRequest(body), 'Good night, sir!')
           .completeAfterIntercept();
 
         const updatedResponse = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
             params: {
               body: {
@@ -446,6 +447,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 persist: true,
                 screenContexts: [],
                 conversationId,
+                scopes: ['observability'],
               },
             },
           })
@@ -458,7 +460,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {

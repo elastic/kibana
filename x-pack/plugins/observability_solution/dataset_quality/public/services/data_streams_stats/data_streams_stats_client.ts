@@ -7,22 +7,25 @@
 
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import rison from '@kbn/rison';
+import { KNOWN_TYPES } from '../../../common/constants';
 import {
-  getDataStreamsDegradedDocsStatsResponseRt,
+  DataStreamDegradedDocsResponse,
+  DataStreamTotalDocsResponse,
+  getDataStreamDegradedDocsResponseRt,
   getDataStreamsStatsResponseRt,
+  getDataStreamTotalDocsResponseRt,
   getIntegrationsResponseRt,
   getNonAggregatableDatasetsRt,
   IntegrationResponse,
   NonAggregatableDatasets,
 } from '../../../common/api_types';
-import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
-  GetDataStreamsDegradedDocsStatsResponse,
   GetDataStreamsStatsQuery,
   GetDataStreamsStatsResponse,
-  GetIntegrationsParams,
+  GetDataStreamsTotalDocsQuery,
   GetNonAggregatableDataStreamsParams,
 } from '../../../common/data_streams_stats';
 import { Integration } from '../../../common/data_streams_stats/integration';
@@ -33,11 +36,15 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   constructor(private readonly http: HttpStart) {}
 
   public async getDataStreamsStats(
-    params: GetDataStreamsStatsQuery = { type: DEFAULT_DATASET_TYPE }
+    params: GetDataStreamsStatsQuery
   ): Promise<DataStreamStatServiceResponse> {
+    const types = params.types.length === 0 ? KNOWN_TYPES : params.types;
     const response = await this.http
       .get<GetDataStreamsStatsResponse>('/internal/dataset_quality/data_streams/stats', {
-        query: params,
+        query: {
+          ...params,
+          types: rison.encodeArray(types),
+        },
       })
       .catch((error) => {
         throw new DatasetQualityError(`Failed to fetch data streams stats: ${error}`, error);
@@ -52,17 +59,37 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     return { dataStreamsStats, datasetUserPrivileges };
   }
 
-  public async getDataStreamsDegradedStats(params: GetDataStreamsDegradedDocsStatsQuery) {
+  public async getDataStreamsTotalDocs(params: GetDataStreamsTotalDocsQuery) {
     const response = await this.http
-      .get<GetDataStreamsDegradedDocsStatsResponse>(
-        '/internal/dataset_quality/data_streams/degraded_docs',
-        {
-          query: {
-            ...params,
-            type: DEFAULT_DATASET_TYPE,
-          },
-        }
-      )
+      .get<DataStreamTotalDocsResponse>('/internal/dataset_quality/data_streams/total_docs', {
+        query: {
+          ...params,
+        },
+      })
+      .catch((error) => {
+        throw new DatasetQualityError(`Failed to fetch data streams total docs: ${error}`, error);
+      });
+
+    const { totalDocs } = decodeOrThrow(
+      getDataStreamTotalDocsResponseRt,
+      (message: string) =>
+        new DatasetQualityError(
+          `Failed to decode data streams total docs stats response: ${message}`
+        )
+    )(response);
+
+    return totalDocs;
+  }
+
+  public async getDataStreamsDegradedStats(params: GetDataStreamsDegradedDocsStatsQuery) {
+    const types = params.types.length === 0 ? KNOWN_TYPES : params.types;
+    const response = await this.http
+      .get<DataStreamDegradedDocsResponse>('/internal/dataset_quality/data_streams/degraded_docs', {
+        query: {
+          ...params,
+          types: rison.encodeArray(types),
+        },
+      })
       .catch((error) => {
         throw new DatasetQualityError(
           `Failed to fetch data streams degraded stats: ${error}`,
@@ -71,7 +98,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
       });
 
     const { degradedDocs } = decodeOrThrow(
-      getDataStreamsDegradedDocsStatsResponseRt,
+      getDataStreamDegradedDocsResponseRt,
       (message: string) =>
         new DatasetQualityError(
           `Failed to decode data streams degraded docs stats response: ${message}`
@@ -82,11 +109,12 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   }
 
   public async getNonAggregatableDatasets(params: GetNonAggregatableDataStreamsParams) {
+    const types = params.types.length === 0 ? KNOWN_TYPES : params.types;
     const response = await this.http
       .get<NonAggregatableDatasets>('/internal/dataset_quality/data_streams/non_aggregatable', {
         query: {
           ...params,
-          type: DEFAULT_DATASET_TYPE,
+          types: rison.encodeArray(types),
         },
       })
       .catch((error) => {
@@ -102,13 +130,9 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     return nonAggregatableDatasets;
   }
 
-  public async getIntegrations(
-    params: GetIntegrationsParams['query'] = { type: DEFAULT_DATASET_TYPE }
-  ): Promise<Integration[]> {
+  public async getIntegrations(): Promise<Integration[]> {
     const response = await this.http
-      .get<IntegrationResponse>('/internal/dataset_quality/integrations', {
-        query: params,
-      })
+      .get<IntegrationResponse>('/internal/dataset_quality/integrations')
       .catch((error) => {
         throw new DatasetQualityError(`Failed to fetch integrations: ${error}`, error);
       });

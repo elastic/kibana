@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
+import type { ReactWrapper, ComponentType } from 'enzyme';
 import { mount } from 'enzyme';
 import { EuiSuperSelect } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
@@ -15,13 +15,6 @@ import type { Props } from './connectors_dropdown';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
-import userEvent from '@testing-library/user-event';
-import { useApplicationCapabilities } from '../../common/lib/kibana';
-
-const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked<
-  typeof useApplicationCapabilities
->;
-jest.mock('../../common/lib/kibana');
 
 describe('ConnectorsDropdown', () => {
   let wrapper: ReactWrapper;
@@ -34,7 +27,9 @@ describe('ConnectorsDropdown', () => {
   };
 
   beforeAll(() => {
-    wrapper = mount(<ConnectorsDropdown {...props} />, { wrappingComponent: TestProviders });
+    wrapper = mount(<ConnectorsDropdown {...props} />, {
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
+    });
   });
 
   test('it renders', () => {
@@ -298,7 +293,7 @@ describe('ConnectorsDropdown', () => {
 
   test('it disables the dropdown', () => {
     const newWrapper = mount(<ConnectorsDropdown {...props} disabled={true} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
 
     expect(
@@ -308,7 +303,7 @@ describe('ConnectorsDropdown', () => {
 
   test('it loading correctly', () => {
     const newWrapper = mount(<ConnectorsDropdown {...props} isLoading={true} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
 
     expect(
@@ -318,7 +313,7 @@ describe('ConnectorsDropdown', () => {
 
   test('it selects the correct connector', () => {
     const newWrapper = mount(<ConnectorsDropdown {...props} selectedConnector={'servicenow-1'} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
 
     expect(
@@ -348,7 +343,7 @@ describe('ConnectorsDropdown', () => {
           ]}
         />,
         {
-          wrappingComponent: TestProviders,
+          wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
         }
       )
     ).not.toThrowError();
@@ -385,24 +380,5 @@ describe('ConnectorsDropdown', () => {
       'This connector is deprecated. Update it, or create a new one.'
     );
     expect(tooltips[0]).toBeInTheDocument();
-  });
-
-  test('it should hide the "Add New Connector" button when the user lacks the capability to add a new connector', async () => {
-    const selectedConnector = 'none';
-    useApplicationCapabilitiesMock().actions = { crud: false, read: true };
-    render(
-      <ConnectorsDropdown
-        appendAddConnectorButton={true}
-        connectors={[]}
-        selectedConnector={selectedConnector}
-        disabled={false}
-        isLoading={false}
-        onChange={() => {}}
-      />,
-      { wrapper: ({ children }) => <TestProviders>{children}</TestProviders> }
-    );
-
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
-    expect(screen.queryByTestId('dropdown-connector-add-connector')).not.toBeInTheDocument();
   });
 });

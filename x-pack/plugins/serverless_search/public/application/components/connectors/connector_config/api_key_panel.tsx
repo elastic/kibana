@@ -23,11 +23,13 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OPTIONAL_LABEL } from '../../../../../common/i18n_string';
 import { useCreateApiKey } from '../../../hooks/api/use_create_api_key';
+import { useGetApiKeys } from '../../../hooks/api/use_api_key';
 interface ApiKeyPanelProps {
   connector: Connector;
 }
 export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ connector }) => {
   const { data, isLoading, mutate } = useCreateApiKey();
+  const { data: apiKeysData } = useGetApiKeys();
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
@@ -59,7 +61,7 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ connector }) => {
       <span>
         <EuiButton
           data-test-subj="serverlessSearchApiKeyPanelNewApiKeyButton"
-          isDisabled={!connector.index_name}
+          isDisabled={!connector.index_name || !apiKeysData?.canManageOwnApiKey}
           isLoading={isLoading}
           iconType="plusInCircle"
           color="primary"

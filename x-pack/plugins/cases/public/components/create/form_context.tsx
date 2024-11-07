@@ -52,7 +52,7 @@ export const FormContext: React.FC<Props> = ({
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
 
   const submitCase = useCallback(
-    async (data: CasePostRequest, isValid) => {
+    async (data: CasePostRequest, isValid: boolean) => {
       if (isValid) {
         startTransaction({ appId, attachments });
 

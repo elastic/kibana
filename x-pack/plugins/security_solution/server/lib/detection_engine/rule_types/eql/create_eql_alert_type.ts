@@ -20,7 +20,8 @@ import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_a
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, version, licensing } = createOptions;
+  const { experimentalFeatures, version, licensing, scheduleNotificationResponseActionsService } =
+    createOptions;
   return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
@@ -78,6 +79,7 @@ export const createEqlAlertType = (
           alertTimestampOverride,
           publicBaseUrl,
           alertWithSuppression,
+          intendedTimestamp,
         },
         services,
         state,
@@ -100,12 +102,13 @@ export const createEqlAlertType = (
           publicBaseUrl,
           primaryTimestamp,
           secondaryTimestamp,
+          intendedTimestamp,
         });
       const isNonSeqAlertSuppressionActive = await getIsAlertSuppressionActive({
         alertSuppression: completeRule.ruleParams.alertSuppression,
         licensing,
       });
-      const result = await eqlExecutor({
+      const { result, loggedRequests } = await eqlExecutor({
         completeRule,
         tuple,
         inputIndex,
@@ -125,8 +128,10 @@ export const createEqlAlertType = (
         alertWithSuppression,
         isAlertSuppressionActive: isNonSeqAlertSuppressionActive,
         experimentalFeatures,
+        state,
+        scheduleNotificationResponseActionsService,
       });
-      return { ...result, state };
+      return { ...result, state, ...(loggedRequests ? { loggedRequests } : {}) };
     },
   };
 };

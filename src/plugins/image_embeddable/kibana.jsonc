@@ -1,14 +1,27 @@
 {
   "type": "plugin",
   "id": "@kbn/image-embeddable-plugin",
-  "owner": "@elastic/appex-sharedux",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "description": "Image embeddable",
   "plugin": {
     "id": "imageEmbeddable",
-    "server": false,
     "browser": true,
-    "requiredPlugins": ["embeddable", "files", "uiActions", "kibanaReact"],
-    "optionalPlugins": ["security", "screenshotMode", "embeddableEnhanced"],
+    "server": false,
+    "requiredPlugins": [
+      "embeddable",
+      "files",
+      "uiActions",
+      "kibanaReact"
+    ],
+    "optionalPlugins": [
+      "security",
+      "screenshotMode",
+      "embeddableEnhanced"
+    ],
     "requiredBundles": []
   }
 }

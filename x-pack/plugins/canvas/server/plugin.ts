@@ -11,7 +11,6 @@ import {
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
@@ -20,7 +19,6 @@ import { ReportingServerPluginSetup } from '@kbn/reporting-server';
 import { getCanvasFeature } from './feature';
 import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
-import { loadSampleData } from './sample_data';
 import { setupInterpreter } from './setup_interpreter';
 import { customElementType, workpadTypeFactory, workpadTemplateType } from './saved_objects';
 import type { CanvasSavedObjectTypeMigrationsDeps } from './saved_objects/migrations';
@@ -33,7 +31,6 @@ interface PluginsSetup {
   embeddable: EmbeddableSetup;
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
-  bfetch: BfetchServerSetup;
   data: DataPluginSetup;
   reporting?: ReportingServerPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -81,14 +78,8 @@ export class CanvasPlugin implements Plugin {
     initRoutes({
       router: canvasRouter,
       expressions: expressionsSetup,
-      bfetch: plugins.bfetch,
       logger: this.logger,
     });
-
-    loadSampleData(
-      plugins.home.sampleData.addSavedObjectsToSampleDataset,
-      plugins.home.sampleData.addAppLinksToSampleDataset
-    );
 
     const getIndexForType = (type: string) =>
       coreSetup

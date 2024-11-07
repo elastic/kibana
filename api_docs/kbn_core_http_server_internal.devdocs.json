@@ -235,9 +235,9 @@
           " implements ",
           {
             "pluginId": "@kbn/server-http-tools",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnServerHttpToolsPluginApi",
-            "section": "def-common.IHttpConfig",
+            "section": "def-server.IHttpConfig",
             "text": "IHttpConfig"
           }
         ],
@@ -475,9 +475,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/server-http-tools",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnServerHttpToolsPluginApi",
-                "section": "def-common.SslConfig",
+                "section": "def-server.SslConfig",
                 "text": "SslConfig"
               }
             ],
@@ -1123,7 +1123,9 @@
           },
           ", server: ",
           "Server",
-          ", cookieOptions: ",
+          "<",
+          "ServerApplicationState",
+          ">, cookieOptions: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -1176,7 +1178,10 @@
               "- hapi server to create SessionStorage for"
             ],
             "signature": [
-              "Server"
+              "Server",
+              "<",
+              "ServerApplicationState",
+              ">"
             ],
             "path": "packages/core/http/core-http-server-internal/src/cookie_session_storage.ts",
             "deprecated": false,

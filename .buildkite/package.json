@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@octokit/rest": "^18.10.0",
-    "axios": "^1.6.3",
+    "axios": "^1.7.4",
     "globby": "^11.1.0",
     "js-yaml": "^4.1.0",
     "minimatch": "^5.0.1",

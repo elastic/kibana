@@ -10,6 +10,6 @@ import { createStatefulTestConfig } from '../../default_configs/stateful.config.
 export default createStatefulTestConfig({
   testFiles: [require.resolve('./oblt.index.ts')],
   junit: {
-    reportName: 'Observibility Stateful - Deployment-agnostic API Integration Tests',
+    reportName: 'Stateful Observability - Deployment-agnostic API Integration Tests',
   },
 });

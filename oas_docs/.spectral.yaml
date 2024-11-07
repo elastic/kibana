@@ -47,6 +47,14 @@ rules:
       function: pattern
       functionOptions:
         notMatch: /(blacklist|whitelist|execute|kill)/i
+  property-description:
+    description: Properties should have descriptions.
+    message: "Each property should have a description"
+    severity: warn
+    given: $.components.schemas.*.properties.*
+    then:
+      field: description
+      function: defined 
   # Examples
   operation-success-examples:
     formats: ['oas3_1']

@@ -8,4 +8,4 @@ This package contains utilities for ES|QL.
 - *removeDropCommandsFromESQLQuery*: Use this function to remove all the occurences of the `drop` command from the query.
 - *appendToESQLQuery*: Use this function to append more pipes in an existing ES|QL query. It adds the additional commands in a new line. 
 - *appendWhereClauseToESQLQuery*: Use this function to append where clause in an existing query. 
-
+- *retrieveMetadataColumns*: Use this function to get if there is a metadata option in the from command, and retrieve the columns if so

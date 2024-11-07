@@ -151,7 +151,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
       name: i18n.translate('xpack.ml.trainedModels.nodesList.nodeMemoryUsageHeader', {
         defaultMessage: 'Memory usage',
       }),
-      truncateText: true,
+      truncateText: false,
       'data-test-subj': 'mlNodesTableColumnMemoryUsage',
       render: (v: NodeItem) => {
         return <MemoryPreviewChart memoryOverview={v.memory_overview} />;
@@ -185,6 +185,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
     },
     box: {
       incremental: true,
+      'data-test-subj': 'mlNodesTableSearchInput',
     },
   };
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject, filter, map, mergeMap, Observable, share, Subject, tap } from 'rxjs';
@@ -184,8 +185,14 @@ export function getDataStateContainer({
     documents$: new BehaviorSubject<DataDocumentsMsg>(initialState),
     totalHits$: new BehaviorSubject<DataTotalHitsMsg>(initialState),
   };
+  // This is debugging code, helping you to understand which messages are sent to the data observables
+  // Adding a debugger in the functions can be helpful to understand what triggers a message
+  // dataSubjects.main$.subscribe((msg) => addLog('dataSubjects.main$', msg));
+  // dataSubjects.documents$.subscribe((msg) => addLog('dataSubjects.documents$', msg));
+  // dataSubjects.totalHits$.subscribe((msg) => addLog('dataSubjects.totalHits$', msg););
+  // Add window.ELASTIC_DISCOVER_LOGGER = 'debug' to see messages in console
 
-  let autoRefreshDone: AutoRefreshDoneFn | undefined;
+  let autoRefreshDone: AutoRefreshDoneFn | undefined | null = null;
   /**
    * handler emitted by `timefilter.getAutoRefreshFetch$()`
    * to notify when data completed loading and to start a new autorefresh loop
@@ -274,25 +281,33 @@ export function getDataStateContainer({
               const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
               const { esqlQueryColumns } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
-
-              if (dataView) {
-                const stateUpdate = getDefaultProfileState({
-                  profilesManager,
-                  resetDefaultProfileState,
-                  defaultColumns,
-                  dataView,
-                  esqlQueryColumns,
+              const clearResetProfileState = () => {
+                internalStateContainer.transitions.setResetDefaultProfileState({
+                  columns: false,
+                  rowHeight: false,
                 });
+              };
 
-                if (stateUpdate) {
-                  await appStateContainer.replaceUrlState(stateUpdate);
-                }
+              if (!dataView) {
+                clearResetProfileState();
+                return;
               }
 
-              internalStateContainer.transitions.setResetDefaultProfileState({
-                columns: false,
-                rowHeight: false,
+              const stateUpdate = getDefaultProfileState({
+                profilesManager,
+                resetDefaultProfileState,
+                defaultColumns,
+                dataView,
+                esqlQueryColumns,
               });
+
+              if (!stateUpdate) {
+                clearResetProfileState();
+                return;
+              }
+
+              await appStateContainer.replaceUrlState(stateUpdate);
+              clearResetProfileState();
             }
           );
 
@@ -304,8 +319,8 @@ export function getDataStateContainer({
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
           // replacing this current one, call it to make sure we tell that the auto refresh is done
-          // and a new one can be scheduled.
-          if (autoRefreshDone === prevAutoRefreshDone) {
+          // and a new one can be scheduled. null is checked to always start initial looping.
+          if (autoRefreshDone === prevAutoRefreshDone || prevAutoRefreshDone === null) {
             // if this function was set and is executed, another refresh fetch can be triggered
             autoRefreshDone?.();
             autoRefreshDone = undefined;

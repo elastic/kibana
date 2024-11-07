@@ -11,6 +11,8 @@ export enum InferenceConnectorType {
   Gemini = '.gemini',
 }
 
+const allSupportedConnectorTypes = Object.values(InferenceConnectorType);
+
 export interface InferenceConnector {
   type: InferenceConnectorType;
   name: string;
@@ -18,9 +20,5 @@ export interface InferenceConnector {
 }
 
 export function isSupportedConnectorType(id: string): id is InferenceConnectorType {
-  return (
-    id === InferenceConnectorType.OpenAI ||
-    id === InferenceConnectorType.Bedrock ||
-    id === InferenceConnectorType.Gemini
-  );
+  return allSupportedConnectorTypes.includes(id as InferenceConnectorType);
 }

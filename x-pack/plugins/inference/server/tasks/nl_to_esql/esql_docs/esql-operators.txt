@@ -1,0 +1,249 @@
+# ES|QL Operators
+
+This document provides an overview of the operators supported by ES|QL.
+
+## Binary Operators
+
+### Equality `==`
+
+The equality operator checks if the values of two operands are equal or not.
+
+Example:
+
+```esql
+FROM employees
+| WHERE emp_no == 10001
+```
+
+### Inequality `!=`
+
+The inequality operator checks if the values of two operands are equal or not.
+
+Example:
+
+```esql
+FROM employees
+| WHERE emp_no != 10001
+```
+
+### Less Than `<`
+
+The less than operator checks if the value of the left operand is less than the value of the right operand.
+
+Example:
+
+```esql
+FROM employees
+| WHERE salary < 50000
+```
+
+### Less Than or Equal To `<=`
+
+This operator checks if the value of the left operand is less than or equal to the value of the right operand.
+
+Example:
+
+```esql
+FROM employees
+| WHERE salary <= 50000
+```
+
+### Greater Than `>`
+
+The greater than operator checks if the value of the left operand is greater than the value of the right operand.
+
+Example:
+
+```esql
+FROM employees
+| WHERE salary > 50000
+```
+
+### Greater Than or Equal To `>=`
+
+This operator checks if the value of the left operand is greater than or equal to the value of the right operand.
+
+Example:
+
+```esql
+FROM employees
+| WHERE salary >= 50000
+```
+
+### Add `+`
+
+The add operator adds the values of the operands.
+
+Example:
+
+```esql
+FROM employees
+| EVAL total_compensation = salary + bonus
+```
+
+### Subtract `-`
+
+The subtract operator subtracts the right-hand operand from the left-hand operand.
+
+Example:
+
+```esql
+FROM employees
+| EVAL remaining_salary = salary - tax
+```
+
+### Multiply `*`
+
+The multiply operator multiplies the values of the operands.
+
+Example:
+
+```esql
+FROM employees
+| EVAL yearly_salary = salary * 12
+```
+
+### Divide `/`
+
+The divide operator divides the left-hand operand by the right-hand operand.
+
+Example:
+
+```esql
+FROM employees
+| EVAL monthly_salary = salary / 12
+```
+
+### Modulus `%`
+
+The modulus operator returns the remainder of the division of the left operand by the right operand.
+
+Example:
+
+```esql
+FROM employees
+| EVAL remainder = salary % 12
+```
+
+## Unary Operators
+
+### Negation (`-`)
+
+Example:
+
+```esql
+FROM employees
+| EVAL negative_salary = -salary
+```
+
+## Logical Operators
+
+### AND
+
+Logical AND operator.
+
+Example:
+
+```esql
+FROM employees
+| WHERE salary > 50000 AND bonus > 10000
+```
+
+### OR
+
+Logical OR operator.
+
+Example:
+
+```esql
+FROM employees
+| WHERE salary > 50000 OR bonus > 10000
+```
+
+### NOT
+
+Logical NOT operator.
+
+Example:
+
+```esql
+FROM employees
+| WHERE NOT (salary > 50000)
+```
+
+## Other Operators
+
+### IS NULL and IS NOT NULL
+
+The `IS NULL` operator returns true if the value is null.
+
+Example:
+
+```esql
+FROM employees
+| WHERE manager IS NULL
+```
+
+The `IS NOT NULL` operator returns true if the value is not null.
+
+Example:
+
+```esql
+FROM employees
+| WHERE manager IS NOT NULL
+```
+
+### IN
+
+The `IN` operator checks if a value is within a set of values (literals, fields or expressions).
+
+Example:
+
+```esql
+FROM employees
+| WHERE department IN ("Sales", "Marketing", "HR")
+```
+
+```esql
+ROW a = 1, b = 4, c = 3
+| WHERE c-a IN (3, b / 2, a)
+```
+
+### LIKE
+
+Use `LIKE` to filter data based on string patterns using wildcards.
+
+The following wildcard characters are supported:
+- `*` matches zero or more characters.
+- `?` matches one character.
+
+Example:
+
+```esql
+FROM employees
+| WHERE first_name LIKE "?b*"
+| KEEP first_name, last_name
+```
+
+### RLIKE
+
+Use `RLIKE` to filter data based on string patterns using regular expressions.
+
+Example:
+
+```esql
+FROM employees
+| WHERE first_name RLIKE ".leja.*"
+| KEEP first_name, last_name
+```
+
+### Cast `::`
+
+The `::` operator provides a convenient alternative syntax to the `TO_<type>` conversion functions.
+
+Example:
+
+```esql
+FROM employees
+| EVAL salary = salary::double
+```

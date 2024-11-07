@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useRef } from 'react';
@@ -35,7 +36,7 @@ export interface AppServices {
 interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
   activeDevTool: DevToolApp;
-  updateRoute: (newRoute: string) => void;
+  history: RouteComponentProps['history'];
   appServices: AppServices;
   location: RouteComponentProps['location'];
   startServices: DevToolsStartServices;
@@ -50,7 +51,7 @@ interface MountedDevToolDescriptor {
 function DevToolsWrapper({
   devTools,
   activeDevTool,
-  updateRoute,
+  history,
   appServices,
   location,
   startServices,
@@ -82,7 +83,7 @@ function DevToolsWrapper({
             isSelected={currentDevTool === activeDevTool}
             onClick={() => {
               if (!currentDevTool.isDisabled()) {
-                updateRoute(`/${currentDevTool.id}`);
+                history.push(`/${currentDevTool.id}`);
               }
             }}
           >
@@ -121,6 +122,7 @@ function DevToolsWrapper({
             const params = {
               element,
               location,
+              history,
               ...startServices,
             };
 
@@ -191,7 +193,7 @@ export function renderApp(
                 exact={!devTool.enableRouting}
                 render={(props) => (
                   <DevToolsWrapper
-                    updateRoute={props.history.push}
+                    history={props.history}
                     location={props.location}
                     activeDevTool={devTool}
                     devTools={devTools}

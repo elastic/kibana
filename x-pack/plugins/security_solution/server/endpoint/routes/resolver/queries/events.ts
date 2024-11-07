@@ -128,18 +128,29 @@ export class EventsQuery extends BaseResolverQuery {
       const response = await client.asCurrentUser.search<SafeResolverEvent>(
         this.buildSearch(parsedFilters)
       );
-      // @ts-expect-error @elastic/elasticsearch _source is optional
-      return response.hits.hits.map((hit) => hit._source);
+      return response.hits.hits.map((hit) => ({
+        ...hit._source,
+        _id: hit._id,
+        _index: hit._index,
+      }));
     } else {
       const { eventID, entityType, agentId } = body;
       if (entityType === 'alertDetail') {
         const response = await alertsClient.find(this.alertDetailQuery(eventID));
         // @ts-expect-error @elastic/elasticsearch _source is optional
-        return response.hits.hits.map((hit) => hit._source);
+        return response.hits.hits.map((hit) => ({
+          ...hit._source,
+          _id: hit._id,
+          _index: hit._index,
+        }));
       } else {
         const response = await alertsClient.find(this.alertsForProcessQuery(eventID, agentId));
         // @ts-expect-error @elastic/elasticsearch _source is optional
-        return response.hits.hits.map((hit) => hit._source);
+        return response.hits.hits.map((hit) => ({
+          ...hit._source,
+          _id: hit._id,
+          _index: hit._index,
+        }));
       }
     }
   }

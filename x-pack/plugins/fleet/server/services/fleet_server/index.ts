@@ -73,7 +73,7 @@ export const hasFleetServersForPolicies = async (
               ? `namespaces:"${spaceIds?.[0]}"`
               : `not namespaces:* or namespaces:"${DEFAULT_SPACE_ID}"`;
 
-          return `(policy_id:${id} and (${space}))`;
+          return `(policy_id:"${id}" and (${space}))`;
         })
         .join(' or ')
     );

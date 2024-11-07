@@ -30,6 +30,7 @@ import {
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { resourceNames } from '..';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
@@ -46,21 +47,19 @@ import {
 } from '../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
+  type AdHocInstruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   type KnowledgeBaseEntry,
   type Message,
-  type AdHocInstruction,
+  KnowledgeBaseType,
+  KnowledgeBaseEntryRole,
 } from '../../../common/types';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
-import {
-  KnowledgeBaseEntryOperationType,
-  KnowledgeBaseService,
-  RecalledEntry,
-} from '../knowledge_base_service';
+import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../util/replace_system_message';
@@ -101,6 +100,7 @@ export class ObservabilityAIAssistantClient {
         name: string;
       };
       knowledgeBaseService: KnowledgeBaseService;
+      scopes: AssistantScope[];
     }
   ) {}
 
@@ -163,11 +163,10 @@ export class ObservabilityAIAssistantClient {
   complete = ({
     functionClient,
     connectorId,
-    simulateFunctionCalling,
+    simulateFunctionCalling = false,
     instructions: adHocInstructions = [],
     messages: initialMessages,
     signal,
-    responseLanguage = 'English',
     persist,
     kibanaPublicUrl,
     isPublic,
@@ -180,7 +179,6 @@ export class ObservabilityAIAssistantClient {
     signal: AbortSignal;
     functionClient: ChatFunctionClient;
     persist: boolean;
-    responseLanguage?: string;
     conversationId?: string;
     title?: string;
     isPublic?: boolean;
@@ -196,13 +194,6 @@ export class ObservabilityAIAssistantClient {
     return new LangTracer(context.active()).startActiveSpan(
       'complete',
       ({ tracer: completeTracer }) => {
-        if (responseLanguage) {
-          adHocInstructions.push({
-            instruction_type: 'application_instruction',
-            text: `You MUST respond in the users preferred language which is: ${responseLanguage}.`,
-          });
-        }
-
         const isConversationUpdate = persist && !!predefinedConversationId;
 
         const conversationId = persist ? predefinedConversationId || v4() : '';
@@ -218,6 +209,9 @@ export class ObservabilityAIAssistantClient {
 
         const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
 
+        const registeredAdhocInstructions = functionClient.getAdhocInstructions();
+        const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
+
         // from the initial messages, override any system message with
         // the one that is based on the instructions (registered, request, kb)
         const messagesWithUpdatedSystemMessage$ = userInstructions$.pipe(
@@ -227,7 +221,7 @@ export class ObservabilityAIAssistantClient {
               getSystemMessageFromInstructions({
                 applicationInstructions: functionClient.getInstructions(),
                 userInstructions,
-                adHocInstructions,
+                adHocInstructions: allAdHocInstructions,
                 availableFunctionNames: functionClient
                   .getFunctions()
                   .map((fn) => fn.definition.name),
@@ -253,7 +247,6 @@ export class ObservabilityAIAssistantClient {
                 switchMap((messages) =>
                   getGeneratedTitle({
                     messages,
-                    responseLanguage,
                     logger: this.dependencies.logger,
                     chat: (name, chatParams) => {
                       return this.chat(name, {
@@ -309,6 +302,8 @@ export class ObservabilityAIAssistantClient {
                 logger: this.dependencies.logger,
                 disableFunctions,
                 tracer: completeTracer,
+                connectorId,
+                useSimulatedFunctionCalling: simulateFunctionCalling === true,
               })
             );
           }),
@@ -713,15 +708,17 @@ export class ObservabilityAIAssistantClient {
   }: {
     queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
-  }): Promise<{ entries: RecalledEntry[] }> => {
-    return this.dependencies.knowledgeBaseService.recall({
-      namespace: this.dependencies.namespace,
-      user: this.dependencies.user,
-      queries,
-      categories,
-      esClient: this.dependencies.esClient,
-      uiSettingsClient: this.dependencies.uiSettingsClient,
-    });
+  }): Promise<RecalledEntry[]> => {
+    return (
+      this.dependencies.knowledgeBaseService?.recall({
+        namespace: this.dependencies.namespace,
+        user: this.dependencies.user,
+        queries,
+        categories,
+        esClient: this.dependencies.esClient,
+        uiSettingsClient: this.dependencies.uiSettingsClient,
+      }) || []
+    );
   };
 
   getKnowledgeBaseStatus = () => {
@@ -746,29 +743,55 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
+  addUserInstruction = async ({
+    entry,
+  }: {
+    entry: Omit<
+      KnowledgeBaseEntry,
+      '@timestamp' | 'confidence' | 'is_correction' | 'type' | 'role'
+    >;
+  }): Promise<void> => {
+    // for now we want to limit the number of user instructions to 1 per user
+    // if a user instruction already exists for the user, we get the id and update it
+    this.dependencies.logger.debug('Adding user instruction entry');
+    const existingId = await this.dependencies.knowledgeBaseService.getPersonalUserInstructionId({
+      isPublic: entry.public,
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+    });
+
+    if (existingId) {
+      entry.id = existingId;
+      this.dependencies.logger.debug(`Updating user instruction with id "${existingId}"`);
+    }
+
+    return this.dependencies.knowledgeBaseService.addEntry({
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+      entry: {
+        ...entry,
+        confidence: 'high',
+        is_correction: false,
+        type: KnowledgeBaseType.UserInstruction,
+        labels: {},
+        role: KnowledgeBaseEntryRole.UserEntry,
+      },
+    });
+  };
+
   addKnowledgeBaseEntry = async ({
     entry,
   }: {
-    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
+    entry: Omit<KnowledgeBaseEntry, '@timestamp' | 'type'>;
   }): Promise<void> => {
     return this.dependencies.knowledgeBaseService.addEntry({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
-      entry,
+      entry: {
+        ...entry,
+        type: KnowledgeBaseType.Contextual,
+      },
     });
-  };
-
-  importKnowledgeBaseEntries = async ({
-    entries,
-  }: {
-    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
-  }): Promise<void> => {
-    const operations = entries.map((entry) => ({
-      type: KnowledgeBaseEntryOperationType.Index,
-      document: { ...entry, '@timestamp': new Date().toISOString() },
-    }));
-
-    await this.dependencies.knowledgeBaseService.addEntries({ operations });
   };
 
   getKnowledgeBaseEntries = async ({

@@ -200,7 +200,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
   }, [totalFeatureImportance]);
 
   const docLink = docLinks.links.ml.featureImportance;
-  const tickFormatter = useCallback((d) => Number(d.toPrecision(3)).toString(), []);
+  const tickFormatter = useCallback((d: any) => Number(d.toPrecision(3)).toString(), []);
 
   // do not expand by default if no feature importance data
   const noDataCallOut = useMemo(() => {

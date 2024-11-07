@@ -19,14 +19,13 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
-import type { ExperimentalFeatures, MlFeatures } from '../../common/constants/app';
+import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '../../common/constants/app';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
-import { clearCache, setDependencyCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
 import { MlRouter } from './routing';
 import type { PageDependencies } from './routing/router';
-import { EnabledFeaturesContextProvider } from './contexts/ml';
+import { EnabledFeaturesContextProvider, MlServerInfoContextProvider } from './contexts/ml';
 import type { StartServices } from './contexts/kibana';
 import { getMlGlobalServices } from './util/get_services';
 
@@ -43,6 +42,7 @@ interface AppProps {
   isServerless: boolean;
   mlFeatures: MlFeatures;
   experimentalFeatures: ExperimentalFeatures;
+  nlpSettings: NLPSettings;
 }
 
 const localStorage = new Storage(window.localStorage);
@@ -60,6 +60,7 @@ const App: FC<AppProps> = ({
   isServerless,
   mlFeatures,
   experimentalFeatures,
+  nlpSettings,
 }) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
@@ -84,6 +85,7 @@ const App: FC<AppProps> = ({
       fieldFormats: deps.fieldFormats,
       kibanaVersion: deps.kibanaVersion,
       lens: deps.lens,
+      licensing: deps.licensing,
       licenseManagement: deps.licenseManagement,
       maps: deps.maps,
       observabilityAIAssistant: deps.observabilityAIAssistant,
@@ -97,7 +99,7 @@ const App: FC<AppProps> = ({
       uiActions: deps.uiActions,
       unifiedSearch: deps.unifiedSearch,
       usageCollection: deps.usageCollection,
-      mlServices: getMlGlobalServices(coreStart.http, deps.data.dataViews, deps.usageCollection),
+      mlServices: getMlGlobalServices(coreStart, deps.data.dataViews, deps.usageCollection),
     };
   }, [deps, coreStart]);
 
@@ -142,7 +144,9 @@ const App: FC<AppProps> = ({
                 showMLNavMenu={chromeStyle === 'classic'}
                 experimentalFeatures={experimentalFeatures}
               >
-                <MlRouter pageDeps={pageDeps} />
+                <MlServerInfoContextProvider nlpSettings={nlpSettings}>
+                  <MlRouter pageDeps={pageDeps} />
+                </MlServerInfoContextProvider>
               </EnabledFeaturesContextProvider>
             </DatePickerContextProvider>
           </StorageContextProvider>
@@ -158,20 +162,9 @@ export const renderApp = (
   appMountParams: AppMountParameters,
   isServerless: boolean,
   mlFeatures: MlFeatures,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  nlpSettings: NLPSettings
 ) => {
-  setDependencyCache({
-    timefilter: deps.data.query.timefilter,
-    fieldFormats: deps.fieldFormats,
-    config: coreStart.uiSettings!,
-    docLinks: coreStart.docLinks!,
-    toastNotifications: coreStart.notifications.toasts,
-    recentlyAccessed: coreStart.chrome!.recentlyAccessed,
-    application: coreStart.application,
-    http: coreStart.http,
-    maps: deps.maps,
-  });
-
   appMountParams.onAppLeave((actions) => actions.default());
 
   ReactDOM.render(
@@ -182,12 +175,12 @@ export const renderApp = (
       isServerless={isServerless}
       mlFeatures={mlFeatures}
       experimentalFeatures={experimentalFeatures}
+      nlpSettings={nlpSettings}
     />,
     appMountParams.element
   );
 
   return () => {
-    clearCache();
     ReactDOM.unmountComponentAtNode(appMountParams.element);
     deps.data.search.session.clear();
   };

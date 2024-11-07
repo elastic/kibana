@@ -11,7 +11,7 @@ import {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { getKqlFilter } from '../../routes/common';
+import { getSavedObjectKqlFilter } from '../../routes/common';
 import { InvalidLocationError } from './normalizers/common_fields';
 import { SyntheticsServerSetup } from '../../types';
 import { RouteContext } from '../../routes/types';
@@ -337,7 +337,10 @@ export class ProjectMonitorFormatter {
     monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>
   ) => {
     const configIds = monitors.map((monitor) => monitor.attributes[ConfigKey.CONFIG_ID]);
-    const monitorFilter = getKqlFilter({ field: ConfigKey.CONFIG_ID, values: configIds });
+    const monitorFilter = getSavedObjectKqlFilter({
+      field: ConfigKey.CONFIG_ID,
+      values: configIds,
+    });
     const finder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
         {

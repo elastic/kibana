@@ -7,64 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TABLE = i18n.translate('xpack.securitySolution.eventDetails.table', {
-  defaultMessage: 'Table',
-});
-
-export const DESCRIPTION = i18n.translate('xpack.securitySolution.eventDetails.description', {
-  defaultMessage: 'Description',
-});
-
-export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.alerts.agentStatus', {
-  defaultMessage: 'Agent status',
-});
-
-export const QUARANTINED_FILE_PATH = i18n.translate(
-  'xpack.securitySolution.detections.alerts.quarantinedFilePath',
-  {
-    defaultMessage: 'Quarantined file path',
-  }
-);
-
-export const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleType', {
-  defaultMessage: 'Rule type',
-});
-
-export const ACTIONS = i18n.translate('xpack.securitySolution.eventDetails.table.actions', {
-  defaultMessage: 'Actions',
-});
-
-export const ALERT_REASON = i18n.translate('xpack.securitySolution.eventDetails.alertReason', {
-  defaultMessage: 'Alert reason',
-});
-
-export const ENDPOINT_COMMANDS = Object.freeze({
-  tried: (command: string) =>
-    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.tried', {
-      values: { command },
-      defaultMessage: 'tried to execute {command} command',
-    }),
-  executed: (command: string) =>
-    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.executed', {
-      values: { command },
-      defaultMessage: 'executed {command} command',
-    }),
-  pending: (command: string) =>
-    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.pending', {
-      values: { command },
-      defaultMessage: 'is executing {command} command',
-    }),
-  failed: (command: string) =>
-    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.failed', {
-      values: { command },
-      defaultMessage: 'failed to execute {command} command',
-    }),
-});
-
-export const SUMMARY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.summaryView', {
-  defaultMessage: 'summary',
-});
-
 export const ALERT_SUMMARY_CONVERSATION_ID = i18n.translate(
   'xpack.securitySolution.alertSummaryView.alertSummaryViewConversationId',
   {

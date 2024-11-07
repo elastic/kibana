@@ -120,10 +120,7 @@ If you fail to remedy this, your upgrade to 8.0+ will fail with a message like:
 
 [source,sh]
 --------------------------------------------
-Unable to complete saved object migrations for the [.kibana] index: Migration failed because some documents were found which use unknown saved object types:
-- "firstDocId" (type "someType")
-- "secondtDocId" (type "someType")
-- "thirdDocId" (type "someOtherType")
+Unable to complete saved object migrations for the [.kibana] index: Migration failed because some documents were found which use unknown saved object types: someType,someOtherType
 
 To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.
 --------------------------------------------

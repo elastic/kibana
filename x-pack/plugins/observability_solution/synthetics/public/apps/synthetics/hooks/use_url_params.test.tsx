@@ -71,7 +71,7 @@ describe('useUrlParams', () => {
     const pushSpy = jest.spyOn(history, 'push');
 
     const setUrlParamsButton = await findByText('Set url params');
-    userEvent.click(setUrlParamsButton);
+    await userEvent.click(setUrlParamsButton);
     expect(pushSpy).toHaveBeenCalledWith({
       pathname: '/',
       search: 'dateRangeEnd=now&dateRangeStart=now-12d',
@@ -97,7 +97,7 @@ describe('useUrlParams', () => {
     const pushSpy = jest.spyOn(history, 'push');
 
     const setUrlParamsButton = await findByText('Set url params');
-    userEvent.click(setUrlParamsButton);
+    await userEvent.click(setUrlParamsButton);
     expect(pushSpy).toHaveBeenCalledWith({
       pathname: '/',
       search: undefined,

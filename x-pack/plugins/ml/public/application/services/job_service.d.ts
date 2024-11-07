@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type { TimeRange } from '@kbn/data-plugin/common/query/timefilter/types';
-import type { CombinedJob, Datafeed, Job } from '../../../common/types/anomaly_detection_jobs';
-import type { Calendar } from '../../../common/types/calendars';
-import type { ToastNotificationService } from './toast_notification_service';
-import type { MlApiServices } from './ml_api_service';
+import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { MlApi } from './ml_api_service';
 
 export interface ExistingJobsAndGroups {
   jobIds: string[];
@@ -18,38 +15,13 @@ export interface ExistingJobsAndGroups {
 
 export declare interface MlJobService {
   jobs: CombinedJob[];
-  createResultsUrlForJobs: (jobs: any[], target: string, timeRange?: TimeRange) => string;
-  tempJobCloningObjects: {
-    createdBy?: string;
-    datafeed?: Datafeed;
-    job?: Job;
-    skipTimeRangeStep: boolean;
-    start?: number;
-    end?: number;
-    calendars: Calendar[] | undefined;
-    autoSetTimeRange?: boolean;
-  };
   skipTimeRangeStep: boolean;
-  saveNewJob(job: Job): Promise<any>;
-  cloneDatafeed(Datafeed: Datafeed): Datafeed;
-  openJob(jobId: string): Promise<any>;
-  saveNewDatafeed(datafeedConfig: any, jobId: string): Promise<any>;
-  startDatafeed(
-    datafeedId: string,
-    jobId: string,
-    start: number | undefined,
-    end: number | undefined
-  ): Promise<any>;
-  createResultsUrl(jobId: string[], start: number, end: number, location: string): string;
-  getJobAndGroupIds(): Promise<ExistingJobsAndGroups>;
   getJob(jobId: string): CombinedJob;
   loadJobsWrapper(): Promise<CombinedJob[]>;
   customUrlsByJob: Record<string, any[]>;
   detectorsByJob: Record<string, any>;
 }
 
-export const mlJobService: MlJobService;
-export const mlJobServiceFactory: (
-  toastNotificationServiceOverride?: ToastNotificationService,
-  mlOverride?: MlApiServices
-) => MlJobService;
+export const mlJobServiceFactory: (mlApi: MlApi) => MlJobService;
+
+export const useMlJobService: () => MlJobService;

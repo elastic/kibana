@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -25,7 +26,12 @@ describe('getRowMenuControlColumn', () => {
       id: 'test_row_menu_control',
       headerAriaLabel: 'row control',
       renderControl: jest.fn((Control, rowProps) => (
-        <Control label={`test-${rowProps.rowIndex}`} iconType="heart" onClick={mockClick} />
+        <Control
+          label={`test-${rowProps.rowIndex}`}
+          tooltipContent={`test-${rowProps.rowIndex}`}
+          iconType="heart"
+          onClick={mockClick}
+        />
       )),
     };
     const rowMenuControlColumn = getRowMenuControlColumn([
@@ -60,6 +66,6 @@ describe('getRowMenuControlColumn', () => {
     expect(button).toBeInTheDocument();
 
     button.click();
-    expect(mockClick).toHaveBeenCalledWith({ record: contextMock.rows[1], rowIndex: 1 });
+    expect(mockClick).toHaveBeenCalledWith({ record: contextMock.getRowByIndex(1), rowIndex: 1 });
   });
 });

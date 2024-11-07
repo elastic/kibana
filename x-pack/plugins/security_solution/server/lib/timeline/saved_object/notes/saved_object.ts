@@ -16,12 +16,13 @@ import { identity } from 'fp-ts/lib/function';
 import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
-import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
+import { MAX_UNASSOCIATED_NOTES, UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   Note,
   BareNote,
   BareNoteWithoutExternalRefs,
   ResponseNote,
+  GetNotesResult,
 } from '../../../../../common/api/timeline';
 import { SavedObjectNoteRuntimeType } from '../../../../../common/types/timeline/note/saved_object';
 import type { SavedObjectNoteWithoutExternalRefs } from '../../../../../common/types/timeline/note/saved_object';
@@ -29,8 +30,6 @@ import type { FrameworkRequest } from '../../../framework';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { noteFieldsMigrator } from './field_migrator';
-
-export const MAX_UNASSOCIATED_NOTES = 1000;
 
 export const deleteNotesByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
   const options: SavedObjectsFindOptions = {
@@ -133,8 +132,11 @@ export const createNote = async ({
   noteId: string | null;
   note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
-}) => {
-  const savedObjectsClient = (await request.context.core).savedObjects.client;
+}): Promise<ResponseNote> => {
+  const {
+    savedObjects: { client: savedObjectsClient },
+    uiSettings: { client: uiSettingsClient },
+  } = await request.context.core;
   const userInfo = request.user;
 
   const noteWithCreator = overrideOwner ? pickSavedNote(noteId, { ...note }, userInfo) : note;
@@ -144,15 +146,15 @@ export const createNote = async ({
       data: noteWithCreator,
     });
   if (references.length === 1 && references[0].id === '') {
-    // Limit unassociated events to 1000
+    const maxUnassociatedNotes = await uiSettingsClient.get<number>(MAX_UNASSOCIATED_NOTES);
     const notesCount = await savedObjectsClient.find<SavedObjectNoteWithoutExternalRefs>({
       type: noteSavedObjectType,
       hasReference: { type: timelineSavedObjectType, id: '' },
     });
-    if (notesCount.total >= MAX_UNASSOCIATED_NOTES) {
+    if (notesCount.total >= maxUnassociatedNotes) {
       return {
         code: 403,
-        message: `Cannot create more than ${MAX_UNASSOCIATED_NOTES} notes without associating them to a timeline`,
+        message: `Cannot create more than ${maxUnassociatedNotes} notes without associating them to a timeline`,
         note: {
           ...note,
           noteId: uuidv1(),
@@ -201,7 +203,7 @@ export const updateNote = async ({
   noteId: string;
   note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
-}) => {
+}): Promise<ResponseNote> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const userInfo = request.user;
 
@@ -261,7 +263,7 @@ const getSavedNote = async (request: FrameworkRequest, NoteId: string) => {
 export const getAllSavedNote = async (
   request: FrameworkRequest,
   options: SavedObjectsFindOptions
-) => {
+): Promise<GetNotesResult> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const savedObjects = await savedObjectsClient.find<SavedObjectNoteWithoutExternalRefs>(options);
 

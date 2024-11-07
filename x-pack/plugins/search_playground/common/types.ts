@@ -50,11 +50,14 @@ export enum APIRoutes {
   POST_CHAT_MESSAGE = '/internal/search_playground/chat',
   POST_QUERY_SOURCE_FIELDS = '/internal/search_playground/query_source_fields',
   GET_INDICES = '/internal/search_playground/indices',
+  POST_SEARCH_QUERY = '/internal/search_playground/search',
+  GET_INDEX_MAPPINGS = '/internal/search_playground/mappings',
 }
 
 export enum LLMs {
   openai = 'openai',
   openai_azure = 'openai_azure',
+  openai_other = 'openai_other',
   bedrock = 'bedrock',
   gemini = 'gemini',
 }
@@ -81,4 +84,10 @@ export interface ModelProvider {
   model: string;
   promptTokenLimit: number;
   provider: LLMs;
+}
+
+export interface Pagination {
+  from: number;
+  size: number;
+  total: number;
 }

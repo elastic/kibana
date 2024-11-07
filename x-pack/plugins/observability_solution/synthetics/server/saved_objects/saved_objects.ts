@@ -12,6 +12,7 @@ import {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
+import { fromSettingsAttribute } from '../routes/settings/dynamic_settings';
 import {
   syntheticsSettings,
   syntheticsSettingsObjectId,
@@ -62,7 +63,7 @@ export const savedObjectsAdapter = {
         syntheticsSettingsObjectType,
         syntheticsSettingsObjectId
       );
-      return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
+      return fromSettingsAttribute(obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         // If the object doesn't exist, check to see if uptime settings exist

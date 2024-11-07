@@ -32,6 +32,9 @@ export function createFieldsRoute(logger: Logger, router: IRouter, baseRoute: st
       validate: {
         body: bodySchema,
       },
+      options: {
+        access: 'internal',
+      },
     },
     handler
   );

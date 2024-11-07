@@ -45,7 +45,7 @@ describe('MaintenanceWindowCell', () => {
   it('shows the tooltip', async () => {
     render(<MaintenanceWindowCell {...props} />);
     expect(screen.getByText('test-title,')).toBeInTheDocument();
-    userEvent.hover(screen.getByText('test-title,'));
+    await userEvent.hover(screen.getByText('test-title,'));
     expect(await screen.findByTestId('maintenance-window-tooltip-content')).toBeInTheDocument();
   });
 

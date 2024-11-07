@@ -1,0 +1,76 @@
+[role="xpack"]
+[[search-space-connection-details]]
+== Find your connection details
+++++
+<titleabbrev>Connection details</titleabbrev>
+++++
+
+To connect to your {es} deployment, you need either a Cloud ID or an {es} endpoint, depending on the
+deployment type you use. For secure connections, it’s recommended to use an API key for authentication.
+
+* Learn how to <<find-cloud-id-cloud-self-managed, find your Cloud ID>> for Elastic Cloud or self-hosted deployments.
+* Learn how to <<create-an-api-key-cloud-self-managed, create an API key>> for Elastic Cloud or self-hosted deployments.  
+* Learn how to <<find-cloud-id-serverless, find your {es} endpoint or Cloud ID>> for a serverless deployment.  
+* Learn how to <<create-an-api-key-serverless, create an API key>> for a serverless deployment.
+
+[float]
+=== Elastic Cloud and self-hosted deployments
+
+[float]
+[[find-cloud-id-cloud-self-managed]]
+==== Find your Cloud ID
+
+. Navigate to the Elastic Cloud home page.
+. In the main menu, click *Manage this deployment*.
++
+[.screenshot]
+image::manage-deployment.png[width=750]
+. The Cloud ID is displayed on the right side of the page.
++
+[.screenshot]
+image::cloud-id.png[width=750]
+
+[float]
+[[create-an-api-key-cloud-self-managed]]
+==== Create an API key
+
+. To navigate to *API keys*, use the <<kibana-navigation-search,*global search bar*>>.
++
+[.screenshot]
+image::api-keys-search-bar.png[width=750]
+. Click *Create API key*.
++
+[.screenshot]
+image::click-create-api-key.png[width=750]
+. Enter the API key details, and click *Create API key*.
+. Copy and securely store the API key, as it will not be shown again.
+
+[float]
+=== Serverless deployments
+
+[float]
+[[find-cloud-id-serverless]]
+==== Find your Elasticsearch endpoint
+
+. Navigate to the serverless project's home page.
+. Scroll down to the *Copy your connection details* section, and copy the *Elasticsearch endpoint*.
++
+[.screenshot]
+image::serverless-connection-details.png[width=750]
+
+[NOTE]
+====
+The *Cloud ID* is also displayed in the Copy your connection details section, which you can use with specific client libraries and connectors.
+====
+
+[float]
+[[create-an-api-key-serverless]]
+==== Create an API key
+
+. Navigate to the serverless project's home page.
+. Scroll down to the *Add an API Key* section, and click *New*.
++
+[.screenshot]
+image::serverless-create-an-api-key.png[width=750]
+. Enter the API key details, and click *Create API key*.
+. Copy and securely store the API key, as it will not be shown again.

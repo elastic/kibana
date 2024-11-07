@@ -8,12 +8,15 @@
 import type { ConsoleProps } from '../..';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../../mocks';
-import { act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+type Render = (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
+type RenderResult = ReturnType<Render>;
+type PromisifiedRender = (...args: Parameters<Render>) => Promise<RenderResult>;
+
 describe('When displaying the side panel', () => {
-  let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
-  let renderResult: ReturnType<typeof render>;
+  let render: Render;
+  let renderResult: RenderResult;
 
   beforeEach(() => {
     const testSetup = getConsoleTestSetup();
@@ -25,14 +28,12 @@ describe('When displaying the side panel', () => {
   });
 
   describe('and displaying Help content', () => {
-    let renderAndOpenHelp: typeof render;
+    let renderAndOpenHelp: PromisifiedRender;
 
     beforeEach(() => {
-      renderAndOpenHelp = (props) => {
+      renderAndOpenHelp = async (props) => {
         render(props);
-        act(() => {
-          userEvent.click(renderResult.getByTestId('test-header-helpButton'));
-        });
+        await userEvent.click(renderResult.getByTestId('test-header-helpButton'));
 
         expect(renderResult.getByTestId('test-sidePanel')).toBeTruthy();
 
@@ -40,8 +41,8 @@ describe('When displaying the side panel', () => {
       };
     });
 
-    it('should display the help panel content', () => {
-      renderAndOpenHelp();
+    it('should display the help panel content', async () => {
+      await renderAndOpenHelp();
 
       expect(renderResult.getByTestId('test-sidePanel-helpContent')).toBeTruthy();
     });

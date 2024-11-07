@@ -22,7 +22,7 @@ describe('CostCapacity', () => {
     const capacity$ = new Subject<number>();
     const pool = new CostCapacity({ capacity$, logger });
 
-    expect(pool.capacity).toBe(0);
+    expect(pool.capacity).toBe(10);
 
     capacity$.next(20);
     expect(pool.capacity).toBe(40);

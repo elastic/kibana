@@ -18,7 +18,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
 import { Conversation } from '../../../..';
-import * as i18n from '../conversation_selector/translations';
+import * as i18n from './translations';
 import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
 import { ConversationSelectorSettingsOption } from './types';
 
@@ -100,7 +100,8 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
 
     // Callback for when user types to create a new conversation
     const onCreateOption = useCallback(
-      (searchValue, flattenedOptions = []) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (searchValue: any, flattenedOptions: any = []) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
         }

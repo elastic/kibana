@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import type {
   RuleCreateProps,
   RuleSource,
@@ -20,7 +21,6 @@ import {
   normalizeThresholdObject,
 } from '../../../../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { addEcsToRequiredFields } from '../../../utils/utils';
 
 export const RULE_DEFAULTS = {
   enabled: false,
@@ -44,7 +44,9 @@ export const RULE_DEFAULTS = {
   version: 1,
 };
 
-export function applyRuleDefaults(rule: RuleCreateProps & { immutable?: boolean }) {
+export function applyRuleDefaults(
+  rule: RuleCreateProps & { immutable?: boolean; rule_source?: RuleSource }
+) {
   const typeSpecificParams = setTypeSpecificDefaults(rule);
   const immutable = rule.immutable ?? false;
 
@@ -54,7 +56,7 @@ export function applyRuleDefaults(rule: RuleCreateProps & { immutable?: boolean 
     ...typeSpecificParams,
     rule_id: rule.rule_id ?? uuidv4(),
     immutable,
-    rule_source: convertImmutableToRuleSource(immutable),
+    rule_source: rule.rule_source ?? convertImmutableToRuleSource(immutable),
     required_fields: addEcsToRequiredFields(rule.required_fields),
   };
 }
@@ -125,7 +127,6 @@ export const setTypeSpecificDefaults = (props: TypeSpecificCreateProps) => {
         query: props.query ?? '',
         filters: props.filters,
         saved_id: props.saved_id,
-        response_actions: props.response_actions,
         alert_suppression: props.alert_suppression,
       };
     }
@@ -138,7 +139,6 @@ export const setTypeSpecificDefaults = (props: TypeSpecificCreateProps) => {
         filters: props.filters,
         saved_id: props.saved_id,
         data_view_id: props.data_view_id,
-        response_actions: props.response_actions,
         alert_suppression: props.alert_suppression,
       };
     }

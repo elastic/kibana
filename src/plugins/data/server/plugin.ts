@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
@@ -12,7 +13,7 @@ import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { ConfigSchema } from '../config';
+import { ConfigSchema } from './config';
 import type { ISearchSetup, ISearchStart } from './search';
 import { DatatableUtilitiesService } from './datatable_utilities';
 import { SearchService } from './search/search_service';

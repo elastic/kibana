@@ -100,7 +100,7 @@ export class GraphPageObject extends FtrService {
       const selectionLabel = await labelElement.getVisibleText();
       this.log.debug('Looking at selection ' + selectionLabel);
       if (selectionLabel !== from && selectionLabel !== to) {
-        (await selection.findByTestSubject(`graph-selected-${selectionLabel}`)).click();
+        await (await selection.findByTestSubject(`graph-selected-${selectionLabel}`)).click();
         await this.common.sleep(200);
       }
     }

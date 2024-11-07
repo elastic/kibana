@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -15,11 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
-  const PageObjects = getPageObjects([
+  const { common, timePicker, discover, settings, unifiedFieldList } = getPageObjects([
     'common',
     'timePicker',
     'discover',
-    'header',
     'settings',
     'unifiedFieldList',
   ]);
@@ -34,19 +34,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       log.debug('management');
-      await PageObjects.common.navigateToApp('settings');
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
-      await PageObjects.settings.addFieldFilter('referer');
-      await PageObjects.settings.addFieldFilter('relatedContent*');
+      await common.navigateToApp('settings');
+      await settings.clickKibanaIndexPatterns();
+      await settings.clickIndexPatternLogstash();
+      await settings.addFieldFilter('referer');
+      await settings.addFieldFilter('relatedContent*');
 
       log.debug('discover');
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRange();
+      await discover.waitUntilSearchingHasFinished();
 
       await retry.try(async function () {
-        expect(await PageObjects.discover.getDocHeader()).to.have.string('Document');
+        expect(await discover.getDocHeader()).to.have.string('Summary');
       });
     });
 
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should not get the field referer', async function () {
-      const fieldNames = await PageObjects.unifiedFieldList.getAllFieldNames();
+      const fieldNames = await unifiedFieldList.getAllFieldNames();
       expect(fieldNames).to.not.contain('referer');
       const relatedContentFields = fieldNames.filter(
         (fieldName) => fieldName.indexOf('relatedContent') === 0

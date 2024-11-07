@@ -13,7 +13,6 @@ import { themeServiceMock } from '@kbn/core/public/mocks';
 
 import { ToastNotificationText } from './toast_notification_text';
 
-jest.mock('../../shared_imports');
 jest.mock('../app_dependencies');
 
 describe('ToastNotificationText', () => {

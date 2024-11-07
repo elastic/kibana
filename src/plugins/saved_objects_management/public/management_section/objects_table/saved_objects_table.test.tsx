@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -50,7 +51,9 @@ const convertType = (type: string): SavedObjectManagementTypeInfo => ({
   namespaceType: 'single',
 });
 
-const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'].map(convertType);
+const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search', 'tag'].map(
+  convertType
+);
 
 const allSavedObjects = [
   {
@@ -79,6 +82,13 @@ const allSavedObjects = [
     type: 'visualization',
     attributes: {
       title: `MyViz`,
+    },
+  },
+  {
+    id: '5',
+    type: 'tag',
+    attributes: {
+      title: `HelloWorldTag`,
     },
   },
 ];
@@ -128,6 +138,7 @@ describe('SavedObjectsTable', () => {
       visualization: 0,
       dashboard: 0,
       search: 0,
+      tag: 0,
     });
 
     defaultProps = {
@@ -147,7 +158,7 @@ describe('SavedObjectsTable', () => {
     };
 
     findObjectsMock.mockImplementation(() => ({
-      total: 4,
+      total: 5,
       saved_objects: [
         {
           id: '1',
@@ -196,6 +207,14 @@ describe('SavedObjectsTable', () => {
               path: '/edit/4',
               uiCapabilitiesPath: 'visualize.show',
             },
+          },
+        },
+        {
+          id: '5',
+          type: 'tag',
+          meta: {
+            title: `HelloWorldTag`,
+            icon: 'tag',
           },
         },
       ],
@@ -450,7 +469,7 @@ describe('SavedObjectsTable', () => {
       component.update();
 
       await component.instance().getRelationships('search', '1');
-      const savedObjectTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
+      const savedObjectTypes = ['index-pattern', 'visualization', 'dashboard', 'search', 'tag'];
       expect(getRelationshipsMock).toHaveBeenCalledWith(http, 'search', '1', savedObjectTypes);
     });
 

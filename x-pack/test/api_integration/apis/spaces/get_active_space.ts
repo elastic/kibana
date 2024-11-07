@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -30,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get('/internal/spaces/_active_space')
         .set('kbn-xsrf', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200)
         .then((response) => {
           const { id, name, _reserved } = response.body;
@@ -45,6 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get('/s/default/internal/spaces/_active_space')
         .set('kbn-xsrf', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200)
         .then((response) => {
           const { id, name, _reserved } = response.body;
@@ -60,6 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get('/s/foo-space/internal/spaces/_active_space')
         .set('kbn-xsrf', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200, {
           id: 'foo-space',
           name: 'Foo Space',
@@ -72,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .get('/s/not-found-space/internal/spaces/_active_space')
         .set('kbn-xsrf', 'xxx')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(404, {
           statusCode: 404,
           error: 'Not Found',

@@ -90,7 +90,7 @@ export class DescendantsQuery extends BaseResolverQuery {
   private queryWithAncestryArray(nodes: NodeID[], ancestryField: string, size: number): JsonObject {
     return {
       _source: false,
-      fields: this.resolverFields,
+      fields: [...this.resolverFields, ancestryField],
       size,
       collapse: {
         field: this.schema.id,
@@ -109,7 +109,10 @@ export class DescendantsQuery extends BaseResolverQuery {
                */
               source: `
                 Map ancestryToIndex = [:];
-                List sourceAncestryArray = params._source.${ancestryField};
+                if (doc['${ancestryField}'].size() == 0) {
+                  return -1;
+                }
+                List sourceAncestryArray = doc['${ancestryField}'];
                 int length = sourceAncestryArray.length;
                 for (int i = 0; i < length; i++) {
                   ancestryToIndex[sourceAncestryArray[i]] = i;

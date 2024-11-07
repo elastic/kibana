@@ -26,10 +26,11 @@ import { ElasticAgentStepPayload, InstalledIntegration, StepProgressPayloadRT } 
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
+import { makeTar, type Entry } from './make_tar';
 
 const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'PUT /internal/observability_onboarding/flow/{onboardingId}',
-  options: { tags: [], xsrfRequired: false },
+  options: { tags: [] },
   params: t.type({
     path: t.type({
       onboardingId: t.string,
@@ -64,7 +65,7 @@ const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
-  options: { tags: [], xsrfRequired: false },
+  options: { tags: [] },
   params: t.type({
     path: t.type({
       id: t.string,
@@ -128,7 +129,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
 
 const getProgressRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
-  options: { tags: [], xsrfRequired: false },
+  options: { tags: [] },
   params: t.type({
     path: t.type({
       onboardingId: t.string,
@@ -185,7 +186,7 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
  *
  * This endpoint differs from the existing `POST /internal/observability_onboarding/logs/flow`
  * endpoint in that it caters for the auto-detect flow where integrations are detected and installed
- * on the host system, rather than in the Kiabana UI.
+ * on the host system, rather than in the Kibana UI.
  */
 const createFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow',
@@ -257,9 +258,16 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
 });
 
 /**
- * This endpoints installs the requested integrations and returns the corresponding config file for Elastic Agent.
+ * This endpoints installs the requested integrations and returns the corresponding config file for
+ * Elastic Agent.
  *
- * The request/response format is TSV (tab-separated values) to simplify parsing in bash.
+ * The request format is TSV (tab-separated values) to simplify parsing in bash.
+ *
+ * The response format is a tar archive containing the Elastic Agent configuration, depending on the
+ * `Accept` header.
+ *
+ * Errors during installation are ignore unless all integrations fail to install. When that happens
+ * a 500 Internal Server Error is returned with the first error message.
  *
  * Example request:
  *
@@ -273,19 +281,32 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
  * checkout_service custom /path/to/error.log
  * ```
  *
+ * Example response (tarball):
+ *
+ * ```
+ * -rw-r--r--  113 elastic-agent.yml
+ * drwxr-xr-x    0 inputs.d/
+ * -rw-r--r-- 4890 inputs.d/system.yml
+ * -rw-r--r--  240 inputs.d/product_service.yml
+ * -rw-r--r--  243 inputs.d/checkout_service.yml
+ * ```
+ *
  * Example curl:
  *
  * ```bash
  * curl --request POST \
  *  --url "http://localhost:5601/internal/observability_onboarding/flow/${ONBOARDING_ID}/integrations/install" \
  *  --header "Authorization: ApiKey ${ENCODED_API_KEY}" \
+ *  --header "Accept: application/x-tar" \
  *  --header "Content-Type: text/tab-separated-values" \
- *  --data $'system\tregistry\nproduct_service\tcustom\t/path/to/access.log\ncheckout_service\tcustom\t/path/to/access.log'
+ *  --header "kbn-xsrf: true" \
+ *  --data $'system\tregistry\nproduct_service\tcustom\t/path/to/access.log\ncheckout_service\tcustom\t/path/to/access.log' \
+ *  --output - | tar -tvf -
  * ```
  */
 const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow/{onboardingId}/integrations/install',
-  options: { tags: [], xsrfRequired: false },
+  options: { tags: [] },
   params: t.type({
     path: t.type({
       onboardingId: t.string,
@@ -317,10 +338,21 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
 
     let installedIntegrations: InstalledIntegration[] = [];
     try {
-      installedIntegrations = await ensureInstalledIntegrations(
+      const settledResults = await ensureInstalledIntegrations(
         integrationsToInstall,
         packageClient
       );
+      installedIntegrations = settledResults.reduce<InstalledIntegration[]>((acc, result) => {
+        if (result.status === 'fulfilled') {
+          acc.push(result.value);
+        }
+        return acc;
+      }, []);
+      // Errors during installation are ignored unless all integrations fail to install. When that happens
+      // a 500 Internal Server Error is returned with the first error message.
+      if (!installedIntegrations.length) {
+        throw (settledResults[0] as PromiseRejectedResult).reason;
+      }
     } catch (error) {
       if (error instanceof FleetUnauthorizedError) {
         return response.forbidden({
@@ -353,19 +385,23 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
 
     return response.ok({
       headers: {
-        'content-type': 'application/yaml',
+        'content-type': 'application/x-tar',
       },
-      body: generateAgentConfig({
-        esHost: elasticsearchUrl,
-        inputs: installedIntegrations.map(({ inputs }) => inputs).flat(),
-      }),
+      body: generateAgentConfigTar({ elasticsearchUrl, installedIntegrations }),
     });
   },
 });
 
+interface InstalledSystemIntegrationMetadata {
+  hostname: string;
+}
+
+type RegistryIntegrationMetadata = InstalledSystemIntegrationMetadata;
+
 export interface RegistryIntegrationToInstall {
   pkgName: string;
   installSource: 'registry';
+  metadata?: RegistryIntegrationMetadata;
 }
 export interface CustomIntegrationToInstall {
   pkgName: string;
@@ -377,15 +413,15 @@ export type IntegrationToInstall = RegistryIntegrationToInstall | CustomIntegrat
 async function ensureInstalledIntegrations(
   integrationsToInstall: IntegrationToInstall[],
   packageClient: PackageClient
-): Promise<InstalledIntegration[]> {
-  return Promise.all(
+): Promise<Array<PromiseSettledResult<InstalledIntegration>>> {
+  return Promise.allSettled(
     integrationsToInstall.map(async (integration) => {
       const { pkgName, installSource } = integration;
 
       if (installSource === 'registry') {
         const installation = await packageClient.ensureInstalledPackage({ pkgName });
         const pkg = installation.package;
-        const inputs = await packageClient.getAgentPolicyInputs(pkg.name, pkg.version);
+        const config = await packageClient.getAgentPolicyConfigYAML(pkg.name, pkg.version);
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
 
         return {
@@ -393,10 +429,11 @@ async function ensureInstalledIntegrations(
           pkgName: pkg.name,
           pkgVersion: pkg.version,
           title: packageInfo.title,
-          inputs: inputs.filter((input) => input.type !== 'httpjson'),
+          config,
           dataStreams:
             packageInfo.data_streams?.map(({ type, dataset }) => ({ type, dataset })) ?? [],
           kibanaAssets: pkg.installed_kibana,
+          metadata: integration.metadata,
         };
       }
 
@@ -409,19 +446,21 @@ async function ensureInstalledIntegrations(
         pkgName,
         pkgVersion: '1.0.0', // Custom integrations are always installed as version `1.0.0`
         title: pkgName,
-        inputs: [
-          {
-            id: `filestream-${pkgName}`,
-            type: 'filestream',
-            streams: [
-              {
-                id: `filestream-${pkgName}`,
-                data_stream: dataStream,
-                paths: integration.logFilePaths,
-              },
-            ],
-          },
-        ],
+        config: dump({
+          inputs: [
+            {
+              id: `filestream-${pkgName}`,
+              type: 'filestream',
+              streams: [
+                {
+                  id: `filestream-${pkgName}`,
+                  data_stream: dataStream,
+                  paths: integration.logFilePaths,
+                },
+              ],
+            },
+          ],
+        }),
         dataStreams: [dataStream],
         kibanaAssets: [],
       };
@@ -451,7 +490,8 @@ async function ensureInstalledIntegrations(
  * Example input:
  *
  * ```text
- * system registry
+ * system registry hostname
+ * nginx registry
  * product_service custom /path/to/access.log
  * product_service custom /path/to/error.log
  * checkout_service custom /path/to/access.log
@@ -464,53 +504,93 @@ function parseIntegrationsTSV(tsv: string) {
       .trim()
       .split('\n')
       .map((line) => line.split('\t', 3))
-      .reduce<Record<string, IntegrationToInstall>>(
-        (acc, [pkgName, installSource, logFilePath]) => {
-          const key = `${pkgName}-${installSource}`;
-          if (installSource === 'registry') {
-            if (logFilePath) {
-              throw new Error(`Integration '${pkgName}' does not support a file path`);
-            }
-            acc[key] = {
-              pkgName,
-              installSource,
-            };
-            return acc;
-          } else if (installSource === 'custom') {
-            if (!logFilePath) {
-              throw new Error(`Missing file path for integration: ${pkgName}`);
-            }
-            // Append file path if integration is already in the list
-            const existing = acc[key];
-            if (existing && existing.installSource === 'custom') {
-              existing.logFilePaths.push(logFilePath);
-              return acc;
-            }
-            acc[key] = {
-              pkgName,
-              installSource,
-              logFilePaths: [logFilePath],
-            };
+      .reduce<Record<string, IntegrationToInstall>>((acc, [pkgName, installSource, parameter]) => {
+        const key = `${pkgName}-${installSource}`;
+        if (installSource === 'registry') {
+          const metadata = parseRegistryIntegrationMetadata(pkgName, parameter);
+
+          acc[key] = {
+            pkgName,
+            installSource,
+            metadata,
+          };
+          return acc;
+        } else if (installSource === 'custom') {
+          if (!parameter) {
+            throw new Error(`Missing file path for integration: ${pkgName}`);
+          }
+          // Append file path if integration is already in the list
+          const existing = acc[key];
+          if (existing && existing.installSource === 'custom') {
+            existing.logFilePaths.push(parameter);
             return acc;
           }
-          throw new Error(`Invalid install source: ${installSource}`);
-        },
-        {}
-      )
+          acc[key] = {
+            pkgName,
+            installSource,
+            logFilePaths: [parameter],
+          };
+          return acc;
+        }
+        throw new Error(`Invalid install source: ${installSource}`);
+      }, {})
   );
 }
 
-const generateAgentConfig = ({ esHost, inputs = [] }: { esHost: string[]; inputs: unknown[] }) => {
-  return dump({
-    outputs: {
-      default: {
-        type: 'elasticsearch',
-        hosts: esHost,
-        api_key: '${API_KEY}', // Placeholder to be replaced by bash script with the actual API key
-      },
+function parseRegistryIntegrationMetadata(
+  pkgName: string,
+  parameter: string
+): RegistryIntegrationMetadata | undefined {
+  switch (pkgName) {
+    case 'system':
+      if (!parameter) {
+        throw new Error('Missing hostname for System integration');
+      }
+
+      return { hostname: parameter };
+    default:
+      return undefined;
+  }
+}
+
+const generateAgentConfigTar = ({
+  elasticsearchUrl,
+  installedIntegrations,
+}: {
+  elasticsearchUrl: string[];
+  installedIntegrations: InstalledIntegration[];
+}) => {
+  const now = new Date();
+  return makeTar([
+    {
+      type: 'File',
+      path: 'elastic-agent.yml',
+      mode: 0o644,
+      mtime: now,
+      data: dump({
+        outputs: {
+          default: {
+            type: 'elasticsearch',
+            hosts: elasticsearchUrl,
+            api_key: '${API_KEY}', // Placeholder to be replaced by bash script with the actual API key
+          },
+        },
+      }),
     },
-    inputs,
-  });
+    {
+      type: 'Directory',
+      path: 'inputs.d/',
+      mode: 0o755,
+      mtime: now,
+    },
+    ...installedIntegrations.map<Entry>((integration) => ({
+      type: 'File',
+      path: `inputs.d/${integration.pkgName}.yml`,
+      mode: 0o644,
+      mtime: now,
+      data: integration.config,
+    })),
+  ]);
 };
 
 export const flowRouteRepository = {

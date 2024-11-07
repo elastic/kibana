@@ -10,10 +10,10 @@ import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
-import { getKqlFilter } from '../../common';
-import { deleteMonitor } from '../delete_monitor';
+import { getSavedObjectKqlFilter } from '../../common';
 import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { ConfigKey } from '../../../../common/constants/monitor_management';
@@ -188,7 +188,7 @@ export class AddEditMonitorAPI {
     prevLocations?: MonitorFields['locations']
   ) {
     const { savedObjectsClient, syntheticsMonitorClient, request } = this.routeContext;
-    const ui = Boolean((request.query as { ui?: boolean })?.ui);
+    const internal = Boolean((request.query as { internal?: boolean })?.internal);
     const {
       locations,
       private_locations: privateLocations,
@@ -212,7 +212,7 @@ export class AddEditMonitorAPI {
     if (!locations && !privateLocations && prevLocations) {
       locationsVal = prevLocations;
     } else {
-      const monitorLocations = parseMonitorLocations(monitorPayload, prevLocations, ui);
+      const monitorLocations = parseMonitorLocations(monitorPayload, prevLocations, internal);
 
       if (monitorLocations.privateLocations.length > 0) {
         this.allPrivateLocations = await getPrivateLocations(savedObjectsClient);
@@ -238,7 +238,7 @@ export class AddEditMonitorAPI {
 
   async validateUniqueMonitorName(name: string, id?: string) {
     const { savedObjectsClient } = this.routeContext;
-    const kqlFilter = getKqlFilter({ field: 'name.keyword', values: name });
+    const kqlFilter = getSavedObjectKqlFilter({ field: 'name.keyword', values: name });
     const { total } = await savedObjectsClient.find({
       perPage: 0,
       type: syntheticsMonitorType,
@@ -339,9 +339,9 @@ export class AddEditMonitorAPI {
       if (encryptedMonitor) {
         await savedObjectsClient.delete(syntheticsMonitorType, newMonitorId);
 
-        await deleteMonitor({
-          routeContext: this.routeContext,
-          monitorId: newMonitorId,
+        const deleteMonitorAPI = new DeleteMonitorAPI(this.routeContext);
+        await deleteMonitorAPI.execute({
+          monitorIds: [newMonitorId],
         });
       }
     } catch (e) {

@@ -40,12 +40,23 @@ export async function getAgentStatusById(
   return (await getAgentById(esClient, soClient, agentId)).status!;
 }
 
+/**
+ * getAgentStatusForAgentPolicy
+ * @param esClient
+ * @param soClient
+ * @param agentPolicyId @deprecated use agentPolicyIds instead since the move to multi-policy
+ * @param filterKuery
+ * @param spaceId
+ * @param agentPolicyIds
+ */
+
 export async function getAgentStatusForAgentPolicy(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   agentPolicyId?: string,
   filterKuery?: string,
-  spaceId?: string
+  spaceId?: string,
+  agentPolicyIds?: string[]
 ) {
   const logger = appContextService.getLogger();
   const runtimeFields = await buildAgentStatusRuntimeField(soClient);
@@ -71,8 +82,14 @@ export async function getAgentStatusForAgentPolicy(
     );
     clauses.push(kueryAsElasticsearchQuery);
   }
-
-  if (agentPolicyId) {
+  // If agentPolicyIds is provided, we filter by those, otherwise we filter by depreciated agentPolicyId
+  if (agentPolicyIds) {
+    clauses.push({
+      terms: {
+        policy_id: agentPolicyIds,
+      },
+    });
+  } else if (agentPolicyId) {
     clauses.push({
       term: {
         policy_id: agentPolicyId,

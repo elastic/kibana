@@ -73,11 +73,6 @@ export interface ServerReturnedEndpointNonExistingPolicies {
   payload: EndpointState['nonExistingPolicies'];
 }
 
-export interface ServerReturnedEndpointAgentPolicies {
-  type: 'serverReturnedEndpointAgentPolicies';
-  payload: EndpointState['agentPolicies'];
-}
-
 export interface ServerFinishedInitialization {
   type: 'serverFinishedInitialization';
   payload: boolean;
@@ -162,7 +157,6 @@ export type EndpointAction =
   | AppRequestedEndpointList
   | ServerReturnedEndpointNonExistingPolicies
   | ServerReturnedAgenstWithEndpointsTotal
-  | ServerReturnedEndpointAgentPolicies
   | UserUpdatedEndpointListRefreshOptions
   | ServerReturnedEndpointsTotal
   | ServerFailedToReturnAgenstWithEndpointsTotal

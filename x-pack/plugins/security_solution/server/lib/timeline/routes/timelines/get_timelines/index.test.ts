@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  serverMock,
-  requestContextMock,
-  createMockConfig,
-} from '../../../../detection_engine/routes/__mocks__';
+import { serverMock, requestContextMock } from '../../../../detection_engine/routes/__mocks__';
 import { getAllTimeline } from '../../../saved_object/timelines';
 import { getTimelineRequest } from '../../../__mocks__/request_responses';
 import { getTimelinesRoute } from '.';
@@ -29,7 +25,7 @@ describe('get all timelines', () => {
     server = serverMock.create();
     context = requestContextMock.createTools().context;
 
-    getTimelinesRoute(server.router, createMockConfig());
+    getTimelinesRoute(server.router);
   });
 
   test('should get the total count', async () => {

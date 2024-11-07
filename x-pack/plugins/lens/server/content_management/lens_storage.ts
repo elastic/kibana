@@ -18,7 +18,7 @@ import {
   type LensSavedObjectAttributes,
   type PartialLensSavedObject,
 } from '../../common/content_management';
-import { cmServicesDefinition } from '../../common/content_management/cm_services';
+import { cmServicesDefinition } from './cm_services';
 
 const searchArgsToSOFindOptions = (args: LensCrudTypes['SearchIn']): SavedObjectsFindOptions => {
   const { query, contentTypeId, options } = args;

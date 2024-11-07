@@ -21,6 +21,13 @@ jest.mock('../../../../hooks', () => ({
   ...jest.requireActual('../../../../hooks'),
   sendGetAgents: jest.fn().mockResolvedValue({
     data: {
+      statusSummary: {},
+      items: [
+        {
+          id: 'agent123',
+          policy_id: 'agent-policy-1',
+        },
+      ],
       total: 5,
     },
   }),
@@ -30,6 +37,19 @@ jest.mock('../../../../hooks', () => ({
         inactive: 2,
       },
       totalInactive: 2,
+    },
+  }),
+  sendBulkGetAgentPolicies: jest.fn().mockReturnValue({
+    data: {
+      items: [
+        { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' },
+        {
+          id: 'agent-policy-managed',
+          name: 'Managed Agent policy',
+          namespace: 'default',
+          managed: true,
+        },
+      ],
     },
   }),
   sendGetAgentPolicies: jest.fn().mockReturnValue({
@@ -104,7 +124,7 @@ describe('useFetchAgentsData', () => {
     });
 
     expect(result?.current.selectedStatus).toEqual(['healthy', 'unhealthy', 'updating', 'offline']);
-    expect(result?.current.agentPolicies).toEqual([
+    expect(result?.current.allAgentPolicies).toEqual([
       {
         id: 'agent-policy-1',
         name: 'Agent policy 1',
@@ -124,17 +144,11 @@ describe('useFetchAgentsData', () => {
         name: 'Agent policy 1',
         namespace: 'default',
       },
-      'agent-policy-managed': {
-        id: 'agent-policy-managed',
-        managed: true,
-        name: 'Managed Agent policy',
-        namespace: 'default',
-      },
     });
     expect(result?.current.kuery).toEqual(
       'status:online or (status:error or status:degraded) or (status:updating or status:unenrolling or status:enrolling) or status:offline'
     );
-    expect(result?.current.currentRequestRef).toEqual({ current: 1 });
+    expect(result?.current.currentRequestRef).toEqual({ current: 2 });
     expect(result?.current.pagination).toEqual({ currentPage: 1, pageSize: 5 });
     expect(result?.current.pageSizeOptions).toEqual([5, 20, 50]);
   });

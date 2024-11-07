@@ -12,15 +12,13 @@ import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
+import { RulePanelKey } from '../../flyout/rule_details/right';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,
   SecurityStepId,
 } from '../../common/components/guided_onboarding_tour/tour_config';
 import { TimelineId } from '../../../common/types/timeline';
-
-import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
-
 import { useKibana, useNavigation } from '../../common/lib/kibana';
 import { APP_ID, CASES_PATH, SecurityPageName } from '../../../common/constants';
 import { timelineActions } from '../../timelines/store';
@@ -38,15 +36,7 @@ const CaseContainerComponent: React.FC = () => {
   const { getAppUrl, navigateTo } = useNavigation();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch();
-  const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
-    SecurityPageName.rules
-  );
   const { openFlyout } = useExpandableFlyoutApi();
-
-  const getDetectionsRuleDetailsHref = useCallback(
-    (ruleId) => detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
-    [detectionsFormatUrl, detectionsUrlSearch]
-  );
 
   const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
 
@@ -68,6 +58,15 @@ const CaseContainerComponent: React.FC = () => {
       });
     },
     [openFlyout, telemetry]
+  );
+
+  const onRuleDetailsClick = useCallback(
+    (ruleId: string | null | undefined) => {
+      if (ruleId) {
+        openFlyout({ right: { id: RulePanelKey, params: { ruleId } } });
+      }
+    },
+    [openFlyout]
   );
 
   const { onLoad: onAlertsTableLoaded } = useFetchNotes();
@@ -137,16 +136,7 @@ const CaseContainerComponent: React.FC = () => {
             },
           },
           ruleDetailsNavigation: {
-            href: getDetectionsRuleDetailsHref,
-            onClick: async (ruleId: string | null | undefined, e) => {
-              if (e) {
-                e.preventDefault();
-              }
-              return navigateTo({
-                deepLinkId: SecurityPageName.rules,
-                path: getRuleDetailsUrl(ruleId ?? ''),
-              });
-            },
+            onClick: onRuleDetailsClick,
           },
           showAlertDetails,
           timelineIntegration: {

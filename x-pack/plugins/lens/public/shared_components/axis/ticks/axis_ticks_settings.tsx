@@ -33,14 +33,14 @@ export const AxisTicksSettings: React.FunctionComponent<AxisTicksSettingsProps> 
   updateTicksVisibilityState,
 }) => {
   const onTicksStatusChange = useCallback(
-    (visible) => updateTicksVisibilityState(visible, axis),
+    (visible: boolean) => updateTicksVisibilityState(visible, axis),
     [axis, updateTicksVisibilityState]
   );
 
   return (
     <>
       <EuiFormRow
-        display="columnCompressedSwitch"
+        display="columnCompressed"
         label={i18n.translate('xpack.lens.shared.tickLabels', {
           defaultMessage: 'Tick labels',
         })}

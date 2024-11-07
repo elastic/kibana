@@ -1,0 +1,596 @@
+{
+  "id": "@kbn/core-feature-flags-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-feature-flags-browser",
+        "id": "def-public.FeatureFlagsSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "FeatureFlagsSetup",
+        "description": [
+          "\nSetup contract of the Feature Flags Service"
+        ],
+        "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser",
+            "id": "def-public.FeatureFlagsSetup.setProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "setProvider",
+            "description": [
+              "\nRegisters an OpenFeature provider to talk to the\n3rd-party service that manages the Feature Flags."
+            ],
+            "signature": [
+              "(provider: ",
+              "Provider",
+              ") => void"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser",
+                "id": "def-public.FeatureFlagsSetup.setProvider.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "provider",
+                "description": [
+                  "The {@link Provider | OpenFeature Provider} to handle the communication with the feature flags management system."
+                ],
+                "signature": [
+                  "Provider"
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser",
+            "id": "def-public.FeatureFlagsSetup.appendContext",
+            "type": "Function",
+            "tags": [],
+            "label": "appendContext",
+            "description": [
+              "\nAppends new keys to the evaluation context."
+            ],
+            "signature": [
+              "(contextToAppend: ",
+              {
+                "pluginId": "@kbn/core-feature-flags-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+                "section": "def-public.EvaluationContext",
+                "text": "EvaluationContext"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser",
+                "id": "def-public.FeatureFlagsSetup.appendContext.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "contextToAppend",
+                "description": [
+                  "The additional keys that should be appended/modified in the evaluation context."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-feature-flags-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+                    "section": "def-public.EvaluationContext",
+                    "text": "EvaluationContext"
+                  }
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-feature-flags-browser",
+        "id": "def-public.FeatureFlagsStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "FeatureFlagsStart",
+        "description": [
+          "\nSetup contract of the Feature Flags Service"
+        ],
+        "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser",
+            "id": "def-public.FeatureFlagsStart.appendContext",
+            "type": "Function",
+            "tags": [],
+            "label": "appendContext",
+            "description": [
+              "\nAppends new keys to the evaluation context."
+            ],
+            "signature": [
+              "(contextToAppend: ",
+              {
+                "pluginId": "@kbn/core-feature-flags-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+                "section": "def-public.EvaluationContext",
+                "text": "EvaluationContext"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser",
+                "id": "def-public.FeatureFlagsStart.appendContext.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "contextToAppend",
+                "description": [
+                  "The additional keys that should be appended/modified in the evaluation context."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-feature-flags-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+                    "section": "def-public.EvaluationContext",
+                    "text": "EvaluationContext"
+                  }
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser",
+            "id": "def-public.FeatureFlagsStart.getBooleanValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getBooleanValue",
+            "description": [
+              "\nEvaluates a boolean flag"
+            ],
+            "signature": [
+              "(flagName: string, fallbackValue: boolean) => boolean"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser",
+                "id": "def-public.FeatureFlagsStart.getBooleanValue.$1",
+                "type": "string",
+                "tags": [],
+                "label": "flagName",
+                "description": [
+                  "The flag ID to evaluate"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser",
+                "id": "def-public.FeatureFlagsStart.getBooleanValue.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "fallbackValue",
+                "description": [
+                  "If the flag cannot be evaluated for whatever reason, the fallback value is provided."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser",
+            "id": "def-public.FeatureFlagsStart.getStringValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getStringValue",
+            "description": [
+              "\nEvaluates a string flag"
+            ],
+            "signature": [
+              "<Value extends string>(flagName: string, fallbackValue: Value) => Value"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser",
+                "id": "def-public.FeatureFlagsStart.getStringValue.$1",
+                "type": "string",
+                "tags": [],
+                "label": "flagName",
+                "description": [
+                  "The flag ID to evaluate"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser",
+                "id": "def-public.FeatureFlagsStart.getStringValue.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fallbackValue",
+                "description": [
+                  "If the flag cannot be evaluated for whatever reason, the fallback value is provided."
+                ],
+                "signature": [
+                  "Value"
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser",
+            "id": "def-public.FeatureFlagsStart.getNumberValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getNumberValue",
+            "description": [
+              "\nEvaluates a number flag"
+            ],
+            "signature": [
+              "<Value extends number>(flagName: string, fallbackValue: Value) => Value"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser",
+                "id": "def-public.FeatureFlagsStart.getNumberValue.$1",
+                "type": "string",
+                "tags": [],
+                "label": "flagName",
+                "description": [
+                  "The flag ID to evaluate"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser",
+                "id": "def-public.FeatureFlagsStart.getNumberValue.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fallbackValue",
+                "description": [
+                  "If the flag cannot be evaluated for whatever reason, the fallback value is provided."
+                ],
+                "signature": [
+                  "Value"
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser",
+            "id": "def-public.FeatureFlagsStart.getBooleanValue$",
+            "type": "Function",
+            "tags": [],
+            "label": "getBooleanValue$",
+            "description": [
+              "\nReturns an observable of a boolean flag"
+            ],
+            "signature": [
+              "(flagName: string, fallbackValue: boolean) => ",
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser",
+                "id": "def-public.FeatureFlagsStart.getBooleanValue$.$1",
+                "type": "string",
+                "tags": [],
+                "label": "flagName",
+                "description": [
+                  "The flag ID to evaluate"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser",
+                "id": "def-public.FeatureFlagsStart.getBooleanValue$.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "fallbackValue",
+                "description": [
+                  "If the flag cannot be evaluated for whatever reason, the fallback value is provided."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser",
+            "id": "def-public.FeatureFlagsStart.getStringValue$",
+            "type": "Function",
+            "tags": [],
+            "label": "getStringValue$",
+            "description": [
+              "\nReturns an observable of a string flag"
+            ],
+            "signature": [
+              "<Value extends string>(flagName: string, fallbackValue: Value) => ",
+              "Observable",
+              "<Value>"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser",
+                "id": "def-public.FeatureFlagsStart.getStringValue$.$1",
+                "type": "string",
+                "tags": [],
+                "label": "flagName",
+                "description": [
+                  "The flag ID to evaluate"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser",
+                "id": "def-public.FeatureFlagsStart.getStringValue$.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fallbackValue",
+                "description": [
+                  "If the flag cannot be evaluated for whatever reason, the fallback value is provided."
+                ],
+                "signature": [
+                  "Value"
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser",
+            "id": "def-public.FeatureFlagsStart.getNumberValue$",
+            "type": "Function",
+            "tags": [],
+            "label": "getNumberValue$",
+            "description": [
+              "\nReturns an observable of a number flag"
+            ],
+            "signature": [
+              "<Value extends number>(flagName: string, fallbackValue: Value) => ",
+              "Observable",
+              "<Value>"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser",
+                "id": "def-public.FeatureFlagsStart.getNumberValue$.$1",
+                "type": "string",
+                "tags": [],
+                "label": "flagName",
+                "description": [
+                  "The flag ID to evaluate"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser",
+                "id": "def-public.FeatureFlagsStart.getNumberValue$.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fallbackValue",
+                "description": [
+                  "If the flag cannot be evaluated for whatever reason, the fallback value is provided."
+                ],
+                "signature": [
+                  "Value"
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-feature-flags-browser",
+        "id": "def-public.EvaluationContext",
+        "type": "Type",
+        "tags": [],
+        "label": "EvaluationContext",
+        "description": [
+          "\nThe evaluation context to use when retrieving the flags.\n\nWe use multi-context so that we can apply segmentation rules at different levels (`organization`/`kibana`).\n* `organization` includes any information that is common to all the projects/deployments in an organization. An example is the in_trial status.\n* The `kibana` context includes all the information that identifies a project/deployment. Examples are version, offering, and has_data.\nKind helps us specify which sub-context should receive the new attributes.\nIf no `kind` is provided, it defaults to `kibana`.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-feature-flags-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+            "section": "def-public.MultiContextEvaluationContext",
+            "text": "MultiContextEvaluationContext"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-feature-flags-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+            "section": "def-public.SingleContextEvaluationContext",
+            "text": "SingleContextEvaluationContext"
+          }
+        ],
+        "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-feature-flags-browser",
+        "id": "def-public.MultiContextEvaluationContext",
+        "type": "Type",
+        "tags": [],
+        "label": "MultiContextEvaluationContext",
+        "description": [
+          "\nMulti-context format. The sub-contexts are provided in their nested properties."
+        ],
+        "signature": [
+          "{ targetingKey?: string | undefined; } & Record<string, ",
+          "EvaluationContextValue",
+          "> & { kind: \"multi\"; organization?: ",
+          "EvaluationContext",
+          " | undefined; kibana?: ",
+          "EvaluationContext",
+          " | undefined; }"
+        ],
+        "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-feature-flags-browser",
+        "id": "def-public.SingleContextEvaluationContext",
+        "type": "Type",
+        "tags": [],
+        "label": "SingleContextEvaluationContext",
+        "description": [
+          "\nSingle Context format. If `kind` is not specified, it applies to the `kibana` sub-context."
+        ],
+        "signature": [
+          "{ targetingKey?: string | undefined; } & Record<string, ",
+          "EvaluationContextValue",
+          "> & { kind?: \"kibana\" | \"organization\" | undefined; }"
+        ],
+        "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

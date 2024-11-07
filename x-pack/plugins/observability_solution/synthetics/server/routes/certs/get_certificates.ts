@@ -34,13 +34,7 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       to: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({
-    request,
-    syntheticsEsClient,
-    savedObjectsClient,
-    server,
-    syntheticsMonitorClient,
-  }) => {
+  handler: async ({ request, syntheticsEsClient, savedObjectsClient }) => {
     const queryParams = request.query;
 
     const monitors = await getAllMonitors({
@@ -57,12 +51,7 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       };
     }
 
-    const { enabledMonitorQueryIds } = processMonitors(
-      monitors,
-      server,
-      savedObjectsClient,
-      syntheticsMonitorClient
-    );
+    const { enabledMonitorQueryIds } = processMonitors(monitors);
 
     const data = await getSyntheticsCerts({
       ...queryParams,

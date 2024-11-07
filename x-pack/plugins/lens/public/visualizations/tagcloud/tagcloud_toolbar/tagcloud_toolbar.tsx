@@ -61,6 +61,7 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
             })}
             type="visualOptions"
             buttonDataTestSubj="lnsVisualOptionsButton"
+            data-test-subj="lnsVisualOptionsPopover"
           >
             <EuiFormRow
               display="columnCompressed"

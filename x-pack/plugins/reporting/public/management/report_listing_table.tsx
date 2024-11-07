@@ -327,7 +327,7 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
         actions: [
           {
             isPrimary: true,
-            'data-test-subj': 'reportDownloadLink',
+            'data-test-subj': (job) => `reportDownloadLink-${job.id}`,
             type: 'icon',
             icon: 'download',
             name: i18n.translate('xpack.reporting.listing.table.downloadReportButtonLabel', {

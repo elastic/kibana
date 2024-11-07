@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@serverles @serverlessQA @ess Rule exception operators for data type keyword', () => {
+  describe('@serverless @serverlessQA @ess Rule exception operators for data type keyword array', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/keyword_as_array');
     });
@@ -65,10 +65,10 @@ export default ({ getService }: FtrProviderContext) => {
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
-          [],
           ['word eight', 'word nine', 'word ten'],
           ['word five', null, 'word six', 'word seven'],
           ['word one', 'word two', 'word three', 'word four'],
+          undefined,
         ]);
       });
 
@@ -89,9 +89,9 @@ export default ({ getService }: FtrProviderContext) => {
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
-          [],
           ['word eight', 'word nine', 'word ten'],
           ['word five', null, 'word six', 'word seven'],
+          undefined,
         ]);
       });
 
@@ -119,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 2, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits).to.eql([[], ['word eight', 'word nine', 'word ten']]);
+        expect(hits).to.eql([['word eight', 'word nine', 'word ten'], undefined]);
       });
 
       it('should filter 3 keyword if all 3 are set as exceptions', async () => {
@@ -154,7 +154,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 1, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits.flat(10)).to.eql([]);
+        expect(hits.flat(10)).to.eql([undefined]);
       });
     });
 
@@ -241,9 +241,9 @@ export default ({ getService }: FtrProviderContext) => {
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
-          [],
           ['word eight', 'word nine', 'word ten'],
           ['word five', null, 'word six', 'word seven'],
+          undefined,
         ]);
       });
 
@@ -263,7 +263,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 2, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits).to.eql([[], ['word eight', 'word nine', 'word ten']]);
+        expect(hits).to.eql([['word eight', 'word nine', 'word ten'], undefined]);
       });
 
       it('should filter 3 keyword if all 3 are set as exceptions', async () => {
@@ -282,7 +282,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 1, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits.flat(10)).to.eql([]);
+        expect(hits.flat(10)).to.eql([undefined]);
       });
     });
 
@@ -344,7 +344,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 1, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits.flat(10)).to.eql([]);
+        expect(hits.flat(10)).to.eql([undefined]);
       });
     });
 
@@ -404,10 +404,10 @@ export default ({ getService }: FtrProviderContext) => {
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
-          [],
           ['word eight', 'word nine', 'word ten'],
           ['word five', null, 'word six', 'word seven'],
           ['word one', 'word two', 'word three', 'word four'],
+          undefined,
         ]);
       });
 
@@ -442,9 +442,9 @@ export default ({ getService }: FtrProviderContext) => {
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
-          [],
           ['word eight', 'word nine', 'word ten'],
           ['word five', null, 'word six', 'word seven'],
+          undefined,
         ]);
       });
 
@@ -469,9 +469,9 @@ export default ({ getService }: FtrProviderContext) => {
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
-          [],
           ['word eight', 'word nine', 'word ten'],
           ['word five', null, 'word six', 'word seven'],
+          undefined,
         ]);
       });
 
@@ -495,7 +495,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 2, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits).to.eql([[], ['word eight', 'word nine', 'word ten']]);
+        expect(hits).to.eql([['word eight', 'word nine', 'word ten'], undefined]);
       });
 
       it('will return only the empty array for results if we have a list that includes all keyword', async () => {
@@ -524,7 +524,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 1, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits.flat(10)).to.eql([]);
+        expect(hits.flat(10)).to.eql([undefined]);
       });
     });
 
@@ -653,9 +653,9 @@ export default ({ getService }: FtrProviderContext) => {
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
-          [],
           ['word eight', 'word nine', 'word ten'],
           ['word five', null, 'word six', 'word seven'],
+          undefined,
         ]);
       });
 
@@ -675,7 +675,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 2, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits).to.eql([[], ['word five', null, 'word six', 'word seven']]);
+        expect(hits).to.eql([['word five', null, 'word six', 'word seven'], undefined]);
       });
 
       it('should filter 3 keyword if all 3 are set as exceptions', async () => {
@@ -694,7 +694,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 1, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
-        expect(hits.flat(10)).to.eql([]);
+        expect(hits.flat(10)).to.eql([undefined]);
       });
     });
 

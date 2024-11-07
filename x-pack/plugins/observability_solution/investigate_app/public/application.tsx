@@ -9,6 +9,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type { History } from 'history';
 import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
@@ -17,6 +18,8 @@ import { InvestigateAppKibanaContext } from './hooks/use_kibana';
 import { getRoutes } from './routes/config';
 import { InvestigateAppServices } from './services/types';
 import type { InvestigateAppStartDependencies } from './types';
+
+const queryClient = new QueryClient();
 
 function Application({
   coreStart,
@@ -61,8 +64,6 @@ function Application({
     );
   };
 
-  const queryClient = new QueryClient();
-
   return (
     <KibanaThemeProvider theme={theme}>
       <InvestigateAppContextProvider context={context}>
@@ -71,6 +72,7 @@ function Application({
             <Router history={history}>
               <QueryClientProvider client={queryClient}>
                 <App />
+                <ReactQueryDevtools initialIsOpen={false} />
               </QueryClientProvider>
             </Router>
           </coreStart.i18n.Context>

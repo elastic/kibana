@@ -7,7 +7,7 @@
 
 export interface CombinedField {
   mappingType: string;
-  delimiter: string;
+  delimiter?: string;
   combinedFieldName: string;
   fieldNames: string[];
 }

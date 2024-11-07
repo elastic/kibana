@@ -1,26 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { ReactWrapper } from 'enzyme';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 
-import { DashboardContainerFactory } from '..';
-import { DASHBOARD_CONTAINER_TYPE } from '../..';
-import { DashboardRenderer } from './dashboard_renderer';
-import { pluginServices } from '../../services/plugin_services';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import { DashboardContainer } from '../embeddable/dashboard_container';
-import { DashboardCreationOptions } from '../embeddable/dashboard_container_factory';
 import { setStubKibanaServices as setPresentationPanelMocks } from '@kbn/presentation-panel-plugin/public/mocks';
+import { BehaviorSubject } from 'rxjs';
+import { DashboardContainerFactory } from '..';
+import { DashboardCreationOptions } from '../..';
+import { DashboardContainer } from '../embeddable/dashboard_container';
+import { DashboardRenderer } from './dashboard_renderer';
+
+jest.mock('../embeddable/dashboard_container_factory', () => ({}));
 
 describe('dashboard renderer', () => {
   let mockDashboardContainer: DashboardContainer;
@@ -37,7 +39,8 @@ describe('dashboard renderer', () => {
     mockDashboardFactory = {
       create: jest.fn().mockReturnValue(mockDashboardContainer),
     } as unknown as DashboardContainerFactory;
-    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../embeddable/dashboard_container_factory').DashboardContainerFactoryDefinition = jest
       .fn()
       .mockReturnValue(mockDashboardFactory);
     setPresentationPanelMocks();
@@ -47,15 +50,11 @@ describe('dashboard renderer', () => {
     await act(async () => {
       mountWithIntl(<DashboardRenderer />);
     });
-    expect(pluginServices.getServices().embeddable.getEmbeddableFactory).toHaveBeenCalledWith(
-      DASHBOARD_CONTAINER_TYPE
-    );
     expect(mockDashboardFactory.create).toHaveBeenCalled();
   });
 
   test('saved object id & creation options are passed to dashboard factory', async () => {
     const options: DashboardCreationOptions = {
-      useControlGroupIntegration: true,
       useSessionStorageIntegration: true,
       useUnifiedSearchIntegration: true,
     };
@@ -107,7 +106,8 @@ describe('dashboard renderer', () => {
     mockDashboardFactory = {
       create: jest.fn().mockReturnValue(mockErrorEmbeddable),
     } as unknown as DashboardContainerFactory;
-    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../embeddable/dashboard_container_factory').DashboardContainerFactoryDefinition = jest
       .fn()
       .mockReturnValue(mockDashboardFactory);
 
@@ -131,7 +131,8 @@ describe('dashboard renderer', () => {
     const mockErrorFactory = {
       create: jest.fn().mockReturnValue(mockErrorEmbeddable),
     } as unknown as DashboardContainerFactory;
-    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../embeddable/dashboard_container_factory').DashboardContainerFactoryDefinition = jest
       .fn()
       .mockReturnValue(mockErrorFactory);
 
@@ -154,7 +155,8 @@ describe('dashboard renderer', () => {
     const mockSuccessFactory = {
       create: jest.fn().mockReturnValue(mockSuccessEmbeddable),
     } as unknown as DashboardContainerFactory;
-    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../embeddable/dashboard_container_factory').DashboardContainerFactoryDefinition = jest
       .fn()
       .mockReturnValue(mockSuccessFactory);
 
@@ -185,7 +187,8 @@ describe('dashboard renderer', () => {
     const mockErrorFactory = {
       create: jest.fn().mockReturnValue(mockErrorEmbeddable),
     } as unknown as DashboardContainerFactory;
-    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../embeddable/dashboard_container_factory').DashboardContainerFactoryDefinition = jest
       .fn()
       .mockReturnValue(mockErrorFactory);
 
@@ -245,11 +248,13 @@ describe('dashboard renderer', () => {
       navigateToDashboard: jest.fn(),
       select: jest.fn().mockReturnValue('WhatAnExpandedPanel'),
       getInput: jest.fn().mockResolvedValue({}),
+      expandedPanelId: new BehaviorSubject('panel1'),
     } as unknown as DashboardContainer;
     const mockSuccessFactory = {
       create: jest.fn().mockReturnValue(mockSuccessEmbeddable),
     } as unknown as DashboardContainerFactory;
-    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../embeddable/dashboard_container_factory').DashboardContainerFactoryDefinition = jest
       .fn()
       .mockReturnValue(mockSuccessFactory);
 
@@ -276,7 +281,8 @@ describe('dashboard renderer', () => {
     const mockUseMarginFalseFactory = {
       create: jest.fn().mockReturnValue(mockUseMarginFalseEmbeddable),
     } as unknown as DashboardContainerFactory;
-    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../embeddable/dashboard_container_factory').DashboardContainerFactoryDefinition = jest
       .fn()
       .mockReturnValue(mockUseMarginFalseFactory);
 

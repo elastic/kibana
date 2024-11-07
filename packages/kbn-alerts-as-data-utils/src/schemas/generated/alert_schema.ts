@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 // ---------------------------------- WARNING ----------------------------------
 // this file was generated, and should not be edited by hand
@@ -92,11 +93,13 @@ const AlertOptional = rt.partial({
   'kibana.alert.end': schemaDate,
   'kibana.alert.flapping': schemaBoolean,
   'kibana.alert.flapping_history': schemaBooleanArray,
+  'kibana.alert.intended_timestamp': schemaDate,
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
   'kibana.alert.previous_action_group': schemaString,
   'kibana.alert.reason': schemaString,
   'kibana.alert.rule.execution.timestamp': schemaDate,
+  'kibana.alert.rule.execution.type': schemaString,
   'kibana.alert.rule.execution.uuid': schemaString,
   'kibana.alert.rule.parameters': schemaUnknown,
   'kibana.alert.rule.tags': schemaStringArray,

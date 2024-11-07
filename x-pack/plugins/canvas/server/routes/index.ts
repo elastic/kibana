@@ -7,7 +7,6 @@
 
 import { IRouter, Logger } from '@kbn/core/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { initCustomElementsRoutes } from './custom_elements';
 import { initShareablesRoutes } from './shareables';
 import { initWorkpadRoutes } from './workpad';
@@ -19,7 +18,6 @@ export interface RouteInitializerDeps {
   router: IRouter<CanvasRouteHandlerContext>;
   logger: Logger;
   expressions: ExpressionsServerSetup;
-  bfetch: BfetchServerSetup;
 }
 
 export function initRoutes(deps: RouteInitializerDeps) {

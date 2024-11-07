@@ -52,7 +52,7 @@ export const ConnectionMode: FunctionComponent<Props> = (props) => {
               id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
               defaultMessage="Use seed nodes by default, or switch to proxy mode."
             />
-            <EuiFormRow hasEmptyLabelSpace fullWidth>
+            <EuiFormRow fullWidth>
               <EuiSwitch
                 label={
                   <FormattedMessage

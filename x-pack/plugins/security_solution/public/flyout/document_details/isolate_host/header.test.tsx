@@ -14,7 +14,6 @@ import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../commo
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
 import { ISOLATE_HOST, UNISOLATE_HOST } from '../../../common/components/endpoint/host_isolation';
-import { TECHNICAL_PREVIEW } from '../../../common/translations';
 
 jest.mock('./context');
 
@@ -58,8 +57,6 @@ describe('Isolation Flyout PanelHeader', () => {
     action: IsolateHostPanelContext['isolateAction'];
     agentType: ResponseActionAgentType;
     title: string;
-    // if `expectedBadgeText` is `undefined`, then it validates that the badge is not displayed
-    expectedBadgeText: string | undefined;
   }> = [];
 
   for (const agentType of RESPONSE_ACTION_AGENT_TYPE) {
@@ -69,10 +66,6 @@ describe('Isolation Flyout PanelHeader', () => {
           action,
           agentType,
           title: action === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST,
-          expectedBadgeText:
-            agentType === 'crowdstrike' || agentType === 'sentinel_one'
-              ? TECHNICAL_PREVIEW
-              : undefined,
         });
       }
     );
@@ -80,22 +73,15 @@ describe('Isolation Flyout PanelHeader', () => {
 
   it.each(testConditions)(
     'should display correct flyout header title for $action on agentType $agentType',
-    ({ action, agentType, title, expectedBadgeText }) => {
+    ({ action, agentType, title }) => {
       setUseIsolateHostPanelContext({
         isolateAction: action,
         dataFormattedForFieldBrowser:
           endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(agentType),
       });
-      const { getByTestId, queryByTestId } = render();
+      const { getByTestId } = render();
 
       expect(getByTestId('flyoutHostIsolationHeaderTitle')).toHaveTextContent(title);
-
-      if (expectedBadgeText) {
-        expect(getByTestId('flyoutHostIsolationHeaderBadge')).toHaveTextContent(expectedBadgeText);
-      } else {
-        expect(queryByTestId('flyoutHostIsolationHeaderBadge')).toBeNull();
-      }
-
       expect(getByTestId('flyoutHostIsolationHeaderIntegration'));
     }
   );

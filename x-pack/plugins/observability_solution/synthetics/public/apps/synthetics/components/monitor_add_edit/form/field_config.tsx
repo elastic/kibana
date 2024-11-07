@@ -1092,6 +1092,55 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       },
     }),
   },
+  [ConfigKey.LABELS]: {
+    fieldKey: ConfigKey.LABELS,
+    label: i18n.translate('xpack.synthetics.monitorConfig.meta.label', {
+      defaultMessage: 'Label fields',
+    }),
+    controlled: true,
+    component: KeyValuePairsField,
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.meta.helpText', {
+      defaultMessage:
+        'List of key-value pairs that will be sent with each monitor event. Useful for adding custom metadata to your monitor.',
+    }),
+    props: ({ field, setValue, trigger }): KeyValuePairsFieldProps => ({
+      readOnly,
+      keyLabel: i18n.translate('xpack.synthetics.monitorConfig.field.key.label', {
+        defaultMessage: 'Field',
+      }),
+      valueLabel: i18n.translate('xpack.synthetics.monitorConfig.field.value.label', {
+        defaultMessage: 'Value',
+      }),
+      addPairControlLabel: i18n.translate('xpack.synthetics.monitorConfig.metaField.label', {
+        defaultMessage: 'Add label field',
+      }),
+      onChange: async (pairs) => {
+        const value: Record<string, string> = {};
+        pairs.forEach((pair) => {
+          const [fieldKey, fieldValue] = pair;
+          value[fieldKey] = String(fieldValue);
+        });
+        if (!isEqual(value, field?.value)) {
+          setValue(ConfigKey.LABELS, value);
+          await trigger(ConfigKey.LABELS);
+        }
+      },
+      defaultPairs: Object.entries(field?.value || {}),
+    }),
+    validation: () => ({
+      validate: {
+        validBodyJSON: (value: Record<string, string>) => {
+          if (Object.entries(value).some((check) => !check[0] || !check[1])) {
+            return i18n.translate('xpack.synthetics.monitorConfig.metaFields.error', {
+              defaultMessage:
+                'This meta fields is not valid. Make sure that both the field and value are defined.',
+            });
+          }
+          return true;
+        },
+      },
+    }),
+  },
   isTLSEnabled: {
     fieldKey: 'isTLSEnabled',
     component: Switch,

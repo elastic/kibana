@@ -15,13 +15,11 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
 
-const CROWDSTRIKE_DEFAULT_API_URL = 'https://api.crowdstrike.com';
 const configFormSchema: ConfigFieldSchema[] = [
   {
     id: 'url',
     label: i18n.URL_LABEL,
     isUrlField: true,
-    defaultValue: CROWDSTRIKE_DEFAULT_API_URL,
   },
 ];
 

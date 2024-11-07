@@ -27,6 +27,7 @@ jest.mock('../guided_onboarding_tour/use_hidden_by_flyout', () => ({
 }));
 jest.mock('../guided_onboarding_tour');
 jest.mock('../user_privileges');
+jest.mock('../user_privileges');
 jest.mock('../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
 }));
@@ -44,6 +45,15 @@ jest.mock(
     }),
   })
 );
+
+const mockUseUiSetting = jest.fn().mockReturnValue([true]);
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useUiSetting$: () => mockUseUiSetting(),
+  };
+});
 
 jest.mock('./add_note_icon_item', () => {
   return {
@@ -249,6 +259,7 @@ describe('Actions', () => {
       expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
       expect(wrapper.find(SecurityTourStep).exists()).toEqual(false);
     });
+
     describe.each(Object.keys(isTourAnchorConditions))('tour condition true: %s', (key: string) => {
       it('Single condition does not make tour step exist', () => {
         const wrapper = mount(
@@ -281,6 +292,7 @@ describe('Actions', () => {
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(true);
     });
+
     test('it enables for eventType=signal', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
@@ -296,6 +308,7 @@ describe('Actions', () => {
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(false);
     });
+
     test('it disables for event.kind: undefined and agent.type: endpoint', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
@@ -311,6 +324,7 @@ describe('Actions', () => {
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(true);
     });
+
     test('it enables for event.kind: event and agent.type: endpoint', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
@@ -327,6 +341,7 @@ describe('Actions', () => {
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(false);
     });
+
     test('it disables for event.kind: alert and agent.type: endpoint', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
@@ -343,6 +358,7 @@ describe('Actions', () => {
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(true);
     });
+
     test('it shows the analyze event button when the event is from an endpoint', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
@@ -358,6 +374,7 @@ describe('Actions', () => {
 
       expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(true);
     });
+
     test('it does not render the analyze event button when the event is from an unsupported source', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
@@ -371,6 +388,60 @@ describe('Actions', () => {
       );
 
       expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(false);
+    });
+
+    test('it does not render the analyze event button on the cases alerts table with advanced settings disabled', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entity_id: ['1'] },
+      };
+      mockUseUiSetting.mockReturnValue([false]);
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} timelineId={TableId.alertsOnCasePage} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(false);
+    });
+
+    test('it does render the analyze event button on the cases alerts table with advanced settings enabled', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entity_id: ['1'] },
+      };
+      mockUseUiSetting.mockReturnValue([true]);
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} timelineId={TableId.alertsOnCasePage} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(true);
+    });
+
+    test('it does render the analyze event button on the alerts page alerts table even with advanced settings disabled', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entity_id: ['1'] },
+      };
+      mockUseUiSetting.mockReturnValue([false]);
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} timelineId={TableId.alertsOnAlertsPage} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(true);
     });
 
     test('it should not show session view button on action tabs for basic users', () => {
@@ -433,6 +504,44 @@ describe('Actions', () => {
       );
 
       expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(true);
+    });
+
+    test('it does not render the session view button on the cases alerts table with advanced settings disabled', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
+        _index: '.ds-logs-endpoint.events.process-default',
+      };
+      mockUseUiSetting.mockReturnValue([false]);
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} timelineId={TableId.alertsOnCasePage} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toBe(false);
+    });
+
+    test('it does render the session view button on the cases alerts table with advanced settings enabled', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
+        _index: '.ds-logs-endpoint.events.process-default',
+      };
+      mockUseUiSetting.mockReturnValue([true]);
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} timelineId={TableId.alertsOnCasePage} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toBe(true);
     });
   });
 

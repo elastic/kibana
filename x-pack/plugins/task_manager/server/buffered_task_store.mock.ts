@@ -11,6 +11,7 @@ import { BufferedTaskStore } from './buffered_task_store';
 const createBufferedTaskStoreMock = () => {
   const mocked: jest.Mocked<PublicMethodsOf<BufferedTaskStore>> = {
     update: jest.fn(),
+    partialUpdate: jest.fn(),
     remove: jest.fn(),
   };
   return mocked;

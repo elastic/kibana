@@ -9,7 +9,10 @@ import { Readable } from 'stream';
 
 import type { estypes } from '@elastic/elasticsearch';
 
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+
 import type {
+  FilesClientFactory,
   FleetFile,
   FleetFromHostFileClientInterface,
   FleetToHostFileClientInterface,
@@ -152,4 +155,11 @@ export const createHapiReadableStreamMock = (): HapiReadableStream => {
   };
 
   return readable;
+};
+
+export const createFleetFilesClientFactoryMock = (): DeeplyMockedKeys<FilesClientFactory> => {
+  return {
+    toHost: jest.fn((_) => createFleetToHostFilesClientMock()),
+    fromHost: jest.fn((_) => createFleetFromHostFilesClientMock()),
+  };
 };

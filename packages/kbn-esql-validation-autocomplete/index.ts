@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export type { SuggestionRawDefinition, ItemKind } from './src/autocomplete/types';
@@ -49,7 +50,7 @@ export {
   getCommandDefinition,
   getAllCommands,
   getCommandOption,
-  lookupColumn,
+  getColumnForASTNode as lookupColumn,
   shouldBeQuotedText,
   printFunctionSignature,
   checkFunctionArgMatchesDefinition as isEqualType,
@@ -61,7 +62,6 @@ export {
   isLiteralItem,
   isTimeIntervalItem,
   isAssignment,
-  isExpression,
   isAssignmentComplete,
   isSingleItem,
 } from './src/shared/helpers';
@@ -75,3 +75,5 @@ export {
 } from './src/shared/resources_helpers';
 
 export { wrapAsEditorMessage } from './src/code_actions/utils';
+
+export { getRecommendedQueries } from './src/autocomplete/recommended_queries/templates';

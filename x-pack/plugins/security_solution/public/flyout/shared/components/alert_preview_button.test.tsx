@@ -11,11 +11,14 @@ import React from 'react';
 import { AlertPreviewButton } from './alert_preview_button';
 import { DocumentDetailsPreviewPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER } from '../../document_details/preview/constants';
+import { createExpandableFlyoutApiMock } from '../../../common/mock/expandable_flyout';
 
 const mockOpenPreviewPanel = jest.fn();
+const mockExpandableFlyoutApi = createExpandableFlyoutApiMock();
 jest.mock('@kbn/expandable-flyout', () => {
   return {
     useExpandableFlyoutApi: () => ({
+      ...mockExpandableFlyoutApi,
       openPreviewPanel: mockOpenPreviewPanel,
     }),
   };

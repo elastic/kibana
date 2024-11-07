@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -19,10 +20,10 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import {
-  type UserProvidedValues,
   type DarkModeValue,
   parseDarkModeValue,
   type UiSettingsParams,
+  type UserProvidedValues,
 } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
 import {
@@ -50,6 +51,7 @@ type RenderOptions =
   | (RenderingPrebootDeps & {
       status?: never;
       elasticsearch?: never;
+      featureFlags?: never;
       customBranding?: never;
       userSettings?: never;
     });
@@ -84,6 +86,7 @@ export class RenderingService {
 
   public async setup({
     elasticsearch,
+    featureFlags,
     http,
     status,
     uiPlugins,
@@ -105,6 +108,7 @@ export class RenderingService {
     return {
       render: this.render.bind(this, {
         elasticsearch,
+        featureFlags,
         http,
         uiPlugins,
         status,
@@ -124,8 +128,16 @@ export class RenderingService {
     },
     { isAnonymousPage = false, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
-    const { elasticsearch, http, uiPlugins, status, customBranding, userSettings, i18n } =
-      renderOptions;
+    const {
+      elasticsearch,
+      featureFlags,
+      http,
+      uiPlugins,
+      status,
+      customBranding,
+      userSettings,
+      i18n,
+    } = renderOptions;
 
     const env = {
       mode: this.coreContext.env.mode,
@@ -136,23 +148,29 @@ export class RenderingService {
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
-    let settingsUserValues: Record<string, UserProvidedValues> = {};
-    let globalSettingsUserValues: Record<string, UserProvidedValues> = {};
-
-    if (!isAnonymousPage) {
-      const userValues = await Promise.all([
-        uiSettings.client?.getUserProvided(),
-        uiSettings.globalClient?.getUserProvided(),
-      ]);
-
-      settingsUserValues = userValues[0];
-      globalSettingsUserValues = userValues[1];
-    }
-
-    const defaultSettings = await withAsyncDefaultValues(
-      request,
-      uiSettings.client?.getRegistered()
-    );
+    // Grouping all async HTTP requests to run them concurrently for performance reasons.
+    const [
+      defaultSettings,
+      settingsUserValues = {},
+      globalSettingsUserValues = {},
+      userSettingDarkMode,
+    ] = await Promise.all([
+      // All sites
+      withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
+      // Only non-anonymous pages
+      ...(!isAnonymousPage
+        ? ([
+            uiSettings.client?.getUserProvided(),
+            uiSettings.globalClient?.getUserProvided(),
+            // dark mode
+            userSettings?.getUserSettingDarkMode(request),
+          ] as [
+            Promise<Record<string, UserProvidedValues>>,
+            Promise<Record<string, UserProvidedValues>>,
+            Promise<DarkModeValue> | undefined
+          ])
+        : []),
+    ]);
 
     const settings = {
       defaults: defaultSettings,
@@ -184,10 +202,6 @@ export class RenderingService {
     }
 
     // dark mode
-    const userSettingDarkMode = isAnonymousPage
-      ? undefined
-      : await userSettings?.getUserSettingDarkMode(request);
-
     const isThemeOverridden = settings.user['theme:darkMode']?.isOverridden ?? false;
 
     let darkMode: DarkModeValue;
@@ -200,7 +214,6 @@ export class RenderingService {
     const themeStylesheetPaths = (mode: boolean) =>
       getThemeStylesheetPaths({
         darkMode: mode,
-        themeVersion,
         baseHref: staticAssetsHrefBase,
       });
     const commonStylesheetPaths = getCommonStylesheetPaths({
@@ -250,6 +263,9 @@ export class RenderingService {
         assetsHrefBase: staticAssetsHrefBase,
         logging: loggingConfig,
         env,
+        featureFlags: {
+          overrides: featureFlags?.getOverrides() || {},
+        },
         clusterInfo,
         apmConfig,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,

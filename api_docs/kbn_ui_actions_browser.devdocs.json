@@ -304,7 +304,7 @@
             "section": "def-common.Presentable",
             "text": "Presentable"
           },
-          "<Context>, \"order\" | \"getDisplayName\" | \"getIconType\" | \"getDisplayNameTooltip\">>"
+          "<Context>, \"order\" | \"getIconType\" | \"getDisplayName\" | \"getDisplayNameTooltip\">>"
         ],
         "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
         "deprecated": false,

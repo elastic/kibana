@@ -42,8 +42,7 @@ import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import { type InputsOverride, packagePolicyService } from './package_policy';
 import { preconfigurePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
-import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
-import { isDefaultAgentlessPolicyEnabled } from './utils/agentless';
+import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_package_policies';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
@@ -159,18 +158,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             defaultMessage:
               '{agentPolicyName} is missing an `id` field. `id` is required, except for policies marked is_default or is_default_fleet_server.',
             values: { agentPolicyName: preconfiguredAgentPolicy.name },
-          })
-        );
-      }
-
-      if (
-        !isDefaultAgentlessPolicyEnabled() &&
-        preconfiguredAgentPolicy?.supports_agentless !== undefined
-      ) {
-        throw new FleetError(
-          i18n.translate('xpack.fleet.preconfiguration.support_agentless', {
-            defaultMessage:
-              '`supports_agentless` is only allowed in serverless environments that support the agentless feature',
           })
         );
       }

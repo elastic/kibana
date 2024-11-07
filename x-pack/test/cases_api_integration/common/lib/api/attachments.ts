@@ -68,7 +68,7 @@ export const createComment = async ({
     `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/comments`
   );
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
 
   const { body: theCase } = await apiCall
     .set('kbn-xsrf', 'true')
@@ -252,7 +252,7 @@ export const updateComment = async ({
     `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/comments`
   );
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
   const { body: res } = await apiCall
     .set('kbn-xsrf', 'true')
     .set(headers)

@@ -20,6 +20,7 @@ import {
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '@kbn/actions-plugin/server/constants/saved_objects';
 import { firstValueFrom } from 'rxjs';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
 import { registerServerRoutes } from './routes/register_routes';
@@ -31,7 +32,6 @@ import {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
-import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { initLangtrace } from './service/client/instrumentation/init_langtrace';
@@ -69,6 +69,7 @@ export class ObservabilityAIAssistantPlugin
       }),
       order: 8600,
       category: DEFAULT_APP_CATEGORIES.observability,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
       catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
       minimumLicense: 'enterprise',
@@ -157,11 +158,10 @@ export class ObservabilityAIAssistantPlugin
       core,
       taskManager: plugins.taskManager,
       getSearchConnectorModelId,
+      enableKnowledgeBase: this.config.enableKnowledgeBase,
     }));
 
     service.register(registerFunctions);
-
-    addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
 
     registerServerRoutes({
       core,

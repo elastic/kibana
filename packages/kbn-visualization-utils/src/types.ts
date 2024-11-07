@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 
@@ -40,4 +42,31 @@ export interface Suggestion<T = unknown, V = unknown> {
   incomplete?: boolean;
   changeType: TableChangeType;
   keptLayerIds: string[];
+}
+
+export enum ChartType {
+  XY = 'XY',
+  Gauge = 'Gauge',
+  Bar = 'Bar',
+  Line = 'Line',
+  Area = 'Area',
+  Donut = 'Donut',
+  Heatmap = 'Heatmap',
+  Metric = 'Metric',
+  Treemap = 'Treemap',
+  Tagcloud = 'Tagcloud',
+  Waffle = 'Waffle',
+  Pie = 'Pie',
+  Mosaic = 'Mosaic',
+  Table = 'Table',
+}
+
+export enum LensVisualizationType {
+  XY = 'lnsXY',
+  Metric = 'lnsMetric',
+  Pie = 'lnsPie',
+  Heatmap = 'lnsHeatmap',
+  Gauge = 'lnsGauge',
+  Datatable = 'lnsDatatable',
+  LegacyMetric = 'lnsLegacyMetric',
 }

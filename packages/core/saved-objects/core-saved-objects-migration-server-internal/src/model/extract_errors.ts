@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { TransformErrorObjects } from '../core';
@@ -51,10 +52,12 @@ export function extractUnknownDocFailureReason(
   resolveMigrationFailuresUrl: string,
   unknownDocs: DocumentIdAndType[]
 ): string {
+  const typesSet = new Set(unknownDocs.map(({ type }) => type));
   return (
-    `Migration failed because some documents were found which use unknown saved object types:\n` +
-    unknownDocs.map((doc) => `- "${doc.id}" (type: "${doc.type}")\n`).join('') +
-    `\nTo proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.\n` +
+    `Migration failed because some documents were found which use unknown saved object types: ${Array.from(
+      typesSet.values()
+    )}\n` +
+    `To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.\n` +
     `Please refer to ${resolveMigrationFailuresUrl} for more information.`
   );
 }

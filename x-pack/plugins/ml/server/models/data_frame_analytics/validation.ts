@@ -27,7 +27,7 @@ import {
   TRAINING_DOCS_LOWER,
   TRAINING_DOCS_UPPER,
   VALIDATION_STATUS,
-} from '../../../common/constants/validation';
+} from '@kbn/ml-validators';
 
 interface MissingAgg {
   [key: string]: {

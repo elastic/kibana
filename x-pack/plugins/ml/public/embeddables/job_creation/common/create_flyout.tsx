@@ -52,7 +52,7 @@ export function createFlyout(
               data,
               lens,
               dashboardService,
-              mlServices: getMlGlobalServices(http, data.dataViews),
+              mlServices: getMlGlobalServices(coreStart, data.dataViews),
             }}
           >
             <FlyoutComponent

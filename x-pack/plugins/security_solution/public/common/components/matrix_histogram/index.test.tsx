@@ -6,7 +6,7 @@
  */
 
 import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
+import { mount, type ComponentType } from 'enzyme';
 import React from 'react';
 
 import { MatrixHistogram } from '.';
@@ -80,7 +80,7 @@ describe('Matrix Histogram Component', () => {
   describe('rendering', () => {
     beforeEach(() => {
       wrapper = mount(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<{}>,
       });
     });
 
@@ -119,7 +119,7 @@ describe('Matrix Histogram Component', () => {
   describe('spacer', () => {
     test('it renders a spacer by default', () => {
       wrapper = mount(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<{}>,
       });
       expect(wrapper.find('[data-test-subj="spacer"]').exists()).toEqual(true);
     });
@@ -128,7 +128,7 @@ describe('Matrix Histogram Component', () => {
       wrapper = mount(
         <MatrixHistogram {...mockMatrixOverTimeHistogramProps} showSpacer={false} />,
         {
-          wrappingComponent: TestProviders,
+          wrappingComponent: TestProviders as ComponentType<{}>,
         }
       );
       expect(wrapper.find('[data-test-subj="spacer"]').exists()).toEqual(false);
@@ -138,7 +138,7 @@ describe('Matrix Histogram Component', () => {
   describe('select dropdown', () => {
     test('should be hidden if only one option is provided', () => {
       wrapper = mount(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<{}>,
       });
       expect(wrapper.find('EuiSelect').exists()).toEqual(false);
     });
@@ -151,7 +151,7 @@ describe('Matrix Histogram Component', () => {
         getLensAttributes: getDnsTopDomainsLensAttributes,
       };
       wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<{}>,
       });
       expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).toEqual(false);
     });
@@ -165,7 +165,7 @@ describe('Matrix Histogram Component', () => {
 
     test('toggleQuery updates toggleStatus', () => {
       wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<{}>,
       });
       expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toEqual(true);
       wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
@@ -174,7 +174,7 @@ describe('Matrix Histogram Component', () => {
 
     test('toggleStatus=true, render components', () => {
       wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<{}>,
       });
       expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toEqual(true);
     });
@@ -182,7 +182,7 @@ describe('Matrix Histogram Component', () => {
     test('toggleStatus=false, do not render components', () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
       wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<{}>,
       });
       expect(wrapper.find('MatrixLoader').exists()).toBe(false);
     });
@@ -190,7 +190,7 @@ describe('Matrix Histogram Component', () => {
     test('toggleStatus=false, skip', () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
       wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<{}>,
       });
 
       expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toEqual(false);

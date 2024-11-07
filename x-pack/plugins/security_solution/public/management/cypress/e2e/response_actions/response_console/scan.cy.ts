@@ -25,11 +25,13 @@ describe(
   {
     env: {
       ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'responseActionScanEnabled',
-          ])}`,
-        ],
+        // This is not needed for this test, but it's a good example of
+        // how to enable experimental features in the Cypress tests.
+        // kbnServerArgs: [
+        //   `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+        //     'featureFlagName',
+        //   ])}`,
+        // ],
       },
     },
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -39,7 +41,8 @@ describe(
       login();
     });
 
-    describe('Scan operation:', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/187932
+    describe.skip('Scan operation:', () => {
       const homeFilePath = Cypress.env('IS_CI') ? '/home/vagrant' : '/home';
 
       const fileContent = 'This is a test file for the scan command.';

@@ -72,10 +72,11 @@ import { visit } from '../../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 
+// Skipped in MKI due to flake
 describe(
   'New Terms rules',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     describe('Detection rules, New Terms', () => {

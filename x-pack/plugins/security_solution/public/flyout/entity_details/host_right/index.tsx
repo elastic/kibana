@@ -9,6 +9,10 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
+import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
+import { sum } from 'lodash';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import type { Refetch } from '../../../common/types';
@@ -29,7 +33,7 @@ import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anom
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedHost } from './hooks/use_observed_host';
 import { HostDetailsPanelKey } from '../host_details_left';
-import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 
 export interface HostPanelProps extends Record<string, unknown> {
@@ -93,6 +97,28 @@ export const HostPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
+  const { data } = useMisconfigurationPreview({
+    query: buildEntityFlyoutPreviewQuery('host.name', hostName),
+    sort: [],
+    enabled: true,
+    pageSize: 1,
+    ignore_unavailable: true,
+  });
+
+  const passedFindings = data?.count.passed || 0;
+  const failedFindings = data?.count.failed || 0;
+
+  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
+
+  const { data: vulnerabilitiesData } = useVulnerabilitiesPreview({
+    query: buildEntityFlyoutPreviewQuery('host.name', hostName),
+    sort: [],
+    enabled: true,
+    pageSize: 1,
+  });
+
+  const hasVulnerabilitiesFindings = sum(Object.values(vulnerabilitiesData?.count || {})) > 0;
+
   useQueryInspector({
     deleteQuery,
     inspect: inspectRiskScore,
@@ -115,13 +141,32 @@ export const HostPanel = ({
           scopeId,
           isRiskScoreExist,
           path: tab ? { tab } : undefined,
+          hasMisconfigurationFindings,
+          hasVulnerabilitiesFindings,
         },
       });
     },
-    [telemetry, openLeftPanel, hostName, isRiskScoreExist, scopeId]
+    [
+      telemetry,
+      openLeftPanel,
+      hostName,
+      scopeId,
+      isRiskScoreExist,
+      hasMisconfigurationFindings,
+      hasVulnerabilitiesFindings,
+    ]
   );
 
-  const openDefaultPanel = useCallback(() => openTabPanel(), [openTabPanel]);
+  const openDefaultPanel = useCallback(
+    () =>
+      openTabPanel(
+        isRiskScoreExist
+          ? EntityDetailsLeftPanelTab.RISK_INPUTS
+          : EntityDetailsLeftPanelTab.CSP_INSIGHTS
+      ),
+    [isRiskScoreExist, openTabPanel]
+  );
+
   const observedHost = useObservedHost(hostName, scopeId);
 
   if (observedHost.isLoading) {
@@ -148,7 +193,10 @@ export const HostPanel = ({
         return (
           <>
             <FlyoutNavigation
-              flyoutIsExpandable={!isPreviewMode && isRiskScoreExist}
+              flyoutIsExpandable={
+                !isPreviewMode &&
+                (isRiskScoreExist || hasMisconfigurationFindings || hasVulnerabilitiesFindings)
+              }
               expandDetails={openDefaultPanel}
             />
             <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />

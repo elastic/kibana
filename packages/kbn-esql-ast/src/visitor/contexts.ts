@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable max-classes-per-file */
@@ -11,11 +12,12 @@
 // and makes it harder to understand the code structure.
 
 import { type GlobalVisitorContext, SharedData } from './global_visitor_context';
-import { firstItem, singleItems } from './utils';
+import { children, firstItem, singleItems } from './utils';
 import type {
   ESQLAstCommand,
   ESQLAstItem,
   ESQLAstNodeWithArgs,
+  ESQLAstNodeWithChildren,
   ESQLAstRenameExpression,
   ESQLColumn,
   ESQLCommandOption,
@@ -25,6 +27,7 @@ import type {
   ESQLIntegerLiteral,
   ESQLList,
   ESQLLiteral,
+  ESQLOrderExpression,
   ESQLSingleAstItem,
   ESQLSource,
   ESQLTimeInterval,
@@ -33,7 +36,6 @@ import type {
   CommandVisitorInput,
   ESQLAstExpressionNode,
   ESQLAstQueryNode,
-  ExpressionVisitorInput,
   ExpressionVisitorOutput,
   UndefinedToVoid,
   VisitorAstNode,
@@ -45,6 +47,11 @@ import { Builder } from '../builder';
 
 const isNodeWithArgs = (x: unknown): x is ESQLAstNodeWithArgs =>
   !!x && typeof x === 'object' && Array.isArray((x as any).args);
+
+const isNodeWithChildren = (x: unknown): x is ESQLAstNodeWithChildren =>
+  !!x &&
+  typeof x === 'object' &&
+  (Array.isArray((x as any).args) || Array.isArray((x as any).values));
 
 export class VisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
@@ -70,7 +77,9 @@ export class VisitorContext<
   ) {}
 
   public *visitArguments(
-    input: VisitorInput<Methods, 'visitExpression'>
+    input:
+      | VisitorInput<Methods, 'visitExpression'>
+      | (() => VisitorInput<Methods, 'visitExpression'>)
   ): Iterable<VisitorOutput<Methods, 'visitExpression'>> {
     this.ctx.assertMethodExists('visitExpression');
 
@@ -84,20 +93,25 @@ export class VisitorContext<
       if (arg.type === 'option' && arg.name !== 'as') {
         continue;
       }
-      yield this.visitExpression(arg, input as any);
+      yield this.visitExpression(
+        arg,
+        typeof input === 'function'
+          ? (input as () => VisitorInput<Methods, 'visitExpression'>)()
+          : (input as VisitorInput<Methods, 'visitExpression'>)
+      );
     }
   }
 
   public arguments(): ESQLAstExpressionNode[] {
     const node = this.node;
 
-    if (!isNodeWithArgs(node)) {
-      throw new Error('Node does not have arguments');
+    if (!isNodeWithChildren(node)) {
+      return [];
     }
 
     const args: ESQLAstExpressionNode[] = [];
 
-    for (const arg of singleItems(node.args)) {
+    for (const arg of children(node)) {
       args.push(arg);
     }
 
@@ -146,6 +160,10 @@ export class QueryVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends VisitorContext<Methods, Data, ESQLAstQueryNode> {
+  public *commands(): Iterable<ESQLAstCommand> {
+    yield* this.node.commands;
+  }
+
   public *visitCommands(
     input: UndefinedToVoid<Parameters<NonNullable<Methods['visitCommand']>>[1]>
   ): Iterable<
@@ -154,7 +172,7 @@ export class QueryVisitorContext<
   > {
     this.ctx.assertMethodExists('visitCommand');
 
-    for (const cmd of this.node) {
+    for (const cmd of this.node.commands) {
       yield this.visitCommand(cmd, input as any);
     }
   }
@@ -319,7 +337,7 @@ export class LimitCommandVisitorContext<
     if (
       arg &&
       arg.type === 'literal' &&
-      (arg.literalType === 'integer' || arg.literalType === 'decimal')
+      (arg.literalType === 'integer' || arg.literalType === 'double')
     ) {
       return arg;
     }
@@ -335,7 +353,7 @@ export class LimitCommandVisitorContext<
   }
 
   public setLimit(value: number): void {
-    const literalNode = Builder.numericLiteral({ value });
+    const literalNode = Builder.expression.literal.numeric({ value, literalType: 'integer' });
 
     this.node.args = [literalNode];
   }
@@ -502,12 +520,14 @@ export class ListLiteralExpressionVisitorContext<
   Node extends ESQLList = ESQLList
 > extends ExpressionVisitorContext<Methods, Data, Node> {
   public *visitElements(
-    input: ExpressionVisitorInput<Methods>
+    input:
+      | VisitorInput<Methods, 'visitExpression'>
+      | (() => VisitorInput<Methods, 'visitExpression'>)
   ): Iterable<ExpressionVisitorOutput<Methods>> {
     this.ctx.assertMethodExists('visitExpression');
 
     for (const value of this.node.values) {
-      yield this.visitExpression(value, input as any);
+      yield this.visitExpression(value, typeof input === 'function' ? (input as any)() : input);
     }
   }
 }
@@ -542,3 +562,8 @@ export class RenameExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends VisitorContext<Methods, Data, ESQLAstRenameExpression> {}
+
+export class OrderExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends VisitorContext<Methods, Data, ESQLOrderExpression> {}

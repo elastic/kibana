@@ -20,16 +20,44 @@ import type { EsAssetReference, Installation } from '../../../../../../common';
 import { appContextService } from '../../../../app_context';
 import { createAppContextStartContractMock } from '../../../../../mocks';
 import { installTransforms } from '../../../elasticsearch/transform/install';
+import { cleanupTransforms } from '../../remove';
 
-import { stepInstallTransforms } from './step_install_transforms';
+import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
+
+import { stepInstallTransforms, cleanupTransformsStep } from './step_install_transforms';
 
 jest.mock('../../../elasticsearch/transform/install');
-
+jest.mock('../../remove', () => {
+  return {
+    ...jest.requireActual('../../remove'),
+    cleanupTransforms: jest.fn(),
+  };
+});
 const mockedInstallTransforms = installTransforms as jest.MockedFunction<typeof installTransforms>;
+const mockCleanupTransforms = cleanupTransforms as jest.MockedFunction<typeof cleanupTransforms>;
+
+let soClient: jest.Mocked<SavedObjectsClientContract>;
+let esClient: jest.Mocked<ElasticsearchClient>;
+
+const packageInstallContext = {
+  packageInfo: {
+    title: 'title',
+    name: 'test-package',
+    version: '1.0.0',
+    description: 'test',
+    type: 'integration',
+    categories: ['cloud', 'custom'],
+    format_version: 'string',
+    release: 'experimental',
+    conditions: { kibana: { version: 'x.y.z' } },
+    owner: { github: 'elastic/fleet' },
+  } as any,
+  paths: ['some/path/1', 'some/path/2'],
+  assetsMap: new Map(),
+  archiveIterator: createArchiveIteratorFromMap(new Map()),
+};
 
 describe('stepInstallTransforms', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  let esClient: jest.Mocked<ElasticsearchClient>;
   const getMockInstalledPackageSo = (
     installedEs: EsAssetReference[] = []
   ): SavedObject<Installation> => {
@@ -60,22 +88,6 @@ describe('stepInstallTransforms', () => {
     jest.mocked(mockedInstallTransforms).mockReset();
   });
 
-  const packageInstallContext = {
-    packageInfo: {
-      title: 'title',
-      name: 'test-package',
-      version: '1.0.0',
-      description: 'test',
-      type: 'integration',
-      categories: ['cloud', 'custom'],
-      format_version: 'string',
-      release: 'experimental',
-      conditions: { kibana: { version: 'x.y.z' } },
-      owner: { github: 'elastic/fleet' },
-    } as any,
-    paths: ['some/path/1', 'some/path/2'],
-    assetsMap: new Map(),
-  };
   appContextService.start(
     createAppContextStartContractMock({
       internal: {
@@ -157,5 +169,182 @@ describe('stepInstallTransforms', () => {
         type: ElasticsearchAssetType.ilmPolicy,
       },
     ]);
+  });
+});
+
+describe('cleanupTransformsStep', () => {
+  const mockInstalledPackageSo: SavedObject<Installation> = {
+    id: 'mocked-package',
+    attributes: {
+      name: 'test-package',
+      version: '1.0.0',
+      install_status: 'installing',
+      install_version: '1.0.0',
+      install_started_at: new Date().toISOString(),
+      install_source: 'registry',
+      verification_status: 'verified',
+      installed_kibana: [] as any,
+      installed_es: [] as any,
+      es_index_patterns: {},
+    },
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+    references: [],
+  };
+
+  beforeEach(async () => {
+    soClient = savedObjectsClientMock.create();
+    esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    appContextService.start(createAppContextStartContractMock());
+  });
+  afterEach(async () => {
+    mockCleanupTransforms.mockReset();
+  });
+  const installedEs = [
+    {
+      id: 'metrics-endpoint.policy-0.1.0-dev.0',
+      type: ElasticsearchAssetType.ingestPipeline,
+    },
+    {
+      id: 'endpoint.metadata_current-default-0.1.0',
+      type: ElasticsearchAssetType.transform,
+    },
+    {
+      id: 'logs-endpoint.metadata_current-template',
+      type: ElasticsearchAssetType.indexTemplate,
+      version: '0.2.0',
+    },
+    {
+      id: 'endpoint.metadata_current-default-0.2.0',
+      type: ElasticsearchAssetType.transform,
+    },
+    {
+      id: '.metrics-endpoint.metadata_united_default-1',
+      type: ElasticsearchAssetType.index,
+    },
+  ];
+
+  it('should clean up transforms already installed', async () => {
+    await cleanupTransformsStep({
+      savedObjectsClient: soClient,
+      // @ts-ignore
+      savedObjectsImporter: jest.fn(),
+      esClient,
+      logger: loggerMock.create(),
+      packageInstallContext,
+      installedPkg: {
+        ...mockInstalledPackageSo,
+        attributes: {
+          ...mockInstalledPackageSo.attributes,
+          installed_es: installedEs as any,
+          install_started_at: new Date(Date.now() - 1000).toISOString(),
+        },
+      },
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+      retryFromLastState: true,
+      initialState: 'install_transforms' as any,
+    });
+
+    expect(mockCleanupTransforms).toBeCalledWith(installedEs, esClient);
+  });
+
+  it('should not clean up assets if force is passed', async () => {
+    await cleanupTransformsStep({
+      savedObjectsClient: soClient,
+      // @ts-ignore
+      savedObjectsImporter: jest.fn(),
+      esClient,
+      logger: loggerMock.create(),
+      packageInstallContext,
+      installedPkg: {
+        ...mockInstalledPackageSo,
+        attributes: {
+          ...mockInstalledPackageSo.attributes,
+          installed_es: installedEs as any,
+          install_started_at: new Date(Date.now() - 1000).toISOString(),
+        },
+      },
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+      force: true,
+      retryFromLastState: true,
+      initialState: 'install_transforms' as any,
+    });
+
+    expect(mockCleanupTransforms).not.toBeCalled();
+  });
+
+  it('should not clean up assets if retryFromLastState is not passed', async () => {
+    await cleanupTransformsStep({
+      savedObjectsClient: soClient,
+      // @ts-ignore
+      savedObjectsImporter: jest.fn(),
+      esClient,
+      logger: loggerMock.create(),
+      packageInstallContext,
+      installedPkg: {
+        ...mockInstalledPackageSo,
+        attributes: {
+          ...mockInstalledPackageSo.attributes,
+          installed_es: installedEs as any,
+          install_started_at: new Date(Date.now() - 1000).toISOString(),
+        },
+      },
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+      initialState: 'install_transforms' as any,
+    });
+
+    expect(mockCleanupTransforms).not.toBeCalled();
+  });
+
+  it('should not clean up assets if initialState != install_transforms', async () => {
+    await cleanupTransformsStep({
+      savedObjectsClient: soClient,
+      // @ts-ignore
+      savedObjectsImporter: jest.fn(),
+      esClient,
+      logger: loggerMock.create(),
+      packageInstallContext,
+      installedPkg: {
+        ...mockInstalledPackageSo,
+        attributes: {
+          ...mockInstalledPackageSo.attributes,
+          installed_es: installedEs as any,
+          install_started_at: new Date(Date.now() - 1000).toISOString(),
+        },
+      },
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+      retryFromLastState: true,
+      initialState: 'create_restart_install' as any,
+    });
+
+    expect(mockCleanupTransforms).not.toBeCalled();
+  });
+
+  it('should not clean up assets if attributes are not present', async () => {
+    await cleanupTransformsStep({
+      savedObjectsClient: soClient,
+      // @ts-ignore
+      savedObjectsImporter: jest.fn(),
+      esClient,
+      logger: loggerMock.create(),
+      packageInstallContext,
+      installedPkg: {
+        ...mockInstalledPackageSo,
+      },
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+      retryFromLastState: true,
+      initialState: 'install_transforms' as any,
+    });
+
+    expect(mockCleanupTransforms).not.toBeCalled();
   });
 });

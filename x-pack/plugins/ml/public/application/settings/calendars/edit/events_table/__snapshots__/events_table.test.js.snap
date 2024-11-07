@@ -17,13 +17,17 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
         },
         Object {
           "field": "start_time",
-          "name": "Start",
+          "name": <span>
+            Start
+          </span>,
           "render": [Function],
           "sortable": true,
         },
         Object {
           "field": "end_time",
-          "name": "End",
+          "name": <span>
+            End
+          </span>,
           "render": [Function],
           "sortable": true,
         },
@@ -62,7 +66,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
       Object {
         "sort": Object {
           "direction": "asc",
-          "field": "description",
+          "field": "start_time",
         },
       }
     }
@@ -88,13 +92,17 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         },
         Object {
           "field": "start_time",
-          "name": "Start",
+          "name": <span>
+            Start
+          </span>,
           "render": [Function],
           "sortable": true,
         },
         Object {
           "field": "end_time",
-          "name": "End",
+          "name": <span>
+            End
+          </span>,
           "render": [Function],
           "sortable": true,
         },
@@ -167,7 +175,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
       Object {
         "sort": Object {
           "direction": "asc",
-          "field": "description",
+          "field": "start_time",
         },
       }
     }

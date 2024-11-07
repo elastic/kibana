@@ -7,6 +7,7 @@
 
 import { initGetActiveSpaceApi } from './get_active_space';
 import { initGetSpaceContentSummaryApi } from './get_content_summary';
+import { initSetSolutionSpaceApi } from './set_solution_space';
 import type { SpacesServiceStart } from '../../../spaces_service/spaces_service';
 import type { SpacesRouter } from '../../../types';
 
@@ -18,4 +19,5 @@ export interface InternalRouteDeps {
 export function initInternalSpacesApi(deps: InternalRouteDeps) {
   initGetActiveSpaceApi(deps);
   initGetSpaceContentSummaryApi(deps);
+  initSetSolutionSpaceApi(deps);
 }

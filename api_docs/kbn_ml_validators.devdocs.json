@@ -1,0 +1,601 @@
+{
+  "id": "@kbn/ml-validators",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.composeValidators",
+        "type": "Function",
+        "tags": [],
+        "label": "composeValidators",
+        "description": [
+          "\nFactory that composes multiple validators into a single function.\n"
+        ],
+        "signature": [
+          "(validators: ((value: any) => { [key: string]: any; } | null)[]) => (value: any) => { [key: string]: any; } | null"
+        ],
+        "path": "x-pack/packages/ml/validators/validators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-validators",
+            "id": "def-common.composeValidators.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "validators",
+            "description": [
+              "List of validators to compose."
+            ],
+            "signature": [
+              "((value: any) => { [key: string]: any; } | null)[]"
+            ],
+            "path": "x-pack/packages/ml/validators/validators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A validator function that runs all the validators."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.dictionaryValidator",
+        "type": "Function",
+        "tags": [],
+        "label": "dictionaryValidator",
+        "description": [
+          "\nFactory to create a dictionary validator function."
+        ],
+        "signature": [
+          "(dict: string[], shouldInclude: boolean) => (value: string) => { matchDict: string; } | null"
+        ],
+        "path": "x-pack/packages/ml/validators/validators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-validators",
+            "id": "def-common.dictionaryValidator.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "dict",
+            "description": [
+              "Dictionary to check against."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/ml/validators/validators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-validators",
+            "id": "def-common.dictionaryValidator.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "shouldInclude",
+            "description": [
+              "Whether the value should be included in the dictionary."
+            ],
+            "signature": [
+              "boolean"
+            ],
+            "path": "x-pack/packages/ml/validators/validators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A validator function that checks if the value is in the dictionary."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.maxLengthValidator",
+        "type": "Function",
+        "tags": [],
+        "label": "maxLengthValidator",
+        "description": [
+          "\nProvides a validator function for maximum allowed input length."
+        ],
+        "signature": [
+          "(maxLength: number) => (value: string) => { maxLength: { requiredLength: number; actualLength: number; }; } | null"
+        ],
+        "path": "x-pack/packages/ml/validators/validators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-validators",
+            "id": "def-common.maxLengthValidator.$1",
+            "type": "number",
+            "tags": [],
+            "label": "maxLength",
+            "description": [
+              "Maximum length allowed."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/validators/validators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.memoryInputValidator",
+        "type": "Function",
+        "tags": [],
+        "label": "memoryInputValidator",
+        "description": [
+          "\nFactory for creating a memory input validator function.\n"
+        ],
+        "signature": [
+          "(allowedUnits: string[]) => <T>(value: T) => { invalidUnits: { allowedUnits: string; }; } | null"
+        ],
+        "path": "x-pack/packages/ml/validators/validators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-validators",
+            "id": "def-common.memoryInputValidator.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "allowedUnits",
+            "description": [
+              "Allowed units for the memory input."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/ml/validators/validators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A validator function that checks if the value is a valid memory input."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.patternValidator",
+        "type": "Function",
+        "tags": [],
+        "label": "patternValidator",
+        "description": [
+          "\nFactory that provides a validator function for checking against pattern."
+        ],
+        "signature": [
+          "(pattern: RegExp) => (value: string) => { pattern: { matchPattern: string; }; } | null"
+        ],
+        "path": "x-pack/packages/ml/validators/validators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-validators",
+            "id": "def-common.patternValidator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern",
+            "description": [
+              "Pattern to check against."
+            ],
+            "signature": [
+              "RegExp"
+            ],
+            "path": "x-pack/packages/ml/validators/validators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A validator function that checks if the value matches the pattern."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.requiredValidator",
+        "type": "Function",
+        "tags": [],
+        "label": "requiredValidator",
+        "description": [
+          "\nFactory to create a required validator function."
+        ],
+        "signature": [
+          "() => <T extends string>(value: T) => { required: boolean; } | null"
+        ],
+        "path": "x-pack/packages/ml/validators/validators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [
+          "A validator function that checks if the value is empty."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.timeIntervalInputValidator",
+        "type": "Function",
+        "tags": [],
+        "label": "timeIntervalInputValidator",
+        "description": [
+          "\nFactory for creating a time interval input validator function.\n"
+        ],
+        "signature": [
+          "() => (value: string) => { invalidTimeInterval: boolean; } | null"
+        ],
+        "path": "x-pack/packages/ml/validators/validators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [
+          "A validator function that checks if the value is a valid time interval."
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.CalloutMessage",
+        "type": "Interface",
+        "tags": [],
+        "label": "CalloutMessage",
+        "description": [
+          "\nInterface for a callout message."
+        ],
+        "path": "x-pack/packages/ml/validators/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-validators",
+            "id": "def-common.CalloutMessage.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique identifier for the callout message."
+            ],
+            "path": "x-pack/packages/ml/validators/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-validators",
+            "id": "def-common.CalloutMessage.heading",
+            "type": "string",
+            "tags": [],
+            "label": "heading",
+            "description": [
+              "\nHeading of the callout message."
+            ],
+            "path": "x-pack/packages/ml/validators/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-validators",
+            "id": "def-common.CalloutMessage.status",
+            "type": "Enum",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "\nStatus of the callout message."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-validators",
+                "scope": "common",
+                "docId": "kibKbnMlValidatorsPluginApi",
+                "section": "def-common.VALIDATION_STATUS",
+                "text": "VALIDATION_STATUS"
+              }
+            ],
+            "path": "x-pack/packages/ml/validators/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-validators",
+            "id": "def-common.CalloutMessage.text",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [
+              "\nText of the callout message."
+            ],
+            "path": "x-pack/packages/ml/validators/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-validators",
+            "id": "def-common.CalloutMessage.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [
+              "\nOptional URL for the callout message."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/validators/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.VALIDATION_STATUS",
+        "type": "Enum",
+        "tags": [],
+        "label": "VALIDATION_STATUS",
+        "description": [
+          "\nEnum for the validation status."
+        ],
+        "path": "x-pack/packages/ml/validators/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.ALL_CATEGORIES",
+        "type": "number",
+        "tags": [],
+        "label": "ALL_CATEGORIES",
+        "description": [
+          "\nConst for all categories."
+        ],
+        "signature": [
+          "-1"
+        ],
+        "path": "x-pack/packages/ml/validators/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.ALLOWED_DATA_UNITS",
+        "type": "Array",
+        "tags": [],
+        "label": "ALLOWED_DATA_UNITS",
+        "description": [
+          "\nConst for allowed data units."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/packages/ml/validators/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.FRACTION_EMPTY_LIMIT",
+        "type": "number",
+        "tags": [],
+        "label": "FRACTION_EMPTY_LIMIT",
+        "description": [
+          "\nConst for the fraction empty limit."
+        ],
+        "signature": [
+          "0.3"
+        ],
+        "path": "x-pack/packages/ml/validators/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.INCLUDED_FIELDS_THRESHOLD",
+        "type": "number",
+        "tags": [],
+        "label": "INCLUDED_FIELDS_THRESHOLD",
+        "description": [
+          "\nConst for the threshold of included fields."
+        ],
+        "signature": [
+          "100"
+        ],
+        "path": "x-pack/packages/ml/validators/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.JOB_ID_MAX_LENGTH",
+        "type": "number",
+        "tags": [],
+        "label": "JOB_ID_MAX_LENGTH",
+        "description": [
+          "\nConst for the maximum length of a job ID."
+        ],
+        "signature": [
+          "64"
+        ],
+        "path": "x-pack/packages/ml/validators/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.MemoryInputValidatorResult",
+        "type": "Type",
+        "tags": [],
+        "label": "MemoryInputValidatorResult",
+        "description": [
+          "\nType for the result of a memory input validation."
+        ],
+        "signature": [
+          "{ invalidUnits: { allowedUnits: string; }; } | null"
+        ],
+        "path": "x-pack/packages/ml/validators/validators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.MINIMUM_NUM_FIELD_FOR_CHECK",
+        "type": "number",
+        "tags": [],
+        "label": "MINIMUM_NUM_FIELD_FOR_CHECK",
+        "description": [
+          "\nConst for the minimum number of fields for check."
+        ],
+        "signature": [
+          "25"
+        ],
+        "path": "x-pack/packages/ml/validators/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.NUM_CATEGORIES_THRESHOLD",
+        "type": "number",
+        "tags": [],
+        "label": "NUM_CATEGORIES_THRESHOLD",
+        "description": [
+          "\nConst for the maximum length of categories."
+        ],
+        "signature": [
+          "10"
+        ],
+        "path": "x-pack/packages/ml/validators/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.SKIP_BUCKET_SPAN_ESTIMATION",
+        "type": "boolean",
+        "tags": [],
+        "label": "SKIP_BUCKET_SPAN_ESTIMATION",
+        "description": [
+          "\nBoolean const for skipping the bucket span estimation."
+        ],
+        "signature": [
+          "true"
+        ],
+        "path": "x-pack/packages/ml/validators/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.TRAINING_DOCS_LOWER",
+        "type": "number",
+        "tags": [],
+        "label": "TRAINING_DOCS_LOWER",
+        "description": [
+          "\nConst for the lower limit of training documents."
+        ],
+        "signature": [
+          "200"
+        ],
+        "path": "x-pack/packages/ml/validators/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.TRAINING_DOCS_UPPER",
+        "type": "number",
+        "tags": [],
+        "label": "TRAINING_DOCS_UPPER",
+        "description": [
+          "\nConst for the upper limit of training documents."
+        ],
+        "signature": [
+          "200000"
+        ],
+        "path": "x-pack/packages/ml/validators/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-validators",
+        "id": "def-common.ValidateAnalyticsJobResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "ValidateAnalyticsJobResponse",
+        "description": [
+          "\nType for the response of the validate analytics job API."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-validators",
+            "scope": "common",
+            "docId": "kibKbnMlValidatorsPluginApi",
+            "section": "def-common.CalloutMessage",
+            "text": "CalloutMessage"
+          },
+          "[]"
+        ],
+        "path": "x-pack/packages/ml/validators/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

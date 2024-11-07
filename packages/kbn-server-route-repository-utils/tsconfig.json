@@ -16,9 +16,10 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-http-browser",
     "@kbn/core-http-server",
     "@kbn/core",
     "@kbn/zod",
+    "@kbn/core-http-browser",
+    "@kbn/sse-utils",
   ]
 }

@@ -30,8 +30,8 @@
 }
 
 .lnsDimensionContainer__content {
-  @include euiYScroll;
   flex: 1;
+  @include euiYScroll;
 }
 
 .lnsDimensionContainer__footer {

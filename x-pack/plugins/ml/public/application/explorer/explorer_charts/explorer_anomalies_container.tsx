@@ -19,6 +19,7 @@ import type { TableSeverity } from '../../components/controls/select_severity/se
 import { SelectSeverityUI } from '../../components/controls/select_severity/select_severity';
 import type { ExplorerChartsData } from './explorer_charts_container_service';
 import type { MlLocator } from '../../../../common/types/locator';
+import type { AnomaliesTableData } from '../explorer_utils';
 
 interface ExplorerAnomaliesContainerProps {
   id: string;
@@ -27,6 +28,7 @@ interface ExplorerAnomaliesContainerProps {
   severity: TableSeverity;
   setSeverity: (severity: TableSeverity) => void;
   mlLocator: MlLocator;
+  tableData: AnomaliesTableData;
   timeBuckets: TimeBuckets;
   timefilter: TimefilterContract;
   onSelectEntity: (
@@ -54,6 +56,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   severity,
   setSeverity,
   mlLocator,
+  tableData,
   timeBuckets,
   timefilter,
   onSelectEntity,
@@ -89,6 +92,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
             ...chartsData,
             severity: severity.val,
             mlLocator,
+            tableData,
             timeBuckets,
             timefilter,
             timeRange,

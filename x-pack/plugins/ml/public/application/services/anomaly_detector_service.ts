@@ -9,13 +9,13 @@ import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 import type { Job, JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { HttpService } from './http_service';
-import { type MlApiServices, mlApiServicesProvider } from './ml_api_service';
+import { type MlApi, mlApiProvider } from './ml_api_service';
 
 export class AnomalyDetectorService {
-  private mlApiServices: MlApiServices;
+  private mlApi: MlApi;
 
   constructor(httpService: HttpService) {
-    this.mlApiServices = mlApiServicesProvider(httpService);
+    this.mlApi = mlApiProvider(httpService);
   }
 
   /**
@@ -31,8 +31,6 @@ export class AnomalyDetectorService {
    * @param jobIds
    */
   getJobs$(jobIds: JobId[]): Observable<Job[]> {
-    return this.mlApiServices
-      .getJobs$({ jobId: jobIds.join(',') })
-      .pipe(map((response) => response.jobs));
+    return this.mlApi.getJobs$({ jobId: jobIds.join(',') }).pipe(map((response) => response.jobs));
   }
 }

@@ -36,6 +36,17 @@ interface Params {
   options: Omit<EqlOptionsSelected, 'query' | 'size'> | undefined;
 }
 
+export interface EqlResponseError {
+  code: EQL_ERROR_CODES;
+  messages?: string[];
+  error?: Error;
+}
+
+export interface ValidateEqlResponse {
+  valid: boolean;
+  error?: EqlResponseError;
+}
+
 export const validateEql = async ({
   data,
   dataViewTitle,
@@ -43,10 +54,7 @@ export const validateEql = async ({
   signal,
   runtimeMappings,
   options,
-}: Params): Promise<{
-  valid: boolean;
-  error?: { code: EQL_ERROR_CODES; messages?: string[]; error?: Error };
-}> => {
+}: Params): Promise<ValidateEqlResponse> => {
   try {
     const { rawResponse: response } = await firstValueFrom(
       data.search.search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(

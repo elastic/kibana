@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DatasetTableSortField, DegradedFieldSortField } from '../../hooks';
+import { DatasetTableSortField } from '../../hooks';
 import {
   DatasetQualityControllerContext,
   DEFAULT_CONTEXT,
@@ -17,7 +17,6 @@ export const getPublicStateFromContext = (
 ): DatasetQualityPublicState => {
   return {
     table: context.table,
-    flyout: context.flyout,
     filters: context.filters,
   };
 };
@@ -35,22 +34,6 @@ export const getContextFromPublicState = (
           field: publicState.table?.sort.field as DatasetTableSortField,
         }
       : DEFAULT_CONTEXT.table.sort,
-  },
-  flyout: {
-    ...DEFAULT_CONTEXT.flyout,
-    ...publicState.flyout,
-    degradedFields: {
-      table: {
-        ...DEFAULT_CONTEXT.flyout.degradedFields.table,
-        ...publicState.flyout?.degradedFields?.table,
-        sort: publicState.flyout?.degradedFields?.table?.sort
-          ? {
-              ...publicState.flyout.degradedFields.table.sort,
-              field: publicState.flyout.degradedFields.table.sort.field as DegradedFieldSortField,
-            }
-          : DEFAULT_CONTEXT.flyout.degradedFields.table.sort,
-      },
-    },
   },
   filters: {
     ...DEFAULT_CONTEXT.filters,

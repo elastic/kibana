@@ -16,6 +16,9 @@ import type { RouteSpyState } from '../../../utils/route/types';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { createTelemetryServiceMock } from '../../../lib/telemetry/telemetry_service.mock';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
+import type { ExpandableFlyoutState } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
+import { createExpandableFlyoutApiMock } from '../../../mock/expandable_flyout';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -26,16 +29,11 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-const mockOpenFlyout = jest.fn();
 
 jest.mock('../../../utils/route/use_route_spy');
 
-jest.mock('@kbn/expandable-flyout', () => {
-  return {
-    useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
-    useExpandableFlyoutState: () => ({ left: false }),
-  };
-});
+const mockOpenFlyout = jest.fn();
+jest.mock('@kbn/expandable-flyout');
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../lib/kibana', () => {
@@ -102,6 +100,11 @@ describe('RowAction', () => {
   };
 
   beforeEach(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+      ...createExpandableFlyoutApiMock(),
+      openFlyout: mockOpenFlyout,
+    });
+    jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
     (useRouteSpy as jest.Mock).mockReturnValue([mockRouteSpy]);
     jest.clearAllMocks();
   });

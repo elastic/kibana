@@ -30,6 +30,7 @@ export function ElasticDocsLink({ section, path, children, ...rest }: Props) {
   const href = `${baseUrl}guide/en${section}/${version}${path}`;
 
   return typeof children === 'function' ? (
+    // @ts-expect-error @types/react@18 This expression is not callable.
     children(href)
   ) : (
     <EuiLink data-test-subj="apmElasticDocsLinkLink" href={href} {...rest}>

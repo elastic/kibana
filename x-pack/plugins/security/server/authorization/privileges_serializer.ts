@@ -6,7 +6,7 @@
  */
 
 import { PrivilegeSerializer } from './privilege_serializer';
-import type { RawKibanaPrivileges } from '../../common/model';
+import type { RawKibanaPrivileges } from '../../common';
 
 interface SerializedPrivilege {
   application: string;

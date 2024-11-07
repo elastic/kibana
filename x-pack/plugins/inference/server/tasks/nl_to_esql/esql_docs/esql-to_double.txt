@@ -1,0 +1,25 @@
+# TO_DOUBLE
+
+The TO_DOUBLE function converts an input value into a double value.
+
+## Syntax
+
+`TO_DOUBLE(field)`
+
+### Parameters
+
+#### field
+
+The input value. This can be a single or multi-valued column or an expression.
+
+## Examples
+
+```esql
+ROW str1 = "5.20128E11", str2 = "foo"
+| EVAL dbl = TO_DOUBLE("520128000000"), dbl1 = TO_DOUBLE(str1), dbl2 = TO_DOUBLE(str2)
+```
+
+## Notes
+
+- If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch and converted to a double.
+- A boolean value of true will be converted to a double value of 1.0, and false will be converted to 0.0.

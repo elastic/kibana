@@ -91,7 +91,7 @@ import {
   migratePackagePolicyToV81102,
   migratePackagePolicyEvictionsFromV81102,
 } from './migrations/security_solution/to_v8_11_0_2';
-import { settingsV1 } from './model_versions/v1';
+import { settingsV1 } from './model_versions/settings_v1';
 import {
   packagePolicyV13AdvancedFields,
   packagePolicyV10OnWriteScanFix,
@@ -100,6 +100,7 @@ import {
   migratePackagePolicyIdsToV8150,
   migratePackagePolicySetRequiresRootToV8150,
 } from './migrations/to_v8_15_0';
+import { backfillAgentPolicyToV4 } from './model_versions/agent_policy_v4';
 
 /*
  * Saved object types and mappings
@@ -160,6 +161,12 @@ export const getSavedObjectTypes = (
           output_secret_storage_requirements_met: { type: 'boolean' },
           use_space_awareness_migration_status: { type: 'keyword', index: false },
           use_space_awareness_migration_started_at: { type: 'date', index: false },
+          delete_unenrolled_agents: {
+            properties: {
+              enabled: { type: 'boolean', index: false },
+              is_preconfigured: { type: 'boolean', index: false },
+            },
+          },
         },
       },
       migrations: {
@@ -176,6 +183,21 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 use_space_awareness_migration_status: { type: 'keyword', index: false },
                 use_space_awareness_migration_started_at: { type: 'date', index: false },
+              },
+            },
+          ],
+        },
+        3: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                delete_unenrolled_agents: {
+                  properties: {
+                    enabled: { type: 'boolean', index: false },
+                    is_preconfigured: { type: 'boolean', index: false },
+                  },
+                },
               },
             },
           ],
@@ -223,6 +245,9 @@ export const getSavedObjectTypes = (
           advanced_settings: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
           global_data_tags: { type: 'flattened', index: false },
+          monitoring_pprof_enabled: { type: 'boolean', index: false },
+          monitoring_http: { type: 'flattened', index: false },
+          monitoring_diagnostics: { type: 'flattened', index: false },
         },
       },
       migrations: {
@@ -260,6 +285,22 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 global_data_tags: { type: 'flattened', index: false },
               },
+            },
+          ],
+        },
+        '4': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                monitoring_pprof_enabled: { type: 'boolean', index: false },
+                monitoring_http: { type: 'flattened', index: false },
+                monitoring_diagnostics: { type: 'flattened', index: false },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillAgentPolicyToV4,
             },
           ],
         },
@@ -986,7 +1027,7 @@ export const getSavedObjectTypes = (
       name: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: true,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: 'agnostic',
       management: {
         importableAndExportable: false,
       },
@@ -999,7 +1040,7 @@ export const getSavedObjectTypes = (
       name: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: true,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: 'agnostic',
       management: {
         importableAndExportable: false,
       },
@@ -1008,6 +1049,19 @@ export const getSavedObjectTypes = (
         properties: {
           policy_id: { type: 'keyword' },
           token_plain: { type: 'keyword' },
+          namespaces: { type: 'keyword' },
+        },
+      },
+      modelVersions: {
+        '1': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                namespaces: { type: 'keyword' },
+              },
+            },
+          ],
         },
       },
     },

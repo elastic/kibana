@@ -508,7 +508,7 @@
             "signature": [
               "(startDependencies: ",
               "LensPluginStartDependencies",
-              ", isNewPanel?: boolean | undefined, deletePanel?: (() => void) | undefined) => Promise<JSX.Element | null>"
+              ", isNewPanel?: boolean | undefined, deletePanel?: (() => void) | undefined) => Promise<React.JSX.Element | null>"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -764,19 +764,18 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Embeddable.canViewUnderlyingData",
-            "type": "Function",
+            "id": "def-public.Embeddable.canViewUnderlyingData$",
+            "type": "Object",
             "tags": [],
-            "label": "canViewUnderlyingData",
+            "label": "canViewUnderlyingData$",
             "description": [],
             "signature": [
-              "() => Promise<boolean>"
+              "BehaviorSubject",
+              "<boolean>"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "lens",
@@ -1545,7 +1544,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"line\" | \"area\" | \"bar\""
+              "\"area\" | \"line\" | \"bar\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -2007,7 +2006,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined) => { error: string; } | Record<\"enabled\" | \"disabled\", { kuery: ",
+              " | undefined) => { error: string; } | Record<\"disabled\" | \"enabled\", { kuery: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2510,7 +2509,7 @@
                 "section": "def-public.IncompleteColumn",
                 "text": "IncompleteColumn"
               },
-              "> | undefined"
+              " | undefined> | undefined"
             ],
             "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
             "deprecated": false,
@@ -3394,7 +3393,7 @@
             "label": "autoScaleMetricAlignment",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
+              "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -3525,7 +3524,7 @@
             "label": "textAlign",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
+              "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -4469,7 +4468,7 @@
             "label": "titlesTextAlign",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
+              "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
@@ -4483,7 +4482,7 @@
             "label": "valuesTextAlign",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
+              "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "x-pack/plugins/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
@@ -6210,7 +6209,7 @@
             "label": "longMessage",
             "description": [],
             "signature": [
-              "React.ReactNode | ((closePopover: () => void) => React.ReactNode)"
+              "React.ReactNode | ((closePopover?: (() => void) | undefined) => React.ReactNode)"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6504,7 +6503,7 @@
               "\nReturn the ID of the current visualization. Used to highlight\nthe active subtype of the visualization."
             ],
             "signature": [
-              "(state: T) => string"
+              "(state: T, layerId?: string | undefined) => string"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6524,6 +6523,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getVisualizationTypeId.$2",
+                "type": "string",
+                "tags": [],
+                "label": "layerId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -7566,6 +7580,41 @@
               {
                 "parentPluginId": "lens",
                 "id": "def-public.Visualization.getCustomLayerHeader.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "VisualizationLayerWidgetProps",
+                  "<T>"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.getSubtypeSwitch",
+            "type": "Function",
+            "tags": [],
+            "label": "getSubtypeSwitch",
+            "description": [],
+            "signature": [
+              "((props: ",
+              "VisualizationLayerWidgetProps",
+              "<T>) => (() => JSX.Element) | null) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getSubtypeSwitch.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -8636,6 +8685,56 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Visualization.onDatasourceUpdate",
+            "type": "Function",
+            "tags": [],
+            "label": "onDatasourceUpdate",
+            "description": [],
+            "signature": [
+              "((state: T, frame?: ",
+              "FramePublicAPI",
+              " | undefined) => T) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onDatasourceUpdate.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onDatasourceUpdate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "frame",
+                "description": [],
+                "signature": [
+                  "FramePublicAPI",
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Visualization.onIndexPatternChange",
             "type": "Function",
             "tags": [],
@@ -9098,12 +9197,12 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Visualization.getSortedColumns",
+            "id": "def-public.Visualization.getExportDatatables",
             "type": "Function",
             "tags": [],
-            "label": "getSortedColumns",
+            "label": "getExportDatatables",
             "description": [
-              "\nA visualization can share how columns are visually sorted"
+              "\nGet all datatables to be exported as csv"
             ],
             "signature": [
               "((state: T, datasourceLayers?: Partial<Record<string, ",
@@ -9114,7 +9213,17 @@
                 "section": "def-public.DatasourcePublicAPI",
                 "text": "DatasourcePublicAPI"
               },
-              ">> | undefined) => string[]) | undefined"
+              ">> | undefined, activeData?: ",
+              "TableInspectorAdapter",
+              " | undefined) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              "[]) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -9122,7 +9231,7 @@
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.getSortedColumns.$1",
+                "id": "def-public.Visualization.getExportDatatables.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -9137,7 +9246,7 @@
               },
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.getSortedColumns.$2",
+                "id": "def-public.Visualization.getExportDatatables.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "datasourceLayers",
@@ -9152,6 +9261,22 @@
                     "text": "DatasourcePublicAPI"
                   },
                   ">> | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getExportDatatables.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "activeData",
+                "description": [],
+                "signature": [
+                  "TableInspectorAdapter",
+                  " | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -9781,7 +9906,7 @@
               "RecursivePartial",
               "<Omit<",
               "AxisStyle",
-              ", \"gridLine\">> | undefined>; title?: string | undefined; children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; gridLine?: ",
+              ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -9803,7 +9928,7 @@
               },
               "<",
               "YDomainRange",
-              " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { theme?: ",
+              " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
               "MakeOverridesSerializable",
               "<",
               "RecursivePartial",
@@ -9839,7 +9964,7 @@
               "MakeOverridesSerializable",
               "<",
               "CustomXDomain",
-              " | undefined>; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onResize?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; ariaLabelledBy?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+              " | undefined>; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: React.ComponentType<{}> | React.ReactChild | undefined; ariaLabelledBy?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
               "LegendStrategy",
               " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> & Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>>) | undefined"
             ],
@@ -9908,7 +10033,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -10235,7 +10360,7 @@
             "label": "preferredSeriesType",
             "description": [],
             "signature": [
-              "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
@@ -11101,7 +11226,7 @@
         "label": "FittingFunction",
         "description": [],
         "signature": [
-          "\"None\" | \"Average\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\""
+          "\"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -11275,7 +11400,15 @@
             "section": "def-public.LensSavedObjectAttributes",
             "text": "LensSavedObjectAttributes"
           },
-          " | undefined>; canViewUnderlyingData: () => Promise<boolean>; getViewUnderlyingDataArgs: () => ",
+          " | undefined>; canViewUnderlyingData$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean>; getViewUnderlyingDataArgs: () => ",
           "ViewUnderlyingDataArgs",
           "; getFullAttributes: () => ",
           {
@@ -11463,8 +11596,64 @@
             "text": "DataView"
           },
           ", excludedVisualizations?: string[] | undefined, preferredChartType?: ",
-          "ChartType",
-          " | undefined) => ",
+          {
+            "pluginId": "@kbn/visualization-utils",
+            "scope": "common",
+            "docId": "kibKbnVisualizationUtilsPluginApi",
+            "section": "def-common.ChartType",
+            "text": "ChartType"
+          },
+          " | undefined, preferredVisAttributes?: LensAttributes<\"lnsXY\", ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.XYState",
+            "text": "XYState"
+          },
+          "> | LensAttributes<\"lnsPie\", ",
+          "PieVisualizationState",
+          "> | LensAttributes<\"lnsHeatmap\", ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.HeatmapVisualizationState",
+            "text": "HeatmapVisualizationState"
+          },
+          "> | LensAttributes<\"lnsGauge\", ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.GaugeVisualizationState",
+            "text": "GaugeVisualizationState"
+          },
+          "> | LensAttributes<\"lnsDatatable\", ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.DatatableVisualizationState",
+            "text": "DatatableVisualizationState"
+          },
+          "> | LensAttributes<\"lnsLegacyMetric\", ",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.LegacyMetricState",
+            "text": "LegacyMetricState"
+          },
+          "> | LensAttributes<\"lnsMetric\", ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.MetricVisualizationState",
+            "text": "MetricVisualizationState"
+          },
+          "> | LensAttributes<string, unknown> | undefined) => ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -11552,8 +11741,78 @@
             "label": "preferredChartType",
             "description": [],
             "signature": [
-              "ChartType",
+              {
+                "pluginId": "@kbn/visualization-utils",
+                "scope": "common",
+                "docId": "kibKbnVisualizationUtilsPluginApi",
+                "section": "def-common.ChartType",
+                "text": "ChartType"
+              },
               " | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LensSuggestionsApi.$5",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "preferredVisAttributes",
+            "description": [],
+            "signature": [
+              "LensAttributes<\"lnsXY\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.XYState",
+                "text": "XYState"
+              },
+              "> | LensAttributes<\"lnsPie\", ",
+              "PieVisualizationState",
+              "> | LensAttributes<\"lnsHeatmap\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.HeatmapVisualizationState",
+                "text": "HeatmapVisualizationState"
+              },
+              "> | LensAttributes<\"lnsGauge\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.GaugeVisualizationState",
+                "text": "GaugeVisualizationState"
+              },
+              "> | LensAttributes<\"lnsDatatable\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.DatatableVisualizationState",
+                "text": "DatatableVisualizationState"
+              },
+              "> | LensAttributes<\"lnsLegacyMetric\", ",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.LegacyMetricState",
+                "text": "LegacyMetricState"
+              },
+              "> | LensAttributes<\"lnsMetric\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.MetricVisualizationState",
+                "text": "MetricVisualizationState"
+              },
+              "> | LensAttributes<string, unknown> | undefined"
             ],
             "path": "x-pack/plugins/lens/public/plugin.ts",
             "deprecated": false,
@@ -11726,7 +11985,7 @@
             "section": "def-public.IncompleteColumn",
             "text": "IncompleteColumn"
           },
-          "> | undefined; sampling?: number | undefined; }"
+          " | undefined> | undefined; sampling?: number | undefined; }"
         ],
         "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
         "deprecated": false,
@@ -11790,7 +12049,7 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+          "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
         ],
         "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
@@ -11875,7 +12134,7 @@
         "signature": [
           "Omit<",
           "LensByValueInput",
-          ", \"overrides\" | \"attributes\"> & { attributes: LensAttributes<\"lnsXY\", ",
+          ", \"attributes\" | \"overrides\"> & { attributes: LensAttributes<\"lnsXY\", ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -11925,7 +12184,7 @@
             "section": "def-public.MetricVisualizationState",
             "text": "MetricVisualizationState"
           },
-          "> | LensAttributes<string, unknown>; overrides?: Partial<Record<\"settings\", { theme?: ",
+          "> | LensAttributes<string, unknown>; overrides?: Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -11961,7 +12220,7 @@
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onResize?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; ariaLabelledBy?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+          " | undefined>; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: React.ComponentType<{}> | React.ReactChild | undefined; ariaLabelledBy?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
           " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
@@ -12013,7 +12272,7 @@
           "RecursivePartial",
           "<Omit<",
           "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; gridLine?: ",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -12466,7 +12725,7 @@
             "label": "autoScaleMetricAlignment",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
+              "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,
@@ -12597,7 +12856,7 @@
             "label": "textAlign",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
+              "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,

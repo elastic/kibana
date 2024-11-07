@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -30,7 +31,7 @@ describe('FieldComponent', () => {
         selectedField={getField('machine.os.raw')}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     const comboBox = wrapper.getByTestId('fieldAutocompleteComboBox');
     const input = within(comboBox).getByRole('combobox');
     expect(input).toHaveAttribute('value', 'machine.os.raw');
@@ -51,7 +52,7 @@ describe('FieldComponent', () => {
         selectedField={getField('machine.os.raw')}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('fieldAutocompleteComboBox').querySelector('input')).toBeDisabled();
   });
   it('should render the loading spinner if isLoading is true when clicked', () => {
@@ -71,7 +72,7 @@ describe('FieldComponent', () => {
       />
     );
     const fieldAutocompleteComboBox = wrapper.getByTestId('fieldAutocompleteComboBox');
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     fireEvent.click(fieldAutocompleteComboBox);
     expect(wrapper.getByRole('progressbar')).toBeInTheDocument();
   });
@@ -91,7 +92,7 @@ describe('FieldComponent', () => {
         selectedField={getField('machine.os.raw')}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('comboBoxClearButton')).toBeInTheDocument();
   });
   it('should change the selected value', async () => {

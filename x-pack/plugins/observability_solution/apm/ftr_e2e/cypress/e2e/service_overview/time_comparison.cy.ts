@@ -46,7 +46,8 @@ const apisToIntercept = [
   },
 ];
 
-describe('Service overview: Time Comparison', () => {
+// See details: https://github.com/elastic/kibana/issues/191961
+describe.skip('Service overview: Time Comparison', () => {
   before(() => {
     synthtrace.index(
       opbeans({

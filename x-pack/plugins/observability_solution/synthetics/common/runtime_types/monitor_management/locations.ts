@@ -78,9 +78,9 @@ export const PublicLocationsCodec = t.array(PublicLocationCodec);
 export const MonitorServiceLocationCodec = t.intersection([
   t.interface({
     id: t.string,
+    label: t.string,
   }),
   t.partial({
-    label: t.string,
     geo: LocationGeoCodec,
     url: t.string,
     isServiceManaged: t.boolean,

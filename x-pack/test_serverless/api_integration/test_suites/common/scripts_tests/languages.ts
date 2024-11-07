@@ -9,38 +9,37 @@ import expect from '@kbn/expect';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common/constants';
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
-  let roleAuthc: RoleCredentials;
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('Script Languages API', function getLanguages() {
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'admin',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+          withCustomHeaders: {
+            [ELASTIC_HTTP_VERSION_HEADER]: SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION,
+          },
+        }
+      );
     });
-    after(async () => {
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-    });
+
     it('should return 200 with an array of languages', async () => {
-      const response = await supertestWithoutAuth
+      const response = await supertestAdminWithCookieCredentials
         .get('/internal/scripts/languages')
-        .set(ELASTIC_HTTP_VERSION_HEADER, SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION)
-        .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleAuthc.apiKeyHeader)
         .expect(200);
       expect(response.body).to.be.an('array');
     });
 
     it.skip('should only return langs enabled for inline scripting', async () => {
-      const response = await supertestWithoutAuth
+      const response = await supertestAdminWithCookieCredentials
         .get('/internal/scripts/languages')
-        .set(ELASTIC_HTTP_VERSION_HEADER, SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION)
-        .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleAuthc.apiKeyHeader)
         .expect(200);
       expect(response.body).to.contain('expression');
       expect(response.body).to.contain('painless');

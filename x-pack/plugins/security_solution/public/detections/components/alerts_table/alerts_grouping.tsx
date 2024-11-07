@@ -12,6 +12,7 @@ import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
+import type { GroupingArgs } from '@kbn/grouping/src';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { getDefaultGroupingOptions } from '../../../common/utils/alerts';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -66,7 +67,9 @@ const useStorage = (storage: Storage, tableId: string) =>
 const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
   const dispatch = useDispatch();
 
-  const { indexPattern, selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView, selectedPatterns } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
 
   const {
     services: { storage, telemetry },
@@ -89,7 +92,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [telemetry]
   );
 
-  const onOptionsChange = useCallback(
+  const onOptionsChange = useCallback<NonNullable<GroupingArgs<{}>['onOptionsChange']>>(
     (options) => {
       dispatch(
         updateGroups({
@@ -101,6 +104,8 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [dispatch, props.tableId]
   );
 
+  const fields = useMemo(() => Object.values(sourcererDataView.fields || {}), [sourcererDataView]);
+
   const { getGrouping, selectedGroups, setSelectedGroups } = useGrouping({
     componentProps: {
       groupPanelRenderer: renderGroupPanel,
@@ -109,7 +114,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       unit: defaultUnit,
     },
     defaultGroupingOptions: getDefaultGroupingOptions(props.tableId),
-    fields: indexPattern.fields,
+    fields,
     groupingId: props.tableId,
     maxGroupingLevels: MAX_GROUPING_LEVELS,
     onGroupChange,

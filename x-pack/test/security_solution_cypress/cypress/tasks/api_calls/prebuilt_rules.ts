@@ -145,15 +145,24 @@ export const bulkCreateRuleAssets = ({
   const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_bulk?refresh`;
 
   const bulkIndexRequestBody = rules.reduce((body, rule) => {
-    const indexOperation = {
+    const document = JSON.stringify(rule);
+    const documentId = `security-rule:${rule['security-rule'].rule_id}`;
+    const historicalDocumentId = `${documentId}_${rule['security-rule'].version}`;
+
+    const indexRuleAsset = `${JSON.stringify({
       index: {
         _index: index,
-        _id: `security-rule:${rule['security-rule'].rule_id}`,
+        _id: documentId,
       },
-    };
+    })}\n${document}\n`;
+    const indexHistoricalRuleAsset = `${JSON.stringify({
+      index: {
+        _index: index,
+        _id: historicalDocumentId,
+      },
+    })}\n${document}\n`;
 
-    const documentData = JSON.stringify(rule);
-    return body.concat(JSON.stringify(indexOperation), '\n', documentData, '\n');
+    return body.concat(indexRuleAsset, indexHistoricalRuleAsset);
   }, '');
 
   rootRequest({

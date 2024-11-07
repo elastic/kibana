@@ -208,6 +208,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [archiveName] },
     () => {
       let servicesDetailedStatistics: ServicesDetailedStatisticsReturn;
+      // eslint-disable-next-line mocha/no-sibling-hooks
       before(async () => {
         const response = await apmApiClient.readUser({
           endpoint: `POST /internal/apm/services/detailed_statistics`,
@@ -232,13 +233,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         servicesDetailedStatistics = response.body;
       });
-      it('returns current period data', async () => {
+      it('returns current period data with time comparison', async () => {
         expect(servicesDetailedStatistics.currentPeriod).not.to.be.empty();
       });
       it('returns previous period data', async () => {
         expect(servicesDetailedStatistics.previousPeriod).not.to.be.empty();
       });
-      it('returns current data for requested service names', () => {
+      it('returns current data for requested service names with time comparison', () => {
         serviceNames.forEach((serviceName) => {
           expect(servicesDetailedStatistics.currentPeriod[serviceName]).not.to.be.empty();
         });
@@ -248,7 +249,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(servicesDetailedStatistics.currentPeriod[serviceName]).not.to.be.empty();
         });
       });
-      it('returns correct statistics', () => {
+      it('returns correct statistics with time comparison', () => {
         const currentPeriodStatistics = servicesDetailedStatistics.currentPeriod[serviceNames[0]];
         const previousPeriodStatistics = servicesDetailedStatistics.previousPeriod[serviceNames[0]];
 

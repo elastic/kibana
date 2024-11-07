@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('@ess @serverless get_rule_management_filters', () => {
+  describe('@ess @serverless @serverlessQA get_rule_management_filters', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });

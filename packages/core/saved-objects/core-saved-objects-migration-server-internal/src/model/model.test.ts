@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { chain } from 'lodash';
@@ -2686,6 +2687,18 @@ describe('migrations v2 model', () => {
               ],
             },
           });
+        });
+
+        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_META if ONLY new SO types have been added', () => {
+          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
+            type: 'types_added' as const,
+            updatedFields: [],
+            newTypes: ['newFeatureType'],
+          });
+          const newState = model(checkTargetTypesMappingsState, res) as UpdateTargetMappingsMeta;
+          expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_META');
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
         });
 
         it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if types match (there might be additions in core fields)', () => {

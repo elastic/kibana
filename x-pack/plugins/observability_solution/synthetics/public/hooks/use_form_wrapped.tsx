@@ -41,7 +41,7 @@ export function useFormWrapped<TFieldValues extends FieldValues = FieldValues, T
 
   // Wrap react-hook-form register method to wire `onChange` and `inputRef`
   const euiRegister = useCallback(
-    (name, ...registerArgs) => {
+    (name: any, ...registerArgs: any) => {
       const { ref, onChange, ...restOfRegister } = register(name, ...registerArgs);
 
       return {

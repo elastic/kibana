@@ -9,7 +9,9 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
+import { DocumentEntryType } from '@kbn/elastic-assistant-common';
 import type { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
+import type { LegacyKnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry';
 import { APP_UI_ID } from '../../../../common';
 
 export interface KnowledgeBaseWriteToolParams extends AssistantToolParams {
@@ -18,7 +20,7 @@ export interface KnowledgeBaseWriteToolParams extends AssistantToolParams {
 
 const toolDetails = {
   description:
-    "Call this for writing details to the user's knowledge base. The knowledge base contains useful information the user wants to store between conversation contexts. Input will be the summarized knowledge base entry to store, with no other text, and whether or not the entry is required.",
+    "Call this for writing details to the user's knowledge base. The knowledge base contains useful information the user wants to store between conversation contexts. Input will be the summarized knowledge base entry to store, a short UI friendly name for the entry, and whether or not the entry is required.",
   id: 'knowledge-base-write-tool',
   name: 'KnowledgeBaseWriteTool',
 };
@@ -26,8 +28,8 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is KnowledgeBaseWriteToolParams => {
-    const { isEnabledKnowledgeBase, kbDataClient, modelExists } = params;
-    return isEnabledKnowledgeBase && modelExists && kbDataClient != null;
+    const { isEnabledKnowledgeBase, kbDataClient } = params;
+    return isEnabledKnowledgeBase && kbDataClient != null;
   },
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
@@ -39,25 +41,42 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
       name: toolDetails.name,
       description: toolDetails.description,
       schema: z.object({
+        name: z
+          .string()
+          .describe(`This is what the user will use to refer to the entry in the future.`),
         query: z.string().describe(`Summary of items/things to save in the knowledge base`),
         required: z
           .boolean()
           .describe(
             `Whether or not the entry is required to always be included in conversations. Is only true if the user explicitly asks for it to be required or always included in conversations, otherwise this is always false.`
-          ),
+          )
+          .default(false),
       }),
       func: async (input, _, cbManager) => {
         logger.debug(
           () => `KnowledgeBaseWriteToolParams:input\n ${JSON.stringify(input, null, 2)}`
         );
 
-        const knowledgeBaseEntry: KnowledgeBaseEntryCreateProps = {
-          metadata: { kbResource: 'user', source: 'conversation', required: input.required },
-          text: input.query,
-        };
+        // Backwards compatibility with v1 schema since this feature is technically supported in `8.15`
+        const knowledgeBaseEntry:
+          | KnowledgeBaseEntryCreateProps
+          | LegacyKnowledgeBaseEntryCreateProps = kbDataClient.isV2KnowledgeBaseEnabled
+          ? {
+              name: input.name,
+              kbResource: 'user',
+              source: 'conversation',
+              required: input.required,
+              text: input.query,
+              type: DocumentEntryType.value,
+            }
+          : {
+              type: DocumentEntryType.value,
+              name: 'unknown',
+              metadata: { kbResource: 'user', source: 'conversation', required: input.required },
+              text: input.query,
+            };
 
         logger.debug(() => `knowledgeBaseEntry\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`);
-
         const resp = await kbDataClient.createKnowledgeBaseEntry({ knowledgeBaseEntry });
 
         if (resp == null) {

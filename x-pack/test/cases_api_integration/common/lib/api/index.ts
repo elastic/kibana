@@ -61,6 +61,8 @@ export * from './user_profiles';
 export * from './omit';
 export * from './configuration';
 export * from './files';
+export * from './telemetry';
+
 export { getSpaceUrlPrefix } from './helpers';
 
 function toArray<T>(input: T | T[]): T[] {
@@ -423,7 +425,7 @@ export const updateCase = async ({
 }): Promise<Case[]> => {
   const apiCall = supertest.patch(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`);
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
 
   const { body: cases } = await apiCall
     .set('kbn-xsrf', 'true')
@@ -458,7 +460,7 @@ export const getAllCasesStatuses = async ({
 export const getCase = async ({
   supertest,
   caseId,
-  includeComments = false,
+  includeComments,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
@@ -468,10 +470,12 @@ export const getCase = async ({
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<Case> => {
+  const basePath = `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}`;
+  const path =
+    includeComments != null ? `${basePath}?includeComments=${includeComments}` : basePath;
+
   const { body: theCase } = await supertest
-    .get(
-      `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}?includeComments=${includeComments}`
-    )
+    .get(path)
     .set('kbn-xsrf', 'true')
     .set('x-elastic-internal-origin', 'foo')
     .auth(auth.user.username, auth.user.password)
@@ -654,7 +658,7 @@ export const pushCase = async ({
     `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/connector/${connectorId}/_push`
   );
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
 
   const { body: res } = await apiCall
     .set('kbn-xsrf', 'true')
@@ -831,7 +835,7 @@ export const replaceCustomField = async ({
     )}${CASES_INTERNAL_URL}/${caseId}/custom_fields/${customFieldId}`
   );
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
 
   const { body: theCustomField } = await apiCall
     .set('kbn-xsrf', 'true')

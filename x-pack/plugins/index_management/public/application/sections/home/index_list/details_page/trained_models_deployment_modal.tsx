@@ -28,7 +28,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isSemanticTextField } from '../../../../components/mappings_editor/lib/utils';
 import { deNormalize } from '../../../../components/mappings_editor/lib';
-import { useMLModelNotificationToasts } from '../../../../../hooks/use_ml_model_status_toasts';
 import { useMappingsState } from '../../../../components/mappings_editor/mappings_state_context';
 import { useAppContext } from '../../../../app_context';
 
@@ -54,15 +53,11 @@ export function TrainedModelsDeploymentModal({
 }: TrainedModelsDeploymentModalProps) {
   const modalTitleId = useGeneratedHtmlId();
   const { fields, inferenceToModelIdMap } = useMappingsState();
-  const {
-    plugins: { ml },
-    url,
-  } = useAppContext();
+  const { url } = useAppContext();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const closeModal = () => setIsModalVisible(false);
   const [mlManagementPageUrl, setMlManagementPageUrl] = useState<string>('');
   const [allowForceSaveMappings, setAllowForceSaveMappings] = useState<boolean>(false);
-  const { showErrorToasts } = useMLModelNotificationToasts();
 
   useEffect(() => {
     const mlLocator = url?.locators.get(ML_APP_LOCATOR);
@@ -85,44 +80,24 @@ export function TrainedModelsDeploymentModal({
 
   const [pendingDeployments, setPendingDeployments] = useState<string[]>([]);
 
-  const startModelAllocation = async (trainedModelId: string) => {
-    try {
-      await ml?.mlApi?.trainedModels.startModelAllocation(trainedModelId);
-    } catch (error) {
-      setErrorsInTrainedModelDeployment((previousState) => ({
-        ...previousState,
-        [trainedModelId]: error.message,
-      }));
-      showErrorToasts(error);
-      setIsModalVisible(true);
-    }
-  };
-
   useEffect(() => {
-    const models = inferenceIdsInPendingList.map(
-      (inferenceId) => inferenceToModelIdMap?.[inferenceId]
+    const models = inferenceIdsInPendingList.map((inferenceId) =>
+      inferenceToModelIdMap?.[inferenceId]
+        ? {
+            inferenceId,
+            ...inferenceToModelIdMap?.[inferenceId],
+          }
+        : undefined
     ); // filter out third-party models
-    for (const model of models) {
-      if (
-        model?.trainedModelId &&
-        model.isDeployable &&
-        !model.isDownloading &&
-        !model.isDeployed
-      ) {
-        // Sometimes the model gets stuck in a ready to deploy state, so we need to trigger deployment manually
-        startModelAllocation(model.trainedModelId);
-      }
-    }
-    const pendingModels = models
+    const allPendingDeployments = models
       .map((model) => {
-        return model?.trainedModelId && !model?.isDeployed ? model?.trainedModelId : '';
+        return model?.trainedModelId && !model?.isDeployed ? model?.inferenceId : '';
       })
-      .filter((trainedModelId) => !!trainedModelId);
-    const uniqueDeployments = pendingModels.filter(
-      (deployment, index) => pendingModels.indexOf(deployment) === index
+      .filter((id) => !!id);
+    const uniqueDeployments = allPendingDeployments.filter(
+      (deployment, index) => allPendingDeployments.indexOf(deployment) === index
     );
     setPendingDeployments(uniqueDeployments);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inferenceIdsInPendingList, inferenceToModelIdMap]);
 
   const erroredDeployments = pendingDeployments.filter(
@@ -132,6 +107,8 @@ export function TrainedModelsDeploymentModal({
   useEffect(() => {
     if (erroredDeployments.length > 0 || pendingDeployments.length > 0) {
       setIsModalVisible(true);
+    } else {
+      setIsModalVisible(false);
     }
   }, [erroredDeployments.length, pendingDeployments.length]);
   return isModalVisible ? (

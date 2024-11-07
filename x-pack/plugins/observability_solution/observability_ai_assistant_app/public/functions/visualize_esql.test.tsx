@@ -128,7 +128,10 @@ describe('VisualizeESQL', () => {
     const setVisibilitySpy = jest.fn();
     renderComponent({}, undefined, setVisibilitySpy);
     await waitFor(() => {
-      userEvent.click(screen.getByTestId('observabilityAiAssistantLensESQLEditButton'));
+      expect(screen.getByTestId('observabilityAiAssistantLensESQLEditButton')).toBeInTheDocument();
+    });
+    await userEvent.click(screen.getByTestId('observabilityAiAssistantLensESQLEditButton'));
+    await waitFor(() => {
       expect(setVisibilitySpy).toHaveBeenCalled();
     });
   });
@@ -178,7 +181,7 @@ describe('VisualizeESQL', () => {
     renderComponent({}, lensService);
 
     await act(async () => {
-      userEvent.click(
+      await userEvent.click(
         await screen.findByTestId('observabilityAiAssistantLensESQLDisplayTableButton')
       );
     });

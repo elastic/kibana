@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -28,6 +29,8 @@ export interface TryInConsoleButtonProps {
   content?: string | React.ReactElement;
   showIcon?: boolean;
   type?: 'link' | 'button' | 'emptyButton';
+  telemetryId?: string;
+  onClick?: () => void;
 }
 export const TryInConsoleButton = ({
   request,
@@ -37,6 +40,8 @@ export const TryInConsoleButton = ({
   content = RUN_IN_CONSOLE,
   showIcon = true,
   type = 'emptyButton',
+  telemetryId,
+  onClick: onClickProp,
 }: TryInConsoleButtonProps) => {
   const url = sharePlugin?.url;
   const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
@@ -64,6 +69,7 @@ export const TryInConsoleButton = ({
     } else {
       window.open(consolePreviewLink, '_blank', 'noreferrer');
     }
+    onClickProp?.();
   };
 
   const getAriaLabel = () => {
@@ -83,6 +89,7 @@ export const TryInConsoleButton = ({
   const commonProps = {
     'data-test-subj': type === 'link' ? 'tryInConsoleLink' : 'tryInConsoleButton',
     'aria-label': getAriaLabel(),
+    'data-telemetry-id': telemetryId,
     onClick,
   };
   const iconType = showIcon ? 'play' : undefined;

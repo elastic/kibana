@@ -742,7 +742,7 @@ describe('AlertsTableState', () => {
   describe('flyout', () => {
     it('should show a flyout when selecting an alert', async () => {
       const wrapper = render(<TestComponent {...tableProps} />);
-      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
+      await userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
 
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
@@ -751,11 +751,11 @@ describe('AlertsTableState', () => {
       expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
 
       // Should paginate too
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
+      await userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
       expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('three');
       expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('four');
 
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
+      await userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
       expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
       expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
     });
@@ -770,13 +770,13 @@ describe('AlertsTableState', () => {
         />
       );
 
-      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
+      await userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
 
       mockUseSearchAlertsQuery.mockClear();
 
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
+      await userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
       expect(mockUseSearchAlertsQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           pageIndex: 1,
@@ -785,7 +785,7 @@ describe('AlertsTableState', () => {
       );
 
       mockUseSearchAlertsQuery.mockClear();
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
+      await userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
       expect(mockUseSearchAlertsQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           pageIndex: 0,
@@ -804,13 +804,13 @@ describe('AlertsTableState', () => {
         />
       );
 
-      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
+      await userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
 
       mockUseSearchAlertsQuery.mockClear();
 
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-last')[0]);
+      await userEvent.click(wrapper.queryAllByTestId('pagination-button-last')[0]);
       expect(mockUseSearchAlertsQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           pageIndex: 1,
@@ -819,7 +819,7 @@ describe('AlertsTableState', () => {
       );
 
       mockUseSearchAlertsQuery.mockClear();
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
+      await userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
       expect(mockUseSearchAlertsQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           pageIndex: 0,
@@ -907,8 +907,8 @@ describe('AlertsTableState', () => {
       await waitFor(() => {
         expect(queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).not.toBe(null);
         expect(
-          getByTestId('dataGridHeader')
-            .querySelectorAll('.euiDataGridHeaderCell__content')[2]
+          queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)!
+            .querySelector('.euiDataGridHeaderCell__content')!
             .getAttribute('title')
         ).toBe(AlertsField.uuid);
       });

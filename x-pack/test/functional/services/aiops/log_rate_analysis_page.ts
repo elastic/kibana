@@ -266,6 +266,22 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       );
     },
 
+    async clickAutoRunButton() {
+      await testSubjects.clickWhenNotDisabledWithoutRetry(
+        'aiopsLogRateAnalysisContentRunAnalysisButton'
+      );
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.missingOrFail('aiopsLogRateAnalysisContentRunAnalysisButton');
+      });
+    },
+
+    async assertAutoRunButtonExists() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('aiopsLogRateAnalysisContentRunAnalysisButton');
+      });
+    },
+
     async assertNoAutoRunButtonExists() {
       await testSubjects.existOrFail('aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton');
     },
@@ -295,21 +311,17 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
           return;
         }
 
-        await testSubjects.existOrFail('aiopsAnalysisTypeCalloutTitle');
-        const currentAnalysisTypeCalloutTitle = await testSubjects.getVisibleText(
-          'aiopsAnalysisTypeCalloutTitle'
+        await testSubjects.existOrFail('aiopsLogRateAnalysisInfoPopoverButton');
+        const currentAnalysisTypePopoverButtonLabel = await testSubjects.getVisibleText(
+          'aiopsLogRateAnalysisInfoPopoverButton'
         );
 
         if (zeroDocsFallback && analysisType === 'spike') {
-          expect(currentAnalysisTypeCalloutTitle).to.be(
-            'Analysis type: Top items for deviation time range'
-          );
+          expect(currentAnalysisTypePopoverButtonLabel).to.be('Top items for deviation time range');
         } else if (zeroDocsFallback && analysisType === 'dip') {
-          expect(currentAnalysisTypeCalloutTitle).to.be(
-            'Analysis type: Top items for baseline time range'
-          );
+          expect(currentAnalysisTypePopoverButtonLabel).to.be('Top items for baseline time range');
         } else {
-          expect(currentAnalysisTypeCalloutTitle).to.be(`Analysis type: Log rate ${analysisType}`);
+          expect(currentAnalysisTypePopoverButtonLabel).to.be(`Log rate ${analysisType}`);
         }
       });
     },

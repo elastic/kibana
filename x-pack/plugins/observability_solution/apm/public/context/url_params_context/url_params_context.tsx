@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useMemo, useRef, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import React, {
+  createContext,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  PropsWithChildren,
+} from 'react';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { getDateRange } from './helpers';
 import { resolveUrlParams } from './resolve_url_params';
 import { UrlParams } from './types';
@@ -24,7 +31,10 @@ const UrlParamsContext = createContext({
   urlParams: {} as UrlParams,
 });
 
-const UrlParamsProvider: React.ComponentClass<{}> = withRouter(({ location, children }) => {
+const UrlParamsProvider: React.ComponentClass<{}> = withRouter<
+  PropsWithChildren<RouteComponentProps>,
+  React.FC<PropsWithChildren<RouteComponentProps>>
+>(({ location, children }) => {
   const refUrlParams = useRef(resolveUrlParams(location, {}));
 
   const { start, end, rangeFrom, rangeTo } = refUrlParams.current;

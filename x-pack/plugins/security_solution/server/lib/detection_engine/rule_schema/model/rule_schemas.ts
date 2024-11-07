@@ -148,6 +148,7 @@ export const BaseRuleParams = z.object({
   relatedIntegrations: RelatedIntegrationArray.optional(),
   requiredFields: RequiredFieldArray.optional(),
   setup: SetupGuide.optional(),
+  responseActions: z.array(RuleResponseAction).optional(),
 });
 
 export type EqlSpecificRuleParams = z.infer<typeof EqlSpecificRuleParams>;
@@ -210,7 +211,6 @@ export const QuerySpecificRuleParams = z.object({
   filters: RuleFilterArray.optional(),
   savedId: SavedQueryId.optional(),
   dataViewId: DataViewId.optional(),
-  responseActions: z.array(RuleResponseAction).optional(),
   alertSuppression: AlertSuppressionCamel.optional(),
 });
 
@@ -226,7 +226,6 @@ export const SavedQuerySpecificRuleParams = z.object({
   query: RuleQuery.optional(),
   filters: RuleFilterArray.optional(),
   savedId: SavedQueryId,
-  responseActions: z.array(RuleResponseAction).optional(),
   alertSuppression: AlertSuppressionCamel.optional(),
 });
 

@@ -98,6 +98,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     sortField: sorting?.field,
     sortOrder: sorting?.direction,
     kuery: search,
+    withAgentCount: true, // Explicitly fetch agent count
     full: true,
   });
 
@@ -355,6 +356,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       <EuiSpacer size="m" />
       <EuiBasicTable<AgentPolicy>
         loading={isLoading}
+        data-test-subj="agentPoliciesTable"
         noItemsMessage={
           isLoading ? (
             <FormattedMessage

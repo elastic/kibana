@@ -14,11 +14,11 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from './test_ids';
-import { ThemeProvider } from 'styled-components';
-import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
+import { ThemeProvider } from '@emotion/react';
 import { ExpandablePanel } from './expandable_panel';
 
-const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
+const mockTheme = { eui: { euiColorMediumShade: '#ece' } };
+
 const TEST_ID = 'test-id';
 const defaultProps = {
   header: {

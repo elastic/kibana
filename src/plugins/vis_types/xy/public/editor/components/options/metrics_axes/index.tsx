@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -108,8 +109,8 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
         }
 
         if (lastCustomLabels[axis.id] !== newCustomLabel && newCustomLabel !== '') {
-          const lastSeriesAggType = get(lastSeriesAgg, `${matchingSeries[0].id}.type`);
-          const lastSeriesAggField = get(lastSeriesAgg, `${matchingSeries[0].id}.field`);
+          const lastSeriesAggType = get(lastSeriesAgg, [matchingSeries[0].id, `type`]); // using array path vs. string because type inference was broken
+          const lastSeriesAggField = get(lastSeriesAgg, [matchingSeries[0].id, `field`]);
           const matchingSeriesAggType = get(matchingSeries, '[0]type.name', '');
           const matchingSeriesAggField = get(matchingSeries, '[0]params.field.name', '');
 

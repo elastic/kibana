@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
@@ -13,6 +14,7 @@ import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 const context = mockCoreContext.create();
 const httpPreboot = httpServiceMock.createInternalPrebootContract();
@@ -38,6 +40,7 @@ export const mockRenderingPrebootDeps = {
 };
 export const mockRenderingSetupDeps = {
   elasticsearch,
+  featureFlags: coreFeatureFlagsMock.createInternalSetup(),
   http: httpSetup,
   uiPlugins: createUiPlugins(),
   customBranding,

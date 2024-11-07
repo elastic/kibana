@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { resetJobs } from '../utils';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { RESETTING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
+import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { OpenJobsWarningCallout } from './open_jobs_warning_callout';
 import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
@@ -38,6 +39,12 @@ interface Props {
 }
 
 export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, refreshJobs }) => {
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useMlKibana();
+  const mlApi = useMlApi();
   const [resetting, setResetting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [jobIds, setJobIds] = useState<string[]>([]);
@@ -73,12 +80,12 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
 
   const resetJob = useCallback(async () => {
     setResetting(true);
-    await resetJobs(jobIds, deleteUserAnnotations);
+    await resetJobs(toasts, mlApi, jobIds, deleteUserAnnotations);
     closeModal();
     setTimeout(() => {
       refreshJobs();
     }, RESETTING_JOBS_REFRESH_INTERVAL_MS);
-  }, [closeModal, deleteUserAnnotations, jobIds, refreshJobs]);
+  }, [closeModal, deleteUserAnnotations, jobIds, mlApi, refreshJobs, toasts]);
 
   if (modalVisible === false || jobIds.length === 0) {
     return null;

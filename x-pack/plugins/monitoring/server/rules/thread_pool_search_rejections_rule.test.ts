@@ -223,10 +223,10 @@ describe('ThreadpoolSearchRejectionsRule', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'esNode1',
         context: {
-          internalFullMessage: `Thread pool search rejections alert is firing for node ${nodeName} in cluster: ${clusterName}. [View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid}))`,
+          internalFullMessage: `Thread pool search rejections alert is firing for node ${nodeName} in cluster: ${clusterName}. [View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:'${clusterUuid}'))`,
           internalShortMessage: `Thread pool search rejections alert is firing for node ${nodeName} in cluster: ${clusterName}. Verify thread pool ${threadPoolType} rejections for the affected node.`,
           node: `${nodeName}`,
-          action: `[View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid}))`,
+          action: `[View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:'${clusterUuid}'))`,
           actionPlain: `Verify thread pool ${threadPoolType} rejections for the affected node.`,
           clusterName,
           count: 1,
@@ -387,10 +387,10 @@ describe('ThreadpoolSearchRejectionsRule', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'esNode1',
         context: {
-          internalFullMessage: `Thread pool search rejections alert is firing for node ${nodeName} in cluster: ${clusterName}. [View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:${clusterUuid},ccs:${ccs}))`,
+          internalFullMessage: `Thread pool search rejections alert is firing for node ${nodeName} in cluster: ${clusterName}. [View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/${nodeId}?_g=(cluster_uuid:'${clusterUuid}',ccs:${ccs}))`,
           internalShortMessage: `Thread pool search rejections alert is firing for node ${nodeName} in cluster: ${clusterName}. Verify thread pool ${threadPoolType} rejections for the affected node.`,
           node: `${nodeName}`,
-          action: `[View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/esNode1?_g=(cluster_uuid:abc123,ccs:testCluster))`,
+          action: `[View node](http://localhost:5601/app/monitoring#/elasticsearch/nodes/esNode1?_g=(cluster_uuid:'${clusterUuid}',ccs:testCluster))`,
           actionPlain: `Verify thread pool ${threadPoolType} rejections for the affected node.`,
           clusterName,
           count,

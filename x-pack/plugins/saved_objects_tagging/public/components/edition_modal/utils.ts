@@ -8,9 +8,9 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import type { TagAttributes } from '../../../common/types';
 import {
-  TagAttributes,
-  TagValidation,
+  type TagValidation,
   validateTagColor,
   validateTagName,
   validateTagDescription,
@@ -66,7 +66,7 @@ export const useIfMounted = () => {
     []
   );
 
-  const ifMounted = useCallback((func) => {
+  const ifMounted = useCallback((func?: () => void) => {
     if (isMounted.current && func) {
       func();
     }

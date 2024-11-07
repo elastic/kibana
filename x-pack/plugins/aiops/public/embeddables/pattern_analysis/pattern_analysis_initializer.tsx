@@ -33,12 +33,16 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import type { PatternAnalysisEmbeddableRuntimeState } from './types';
 import { PatternAnalysisSettings } from '../../components/log_categorization/log_categorization_for_embeddable/embeddable_menu';
+import { TimeFieldWarning } from '../../components/time_field_warning';
 import { RandomSampler } from '../../components/log_categorization/sampling_menu';
 import {
   DEFAULT_PROBABILITY,
   RANDOM_SAMPLER_OPTION,
 } from '../../components/log_categorization/sampling_menu/random_sampler';
-import type { MinimumTimeRangeOption } from '../../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
+import {
+  DEFAULT_MINIMUM_TIME_RANGE_OPTION,
+  type MinimumTimeRangeOption,
+} from '../../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
 import { getMessageField } from '../../components/log_categorization/utils';
 import { FieldSelector } from '../../components/log_categorization/log_categorization_for_embeddable/field_selector';
 import { SamplingPanel } from '../../components/log_categorization/sampling_menu/sampling_panel';
@@ -59,6 +63,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
   isNewPanel,
 }) => {
   const {
+    data: { dataViews },
     unifiedSearch: {
       ui: { IndexPatternSelect },
     },
@@ -67,7 +72,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
   const [formInput, setFormInput] = useState<PatternAnalysisEmbeddableRuntimeState>(
     pick(
       initialInput ?? {
-        minimumTimeRangeOption: '1 week',
+        minimumTimeRangeOption: DEFAULT_MINIMUM_TIME_RANGE_OPTION,
         randomSamplerMode: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
         randomSamplerProbability: DEFAULT_PROBABILITY,
       },
@@ -163,7 +168,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
               }}
             />
           </EuiFormRow>
-          <DataSourceContextProvider dataViewId={formInput.dataViewId}>
+          <DataSourceContextProvider dataViews={dataViews} dataViewId={formInput.dataViewId}>
             <EuiSpacer />
 
             <FormControls
@@ -382,34 +387,6 @@ const TextFieldWarning = () => {
             'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title.description',
             {
               defaultMessage: 'Pattern analysis can only be run on data views with a text field.',
-            }
-          )}
-        </p>
-      </EuiCallOut>
-      <EuiSpacer />
-    </>
-  );
-};
-
-const TimeFieldWarning = () => {
-  return (
-    <>
-      <EuiCallOut
-        size="s"
-        title={i18n.translate(
-          'xpack.aiops.logCategorization.embeddableMenu.timeFieldWarning.title',
-          {
-            defaultMessage: 'The selected data view does not contain a time field.',
-          }
-        )}
-        color="warning"
-        iconType="warning"
-      >
-        <p>
-          {i18n.translate(
-            'xpack.aiops.logCategorization.embeddableMenu.timeFieldWarning.title.description',
-            {
-              defaultMessage: 'Pattern analysis can only be run on data views with a time field.',
             }
           )}
         </p>

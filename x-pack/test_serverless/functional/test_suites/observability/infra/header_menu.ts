@@ -13,7 +13,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'infraHome', 'header']);
 
-  describe('Header menu', () => {
+  // failing feature flag test, see https://github.com/elastic/kibana/issues/191809
+  describe.skip('Header menu', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await pageObjects.svlCommonPage.loginAsViewer();

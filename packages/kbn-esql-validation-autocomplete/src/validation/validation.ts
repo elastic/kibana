@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import uniqBy from 'lodash/uniqBy';
@@ -25,12 +26,11 @@ import {
   CommandModeDefinition,
   CommandOptionsDefinition,
   FunctionParameter,
-  FunctionDefinition,
 } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
   extractSingularType,
-  lookupColumn,
+  getColumnForASTNode,
   getCommandDefinition,
   getFunctionDefinition,
   isArrayType,
@@ -46,7 +46,6 @@ import {
   sourceExists,
   getColumnExists,
   hasWildcard,
-  hasCCSSource,
   isSettingItem,
   isAssignment,
   isVariable,
@@ -54,6 +53,7 @@ import {
   isAggFunction,
   getQuotedColumnName,
   isInlineCastItem,
+  getSignaturesWithMatchingArity,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import { getMessageFromId, errors } from './errors';
@@ -74,9 +74,9 @@ import {
   retrieveFieldsFromStringSources,
 } from './resources';
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
-import { getParamAtPosition } from '../autocomplete/helper';
+import { getParamAtPosition } from '../shared/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
-import { isStringType } from '../shared/esql_types';
+import { compareTypesWithLiterals } from '../shared/esql_types';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -88,8 +88,8 @@ function validateFunctionLiteralArg(
   const messages: ESQLMessage[] = [];
   if (isLiteralItem(actualArg)) {
     if (
-      actualArg.literalType === 'string' &&
-      argDef.literalOptions &&
+      actualArg.literalType === 'keyword' &&
+      argDef.acceptedValues &&
       isValidLiteralOption(actualArg, argDef)
     ) {
       messages.push(
@@ -98,7 +98,7 @@ function validateFunctionLiteralArg(
           values: {
             name: astFunction.name,
             value: actualArg.value,
-            supportedOptions: argDef.literalOptions?.map((option) => `"${option}"`).join(', '),
+            supportedOptions: argDef.acceptedValues?.map((option) => `"${option}"`).join(', '),
           },
           locations: actualArg.location,
         })
@@ -112,7 +112,7 @@ function validateFunctionLiteralArg(
           values: {
             name: astFunction.name,
             argType: argDef.type as string,
-            value: typeof actualArg.value === 'number' ? actualArg.value : String(actualArg.value),
+            value: actualArg.text,
             givenType: actualArg.literalType,
           },
           locations: actualArg.location,
@@ -198,11 +198,7 @@ function validateNestedFunctionArg(
     const argFn = getFunctionDefinition(actualArg.name)!;
     const fnDef = getFunctionDefinition(astFunction.name)!;
     // no nestying criteria should be enforced only for same type function
-    if (
-      'noNestingFunctions' in parameterDefinition &&
-      parameterDefinition.noNestingFunctions &&
-      fnDef.type === argFn.type
-    ) {
+    if (fnDef.type === 'agg' && argFn.type === 'agg') {
       messages.push(
         getMessageFromId({
           messageId: 'noNestedArgumentSupport',
@@ -295,7 +291,7 @@ function validateFunctionColumnArg(
   if (
     !checkFunctionArgMatchesDefinition(actualArg, parameterDefinition, references, parentCommand)
   ) {
-    const columnHit = lookupColumn(actualArg, references);
+    const columnHit = getColumnForASTNode(actualArg, references);
     messages.push(
       getMessageFromId({
         messageId: 'wrongArgumentType',
@@ -311,21 +307,6 @@ function validateFunctionColumnArg(
   }
 
   return messages;
-}
-
-function extractCompatibleSignaturesForFunction(
-  fnDef: FunctionDefinition,
-  astFunction: ESQLFunction
-) {
-  return fnDef.signatures.filter((def) => {
-    if (def.minParams) {
-      return astFunction.args.length >= def.minParams;
-    }
-    return (
-      astFunction.args.length >= def.params.filter(({ optional }) => !optional).length &&
-      astFunction.args.length <= def.params.length
-    );
-  });
 }
 
 function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
@@ -380,7 +361,7 @@ function validateFunction(
       return messages;
     }
   }
-  const matchingSignatures = extractCompatibleSignaturesForFunction(fnDefinition, astFunction);
+  const matchingSignatures = getSignaturesWithMatchingArity(fnDefinition, astFunction);
   if (!matchingSignatures.length) {
     const { max, min } = getMaxMinNumberOfParams(fnDefinition);
     if (max === min) {
@@ -818,11 +799,6 @@ function validateSource(
     return messages;
   }
 
-  const hasCCS = hasCCSSource(source.name);
-  if (hasCCS) {
-    return messages;
-  }
-
   const commandDef = getCommandDefinition(commandName);
   const isWildcardAndNotSupported =
     hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
@@ -876,13 +852,15 @@ function validateColumnForCommand(
         ({ type, innerTypes }) => type === 'column' && innerTypes
       );
       // this should be guaranteed by the columnCheck above
-      const columnRef = lookupColumn(column, references)!;
+      const columnRef = getColumnForASTNode(column, references)!;
 
       if (columnParamsWithInnerTypes.length) {
-        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerTypes }) => {
-          if (innerTypes?.includes('string') && isStringType(columnRef.type)) return false;
-          return innerTypes && !innerTypes.includes('any') && !innerTypes.includes(columnRef.type);
-        });
+        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(
+          ({ innerTypes }) =>
+            innerTypes &&
+            !innerTypes.includes('any') &&
+            !innerTypes.some((type) => compareTypesWithLiterals(type, columnRef.type))
+        );
         if (hasSomeWrongInnerTypes) {
           const supportedTypes: string[] = columnParamsWithInnerTypes
             .map(({ innerTypes }) => innerTypes)
@@ -1096,9 +1074,11 @@ function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>) {
 }
 
 export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
-  getFieldsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
+  getColumnsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
+  getPreferences: [],
+  getFieldsMetadata: [],
 };
 
 /**

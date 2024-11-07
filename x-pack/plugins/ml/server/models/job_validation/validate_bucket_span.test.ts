@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../common/constants/validation';
+import { SKIP_BUCKET_SPAN_ESTIMATION } from '@kbn/ml-validators';
 
 import type { JobValidationMessage } from '../../../common/constants/messages';
 // @ts-ignore

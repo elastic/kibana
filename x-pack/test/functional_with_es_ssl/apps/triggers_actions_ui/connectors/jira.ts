@@ -50,8 +50,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should create the connector', async () => {
         const connectorName = generateUniqueKey();
         const createdAction = await createJiraConnector(connectorName);
-        objectRemover.add(createdAction.id, 'action', 'actions');
-        browser.refresh();
+        objectRemover.add(createdAction.id, 'connector', 'actions');
+        await browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -72,7 +72,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const connectorName = generateUniqueKey();
         const createdAction = await createJiraConnector(connectorName);
         connectorId = createdAction.id;
-        objectRemover.add(connectorId, 'action', 'actions');
+        objectRemover.add(connectorId, 'connector', 'actions');
       });
 
       beforeEach(async () => {
@@ -86,14 +86,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('shouldnt throw a type error for other fields when its valid json', async () => {
-        fillJiraActionForm('{ "key": "value" }');
+        await fillJiraActionForm('{ "key": "value" }');
         expect(await testSubjects.getVisibleText('executionFailureResult')).to.not.contain(
           '[subActionParams.incident.otherFields.0]: could not parse record value from json input'
         );
       });
 
       it('shouldnt throw a type error for other fields when its not valid json', async () => {
-        fillJiraActionForm('{ "no_valid_json" }');
+        await fillJiraActionForm('{ "no_valid_json" }');
         expect(await testSubjects.getVisibleText('executionFailureResult')).to.contain(
           '[subActionParams.incident.otherFields.0]: could not parse record value from json input'
         );

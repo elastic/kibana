@@ -67,7 +67,6 @@ export const createDeserializer =
       },
       frozen: {
         enabled: Boolean(frozen),
-        dataTierAllocationType: determineDataTierAllocationType(frozen?.actions),
         minAgeToMilliSeconds: -1,
       },
       delete: {

@@ -3,12 +3,8 @@
 exports[`should not render fields-editor when there is no layername 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
     display="columnCompressed"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Source layer"
-    labelType="label"
   >
     <EuiFieldText
       compressed={true}
@@ -59,12 +55,8 @@ exports[`should not render fields-editor when there is no layername 1`] = `
 exports[`should render with fields 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
     display="columnCompressed"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Source layer"
-    labelType="label"
   >
     <EuiFieldText
       compressed={true}
@@ -110,10 +102,6 @@ exports[`should render with fields 1`] = `
     }
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label={
       <EuiToolTip
         anchorClassName="eui-alignMiddle"
@@ -144,7 +132,6 @@ exports[`should render with fields 1`] = `
         </span>
       </EuiToolTip>
     }
-    labelType="label"
   >
     <MVTFieldConfigEditor
       fields={Array []}
@@ -157,12 +144,8 @@ exports[`should render with fields 1`] = `
 exports[`should render without fields 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
     display="columnCompressed"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Source layer"
-    labelType="label"
   >
     <EuiFieldText
       compressed={true}

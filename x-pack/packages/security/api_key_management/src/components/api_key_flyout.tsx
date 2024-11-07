@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExclusiveUnion, htmlIdGenerator } from '@elastic/eui';
+import type { ExclusiveUnion } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -27,12 +27,13 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  htmlIdGenerator,
   useEuiTheme,
 } from '@elastic/eui';
 import { Form, FormikProvider, useFormik } from 'formik';
 import moment from 'moment-timezone';
-import { FunctionComponent, useRef } from 'react';
-import React, { useEffect, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { CodeEditorField } from '@kbn/code-editor';
@@ -41,10 +42,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { useDarkMode, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
-
-import { Role } from '@kbn/security-plugin-types-common';
 import { FormField, FormRow } from '@kbn/security-form-components';
-import type { ApiKeyRoleDescriptors, CategorizedApiKey } from '@kbn/security-plugin-types-common';
+import type {
+  ApiKeyRoleDescriptors,
+  CategorizedApiKey,
+  Role,
+} from '@kbn/security-plugin-types-common';
+
 import { ApiKeyBadge, ApiKeyStatus, TimeToolTip } from '.';
 import { APIKeysAPIClient } from './api_keys_api_client';
 import type {
@@ -96,6 +100,7 @@ interface CommonApiKeyFlyoutProps {
   http?: CoreStart['http'];
   currentUser?: AuthenticatedUser;
   isLoadingCurrentUser?: boolean;
+  defaultName?: string;
   defaultMetadata?: string;
   defaultRoleDescriptors?: string;
   defaultExpiration?: string;
@@ -172,6 +177,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   defaultExpiration,
   defaultMetadata,
   defaultRoleDescriptors,
+  defaultName,
   apiKey,
   canManageCrossClusterApiKeys = false,
   readOnly = false,
@@ -249,6 +255,12 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
       formik.setFieldValue('role_descriptors', defaultRoleDescriptors);
     }
   }, [defaultRoleDescriptors]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (defaultName && !apiKey) {
+      formik.setFieldValue('name', defaultName);
+    }
+  }, [defaultName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (defaultMetadata && !apiKey) {

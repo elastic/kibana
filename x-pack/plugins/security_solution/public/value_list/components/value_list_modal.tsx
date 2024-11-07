@@ -6,6 +6,7 @@
  */
 import React, { useState, useCallback } from 'react';
 import { css } from '@emotion/css';
+import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiModal,
   EuiModalHeader,
@@ -100,7 +101,7 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
     pageSizeOptions: [5, 10, 25],
   };
 
-  const onQueryChange = useCallback((params) => {
+  const onQueryChange: NonNullable<EuiSearchBarProps['onChange']> = useCallback((params) => {
     setFilter(params.queryText);
   }, []);
 

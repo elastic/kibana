@@ -75,7 +75,7 @@ const ConfigUploaderComponent: React.FC<ConfigUploaderProps> = ({ onChange }) =>
   };
 
   const handleInputChange = useCallback(
-    (inputFiles) => {
+    (inputFiles: any) => {
       if (!inputFiles.length) {
         return;
       }

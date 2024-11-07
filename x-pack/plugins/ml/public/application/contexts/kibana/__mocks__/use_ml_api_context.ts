@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { MlApiServices } from '../../../services/ml_api_service';
+import type { MlApi } from '../../../services/ml_api_service';
 
-export const useMlApiContext: () => jest.Mocked<MlApiServices> = jest.fn(() => {
+export const useMlApi: () => jest.Mocked<MlApi> = jest.fn(() => {
   return {
     jobs: {
       getAllJobAndGroupIds: jest.fn(),
@@ -18,5 +18,5 @@ export const useMlApiContext: () => jest.Mocked<MlApiServices> = jest.fn(() => {
     dataFrameAnalytics: {
       getDataFrameAnalytics: jest.fn(),
     },
-  } as unknown as jest.Mocked<MlApiServices>;
+  } as unknown as jest.Mocked<MlApi>;
 });

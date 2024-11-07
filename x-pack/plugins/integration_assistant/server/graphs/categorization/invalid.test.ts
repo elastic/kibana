@@ -18,15 +18,15 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
-const mockLlm = new FakeLLM({
+const model = new FakeLLM({
   response: JSON.stringify(categorizationMockProcessors, null, 2),
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
-const testState: CategorizationState = categorizationTestState;
+const state: CategorizationState = categorizationTestState;
 
 describe('Testing categorization handler', () => {
   it('handleInvalidCategorization()', async () => {
-    const response = await handleInvalidCategorization(testState, mockLlm);
+    const response = await handleInvalidCategorization({ state, model });
     expect(response.currentPipeline).toStrictEqual(
       categorizationExpectedHandlerResponse.currentPipeline
     );

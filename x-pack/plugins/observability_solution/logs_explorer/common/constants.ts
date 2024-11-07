@@ -40,7 +40,16 @@ export const SMART_FALLBACK_FIELDS = {
 };
 
 // UI preferences
-export const DEFAULT_COLUMNS = [RESOURCE_FIELD_CONFIGURATION, CONTENT_FIELD_CONFIGURATION];
+export const DEFAULT_COLUMNS = [
+  /**
+   * We are switching from these virtual columns to the One Discover Summary column.
+   * In this effort we don't want to immediately cleanup everything about these virtual columns,
+   * but only disable their instantiation.
+   * We'll clean this part as soon as we decide to definitevely discard these columns.
+   **/
+  // RESOURCE_FIELD_CONFIGURATION,
+  //  CONTENT_FIELD_CONFIGURATION
+];
 export const DEFAULT_ROWS_PER_PAGE = 100;
 
 // List of prefixes which needs to be filtered out for Display in Content Column

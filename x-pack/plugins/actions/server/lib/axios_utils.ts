@@ -17,7 +17,7 @@ import {
 import { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { SSLSettings } from '../types';
+import { ConnectorUsageCollector, SSLSettings } from '../types';
 import { combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
 
 export const request = async <T = unknown>({
@@ -30,6 +30,7 @@ export const request = async <T = unknown>({
   headers,
   sslOverrides,
   timeout,
+  connectorUsageCollector,
   ...config
 }: {
   axios: AxiosInstance;
@@ -41,6 +42,7 @@ export const request = async <T = unknown>({
   headers?: Record<string, AxiosHeaderValue>;
   timeout?: number;
   sslOverrides?: SSLSettings;
+  connectorUsageCollector?: ConnectorUsageCollector;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
   if (!isEmpty(axios?.defaults?.baseURL ?? '')) {
     throw new Error(
@@ -64,18 +66,31 @@ export const request = async <T = unknown>({
     headers,
   });
 
-  return await axios(url, {
-    ...restConfig,
-    method,
-    headers: headersWithBasicAuth,
-    ...(data ? { data } : {}),
-    // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
-    httpAgent,
-    httpsAgent,
-    proxy: false,
-    maxContentLength,
-    timeout: Math.max(settingsTimeout, timeout ?? 0),
-  });
+  try {
+    const result = await axios(url, {
+      ...restConfig,
+      method,
+      headers: headersWithBasicAuth,
+      ...(data ? { data } : {}),
+      // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
+      httpAgent,
+      httpsAgent,
+      proxy: false,
+      maxContentLength,
+      timeout: Math.max(settingsTimeout, timeout ?? 0),
+    });
+
+    if (connectorUsageCollector) {
+      connectorUsageCollector.addRequestBodyBytes(result, data);
+    }
+
+    return result;
+  } catch (error) {
+    if (connectorUsageCollector) {
+      connectorUsageCollector.addRequestBodyBytes(error, data);
+    }
+    throw error;
+  }
 };
 
 export const patch = async <T = unknown>({
@@ -84,12 +99,14 @@ export const patch = async <T = unknown>({
   data,
   logger,
   configurationUtilities,
+  connectorUsageCollector,
 }: {
   axios: AxiosInstance;
   url: string;
   data: T;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
+  connectorUsageCollector?: ConnectorUsageCollector;
 }): Promise<AxiosResponse> => {
   return request({
     axios,
@@ -98,6 +115,7 @@ export const patch = async <T = unknown>({
     method: 'patch',
     data,
     configurationUtilities,
+    connectorUsageCollector,
   });
 };
 
@@ -119,6 +137,16 @@ export const throwIfResponseIsNotValid = ({
   const requiredContentType = 'application/json';
   const contentType = res.headers['content-type'] ?? 'undefined';
   const data = res.data;
+  const statusCode = res.status;
+
+  /**
+   * Some external services may return a 204
+   * status code but with unsupported content type like text/html.
+   * To avoid throwing on valid requests we return.
+   */
+  if (statusCode === 204) {
+    return;
+  }
 
   /**
    * Check that the content-type of the response is application/json.

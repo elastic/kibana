@@ -11,7 +11,9 @@
         "closed",
         "hidden",
         "none"
-      ]
+      ],
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__"
     },
     "methods": [
       "GET"

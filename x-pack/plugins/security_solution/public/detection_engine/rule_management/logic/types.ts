@@ -32,7 +32,11 @@ export interface CreateRulesProps {
 }
 
 export interface PreviewRulesProps {
-  rule: RuleCreateProps & { invocationCount: number; timeframeEnd: string };
+  rule: RuleCreateProps & {
+    invocationCount: number;
+    timeframeEnd: string;
+  };
+  enableLoggedRequests?: boolean;
   signal?: AbortSignal;
 }
 
@@ -95,6 +99,7 @@ export interface FilterOptions {
   excludeRuleTypes?: Type[];
   enabled?: boolean; // undefined is to display all the rules
   ruleExecutionStatus?: RuleExecutionStatus; // undefined means "all"
+  ruleSource?: RuleCustomizationEnum[]; // undefined is to display all the rules
 }
 
 export interface FetchRulesResponse {
@@ -197,4 +202,9 @@ export interface FindRulesReferencedByExceptionsListProp {
 export interface FindRulesReferencedByExceptionsProps {
   lists: FindRulesReferencedByExceptionsListProp[];
   signal?: AbortSignal;
+}
+
+export enum RuleCustomizationEnum {
+  customized = 'CUSTOMIZED',
+  not_customized = 'NOT_CUSTOMIZED',
 }

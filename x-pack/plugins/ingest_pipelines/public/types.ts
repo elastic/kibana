@@ -25,3 +25,7 @@ export interface StartDependencies {
   licensing?: LicensingPluginStart;
   console?: ConsolePluginStart;
 }
+
+export interface Config {
+  enableManageProcessors: boolean;
+}

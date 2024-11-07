@@ -67,6 +67,10 @@ describe('transformRuleDomainToRule', () => {
     updatedBy: 'user',
     apiKey: MOCK_API_KEY,
     apiKeyOwner: 'user',
+    flapping: {
+      lookBackWindow: 20,
+      statusChangeThreshold: 20,
+    },
   };
 
   it('should transform rule domain to rule', () => {
@@ -100,6 +104,10 @@ describe('transformRuleDomainToRule', () => {
       revision: 0,
       updatedBy: 'user',
       apiKeyOwner: 'user',
+      flapping: {
+        lookBackWindow: 20,
+        statusChangeThreshold: 20,
+      },
     });
   });
 
@@ -135,6 +143,10 @@ describe('transformRuleDomainToRule', () => {
       revision: 0,
       updatedBy: 'user',
       apiKeyOwner: 'user',
+      flapping: {
+        lookBackWindow: 20,
+        statusChangeThreshold: 20,
+      },
     });
   });
 
@@ -172,6 +184,10 @@ describe('transformRuleDomainToRule', () => {
       revision: 0,
       updatedBy: 'user',
       apiKeyOwner: 'user',
+      flapping: {
+        lookBackWindow: 20,
+        statusChangeThreshold: 20,
+      },
     });
   });
 });

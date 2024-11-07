@@ -76,6 +76,7 @@ export const CasesConnectorRunParamsSchema = schema.object({
     min: 1,
     max: MAX_OPEN_CASES,
   }),
+  templateId: schema.nullable(schema.string()),
 });
 
 export const CasesConnectorRuleActionParamsSchema = schema.object({
@@ -84,6 +85,7 @@ export const CasesConnectorRuleActionParamsSchema = schema.object({
     groupingBy: GroupingSchema,
     reopenClosedCases: ReopenClosedCasesSchema,
     timeWindow: TimeWindowSchema,
+    templateId: schema.nullable(schema.string()),
   }),
 });
 

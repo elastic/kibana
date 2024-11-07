@@ -8,7 +8,8 @@
 import './authentication_state_page.scss';
 
 import { EuiIcon, EuiImage, EuiSpacer, EuiTitle } from '@elastic/eui';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 interface Props {
   className?: string;

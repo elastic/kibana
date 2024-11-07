@@ -415,6 +415,46 @@ export async function getAgentById(
   return agentHit;
 }
 
+/**
+ * Get list of agents by `id`. service method performs space awareness checks.
+ * @param esClient
+ * @param soClient
+ * @param agentIds
+ * @param options
+ *
+ * @throws AgentNotFoundError
+ */
+export const getByIds = async (
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  agentIds: string[],
+  options?: Partial<{ ignoreMissing: boolean }>
+): Promise<Agent[]> => {
+  const agentsHits = await getAgentsById(esClient, soClient, agentIds);
+  const currentNamespace = getCurrentNamespace(soClient);
+  const response: Agent[] = [];
+
+  for (const agentHit of agentsHits) {
+    let throwError = false;
+
+    if ('notFound' in agentHit && !options?.ignoreMissing) {
+      throwError = true;
+    } else if ((await isAgentInNamespace(agentHit as Agent, currentNamespace)) !== true) {
+      throwError = true;
+    }
+
+    if (throwError) {
+      throw new AgentNotFoundError(`Agent ${agentHit.id} not found`, { agentId: agentHit.id });
+    }
+
+    if (!(`notFound` in agentHit)) {
+      response.push(agentHit);
+    }
+  }
+
+  return response;
+};
+
 async function _filterAgents(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
@@ -433,7 +473,7 @@ async function _filterAgents(
 }> {
   const { page = 1, perPage = 20, sortField = 'enrolled_at', sortOrder = 'desc' } = options;
   const runtimeFields = await buildAgentStatusRuntimeField(soClient);
-  const currentNameSpace = getCurrentNamespace(soClient);
+  const currentSpaceId = getCurrentNamespace(soClient);
 
   let res;
   try {
@@ -445,7 +485,7 @@ async function _filterAgents(
       runtime_mappings: runtimeFields,
       fields: Object.keys(runtimeFields),
       sort: [{ [sortField]: { order: sortOrder } }],
-      query: await addNamespaceFilteringToQuery({ bool: { filter: [query] } }, currentNameSpace),
+      query: await addNamespaceFilteringToQuery({ bool: { filter: [query] } }, currentSpaceId),
       index: AGENTS_INDEX,
       ignore_unavailable: true,
     });

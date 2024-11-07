@@ -6,13 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import type { Agent as SuperTestAgent } from 'supertest';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import {
-  data as telemetryMockData,
-  MockTelemetryFindings,
-} from '@kbn/test-suites-xpack/cloud_security_posture_api/telemetry/data';
+import { data as telemetryMockData } from '@kbn/test-suites-xpack/cloud_security_posture_api/telemetry/data';
 import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
+import {
+  waitForPluginInitialized,
+  EsIndexDataProvider,
+} from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
@@ -21,56 +22,19 @@ const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
-  const log = getService('log');
+  const logger = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
   let roleAuthc: RoleCredentials;
   let internalRequestHeader: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string };
 
-  /**
-   * required before indexing findings
-   */
-  const waitForPluginInitialized = (
-    supertestWithoutAuthParam: SuperTestAgent,
-    internalRequestHeaderParam: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string },
-    roleAuthcParam: RoleCredentials
-  ): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
-      const response = await supertestWithoutAuthParam
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(internalRequestHeaderParam)
-        .set(roleAuthcParam.apiKeyHeader)
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
-    });
-
-  const index = {
-    remove: () =>
-      es.deleteByQuery({
-        index: FINDINGS_INDEX,
-        query: { match_all: {} },
-        refresh: true,
-      }),
-
-    add: async (mockTelemetryFindings: MockTelemetryFindings[]) => {
-      const operations = mockTelemetryFindings.flatMap((doc) => [
-        { index: { _index: FINDINGS_INDEX } },
-        doc,
-      ]);
-
-      const response = await es.bulk({ refresh: 'wait_for', index: FINDINGS_INDEX, operations });
-      expect(response.errors).to.eql(false);
-    },
-  };
+  const findingsIndex = new EsIndexDataProvider(es, FINDINGS_INDEX);
 
   describe('Verify cloud_security_posture telemetry payloads', function () {
     // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.fleet-actions-7], this action is granted by the index privileges [create_index,manage,all]
@@ -79,6 +43,14 @@ export default function ({ getService }: FtrProviderContext) {
     let agentPolicyId: string;
 
     before(async () => {
+      supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'admin',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+          withCustomHeaders: { [ELASTIC_HTTP_VERSION_HEADER]: '2' },
+        }
+      );
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
       await kibanaServer.savedObjects.cleanStandardList();
@@ -106,7 +78,12 @@ export default function ({ getService }: FtrProviderContext) {
         roleAuthc,
         internalRequestHeader
       );
-      await waitForPluginInitialized(supertestWithoutAuth, internalRequestHeader, roleAuthc);
+
+      const supertestAdmin = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        useCookieHeader: true,
+        withInternalHeaders: true,
+      });
+      await waitForPluginInitialized({ logger, retry, supertest: supertestAdmin });
     });
 
     after(async () => {
@@ -116,19 +93,16 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await index.remove();
+      await findingsIndex.deleteAll();
     });
 
     it('includes only KSPM findings', async () => {
-      await index.add(telemetryMockData.kspmFindings);
+      await findingsIndex.addBulk(telemetryMockData.kspmFindings);
 
       const {
         body: [{ stats: apiResponse }],
-      } = await supertestWithoutAuth
+      } = await supertestAdminWithCookieCredentials
         .post(`/internal/telemetry/clusters/_stats`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(internalRequestHeader)
-        .set(roleAuthc.apiKeyHeader)
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -174,15 +148,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('includes only CSPM findings', async () => {
-      await index.add(telemetryMockData.cspmFindings);
+      await findingsIndex.addBulk(telemetryMockData.cspmFindings);
 
       const {
         body: [{ stats: apiResponse }],
-      } = await supertestWithoutAuth
+      } = await supertestAdminWithCookieCredentials
         .post(`/internal/telemetry/clusters/_stats`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(internalRequestHeader)
-        .set(roleAuthc.apiKeyHeader)
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -220,16 +191,15 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('includes CSPM and KSPM findings', async () => {
-      await index.add(telemetryMockData.kspmFindings);
-      await index.add(telemetryMockData.cspmFindings);
+      await findingsIndex.addBulk([
+        ...telemetryMockData.kspmFindings,
+        ...telemetryMockData.cspmFindings,
+      ]);
 
       const {
         body: [{ stats: apiResponse }],
-      } = await supertestWithoutAuth
+      } = await supertestAdminWithCookieCredentials
         .post(`/internal/telemetry/clusters/_stats`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(internalRequestHeader)
-        .set(roleAuthc.apiKeyHeader)
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -299,15 +269,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`'includes only KSPM findings without posture_type'`, async () => {
-      await index.add(telemetryMockData.kspmFindingsNoPostureType);
+      await findingsIndex.addBulk(telemetryMockData.kspmFindingsNoPostureType);
 
       const {
         body: [{ stats: apiResponse }],
-      } = await supertestWithoutAuth
+      } = await supertestAdminWithCookieCredentials
         .post(`/internal/telemetry/clusters/_stats`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(internalRequestHeader)
-        .set(roleAuthc.apiKeyHeader)
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -354,16 +321,15 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('includes KSPM findings without posture_type and CSPM findings as well', async () => {
-      await index.add(telemetryMockData.kspmFindingsNoPostureType);
-      await index.add(telemetryMockData.cspmFindings);
+      await findingsIndex.addBulk([
+        ...telemetryMockData.kspmFindingsNoPostureType,
+        ...telemetryMockData.cspmFindings,
+      ]);
 
       const {
         body: [{ stats: apiResponse }],
-      } = await supertestWithoutAuth
+      } = await supertestAdminWithCookieCredentials
         .post(`/internal/telemetry/clusters/_stats`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(internalRequestHeader)
-        .set(roleAuthc.apiKeyHeader)
         .send({
           unencrypted: true,
           refreshCache: true,

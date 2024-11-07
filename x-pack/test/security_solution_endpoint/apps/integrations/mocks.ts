@@ -7,8 +7,11 @@
 
 import { FullAgentPolicy } from '@kbn/fleet-plugin/common/types';
 import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services/artifacts/types';
+import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { InternalUnifiedManifestBaseSchema } from '@kbn/security-solution-plugin/server/endpoint/schemas/artifacts';
 import { TranslatedExceptionListItem } from '@kbn/security-solution-plugin/server/endpoint/schemas/artifacts/lists';
+import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 export interface AgentPolicyResponseType {
   _index: string;
@@ -119,6 +122,19 @@ export const getArtifactsListTestsData = () => [
       confirmSelector: 'trustedAppsListPage-deleteModal-submitButton',
       card: 'trustedAppsListPage-card',
     },
+    listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+    createBody: {
+      entries: [
+        {
+          type: 'match',
+          field: 'process.hash.sha256',
+          value: 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+          operator: 'included',
+        },
+      ],
+      tags: [GLOBAL_ARTIFACT_TAG],
+      os_types: ['windows'],
+    } as Partial<CreateExceptionListItemSchema>,
     urlPath: 'trusted_apps',
     pageObject: 'trustedApps',
     fleetArtifact: {
@@ -206,8 +222,9 @@ export const getArtifactsListTestsData = () => [
           selector: 'fieldAutocompleteComboBox',
         },
         {
-          type: 'customClick',
-          selector: 'button[title="agent.ephemeral_id"]',
+          type: 'input',
+          selector: 'fieldAutocompleteComboBox',
+          value: 'agent.ephemeral_id',
         },
         {
           type: 'click',
@@ -248,10 +265,6 @@ export const getArtifactsListTestsData = () => [
           value: 'agent.id',
         },
         {
-          type: 'customClick',
-          selector: 'button[title="agent.id"]',
-        },
-        {
           type: 'input',
           selector: 'valuesAutocompleteMatch',
           value: 'test super large value',
@@ -281,6 +294,19 @@ export const getArtifactsListTestsData = () => [
       confirmSelector: 'EventFiltersListPage-deleteModal-submitButton',
       card: 'EventFiltersListPage-card',
     },
+    listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+    createBody: {
+      entries: [
+        {
+          field: 'agent.ephemeral_id',
+          value: 'endpoint',
+          type: 'match',
+          operator: 'included',
+        },
+      ],
+      tags: [GLOBAL_ARTIFACT_TAG],
+      os_types: ['windows'],
+    } as Partial<CreateExceptionListItemSchema>,
     urlPath: 'event_filters',
     pageObject: 'eventFilters',
     fleetArtifact: {
@@ -456,6 +482,31 @@ export const getArtifactsListTestsData = () => [
       card: 'blocklistCard',
     },
     pageObject: 'blocklist',
+    listId: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+    createBody: {
+      entries: [
+        {
+          type: 'match_any',
+          field: 'file.hash.md5',
+          value: ['741462ab431a22233c787baab9b653c7'],
+          operator: 'included',
+        },
+        {
+          type: 'match_any',
+          field: 'file.hash.sha1',
+          value: ['aedb279e378bed6c2db3c9dc9e12ba635e0b391c'],
+          operator: 'included',
+        },
+        {
+          type: 'match_any',
+          field: 'file.hash.sha256',
+          value: ['a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476'],
+          operator: 'included',
+        },
+      ],
+      tags: [GLOBAL_ARTIFACT_TAG],
+      os_types: ['windows'],
+    } as Partial<CreateExceptionListItemSchema>,
     urlPath: 'blocklist',
     fleetArtifact: {
       identifier: 'endpoint-blocklist-windows-v1',
@@ -610,6 +661,19 @@ export const getArtifactsListTestsData = () => [
       confirmSelector: 'hostIsolationExceptionsDeletionConfirm',
       card: 'hostIsolationExceptionsCard',
     },
+    listId: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
+    createBody: {
+      entries: [
+        {
+          type: 'match',
+          field: 'destination.ip',
+          value: '1.1.1.1',
+          operator: 'included',
+        },
+      ],
+      tags: [GLOBAL_ARTIFACT_TAG],
+      os_types: ['windows', 'linux', 'macos'],
+    } as Partial<CreateExceptionListItemSchema>,
     pageObject: 'hostIsolationExceptions',
     urlPath: 'host_isolation_exceptions',
     fleetArtifact: {

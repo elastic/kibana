@@ -14,7 +14,7 @@ import {
   EuiButtonIcon,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { useMeasure } from 'react-use';
+import useMeasure from 'react-use/lib/useMeasure';
 
 import { css } from '@emotion/react';
 import {
@@ -130,6 +130,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
               >
                 <EuiBadge
                   color={badge.color}
+                  data-test-subj={`quickPrompt-${badge.name}`}
                   onClick={() => onClickAddQuickPrompt(badge)}
                   onClickAriaLabel={badge.name}
                 >

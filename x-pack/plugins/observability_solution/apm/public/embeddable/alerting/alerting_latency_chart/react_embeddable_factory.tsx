@@ -13,8 +13,7 @@ import type { EmbeddableApmAlertingLatencyVizProps } from '../types';
 import type { EmbeddableDeps } from '../../types';
 import { ApmEmbeddableContext } from '../../embeddable_context';
 import { APMAlertingLatencyChart } from './chart';
-
-export const APM_ALERTING_LATENCY_CHART_EMBEDDABLE = 'APM_ALERTING_LATENCY_CHART_EMBEDDABLE';
+import { APM_ALERTING_LATENCY_CHART_EMBEDDABLE } from '../constants';
 
 export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: ReactEmbeddableFactory<

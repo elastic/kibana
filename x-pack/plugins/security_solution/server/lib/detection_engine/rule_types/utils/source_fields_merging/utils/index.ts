@@ -5,7 +5,7 @@
  * 2.0.
  */
 export * from './array_in_path_exists';
-export * from './filter_field_entries';
+export * from './filter_field_entry';
 export * from './is_array_of_primitives';
 export * from './is_ignored';
 export * from './is_invalid_key';

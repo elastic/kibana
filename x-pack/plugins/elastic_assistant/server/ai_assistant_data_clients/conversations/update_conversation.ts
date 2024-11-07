@@ -76,7 +76,7 @@ export const updateConversation = async ({
         },
       },
       refresh: true,
-      script: getUpdateScript({ conversation: params, isPatch }),
+      script: getUpdateScript({ conversation: params, isPatch }).script,
     });
 
     if (response.failures && response.failures.length > 0) {
@@ -115,13 +115,17 @@ export const transformToUpdateScheme = (
     id,
     updated_at: updatedAt,
     title,
-    api_config: {
-      action_type_id: apiConfig?.actionTypeId,
-      connector_id: apiConfig?.connectorId,
-      default_system_prompt_id: apiConfig?.defaultSystemPromptId,
-      model: apiConfig?.model,
-      provider: apiConfig?.provider,
-    },
+    ...(apiConfig
+      ? {
+          api_config: {
+            action_type_id: apiConfig?.actionTypeId,
+            connector_id: apiConfig?.connectorId,
+            default_system_prompt_id: apiConfig?.defaultSystemPromptId,
+            model: apiConfig?.model,
+            provider: apiConfig?.provider,
+          },
+        }
+      : {}),
     exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
     replacements: replacements
       ? Object.keys(replacements).map((key) => ({

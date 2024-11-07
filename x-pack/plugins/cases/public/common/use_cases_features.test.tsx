@@ -37,9 +37,14 @@ describe('useCasesFeatures', () => {
   it.each(tests)(
     'returns isAlertsEnabled=%s and isSyncAlertsEnabled=%s if feature.alerts=%s',
     async (isAlertsEnabled, isSyncAlertsEnabled, alerts) => {
-      const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
-        wrapper: ({ children }) => <TestProviders features={{ alerts }}>{children}</TestProviders>,
-      });
+      const { result } = renderHook<React.PropsWithChildren<{}>, UseCasesFeatures>(
+        () => useCasesFeatures(),
+        {
+          wrapper: ({ children }) => (
+            <TestProviders features={{ alerts }}>{children}</TestProviders>
+          ),
+        }
+      );
 
       expect(result.current).toEqual({
         isAlertsEnabled,
@@ -52,13 +57,16 @@ describe('useCasesFeatures', () => {
   );
 
   it('returns the metrics correctly', async () => {
-    const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
-      wrapper: ({ children }) => (
-        <TestProviders features={{ metrics: [CaseMetricsFeature.CONNECTORS] }}>
-          {children}
-        </TestProviders>
-      ),
-    });
+    const { result } = renderHook<React.PropsWithChildren<{}>, UseCasesFeatures>(
+      () => useCasesFeatures(),
+      {
+        wrapper: ({ children }) => (
+          <TestProviders features={{ metrics: [CaseMetricsFeature.CONNECTORS] }}>
+            {children}
+          </TestProviders>
+        ),
+      }
+    );
 
     expect(result.current).toEqual({
       isAlertsEnabled: true,
@@ -83,9 +91,12 @@ describe('useCasesFeatures', () => {
         license: { type },
       });
 
-      const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
-        wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders>,
-      });
+      const { result } = renderHook<React.PropsWithChildren<{}>, UseCasesFeatures>(
+        () => useCasesFeatures(),
+        {
+          wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders>,
+        }
+      );
 
       expect(result.current).toEqual({
         isAlertsEnabled: true,

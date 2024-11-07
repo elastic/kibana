@@ -25,10 +25,14 @@ export const useSystemPromptTable = () => {
   const getColumns = useCallback(
     ({
       isActionsDisabled,
+      isDeleteEnabled,
+      isEditEnabled,
       onEditActionClicked,
       onDeleteActionClicked,
     }: {
       isActionsDisabled: boolean;
+      isDeleteEnabled: (conversation: SystemPromptTableItem) => boolean;
+      isEditEnabled: (conversation: SystemPromptTableItem) => boolean;
       onEditActionClicked: (prompt: SystemPromptTableItem) => void;
       onDeleteActionClicked: (prompt: SystemPromptTableItem) => void;
     }): Array<EuiBasicTableColumn<SystemPromptTableItem>> => [
@@ -79,6 +83,8 @@ export const useSystemPromptTable = () => {
         align: 'center',
         width: '120px',
         ...getActions({
+          isDeleteEnabled,
+          isEditEnabled,
           onDelete: onDeleteActionClicked,
           onEdit: onEditActionClicked,
         }),

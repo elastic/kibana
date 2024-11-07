@@ -18,15 +18,16 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import { TIKA_PREVIEW_CHARS, type FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
+import { FILE_FORMATS } from '../../../../../common/constants';
 import { EDITOR_MODE, JsonEditor } from '../json_editor';
 import { useGrokHighlighter } from './use_text_parser';
 import { LINE_LIMIT } from './grok_highlighter';
 
 interface Props {
-  data: string;
+  fileContents: string;
   format: string;
   numberOfLines: number;
   semiStructureTextData: SemiStructureTextData | null;
@@ -51,7 +52,12 @@ function semiStructureTextDataGuard(
   );
 }
 
-export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStructureTextData }) => {
+export const FileContents: FC<Props> = ({
+  fileContents,
+  format,
+  numberOfLines,
+  semiStructureTextData,
+}) => {
   let mode = EDITOR_MODE.TEXT;
   if (format === EDITOR_MODE.JSON) {
     mode = EDITOR_MODE.JSON;
@@ -63,8 +69,8 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
     semiStructureTextDataGuard(semiStructureTextData)
   );
   const formattedData = useMemo(
-    () => limitByNumberOfLines(data, numberOfLines),
-    [data, numberOfLines]
+    () => limitByNumberOfLines(fileContents, numberOfLines),
+    [fileContents, numberOfLines]
   );
 
   const [highlightedLines, setHighlightedLines] = useState<JSX.Element[] | null>(null);
@@ -78,7 +84,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
       semiStructureTextData!;
 
     grokHighlighter(
-      data,
+      fileContents,
       grokPattern!,
       mappings,
       ecsCompatibility,
@@ -96,7 +102,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
           setIsSemiStructureTextData(false);
         }
       });
-  }, [data, semiStructureTextData, grokHighlighter, isSemiStructureTextData, isMounted]);
+  }, [fileContents, semiStructureTextData, grokHighlighter, isSemiStructureTextData, isMounted]);
 
   return (
     <>
@@ -127,13 +133,23 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
 
       <EuiSpacer size="s" />
 
-      <FormattedMessage
-        id="xpack.dataVisualizer.file.fileContents.firstLinesDescription"
-        defaultMessage="First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}"
-        values={{
-          numberOfLines: showHighlights ? LINE_LIMIT : numberOfLines,
-        }}
-      />
+      {format === FILE_FORMATS.TIKA ? (
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.fileContents.characterCount"
+          defaultMessage="Preview limited to the first {numberOfChars} characters"
+          values={{
+            numberOfChars: TIKA_PREVIEW_CHARS,
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.fileContents.firstLinesDescription"
+          defaultMessage="First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}"
+          values={{
+            numberOfLines: showHighlights ? LINE_LIMIT : numberOfLines,
+          }}
+        />
+      )}
 
       <EuiSpacer size="s" />
 

@@ -68,7 +68,9 @@ const getRegisterRouteDependencies = () => {
 };
 
 const initApi = (
-  routes: Array<ServerRoute<any, t.Any, APMRouteHandlerResources, any, APMRouteCreateOptions>>
+  routes: Array<
+    ServerRoute<any, t.Any | undefined, APMRouteHandlerResources, any, APMRouteCreateOptions>
+  >
 ) => {
   const { mocks, dependencies } = getRegisterRouteDependencies();
 
@@ -157,11 +159,18 @@ describe('createApi', () => {
         },
         handler: async () => ({}),
       },
+      {
+        endpoint: 'GET /fez',
+        options: {
+          tags: ['access:apm', 'access:apm_settings_write'],
+        },
+        handler: async () => ({}),
+      },
     ]);
 
     expect(createRouter).toHaveBeenCalledTimes(1);
 
-    expect(get).toHaveBeenCalledTimes(2);
+    expect(get).toHaveBeenCalledTimes(3);
     expect(post).toHaveBeenCalledTimes(1);
     expect(put).toHaveBeenCalledTimes(1);
 
@@ -178,6 +187,14 @@ describe('createApi', () => {
         tags: ['access:apm', 'access:apm_write'],
       },
       path: '/qux',
+      validate: expect.anything(),
+    });
+
+    expect(get.mock.calls[2][0]).toEqual({
+      options: {
+        tags: ['access:apm', 'access:apm_settings_write'],
+      },
+      path: '/fez',
       validate: expect.anything(),
     });
 

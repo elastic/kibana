@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { uniqBy } from 'lodash';
 
@@ -179,7 +179,7 @@ const processTransformAssetsPerModule = (
     }
     const packageAssets = transformsSpecifications.get(transformModuleId);
 
-    const content = safeLoad(getAssetFromAssetsMap(assetsMap, path).toString('utf-8'));
+    const content = load(getAssetFromAssetsMap(assetsMap, path).toString('utf-8'));
 
     // Handling fields.yml and all other files within 'fields' folder
     if (fileName === TRANSFORM_SPECS_TYPES.FIELDS || isFields(path)) {

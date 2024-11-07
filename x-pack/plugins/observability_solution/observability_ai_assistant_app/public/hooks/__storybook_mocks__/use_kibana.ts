@@ -7,9 +7,12 @@
 
 import React from 'react';
 import { Subject } from 'rxjs';
-import { useChat } from './use_chat';
 
 const ObservabilityAIAssistantMultipaneFlyoutContext = React.createContext(undefined);
+
+function useChat() {
+  return { next: () => {}, messages: [], setMessages: () => {}, state: undefined, stop: () => {} };
+}
 
 export function useKibana() {
   return {

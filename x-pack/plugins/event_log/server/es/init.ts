@@ -216,9 +216,14 @@ class EsInitializationSteps {
     const exists = await this.esContext.esAdapter.doesIndexTemplateExist(
       this.esContext.esNames.indexTemplate
     );
+    const templateBody = getIndexTemplate(this.esContext.esNames);
     if (!exists) {
-      const templateBody = getIndexTemplate(this.esContext.esNames);
       await this.esContext.esAdapter.createIndexTemplate(
+        this.esContext.esNames.indexTemplate,
+        templateBody
+      );
+    } else {
+      await this.esContext.esAdapter.updateIndexTemplate(
         this.esContext.esNames.indexTemplate,
         templateBody
       );
@@ -230,14 +235,10 @@ class EsInitializationSteps {
       this.esContext.esNames.dataStream
     );
     if (!exists) {
-      await this.esContext.esAdapter.createDataStream(this.esContext.esNames.dataStream, {
-        aliases: {
-          [this.esContext.esNames.dataStream]: {
-            is_write_index: true,
-            is_hidden: true,
-          },
-        },
-      });
+      await this.esContext.esAdapter.createDataStream(this.esContext.esNames.dataStream);
+    } else {
+      // apply current mappings to existing data stream
+      await this.esContext.esAdapter.updateConcreteIndices(this.esContext.esNames.dataStream);
     }
   }
 }

@@ -83,7 +83,7 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
   };
 
   const handleInputChange = useCallback(
-    (inputFiles) => {
+    (inputFiles: any) => {
       if (!inputFiles.length) {
         packName.current = '';
 

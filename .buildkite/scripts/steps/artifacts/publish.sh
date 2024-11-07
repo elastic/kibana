@@ -54,7 +54,7 @@ chmod -R a+r target/*
 chmod -R a+w target
 
 echo "--- Pull latest Release Manager CLI"
-docker pull docker.elastic.co/infra/release-manager:latest
+docker_with_retry pull docker.elastic.co/infra/release-manager:latest
 
 echo "--- Publish artifacts"
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] || [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then

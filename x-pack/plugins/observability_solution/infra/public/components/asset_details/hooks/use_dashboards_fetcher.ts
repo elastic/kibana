@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import type { SearchDashboardsResponse } from '@kbn/dashboard-plugin/public/services/dashboard_content_management/lib/find_dashboards';
+import type { SearchDashboardsResponse } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';

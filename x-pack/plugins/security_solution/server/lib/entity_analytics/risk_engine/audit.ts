@@ -16,4 +16,5 @@ export enum RiskEngineAuditActions {
   RISK_ENGINE_CONFIGURATION_GET = 'risk_engine_configuration_get',
   RISK_ENGINE_DISABLE_LEGACY_ENGINE = 'risk_engine_disable_legacy_engine',
   RISK_ENGINE_REMOVE_TASK = 'risk_engine_remove_task',
+  RISK_ENGINE_SCHEDULE_NOW = 'risk_engine_schedule_now',
 }

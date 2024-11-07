@@ -144,6 +144,7 @@ export const createEventSignal = async ({
       index: inputIndex,
       exceptionFilter,
       fields: inputIndexFields,
+      loadFields: true,
     });
 
     ruleExecutionLogger.debug(`${ids?.length} matched signals found`);

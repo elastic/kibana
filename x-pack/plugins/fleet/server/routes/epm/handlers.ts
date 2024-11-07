@@ -9,7 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 import type { HttpResponseOptions } from '@kbn/core/server';
 
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common';
 
@@ -98,12 +98,11 @@ export const getCategoriesHandler: FleetRequestHandler<
   TypeOf<typeof GetCategoriesRequestSchema.query>
 > = async (context, request, response) => {
   try {
-    const res = await getCategories({
+    const items = await getCategories({
       ...request.query,
     });
     const body: GetCategoriesResponse = {
-      items: res,
-      response: res,
+      items,
     };
     return response.ok({ body, headers: { ...CACHE_CONTROL_10_MINUTES_HEADER } });
   } catch (error) {
@@ -124,7 +123,6 @@ export const getListHandler: FleetRequestHandler<
     const flattenedRes = res.map((pkg) => soToInstallationInfo(pkg)) as PackageList;
     const body: GetPackagesResponse = {
       items: flattenedRes,
-      response: res,
     };
     return response.ok({
       body,
@@ -142,9 +140,12 @@ export const getInstalledListHandler: FleetRequestHandler<
   TypeOf<typeof GetInstalledPackagesRequestSchema.query>
 > = async (context, request, response) => {
   try {
-    const savedObjectsClient = (await context.fleet).internalSoClient;
+    const [fleetContext, coreContext] = await Promise.all([context.fleet, context.core]);
+    const savedObjectsClient = fleetContext.internalSoClient;
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
     const res = await getInstalledPackages({
       savedObjectsClient,
+      esClient,
       ...request.query,
     });
 
@@ -196,7 +197,6 @@ export const getLimitedListHandler: FleetRequestHandler<
     });
     const body: GetLimitedPackagesResponse = {
       items: res,
-      response: res,
     };
     return response.ok({
       body,
@@ -230,7 +230,6 @@ export const getInfoHandler: FleetRequestHandler<
       prerelease,
     });
     const flattenedRes = soToInstallationInfo(res) as PackageInfo;
-
     let metadata: any;
     if (request.query.withMetadata) {
       const allSpaceSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
@@ -331,8 +330,9 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const spaceId = fleetContext.spaceId;
+  const installSource = 'registry';
   const res = await installPackage({
-    installSource: 'registry',
+    installSource,
     savedObjectsClient,
     pkgkey: pkgVersion ? `${pkgName}-${pkgVersion}` : pkgName,
     esClient,
@@ -349,7 +349,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     const body: InstallPackageResponse = {
       items: res.assets || [],
       _meta: {
-        install_source: res.installSource,
+        install_source: res.installSource ?? installSource,
       },
     };
     return response.ok({ body });
@@ -372,10 +372,10 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   const spaceId = fleetContext.spaceId;
   const { integrationName, force, datasets } = request.body;
-
+  const installSource = 'custom';
   try {
     const res = await installPackage({
-      installSource: 'custom',
+      installSource,
       savedObjectsClient,
       pkgName: integrationName,
       datasets,
@@ -390,7 +390,7 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
       const body: InstallPackageResponse = {
         items: res.assets || [],
         _meta: {
-          install_source: res.installSource,
+          install_source: res.installSource ?? installSource,
         },
       };
       return response.ok({ body });
@@ -457,7 +457,6 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
     items: payload,
-    response: payload,
   };
   return response.ok({ body });
 };
@@ -476,9 +475,9 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const spaceId = fleetContext.spaceId;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
-
+  const installSource = 'upload';
   const res = await installPackage({
-    installSource: 'upload',
+    installSource,
     savedObjectsClient,
     esClient,
     archiveBuffer,
@@ -491,9 +490,8 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   if (!res.error) {
     const body: InstallPackageResponse = {
       items: res.assets || [],
-      response: res.assets || [],
       _meta: {
-        install_source: res.installSource,
+        install_source: res.installSource ?? installSource,
       },
     };
     return response.ok({ body });
@@ -516,8 +514,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
 
 export const deletePackageHandler: FleetRequestHandler<
   TypeOf<typeof DeletePackageRequestSchema.params>,
-  TypeOf<typeof DeletePackageRequestSchema.query>,
-  TypeOf<typeof DeletePackageRequestSchema.body>
+  TypeOf<typeof DeletePackageRequestSchema.query>
 > = async (context, request, response) => {
   try {
     const { pkgName, pkgVersion } = request.params;
@@ -597,16 +594,17 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
       pkgVersion,
     });
 
-    const resp = await handleTransformReauthorizeAndStart({
-      esClient,
-      savedObjectsClient,
-      logger,
-      pkgName,
-      pkgVersion,
-      transforms,
-      secondaryAuth,
-      username,
-    });
+    const resp: Array<{ transformId: string; success: boolean; error: null | any }> =
+      await handleTransformReauthorizeAndStart({
+        esClient,
+        savedObjectsClient,
+        logger,
+        pkgName,
+        pkgVersion,
+        transforms,
+        secondaryAuth,
+        username,
+      });
 
     return response.ok({ body: resp });
   } catch (error) {
@@ -672,8 +670,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
     };
 
     return {
-      // When savedObject gets removed, replace `pkg` with `...omit(pkg, 'savedObject')`
-      ...pkg,
+      ...omit(pkg, 'savedObject'),
       installationInfo,
     };
   }

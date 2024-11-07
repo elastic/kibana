@@ -8,10 +8,9 @@ import semverValid from 'semver/functions/valid';
 import semverCompare from 'semver/functions/compare';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../benchmarks/benchmarks';
 import { getBenchmarkFromPackagePolicy } from '../../../../common/utils/helpers';
-
-import type { CspBenchmarkRule } from '../../../../common/types/latest';
 
 export const getSortedCspBenchmarkRulesTemplates = (
   cspBenchmarkRules: CspBenchmarkRule[],

@@ -60,8 +60,13 @@ import {
   FleetUnauthorizedError,
   PackageNotFoundError,
   FleetTooManyRequestsError,
+  PackageInvalidDeploymentMode,
 } from '../../../errors';
-import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
+import {
+  PACKAGES_SAVED_OBJECT_TYPE,
+  MAX_TIME_COMPLETE_INSTALL,
+  MAX_REINSTALL_RETRIES,
+} from '../../../constants';
 import { dataStreamService, licenseService } from '../..';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
@@ -71,6 +76,7 @@ import {
   deleteVerificationResult,
   unpackBufferToAssetsMap,
 } from '../archive';
+import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
@@ -78,13 +84,13 @@ import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
 import { getFilteredInstallPackages } from '../filtered_packages';
 
+import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
+
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
 
 import { formatVerificationResultForSO } from './package_verification';
 import { getInstallation, getInstallationObject } from './get';
-import { removeInstallation } from './remove';
 import { getInstalledPackageWithAssets, getPackageSavedObjects } from './get';
-import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
@@ -97,9 +103,16 @@ import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
+import { removeInstallation } from './remove';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
+
+const PACKAGES_TO_INSTALL_WITH_STREAMING = [
+  // The security_detection_engine package contains a large number of assets and
+  // is not suitable for regular installation as it might cause OOM errors.
+  'security_detection_engine',
+];
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -274,15 +287,12 @@ export async function handleInstallPackageFailure({
     createdAt: new Date().toISOString(),
     latestAttempts: installedPkg?.attributes.latest_install_failed_attempts,
   });
-
-  // if there is an unknown server error, uninstall any package assets or reinstall the previous version if update
+  // if there is an unknown server error, check the installType and do the following actions
   try {
     const installType = getInstallType({ pkgVersion, installedPkg });
-    if (installType === 'install') {
-      logger.error(`uninstalling ${pkgkey} after error installing: [${error.toString()}]`);
-      await removeInstallation({ savedObjectsClient, pkgName, pkgVersion, esClient });
-      return;
-    }
+    const attemptNumber = installedPkg?.attributes?.latest_install_failed_attempts?.length
+      ? installedPkg.attributes.latest_install_failed_attempts.length + 1
+      : 1;
 
     await updateInstallStatusToFailed({
       logger,
@@ -291,20 +301,43 @@ export async function handleInstallPackageFailure({
       status: 'install_failed',
       latestInstallFailedAttempts,
     });
-
-    if (installType === 'reinstall') {
-      logger.error(`Failed to reinstall ${pkgkey}: [${error.toString()}]`, { error });
+    // in case of install, uninstall any package assets
+    if (installType === 'install') {
+      logger.error(
+        `Uninstalling ${pkgkey} after error installing: [${error.toString()}] with install type: ${installType}`
+      );
+      await removeInstallation({ savedObjectsClient, pkgName, pkgVersion, esClient });
+      return;
     }
 
+    // in case of reinstall, restart install where it left off
+    // retry MAX_REINSTALL_RETRIES times before exiting, in case the error persists
+    if (installType === 'reinstall' && attemptNumber <= MAX_REINSTALL_RETRIES) {
+      logger.error(`Error installing ${pkgkey}: [${error.toString()}]`);
+      logger.debug(
+        `Retrying install of ${pkgkey} with install type: ${installType} - Attempt ${attemptNumber} `
+      );
+      await installPackage({
+        installSource: 'registry',
+        savedObjectsClient,
+        pkgkey,
+        esClient,
+        spaceId,
+        authorizationHeader,
+        retryFromLastState: true,
+      });
+      return;
+    }
+    // In case of update, reinstall the previous version
     if (installType === 'update') {
       if (!installedPkg) {
         logger.error(
-          `failed to rollback package after installation error ${error} because saved object was undefined`
+          `Failed to rollback package with install type: ${installType} after installation error ${error} because saved object was undefined`
         );
         return;
       }
       const prevVersion = `${pkgName}-${installedPkg.attributes.version}`;
-      logger.error(`rolling back to ${prevVersion} after error installing ${pkgkey}`);
+      logger.error(`Rolling back to ${prevVersion} after error installing ${pkgkey}`);
       await installPackage({
         installSource: 'registry',
         savedObjectsClient,
@@ -331,7 +364,7 @@ export async function handleInstallPackageFailure({
           })
         : [],
     });
-    logger.error(`failed to uninstall or rollback package after installation error ${e}`);
+    logger.error(`Failed to uninstall or rollback package after installation error ${e}`);
   }
 }
 
@@ -354,6 +387,7 @@ interface InstallRegistryPackageParams {
   authorizationHeader?: HTTPAuthorizationHeader | null;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
+  retryFromLastState?: boolean;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -416,11 +450,13 @@ async function installPackageFromRegistry({
   prerelease = false,
   ignoreMappingUpdateErrors = false,
   skipDataStreamRollover = false,
+  retryFromLastState = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion: version } = Registry.splitPkgKey(pkgkey);
   let pkgVersion = version ?? '';
+  const useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
 
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
@@ -450,11 +486,12 @@ async function installPackageFromRegistry({
     }
 
     // get latest package version and requested version in parallel for performance
-    const [latestPackage, { paths, packageInfo, assetsMap, verificationResult }] =
+    const [latestPackage, { paths, packageInfo, assetsMap, archiveIterator, verificationResult }] =
       await Promise.all([
         latestPkg ? Promise.resolve(latestPkg) : queryLatest(),
         Registry.getPackage(pkgName, pkgVersion, {
           ignoreUnverified: force && !neverIgnoreVerificationError,
+          useStreaming,
         }),
       ]);
 
@@ -462,6 +499,7 @@ async function installPackageFromRegistry({
       packageInfo,
       assetsMap,
       paths,
+      archiveIterator,
     };
 
     // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
@@ -482,44 +520,40 @@ async function installPackageFromRegistry({
         }`
       );
     }
-    const { enablePackagesStateMachine } = appContextService.getExperimentalFeatures();
-    if (enablePackagesStateMachine) {
-      return await installPackageWitStateMachine({
-        pkgName,
-        pkgVersion,
-        installSource,
-        installedPkg,
-        installType,
-        savedObjectsClient,
-        esClient,
-        spaceId,
-        force,
-        packageInstallContext,
-        paths,
-        verificationResult,
-        authorizationHeader,
-        ignoreMappingUpdateErrors,
-        skipDataStreamRollover,
-      });
-    } else {
-      return await installPackageCommon({
-        pkgName,
-        pkgVersion,
-        installSource,
-        installedPkg,
-        installType,
-        savedObjectsClient,
-        esClient,
-        spaceId,
-        force,
-        packageInstallContext,
-        paths,
-        verificationResult,
-        authorizationHeader,
-        ignoreMappingUpdateErrors,
-        skipDataStreamRollover,
-      });
+
+    // only allow install of agentless packages if agentless is enabled, or if using force flag
+    const agentlessEnabled = isAgentlessEnabled();
+    const agentlessOnlyIntegration = isOnlyAgentlessIntegration(packageInfo);
+    if (!agentlessEnabled && agentlessOnlyIntegration) {
+      if (!force) {
+        throw new PackageInvalidDeploymentMode(
+          `${pkgkey} contains agentless policy templates, agentless is not available on this deployment`
+        );
+      }
+      logger.debug(
+        `${pkgkey} contains agentless policy templates, agentless is not available on this deployment but installing anyway due to force flag`
+      );
     }
+
+    return await installPackageWithStateMachine({
+      pkgName,
+      pkgVersion,
+      installSource,
+      installedPkg,
+      installType,
+      savedObjectsClient,
+      esClient,
+      spaceId,
+      force,
+      packageInstallContext,
+      paths,
+      verificationResult,
+      authorizationHeader,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
+      retryFromLastState,
+      useStreaming,
+    });
   } catch (e) {
     sendEvent({
       ...telemetryEvent,
@@ -539,7 +573,7 @@ function getElasticSubscription(packageInfo: ArchivePackage) {
   return subscription || packageInfo.license || 'basic';
 }
 
-async function installPackageCommon(options: {
+async function installPackageWithStateMachine(options: {
   pkgName: string;
   pkgVersion: string;
   installSource: InstallSource;
@@ -556,6 +590,8 @@ async function installPackageCommon(options: {
   authorizationHeader?: HTTPAuthorizationHeader | null;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
+  retryFromLastState?: boolean;
+  useStreaming?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -574,171 +610,13 @@ async function installPackageCommon(options: {
     ignoreMappingUpdateErrors,
     skipDataStreamRollover,
     packageInstallContext,
-  } = options;
-  let { telemetryEvent } = options;
-  const logger = appContextService.getLogger();
-  logger.info(`Install - Starting installation of ${pkgName}@${pkgVersion} from ${installSource} `);
-
-  // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
-  await Promise.resolve();
-  const span = apm.startSpan(
-    `Install package from ${installSource} ${pkgName}@${pkgVersion}`,
-    'package'
-  );
-
-  if (!telemetryEvent) {
-    telemetryEvent = getTelemetryEvent(pkgName, pkgVersion);
-    telemetryEvent.installType = installType;
-    telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
-  }
-
-  try {
-    span?.addLabels({
-      packageName: pkgName,
-      packageVersion: pkgVersion,
-      installType,
-    });
-
-    const filteredPackages = getFilteredInstallPackages();
-    if (filteredPackages.includes(pkgName)) {
-      throw new FleetUnauthorizedError(`${pkgName} installation is not authorized`);
-    }
-
-    // if the requested version is the same as installed version, check if we allow it based on
-    // current installed package status and force flag, if we don't allow it,
-    // just return the asset references from the existing installation
-    if (
-      installedPkg?.attributes.version === pkgVersion &&
-      installedPkg?.attributes.install_status === 'installed'
-    ) {
-      if (!force) {
-        logger.debug(`${pkgName}-${pkgVersion} is already installed, skipping installation`);
-        return {
-          assets: [
-            ...installedPkg.attributes.installed_es,
-            ...installedPkg.attributes.installed_kibana,
-          ],
-          status: 'already_installed',
-          installType,
-          installSource,
-        };
-      }
-    }
-    const elasticSubscription = getElasticSubscription(packageInfo);
-    if (!licenseService.hasAtLeast(elasticSubscription)) {
-      logger.error(`Installation requires ${elasticSubscription} license`);
-      const err = new FleetError(`Installation requires ${elasticSubscription} license`);
-      sendEvent({
-        ...telemetryEvent,
-        errorMessage: err.message,
-      });
-      return { error: err, installType, installSource };
-    }
-
-    // try installing the package, if there was an error, call error handler and rethrow
-    return await _installPackage({
-      savedObjectsClient,
-      esClient,
-      logger,
-      installedPkg,
-      packageInstallContext,
-      installType,
-      spaceId,
-      verificationResult,
-      installSource,
-      authorizationHeader,
-      force,
-      ignoreMappingUpdateErrors,
-      skipDataStreamRollover,
-    })
-      .then(async (assets) => {
-        logger.debug(`Removing old assets from previous versions of ${pkgName}`);
-        await removeOldAssets({
-          soClient: savedObjectsClient,
-          pkgName: packageInfo.name,
-          currentVersion: packageInfo.version,
-        });
-        sendEvent({
-          ...telemetryEvent!,
-          status: 'success',
-        });
-        return { assets, status: 'installed' as InstallResultStatus, installType, installSource };
-      })
-      .catch(async (err: Error) => {
-        logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`, {
-          error: { stack_trace: err.stack },
-        });
-        await handleInstallPackageFailure({
-          savedObjectsClient,
-          error: err,
-          pkgName,
-          pkgVersion,
-          installedPkg,
-          spaceId,
-          esClient,
-          authorizationHeader,
-        });
-        sendEvent({
-          ...telemetryEvent!,
-          errorMessage: err.message,
-        });
-        return { error: err, installType, installSource };
-      });
-  } catch (e) {
-    sendEvent({
-      ...telemetryEvent,
-      errorMessage: e.message,
-    });
-    return {
-      error: e,
-      installType,
-      installSource,
-    };
-  } finally {
-    span?.end();
-  }
-}
-
-async function installPackageWitStateMachine(options: {
-  pkgName: string;
-  pkgVersion: string;
-  installSource: InstallSource;
-  installedPkg?: SavedObject<Installation>;
-  installType: InstallType;
-  savedObjectsClient: SavedObjectsClientContract;
-  esClient: ElasticsearchClient;
-  spaceId: string;
-  force?: boolean;
-  packageInstallContext: PackageInstallContext;
-  paths: string[];
-  verificationResult?: PackageVerificationResult;
-  telemetryEvent?: PackageUpdateEvent;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
-  ignoreMappingUpdateErrors?: boolean;
-  skipDataStreamRollover?: boolean;
-}): Promise<InstallResult> {
-  const packageInfo = options.packageInstallContext.packageInfo;
-
-  const {
-    pkgName,
-    pkgVersion,
-    installSource,
-    installedPkg,
-    installType,
-    savedObjectsClient,
-    force,
-    esClient,
-    spaceId,
-    verificationResult,
-    authorizationHeader,
-    ignoreMappingUpdateErrors,
-    skipDataStreamRollover,
-    packageInstallContext,
+    retryFromLastState,
+    useStreaming,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
   logger.info(
-    `Install with enablePackagesStateMachine - Starting installation of ${pkgName}@${pkgVersion} from ${installSource} `
+    `Install with state machine - Starting installation of ${pkgName}@${pkgVersion} from ${installSource} `
   );
 
   // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
@@ -830,6 +708,8 @@ async function installPackageWitStateMachine(options: {
       force,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
+      retryFromLastState,
+      useStreaming,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
@@ -919,6 +799,7 @@ async function installPackageByUpload({
     }
     const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
     const pkgName = packageInfo.name;
+    const useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
 
     // Allow for overriding the version in the manifest for cases where we install
     // stack-aligned bundled packages to support special cases around the
@@ -941,22 +822,22 @@ async function installPackageByUpload({
       packageInfo,
     });
 
-    const { assetsMap, paths } = await unpackBufferToAssetsMap({
-      name: packageInfo.name,
-      version: pkgVersion,
+    const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
       archiveBuffer,
       contentType,
+      useStreaming,
     });
 
     const packageInstallContext: PackageInstallContext = {
       packageInfo: { ...packageInfo, version: pkgVersion },
       assetsMap,
       paths,
+      archiveIterator,
     };
     // update the timestamp of latest installation
     setLastUploadInstallCache();
 
-    return await installPackageCommon({
+    return await installPackageWithStateMachine({
       packageInstallContext,
       pkgName,
       pkgVersion,
@@ -971,6 +852,7 @@ async function installPackageByUpload({
       authorizationHeader,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
+      useStreaming,
     });
   } catch (e) {
     return {
@@ -984,6 +866,7 @@ async function installPackageByUpload({
 export type InstallPackageParams = {
   spaceId: string;
   neverIgnoreVerificationError?: boolean;
+  retryFromLastState?: boolean;
 } & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
@@ -991,6 +874,9 @@ export type InstallPackageParams = {
   | ({ installSource: Extract<InstallSource, 'custom'> } & InstallCustomPackageParams)
 );
 
+/**
+ * Entrypoint function for installing packages; this function gets also called by the POST epm/packages handler
+ */
 export async function installPackage(args: InstallPackageParams): Promise<InstallResult> {
   if (!('installSource' in args)) {
     throw new FleetError('installSource is required');
@@ -1011,6 +897,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       prerelease,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
+      retryFromLastState,
     } = args;
 
     const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
@@ -1052,6 +939,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       authorizationHeader,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
+      retryFromLastState,
     });
     return response;
   } else if (args.installSource === 'upload') {
@@ -1132,15 +1020,16 @@ export async function installCustomPackage(
     acc.set(asset.path, asset.content);
     return acc;
   }, new Map<string, Buffer | undefined>());
-  const paths = [...assetsMap.keys()];
+  const paths = assets.map((asset) => asset.path);
+  const archiveIterator = createArchiveIteratorFromMap(assetsMap);
 
   const packageInstallContext: PackageInstallContext = {
     assetsMap,
     paths,
     packageInfo,
+    archiveIterator,
   };
-
-  return await installPackageCommon({
+  return await installPackageWithStateMachine({
     packageInstallContext,
     pkgName,
     pkgVersion: INITIAL_VERSION,
@@ -1470,16 +1359,20 @@ export async function installAssetsForInputPackagePolicy(opts: {
       ignoreUnverified: force,
     });
 
+    const archiveIterator = createArchiveIteratorFromMap(pkg.assetsMap);
     packageInstallContext = {
       assetsMap: pkg.assetsMap,
       packageInfo: pkg.packageInfo,
       paths: pkg.paths,
+      archiveIterator,
     };
   } else {
+    const archiveIterator = createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap);
     packageInstallContext = {
       assetsMap: installedPkgWithAssets.assetsMap,
       packageInfo: installedPkgWithAssets.packageInfo,
       paths: installedPkgWithAssets.paths,
+      archiveIterator,
     };
   }
 

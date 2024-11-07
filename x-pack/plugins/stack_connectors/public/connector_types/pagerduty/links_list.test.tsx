@@ -33,7 +33,7 @@ describe('LinksList', () => {
   it('clicking add button calls editAction with correct params', async () => {
     render(<LinksList {...options} />);
 
-    userEvent.click(await screen.findByTestId('pagerDutyAddLinkButton'));
+    await userEvent.click(await screen.findByTestId('pagerDutyAddLinkButton'));
 
     expect(editAction).toHaveBeenCalledWith('links', [{ href: '', text: '' }], 0);
   });
@@ -52,7 +52,7 @@ describe('LinksList', () => {
 
     expect(await screen.findAllByTestId('linksListItemRow', { exact: false })).toHaveLength(3);
 
-    userEvent.click((await screen.findAllByTestId('pagerDutyRemoveLinkButton'))[1]);
+    await userEvent.click((await screen.findAllByTestId('pagerDutyRemoveLinkButton'))[1]);
 
     expect(editAction).toHaveBeenCalledWith(
       'links',
@@ -69,7 +69,8 @@ describe('LinksList', () => {
 
     expect(await screen.findByTestId('linksListItemRow', { exact: false })).toBeInTheDocument();
 
-    userEvent.paste(await screen.findByTestId('linksHrefInput'), 'newHref');
+    await userEvent.click(await screen.findByTestId('linksHrefInput'));
+    await userEvent.paste('newHref');
 
     expect(editAction).toHaveBeenCalledWith('links', [{ href: 'newHref', text: 'foobar' }], 0);
   });
@@ -79,7 +80,8 @@ describe('LinksList', () => {
 
     expect(await screen.findByTestId('linksListItemRow', { exact: false })).toBeInTheDocument();
 
-    userEvent.paste(await screen.findByTestId('linksTextInput'), 'newText');
+    await userEvent.click(await screen.findByTestId('linksTextInput'));
+    await userEvent.paste('newText');
 
     expect(editAction).toHaveBeenCalledWith('links', [{ href: 'foobar', text: 'newText' }], 0);
   });

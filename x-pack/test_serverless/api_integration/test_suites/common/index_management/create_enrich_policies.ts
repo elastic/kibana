@@ -6,20 +6,17 @@
  */
 
 import expect from 'expect';
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 const INTERNAL_API_BASE_PATH = '/internal/index_management';
 
 export default function ({ getService }: FtrProviderContext) {
+  const svlCommonApi = getService('svlCommonApi');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
   const es = getService('es');
   const log = getService('log');
-
-  const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let roleAuthc: RoleCredentials;
-  let internalReqHeader: InternalRequestHeader;
 
   describe('Create enrich policy', function () {
     const INDEX_A_NAME = `index-${Math.random()}`;
@@ -27,8 +24,14 @@ export default function ({ getService }: FtrProviderContext) {
     const POLICY_NAME = `policy-${Math.random()}`;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'admin',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        }
+      );
+
       try {
         await es.indices.create({
           index: INDEX_A_NAME,
@@ -74,14 +77,11 @@ export default function ({ getService }: FtrProviderContext) {
         log.debug('[Cleanup error] Error deleting test index');
         throw err;
       }
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('Allows to create an enrich policy', async () => {
-      const { body } = await supertestWithoutAuth
+      const { body } = await supertestAdminWithCookieCredentials
         .post(`${INTERNAL_API_BASE_PATH}/enrich_policies`)
-        .set(internalReqHeader)
-        .set(roleAuthc.apiKeyHeader)
         .send({
           policy: {
             name: POLICY_NAME,
@@ -97,10 +97,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Can retrieve fields from indices', async () => {
-      const { body } = await supertestWithoutAuth
+      const { body } = await supertestAdminWithCookieCredentials
         .post(`${INTERNAL_API_BASE_PATH}/enrich_policies/get_fields_from_indices`)
-        .set(internalReqHeader)
-        .set(roleAuthc.apiKeyHeader)
         .send({ indices: [INDEX_A_NAME, INDEX_B_NAME] })
         .expect(200);
 
@@ -126,10 +124,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Can retrieve matching indices', async () => {
-      const { body, status } = await supertestWithoutAuth
+      const { body, status } = await supertestAdminWithCookieCredentials
         .post(`${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_indices`)
-        .set(internalReqHeader)
-        .set(roleAuthc.apiKeyHeader)
         .send({ pattern: 'index-' });
       svlCommonApi.assertResponseStatusCode(200, status, body);
 

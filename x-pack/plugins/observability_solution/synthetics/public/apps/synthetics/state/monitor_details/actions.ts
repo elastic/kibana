@@ -7,11 +7,7 @@
 
 import { createAction } from '@reduxjs/toolkit';
 import { MostRecentPingsRequest } from './api';
-import {
-  Ping,
-  PingsResponse,
-  EncryptedSyntheticsSavedMonitor,
-} from '../../../../../common/runtime_types';
+import { Ping, PingsResponse, SyntheticsMonitorWithId } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
 export const setMonitorDetailsLocationAction = createAction<string>(
@@ -19,8 +15,8 @@ export const setMonitorDetailsLocationAction = createAction<string>(
 );
 
 export const getMonitorAction = createAsyncAction<
-  { monitorId: string },
-  EncryptedSyntheticsSavedMonitor
+  { monitorId: string; spaceId?: string },
+  SyntheticsMonitorWithId
 >('[MONITOR DETAILS] GET MONITOR');
 
 export const getMonitorLastRunAction = createAsyncAction<

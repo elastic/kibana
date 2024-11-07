@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiButtonGroup,
   EuiText,
@@ -33,6 +32,7 @@ import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
+import type { SetRuleQuery } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
@@ -65,7 +65,7 @@ import {
   useFormData,
   UseMultiFields,
 } from '../../../../shared_imports';
-import type { FormHook } from '../../../../shared_imports';
+import type { FormHook, FieldHook } from '../../../../shared_imports';
 import { schema } from './schema';
 import { getTermsAggregationFields } from './utils';
 import { useExperimentalFeatureFieldsTransform } from './use_experimental_feature_fields_transform';
@@ -81,7 +81,7 @@ import {
   isSuppressionRuleInGA,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
-import { DataViewSelector } from '../data_view_selector';
+import { DataViewSelectorField } from '../data_view_selector_field';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
@@ -161,6 +161,14 @@ const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
   ${({ theme }) => `padding-left: ${theme.eui.euiSizeXL};`}
 `;
 
+/* eslint-disable react/no-unused-prop-types */
+interface GroupByChildrenProps {
+  groupByRadioSelection: FieldHook<string>;
+  groupByDurationUnit: FieldHook<string>;
+  groupByDurationValue: FieldHook<number | undefined>;
+}
+/* eslint-enable react/no-unused-prop-types */
+
 // eslint-disable-next-line complexity
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   dataSourceType,
@@ -175,7 +183,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   isLoading,
   isQueryBarValid,
   isUpdateView = false,
-  kibanaDataViews,
   optionsSelected,
   queryBarSavedId,
   queryBarTitle,
@@ -225,7 +232,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setFieldValue,
   });
 
-  const handleSetRuleFromTimeline = useCallback(
+  const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
     ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
       const setQuery = () => {
         setFieldValue('index', timelineIndex);
@@ -426,7 +433,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, []);
 
   const ThresholdInputChildren = useCallback(
-    ({ thresholdField, thresholdValue, thresholdCardinalityField, thresholdCardinalityValue }) => (
+    ({
+      thresholdField,
+      thresholdValue,
+      thresholdCardinalityField,
+      thresholdCardinalityValue,
+    }: Record<string, FieldHook>) => (
       <ThresholdInput
         browserFields={aggFields}
         thresholdField={thresholdField}
@@ -439,7 +451,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   );
 
   const ThreatMatchInputChildren = useCallback(
-    ({ threatMapping }) => (
+    ({ threatMapping }: Record<string, FieldHook>) => (
       <ThreatMatchInput
         handleResetThreatIndices={handleResetThreatIndices}
         indexPatterns={indexPattern}
@@ -532,7 +544,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const isMissingFieldsDisabled = areSuppressionFieldsDisabled || !areSuppressionFieldsSelected;
 
   const GroupByChildren = useCallback(
-    ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
+    ({
+      groupByRadioSelection,
+      groupByDurationUnit,
+      groupByDurationValue,
+    }: GroupByChildrenProps) => (
       <EuiRadioGroup
         disabled={isGroupByChildrenDisabled}
         idSelected={groupByRadioSelection.value}
@@ -587,7 +603,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   );
 
   const AlertSuppressionMissingFields = useCallback(
-    ({ suppressionMissingFields }) => (
+    ({ suppressionMissingFields }: Record<string, FieldHook<string | undefined>>) => (
       <EuiRadioGroup
         disabled={isMissingFieldsDisabled}
         idSelected={suppressionMissingFields.value}
@@ -635,21 +651,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [dataSourceType]
   );
 
-  const DataViewSelectorMemo = useMemo(() => {
-    return kibanaDataViews == null || Object.keys(kibanaDataViews).length === 0 ? (
-      <EuiLoadingSpinner size="l" />
-    ) : (
-      <UseField
-        key="DataViewSelector"
-        path="dataViewId"
-        component={DataViewSelector}
-        componentProps={{
-          kibanaDataViews,
-        }}
-      />
-    );
-  }, [kibanaDataViews]);
-
   const DataSource = useMemo(() => {
     return (
       <RuleTypeEuiFormRow label={i18n.SOURCE} $isVisible={true} fullWidth>
@@ -696,7 +697,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
           <EuiFlexItem>
             <StyledVisibleContainer isVisible={dataSourceType === DataSourceType.DataView}>
-              {DataViewSelectorMemo}
+              <UseField
+                key="DataViewSelector"
+                path="dataViewId"
+                component={DataViewSelectorField}
+              />
             </StyledVisibleContainer>
             <StyledVisibleContainer isVisible={dataSourceType === DataSourceType.IndexPatterns}>
               <CommonUseField
@@ -730,7 +735,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     dataSourceType,
     onChangeDataSource,
     dataViewIndexPatternToggleButtonOptions,
-    DataViewSelectorMemo,
     indexModified,
     handleResetIndices,
   ]);
@@ -935,8 +939,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
 
-          {!isMlRule(ruleType) && !isQueryBarValid && (
-            <AiAssistant getFields={form.getFields} language={queryBar?.query?.language} />
+          {!isMlRule(ruleType) && !isQueryBarValid && queryBar?.query?.query && (
+            <AiAssistant
+              getFields={form.getFields}
+              setFieldValue={form.setFieldValue}
+              language={queryBar?.query?.language}
+            />
           )}
 
           {isQueryRule(ruleType) && (

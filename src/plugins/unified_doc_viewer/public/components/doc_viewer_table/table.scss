@@ -62,17 +62,21 @@
   color: $euiColorFullShade;
   vertical-align: top;
 
+  &--highlighted {
+    font-weight: $euiFontWeightBold;
+  }
+
   .euiDataGridRowCell__popover & {
     font-size: $euiFontSizeS;
   }
 }
 
 .kbnDocViewer__fieldsGrid {
-  &.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeaderCell {
+  &.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader {
     border-top: none;
   }
 
-  &.euiDataGrid--headerUnderline .euiDataGridHeaderCell {
+  &.euiDataGrid--headerUnderline .euiDataGridHeader {
     border-bottom: $euiBorderThin;
   }
 
@@ -86,7 +90,7 @@
   }
 
   & [data-gridcell-column-id='pin_field'] .euiDataGridRowCell__content {
-    padding: $euiSizeXS / 2 0 0 $euiSizeXS;
+    padding: calc($euiSizeXS / 2) 0 0 $euiSizeXS;
   }
 
   .kbnDocViewer__fieldsGrid__pinAction {

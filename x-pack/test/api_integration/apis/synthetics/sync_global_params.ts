@@ -83,6 +83,15 @@ export default function ({ getService }: FtrProviderContext) {
           isInvalid: false,
         },
         {
+          id: 'dev2',
+          label: 'Dev Service 2',
+          geo: { lat: 0, lon: 0 },
+          url: 'mockDevUrl',
+          isServiceManaged: true,
+          status: LocationStatus.EXPERIMENTAL,
+          isInvalid: false,
+        },
+        {
           id: testFleetPolicyID,
           isInvalid: false,
           isServiceManaged: false,
@@ -278,8 +287,9 @@ export default function ({ getService }: FtrProviderContext) {
       const deleteResponse = await supertestAPI
         .delete(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
-        .send({ ids })
-        .expect(200);
+        .send({ ids });
+
+      expect(deleteResponse.status).eql(200);
 
       expect(deleteResponse.body).to.have.length(2);
 

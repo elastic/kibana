@@ -7,7 +7,7 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 
-import type { StopTransformsRequestSchema } from '../../../../common/api_schemas/stop_transforms';
+import type { StopTransformsRequestSchema } from '../../api_schemas/stop_transforms';
 
 import type { TransformRequestHandlerContext } from '../../../services/license';
 

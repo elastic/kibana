@@ -21,43 +21,32 @@ import {
   ALERT_DESCRIPTION_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
-import { DocumentDetailsRuleOverviewPanelKey } from '../../shared/constants/panel_keys';
-
-export const RULE_OVERVIEW_BANNER = {
-  title: i18n.translate('xpack.securitySolution.flyout.right.about.description.rulePreviewTitle', {
-    defaultMessage: 'Preview rule details',
-  }),
-  backgroundColor: 'warning',
-  textColor: 'warning',
-};
+import { RULE_PREVIEW_BANNER, RulePreviewPanelKey } from '../../../rule_details/right';
 
 /**
  * Displays the rule description of a signal document.
  */
 export const AlertDescription: FC = () => {
   const { telemetry } = useKibana().services;
-  const { dataFormattedForFieldBrowser, scopeId, eventId, indexName, isPreview } =
-    useDocumentDetailsContext();
+  const { dataFormattedForFieldBrowser, scopeId, isPreview } = useDocumentDetailsContext();
   const { isAlert, ruleDescription, ruleName, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const openRulePreview = useCallback(() => {
     openPreviewPanel({
-      id: DocumentDetailsRuleOverviewPanelKey,
+      id: RulePreviewPanelKey,
       params: {
-        id: eventId,
-        indexName,
-        scopeId,
-        banner: RULE_OVERVIEW_BANNER,
         ruleId,
+        banner: RULE_PREVIEW_BANNER,
+        isPreviewMode: true,
       },
     });
     telemetry.reportDetailsFlyoutOpened({
       location: scopeId,
       panel: 'preview',
     });
-  }, [eventId, openPreviewPanel, indexName, scopeId, ruleId, telemetry]);
+  }, [openPreviewPanel, scopeId, ruleId, telemetry]);
 
   const viewRule = useMemo(
     () => (

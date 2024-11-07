@@ -1,15 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable max-classes-per-file */
 
-import { AsyncProfileService, ContextWithProfileId, ProfileService } from './profile_service';
-import { Profile } from './types';
+import {
+  AsyncProfileProvider,
+  AsyncProfileService,
+  ContextWithProfileId,
+  ProfileProvider,
+  ProfileService,
+} from './profile_service';
+import type { CellRenderersExtensionParams, Profile } from './types';
 
 interface TestParams {
   myParam: string;
@@ -24,7 +31,7 @@ const defaultContext: ContextWithProfileId<TestContext> = {
   myContext: 'test',
 };
 
-class TestProfileService extends ProfileService<Profile, TestParams, TestContext> {
+class TestProfileService extends ProfileService<ProfileProvider<Profile, TestParams, TestContext>> {
   constructor() {
     super(defaultContext);
   }
@@ -32,7 +39,9 @@ class TestProfileService extends ProfileService<Profile, TestParams, TestContext
 
 type TestProfileProvider = Parameters<TestProfileService['registerProvider']>[0];
 
-class TestAsyncProfileService extends AsyncProfileService<Profile, TestParams, TestContext> {
+class TestAsyncProfileService extends AsyncProfileService<
+  AsyncProfileProvider<Profile, TestParams, TestContext>
+> {
   constructor() {
     super(defaultContext);
   }
@@ -42,25 +51,27 @@ type TestAsyncProfileProvider = Parameters<TestAsyncProfileService['registerProv
 
 const provider: TestProfileProvider = {
   profileId: 'test-profile-1',
-  profile: { getCellRenderers: jest.fn() },
+  profile: {
+    getCellRenderers: jest.fn((prev) => (params) => prev(params)),
+  },
   resolve: jest.fn(() => ({ isMatch: false })),
 };
 
 const provider2: TestProfileProvider = {
   profileId: 'test-profile-2',
-  profile: { getCellRenderers: jest.fn() },
+  profile: { getCellRenderers: jest.fn((prev) => (params) => prev(params)) },
   resolve: jest.fn(({ myParam }) => ({ isMatch: true, context: { myContext: myParam } })),
 };
 
 const provider3: TestProfileProvider = {
   profileId: 'test-profile-3',
-  profile: { getCellRenderers: jest.fn() },
+  profile: { getCellRenderers: jest.fn((prev) => (params) => prev(params)) },
   resolve: jest.fn(({ myParam }) => ({ isMatch: true, context: { myContext: myParam } })),
 };
 
 const asyncProvider2: TestAsyncProfileProvider = {
   profileId: 'test-profile-2',
-  profile: { getCellRenderers: jest.fn() },
+  profile: { getCellRenderers: jest.fn((prev) => (params) => prev(params)) },
   resolve: jest.fn(async ({ myParam }) => ({ isMatch: true, context: { myContext: myParam } })),
 };
 
@@ -79,17 +90,30 @@ describe('ProfileService', () => {
   it('should allow registering providers and getting profiles', () => {
     service.registerProvider(provider);
     service.registerProvider(provider2);
-    expect(service.getProfile({ profileId: 'test-profile-1', myContext: 'test' })).toBe(
-      provider.profile
-    );
-    expect(service.getProfile({ profileId: 'test-profile-2', myContext: 'test' })).toBe(
-      provider2.profile
-    );
+    const params = {
+      context: { profileId: 'test-profile-1', myContext: 'test' },
+    };
+    const params2 = {
+      context: { profileId: 'test-profile-2', myContext: 'test' },
+    };
+    const profile = service.getProfile(params);
+    const profile2 = service.getProfile(params2);
+    const baseImpl = jest.fn(() => ({}));
+    profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
+    expect(provider.profile.getCellRenderers).toHaveBeenCalledTimes(1);
+    expect(provider.profile.getCellRenderers).toHaveBeenCalledWith(baseImpl, params);
+    expect(baseImpl).toHaveBeenCalledTimes(1);
+    profile2.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
+    expect(provider2.profile.getCellRenderers).toHaveBeenCalledTimes(1);
+    expect(provider2.profile.getCellRenderers).toHaveBeenCalledWith(baseImpl, params2);
+    expect(baseImpl).toHaveBeenCalledTimes(2);
   });
 
   it('should return empty profile if no provider is found', () => {
     service.registerProvider(provider);
-    expect(service.getProfile({ profileId: 'test-profile-2', myContext: 'test' })).toEqual({});
+    expect(
+      service.getProfile({ context: { profileId: 'test-profile-2', myContext: 'test' } })
+    ).toEqual({});
   });
 
   it('should resolve to first matching context', () => {

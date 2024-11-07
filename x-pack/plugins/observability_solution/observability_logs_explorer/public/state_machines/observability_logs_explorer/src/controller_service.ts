@@ -19,7 +19,7 @@ export const createController =
   (context, event) =>
   (send) => {
     createLogsExplorerController({
-      initialState: context.initialLogsExplorerState,
+      initialState: { ...context.initialLogsExplorerState, allSelection: context.allSelection },
     }).then((controller) => {
       send({
         type: 'CONTROLLER_CREATED',

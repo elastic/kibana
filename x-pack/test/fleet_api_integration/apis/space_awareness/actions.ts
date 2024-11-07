@@ -10,51 +10,33 @@ import { AGENT_POLICY_INDEX, CreateAgentPolicyResponse } from '@kbn/fleet-plugin
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetActionIndices, cleanFleetIndices, createFleetAgent } from './helpers';
-import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
+import {
+  cleanFleetActionIndices,
+  cleanFleetAgentPolicies,
+  cleanFleetIndices,
+  createFleetAgent,
+} from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const spaces = getService('spaces');
+  let TEST_SPACE_1: string;
 
-  describe('actions', async function () {
+  describe('actions', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
     before(async () => {
+      TEST_SPACE_1 = spaces.getDefaultTestSpace();
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.savedObjects.cleanStandardList({
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
-    });
 
-    beforeEach(async () => {
-      await cleanFleetActionIndices(esClient);
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.savedObjects.cleanStandardList({
-        space: TEST_SPACE_1,
-      });
-      await cleanFleetIndices(esClient);
-    });
-
-    setupTestSpaces(providerContext);
-
-    let defaultSpacePolicy1: CreateAgentPolicyResponse;
-    let spaceTest1Policy1: CreateAgentPolicyResponse;
-    let spaceTest1Policy2: CreateAgentPolicyResponse;
-
-    let defaultSpaceAgent1: string;
-    let defaultSpaceAgent2: string;
-    let testSpaceAgent1: string;
-    let testSpaceAgent2: string;
-
-    before(async () => {
       await apiClient.postEnableSpaceAwareness();
 
       const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
@@ -77,7 +59,31 @@ export default function (providerContext: FtrProviderContext) {
       defaultSpaceAgent2 = _defaultSpaceAgent2;
       testSpaceAgent1 = _testSpaceAgent1;
       testSpaceAgent2 = _testSpaceAgent2;
+
+      await spaces.createTestSpace(TEST_SPACE_1);
     });
+
+    beforeEach(async () => {
+      await cleanFleetActionIndices(esClient);
+      await cleanFleetAgentPolicies(esClient);
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList({
+        space: TEST_SPACE_1,
+      });
+      await cleanFleetIndices(esClient);
+    });
+
+    let defaultSpacePolicy1: CreateAgentPolicyResponse;
+    let spaceTest1Policy1: CreateAgentPolicyResponse;
+    let spaceTest1Policy2: CreateAgentPolicyResponse;
+
+    let defaultSpaceAgent1: string;
+    let defaultSpaceAgent2: string;
+    let testSpaceAgent1: string;
+    let testSpaceAgent2: string;
 
     describe('GET /agents/action_status', () => {
       it('should return agent actions in the default space', async () => {
@@ -100,6 +106,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(actionStatusInDefaultSpace.items[0].type).to.eql('UPDATE_TAGS');
         expect(actionStatusInDefaultSpace.items[0].nbAgentsActioned).to.eql(2);
+        expect(actionStatusInDefaultSpace.items[0].nbAgentsActionCreated).to.eql(2);
         expect(actionStatusInDefaultSpace.items[0].status).to.eql('COMPLETE');
 
         const actionStatusInCustomSpace = await apiClient.getActionStatus(TEST_SPACE_1);
@@ -132,6 +139,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(actionStatusInCustomSpace.items[0].type).to.eql('UPDATE_TAGS');
         expect(actionStatusInCustomSpace.items[0].nbAgentsActioned).to.eql(2);
+        expect(actionStatusInCustomSpace.items[0].nbAgentsActionCreated).to.eql(2);
         expect(actionStatusInCustomSpace.items[0].status).to.eql('COMPLETE');
       });
 
@@ -174,6 +182,7 @@ export default function (providerContext: FtrProviderContext) {
           'nbAgentsFailed'
         );
         expect(actionStatusInDefaultSpace.items[0].type).to.eql('POLICY_CHANGE');
+        expect(actionStatusInDefaultSpace.items[0].nbAgentsActionCreated).to.eql(2);
         expect(actionStatusInDefaultSpace.items[0].nbAgentsActioned).to.eql(2);
 
         const actionStatusInCustomSpace = await apiClient.getActionStatus(TEST_SPACE_1);
@@ -209,6 +218,7 @@ export default function (providerContext: FtrProviderContext) {
           'nbAgentsFailed'
         );
         expect(actionStatusInCustomSpace.items[0].type).to.eql('POLICY_CHANGE');
+        expect(actionStatusInCustomSpace.items[0].nbAgentsActionCreated).to.eql(2);
         expect(actionStatusInCustomSpace.items[0].nbAgentsActioned).to.eql(2);
       });
     });
@@ -251,7 +261,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('post /agents/actions/{actionId}/cancel', () => {
+    describe('POST /agents/actions/{actionId}/cancel', () => {
       it('should return 200 and a CANCEL action if the action is in the same space', async () => {
         // Create UPDATE_TAGS action for agents in custom space
         await apiClient.bulkUpdateAgentTags(

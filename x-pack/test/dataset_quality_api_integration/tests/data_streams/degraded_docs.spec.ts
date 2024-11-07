@@ -7,8 +7,7 @@
 
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { DatasetQualityApiError } from '../../common/dataset_quality_api_supertest';
-import { expectToReject } from '../../utils';
+import rison from '@kbn/rison';
 import { DatasetQualityApiClientKey } from '../../common/config';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -24,7 +23,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       endpoint: 'GET /internal/dataset_quality/data_streams/degraded_docs',
       params: {
         query: {
-          type: 'logs',
+          types: rison.encodeArray(['logs']),
           start,
           end,
         },
@@ -33,13 +32,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('Degraded docs', { config: 'basic' }, () => {
-    describe('authorization', () => {
-      it('should return a 403 when the user does not have sufficient privileges', async () => {
-        const err = await expectToReject<DatasetQualityApiError>(() => callApiAs('noAccessUser'));
-        expect(err.res.status).to.be(403);
-      });
-    });
-
     describe('and there are log documents', () => {
       before(async () => {
         await synthtrace.index([
@@ -74,26 +66,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns stats correctly', async () => {
-        const stats = await callApiAs('datasetQualityLogsUser');
-        expect(stats.body.degradedDocs.length).to.be(2);
+        const stats = await callApiAs('datasetQualityMonitorUser');
+        expect(stats.body.degradedDocs.length).to.be(1);
 
         const degradedDocsStats = stats.body.degradedDocs.reduce(
           (acc, curr) => ({
             ...acc,
             [curr.dataset]: {
-              percentage: curr.percentage,
               count: curr.count,
             },
           }),
-          {} as Record<string, { percentage: number; count: number }>
+          {} as Record<string, { count: number }>
         );
 
-        expect(degradedDocsStats['logs-synth.1-default']).to.eql({
-          percentage: 0,
-          count: 0,
-        });
         expect(degradedDocsStats['logs-synth.2-default']).to.eql({
-          percentage: 100,
           count: 1,
         });
       });
@@ -105,7 +91,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('and there are not log documents', () => {
       it('returns stats correctly', async () => {
-        const stats = await callApiAs('datasetQualityLogsUser');
+        const stats = await callApiAs('datasetQualityMonitorUser');
 
         expect(stats.body.degradedDocs.length).to.be(0);
       });
@@ -154,118 +140,46 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns counts and list of datasets correctly', async () => {
-        const stats = await callApiAs('datasetQualityLogsUser');
-        expect(stats.body.degradedDocs.length).to.be(18);
+        const stats = await callApiAs('datasetQualityMonitorUser');
+        expect(stats.body.degradedDocs.length).to.be(9);
 
         const expected = {
           degradedDocs: [
             {
-              dataset: 'logs-apache.access-default',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
-            },
-            {
-              dataset: 'logs-apache.access-space1',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
-            },
-            {
-              dataset: 'logs-apache.access-space2',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
-            },
-            {
               dataset: 'logs-apache.error-default',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
             },
             {
               dataset: 'logs-apache.error-space1',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
             },
             {
               dataset: 'logs-apache.error-space2',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
-            },
-            {
-              dataset: 'logs-mysql.access-default',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
-            },
-            {
-              dataset: 'logs-mysql.access-space1',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
-            },
-            {
-              dataset: 'logs-mysql.access-space2',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
             },
             {
               dataset: 'logs-mysql.error-default',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
             },
             {
               dataset: 'logs-mysql.error-space1',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
             },
             {
               dataset: 'logs-mysql.error-space2',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
-            },
-            {
-              dataset: 'logs-nginx.access-default',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
-            },
-            {
-              dataset: 'logs-nginx.access-space1',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
-            },
-            {
-              dataset: 'logs-nginx.access-space2',
-              count: 0,
-              docsCount: 1,
-              percentage: 0,
             },
             {
               dataset: 'logs-nginx.error-default',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
             },
             {
               dataset: 'logs-nginx.error-space1',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
             },
             {
               dataset: 'logs-nginx.error-space2',
               count: 1,
-              docsCount: 2,
-              percentage: 50,
             },
           ],
         };

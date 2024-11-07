@@ -38,16 +38,14 @@ import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
 
-import { RuleActionsSandbox } from './components/rule_form/rule_actions_sandbox';
-import { RuleDetailsSandbox } from './components/rule_form/rule_details_sandbox';
-
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
-  notification: CoreStart['notifications'];
+  notifications: CoreStart['notifications'];
   application: CoreStart['application'];
   docLinks: CoreStart['docLinks'];
   i18n: CoreStart['i18n'];
   theme: CoreStart['theme'];
+  settings: CoreStart['settings'];
   history: ScopedHistory;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
@@ -62,7 +60,8 @@ const TriggersActionsUiExampleApp = ({
   triggersActionsUi,
   http,
   application,
-  notification,
+  notifications,
+  settings,
   docLinks,
   i18n,
   theme,
@@ -192,7 +191,7 @@ const TriggersActionsUiExampleApp = ({
                   plugins={{
                     http,
                     application,
-                    notification,
+                    notifications,
                     docLinks,
                     i18n,
                     theme,
@@ -200,9 +199,10 @@ const TriggersActionsUiExampleApp = ({
                     data,
                     dataViews,
                     unifiedSearch,
+                    settings,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
+                    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
                   }}
-                  returnUrl={application.getUrlForApp('triggersActionsUiExample')}
                 />
               </Page>
             )}
@@ -216,7 +216,7 @@ const TriggersActionsUiExampleApp = ({
                   plugins={{
                     http,
                     application,
-                    notification,
+                    notifications,
                     docLinks,
                     theme,
                     i18n,
@@ -224,28 +224,11 @@ const TriggersActionsUiExampleApp = ({
                     data,
                     dataViews,
                     unifiedSearch,
+                    settings,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
+                    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
                   }}
-                  returnUrl={application.getUrlForApp('triggersActionsUiExample')}
                 />
-              </Page>
-            )}
-          />
-          <Route
-            exact
-            path="/rule_actions"
-            render={() => (
-              <Page title="Rule Actions">
-                <RuleActionsSandbox />
-              </Page>
-            )}
-          />
-          <Route
-            exact
-            path="/rule_details"
-            render={() => (
-              <Page title="Rule Details">
-                <RuleDetailsSandbox />
               </Page>
             )}
           />
@@ -262,7 +245,7 @@ export const renderApp = (
   deps: TriggersActionsUiExamplePublicStartDeps,
   { appBasePath, element, history }: AppMountParameters
 ) => {
-  const { http, notifications, docLinks, application, i18n, theme } = core;
+  const { http, notifications, docLinks, application, i18n, theme, settings } = core;
   const { triggersActionsUi } = deps;
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
 
@@ -281,11 +264,12 @@ export const renderApp = (
             <TriggersActionsUiExampleApp
               history={history}
               http={http}
-              notification={notifications}
+              notifications={notifications}
               application={application}
               docLinks={docLinks}
               i18n={i18n}
               theme={theme}
+              settings={settings}
               triggersActionsUi={deps.triggersActionsUi}
               data={deps.data}
               charts={deps.charts}

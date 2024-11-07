@@ -5,27 +5,40 @@
  * 2.0.
  */
 
-import {
-  AlertInstanceContext as AlertContext,
-  AlertInstanceState as AlertState,
-} from '@kbn/alerting-plugin/server';
+import rison from '@kbn/rison';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
-import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
-import { createLifecycleRuleExecutorMock } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_rule_executor_mock';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Aggregators, InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { createInventoryMetricThresholdExecutor } from './inventory_metric_threshold_executor';
 import { ConditionResult } from './evaluate_condition';
-import { InfraBackendLibs } from '../../infra_types';
+import { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import { infraPluginMock } from '../../../mocks';
 import { logsSharedPluginMock } from '@kbn/logs-shared-plugin/server/mocks';
 import { createLogSourcesServiceMock } from '@kbn/logs-data-access-plugin/common/services/log_sources_service/log_sources_service.mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import {
+  AssetDetailsLocator,
+  AssetDetailsLocatorParams,
+  InventoryLocator,
+  InventoryLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
 
 jest.mock('./evaluate_condition', () => ({ evaluateCondition: jest.fn() }));
+
+const mockAssetDetailsLocator = {
+  getRedirectUrl: jest
+    .fn()
+    .mockImplementation(
+      ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
+        `/node-mock/${assetType}/${assetId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
+    ),
+} as unknown as jest.Mocked<AssetDetailsLocator>;
+
+const mockInventoryLocator = {
+  getRedirectUrl: jest.fn().mockImplementation(({}: InventoryLocatorParams) => `/inventory-mock`),
+} as unknown as jest.Mocked<InventoryLocator>;
 
 interface AlertTestInstance {
   actionGroup: string;
@@ -130,9 +143,7 @@ const mockLibs = {
     infraPluginMock.createStartContract(),
   ],
   configuration: createMockStaticConfiguration({}),
-  metricsRules: {
-    createLifecycleRuleExecutor: createLifecycleRuleExecutorMock,
-  },
+  metricsRules: {},
   basePath: {
     publicBaseUrl: 'http://localhost:5601',
     prepend: (path: string) => path,
@@ -145,14 +156,10 @@ const mockLibs = {
   logger,
 } as unknown as InfraBackendLibs;
 const alerts = new Map<string, AlertTestInstance>();
-let services: RuleExecutorServicesMock & LifecycleAlertServices<AlertState, AlertContext, string>;
+let services: RuleExecutorServicesMock;
 
 const setup = () => {
-  const alertsServices = alertsMock.createRuleExecutorServices();
-  services = {
-    ...alertsServices,
-    ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
-  };
+  services = alertsMock.createRuleExecutorServices();
 
   services.alertsClient.report.mockImplementation((params: any) => {
     alerts.set(params.id, { actionGroup: params.actionGroup, context: [], payload: [] });
@@ -182,7 +189,12 @@ function clearInstances() {
   alerts.clear();
 }
 
-const executor = createInventoryMetricThresholdExecutor(mockLibs);
+const mockLocators = {
+  assetDetailsLocator: mockAssetDetailsLocator,
+  inventoryLocator: mockInventoryLocator,
+} as unknown as InfraLocators;
+
+const executor = createInventoryMetricThresholdExecutor(mockLibs, mockLocators);
 
 const baseCriterion = {
   aggType: Aggregators.AVERAGE,

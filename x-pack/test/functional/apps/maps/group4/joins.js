@@ -18,7 +18,7 @@ const EXPECTED_JOIN_VALUES = {
 const VECTOR_SOURCE_ID = 'n1t6f';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const security = getService('security');
 
@@ -28,36 +28,33 @@ export default function ({ getPageObjects, getService }) {
         ['global_maps_all', 'geoshape_data_reader', 'meta_for_geoshape_data_reader'],
         { skipBrowserRefresh: true }
       );
-      await PageObjects.maps.loadSavedMap('join example');
+      await maps.loadSavedMap('join example');
     });
 
     after(async () => {
       await inspector.close();
-      await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
+      await maps.refreshAndClearUnsavedChangesWarning();
       await security.testUser.restoreDefaults();
     });
 
     it('should re-fetch join with refresh timer', async () => {
       async function getRequestTimestamp() {
-        await PageObjects.maps.openInspectorRequest('load join metrics (geo_shapes*)');
+        await maps.openInspectorRequest('load join metrics (geo_shapes*)');
         const requestStats = await inspector.getTableData();
-        const requestTimestamp = PageObjects.maps.getInspectorStatRowHit(
-          requestStats,
-          'Request timestamp'
-        );
+        const requestTimestamp = maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
         await inspector.close();
         return requestTimestamp;
       }
 
       const beforeRefreshTimerTimestamp = await getRequestTimestamp();
       expect(beforeRefreshTimerTimestamp.length).to.be(24);
-      await PageObjects.maps.triggerSingleRefresh(1000);
+      await maps.triggerSingleRefresh(1000);
       const afterRefreshTimerTimestamp = await getRequestTimestamp();
       expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
     });
 
     it('should show dynamic data range in legend', async () => {
-      const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
+      const layerTOCDetails = await maps.getLayerTOCDetails('geo_shapes*');
       const split = layerTOCDetails.trim().split('\n');
 
       //field display name
@@ -75,7 +72,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should decorate feature properties with join property', async () => {
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      const mapboxStyle = await maps.getMapboxStyle();
       expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(8);
 
       mapboxStyle.sources.n1t6f.data.features.forEach(({ properties }) => {
@@ -90,7 +87,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should flag only the joined features as visible', async () => {
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      const mapboxStyle = await maps.getMapboxStyle();
       const vectorSource = mapboxStyle.sources[VECTOR_SOURCE_ID];
 
       const visibilitiesOfFeatures = vectorSource.data.features.map((feature) => {
@@ -112,16 +109,16 @@ export default function ({ getPageObjects, getService }) {
 
     describe('query bar', () => {
       before(async () => {
-        await PageObjects.maps.setAndSubmitQuery('prop1 < 10');
+        await maps.setAndSubmitQuery('prop1 < 10');
       });
 
       after(async () => {
         await inspector.close();
-        await PageObjects.maps.setAndSubmitQuery('');
+        await maps.setAndSubmitQuery('');
       });
 
       it('should not apply query to source and apply query to join', async () => {
-        const { rawResponse: joinResponse } = await PageObjects.maps.getResponse(
+        const { rawResponse: joinResponse } = await maps.getResponse(
           'load join metrics (geo_shapes*)'
         );
         expect(joinResponse.aggregations.join.buckets.length).to.equal(2);
@@ -130,22 +127,22 @@ export default function ({ getPageObjects, getService }) {
 
     describe('where clause', () => {
       before(async () => {
-        await PageObjects.maps.setJoinWhereQuery('geo_shapes*', 'prop1 >= 11');
+        await maps.setJoinWhereQuery('geo_shapes*', 'prop1 >= 11');
       });
 
       after(async () => {
-        await PageObjects.maps.closeLayerPanel();
+        await maps.closeLayerPanel();
       });
 
       it('should apply query to join request', async () => {
-        const { rawResponse: joinResponse } = await PageObjects.maps.getResponse(
+        const { rawResponse: joinResponse } = await maps.getResponse(
           'load join metrics (geo_shapes*)'
         );
         expect(joinResponse.aggregations.join.buckets.length).to.equal(1);
       });
 
       it('should update dynamic data range in legend with new results', async () => {
-        const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
+        const layerTOCDetails = await maps.getLayerTOCDetails('geo_shapes*');
         const split = layerTOCDetails.trim().split('\n');
 
         const min = split[0];
@@ -156,7 +153,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should flag only the joined features as visible', async () => {
-        const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+        const mapboxStyle = await maps.getMapboxStyle();
         const vectorSource = mapboxStyle.sources[VECTOR_SOURCE_ID];
 
         const visibilitiesOfFeatures = vectorSource.data.features.map((feature) => {
@@ -183,8 +180,8 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should not contain any elasticsearch request after layer is deleted', async () => {
-        await PageObjects.maps.removeLayer('geo_shapes*');
-        const noRequests = await PageObjects.maps.doesInspectorHaveRequests();
+        await maps.removeLayer('geo_shapes*');
+        const noRequests = await maps.doesInspectorHaveRequests();
         expect(noRequests).to.equal(true);
       });
     });

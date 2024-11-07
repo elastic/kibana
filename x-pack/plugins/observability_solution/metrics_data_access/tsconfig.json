@@ -16,7 +16,6 @@
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/home-plugin",
-    "@kbn/vis-type-timeseries-plugin",
     "@kbn/features-plugin",
     "@kbn/spaces-plugin",
     "@kbn/alerting-plugin",
@@ -35,6 +34,7 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/lens-embeddable-utils",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/router-utils"
   ]
 }

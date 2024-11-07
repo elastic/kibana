@@ -8,6 +8,7 @@
 import { recurse } from 'cypress-recurse';
 import type { UsageRecord } from '@kbn/security-solution-serverless/server/types';
 import { METERING_SERVICE_BATCH_SIZE } from '@kbn/security-solution-serverless/server/constants';
+import { login, ROLE } from '../../tasks/login';
 import {
   getInterceptedRequestsFromTransparentApiProxy,
   startTransparentApiProxy,
@@ -15,10 +16,8 @@ import {
 } from '../../tasks/transparent_api_proxy';
 import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHeartbeats } from '../../tasks/index_endpoint_heartbeats';
-import { login, ROLE } from '../../tasks/login';
 
-// Failing: See https://github.com/elastic/kibana/issues/187083
-describe.skip(
+describe(
   'Metering',
   {
     tags: ['@serverless', '@skipInServerlessMKI'],
@@ -26,7 +25,7 @@ describe.skip(
       ftrConfig: {
         kbnServerArgs: [
           `--xpack.securitySolutionServerless.usageReportingTaskInterval=1m`,
-          `--xpack.securitySolutionServerless.usageReportingApiUrl=https://localhost:3623`,
+          `--xpack.securitySolutionServerless.usageApi.url=http://localhost:3623`,
         ],
       },
     },
@@ -39,7 +38,6 @@ describe.skip(
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHeartbeats> | undefined;
 
     before(() => {
-      login(ROLE.system_indices_superuser);
       startTransparentApiProxy({ port: 3623 });
       indexEndpointHeartbeats({
         count: HEARTBEAT_COUNT,
@@ -47,6 +45,10 @@ describe.skip(
       }).then((indexedHeartbeats) => {
         endpointData = indexedHeartbeats;
       });
+    });
+
+    beforeEach(() => {
+      login(ROLE.system_indices_superuser);
     });
 
     after(() => {
@@ -57,7 +59,8 @@ describe.skip(
       stopTransparentApiProxy();
     });
 
-    describe('Usage Reporting Task', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/187083
+    describe.skip('Usage Reporting Task', () => {
       it('properly sends indexed heartbeats to the metering api', () => {
         const expectedChunks = Math.ceil(HEARTBEAT_COUNT / METERING_SERVICE_BATCH_SIZE);
 

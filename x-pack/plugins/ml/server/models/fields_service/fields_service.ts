@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
-import type { IScopedClusterClient } from '@kbn/core/server';
 import { duration } from 'moment';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import type { AggCardinality } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { parseInterval } from '../../../common/util/parse_interval';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
@@ -146,7 +148,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       mustCriteria.push(query);
     }
 
-    const runtimeMappings: any = {};
+    const runtimeMappings: any = Object.create(null);
     const aggs = fieldsToAgg.reduce(
       (obj, field) => {
         if (

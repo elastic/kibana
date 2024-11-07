@@ -11,19 +11,21 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { cloneDeep } from 'lodash';
 
 import { EuiDescriptionList, EuiLink, EuiPanel } from '@elastic/eui';
 
-import { cloneDeep } from 'lodash';
+import { context } from '@kbn/kibana-react-plugin/public';
 
 import { AddToFilterListLink } from './add_to_filter_list_link';
 import { DeleteRuleModal } from './delete_rule_modal';
 import { EditConditionLink } from './edit_condition_link';
 import { buildRuleDescription } from '../utils';
-import { ml } from '../../../services/ml_api_service';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export class RuleActionPanel extends Component {
+  static contextType = context;
+
   constructor(props) {
     super(props);
 
@@ -41,6 +43,7 @@ export class RuleActionPanel extends Component {
   }
 
   componentDidMount() {
+    const mlApi = this.context.services.mlServices.mlApi;
     // If the rule has a scope section with a single partitioning field key,
     // load the filter list to check whether to add a link to add the
     // anomaly partitioning field value to the filter list.
@@ -56,7 +59,7 @@ export class RuleActionPanel extends Component {
         partitionFieldValue[0].length > 0
       ) {
         const filterId = scope[partitionFieldName].filter_id;
-        ml.filters
+        mlApi.filters
           .filters({ filterId })
           .then((filter) => {
             const filterItems = filter.items;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { indexNameToDataStreamParts } from '../../common/utils';
+import { DataStreamStatType } from '../../common/data_streams_stats';
 import { Integration } from '../../common/data_streams_stats/integration';
+import { DEFAULT_DICTIONARY_TYPE } from '../state_machines/dataset_quality_controller';
 import { generateDatasets } from './generate_datasets';
-import { DataStreamStatType } from '../../common/data_streams_stats/types';
 
 describe('generateDatasets', () => {
   const integrations: Integration[] = [
@@ -40,6 +40,7 @@ describe('generateDatasets', () => {
       lastActivity: 1712911241117,
       size: '82.1kb',
       sizeBytes: 84160,
+      totalDocs: 100,
       integration: 'system',
       userPrivileges: {
         canMonitor: true,
@@ -50,183 +51,339 @@ describe('generateDatasets', () => {
       lastActivity: 1712911241117,
       size: '62.5kb',
       sizeBytes: 64066,
+      totalDocs: 100,
       userPrivileges: {
         canMonitor: true,
       },
     },
   ];
 
+  const totalDocs = {
+    ...DEFAULT_DICTIONARY_TYPE,
+    logs: [
+      {
+        dataset: 'logs-system.application-default',
+        count: 100,
+      },
+      {
+        dataset: 'logs-synth-default',
+        count: 100,
+      },
+    ],
+  };
+
   const degradedDocs = [
     {
       dataset: 'logs-system.application-default',
-      percentage: 0,
       count: 0,
-      docsCount: 0,
-      quality: 'good' as const,
     },
     {
       dataset: 'logs-synth-default',
-      percentage: 11.320754716981131,
       count: 6,
-      docsCount: 0,
-      quality: 'poor' as const,
     },
   ];
 
-  it('merges integrations information with dataStreamStats', () => {
-    const datasets = generateDatasets(dataStreamStats, undefined, integrations);
+  it('merges integrations information with dataStreamStats and degradedDocs', () => {
+    const datasets = generateDatasets(dataStreamStats, degradedDocs, integrations, totalDocs);
 
     expect(datasets).toEqual([
       {
-        ...dataStreamStats[0],
-        name: indexNameToDataStreamParts(dataStreamStats[0].name).dataset,
-        namespace: indexNameToDataStreamParts(dataStreamStats[0].name).namespace,
-        title:
-          integrations[0].datasets[indexNameToDataStreamParts(dataStreamStats[0].name).dataset],
-        type: indexNameToDataStreamParts(dataStreamStats[0].name).type,
-        rawName: dataStreamStats[0].name,
+        name: 'system.application',
+        type: 'logs',
+        namespace: 'default',
+        title: 'Windows Application Events',
+        rawName: 'logs-system.application-default',
+        lastActivity: 1712911241117,
+        size: '82.1kb',
+        sizeBytes: 84160,
         integration: integrations[0],
+        totalDocs: 100,
+        userPrivileges: {
+          canMonitor: true,
+        },
+        docsInTimeRange: 100,
+        quality: 'good',
         degradedDocs: {
-          percentage: degradedDocs[0].percentage,
-          count: degradedDocs[0].count,
-          docsCount: degradedDocs[0].docsCount,
-          quality: degradedDocs[0].quality,
+          percentage: 0,
+          count: 0,
         },
       },
       {
-        ...dataStreamStats[1],
-        name: indexNameToDataStreamParts(dataStreamStats[1].name).dataset,
-        namespace: indexNameToDataStreamParts(dataStreamStats[1].name).namespace,
-        title: indexNameToDataStreamParts(dataStreamStats[1].name).dataset,
-        type: indexNameToDataStreamParts(dataStreamStats[1].name).type,
-        rawName: dataStreamStats[1].name,
+        name: 'synth',
+        type: 'logs',
+        namespace: 'default',
+        title: 'synth',
+        rawName: 'logs-synth-default',
+        lastActivity: 1712911241117,
+        size: '62.5kb',
+        sizeBytes: 64066,
+        integration: undefined,
+        totalDocs: 100,
+        userPrivileges: {
+          canMonitor: true,
+        },
+        docsInTimeRange: 100,
+        quality: 'poor',
         degradedDocs: {
-          count: 0,
+          count: 6,
+          percentage: 6,
+        },
+      },
+    ]);
+  });
+
+  it('merges integrations information with dataStreamStats and degradedDocs when no docs in timerange', () => {
+    const datasets = generateDatasets(
+      dataStreamStats,
+      degradedDocs,
+      integrations,
+      DEFAULT_DICTIONARY_TYPE
+    );
+
+    expect(datasets).toEqual([
+      {
+        name: 'system.application',
+        type: 'logs',
+        namespace: 'default',
+        title: 'Windows Application Events',
+        rawName: 'logs-system.application-default',
+        lastActivity: 1712911241117,
+        size: '82.1kb',
+        sizeBytes: 84160,
+        integration: integrations[0],
+        totalDocs: 100,
+        userPrivileges: {
+          canMonitor: true,
+        },
+        docsInTimeRange: 0,
+        quality: 'good',
+        degradedDocs: {
           percentage: 0,
-          docsCount: 0,
-          quality: 'good',
+          count: 0,
+        },
+      },
+      {
+        name: 'synth',
+        type: 'logs',
+        namespace: 'default',
+        title: 'synth',
+        rawName: 'logs-synth-default',
+        lastActivity: 1712911241117,
+        size: '62.5kb',
+        sizeBytes: 64066,
+        integration: undefined,
+        totalDocs: 100,
+        userPrivileges: {
+          canMonitor: true,
+        },
+        docsInTimeRange: 0,
+        quality: 'good',
+        degradedDocs: {
+          count: 6,
+          percentage: 0,
         },
       },
     ]);
   });
 
   it('merges integrations information with degradedDocs', () => {
-    const datasets = generateDatasets(undefined, degradedDocs, integrations);
+    const datasets = generateDatasets([], degradedDocs, integrations, totalDocs);
 
     expect(datasets).toEqual([
       {
-        rawName: degradedDocs[0].dataset,
-        name: indexNameToDataStreamParts(degradedDocs[0].dataset).dataset,
-        type: indexNameToDataStreamParts(degradedDocs[0].dataset).type,
+        name: 'system.application',
+        type: 'logs',
+        namespace: 'default',
+        title: 'Windows Application Events',
+        rawName: 'logs-system.application-default',
         lastActivity: undefined,
         size: undefined,
         sizeBytes: undefined,
-        userPrivileges: undefined,
-        namespace: indexNameToDataStreamParts(degradedDocs[0].dataset).namespace,
-        title:
-          integrations[0].datasets[indexNameToDataStreamParts(degradedDocs[0].dataset).dataset],
         integration: integrations[0],
+        totalDocs: undefined,
+        userPrivileges: undefined,
+        docsInTimeRange: 100,
+        quality: 'good',
         degradedDocs: {
-          percentage: degradedDocs[0].percentage,
-          count: degradedDocs[0].count,
-          docsCount: degradedDocs[0].docsCount,
-          quality: degradedDocs[0].quality,
+          percentage: 0,
+          count: 0,
         },
       },
       {
-        rawName: degradedDocs[1].dataset,
-        name: indexNameToDataStreamParts(degradedDocs[1].dataset).dataset,
-        type: indexNameToDataStreamParts(degradedDocs[1].dataset).type,
+        name: 'synth',
+        type: 'logs',
+        namespace: 'default',
+        title: 'synth',
+        rawName: 'logs-synth-default',
         lastActivity: undefined,
         size: undefined,
         sizeBytes: undefined,
-        userPrivileges: undefined,
-        namespace: indexNameToDataStreamParts(degradedDocs[1].dataset).namespace,
-        title: indexNameToDataStreamParts(degradedDocs[1].dataset).dataset,
         integration: undefined,
+        totalDocs: undefined,
+        userPrivileges: undefined,
+        docsInTimeRange: 100,
+        quality: 'poor',
         degradedDocs: {
-          percentage: degradedDocs[1].percentage,
-          count: degradedDocs[1].count,
-          docsCount: degradedDocs[1].docsCount,
-          quality: degradedDocs[1].quality,
+          count: 6,
+          percentage: 6,
         },
       },
     ]);
   });
 
-  it('merges integrations information with dataStreamStats and degradedDocs', () => {
-    const datasets = generateDatasets(dataStreamStats, degradedDocs, integrations);
+  it('merges integrations information with degradedDocs and totalDocs', () => {
+    const datasets = generateDatasets([], degradedDocs, integrations, {
+      ...totalDocs,
+      logs: [...totalDocs.logs, { dataset: 'logs-another-default', count: 100 }],
+    });
 
     expect(datasets).toEqual([
       {
-        ...dataStreamStats[0],
-        name: indexNameToDataStreamParts(dataStreamStats[0].name).dataset,
-        namespace: indexNameToDataStreamParts(dataStreamStats[0].name).namespace,
-        title:
-          integrations[0].datasets[indexNameToDataStreamParts(dataStreamStats[0].name).dataset],
-        type: indexNameToDataStreamParts(dataStreamStats[0].name).type,
-        rawName: dataStreamStats[0].name,
+        name: 'system.application',
+        type: 'logs',
+        namespace: 'default',
+        title: 'Windows Application Events',
+        rawName: 'logs-system.application-default',
+        lastActivity: undefined,
+        size: undefined,
+        sizeBytes: undefined,
         integration: integrations[0],
+        totalDocs: undefined,
+        userPrivileges: undefined,
+        docsInTimeRange: 100,
+        quality: 'good',
         degradedDocs: {
-          percentage: degradedDocs[0].percentage,
-          count: degradedDocs[0].count,
-          docsCount: degradedDocs[0].docsCount,
-          quality: degradedDocs[0].quality,
+          percentage: 0,
+          count: 0,
         },
       },
       {
-        ...dataStreamStats[1],
-        name: indexNameToDataStreamParts(dataStreamStats[1].name).dataset,
-        namespace: indexNameToDataStreamParts(dataStreamStats[1].name).namespace,
-        title: indexNameToDataStreamParts(dataStreamStats[1].name).dataset,
-        type: indexNameToDataStreamParts(dataStreamStats[1].name).type,
-        rawName: dataStreamStats[1].name,
+        name: 'synth',
+        type: 'logs',
+        namespace: 'default',
+        title: 'synth',
+        rawName: 'logs-synth-default',
+        lastActivity: undefined,
+        size: undefined,
+        sizeBytes: undefined,
+        integration: undefined,
+        totalDocs: undefined,
+        userPrivileges: undefined,
+        docsInTimeRange: 100,
+        quality: 'poor',
         degradedDocs: {
-          percentage: degradedDocs[1].percentage,
-          count: degradedDocs[1].count,
-          docsCount: degradedDocs[1].docsCount,
-          quality: degradedDocs[1].quality,
+          count: 6,
+          percentage: 6,
+        },
+      },
+      {
+        name: 'another',
+        type: 'logs',
+        namespace: 'default',
+        title: 'another',
+        rawName: 'logs-another-default',
+        lastActivity: undefined,
+        size: undefined,
+        sizeBytes: undefined,
+        integration: undefined,
+        totalDocs: undefined,
+        userPrivileges: undefined,
+        docsInTimeRange: 100,
+        quality: 'good',
+        degradedDocs: {
+          percentage: 0,
+          count: 0,
+        },
+      },
+    ]);
+  });
+
+  it('merges integrations information with dataStreamStats', () => {
+    const datasets = generateDatasets(dataStreamStats, [], integrations, totalDocs);
+
+    expect(datasets).toEqual([
+      {
+        name: 'system.application',
+        type: 'logs',
+        namespace: 'default',
+        title: 'Windows Application Events',
+        rawName: 'logs-system.application-default',
+        lastActivity: 1712911241117,
+        size: '82.1kb',
+        sizeBytes: 84160,
+        integration: integrations[0],
+        totalDocs: 100,
+        userPrivileges: {
+          canMonitor: true,
+        },
+        quality: 'good',
+        docsInTimeRange: 100,
+        degradedDocs: {
+          count: 0,
+          percentage: 0,
+        },
+      },
+      {
+        name: 'synth',
+        type: 'logs',
+        namespace: 'default',
+        title: 'synth',
+        rawName: 'logs-synth-default',
+        lastActivity: 1712911241117,
+        size: '62.5kb',
+        sizeBytes: 64066,
+        integration: undefined,
+        totalDocs: 100,
+        userPrivileges: {
+          canMonitor: true,
+        },
+        quality: 'good',
+        docsInTimeRange: 100,
+        degradedDocs: {
+          count: 0,
+          percentage: 0,
         },
       },
     ]);
   });
 
   it('merges integration information with dataStreamStats when dataset is not an integration default one', () => {
-    const dataset = 'logs-system.custom-default';
-
     const nonDefaultDataset = {
-      name: dataset,
+      name: 'logs-system.custom-default',
       lastActivity: 1712911241117,
       size: '82.1kb',
       sizeBytes: 84160,
+      totalDocs: 100,
       integration: 'system',
       userPrivileges: {
         canMonitor: true,
       },
     };
 
-    const datasets = generateDatasets([nonDefaultDataset], undefined, integrations);
+    const datasets = generateDatasets([nonDefaultDataset], [], integrations, totalDocs);
 
     expect(datasets).toEqual([
       {
-        ...nonDefaultDataset,
-        title: indexNameToDataStreamParts(dataset).dataset,
-        name: indexNameToDataStreamParts(dataset).dataset,
-        namespace: indexNameToDataStreamParts(dataset).namespace,
-        type: indexNameToDataStreamParts(dataset).type,
-        rawName: nonDefaultDataset.name,
+        name: 'system.custom',
+        type: 'logs',
+        namespace: 'default',
+        title: 'system.custom',
+        rawName: 'logs-system.custom-default',
+        lastActivity: 1712911241117,
+        size: '82.1kb',
+        sizeBytes: 84160,
         integration: integrations[0],
+        userPrivileges: {
+          canMonitor: true,
+        },
+        quality: 'good',
+        totalDocs: 100,
+        docsInTimeRange: 0,
         degradedDocs: {
           count: 0,
           percentage: 0,
-          docsCount: 0,
-          quality: 'good',
         },
       },
     ]);
-  });
-
-  it('returns an empty array if no valid object is provided', () => {
-    expect(generateDatasets(undefined, undefined, integrations)).toEqual([]);
   });
 });

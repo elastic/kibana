@@ -46,10 +46,6 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     size="m"
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText="Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character"
     isInvalid={false}
     label={
@@ -58,7 +54,6 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
         id="xpack.ml.settings.filterLists.editFilterHeader.filterListIdAriaLabel"
       />
     }
-    labelType="label"
   >
     <EuiFieldText
       data-test-subj="mlNewFilterListIdInput"
@@ -146,15 +141,11 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     size="m"
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
     error={
       Array [
         "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character",
       ]
     }
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={true}
     label={
       <Memo(MemoizedFormattedMessage)
@@ -162,7 +153,6 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
         id="xpack.ml.settings.filterLists.editFilterHeader.filterListIdAriaLabel"
       />
     }
-    labelType="label"
   >
     <EuiFieldText
       data-test-subj="mlNewFilterListIdInput"

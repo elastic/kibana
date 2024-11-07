@@ -16,7 +16,6 @@ import { TransactionLink } from '../app/transaction_link';
 import { homeRoute } from './home';
 import { serviceDetailRoute } from './service_detail';
 import { mobileServiceDetailRoute } from './mobile_service_detail';
-import { logsServiceDetailsRoute } from './entities/logs_service_details';
 import { settingsRoute } from './settings';
 import { onboarding } from './onboarding';
 import { tutorialRedirectRoute } from './onboarding/redirect';
@@ -25,6 +24,7 @@ import { ServiceGroupsList } from '../app/service_groups';
 import { offsetRt } from '../../../common/comparison_rt';
 import { diagnosticsRoute } from '../app/diagnostics';
 import { TransactionDetailsByNameLink } from '../app/transaction_details_link';
+import { EntityLink } from '../app/entities/entity_link';
 
 const ServiceGroupsTitle = i18n.translate('xpack.apm.views.serviceGroups.title', {
   defaultMessage: 'Services',
@@ -35,6 +35,18 @@ const ServiceGroupsTitle = i18n.translate('xpack.apm.views.serviceGroups.title',
  * creates the routes.
  */
 const apmRoutes = {
+  '/link-to/entity/{serviceName}': {
+    element: <EntityLink />,
+    params: t.type({
+      path: t.type({
+        serviceName: t.string,
+      }),
+      query: t.partial({
+        rangeFrom: t.string,
+        rangeTo: t.string,
+      }),
+    }),
+  },
   '/link-to/transaction': {
     element: <TransactionDetailsByNameLink />,
     params: t.type({
@@ -87,6 +99,7 @@ const apmRoutes = {
           defaultMessage: 'APM',
         })}
         href="/"
+        omitOnServerless
       >
         <Outlet />
       </Breadcrumb>
@@ -95,7 +108,7 @@ const apmRoutes = {
       // this route fails on navigation unless it's defined before home
       '/service-groups': {
         element: (
-          <Breadcrumb title={ServiceGroupsTitle} href={'/service-groups'}>
+          <Breadcrumb title={ServiceGroupsTitle} href={'/service-groups'} omitOnServerless>
             <ApmMainTemplate
               pageTitle={ServiceGroupsTitle}
               environmentFilter={false}
@@ -132,7 +145,6 @@ const apmRoutes = {
       ...settingsRoute,
       ...serviceDetailRoute,
       ...mobileServiceDetailRoute,
-      ...logsServiceDetailsRoute,
       ...homeRoute,
     },
   },

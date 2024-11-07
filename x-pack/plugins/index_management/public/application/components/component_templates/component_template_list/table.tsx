@@ -146,13 +146,19 @@ export const ComponentTable: FunctionComponent<Props> = ({
     selection: {
       onSelectionChange: setSelection,
       selectable: ({ usedBy }) => usedBy.length === 0,
-      selectableMessage: (selectable) =>
+      selectableMessage: (selectable, { name }) =>
         selectable
           ? i18n.translate('xpack.idxMgmt.componentTemplatesList.table.selectionLabel', {
-              defaultMessage: 'Select this component template',
+              defaultMessage: 'Select "{name}" component template',
+              values: {
+                name,
+              },
             })
           : i18n.translate('xpack.idxMgmt.componentTemplatesList.table.disabledSelectionLabel', {
-              defaultMessage: 'Component template is in use and cannot be deleted',
+              defaultMessage: 'Component template "{name}" is in use and cannot be deleted',
+              values: {
+                name,
+              },
             }),
     },
     rowProps: () => ({
@@ -257,6 +263,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
                 },
                 () => trackMetric(METRIC_TYPE.CLICK, UIM_COMPONENT_TEMPLATE_DETAILS)
               )}
+              role="button"
               data-test-subj="templateDetailsLink"
             >
               {name}

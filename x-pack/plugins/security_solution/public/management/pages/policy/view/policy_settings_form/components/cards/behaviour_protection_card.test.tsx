@@ -13,7 +13,7 @@ import React from 'react';
 import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
 import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { ProtectionModes } from '../../../../../../../../common/endpoint/types';
 import type { BehaviourProtectionCardProps } from './protection_seetings_card/behaviour_protection_card';
 import {

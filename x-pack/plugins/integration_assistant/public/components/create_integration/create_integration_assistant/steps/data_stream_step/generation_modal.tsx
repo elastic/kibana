@@ -21,149 +21,19 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
-import type {
-  CategorizationRequestBody,
-  EcsMappingRequestBody,
-  RelatedRequestBody,
-} from '../../../../../../common';
-import {
-  runCategorizationGraph,
-  runEcsGraph,
-  runRelatedGraph,
-} from '../../../../../common/lib/api';
-import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { State } from '../../state';
 import * as i18n from './translations';
-import { useTelemetry } from '../../../telemetry';
 
-export type OnComplete = (result: State['result']) => void;
-
-const ProgressOrder = ['ecs', 'categorization', 'related'];
-type ProgressItem = (typeof ProgressOrder)[number];
+import type { OnComplete, ProgressItem } from './use_generation';
+import { ProgressOrder, useGeneration } from './use_generation';
 
 const progressText: Record<ProgressItem, string> = {
+  analyzeLogs: i18n.PROGRESS_ANALYZE_LOGS,
   ecs: i18n.PROGRESS_ECS_MAPPING,
   categorization: i18n.PROGRESS_CATEGORIZATION,
   related: i18n.PROGRESS_RELATED_GRAPH,
-};
-
-interface UseGenerationProps {
-  integrationSettings: State['integrationSettings'];
-  connector: State['connector'];
-  onComplete: OnComplete;
-}
-export const useGeneration = ({
-  integrationSettings,
-  connector,
-  onComplete,
-}: UseGenerationProps) => {
-  const { reportGenerationComplete } = useTelemetry();
-  const { http, notifications } = useKibana().services;
-  const [progress, setProgress] = useState<ProgressItem>();
-  const [error, setError] = useState<null | string>(null);
-  const [isRequesting, setIsRequesting] = useState<boolean>(true);
-
-  useEffect(() => {
-    if (
-      !isRequesting ||
-      http == null ||
-      connector == null ||
-      integrationSettings == null ||
-      notifications?.toasts == null
-    ) {
-      return;
-    }
-    const generationStartedAt = Date.now();
-    const abortController = new AbortController();
-    const deps = { http, abortSignal: abortController.signal };
-
-    (async () => {
-      try {
-        const ecsRequest: EcsMappingRequestBody = {
-          packageName: integrationSettings.name ?? '',
-          dataStreamName: integrationSettings.dataStreamName ?? '',
-          rawSamples: integrationSettings.logsSampleParsed ?? [],
-          connectorId: connector.id,
-          langSmithOptions: getLangSmithOptions(),
-        };
-
-        setProgress('ecs');
-        const ecsGraphResult = await runEcsGraph(ecsRequest, deps);
-        if (abortController.signal.aborted) return;
-        if (isEmpty(ecsGraphResult?.results)) {
-          setError('No results from ECS graph');
-          return;
-        }
-        const categorizationRequest: CategorizationRequestBody = {
-          ...ecsRequest,
-          currentPipeline: ecsGraphResult.results.pipeline,
-        };
-
-        setProgress('categorization');
-        const categorizationResult = await runCategorizationGraph(categorizationRequest, deps);
-        if (abortController.signal.aborted) return;
-        const relatedRequest: RelatedRequestBody = {
-          ...categorizationRequest,
-          currentPipeline: categorizationResult.results.pipeline,
-        };
-
-        setProgress('related');
-        const relatedGraphResult = await runRelatedGraph(relatedRequest, deps);
-        if (abortController.signal.aborted) return;
-
-        if (isEmpty(relatedGraphResult?.results)) {
-          throw new Error('Results not found in response');
-        }
-
-        reportGenerationComplete({
-          connector,
-          integrationSettings,
-          durationMs: Date.now() - generationStartedAt,
-        });
-
-        onComplete(relatedGraphResult.results);
-      } catch (e) {
-        if (abortController.signal.aborted) return;
-        const errorMessage = `${e.message}${
-          e.body ? ` (${e.body.statusCode}): ${e.body.message}` : ''
-        }`;
-
-        reportGenerationComplete({
-          connector,
-          integrationSettings,
-          durationMs: Date.now() - generationStartedAt,
-          error: errorMessage,
-        });
-
-        setError(errorMessage);
-      } finally {
-        setIsRequesting(false);
-      }
-    })();
-    return () => {
-      abortController.abort();
-    };
-  }, [
-    isRequesting,
-    onComplete,
-    setProgress,
-    connector,
-    http,
-    integrationSettings,
-    reportGenerationComplete,
-    notifications?.toasts,
-  ]);
-
-  const retry = useCallback(() => {
-    setError(null);
-    setIsRequesting(true);
-  }, []);
-
-  return { progress, error, retry };
 };
 
 const useModalCss = () => {
@@ -212,7 +82,7 @@ export const GenerationModal = React.memo<GenerationModalProps>(
                 {error ? (
                   <EuiFlexItem>
                     <EuiCallOut
-                      title={i18n.GENERATION_ERROR(progressText[progress])}
+                      title={i18n.GENERATION_ERROR_TITLE(progressText[progress])}
                       color="danger"
                       iconType="alert"
                       data-test-subj="generationErrorCallout"

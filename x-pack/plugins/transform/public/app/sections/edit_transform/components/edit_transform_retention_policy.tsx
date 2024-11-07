@@ -12,7 +12,7 @@ import { EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import type { PostTransformsPreviewRequestSchema } from '../../../../../common/api_schemas/transforms';
+import type { PostTransformsPreviewRequestSchema } from '../../../../../server/routes/api_schemas/transforms';
 import { isLatestTransform, isPivotTransform } from '../../../../../common/types/transform';
 import { getErrorMessage } from '../../../../../common/utils/errors';
 

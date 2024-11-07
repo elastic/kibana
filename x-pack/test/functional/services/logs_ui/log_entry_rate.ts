@@ -29,6 +29,14 @@ export function LogEntryRatePageProvider({ getPageObjects, getService }: FtrProv
       return await testSubjects.find('noDataPage');
     },
 
+    getNoMlReadPrivilegesPrompt() {
+      return testSubjects.find('logsMissingMLReadPrivileges');
+    },
+
+    getNoMlAllPrivilegesPrompt() {
+      return testSubjects.find('logsMissingMLAllPrivileges');
+    },
+
     async startJobSetup() {
       await testSubjects.click('infraLogEntryRateSetupContentMlSetupButton');
     },

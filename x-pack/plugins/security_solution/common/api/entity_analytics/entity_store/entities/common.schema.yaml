@@ -1,0 +1,137 @@
+openapi: 3.0.0
+info:
+  title: Common Entities Schemas
+  description: Common Entities schemas for the Entity Store
+  version: '1'
+paths: {}
+components:
+  schemas:
+    UserEntity:
+      type: object
+      required:
+        - "@timestamp"
+        - user
+        - entity
+      properties:
+        "@timestamp":
+          type: string
+          format: date-time
+        entity:
+          type: object
+          required:
+            - name
+            - source
+          properties:
+            name:
+              type: string
+            source:
+              type: string
+        user:
+          type: object
+          properties:
+            full_name:
+              type: array
+              items:
+                type: string
+            domain:
+              type: array
+              items:
+                type: string
+            roles:
+              type: array
+              items:
+                type: string
+            name:
+              type: string
+            id:
+              type: array
+              items:
+                type: string
+            email:
+              type: array
+              items:
+                type: string
+            hash:
+              type: array
+              items:
+                type: string
+            risk:
+              $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+          required:
+            - name
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
+    HostEntity:
+      type: object
+      required:
+        - "@timestamp"
+        - host
+        - entity
+      properties:
+        "@timestamp":
+          type: string
+          format: date-time
+        entity:
+          type: object
+          required:
+            - name
+            - source
+          properties:
+            name:
+              type: string
+            source:
+              type: string
+        host:
+          type: object
+          properties:
+            hostname:
+              type: array
+              items:
+                type: string
+            domain:
+              type: array
+              items:
+                type: string
+            ip:
+              type: array
+              items:
+                type: string
+            name:
+              type: string
+            id:
+              type: array
+              items:
+                type: string
+            type:
+              type: array
+              items:
+                type: string
+            mac:
+              type: array
+              items:
+                type: string
+            architecture:
+              type: array
+              items:
+                type: string
+            risk:
+              $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+          required:
+            - name
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
+
+    Entity:
+      oneOf:
+        - $ref: '#/components/schemas/UserEntity'
+        - $ref: '#/components/schemas/HostEntity'

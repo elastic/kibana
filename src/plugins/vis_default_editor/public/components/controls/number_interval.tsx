@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { get } from 'lodash';
@@ -72,7 +73,7 @@ function NumberIntervalParamEditor({
   setTouched,
   setValidity,
   setValue,
-}: AggParamEditorProps<string | undefined>) {
+}: AggParamEditorProps<string | undefined | number>) {
   const field = agg.getField();
   const fieldSupportsAuto = !field || field.type === 'number';
   const isAutoChecked = fieldSupportsAuto && isAutoInterval(value);
@@ -84,12 +85,12 @@ function NumberIntervalParamEditor({
     setValidity(isValid);
   }, [isValid, setValidity]);
 
-  const onChange: EuiFieldNumberProps['onChange'] = useCallback(
+  const onChange = useCallback<NonNullable<EuiFieldNumberProps['onChange']>>(
     ({ target }) => setValue(isNaN(target.valueAsNumber) ? '' : target.valueAsNumber),
     [setValue]
   );
 
-  const onAutoSwitchChange: EuiSwitchProps['onChange'] = useCallback(
+  const onAutoSwitchChange = useCallback<EuiSwitchProps['onChange']>(
     (e) => {
       const isAutoSwitchChecked = e.target.checked;
 
@@ -104,7 +105,7 @@ function NumberIntervalParamEditor({
       label={label}
       fullWidth={true}
       isInvalid={showValidation && !isValid}
-      helpText={get(editorConfig, 'interval.help')}
+      helpText={get(editorConfig, 'interval.help') as string}
     >
       <EuiFlexGroup gutterSize="s" responsive={false} direction={'column'}>
         <EuiFlexItem>

@@ -29,12 +29,12 @@ export type ObservabilityOnboardingClientOptions = Omit<
 export type ObservabilityOnboardingClient = RouteRepositoryClient<
   ObservabilityOnboardingServerRouteRepository,
   ObservabilityOnboardingClientOptions
->;
+>['fetch'];
 
 export type AutoAbortedObservabilityClient = RouteRepositoryClient<
   ObservabilityOnboardingServerRouteRepository,
   Omit<ObservabilityOnboardingClientOptions, 'signal'>
->;
+>['fetch'];
 
 export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
   ObservabilityOnboardingServerRouteRepository,

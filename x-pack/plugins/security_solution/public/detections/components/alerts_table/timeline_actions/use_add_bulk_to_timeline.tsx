@@ -67,7 +67,6 @@ export const useAddBulkToTimelineAction = ({
   const {
     browserFields,
     dataViewId,
-    indexPattern,
     sourcererDataView,
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
@@ -96,13 +95,13 @@ export const useAddBulkToTimelineAction = ({
     return combineQueries({
       config: esQueryConfig,
       dataProviders: [],
-      indexPattern,
+      indexPattern: sourcererDataView,
       filters: combinedFilters,
       kqlQuery: { query: '', language: 'kuery' },
       browserFields,
       kqlMode: 'filter',
     });
-  }, [esQueryConfig, indexPattern, combinedFilters, browserFields]);
+  }, [esQueryConfig, sourcererDataView, combinedFilters, browserFields]);
 
   const filterQuery = useMemo(() => {
     if (!combinedQuery) return '';
@@ -120,7 +119,7 @@ export const useAddBulkToTimelineAction = ({
     sort: timelineQuerySortField,
     indexNames: selectedPatterns,
     filterQuery,
-    runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
+    runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
     limit: Math.min(BULK_ADD_TO_TIMELINE_LIMIT, totalCount),
     timerangeKind: 'absolute',
   });
@@ -143,7 +142,8 @@ export const useAddBulkToTimelineAction = ({
   });
 
   const updateTimelineIsLoading = useCallback(
-    (payload) => dispatch(timelineActions.updateIsLoading(payload)),
+    (payload: Parameters<typeof timelineActions.updateIsLoading>[0]) =>
+      dispatch(timelineActions.updateIsLoading(payload)),
     [dispatch]
   );
 
@@ -191,8 +191,10 @@ export const useAddBulkToTimelineAction = ({
     [dispatch, createTimeline, selectedEventIds, tableId]
   );
 
-  const onActionClick: BulkActionsConfig['onClick'] | CustomBulkAction['onClick'] = useCallback(
-    (items: TimelineItem[] | undefined, isAllSelected: boolean, setLoading, clearSelection) => {
+  const onActionClick = useCallback<
+    NonNullable<BulkActionsConfig['onClick'] | CustomBulkAction['onClick']>
+  >(
+    (items, isAllSelected, setLoading, clearSelection) => {
       if (!items) return;
       /*
        * Trigger actions table passed isAllSelected param

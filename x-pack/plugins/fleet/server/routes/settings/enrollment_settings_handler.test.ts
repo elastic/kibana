@@ -4,12 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { agentPolicyService } from '../../services';
 import { getFleetServerPolicies } from '../../services/fleet_server';
 
-import { getFleetServerOrAgentPolicies, getDownloadSource } from './enrollment_settings_handler';
+import type { FleetRequestHandlerContext } from '../../types';
+import { GetEnrollmentSettingsResponseSchema } from '../../types';
+import { xpackMocks } from '../../mocks';
+
+import {
+  getFleetServerOrAgentPolicies,
+  getDownloadSource,
+  getEnrollmentSettingsHandler,
+} from './enrollment_settings_handler';
 
 jest.mock('../../services', () => ({
   agentPolicyService: {
@@ -42,6 +50,27 @@ jest.mock('../../services', () => ({
 
 jest.mock('../../services/fleet_server', () => ({
   getFleetServerPolicies: jest.fn(),
+  hasFleetServersForPolicies: jest.fn().mockResolvedValue(true),
+}));
+
+jest.mock('../../services/fleet_server_host', () => ({
+  getFleetServerHostsForAgentPolicy: jest.fn().mockResolvedValue({
+    id: 'host-1',
+    is_default: true,
+    is_preconfigured: true,
+    name: 'Host 1',
+    host_urls: ['http://localhost:8220'],
+    proxy_id: 'proxy-1',
+  }),
+}));
+
+jest.mock('../../services/fleet_proxies', () => ({
+  getFleetProxy: jest.fn().mockResolvedValue({
+    id: 'proxy-1',
+    name: 'Proxy 1',
+    url: 'https://proxy-1/',
+    is_preconfigured: true,
+  }),
 }));
 
 describe('EnrollmentSettingsHandler utils', () => {
@@ -204,6 +233,75 @@ describe('EnrollmentSettingsHandler utils', () => {
         host: 'https://source-2/',
         is_default: false,
         proxy_id: 'proxy-1',
+      });
+    });
+
+    describe('schema validation', () => {
+      let context: FleetRequestHandlerContext;
+      let response: ReturnType<typeof httpServerMock.createResponseFactory>;
+
+      beforeEach(() => {
+        context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
+        response = httpServerMock.createResponseFactory();
+      });
+
+      it('should return valid enrollment settings', async () => {
+        const fleetServerPolicies = [
+          {
+            id: 'fs-policy-1',
+            name: 'FS Policy 1',
+            is_managed: true,
+            is_default_fleet_server: true,
+            has_fleet_server: true,
+            download_source_id: 'source-2',
+            fleet_server_host_id: undefined,
+          },
+        ];
+        (getFleetServerPolicies as jest.Mock).mockResolvedValueOnce(fleetServerPolicies);
+        const expectedResponse = {
+          fleet_server: {
+            has_active: true,
+            host_proxy: {
+              id: 'proxy-1',
+              name: 'Proxy 1',
+              is_preconfigured: true,
+              url: 'https://proxy-1/',
+            },
+
+            host: {
+              host_urls: ['http://localhost:8220'],
+              id: 'host-1',
+              is_default: true,
+              is_preconfigured: true,
+              name: 'Host 1',
+              proxy_id: 'proxy-1',
+            },
+            policies: [
+              {
+                download_source_id: 'source-2',
+                fleet_server_host_id: undefined,
+                has_fleet_server: true,
+                id: 'fs-policy-1',
+                is_default_fleet_server: true,
+                is_managed: true,
+                name: 'FS Policy 1',
+                space_ids: undefined,
+              },
+            ],
+          },
+          download_source: {
+            host: 'https://source-1/',
+            id: 'source-1',
+            is_default: true,
+            name: 'Source 1',
+          },
+        };
+        await getEnrollmentSettingsHandler(context, {} as any, response);
+        expect(response.ok).toHaveBeenCalledWith({
+          body: expectedResponse,
+        });
+        const validationResp = GetEnrollmentSettingsResponseSchema.validate(expectedResponse);
+        expect(validationResp).toEqual(expectedResponse);
       });
     });
   });

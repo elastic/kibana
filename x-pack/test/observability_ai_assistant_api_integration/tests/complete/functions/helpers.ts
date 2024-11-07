@@ -12,6 +12,7 @@ import {
   StreamingChatResponseEvent,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { Readable } from 'stream';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { CreateTest } from '../../../common/config';
 
 function decodeEvents(body: Readable | string) {
@@ -32,15 +33,17 @@ export async function invokeChatCompleteWithFunctionRequest({
   connectorId,
   observabilityAIAssistantAPIClient,
   functionCall,
+  scopes,
 }: {
   connectorId: string;
   observabilityAIAssistantAPIClient: Awaited<
     ReturnType<CreateTest['services']['observabilityAIAssistantAPIClient']>
   >;
   functionCall: Message['message']['function_call'];
+  scopes?: AssistantScope[];
 }) {
   const { body } = await observabilityAIAssistantAPIClient
-    .editorUser({
+    .editor({
       endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
       params: {
         body: {
@@ -57,6 +60,7 @@ export async function invokeChatCompleteWithFunctionRequest({
           connectorId,
           persist: false,
           screenContexts: [],
+          scopes: scopes || ['observability' as AssistantScope],
         },
       },
     })

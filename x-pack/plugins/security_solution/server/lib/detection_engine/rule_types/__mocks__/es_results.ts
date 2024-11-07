@@ -556,6 +556,7 @@ export const sampleSignalHit = (): SignalHit => ({
       saved_id: undefined,
       alert_suppression: undefined,
       investigation_fields: undefined,
+      rule_source: { type: 'internal' },
     },
     depth: 1,
   },

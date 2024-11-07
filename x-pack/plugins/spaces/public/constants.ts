@@ -13,7 +13,7 @@ export const getSpacesFeatureDescription = () => {
   if (!spacesFeatureDescription) {
     spacesFeatureDescription = i18n.translate('xpack.spaces.featureDescription', {
       defaultMessage:
-        'Organize your dashboards and other saved objects into meaningful categories.',
+        'Organize Kibana into spaces with dedicated navigation, privileges and objects.',
     });
   }
   return spacesFeatureDescription;

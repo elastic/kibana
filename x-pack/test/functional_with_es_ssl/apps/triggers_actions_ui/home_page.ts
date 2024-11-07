@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
-import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
+import { getTestAlertData, getTestConnectorData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -35,7 +35,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Loads the app with actions but not alerting privilege', () => {
+    describe('Loads the app with actions but not alerting privilege', function () {
+      this.tags('skipFIPS');
+
       before(async () => {
         await security.testUser.setRoles(['only_actions_role']);
       });
@@ -82,12 +84,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('navigates to an alert details page', async () => {
-          const { body: createdAction } = await supertest
+          const { body: createdConnector } = await supertest
             .post(`/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestActionData())
+            .send(getTestConnectorData())
             .expect(200);
-          objectRemover.add(createdAction.id, 'action', 'actions');
+          objectRemover.add(createdConnector.id, 'connector', 'actions');
 
           const { body: createdAlert } = await supertest
             .post(`/api/alerting/rule`)

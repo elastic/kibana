@@ -55,7 +55,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
     const ruleType = 'test.waitingRule';
     const aadIndex = `.alerts-${ruleType.toLowerCase()}.alerts-default`;
 
-    describe(`should be handled for alerting framework based AaD`, () => {
+    describe(`should be handled for alerting framework based AaD`, function () {
+      this.tags('skipFIPS');
       it('for a single conflicted alert', async () => {
         const source = uuidv4();
         const count = 1;

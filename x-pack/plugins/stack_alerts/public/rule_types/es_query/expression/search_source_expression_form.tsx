@@ -12,7 +12,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
+import type { SearchBarProps, StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters, getTime } from '@kbn/data-plugin/public';
 import type { SavedQuery, ISearchSource } from '@kbn/data-plugin/public';
@@ -139,9 +139,12 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     setEsFields(convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec())));
   }, []);
 
-  const onUpdateFilters = useCallback((newFilters) => {
-    dispatch({ type: 'filter', payload: mapAndFlattenFilters(newFilters) });
-  }, []);
+  const onUpdateFilters = useCallback<NonNullable<StatefulSearchBarProps['onFiltersUpdated']>>(
+    (newFilters) => {
+      dispatch({ type: 'filter', payload: mapAndFlattenFilters(newFilters) });
+    },
+    []
+  );
 
   const onChangeQuery = useCallback(
     ({ query: newQuery }: { query?: Query }) => {

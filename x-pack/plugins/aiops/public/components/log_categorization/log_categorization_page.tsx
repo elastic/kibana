@@ -28,10 +28,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
-
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
+
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
@@ -59,14 +59,10 @@ import { useActions } from './category_table/use_actions';
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
 
-interface LogCategorizationPageProps {
-  /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin: string;
-}
-
-export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddingOrigin }) => {
+export const LogCategorizationPage: FC = () => {
   const {
     notifications: { toasts },
+    embeddingOrigin,
   } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
@@ -229,7 +225,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
           searchQuery,
           runtimeMappings,
           {
-            [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
+            [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
           }
         ),
 

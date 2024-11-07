@@ -28,7 +28,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       await setupFleet(bettertest);
     });
 
-    describe('cloud_apm_migration_enabled', () => {
+    describe('cloud_apm_migration_enabled - basic', () => {
       it('should be false when when config not set', async () => {
         const { body } = await bettertest({
           pathname: '/internal/apm/fleet/migration_check',
@@ -39,6 +39,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   });
 
   registry.when('Fleet migration check - cloud', { config: 'cloud', archives: [] }, () => {
+    // eslint-disable-next-line mocha/no-sibling-hooks
     before(async () => {
       await setupFleet(bettertest);
     });
@@ -58,7 +59,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
     });
 
-    describe('cloud_apm_migration_enabled', () => {
+    describe('cloud_apm_migration_enabled - cloud', () => {
       it('should be true when when config is set', async () => {
         const { body } = await bettertest({
           pathname: '/internal/apm/fleet/migration_check',

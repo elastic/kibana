@@ -1,0 +1,36 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n-react",
+    "@kbn/data-plugin",
+    "@kbn/unified-field-list",
+    "@kbn/ml-date-picker",
+    "@kbn/i18n",
+    "@kbn/react-field",
+    "@kbn/ml-anomaly-utils",
+    "@kbn/ml-kibana-theme",
+    "@kbn/ml-data-grid",
+    "@kbn/ml-string-hash",
+    "@kbn/ml-is-populated-object",
+    "@kbn/ml-query-utils",
+    "@kbn/ml-is-defined",
+    "@kbn/field-types",
+    "@kbn/ui-theme",
+    "@kbn/core-theme-browser",
+  ]
+}

@@ -96,16 +96,16 @@ export const ExportJobsFlyoutContent = ({
   const {
     services: {
       notifications: { toasts },
-      mlServices: { mlUsageCollection, mlApiServices },
+      mlServices: { mlUsageCollection, mlApi },
     },
   } = useMlKibana();
 
   const {
     getJobs,
     dataFrameAnalytics: { getDataFrameAnalytics },
-  } = mlApiServices;
+  } = mlApi;
 
-  const jobsExportService = useMemo(() => new JobsExportService(mlApiServices), [mlApiServices]);
+  const jobsExportService = useMemo(() => new JobsExportService(mlApi), [mlApi]);
   const [adJobIds, setAdJobIds] = useState<string[]>([]);
   const [dfaJobIds, setDfaJobIds] = useState<string[]>([]);
   const [selectedJobIds, setSelectedJobIds] = useState<string[]>([]);

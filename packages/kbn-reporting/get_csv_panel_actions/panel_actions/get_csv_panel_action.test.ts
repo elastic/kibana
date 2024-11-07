@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Rx from 'rxjs';
@@ -60,7 +61,6 @@ describe('GetCsvReportPanelAction', () => {
   beforeEach(() => {
     csvConfig = {
       scroll: {} as ClientConfigType['csv']['scroll'],
-      enablePanelActionDownload: false,
     };
 
     apiClient = new ReportingAPIClient(core.http, core.uiSettings, '7.15.0');
@@ -282,60 +282,6 @@ describe('GetCsvReportPanelAction', () => {
       });
 
       expect(await plugin.isCompatible(context)).toEqual(true);
-    });
-  });
-
-  describe('download csv', () => {
-    beforeEach(() => {
-      csvConfig = {
-        scroll: {} as ClientConfigType['csv']['scroll'],
-        enablePanelActionDownload: true,
-      };
-
-      core.http.post.mockResolvedValue({});
-    });
-
-    it('shows a success toast when the download successfully starts', async () => {
-      const panel = new ReportingCsvPanelAction({
-        core,
-        apiClient,
-        startServices$: mockStartServices$,
-        usesUiCapabilities: true,
-        csvConfig,
-      });
-
-      await Rx.firstValueFrom(mockStartServices$);
-
-      await panel.execute(context);
-
-      expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        'data-test-subj': 'csvDownloadStarted',
-        text: expect.any(Function),
-        title: 'CSV download started',
-      });
-      expect(core.notifications.toasts.addDanger).not.toHaveBeenCalled();
-    });
-
-    it('shows a bad old toastie when it unsuccessfully fails', async () => {
-      apiClient.createImmediateReport = jest.fn().mockRejectedValue('No more ram!');
-      const panel = new ReportingCsvPanelAction({
-        core,
-        apiClient,
-        startServices$: mockStartServices$,
-        usesUiCapabilities: true,
-        csvConfig,
-      });
-
-      await Rx.firstValueFrom(mockStartServices$);
-
-      await panel.execute(context);
-
-      expect(core.notifications.toasts.addSuccess).toHaveBeenCalled();
-      expect(core.notifications.toasts.addDanger).toHaveBeenCalledWith({
-        'data-test-subj': 'downloadCsvFail',
-        text: "We couldn't download your CSV at this time.",
-        title: 'CSV download failed',
-      });
     });
   });
 });

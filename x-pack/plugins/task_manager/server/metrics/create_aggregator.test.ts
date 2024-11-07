@@ -35,6 +35,11 @@ import { TaskOverdueMetric, TaskOverdueMetricsAggregator } from './task_overdue_
 const logger = loggingSystemMock.createLogger();
 const mockMetricsAggregator = metricsAggregatorMock.create();
 const config: TaskManagerConfig = {
+  discovery: {
+    active_nodes_lookback: '30s',
+    interval: 10000,
+  },
+  kibanas_per_partition: 2,
   allow_reading_invalid_state: false,
   ephemeral_tasks: {
     enabled: true,
@@ -69,10 +74,11 @@ const config: TaskManagerConfig = {
   },
   version_conflict_threshold: 80,
   worker_utilization_running_average_window: 5,
-  claim_strategy: 'default',
+  claim_strategy: 'update_by_query',
   request_timeouts: {
     update_by_query: 1000,
   },
+  auto_calculate_default_ech_capacity: false,
 };
 
 describe('createAggregator', () => {

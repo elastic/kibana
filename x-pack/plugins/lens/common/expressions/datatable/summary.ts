@@ -8,15 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { ColumnConfigArg } from './datatable_column';
-import { getOriginalId } from './transpose_helpers';
+import { getOriginalId } from '@kbn/transpose-utils';
+import { DatatableColumnArgs } from './datatable_column';
 import { isNumericFieldForDatatable } from './utils';
 
-type SummaryRowType = Extract<ColumnConfigArg['summaryRow'], string>;
+type SummaryRowType = Extract<DatatableColumnArgs['summaryRow'], string>;
 
 export function getFinalSummaryConfiguration(
   columnId: string,
-  columnArgs: Pick<ColumnConfigArg, 'summaryRow' | 'summaryLabel'> | undefined,
+  columnArgs: Pick<DatatableColumnArgs, 'summaryRow' | 'summaryLabel'> | undefined,
   table: Datatable | undefined
 ) {
   const isNumeric = isNumericFieldForDatatable(table, columnId);
@@ -87,13 +87,13 @@ export function getSummaryRowOptions(): Array<{
 
 /** @internal **/
 export function computeSummaryRowForColumn(
-  columnArgs: ColumnConfigArg,
+  columnArgs: DatatableColumnArgs,
   table: Datatable,
   formatters: Record<string, FieldFormat>,
   defaultFormatter: FieldFormat
 ) {
   const summaryValue = computeFinalValue(columnArgs.summaryRow, columnArgs.columnId, table.rows);
-  // ignore the coluymn formatter for the count case
+  // ignore the column formatter for the count case
   if (columnArgs.summaryRow === 'count') {
     return defaultFormatter.convert(summaryValue);
   }
@@ -101,7 +101,7 @@ export function computeSummaryRowForColumn(
 }
 
 function computeFinalValue(
-  type: ColumnConfigArg['summaryRow'],
+  type: DatatableColumnArgs['summaryRow'],
   columnId: string,
   rows: Datatable['rows']
 ) {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useEuiTheme } from '@elastic/eui';
@@ -129,9 +130,6 @@ export function Histogram({
         | undefined;
       const response = json?.rawResponse;
 
-      // The response can have `response?._shards.failed` but we should still be able to show hits number
-      // TODO: show shards warnings as a badge next to the total hits number
-
       if (requestFailed) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
         onChartLoad?.({ adapters: adapters ?? {} });
@@ -141,10 +139,14 @@ export function Histogram({
       const adapterTables = adapters?.tables?.tables;
       const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
 
-      onTotalHitsChange?.(
-        isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
-        totalHits ?? hits?.total
-      );
+      if (response?._shards?.failed || response?.timed_out) {
+        onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, totalHits);
+      } else {
+        onTotalHitsChange?.(
+          isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
+          totalHits ?? hits?.total
+        );
+      }
 
       if (response) {
         const newBucketInterval = buildBucketInterval({

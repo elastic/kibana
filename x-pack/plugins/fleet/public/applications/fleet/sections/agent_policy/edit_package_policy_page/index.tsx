@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { isEmpty } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -47,8 +46,6 @@ import {
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
-
-import { AGENTLESS_POLICY_ID } from '../../../../../../common/constants';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
@@ -76,7 +73,6 @@ export const EditPackagePolicyPage = memo(() => {
   } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
 
   const packagePolicy = useGetOnePackagePolicy(packagePolicyId);
-
   const extensionView = useUIExtension(
     packagePolicy.data?.item?.package?.name ?? '',
     'package-policy-edit'
@@ -107,8 +103,7 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const { isAgentlessPackagePolicy } = useAgentless();
-
+  const { isAgentlessAgentPolicy, isAgentlessIntegration } = useAgentless();
   const {
     // data
     agentPolicies: existingAgentPolicies,
@@ -131,7 +126,15 @@ export const EditPackagePolicyForm = memo<{
   } = usePackagePolicyWithRelatedData(packagePolicyId, {
     forceUpgrade,
   });
-  const hasAgentlessAgentPolicy = packagePolicy.policy_ids.includes(AGENTLESS_POLICY_ID);
+
+  const hasAgentlessAgentPolicy = useMemo(
+    () =>
+      existingAgentPolicies.length === 1
+        ? existingAgentPolicies.some((policy) => isAgentlessAgentPolicy(policy)) &&
+          isAgentlessIntegration(packageInfo)
+        : false,
+    [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, isAgentlessIntegration]
+  );
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);
@@ -163,8 +166,8 @@ export const EditPackagePolicyForm = memo<{
       let count = 0;
       for (const id of packagePolicy.policy_ids) {
         const { data } = await sendGetAgentStatus({ policyId: id });
-        if (data?.results.total) {
-          count += data.results.total;
+        if (data?.results.active) {
+          count += data.results.active;
         }
       }
       setAgentCount(count);
@@ -250,7 +253,10 @@ export const EditPackagePolicyForm = memo<{
       return;
     }
     if (
-      (agentCount !== 0 || agentPoliciesToAdd.length > 0 || agentPoliciesToRemove.length > 0) &&
+      (agentCount !== 0 ||
+        agentPolicies.length === 0 ||
+        agentPoliciesToAdd.length > 0 ||
+        agentPoliciesToRemove.length > 0) &&
       !hasAgentlessAgentPolicy &&
       formState !== 'CONFIRM'
     ) {
@@ -449,7 +455,7 @@ export const EditPackagePolicyForm = memo<{
         onChange={handleExtensionViewOnChange}
         validationResults={validationResults}
         isEditPage={true}
-        isAgentlessEnabled={isAgentlessPackagePolicy(packagePolicy)}
+        isAgentlessEnabled={hasAgentlessAgentPolicy}
       />
     </ExtensionWrapper>
   );
@@ -485,7 +491,7 @@ export const EditPackagePolicyForm = memo<{
       <EuiErrorBoundary>
         {isLoadingData ? (
           <Loading />
-        ) : loadingError || isEmpty(existingAgentPolicies) || !packageInfo ? (
+        ) : loadingError || !packageInfo ? (
           <ErrorComponent
             title={
               <FormattedMessage
@@ -592,7 +598,7 @@ export const EditPackagePolicyForm = memo<{
                                 content: (
                                   <FormattedMessage
                                     id="xpack.fleet.agentPolicy.saveIntegrationTooltip"
-                                    defaultMessage="To save the integration policy, you must have security enabled and have the All privilege for Integrations. Contact your administrator."
+                                    defaultMessage="To save the integration policy, you must have security enabled and have the All privilege for Integrations and Agent Policies. Contact your administrator."
                                   />
                                 ),
                               }
