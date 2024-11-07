@@ -13,6 +13,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const { timePicker } = getPageObjects(['timePicker']);
 
   describe('lens app - group 2', () => {
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
@@ -41,6 +42,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       });
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
@@ -48,6 +50,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
       await kibanaServer.savedObjects.cleanStandardList();
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
     // total run time ~ 16m 20s

@@ -13,7 +13,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'visualize',
     'lens',
     'visEditor',
-
     'header',
     'visChart',
   ]);
