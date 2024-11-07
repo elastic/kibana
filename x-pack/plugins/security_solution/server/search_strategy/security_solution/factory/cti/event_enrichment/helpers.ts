@@ -46,16 +46,19 @@ export const buildIndicatorShouldClauses = (
 export const buildIndicatorEnrichments = (hits: estypes.SearchHit[]): CtiEnrichment[] => {
   return hits.flatMap<CtiEnrichment>(({ matched_queries: matchedQueries, ...hit }) => {
     return (
-      matchedQueries?.reduce<CtiEnrichment[]>((enrichments, matchedQuery) => {
-        if (isValidEventField(matchedQuery)) {
-          enrichments.push({
-            ...hit.fields,
-            ...buildIndicatorMatchedFields(hit, matchedQuery),
-          });
-        }
+      (matchedQueries as string[] | undefined)?.reduce<CtiEnrichment[]>(
+        (enrichments, matchedQuery) => {
+          if (isValidEventField(matchedQuery)) {
+            enrichments.push({
+              ...hit.fields,
+              ...buildIndicatorMatchedFields(hit, matchedQuery),
+            });
+          }
 
-        return enrichments;
-      }, []) ?? []
+          return enrichments;
+        },
+        []
+      ) ?? []
     );
   });
 };
