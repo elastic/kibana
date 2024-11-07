@@ -9,7 +9,7 @@ In this tutorial we'll use the {kib} sample web logs in Discover and Lens to exp
 [[prerequisite]]
 === Prerequisite 
 
-To be able to select **Language {esql}** from the Data views menu the `enableESQL` setting must be enabled from **Stack Management > Advanced Settings**. It is enabled by default. 
+To view the {esql} option in **Discover**, the `enableESQL` setting must be enabled from Kibana's **Advanced Settings**. It is enabled by default. 
 
 [float]
 [[tutorial-try-esql]]
@@ -21,20 +21,22 @@ To load the sample data:
 . Click **Other sample data sets**.
 . On the Sample web logs card, click **Add data**.
 . Open the main menu and select *Discover*.
-. From the Data views menu, select *Language {esql}*.
+. Select *Try {esql}* from the application menu bar.
 
 Let's say we want to find out what operating system users have and how much RAM is on their machine.  
 
 . Set the time range to **Last 7 days**.
-. Expand image:images/expand-icon-2.png[An image of the expand icon] the query bar.
-. Put each processing command on a new line for better readability.
 . Copy the query below:
 +
 [source,esql]
 ----
-FROM kibana_sample_data_logs 
-| KEEP machine.os, machine.ram
+FROM kibana_sample_data_logs <1>
+| KEEP machine.os, machine.ram <2>
 ----
+<1> We're specifically looking for data from the sample web logs we just installed.
+<2> We're only keeping the `machine.os` and `machine.ram` fields in the results table.
++
+TIP: Put each processing command on a new line for better readability.
 +
 . Click **▶Run**.
 +
@@ -57,12 +59,12 @@ FROM kibana_sample_data_logs
 | LIMIT 10
 ----
 +
-. Click **▶Run**.
+. Click **▶Run** again. You can notice that the table is now limited to 10 results. The visualization also updated automatically based on the fields you have in your query, and broke down the data for you.
 +
 [role="screenshot"]
 image:images/esql-limit.png[An image of the extended query result]
 
-Let's sort the data by machine ram and filter out the destination GB. 
+We will now take it a step further to sort the data by machine ram and filter out the `GB` destination. 
 
 . Copy the query below:
 +
@@ -75,14 +77,16 @@ FROM kibana_sample_data_logs
 | LIMIT 10
 ----
 +
-. Click **▶Run**.
+. Click **▶Run** again. The table and visualization no longer show results for which the `geo.dest` field value is "GB", and the results are now sorted in descending order in the table based on the `machine.ram` field. 
 +
 [role="screenshot"]
 image:images/esql-full-query.png[An image of the full query result]
 +
 . Click **Save** to save the query and visualization to a dashboard. 
 
-To make changes to the visualization you can use the visualization drop-down. To make changes to the colors used or the axes, or click the pencil icon. This opens an in-line editor where you can change the colors and axes of the visualization. 
+You can make changes to the visualization by clicking the pencil icon. This opens additional settings that let you adjust the chart type, axes, breakdown, colors, and information displayed to your liking. If you're not sure which route to go, check one of the suggestions available in the visualization editor.
+
+If you'd like to keep the visualization and add it to a dashboard, you can save it using the floppy disk icon.
 
 [TIP]
 ====
