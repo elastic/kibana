@@ -5917,49 +5917,110 @@ paths:
     post:
       description: Create a new agent key for APM.
       operationId: createAgentKey
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                privileges:
-                  items:
-                    enum:
-                      - event:write
-                      - config_agent:read
-                    type: string
-                  type: array
+              $ref: '#/components/schemas/APM_UI_agent_keys_object'
         required: true
       responses:
         '200':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  api_key:
-                    type: string
-                  encoded:
-                    type: string
-                  expiration:
-                    format: int64
-                    type: integer
-                  id:
-                    type: string
-                  name:
-                    type: string
+                $ref: '#/components/schemas/APM_UI_agent_keys_response'
           description: Agent key created successfully
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_403_response'
+          description: Forbidden response
+        '500':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_500_response'
+          description: Internal Server Error response
       summary: Create an APM agent key
       tags:
         - APM agent keys
+  /api/apm/fleet/apm_server_schema:
+    post:
+      operationId: saveApmServerSchema
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                schema:
+                  additionalProperties: true
+                  description: Schema object
+                  example:
+                    foo: bar
+                  type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_403_response'
+          description: Forbidden response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Save APM server schema
+      tags:
+        - APM server schema
   /api/apm/services/{serviceName}/annotation:
     post:
       description: Create a new annotation for a specific service.
       operationId: createAnnotation
       parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
         - description: The name of the service
           in: path
           name: serviceName
@@ -5970,63 +6031,39 @@ paths:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
             schema:
-              type: object
-              properties:
-                '@timestamp':
-                  type: string
-                message:
-                  type: string
-                service:
-                  type: object
-                  properties:
-                    environment:
-                      type: string
-                    version:
-                      type: string
-                tags:
-                  items:
-                    type: string
-                  type: array
+              $ref: '#/components/schemas/APM_UI_create_annotation_object'
         required: true
       responses:
         '200':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  _id:
-                    type: string
-                  _index:
-                    type: string
-                  _source:
-                    type: object
-                    properties:
-                      '@timestamp':
-                        type: string
-                      annotation:
-                        type: string
-                      event:
-                        type: object
-                        properties:
-                          created:
-                            type: string
-                      message:
-                        type: string
-                      service:
-                        type: object
-                        properties:
-                          environment:
-                            type: string
-                          name:
-                            type: string
-                          version:
-                            type: string
-                      tags:
-                        items:
-                          type: string
-                        type: array
+                $ref: '#/components/schemas/APM_UI_create_annotation_response'
           description: Annotation created successfully
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_403_response'
+          description: Forbidden response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
       summary: Create a service annotation
       tags:
         - APM annotations
@@ -6035,6 +6072,7 @@ paths:
       description: Search for annotations related to a specific service.
       operationId: getAnnotation
       parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
         - description: The name of the service
           in: path
           name: serviceName
@@ -6064,27 +6102,484 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  annotations:
-                    items:
-                      type: object
-                      properties:
-                        '@timestamp':
-                          type: number
-                        id:
-                          type: string
-                        text:
-                          type: string
-                        type:
-                          enum:
-                            - version
-                          type: string
-                    type: array
+                $ref: '#/components/schemas/APM_UI_annotation_search_response'
           description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '500':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_500_response'
+          description: Internal Server Error response
       summary: Search for annotations
       tags:
         - APM annotations
+  /api/apm/settings/agent-configuration:
+    delete:
+      operationId: deleteAgentConfiguration
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: '#/components/schemas/APM_UI_service_object'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/APM_UI_delete_agent_configurations_response
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_403_response'
+          description: Forbidden response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Delete agent configuration
+      tags:
+        - APM agent configuration
+    get:
+      operationId: getAgentConfigurations
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_agent_configurations_response'
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Get a list of agent configurations
+      tags:
+        - APM agent configuration
+    put:
+      operationId: createUpdateAgentConfiguration
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
+        - description: If the config exists ?overwrite=true is required
+          in: query
+          name: overwrite
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: '#/components/schemas/APM_UI_agent_configuration_intake_object'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_403_response'
+          description: Forbidden response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Create or update agent configuration
+      tags:
+        - APM agent configuration
+  /api/apm/settings/agent-configuration/agent_name:
+    get:
+      description: Retrieve `agentName` for a service.
+      operationId: getAgentNameForService
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - description: The name of the service
+          example: node
+          in: query
+          name: serviceName
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_service_agent_name_response'
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Get agent name for service
+      tags:
+        - APM agent configuration
+  /api/apm/settings/agent-configuration/environments:
+    get:
+      operationId: getEnvironmentsForService
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - description: The name of the service
+          in: query
+          name: serviceName
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_service_environments_response'
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Get environments for service
+      tags:
+        - APM agent configuration
+  /api/apm/settings/agent-configuration/search:
+    post:
+      description: >
+        This endpoint allows to search for single agent configuration and update
+        'applied_by_agent' field.
+      operationId: searchSingleConfiguration
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: '#/components/schemas/APM_UI_search_agent_configuration_object'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/APM_UI_search_agent_configuration_response
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Lookup single agent configuration
+      tags:
+        - APM agent configuration
+  /api/apm/settings/agent-configuration/view:
+    get:
+      operationId: getSingleAgentConfiguration
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - description: Service name
+          example: node
+          in: query
+          name: name
+          schema:
+            type: string
+        - description: Service environment
+          example: prod
+          in: query
+          name: environment
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/APM_UI_single_agent_configuration_response
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Get single agent configuration
+      tags:
+        - APM agent configuration
+  /api/apm/sourcemaps:
+    get:
+      description: Returns an array of Fleet artifacts, including source map uploads.
+      operationId: getSourceMaps
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - description: Page number
+          in: query
+          name: page
+          schema:
+            type: number
+        - description: Number of records per page
+          in: query
+          name: perPage
+          schema:
+            type: number
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_source_maps_response'
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '500':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_500_response'
+          description: Internal Server Error response
+        '501':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_501_response'
+          description: Not Implemented response
+      summary: Get source maps
+      tags:
+        - APM sourcemaps
+    post:
+      description: Upload a source map for a specific service and version.
+      operationId: uploadSourceMap
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
+      requestBody:
+        content:
+          multipart/form-data; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: '#/components/schemas/APM_UI_upload_source_map_object'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_upload_source_maps_response'
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_403_response'
+          description: Forbidden response
+        '500':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_500_response'
+          description: Internal Server Error response
+        '501':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_501_response'
+          description: Not Implemented response
+      summary: Upload source map
+      tags:
+        - APM sourcemaps
+  /api/apm/sourcemaps/{id}:
+    delete:
+      description: Delete a previously uploaded source map.
+      operationId: deleteSourceMap
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
+        - description: Source map identifier
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_403_response'
+          description: Forbidden response
+        '500':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_500_response'
+          description: Internal Server Error response
+        '501':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_501_response'
+          description: Not Implemented response
+      summary: Delete source map
+      tags:
+        - APM sourcemaps
   /api/asset_criticality:
     delete:
       description: Delete the asset criticality record for a specific entity.
@@ -17749,7 +18244,6 @@ paths:
           name: kuery
           required: false
           schema:
-            deprecated: true
             type: string
       responses:
         '200':
@@ -17779,16 +18273,12 @@ paths:
                         type: number
                       other:
                         type: number
-                      total:
-                        deprecated: true
-                        type: number
                       unenrolled:
                         type: number
                       updating:
                         type: number
                     required:
                       - events
-                      - total
                       - online
                       - error
                       - offline
@@ -17892,41 +18382,6 @@ paths:
       summary: ''
       tags:
         - Elastic Agents
-  /api/fleet/agent-status:
-    get:
-      operationId: get-fleet-agent-status-2
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - in: query
-          name: policyId
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: policyIds
-          required: false
-          schema:
-            anyOf:
-              - items:
-                  type: string
-                type: array
-              - type: string
-        - in: query
-          name: kuery
-          required: false
-          schema:
-            deprecated: true
-            type: string
-      responses: {}
-      summary: ''
-      tags: []
   /api/fleet/agents:
     get:
       description: List agents
@@ -18003,285 +18458,6 @@ paths:
                 type: object
                 properties:
                   items:
-                    items:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        access_api_key:
-                          type: string
-                        access_api_key_id:
-                          type: string
-                        active:
-                          type: boolean
-                        agent:
-                          additionalProperties: true
-                          type: object
-                          properties:
-                            id:
-                              type: string
-                            version:
-                              type: string
-                          required:
-                            - id
-                            - version
-                        components:
-                          items:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              id:
-                                type: string
-                              message:
-                                type: string
-                              status:
-                                enum:
-                                  - STARTING
-                                  - CONFIGURING
-                                  - HEALTHY
-                                  - DEGRADED
-                                  - FAILED
-                                  - STOPPING
-                                  - STOPPED
-                                type: string
-                              type:
-                                type: string
-                              units:
-                                items:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    id:
-                                      type: string
-                                    message:
-                                      type: string
-                                    payload:
-                                      additionalProperties: {}
-                                      type: object
-                                    status:
-                                      enum:
-                                        - STARTING
-                                        - CONFIGURING
-                                        - HEALTHY
-                                        - DEGRADED
-                                        - FAILED
-                                        - STOPPING
-                                        - STOPPED
-                                      type: string
-                                    type:
-                                      enum:
-                                        - input
-                                        - output
-                                      type: string
-                                  required:
-                                    - id
-                                    - type
-                                    - status
-                                    - message
-                                type: array
-                            required:
-                              - id
-                              - type
-                              - status
-                              - message
-                          type: array
-                        default_api_key:
-                          type: string
-                        default_api_key_history:
-                          items:
-                            additionalProperties: false
-                            deprecated: true
-                            type: object
-                            properties:
-                              id:
-                                type: string
-                              retired_at:
-                                type: string
-                            required:
-                              - id
-                              - retired_at
-                          type: array
-                        default_api_key_id:
-                          type: string
-                        enrolled_at:
-                          type: string
-                        id:
-                          type: string
-                        last_checkin:
-                          type: string
-                        last_checkin_message:
-                          type: string
-                        last_checkin_status:
-                          enum:
-                            - error
-                            - online
-                            - degraded
-                            - updating
-                            - starting
-                          type: string
-                        local_metadata:
-                          additionalProperties: {}
-                          type: object
-                        metrics:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            cpu_avg:
-                              type: number
-                            memory_size_byte_avg:
-                              type: number
-                        namespaces:
-                          items:
-                            type: string
-                          type: array
-                        outputs:
-                          additionalProperties:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              api_key_id:
-                                type: string
-                              to_retire_api_key_ids:
-                                items:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    id:
-                                      type: string
-                                    retired_at:
-                                      type: string
-                                  required:
-                                    - id
-                                    - retired_at
-                                type: array
-                              type:
-                                type: string
-                            required:
-                              - api_key_id
-                              - type
-                          type: object
-                        packages:
-                          items:
-                            type: string
-                          type: array
-                        policy_id:
-                          type: string
-                        policy_revision:
-                          nullable: true
-                          type: number
-                        sort:
-                          items:
-                            anyOf:
-                              - type: number
-                              - type: string
-                              - enum: []
-                                nullable: true
-                          type: array
-                        status:
-                          enum:
-                            - offline
-                            - error
-                            - online
-                            - inactive
-                            - enrolling
-                            - unenrolling
-                            - unenrolled
-                            - updating
-                            - degraded
-                          type: string
-                        tags:
-                          items:
-                            type: string
-                          type: array
-                        type:
-                          enum:
-                            - PERMANENT
-                            - EPHEMERAL
-                            - TEMPORARY
-                          type: string
-                        unenrolled_at:
-                          type: string
-                        unenrollment_started_at:
-                          type: string
-                        unhealthy_reason:
-                          items:
-                            enum:
-                              - input
-                              - output
-                              - other
-                            type: string
-                          nullable: true
-                          type: array
-                        upgrade_details:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            action_id:
-                              type: string
-                            metadata:
-                              additionalProperties: false
-                              type: object
-                              properties:
-                                download_percent:
-                                  type: number
-                                download_rate:
-                                  type: number
-                                error_msg:
-                                  type: string
-                                failed_state:
-                                  enum:
-                                    - UPG_REQUESTED
-                                    - UPG_SCHEDULED
-                                    - UPG_DOWNLOADING
-                                    - UPG_EXTRACTING
-                                    - UPG_REPLACING
-                                    - UPG_RESTARTING
-                                    - UPG_FAILED
-                                    - UPG_WATCHING
-                                    - UPG_ROLLBACK
-                                  type: string
-                                retry_error_msg:
-                                  type: string
-                                retry_until:
-                                  type: string
-                                scheduled_at:
-                                  type: string
-                            state:
-                              enum:
-                                - UPG_REQUESTED
-                                - UPG_SCHEDULED
-                                - UPG_DOWNLOADING
-                                - UPG_EXTRACTING
-                                - UPG_REPLACING
-                                - UPG_RESTARTING
-                                - UPG_FAILED
-                                - UPG_WATCHING
-                                - UPG_ROLLBACK
-                              type: string
-                            target_version:
-                              type: string
-                          required:
-                            - target_version
-                            - action_id
-                            - state
-                        upgrade_started_at:
-                          nullable: true
-                          type: string
-                        upgraded_at:
-                          nullable: true
-                          type: string
-                        user_provided_metadata:
-                          additionalProperties: {}
-                          type: object
-                      required:
-                        - id
-                        - packages
-                        - type
-                        - active
-                        - enrolled_at
-                        - local_metadata
-                    type: array
-                  list:
-                    deprecated: true
                     items:
                       additionalProperties: false
                       type: object
@@ -19595,43 +19771,6 @@ paths:
       summary: ''
       tags:
         - Elastic Agent actions
-    put:
-      operationId: put-fleet-agents-agentid-reassign
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - in: path
-          name: agentId
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                policy_id:
-                  type: string
-              required:
-                - policy_id
-      responses: {}
-      summary: ''
-      tags: []
   /api/fleet/agents/{agentId}/request_diagnostics:
     post:
       description: Request agent diagnostics
@@ -21135,44 +21274,6 @@ paths:
                         - active
                         - created_at
                     type: array
-                  list:
-                    deprecated: true
-                    items:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        active:
-                          description: >-
-                            When false, the enrollment API key is revoked and
-                            cannot be used for enrolling Elastic Agents.
-                          type: boolean
-                        api_key:
-                          description: >-
-                            The enrollment API key (token) used for enrolling
-                            Elastic Agents.
-                          type: string
-                        api_key_id:
-                          description: The ID of the API key in the Security API.
-                          type: string
-                        created_at:
-                          type: string
-                        id:
-                          type: string
-                        name:
-                          description: The name of the enrollment API key.
-                          type: string
-                        policy_id:
-                          description: >-
-                            The ID of the agent policy the Elastic Agent will be
-                            enrolled in.
-                          type: string
-                      required:
-                        - id
-                        - api_key_id
-                        - api_key
-                        - active
-                        - created_at
-                    type: array
                   page:
                     type: number
                   perPage:
@@ -21184,7 +21285,6 @@ paths:
                   - total
                   - page
                   - perPage
-                  - list
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -21446,120 +21546,6 @@ paths:
       summary: ''
       tags:
         - Fleet enrollment API keys
-  /api/fleet/enrollment-api-keys:
-    get:
-      operationId: get-fleet-enrollment-api-keys-2
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - in: query
-          name: page
-          required: false
-          schema:
-            default: 1
-            type: number
-        - in: query
-          name: perPage
-          required: false
-          schema:
-            default: 20
-            type: number
-        - in: query
-          name: kuery
-          required: false
-          schema:
-            type: string
-      responses: {}
-      summary: ''
-      tags: []
-    post:
-      operationId: post-fleet-enrollment-api-keys-2
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                expiration:
-                  type: string
-                name:
-                  type: string
-                policy_id:
-                  type: string
-              required:
-                - policy_id
-      responses: {}
-      summary: ''
-      tags: []
-  /api/fleet/enrollment-api-keys/{keyId}:
-    delete:
-      operationId: delete-fleet-enrollment-api-keys-keyid-2
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - in: path
-          name: keyId
-          required: true
-          schema:
-            type: string
-      responses: {}
-      summary: ''
-      tags: []
-    get:
-      operationId: get-fleet-enrollment-api-keys-keyid-2
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - in: path
-          name: keyId
-          required: true
-          schema:
-            type: string
-      responses: {}
-      summary: ''
-      tags: []
   /api/fleet/epm/bulk_assets:
     post:
       description: Bulk get assets
@@ -21678,11 +21664,6 @@ paths:
           schema:
             type: boolean
         - in: query
-          name: experimental
-          required: false
-          schema:
-            type: boolean
-        - in: query
           name: include_policy_templates
           required: false
           schema:
@@ -21698,27 +21679,6 @@ paths:
                   items:
                     items:
                       additionalProperties: false
-                      type: object
-                      properties:
-                        count:
-                          type: number
-                        id:
-                          type: string
-                        parent_id:
-                          type: string
-                        parent_title:
-                          type: string
-                        title:
-                          type: string
-                      required:
-                        - id
-                        - title
-                        - count
-                    type: array
-                  response:
-                    items:
-                      additionalProperties: false
-                      deprecated: true
                       type: object
                       properties:
                         count:
@@ -21827,59 +21787,6 @@ paths:
                     required:
                       - install_source
                   items:
-                    items:
-                      anyOf:
-                        - additionalProperties: false
-                          type: object
-                          properties:
-                            id:
-                              type: string
-                            originId:
-                              type: string
-                            type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
-                          required:
-                            - id
-                            - type
-                        - additionalProperties: false
-                          type: object
-                          properties:
-                            deferred:
-                              type: boolean
-                            id:
-                              type: string
-                            type:
-                              enum:
-                                - index
-                                - index_template
-                                - component_template
-                                - ingest_pipeline
-                                - ilm_policy
-                                - data_stream_ilm_policy
-                                - transform
-                                - ml_model
-                              type: string
-                            version:
-                              type: string
-                          required:
-                            - id
-                            - type
-                    type: array
-                  response:
-                    deprecated: true
                     items:
                       anyOf:
                         - additionalProperties: false
@@ -22056,11 +21963,6 @@ paths:
             type: string
         - in: query
           name: prerelease
-          required: false
-          schema:
-            type: boolean
-        - in: query
-          name: experimental
           required: false
           schema:
             type: boolean
@@ -22388,7 +22290,6 @@ paths:
                             - beta
                             - experimental
                           type: string
-                        savedObject: {}
                         signature_path:
                           type: string
                         source:
@@ -22417,354 +22318,6 @@ paths:
                         version:
                           type: string
                       required:
-                        - savedObject
-                        - name
-                        - version
-                        - title
-                        - id
-                    type: array
-                  response:
-                    items:
-                      additionalProperties: true
-                      deprecated: true
-                      type: object
-                      properties:
-                        categories:
-                          items:
-                            type: string
-                          type: array
-                        conditions:
-                          additionalProperties: true
-                          type: object
-                          properties:
-                            elastic:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                capabilities:
-                                  items:
-                                    type: string
-                                  type: array
-                                subscription:
-                                  type: string
-                            kibana:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                version:
-                                  type: string
-                        data_streams:
-                          items:
-                            additionalProperties: {}
-                            type: object
-                          type: array
-                        description:
-                          type: string
-                        discovery:
-                          additionalProperties: true
-                          type: object
-                          properties:
-                            fields:
-                              items:
-                                additionalProperties: true
-                                type: object
-                                properties:
-                                  name:
-                                    type: string
-                                required:
-                                  - name
-                              type: array
-                        download:
-                          type: string
-                        format_version:
-                          type: string
-                        icons:
-                          items:
-                            additionalProperties: true
-                            type: object
-                            properties:
-                              dark_mode:
-                                type: boolean
-                              path:
-                                type: string
-                              size:
-                                type: string
-                              src:
-                                type: string
-                              title:
-                                type: string
-                              type:
-                                type: string
-                            required:
-                              - src
-                          type: array
-                        id:
-                          type: string
-                        installationInfo:
-                          additionalProperties: true
-                          type: object
-                          properties:
-                            additional_spaces_installed_kibana:
-                              additionalProperties:
-                                items:
-                                  additionalProperties: true
-                                  type: object
-                                  properties:
-                                    id:
-                                      type: string
-                                    originId:
-                                      type: string
-                                    type:
-                                      enum:
-                                        - dashboard
-                                        - lens
-                                        - visualization
-                                        - search
-                                        - index-pattern
-                                        - map
-                                        - ml-module
-                                        - security-rule
-                                        - csp-rule-template
-                                        - osquery-pack-asset
-                                        - osquery-saved-query
-                                        - tag
-                                      type: string
-                                  required:
-                                    - id
-                                    - type
-                                type: array
-                              type: object
-                            created_at:
-                              type: string
-                            experimental_data_stream_features:
-                              items:
-                                additionalProperties: true
-                                type: object
-                                properties:
-                                  data_stream:
-                                    type: string
-                                  features:
-                                    additionalProperties: true
-                                    type: object
-                                    properties:
-                                      doc_value_only_numeric:
-                                        type: boolean
-                                      doc_value_only_other:
-                                        type: boolean
-                                      synthetic_source:
-                                        type: boolean
-                                      tsdb:
-                                        type: boolean
-                                required:
-                                  - data_stream
-                                  - features
-                              type: array
-                            install_format_schema_version:
-                              type: string
-                            install_source:
-                              enum:
-                                - registry
-                                - upload
-                                - bundled
-                                - custom
-                              type: string
-                            install_status:
-                              enum:
-                                - installed
-                                - installing
-                                - install_failed
-                              type: string
-                            installed_es:
-                              items:
-                                additionalProperties: true
-                                type: object
-                                properties:
-                                  deferred:
-                                    type: boolean
-                                  id:
-                                    type: string
-                                  type:
-                                    enum:
-                                      - index
-                                      - index_template
-                                      - component_template
-                                      - ingest_pipeline
-                                      - ilm_policy
-                                      - data_stream_ilm_policy
-                                      - transform
-                                      - ml_model
-                                    type: string
-                                  version:
-                                    type: string
-                                required:
-                                  - id
-                                  - type
-                              type: array
-                            installed_kibana:
-                              items:
-                                additionalProperties: true
-                                type: object
-                                properties:
-                                  id:
-                                    type: string
-                                  originId:
-                                    type: string
-                                  type:
-                                    enum:
-                                      - dashboard
-                                      - lens
-                                      - visualization
-                                      - search
-                                      - index-pattern
-                                      - map
-                                      - ml-module
-                                      - security-rule
-                                      - csp-rule-template
-                                      - osquery-pack-asset
-                                      - osquery-saved-query
-                                      - tag
-                                    type: string
-                                required:
-                                  - id
-                                  - type
-                              type: array
-                            installed_kibana_space_id:
-                              type: string
-                            latest_executed_state:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                error:
-                                  type: string
-                                name:
-                                  type: string
-                                started_at:
-                                  type: string
-                              required:
-                                - name
-                                - started_at
-                            latest_install_failed_attempts:
-                              items:
-                                additionalProperties: true
-                                type: object
-                                properties:
-                                  created_at:
-                                    type: string
-                                  error:
-                                    additionalProperties: true
-                                    type: object
-                                    properties:
-                                      message:
-                                        type: string
-                                      name:
-                                        type: string
-                                      stack:
-                                        type: string
-                                    required:
-                                      - name
-                                      - message
-                                  target_version:
-                                    type: string
-                                required:
-                                  - created_at
-                                  - target_version
-                                  - error
-                              type: array
-                            name:
-                              type: string
-                            namespaces:
-                              items:
-                                type: string
-                              type: array
-                            type:
-                              type: string
-                            updated_at:
-                              type: string
-                            verification_key_id:
-                              nullable: true
-                              type: string
-                            verification_status:
-                              enum:
-                                - unverified
-                                - verified
-                                - unknown
-                              type: string
-                            version:
-                              type: string
-                          required:
-                            - type
-                            - installed_kibana
-                            - installed_es
-                            - name
-                            - version
-                            - install_status
-                            - install_source
-                            - verification_status
-                        integration:
-                          type: string
-                        internal:
-                          type: boolean
-                        latestVersion:
-                          type: string
-                        name:
-                          type: string
-                        owner:
-                          additionalProperties: true
-                          type: object
-                          properties:
-                            github:
-                              type: string
-                            type:
-                              enum:
-                                - elastic
-                                - partner
-                                - community
-                              type: string
-                        path:
-                          type: string
-                        policy_templates:
-                          items:
-                            additionalProperties: {}
-                            type: object
-                          type: array
-                        readme:
-                          type: string
-                        release:
-                          enum:
-                            - ga
-                            - beta
-                            - experimental
-                          type: string
-                        savedObject: {}
-                        signature_path:
-                          type: string
-                        source:
-                          additionalProperties: true
-                          type: object
-                          properties:
-                            license:
-                              type: string
-                          required:
-                            - license
-                        status:
-                          type: string
-                        title:
-                          type: string
-                        type:
-                          enum:
-                            - integration
-                            - input
-                            - content
-                          type: string
-                        vars:
-                          items:
-                            additionalProperties: {}
-                            type: object
-                          type: array
-                        version:
-                          type: string
-                      required:
-                        - savedObject
                         - name
                         - version
                         - title
@@ -22845,59 +22398,6 @@ paths:
                     required:
                       - install_source
                   items:
-                    items:
-                      anyOf:
-                        - additionalProperties: false
-                          type: object
-                          properties:
-                            id:
-                              type: string
-                            originId:
-                              type: string
-                            type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
-                          required:
-                            - id
-                            - type
-                        - additionalProperties: false
-                          type: object
-                          properties:
-                            deferred:
-                              type: boolean
-                            id:
-                              type: string
-                            type:
-                              enum:
-                                - index
-                                - index_template
-                                - component_template
-                                - ingest_pipeline
-                                - ilm_policy
-                                - data_stream_ilm_policy
-                                - transform
-                                - ml_model
-                              type: string
-                            version:
-                              type: string
-                          required:
-                            - id
-                            - type
-                    type: array
-                  response:
-                    deprecated: true
                     items:
                       anyOf:
                         - additionalProperties: false
@@ -23133,106 +22633,6 @@ paths:
                             - statusCode
                             - error
                     type: array
-                  response:
-                    deprecated: true
-                    items:
-                      anyOf:
-                        - additionalProperties: false
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                            result:
-                              additionalProperties: false
-                              type: object
-                              properties:
-                                assets:
-                                  items:
-                                    anyOf:
-                                      - additionalProperties: false
-                                        type: object
-                                        properties:
-                                          id:
-                                            type: string
-                                          originId:
-                                            type: string
-                                          type:
-                                            enum:
-                                              - dashboard
-                                              - lens
-                                              - visualization
-                                              - search
-                                              - index-pattern
-                                              - map
-                                              - ml-module
-                                              - security-rule
-                                              - csp-rule-template
-                                              - osquery-pack-asset
-                                              - osquery-saved-query
-                                              - tag
-                                            type: string
-                                        required:
-                                          - id
-                                          - type
-                                      - additionalProperties: false
-                                        type: object
-                                        properties:
-                                          deferred:
-                                            type: boolean
-                                          id:
-                                            type: string
-                                          type:
-                                            enum:
-                                              - index
-                                              - index_template
-                                              - component_template
-                                              - ingest_pipeline
-                                              - ilm_policy
-                                              - data_stream_ilm_policy
-                                              - transform
-                                              - ml_model
-                                            type: string
-                                          version:
-                                            type: string
-                                        required:
-                                          - id
-                                          - type
-                                  type: array
-                                error: {}
-                                installSource:
-                                  type: string
-                                installType:
-                                  type: string
-                                status:
-                                  enum:
-                                    - installed
-                                    - already_installed
-                                  type: string
-                              required:
-                                - error
-                                - installType
-                            version:
-                              type: string
-                          required:
-                            - name
-                            - version
-                            - result
-                        - additionalProperties: false
-                          type: object
-                          properties:
-                            error:
-                              anyOf:
-                                - type: string
-                                - {}
-                            name:
-                              type: string
-                            statusCode:
-                              type: number
-                          required:
-                            - name
-                            - statusCode
-                            - error
-                    type: array
                 required:
                   - items
         '400':
@@ -23254,177 +22654,6 @@ paths:
       summary: ''
       tags:
         - Elastic Package Manager (EPM)
-  /api/fleet/epm/packages/{pkgkey}:
-    delete:
-      operationId: delete-fleet-epm-packages-pkgkey
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - in: path
-          name: pkgkey
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              additionalProperties: false
-              nullable: true
-              type: object
-              properties:
-                force:
-                  type: boolean
-              required:
-                - force
-      responses: {}
-      summary: ''
-      tags: []
-    get:
-      operationId: get-fleet-epm-packages-pkgkey
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - in: path
-          name: pkgkey
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: ignoreUnverified
-          required: false
-          schema:
-            type: boolean
-        - in: query
-          name: prerelease
-          required: false
-          schema:
-            type: boolean
-        - in: query
-          name: full
-          required: false
-          schema:
-            type: boolean
-        - in: query
-          name: withMetadata
-          required: false
-          schema:
-            default: false
-            type: boolean
-      responses: {}
-      summary: ''
-      tags: []
-    post:
-      operationId: post-fleet-epm-packages-pkgkey
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - in: path
-          name: pkgkey
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: prerelease
-          required: false
-          schema:
-            type: boolean
-        - in: query
-          name: ignoreMappingUpdateErrors
-          required: false
-          schema:
-            default: false
-            type: boolean
-        - in: query
-          name: skipDataStreamRollover
-          required: false
-          schema:
-            default: false
-            type: boolean
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              additionalProperties: false
-              nullable: true
-              type: object
-              properties:
-                force:
-                  type: boolean
-              required:
-                - force
-      responses: {}
-      summary: ''
-      tags: []
-    put:
-      operationId: put-fleet-epm-packages-pkgkey
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - in: path
-          name: pkgkey
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                keepPoliciesUpToDate:
-                  type: boolean
-              required:
-                - keepPoliciesUpToDate
-      responses: {}
-      summary: ''
-      tags: []
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}:
     delete:
       description: Delete package
@@ -23452,7 +22681,7 @@ paths:
             type: string
         - in: path
           name: pkgVersion
-          required: true
+          required: false
           schema:
             type: string
         - in: query
@@ -23460,18 +22689,6 @@ paths:
           required: false
           schema:
             type: boolean
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              additionalProperties: false
-              nullable: true
-              type: object
-              properties:
-                force:
-                  type: boolean
-              required:
-                - force
       responses:
         '200':
           content:
@@ -23481,59 +22698,6 @@ paths:
                 type: object
                 properties:
                   items:
-                    items:
-                      anyOf:
-                        - additionalProperties: false
-                          type: object
-                          properties:
-                            id:
-                              type: string
-                            originId:
-                              type: string
-                            type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
-                          required:
-                            - id
-                            - type
-                        - additionalProperties: false
-                          type: object
-                          properties:
-                            deferred:
-                              type: boolean
-                            id:
-                              type: string
-                            type:
-                              enum:
-                                - index
-                                - index_template
-                                - component_template
-                                - ingest_pipeline
-                                - ilm_policy
-                                - data_stream_ilm_policy
-                                - transform
-                                - ml_model
-                              type: string
-                            version:
-                              type: string
-                          required:
-                            - id
-                            - type
-                    type: array
-                  response:
-                    deprecated: true
                     items:
                       anyOf:
                         - additionalProperties: false
@@ -23625,7 +22789,7 @@ paths:
             type: string
         - in: path
           name: pkgVersion
-          required: true
+          required: false
           schema:
             type: string
         - in: query
@@ -24005,7 +23169,6 @@ paths:
                           - beta
                           - experimental
                         type: string
-                      savedObject: {}
                       screenshots:
                         items:
                           additionalProperties: false
@@ -24054,7 +23217,6 @@ paths:
                       version:
                         type: string
                     required:
-                      - savedObject
                       - name
                       - version
                       - title
@@ -24067,409 +23229,6 @@ paths:
                         type: boolean
                     required:
                       - has_policies
-                  response:
-                    additionalProperties: true
-                    deprecated: true
-                    type: object
-                    properties:
-                      agent:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          privileges:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              root:
-                                type: boolean
-                      asset_tags:
-                        items:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            asset_ids:
-                              items:
-                                type: string
-                              type: array
-                            asset_types:
-                              items:
-                                type: string
-                              type: array
-                            text:
-                              type: string
-                          required:
-                            - text
-                        type: array
-                      assets:
-                        additionalProperties: {}
-                        type: object
-                      categories:
-                        items:
-                          type: string
-                        type: array
-                      conditions:
-                        additionalProperties: true
-                        type: object
-                        properties:
-                          elastic:
-                            additionalProperties: true
-                            type: object
-                            properties:
-                              capabilities:
-                                items:
-                                  type: string
-                                type: array
-                              subscription:
-                                type: string
-                          kibana:
-                            additionalProperties: true
-                            type: object
-                            properties:
-                              version:
-                                type: string
-                      data_streams:
-                        items:
-                          additionalProperties: {}
-                          type: object
-                        type: array
-                      description:
-                        type: string
-                      discovery:
-                        additionalProperties: true
-                        type: object
-                        properties:
-                          fields:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                name:
-                                  type: string
-                              required:
-                                - name
-                            type: array
-                      download:
-                        type: string
-                      elasticsearch:
-                        additionalProperties: {}
-                        type: object
-                      format_version:
-                        type: string
-                      icons:
-                        items:
-                          additionalProperties: true
-                          type: object
-                          properties:
-                            dark_mode:
-                              type: boolean
-                            path:
-                              type: string
-                            size:
-                              type: string
-                            src:
-                              type: string
-                            title:
-                              type: string
-                            type:
-                              type: string
-                          required:
-                            - src
-                        type: array
-                      installationInfo:
-                        additionalProperties: true
-                        type: object
-                        properties:
-                          additional_spaces_installed_kibana:
-                            additionalProperties:
-                              items:
-                                additionalProperties: true
-                                type: object
-                                properties:
-                                  id:
-                                    type: string
-                                  originId:
-                                    type: string
-                                  type:
-                                    enum:
-                                      - dashboard
-                                      - lens
-                                      - visualization
-                                      - search
-                                      - index-pattern
-                                      - map
-                                      - ml-module
-                                      - security-rule
-                                      - csp-rule-template
-                                      - osquery-pack-asset
-                                      - osquery-saved-query
-                                      - tag
-                                    type: string
-                                required:
-                                  - id
-                                  - type
-                              type: array
-                            type: object
-                          created_at:
-                            type: string
-                          experimental_data_stream_features:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                data_stream:
-                                  type: string
-                                features:
-                                  additionalProperties: true
-                                  type: object
-                                  properties:
-                                    doc_value_only_numeric:
-                                      type: boolean
-                                    doc_value_only_other:
-                                      type: boolean
-                                    synthetic_source:
-                                      type: boolean
-                                    tsdb:
-                                      type: boolean
-                              required:
-                                - data_stream
-                                - features
-                            type: array
-                          install_format_schema_version:
-                            type: string
-                          install_source:
-                            enum:
-                              - registry
-                              - upload
-                              - bundled
-                              - custom
-                            type: string
-                          install_status:
-                            enum:
-                              - installed
-                              - installing
-                              - install_failed
-                            type: string
-                          installed_es:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                deferred:
-                                  type: boolean
-                                id:
-                                  type: string
-                                type:
-                                  enum:
-                                    - index
-                                    - index_template
-                                    - component_template
-                                    - ingest_pipeline
-                                    - ilm_policy
-                                    - data_stream_ilm_policy
-                                    - transform
-                                    - ml_model
-                                  type: string
-                                version:
-                                  type: string
-                              required:
-                                - id
-                                - type
-                            type: array
-                          installed_kibana:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                id:
-                                  type: string
-                                originId:
-                                  type: string
-                                type:
-                                  enum:
-                                    - dashboard
-                                    - lens
-                                    - visualization
-                                    - search
-                                    - index-pattern
-                                    - map
-                                    - ml-module
-                                    - security-rule
-                                    - csp-rule-template
-                                    - osquery-pack-asset
-                                    - osquery-saved-query
-                                    - tag
-                                  type: string
-                              required:
-                                - id
-                                - type
-                            type: array
-                          installed_kibana_space_id:
-                            type: string
-                          latest_executed_state:
-                            additionalProperties: true
-                            type: object
-                            properties:
-                              error:
-                                type: string
-                              name:
-                                type: string
-                              started_at:
-                                type: string
-                            required:
-                              - name
-                              - started_at
-                          latest_install_failed_attempts:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                created_at:
-                                  type: string
-                                error:
-                                  additionalProperties: true
-                                  type: object
-                                  properties:
-                                    message:
-                                      type: string
-                                    name:
-                                      type: string
-                                    stack:
-                                      type: string
-                                  required:
-                                    - name
-                                    - message
-                                target_version:
-                                  type: string
-                              required:
-                                - created_at
-                                - target_version
-                                - error
-                            type: array
-                          name:
-                            type: string
-                          namespaces:
-                            items:
-                              type: string
-                            type: array
-                          type:
-                            type: string
-                          updated_at:
-                            type: string
-                          verification_key_id:
-                            nullable: true
-                            type: string
-                          verification_status:
-                            enum:
-                              - unverified
-                              - verified
-                              - unknown
-                            type: string
-                          version:
-                            type: string
-                        required:
-                          - type
-                          - installed_kibana
-                          - installed_es
-                          - name
-                          - version
-                          - install_status
-                          - install_source
-                          - verification_status
-                      internal:
-                        type: boolean
-                      keepPoliciesUpToDate:
-                        type: boolean
-                      latestVersion:
-                        type: string
-                      license:
-                        type: string
-                      licensePath:
-                        type: string
-                      name:
-                        type: string
-                      notice:
-                        type: string
-                      owner:
-                        additionalProperties: true
-                        type: object
-                        properties:
-                          github:
-                            type: string
-                          type:
-                            enum:
-                              - elastic
-                              - partner
-                              - community
-                            type: string
-                      path:
-                        type: string
-                      policy_templates:
-                        items:
-                          additionalProperties: {}
-                          type: object
-                        type: array
-                      readme:
-                        type: string
-                      release:
-                        enum:
-                          - ga
-                          - beta
-                          - experimental
-                        type: string
-                      savedObject: {}
-                      screenshots:
-                        items:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            dark_mode:
-                              type: boolean
-                            path:
-                              type: string
-                            size:
-                              type: string
-                            src:
-                              type: string
-                            title:
-                              type: string
-                            type:
-                              type: string
-                          required:
-                            - src
-                        type: array
-                      signature_path:
-                        type: string
-                      source:
-                        additionalProperties: true
-                        type: object
-                        properties:
-                          license:
-                            type: string
-                        required:
-                          - license
-                      status:
-                        type: string
-                      title:
-                        type: string
-                      type:
-                        enum:
-                          - integration
-                          - input
-                          - content
-                        type: string
-                      vars:
-                        items:
-                          additionalProperties: {}
-                          type: object
-                        type: array
-                      version:
-                        type: string
-                    required:
-                      - savedObject
-                      - name
-                      - version
-                      - title
-                      - assets
                 required:
                   - item
         '400':
@@ -24517,7 +23276,7 @@ paths:
             type: string
         - in: path
           name: pkgVersion
-          required: true
+          required: false
           schema:
             type: string
         - in: query
@@ -24619,59 +23378,6 @@ paths:
                             - id
                             - type
                     type: array
-                  response:
-                    deprecated: true
-                    items:
-                      anyOf:
-                        - additionalProperties: false
-                          type: object
-                          properties:
-                            id:
-                              type: string
-                            originId:
-                              type: string
-                            type:
-                              enum:
-                                - dashboard
-                                - lens
-                                - visualization
-                                - search
-                                - index-pattern
-                                - map
-                                - ml-module
-                                - security-rule
-                                - csp-rule-template
-                                - osquery-pack-asset
-                                - osquery-saved-query
-                                - tag
-                              type: string
-                          required:
-                            - id
-                            - type
-                        - additionalProperties: false
-                          type: object
-                          properties:
-                            deferred:
-                              type: boolean
-                            id:
-                              type: string
-                            type:
-                              enum:
-                                - index
-                                - index_template
-                                - component_template
-                                - ingest_pipeline
-                                - ilm_policy
-                                - data_stream_ilm_policy
-                                - transform
-                                - ml_model
-                              type: string
-                            version:
-                              type: string
-                          required:
-                            - id
-                            - type
-                    type: array
                 required:
                   - items
                   - _meta
@@ -24720,7 +23426,7 @@ paths:
             type: string
         - in: path
           name: pkgVersion
-          required: true
+          required: false
           schema:
             type: string
       requestBody:
@@ -25090,7 +23796,6 @@ paths:
                           - beta
                           - experimental
                         type: string
-                      savedObject: {}
                       screenshots:
                         items:
                           additionalProperties: false
@@ -25139,410 +23844,6 @@ paths:
                       version:
                         type: string
                     required:
-                      - savedObject
-                      - name
-                      - version
-                      - title
-                      - assets
-                  response:
-                    additionalProperties: true
-                    deprecated: true
-                    type: object
-                    properties:
-                      agent:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          privileges:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              root:
-                                type: boolean
-                      asset_tags:
-                        items:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            asset_ids:
-                              items:
-                                type: string
-                              type: array
-                            asset_types:
-                              items:
-                                type: string
-                              type: array
-                            text:
-                              type: string
-                          required:
-                            - text
-                        type: array
-                      assets:
-                        additionalProperties: {}
-                        type: object
-                      categories:
-                        items:
-                          type: string
-                        type: array
-                      conditions:
-                        additionalProperties: true
-                        type: object
-                        properties:
-                          elastic:
-                            additionalProperties: true
-                            type: object
-                            properties:
-                              capabilities:
-                                items:
-                                  type: string
-                                type: array
-                              subscription:
-                                type: string
-                          kibana:
-                            additionalProperties: true
-                            type: object
-                            properties:
-                              version:
-                                type: string
-                      data_streams:
-                        items:
-                          additionalProperties: {}
-                          type: object
-                        type: array
-                      description:
-                        type: string
-                      discovery:
-                        additionalProperties: true
-                        type: object
-                        properties:
-                          fields:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                name:
-                                  type: string
-                              required:
-                                - name
-                            type: array
-                      download:
-                        type: string
-                      elasticsearch:
-                        additionalProperties: {}
-                        type: object
-                      format_version:
-                        type: string
-                      icons:
-                        items:
-                          additionalProperties: true
-                          type: object
-                          properties:
-                            dark_mode:
-                              type: boolean
-                            path:
-                              type: string
-                            size:
-                              type: string
-                            src:
-                              type: string
-                            title:
-                              type: string
-                            type:
-                              type: string
-                          required:
-                            - src
-                        type: array
-                      installationInfo:
-                        additionalProperties: true
-                        type: object
-                        properties:
-                          additional_spaces_installed_kibana:
-                            additionalProperties:
-                              items:
-                                additionalProperties: true
-                                type: object
-                                properties:
-                                  id:
-                                    type: string
-                                  originId:
-                                    type: string
-                                  type:
-                                    enum:
-                                      - dashboard
-                                      - lens
-                                      - visualization
-                                      - search
-                                      - index-pattern
-                                      - map
-                                      - ml-module
-                                      - security-rule
-                                      - csp-rule-template
-                                      - osquery-pack-asset
-                                      - osquery-saved-query
-                                      - tag
-                                    type: string
-                                required:
-                                  - id
-                                  - type
-                              type: array
-                            type: object
-                          created_at:
-                            type: string
-                          experimental_data_stream_features:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                data_stream:
-                                  type: string
-                                features:
-                                  additionalProperties: true
-                                  type: object
-                                  properties:
-                                    doc_value_only_numeric:
-                                      type: boolean
-                                    doc_value_only_other:
-                                      type: boolean
-                                    synthetic_source:
-                                      type: boolean
-                                    tsdb:
-                                      type: boolean
-                              required:
-                                - data_stream
-                                - features
-                            type: array
-                          install_format_schema_version:
-                            type: string
-                          install_source:
-                            enum:
-                              - registry
-                              - upload
-                              - bundled
-                              - custom
-                            type: string
-                          install_status:
-                            enum:
-                              - installed
-                              - installing
-                              - install_failed
-                            type: string
-                          installed_es:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                deferred:
-                                  type: boolean
-                                id:
-                                  type: string
-                                type:
-                                  enum:
-                                    - index
-                                    - index_template
-                                    - component_template
-                                    - ingest_pipeline
-                                    - ilm_policy
-                                    - data_stream_ilm_policy
-                                    - transform
-                                    - ml_model
-                                  type: string
-                                version:
-                                  type: string
-                              required:
-                                - id
-                                - type
-                            type: array
-                          installed_kibana:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                id:
-                                  type: string
-                                originId:
-                                  type: string
-                                type:
-                                  enum:
-                                    - dashboard
-                                    - lens
-                                    - visualization
-                                    - search
-                                    - index-pattern
-                                    - map
-                                    - ml-module
-                                    - security-rule
-                                    - csp-rule-template
-                                    - osquery-pack-asset
-                                    - osquery-saved-query
-                                    - tag
-                                  type: string
-                              required:
-                                - id
-                                - type
-                            type: array
-                          installed_kibana_space_id:
-                            type: string
-                          latest_executed_state:
-                            additionalProperties: true
-                            type: object
-                            properties:
-                              error:
-                                type: string
-                              name:
-                                type: string
-                              started_at:
-                                type: string
-                            required:
-                              - name
-                              - started_at
-                          latest_install_failed_attempts:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                created_at:
-                                  type: string
-                                error:
-                                  additionalProperties: true
-                                  type: object
-                                  properties:
-                                    message:
-                                      type: string
-                                    name:
-                                      type: string
-                                    stack:
-                                      type: string
-                                  required:
-                                    - name
-                                    - message
-                                target_version:
-                                  type: string
-                              required:
-                                - created_at
-                                - target_version
-                                - error
-                            type: array
-                          name:
-                            type: string
-                          namespaces:
-                            items:
-                              type: string
-                            type: array
-                          type:
-                            type: string
-                          updated_at:
-                            type: string
-                          verification_key_id:
-                            nullable: true
-                            type: string
-                          verification_status:
-                            enum:
-                              - unverified
-                              - verified
-                              - unknown
-                            type: string
-                          version:
-                            type: string
-                        required:
-                          - type
-                          - installed_kibana
-                          - installed_es
-                          - name
-                          - version
-                          - install_status
-                          - install_source
-                          - verification_status
-                      internal:
-                        type: boolean
-                      keepPoliciesUpToDate:
-                        type: boolean
-                      latestVersion:
-                        type: string
-                      license:
-                        type: string
-                      licensePath:
-                        type: string
-                      name:
-                        type: string
-                      notice:
-                        type: string
-                      owner:
-                        additionalProperties: true
-                        type: object
-                        properties:
-                          github:
-                            type: string
-                          type:
-                            enum:
-                              - elastic
-                              - partner
-                              - community
-                            type: string
-                      path:
-                        type: string
-                      policy_templates:
-                        items:
-                          additionalProperties: {}
-                          type: object
-                        type: array
-                      readme:
-                        type: string
-                      release:
-                        enum:
-                          - ga
-                          - beta
-                          - experimental
-                        type: string
-                      savedObject: {}
-                      screenshots:
-                        items:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            dark_mode:
-                              type: boolean
-                            path:
-                              type: string
-                            size:
-                              type: string
-                            src:
-                              type: string
-                            title:
-                              type: string
-                            type:
-                              type: string
-                          required:
-                            - src
-                        type: array
-                      signature_path:
-                        type: string
-                      source:
-                        additionalProperties: true
-                        type: object
-                        properties:
-                          license:
-                            type: string
-                        required:
-                          - license
-                      status:
-                        type: string
-                      title:
-                        type: string
-                      type:
-                        enum:
-                          - integration
-                          - input
-                          - content
-                        type: string
-                      vars:
-                        items:
-                          additionalProperties: {}
-                          type: object
-                        type: array
-                      version:
-                        type: string
-                    required:
-                      - savedObject
                       - name
                       - version
                       - title
@@ -25944,11 +24245,6 @@ paths:
                 type: object
                 properties:
                   items:
-                    items:
-                      type: string
-                    type: array
-                  response:
-                    deprecated: true
                     items:
                       type: string
                     type: array
@@ -26574,9 +24870,6 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                host:
-                  format: uri
-                  type: string
                 id:
                   type: string
               required:
@@ -26589,9 +24882,6 @@ paths:
                 additionalProperties: false
                 type: object
                 properties:
-                  host:
-                    deprecated: true
-                    type: string
                   host_id:
                     type: string
                   name:
@@ -36346,29 +34636,6 @@ paths:
       summary: ''
       tags:
         - Fleet service tokens
-  /api/fleet/service-tokens:
-    post:
-      description: Create a service token
-      operationId: post-fleet-service-tokens-2
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-      responses: {}
-      summary: ''
-      tags: []
   /api/fleet/settings:
     get:
       description: Get settings
@@ -36405,10 +34672,6 @@ paths:
                         required:
                           - enabled
                           - is_preconfigured
-                      fleet_server_hosts:
-                        items:
-                          type: string
-                        type: array
                       has_seen_add_data_notice:
                         type: boolean
                       id:
@@ -36508,11 +34771,6 @@ paths:
                   required:
                     - enabled
                     - is_preconfigured
-                fleet_server_hosts:
-                  items:
-                    format: uri
-                    type: string
-                  type: array
                 has_seen_add_data_notice:
                   type: boolean
                 kibana_ca_sha256:
@@ -36547,10 +34805,6 @@ paths:
                         required:
                           - enabled
                           - is_preconfigured
-                      fleet_server_hosts:
-                        items:
-                          type: string
-                        type: array
                       has_seen_add_data_notice:
                         type: boolean
                       id:
@@ -40934,7 +39188,9 @@ paths:
         visualizations, data views, and saved searches, as required. You can
         request to overwrite any objects that already exist in the target space
         if they share an identifier or you can use the resolve copy saved
-        objects conflicts API to do this on a per-object basis.
+        objects conflicts API to do this on a per-object
+        basis.<br/><br/>[Required authorization] Route required privileges: ALL
+        of [copySavedObjectsToSpaces].
       operationId: post-spaces-copy-saved-objects
       parameters:
         - description: The version of the API to use
@@ -41123,7 +39379,8 @@ paths:
     post:
       description: >-
         Overwrite saved objects that are returned as errors from the copy saved
-        objects to space API.
+        objects to space API.<br/><br/>[Required authorization] Route required
+        privileges: ALL of [copySavedObjectsToSpaces].
       operationId: post-spaces-resolve-copy-saved-objects-errors
       parameters:
         - description: The version of the API to use
@@ -45568,6 +43825,24 @@ components:
       required: true
       schema:
         type: string
+    APM_UI_elastic_api_version:
+      description: The version of the API to use
+      in: header
+      name: elastic-api-version
+      required: true
+      schema:
+        default: '2023-10-31'
+        enum:
+          - '2023-10-31'
+        type: string
+    APM_UI_kbn_xsrf:
+      description: A required header to protect against CSRF attacks
+      in: header
+      name: kbn-xsrf
+      required: true
+      schema:
+        example: 'true'
+        type: string
     Cases_alert_id:
       description: An identifier for the alert.
       in: path
@@ -46059,6 +44334,471 @@ components:
           description: Specifies the data type for the field.
           example: scaled_float
           type: string
+    APM_UI_400_response:
+      type: object
+      properties:
+        error:
+          description: Error type
+          example: Not Found
+          type: string
+        message:
+          description: Error message
+          example: Not Found
+          type: string
+        statusCode:
+          description: Error status code
+          example: 400
+          type: number
+    APM_UI_401_response:
+      type: object
+      properties:
+        error:
+          description: Error type
+          example: Unauthorized
+          type: string
+        message:
+          description: Error message
+          type: string
+        statusCode:
+          description: Error status code
+          example: 401
+          type: number
+    APM_UI_403_response:
+      type: object
+      properties:
+        error:
+          description: Error type
+          example: Forbidden
+          type: string
+        message:
+          description: Error message
+          type: string
+        statusCode:
+          description: Error status code
+          example: 403
+          type: number
+    APM_UI_404_response:
+      type: object
+      properties:
+        error:
+          description: Error type
+          example: Not Found
+          type: string
+        message:
+          description: Error message
+          example: Not Found
+          type: string
+        statusCode:
+          description: Error status code
+          example: 404
+          type: number
+    APM_UI_500_response:
+      type: object
+      properties:
+        error:
+          description: Error type
+          example: Internal Server Error
+          type: string
+        message:
+          description: Error message
+          type: string
+        statusCode:
+          description: Error status code
+          example: 500
+          type: number
+    APM_UI_501_response:
+      type: object
+      properties:
+        error:
+          description: Error type
+          example: Not Implemented
+          type: string
+        message:
+          description: Error message
+          example: Not Implemented
+          type: string
+        statusCode:
+          description: Error status code
+          example: 501
+          type: number
+    APM_UI_agent_configuration_intake_object:
+      type: object
+      properties:
+        agent_name:
+          description: Agent name
+          type: string
+        service:
+          $ref: '#/components/schemas/APM_UI_service_object'
+        settings:
+          $ref: '#/components/schemas/APM_UI_settings_object'
+      required:
+        - service
+        - settings
+    APM_UI_agent_configuration_object:
+      description: Agent configuration
+      type: object
+      properties:
+        '@timestamp':
+          description: Timestamp
+          example: 1730194190636
+          type: number
+        agent_name:
+          description: Agent name
+          type: string
+        applied_by_agent:
+          description: Applied by agent
+          example: true
+          type: boolean
+        etag:
+          description: Etag
+          example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85
+          type: string
+        service:
+          $ref: '#/components/schemas/APM_UI_service_object'
+        settings:
+          $ref: '#/components/schemas/APM_UI_settings_object'
+      required:
+        - service
+        - settings
+        - '@timestamp'
+        - etag
+    APM_UI_agent_configurations_response:
+      type: object
+      properties:
+        configurations:
+          description: Agent configuration
+          items:
+            $ref: '#/components/schemas/APM_UI_agent_configuration_object'
+          type: array
+    APM_UI_agent_keys_object:
+      type: object
+      properties:
+        name:
+          description: Agent name
+          type: string
+        privileges:
+          description: Privileges configuration
+          items:
+            enum:
+              - event:write
+              - config_agent:read
+            type: string
+          type: array
+      required:
+        - name
+        - privileges
+    APM_UI_agent_keys_response:
+      type: object
+      properties:
+        agentKey:
+          description: Agent key
+          type: object
+          properties:
+            api_key:
+              type: string
+            encoded:
+              type: string
+            expiration:
+              format: int64
+              type: integer
+            id:
+              type: string
+            name:
+              type: string
+          required:
+            - id
+            - name
+            - api_key
+            - encoded
+    APM_UI_annotation_search_response:
+      type: object
+      properties:
+        annotations:
+          description: Annotations
+          items:
+            type: object
+            properties:
+              '@timestamp':
+                type: number
+              id:
+                type: string
+              text:
+                type: string
+              type:
+                enum:
+                  - version
+                type: string
+          type: array
+    APM_UI_base_source_map_object:
+      type: object
+      properties:
+        compressionAlgorithm:
+          description: Compression Algorithm
+          type: string
+        created:
+          description: Created date
+          type: string
+        decodedSha256:
+          description: Decoded SHA-256
+          type: string
+        decodedSize:
+          description: Decoded size
+          type: number
+        encodedSha256:
+          description: Encoded SHA-256
+          type: string
+        encodedSize:
+          description: Encoded size
+          type: number
+        encryptionAlgorithm:
+          description: Encryption Algorithm
+          type: string
+        id:
+          description: Identifier
+          type: string
+        identifier:
+          description: Identifier
+          type: string
+        packageName:
+          description: Package name
+          type: string
+        relative_url:
+          description: Relative URL
+          type: string
+        type:
+          description: Type
+          type: string
+    APM_UI_create_annotation_object:
+      type: object
+      properties:
+        '@timestamp':
+          description: Timestamp
+          type: string
+        message:
+          description: Message
+          type: string
+        service:
+          description: Service
+          type: object
+          properties:
+            environment:
+              type: string
+            version:
+              type: string
+          required:
+            - version
+        tags:
+          description: Tags
+          items:
+            type: string
+          type: array
+      required:
+        - '@timestamp'
+        - service
+    APM_UI_create_annotation_response:
+      type: object
+      properties:
+        _id:
+          description: Identifier
+          type: string
+        _index:
+          description: Index
+          type: string
+        _source:
+          description: Response
+          type: object
+          properties:
+            '@timestamp':
+              type: string
+            annotation:
+              type: object
+              properties:
+                title:
+                  type: string
+                type:
+                  type: string
+            event:
+              type: object
+              properties:
+                created:
+                  type: string
+            message:
+              type: string
+            service:
+              type: object
+              properties:
+                environment:
+                  type: string
+                name:
+                  type: string
+                version:
+                  type: string
+            tags:
+              items:
+                type: string
+              type: array
+    APM_UI_delete_agent_configurations_response:
+      type: object
+      properties:
+        result:
+          description: Result
+          type: string
+    APM_UI_search_agent_configuration_object:
+      type: object
+      properties:
+        etag:
+          description: If etags match then `applied_by_agent` field will be set to `true`
+          example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85
+          type: string
+        mark_as_applied_by_agent:
+          description: >
+            `markAsAppliedByAgent=true` means "force setting it to true
+            regardless of etag".
+
+            This is needed for Jaeger agent that doesn't have etags
+          type: boolean
+        service:
+          $ref: '#/components/schemas/APM_UI_service_object'
+      required:
+        - service
+    APM_UI_search_agent_configuration_response:
+      type: object
+      properties:
+        _id:
+          description: Identifier
+          type: string
+        _index:
+          description: Index
+          type: string
+        _score:
+          description: Score
+          type: number
+        _source:
+          $ref: '#/components/schemas/APM_UI_agent_configuration_object'
+    APM_UI_service_agent_name_response:
+      type: object
+      properties:
+        agentName:
+          description: Agent name
+          example: nodejs
+          type: string
+    APM_UI_service_environment_object:
+      type: object
+      properties:
+        alreadyConfigured:
+          description: Already configured
+          type: boolean
+        name:
+          description: Service environment name
+          example: ALL_OPTION_VALUE
+          type: string
+    APM_UI_service_environments_response:
+      type: object
+      properties:
+        environments:
+          description: Service environment list
+          items:
+            $ref: '#/components/schemas/APM_UI_service_environment_object'
+          type: array
+    APM_UI_service_object:
+      description: Service
+      type: object
+      properties:
+        environment:
+          description: Environment
+          example: prod
+          type: string
+        name:
+          description: Name
+          example: node
+          type: string
+    APM_UI_settings_object:
+      additionalProperties:
+        type: string
+      description: Agent configuration settings
+      type: object
+    APM_UI_single_agent_configuration_response:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+          required:
+            - id
+        - $ref: '#/components/schemas/APM_UI_agent_configuration_object'
+    APM_UI_source_maps_response:
+      type: object
+      properties:
+        artifacts:
+          description: Artifacts
+          items:
+            allOf:
+              - type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      bundleFilepath:
+                        type: string
+                      serviceName:
+                        type: string
+                      serviceVersion:
+                        type: string
+                      sourceMap:
+                        type: object
+                        properties:
+                          file:
+                            type: string
+                          mappings:
+                            type: string
+                          sourceRoot:
+                            type: string
+                          sources:
+                            items:
+                              type: string
+                            type: array
+                          sourcesContent:
+                            items:
+                              type: string
+                            type: array
+                          version:
+                            type: number
+              - $ref: '#/components/schemas/APM_UI_base_source_map_object'
+          type: array
+    APM_UI_upload_source_map_object:
+      type: object
+      properties:
+        bundle_filepath:
+          description: >-
+            The absolute path of the final bundle as used in the web
+            application.
+          type: string
+        service_name:
+          description: The name of the service that the service map should apply to.
+          type: string
+        service_version:
+          description: The version of the service that the service map should apply to.
+          type: string
+        sourcemap:
+          description: >
+            The source map. String or file upload. It must follow the
+
+            [source map revision 3
+            proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k).
+          format: binary
+          type: string
+      required:
+        - service_name
+        - service_version
+        - bundle_filepath
+        - sourcemap
+    APM_UI_upload_source_maps_response:
+      allOf:
+        - type: object
+          properties:
+            body:
+              type: string
+        - $ref: '#/components/schemas/APM_UI_base_source_map_object'
     Cases_4xx_response:
       properties:
         error:
@@ -60117,6 +58857,9 @@ security:
   - basicAuth: []
 tags:
   - name: alerting
+  - description: |
+      Adjust APM agent configuration without need to redeploy your application.
+    name: APM agent configuration
   - description: >
       Configure APM agent keys to authorize requests from APM agents to the APM
       Server.
@@ -60126,6 +58869,10 @@ tags:
       Annotations enable you to easily see how events are impacting the
       performance of your applications.
     name: APM annotations
+  - description: Create APM fleet server schema.
+    name: APM server schema
+  - description: Configure APM source maps.
+    name: APM sourcemaps
   - description: Case APIs enable you to open and track issues.
     name: cases
   - name: connectors

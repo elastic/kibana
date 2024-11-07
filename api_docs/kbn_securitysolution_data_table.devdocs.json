@@ -1210,7 +1210,7 @@
             "section": "def-common.SortColumnTable",
             "text": "SortColumnTable"
           },
-          "[]; readonly title: string; readonly isLoading: boolean; readonly columns: (Pick<",
+          "[]; readonly title: string; readonly columns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
@@ -1256,7 +1256,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; readonly initialized?: boolean | undefined; readonly dataViewId: string | null; readonly defaultColumns: (Pick<",
+          "[] | undefined; readonly initialized?: boolean | undefined; readonly isLoading: boolean; readonly dataViewId: string | null; readonly defaultColumns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
