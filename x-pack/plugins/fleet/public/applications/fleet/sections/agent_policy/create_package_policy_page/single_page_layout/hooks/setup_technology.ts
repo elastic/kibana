@@ -180,6 +180,7 @@ export function useSetupTechnology({
           } as NewAgentPolicy;
 
           setNewAgentPolicy(agentlessPolicy);
+          setNewAgentlessPolicy(agentlessPolicy);
           setSelectedPolicyTab(SelectedPolicyTab.NEW);
           updateAgentPolicies([agentlessPolicy] as AgentPolicy[]);
         }
