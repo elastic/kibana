@@ -181,7 +181,7 @@ export function getRecommendedXAxisTitleVisibility(
 }
 
 export const isDataLayer = (layer: XYLayerConfig): layer is XYDataLayerConfig =>
-  layer.layerType === layerTypes.DATA || !layer.layerType;
+  layer.layerType === layerTypes.DATA || layer.layerType === layerTypes.ESQL || !layer.layerType;
 
 export const getDataLayers = (layers: XYLayerConfig[]) =>
   (layers || []).filter((layer): layer is XYDataLayerConfig => isDataLayer(layer));
@@ -394,7 +394,7 @@ const newLayerFn = {
     seriesType: SeriesType;
   }): XYDataLayerConfig => ({
     layerId,
-    layerType: layerTypes.DATA,
+    layerType: layerTypes.ESQL,
     accessors: [],
     seriesType,
   }),

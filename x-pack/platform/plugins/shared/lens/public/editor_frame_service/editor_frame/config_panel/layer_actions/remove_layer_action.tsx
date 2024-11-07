@@ -66,6 +66,7 @@ const getCopy = (
 
   switch (layerType) {
     case 'data':
+    case 'esql':
       return {
         buttonLabel,
         modalTitle:

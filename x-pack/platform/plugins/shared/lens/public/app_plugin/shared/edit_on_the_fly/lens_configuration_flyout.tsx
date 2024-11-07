@@ -649,6 +649,7 @@ export function LensEditConfigurationFlyout({
                   flex: ${isSuggestionsAccordionOpen ? 1 : 'none'};
                 }
               `}
+
             >
               <SuggestionPanel
                 ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}

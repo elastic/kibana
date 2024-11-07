@@ -90,6 +90,7 @@ export class FormBasedDatasource {
         charts,
         dataViewFieldEditor,
         uiActions,
+        expressions,
       });
     });
   }
