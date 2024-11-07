@@ -8,10 +8,9 @@ import { EuiSpacer } from '@elastic/eui';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useKibana } from '../../hooks/use_kibana';
-import { useUnifiedSearch } from '../../hooks/use_unified_search';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
 import { InventoryGroupAccordion } from './inventory_group_accordion';
 import { InventorySummary } from './inventory_summary';
 
@@ -19,8 +18,8 @@ export function GroupedInventory() {
   const {
     services: { inventoryAPIClient },
   } = useKibana();
-  const { refreshSubject$, isControlPanelsInitiated } = useInventorySearchBarContext();
-  const { stringifiedEsQuery } = useUnifiedSearch();
+  const { refreshSubject$, isControlPanelsInitiated, stringifiedEsQuery } =
+    useUnifiedSearchContext();
 
   const {
     value = { groupBy: ENTITY_TYPE, groups: [], entitiesCount: 0 },

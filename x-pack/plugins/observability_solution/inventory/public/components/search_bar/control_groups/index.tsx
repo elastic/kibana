@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import {
   ControlGroupRenderer,
   ControlGroupRendererApi,
@@ -12,17 +13,18 @@ import {
 } from '@kbn/controls-plugin/public';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { skip, Subscription } from 'rxjs';
-import { css } from '@emotion/react';
-import { useInventorySearchBarContext } from '../../../context/inventory_search_bar_context_provider';
-import { useUnifiedSearch } from '../../../hooks/use_unified_search';
+import { useUnifiedSearchContext } from '../../../hooks/use_unified_search_context';
 import { useControlPanels } from './use_control_panels';
 
 export function ControlGroups() {
-  const { isControlPanelsInitiated, setIsControlPanelsInitiated, dataView } =
-    useInventorySearchBarContext();
+  const {
+    isControlPanelsInitiated,
+    setIsControlPanelsInitiated,
+    dataView,
+    searchState,
+    onControlFiltersChange,
+  } = useUnifiedSearchContext();
   const { controlPanels, setControlPanels } = useControlPanels(dataView);
-  const { searchState, setSearchState } = useUnifiedSearch();
-  console.log('### caue  ControlGroups  searchState:', searchState);
   const subscriptions = useRef<Subscription>(new Subscription());
 
   const getInitialInput = useCallback(
@@ -44,7 +46,7 @@ export function ControlGroups() {
 
       subscriptions.current.add(
         controlGroup.filters$.pipe(skip(1)).subscribe((newFilters = []) => {
-          setSearchState((state) => ({ ...state, controlFilters: newFilters }));
+          onControlFiltersChange(newFilters);
         })
       );
 
@@ -57,7 +59,12 @@ export function ControlGroups() {
         })
       );
     },
-    [isControlPanelsInitiated, setControlPanels, setIsControlPanelsInitiated, setSearchState]
+    [
+      isControlPanelsInitiated,
+      onControlFiltersChange,
+      setControlPanels,
+      setIsControlPanelsInitiated,
+    ]
   );
 
   useEffect(() => {

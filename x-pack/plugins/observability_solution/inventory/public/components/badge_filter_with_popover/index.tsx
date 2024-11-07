@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import React, { useState } from 'react';
-import { useUnifiedSearch } from '../../hooks/use_unified_search';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
 
 interface Props {
   field: string;
@@ -30,7 +30,7 @@ interface Props {
 export function BadgeFilterWithPopover({ field, value }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const theme = useEuiTheme();
-  const { addFilter } = useUnifiedSearch();
+  const { addFilter } = useUnifiedSearchContext();
 
   return (
     <EuiPopover

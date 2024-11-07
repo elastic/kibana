@@ -13,13 +13,12 @@ import {
   type EntityColumnIds,
   type EntityPagination,
 } from '../../../common/entities';
-import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
 import { EntitiesGrid } from '../entities_grid';
-import { useUnifiedSearch } from '../../hooks/use_unified_search';
 import { InventorySummary } from '../grouped_inventory/inventory_summary';
 
 const paginationDecoder = decodeOrThrow(entityPaginationRt);
@@ -28,10 +27,10 @@ export function UnifiedInventory() {
   const {
     services: { inventoryAPIClient },
   } = useKibana();
-  const { refreshSubject$, isControlPanelsInitiated } = useInventorySearchBarContext();
+  const { refreshSubject$, isControlPanelsInitiated, stringifiedEsQuery } =
+    useUnifiedSearchContext();
   const { query } = useInventoryParams('/');
   const { sortDirection, sortField, pagination: paginationQuery } = query;
-  const { stringifiedEsQuery } = useUnifiedSearch();
 
   let pagination: EntityPagination | undefined = {};
   const inventoryRoute = useInventoryRouter();

@@ -8,24 +8,43 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
-import React, { useCallback } from 'react';
-import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
+import React, { useCallback, useEffect } from 'react';
+import deepEqual from 'fast-deep-equal';
 import { useKibana } from '../../hooks/use_kibana';
-import { useUnifiedSearch } from '../../hooks/use_unified_search';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
 import { getKqlFieldsWithFallback } from '../../utils/get_kql_field_names_with_fallback';
 import { ControlGroups } from './control_groups';
 import { DiscoverButton } from './discover_button';
 
 export function SearchBar() {
-  const { refreshSubject$, dataView } = useInventorySearchBarContext();
-  const { searchState, setSearchState } = useUnifiedSearch();
-  console.log('### caue  SearchBar  searchState:', searchState);
+  const { refreshSubject$, dataView, searchState, onQueryChange } = useUnifiedSearchContext();
 
   const {
-    services: { unifiedSearch, telemetry },
+    services: {
+      unifiedSearch,
+      telemetry,
+      data: {
+        query: { queryString: queryStringService },
+      },
+    },
   } = useKibana();
 
   const { SearchBar: UnifiedSearchBar } = unifiedSearch.ui;
+
+  const syncSearchBarWithUrl = useCallback(() => {
+    const query = searchState.query;
+    if (query && !deepEqual(queryStringService.getQuery(), query)) {
+      queryStringService.setQuery(query);
+    }
+
+    if (!query) {
+      queryStringService.clearQuery();
+    }
+  }, [searchState.query, queryStringService]);
+
+  useEffect(() => {
+    syncSearchBarWithUrl();
+  }, [syncSearchBarWithUrl]);
 
   const registerSearchSubmittedEvent = useCallback(
     ({ searchQuery, searchIsUpdate }: { searchQuery?: Query; searchIsUpdate?: boolean }) => {
@@ -40,7 +59,7 @@ export function SearchBar() {
   const handleQuerySubmit = useCallback<NonNullable<SearchBarOwnProps['onQuerySubmit']>>(
     ({ query = { language: 'kuery', query: '' } }, isUpdate) => {
       if (isUpdate) {
-        setSearchState((state) => ({ ...state, query }));
+        onQueryChange(query);
       } else {
         refreshSubject$.next();
       }
@@ -50,7 +69,7 @@ export function SearchBar() {
         searchIsUpdate: isUpdate,
       });
     },
-    [setSearchState, registerSearchSubmittedEvent, refreshSubject$]
+    [registerSearchSubmittedEvent, onQueryChange, refreshSubject$]
   );
 
   return (

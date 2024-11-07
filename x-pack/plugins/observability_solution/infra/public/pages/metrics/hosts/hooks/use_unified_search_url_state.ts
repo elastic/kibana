@@ -79,9 +79,11 @@ export const useHostsUrlState = (): [HostsState, Dispatch<HostsStateAction>] => 
     urlStateKey: '_a',
     writeDefaultState: true,
   });
+  console.log('### caue  useHostsUrlState  urlState:', urlState);
 
   const [search, setSearch] = useReducer(reducer, urlState);
   if (!deepEqual(search, urlState)) {
+    console.log('################################:', search);
     setUrlState(search);
     if (localStorageHostLimit !== search.limit) {
       setLocalStorageHostLimit(search.limit);

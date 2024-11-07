@@ -4,13 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { EuiDataGridSorting } from '@elastic/eui';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
-import { useKibana } from '../../hooks/use_kibana';
-import { EntitiesGrid } from '../entities_grid';
+import React from 'react';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import {
   entityPaginationRt,
   type EntityColumnIds,
@@ -19,7 +16,9 @@ import {
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
-import { useUnifiedSearch } from '../../hooks/use_unified_search';
+import { useKibana } from '../../hooks/use_kibana';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
+import { EntitiesGrid } from '../entities_grid';
 
 interface Props {
   groupValue: string;
@@ -32,7 +31,7 @@ export function GroupedEntitiesGrid({ groupValue }: Props) {
   const { sortField, sortDirection, pagination: paginationQuery } = query;
   const inventoryRoute = useInventoryRouter();
   let pagination: EntityPagination | undefined = {};
-  const { stringifiedEsQuery } = useUnifiedSearch();
+  const { stringifiedEsQuery } = useUnifiedSearchContext();
   try {
     pagination = paginationDecoder(paginationQuery);
   } catch (error) {
@@ -47,7 +46,7 @@ export function GroupedEntitiesGrid({ groupValue }: Props) {
   }
   const pageIndex = pagination?.[groupValue] ?? 0;
 
-  const { refreshSubject$, isControlPanelsInitiated } = useInventorySearchBarContext();
+  const { refreshSubject$, isControlPanelsInitiated } = useUnifiedSearchContext();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
@@ -112,20 +111,6 @@ export function GroupedEntitiesGrid({ groupValue }: Props) {
     });
   }
 
-  function handleTypeFilter(type: string) {
-    const { pagination: _, ...rest } = query;
-
-    // TODO: caue check it
-    inventoryRoute.push('/', {
-      path: {},
-      query: {
-        ...rest,
-        // Override the current entity types
-        // entityTypes: [type],
-      },
-    });
-  }
-
   return (
     <EntitiesGrid
       entities={value.entities}
@@ -135,7 +120,6 @@ export function GroupedEntitiesGrid({ groupValue }: Props) {
       onChangePage={handlePageChange}
       onChangeSort={handleSortChange}
       pageIndex={pageIndex}
-      onFilterByType={handleTypeFilter}
     />
   );
 }
