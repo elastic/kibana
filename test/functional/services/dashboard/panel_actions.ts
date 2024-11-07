@@ -127,6 +127,8 @@ export class DashboardPanelActionsService extends FtrService {
 
   async navigateToEditorFromFlyout(wrapper?: WebElementWrapper) {
     this.log.debug('navigateToEditorFromFlyout');
+    // make sure the context menu is open before proceeding
+    await this.openContextMenu();
     await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ);
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
