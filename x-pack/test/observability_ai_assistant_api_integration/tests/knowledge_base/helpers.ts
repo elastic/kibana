@@ -54,3 +54,28 @@ export async function clearConversations(es: Client) {
     refresh: true,
   });
 }
+
+export async function createInferenceEndpoint({ es, name }: { es: Client; name: string }) {
+  return es.transport.request({
+    method: 'PUT',
+    path: `_inference/sparse_embedding/${name}`,
+    body: {
+      service: 'elasticsearch',
+      service_settings: {
+        num_allocations: 1,
+        num_threads: 1,
+        model_id: 'pt_tiny_elser',
+      },
+    },
+  });
+}
+
+export async function deleteInferenceEndpoint({ es, name }: { es: Client; name: string }) {
+  return es.transport.request({
+    method: 'DELETE',
+    path: `_inference/sparse_embedding/${name}`,
+    querystring: {
+      force: true,
+    },
+  });
+}

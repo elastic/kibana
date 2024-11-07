@@ -36,6 +36,7 @@ import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
+import { registerMigrateKnowledgeBaseEntriesTask } from './service/task_manager_definitions/register_migrate_knowledge_base_entries_task';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -156,10 +157,15 @@ export class ObservabilityAIAssistantPlugin
     const service = (this.service = new ObservabilityAIAssistantService({
       logger: this.logger.get('service'),
       core,
-      taskManager: plugins.taskManager,
       getSearchConnectorModelId,
       enableKnowledgeBase: this.config.enableKnowledgeBase,
     }));
+
+    registerMigrateKnowledgeBaseEntriesTask({
+      core,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+    });
 
     service.register(registerFunctions);
 

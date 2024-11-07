@@ -31,7 +31,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
             onClick={onRetryInstall}
           >
             {i18n.translate(
-              'xpack.observabilityAiAssistant.welcomeMessageKnowledgeBaseSetupErrorPanel.retryInstallingLinkLabel',
+              'xpack.aiAssistant.welcomeMessageKnowledgeBaseSetupErrorPanel.retryInstallingLinkLabel',
               { defaultMessage: 'Retry install knowledge base' }
             )}
           </EuiLink>

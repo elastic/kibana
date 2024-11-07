@@ -60,9 +60,9 @@ export const kbComponentTemplate: ClusterComponentTemplate['component_template']
       namespace: keyword,
       text,
       semantic_text: {
-        // @ts-expect-error: @elastic/elasticsearch does not have this type yet
         type: 'semantic_text',
         inference_id: AI_ASSISTANT_KB_INFERENCE_ID,
+        // @ts-expect-error: @elastic/elasticsearch does not have this type yet
         model_settings: {
           task_type: 'sparse_embedding',
         },

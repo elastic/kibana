@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 
@@ -101,4 +102,31 @@ export async function getInferenceEndpoint({
     logger.error(`Failed to fetch inference endpoint: ${e.message}`);
     throw e;
   }
+}
+
+export async function getInferenceEndpointStatus({
+  esClient,
+  logger,
+}: {
+  esClient: { asInternalUser: ElasticsearchClient };
+  logger: Logger;
+}) {
+  try {
+    const endpoint = await getInferenceEndpoint({ esClient, logger });
+    const ready = endpoint !== undefined;
+    return { ...endpoint, ready };
+  } catch (error) {
+    if (isInferenceEndpointMissingOrUnavailable(error)) {
+      return { ready: false };
+    }
+    throw error;
+  }
+}
+
+export function isInferenceEndpointMissingOrUnavailable(error: Error) {
+  return (
+    error instanceof errors.ResponseError &&
+    (error.body?.error?.type === 'resource_not_found_exception' ||
+      error.body?.error?.type === 'status_exception')
+  );
 }

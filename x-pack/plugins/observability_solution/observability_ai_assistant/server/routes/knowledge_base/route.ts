@@ -22,9 +22,7 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     service,
     request,
   }): Promise<
-    Partial<InferenceEndpointResponse['endpoints'][0]> & {
-      ready: boolean;
-    }
+    { ready: boolean; enabled: boolean } & Partial<InferenceEndpointResponse['endpoints'][0]>
   > => {
     const client = await service.getClient({ request });
 
@@ -44,7 +42,7 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
       idleSocket: 20 * 60 * 1000, // 20 minutes
     },
   },
-  handler: async (resources): Promise<unknown> => {
+  handler: async (resources): Promise<any> => {
     const client = await resources.service.getClient({ request: resources.request });
 
     if (!client) {
@@ -252,8 +250,8 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    const status = await client.getKnowledgeBaseStatus();
-    if (!status.ready) {
+    const { ready } = await client.getKnowledgeBaseStatus();
+    if (!ready) {
       throw new Error('Knowledge base is not ready');
     }
 

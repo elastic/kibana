@@ -10,7 +10,6 @@ import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-pl
 import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
@@ -57,14 +56,13 @@ export class ObservabilityAIAssistantService {
   constructor({
     logger,
     core,
-    taskManager,
     getSearchConnectorModelId,
     enableKnowledgeBase,
   }: {
     logger: Logger;
     core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
-    taskManager: TaskManagerSetupContract;
     getSearchConnectorModelId: () => Promise<string>;
+    enableKnowledgeBase: boolean;
   }) {
     this.core = core;
     this.logger = logger;
@@ -72,17 +70,6 @@ export class ObservabilityAIAssistantService {
     this.enableKnowledgeBase = enableKnowledgeBase;
 
     this.registerInit();
-
-    registerMigrateKnowledgeBaseEntriesTask({
-      taskManager,
-      logger,
-      getKbService: () => this.kbService,
-      getTaskManagerStart,
-      getEsClient: async () => {
-        const [coreStart] = await core.getStartServices();
-        return coreStart.elasticsearch.client.asInternalUser;
-      },
-    });
   }
 
   init = async () => {};
@@ -99,7 +86,7 @@ export class ObservabilityAIAssistantService {
   private doInit = async () => {
     try {
       this.logger.info('Setting up index assets');
-      const [coreStart, pluginsStart] = await this.core.getStartServices();
+      const [coreStart] = await this.core.getStartServices();
 
       const esClient = {
         asInternalUser: coreStart.elasticsearch.client.asInternalUser,
@@ -183,7 +170,6 @@ export class ObservabilityAIAssistantService {
       this.kbService = new KnowledgeBaseService({
         logger: this.logger.get('kb'),
         esClient,
-        taskManagerStart: pluginsStart.taskManager,
         getSearchConnectorModelId: this.getSearchConnectorModelId,
         enabled: this.enableKnowledgeBase,
       });

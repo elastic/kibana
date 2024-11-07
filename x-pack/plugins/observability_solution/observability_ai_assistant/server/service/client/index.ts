@@ -722,7 +722,7 @@ export class ObservabilityAIAssistantClient {
   };
 
   getKnowledgeBaseStatus = () => {
-    return this.dependencies.knowledgeBaseService.getElserModelStatus();
+    return this.dependencies.knowledgeBaseService.getStatus();
   };
 
   setupKnowledgeBase = () => {
@@ -737,9 +737,8 @@ export class ObservabilityAIAssistantClient {
 
   migrateKnowledgeBaseToSemanticText = () => {
     return runSemanticTextKnowledgeBaseMigration({
-      esClient: this.dependencies.esClient.asInternalUser,
+      esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
-      kbService: this.dependencies.knowledgeBaseService,
     });
   };
 

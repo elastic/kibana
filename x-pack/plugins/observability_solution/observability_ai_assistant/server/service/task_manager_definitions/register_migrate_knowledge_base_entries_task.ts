@@ -7,14 +7,13 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import pLimit from 'p-limit';
-import {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
-import { Logger } from '@kbn/core/server';
+import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import pRetry from 'p-retry';
 import { KnowledgeBaseEntry } from '../../../common';
 import { resourceNames } from '..';
-import { KnowledgeBaseService } from '../knowledge_base_service';
+import { getInferenceEndpoint } from '../create_inference_endpoint';
+import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 
 const TASK_ID = 'ai-assistant-knowledge-base-migration-task-id';
 const TASK_TYPE = 'ai-assistant-knowledge-base-migration-task';
@@ -25,17 +24,16 @@ const TASK_TYPE = 'ai-assistant-knowledge-base-migration-task';
 export async function registerMigrateKnowledgeBaseEntriesTask({
   taskManager,
   logger,
-  getKbService,
-  getTaskManagerStart,
-  getEsClient,
+  core,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
-  getKbService: () => KnowledgeBaseService | undefined;
-  getTaskManagerStart: () => Promise<TaskManagerStartContract>;
-  getEsClient: () => Promise<ElasticsearchClient>;
+  core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
 }) {
   logger.debug(`Register task "${TASK_TYPE}"`);
+
+  const [coreStart, pluginsStart] = await core.getStartServices();
+
   taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
       title: 'Migrate AI Assistant Knowledge Base',
@@ -46,24 +44,17 @@ export async function registerMigrateKnowledgeBaseEntriesTask({
         return {
           async run() {
             logger.debug(`Run task: "${TASK_TYPE}"`);
-            const esClient = await getEsClient();
 
-            const kbService = getKbService();
-            if (!kbService) {
-              throw new Error('Knowledge base service is not available');
-            }
-
-            await runSemanticTextKnowledgeBaseMigration({ esClient, logger, kbService });
+            const esClient = { asInternalUser: coreStart.elasticsearch.client.asInternalUser };
+            await runSemanticTextKnowledgeBaseMigration({ esClient, logger });
           },
         };
       },
     },
   });
 
-  const taskManagerStart = await getTaskManagerStart();
-
   logger.debug(`Scheduled task: "${TASK_TYPE}"`);
-  await taskManagerStart.ensureScheduled({
+  await pluginsStart.taskManager.ensureScheduled({
     id: TASK_ID,
     taskType: TASK_TYPE,
     scope: ['aiAssistant'],
@@ -75,16 +66,14 @@ export async function registerMigrateKnowledgeBaseEntriesTask({
 export async function runSemanticTextKnowledgeBaseMigration({
   esClient,
   logger,
-  kbService,
 }: {
-  esClient: ElasticsearchClient;
+  esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
-  kbService: KnowledgeBaseService;
 }) {
   logger.debug('Knowledge base migration: Running migration');
 
   try {
-    const response = await esClient.search<KnowledgeBaseEntry>({
+    const response = await esClient.asInternalUser.search<KnowledgeBaseEntry>({
       size: 100,
       track_total_hits: true,
       index: [resourceNames.aliases.kb],
@@ -109,7 +98,7 @@ export async function runSemanticTextKnowledgeBaseMigration({
 
     logger.debug(`Knowledge base migration: Found ${response.hits.hits.length} entries to migrate`);
 
-    await kbService.waitForElserModelReady();
+    await waitForInferenceEndpoint({ esClient, logger });
 
     // Limit the number of concurrent requests to avoid overloading the cluster
     const limiter = pLimit(10);
@@ -119,7 +108,7 @@ export async function runSemanticTextKnowledgeBaseMigration({
           return;
         }
 
-        return esClient.update({
+        return esClient.asInternalUser.update({
           index: resourceNames.aliases.kb,
           id: hit._id,
           body: {
@@ -134,9 +123,24 @@ export async function runSemanticTextKnowledgeBaseMigration({
 
     await Promise.all(promises);
     logger.debug(`Knowledge base migration: Migrated ${promises.length} entries`);
-    await runSemanticTextKnowledgeBaseMigration({ esClient, logger, kbService });
+    await runSemanticTextKnowledgeBaseMigration({ esClient, logger });
   } catch (e) {
     logger.error('Knowledge base migration: Failed to migrate entries');
     logger.error(e);
   }
+}
+
+async function waitForInferenceEndpoint({
+  esClient,
+  logger,
+}: {
+  esClient: { asInternalUser: ElasticsearchClient };
+  logger: Logger;
+}) {
+  return pRetry(async () => {
+    const endpoint = await getInferenceEndpoint({ esClient, logger });
+    if (!endpoint) {
+      throw new Error('Inference endpoint not yet ready');
+    }
+  });
 }

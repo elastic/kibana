@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { errors } from '@elastic/elasticsearch';
+
 import { serverUnavailable } from '@hapi/boom';
 import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import pRetry from 'p-retry';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { resourceNames } from '..';
@@ -24,7 +22,8 @@ import { getCategoryQuery } from '../util/get_category_query';
 import {
   createInferenceEndpoint,
   deleteInferenceEndpoint,
-  getInferenceEndpoint,
+  getInferenceEndpointStatus,
+  isInferenceEndpointMissingOrUnavailable,
 } from '../create_inference_endpoint';
 import { recallFromConnectors } from './recall_from_connectors';
 
@@ -33,7 +32,6 @@ interface Dependencies {
     asInternalUser: ElasticsearchClient;
   };
   logger: Logger;
-  taskManagerStart: TaskManagerStartContract;
   getSearchConnectorModelId: () => Promise<string>;
   enabled: boolean;
 }
@@ -46,14 +44,6 @@ export interface RecalledEntry {
   labels?: Record<string, string>;
 }
 
-function isModelMissingOrUnavailableError(error: Error) {
-  return (
-    error instanceof errors.ResponseError &&
-    (error.body?.error?.type === 'resource_not_found_exception' ||
-      error.body?.error?.type === 'status_exception')
-  );
-}
-
 function throwKnowledgeBaseNotReady(body: any) {
   throw serverUnavailable(`Knowledge base is not ready yet`, body);
 }
@@ -61,159 +51,23 @@ function throwKnowledgeBaseNotReady(body: any) {
 export class KnowledgeBaseService {
   constructor(private readonly dependencies: Dependencies) {}
 
-  setup = async () => {
-    this.dependencies.logger.debug('Setting up knowledge base');
-    if (!this.dependencies.enabled) {
-      return;
-    }
-    const elserModelId = await this.dependencies.getModelId();
+  async setup(esClient: {
+    asCurrentUser: ElasticsearchClient;
+    asInternalUser: ElasticsearchClient;
+  }) {
+    return createInferenceEndpoint({ esClient, logger: this.dependencies.logger });
+  }
 
-    const retryOptions = { factor: 1, minTimeout: 10000, retries: 12 };
-    const getModelInfo = async () => {
-      return await this.dependencies.esClient.asInternalUser.ml.getTrainedModels({
-        model_id: elserModelId,
-        include: 'definition_status',
-      });
-    };
-
-    const isModelInstalledAndReady = async () => {
-      try {
-        const getResponse = await getModelInfo();
-        this.dependencies.logger.debug(
-          () => 'Model definition status:\n' + JSON.stringify(getResponse.trained_model_configs[0])
-        );
-
-        return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
-      } catch (error) {
-        if (isModelMissingOrUnavailableError(error)) {
-          return false;
-        }
-
-        throw error;
-      }
-    };
-
-    const installModelIfDoesNotExist = async () => {
-      const modelInstalledAndReady = await isModelInstalledAndReady();
-      if (!modelInstalledAndReady) {
-        await installModel();
-      }
-    };
-
-    const installModel = async () => {
-      this.dependencies.logger.info(`Installing ${elserModelId} model`);
-      try {
-        await this.dependencies.esClient.asInternalUser.ml.putTrainedModel(
-          {
-            model_id: elserModelId,
-            input: {
-              field_names: ['text_field'],
-            },
-            wait_for_completion: true,
-          },
-          { requestTimeout: '20m' }
-        );
-      } catch (error) {
-        if (isCreateModelValidationError(error)) {
-          throw badRequest(error);
-        } else {
-          throw error;
-        }
-      }
-      this.dependencies.logger.info(`Finished installing ${elserModelId} model`);
-    };
-
-    const pollForModelInstallCompleted = async () => {
-      await pRetry(async () => {
-        this.dependencies.logger.info(`Polling installation of ${elserModelId} model`);
-        const modelInstalledAndReady = await isModelInstalledAndReady();
-        if (!modelInstalledAndReady) {
-          throwKnowledgeBaseNotReady({
-            message: 'Model is not fully defined',
-          });
-        }
-      }, retryOptions);
-    };
-    await installModelIfDoesNotExist();
-    await pollForModelInstallCompleted();
-
+  async reset(esClient: { asCurrentUser: ElasticsearchClient }) {
     try {
-      await this.dependencies.esClient.asInternalUser.ml.startTrainedModelDeployment({
-        model_id: elserModelId,
-        wait_for: 'fully_allocated',
-      });
+      await deleteInferenceEndpoint({ esClient, logger: this.dependencies.logger });
     } catch (error) {
-      this.dependencies.logger.debug(`Error starting ${elserModelId} model deployment`);
-      this.dependencies.logger.debug(error);
-      if (!isModelMissingOrUnavailableError(error)) {
-        throw error;
-      }
-    }
-
-    await pRetry(async () => {
-      const response = await this.dependencies.esClient.asInternalUser.ml.getTrainedModelsStats({
-        model_id: elserModelId,
-      });
-
-      const isReady = response.trained_model_stats.some((stats) =>
-        (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[]).some(
-          (node) => node.routing_state.routing_state === 'started'
-        )
-      );
-
-      if (isReady) {
+      if (isInferenceEndpointMissingOrUnavailable(error)) {
         return;
       }
-
-      this.dependencies.logger.debug(`${elserModelId} model is not allocated yet`);
-      this.dependencies.logger.debug(() => JSON.stringify(response));
-
-      throw gatewayTimeout();
-    }, retryOptions);
-
-    this.dependencies.logger.info(`${elserModelId} model is ready`);
-  };
-
-  status = async () => {
-    this.dependencies.logger.debug('Checking model status');
-    if (!this.dependencies.enabled) {
-      return { ready: false, enabled: false };
+      throw error;
     }
-    const elserModelId = await this.dependencies.getModelId();
-
-    try {
-      const modelStats = await this.dependencies.esClient.asInternalUser.ml.getTrainedModelsStats({
-        model_id: elserModelId,
-      });
-      const elserModelStats = modelStats.trained_model_stats[0];
-      const deploymentState = elserModelStats.deployment_stats?.state;
-      const allocationState = elserModelStats.deployment_stats?.allocation_status.state;
-      const ready = deploymentState === 'started' && allocationState === 'fully_allocated';
-
-      this.dependencies.logger.debug(
-        `Model deployment state: ${deploymentState}, allocation state: ${allocationState}, ready: ${ready}`
-      );
-
-      return {
-        ready,
-        deployment_state: deploymentState,
-        allocation_state: allocationState,
-        model_name: elserModelId,
-        enabled: true,
-      };
-    } catch (error) {
-      this.dependencies.logger.debug(
-        `Failed to get status for model "${elserModelId}" due to ${error.message}`
-      );
-
-      return {
-        error: error instanceof errors.ResponseError ? error.body.error : String(error),
-        ready: false,
-        enabled: true,
-        model_name: elserModelId,
-      };
-    }
-  };
+  }
 
   private async recallFromKnowledgeBase({
     queries,
@@ -252,7 +106,6 @@ export class KnowledgeBaseService {
       Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'title'> & { doc_id?: string }
     >({
       index: [resourceNames.aliases.kb],
-      // @ts-expect-error: `semantic` is not in the types yet
       query: esQuery,
       size: 20,
       _source: {
@@ -301,7 +154,7 @@ export class KnowledgeBaseService {
         categories,
         namespace,
       }).catch((error) => {
-        if (isModelMissingOrUnavailableError(error)) {
+        if (isInferenceEndpointMissingOrUnavailable(error)) {
           throwKnowledgeBaseNotReady(error.body);
         }
         throw error;
@@ -458,7 +311,7 @@ export class KnowledgeBaseService {
         })),
       };
     } catch (error) {
-      if (isModelMissingOrUnavailableError(error)) {
+      if (isInferenceEndpointMissingOrUnavailable(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
       throw error;
@@ -555,7 +408,7 @@ export class KnowledgeBaseService {
         refresh: 'wait_for',
       });
     } catch (error) {
-      if (error instanceof errors.ResponseError && error.body.error.type === 'status_exception') {
+      if (isInferenceEndpointMissingOrUnavailable(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
       throw error;
@@ -572,10 +425,22 @@ export class KnowledgeBaseService {
 
       return Promise.resolve();
     } catch (error) {
-      if (isModelMissingOrUnavailableError(error)) {
+      if (isInferenceEndpointMissingOrUnavailable(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
       throw error;
     }
+  };
+
+  getStatus = async () => {
+    const status = await getInferenceEndpointStatus({
+      esClient: this.dependencies.esClient,
+      logger: this.dependencies.logger,
+    });
+
+    return {
+      ...status,
+      enabled: this.dependencies.enabled,
+    };
   };
 }

@@ -6,7 +6,7 @@
         "is_write_index": true
       }
     },
-    "index": ".kibana_1",
+    "index": ".kibana-observability-ai-assistant-kb-000001",
     "mappings": {
       "dynamic": "false",
       "properties": {
@@ -44,17 +44,7 @@
         },
         "labels": {
           "dynamic": "true",
-          "properties": {
-            "category": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            }
-          }
+          "type": "object"
         },
         "ml": {
           "properties": {
@@ -71,6 +61,15 @@
           "type": "boolean"
         },
         "text": {
+          "type": "text"
+        },
+        "title": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
           "type": "text"
         },
         "type": {
