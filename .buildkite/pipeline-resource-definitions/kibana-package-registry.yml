@@ -16,11 +16,11 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / package registry promote
-      description: Promote package-registry/distribution:lite
+      description: Promote docker.elastic.co/package-registry/distribution:lite for Kibana CI
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: "#kibana-operations-alerts"
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: "false"
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: "true"
       repository: elastic/kibana
       branch_configuration: main
       default_branch: main
