@@ -74,19 +74,12 @@ export function useAlertsHistory({
     refetchOnWindowFocus: false,
     enabled,
   });
-  return enabled
-    ? {
-        data: isInitialLoading ? EMPTY_ALERTS_HISTORY : data ?? EMPTY_ALERTS_HISTORY,
-        isLoading: isInitialLoading || isLoading || isRefetching,
-        isSuccess,
-        isError,
-      }
-    : {
-        data: EMPTY_ALERTS_HISTORY,
-        isLoading: false,
-        isSuccess: false,
-        isError: false,
-      };
+  return {
+    data: isInitialLoading ? EMPTY_ALERTS_HISTORY : data ?? EMPTY_ALERTS_HISTORY,
+    isLoading: enabled && (isInitialLoading || isLoading || isRefetching),
+    isSuccess,
+    isError,
+  };
 }
 interface AggsESResponse {
   aggregations: {
