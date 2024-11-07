@@ -27,6 +27,7 @@ import {
   INTERNAL_CASE_OBSERVABLES_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   INTERNAL_CASE_OBSERVABLES_PATCH_URL,
+  INTERNAL_CASE_SIMILAR_CASES_URL,
 } from '@kbn/cases-plugin/common/constants';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import type { SingleCaseMetricsResponse, CasesMetricsResponse } from '@kbn/cases-plugin/common';
@@ -924,14 +925,21 @@ export const similarCases = async ({
   body,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
+  caseId,
 }: {
   supertest: SuperTest.Agent;
   body: SimilarCasesSearchRequest;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
+  caseId: string;
 }): Promise<CasesSimilarResponse> => {
   const { body: res } = await supertest
-    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/_similar`)
+    .post(
+      `${getSpaceUrlPrefix(auth.space)}${INTERNAL_CASE_SIMILAR_CASES_URL.replace(
+        '{case_id}',
+        caseId
+      )}`
+    )
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .send({ ...body })
