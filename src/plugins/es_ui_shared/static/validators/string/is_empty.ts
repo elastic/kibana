@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export const isEmptyString = (value: string) => value.trim() === '';
+export const isEmptyString = (value: string, trimString: boolean = true) =>
+  (trimString ? value.trim() : value) === '';
