@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, type ChangeEvent } from 'react';
 
 import {
   EuiIcon,
@@ -40,10 +40,22 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
   onChangeExpires,
 }) => {
   let expirationDate: Date | undefined;
+
   if (expires) {
     expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + parseInt(expires, 10));
   }
+
+  const handleNameChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => onChangeName(e.currentTarget.value),
+    []
+  );
+
+  const handleOnChangeExpires = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => onChangeExpires(e.currentTarget.value || '1'),
+    []
+  );
+
   return (
     <EuiForm>
       <EuiFormRow
@@ -60,7 +72,7 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
           fullWidth
           isLoading={isLoading}
           value={name}
-          onChange={(e) => onChangeName(e.currentTarget.value)}
+          onChange={handleNameChange}
           data-test-subj="create-api-key-name"
         />
       </EuiFormRow>
@@ -127,22 +139,24 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
         <EuiFormRow
           fullWidth
           helpText={
-            <FormattedMessage
-              id="xpack.enterpriseSearch.apiKey.expiresHelpText"
-              defaultMessage="This API Key will expire on {expirationDate}"
-              values={{
-                expirationDate: (
-                  <strong>
-                    <FormattedDate
-                      year="numeric"
-                      month="long"
-                      day="numeric"
-                      value={expirationDate!}
-                    />
-                  </strong>
-                ),
-              }}
-            />
+            expirationDate && (
+              <FormattedMessage
+                id="xpack.enterpriseSearch.apiKey.expiresHelpText"
+                defaultMessage="This API Key will expire on {expirationDate}"
+                values={{
+                  expirationDate: (
+                    <strong>
+                      <FormattedDate
+                        year="numeric"
+                        month="long"
+                        day="numeric"
+                        value={expirationDate}
+                      />
+                    </strong>
+                  ),
+                }}
+              />
+            )
           }
         >
           <EuiFieldNumber
@@ -154,7 +168,7 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
             placeholder="1"
             value={expires || ''}
             min={1}
-            onChange={(e) => onChangeExpires(e.currentTarget.value)}
+            onChange={handleOnChangeExpires}
             data-test-subj="create-api-key-expires-days-number-field"
           />
         </EuiFormRow>
