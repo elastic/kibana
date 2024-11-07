@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
-import { getTestAlertData, getTestConnectorData } from '../../lib/get_test_data';
+import { getTestAlertData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -24,6 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await security.testUser.setRoles(['alerts_and_actions_role']);
       });
+
       after(async () => {
         await security.testUser.restoreDefaults();
       });
@@ -41,6 +42,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await security.testUser.setRoles(['only_actions_role']);
       });
+
       after(async () => {
         await security.testUser.restoreDefaults();
       });
@@ -57,10 +59,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('triggersActions');
       });
 
-      after(async () => {
-        await objectRemover.removeAll();
-      });
-
       it('Loads the Alerts page', async () => {
         log.debug('Checking for section heading to say Rules.');
 
@@ -72,14 +70,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         let createdRule: { name: string; id: string };
 
         before(async () => {
-          const { body: createdAction } = await supertest
-            .post(`/api/actions/connector`)
-            .set('kbn-xsrf', 'foo')
-            .send(getTestConnectorData())
-            .expect(200);
-
-          objectRemover.add(createdAction.id, 'action', 'actions');
-
           const resRule = await supertest
             .post(`/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
@@ -87,7 +77,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             .expect(200);
 
           createdRule = resRule.body;
-          objectRemover.add(resRule.body.id, 'alert', 'alerts');
+          objectRemover.add(createdRule.id, 'rule', 'alerting');
         });
 
         after(async () => {
