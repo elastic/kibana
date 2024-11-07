@@ -167,7 +167,7 @@ const LinksEditor = ({
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="m" data-test-subj="links--panelEditor--title">
+            <EuiTitle size="s" data-test-subj="links--panelEditor--title">
               <h2>
                 {isEditingExisting
                   ? LinksStrings.editor.panelEditor.getEditFlyoutTitle()
@@ -186,6 +186,7 @@ const LinksEditor = ({
         <EuiForm fullWidth>
           <EuiFormRow label={LinksStrings.editor.panelEditor.getLayoutSettingsTitle()}>
             <EuiButtonGroup
+              isFullWidth
               options={layoutOptions}
               buttonSize="compressed"
               idSelected={currentLayout}
@@ -268,6 +269,7 @@ const LinksEditor = ({
                     data-test-subj="links--panelEditor--saveByReferenceTooltip"
                   >
                     <EuiSwitch
+                      compressed
                       label={LinksStrings.editor.panelEditor.getSaveToLibrarySwitchLabel()}
                       checked={saveByReference}
                       disabled={hasZeroLinks}

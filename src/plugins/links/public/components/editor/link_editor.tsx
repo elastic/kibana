@@ -100,7 +100,7 @@ export const LinkEditor = ({
           iconType={'arrowLeft'}
           onClick={() => onClose()}
         >
-          <EuiTitle size="m" aria-label={LinksStrings.editor.linkEditor.getGoBackAriaLabel()}>
+          <EuiTitle size="s" aria-label={LinksStrings.editor.linkEditor.getGoBackAriaLabel()}>
             <h2>
               {link
                 ? LinksStrings.editor.getEditLinkTitle()
@@ -113,6 +113,7 @@ export const LinkEditor = ({
         <EuiForm component="form" fullWidth>
           <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkTypePickerLabel()}>
             <EuiRadioGroup
+              compressed
               options={linkTypes}
               idSelected={selectedLinkType}
               onChange={(id) => {
@@ -131,6 +132,7 @@ export const LinkEditor = ({
           />
           <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkTextLabel()}>
             <EuiFieldText
+              compressed
               placeholder={
                 (linkDestination ? defaultLinkLabel : '') ||
                 LinksStrings.editor.linkEditor.getLinkTextPlaceholder()
