@@ -11,6 +11,7 @@ import type { IndicesStatusResponse, UserStartPrivilegesResponse } from '../../.
 
 import { AnalyticsEvents } from '../../analytics/constants';
 import { AvailableLanguages } from '../../code_examples';
+import { useKibana } from '../../hooks/use_kibana';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { CreateIndexFormState } from '../../types';
 import { generateRandomIndexName } from '../../utils/indices';
@@ -41,6 +42,7 @@ enum CreateIndexViewMode {
 }
 
 export const CreateIndex = ({ indicesData, userPrivileges }: CreateIndexProps) => {
+  const { application } = useKibana().services;
   const [createIndexView, setCreateIndexView] = useState<CreateIndexViewMode>(
     userPrivileges?.privileges.canCreateIndex === false
       ? CreateIndexViewMode.Code
@@ -76,9 +78,16 @@ export const CreateIndex = ({ indicesData, userPrivileges }: CreateIndexProps) =
     },
     [usageTracker, formState, setFormState]
   );
+  const onClose = useCallback(() => {
+    application.navigateToApp('management', { deepLinkId: 'index_management' });
+  }, [application]);
 
   return (
-    <CreateIndexPanel createIndexView={createIndexView} onChangeView={onChangeView}>
+    <CreateIndexPanel
+      createIndexView={createIndexView}
+      onChangeView={onChangeView}
+      onClose={onClose}
+    >
       {createIndexView === CreateIndexViewMode.UI && (
         <CreateIndexUIView
           formState={formState}

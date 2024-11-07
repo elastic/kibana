@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -17,6 +18,7 @@ import {
   EuiText,
   EuiTextAlign,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -30,6 +32,8 @@ export interface CreateIndexPanelProps {
   children: React.ReactNode | React.ReactNode[];
   createIndexView: CreateIndexViewMode;
   onChangeView: (id: string) => void;
+  onClose: () => void;
+  showSkip?: boolean;
   title?: React.ReactNode;
 }
 
@@ -37,9 +41,12 @@ export const CreateIndexPanel = ({
   children,
   createIndexView,
   onChangeView,
+  onClose,
+  showSkip,
   title,
 }: CreateIndexPanelProps) => {
   const { cloud, http } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
 
   const o11yTrialLink = useMemo(() => {
     if (cloud && cloud.isServerlessEnabled) {
@@ -50,158 +57,194 @@ export const CreateIndexPanel = ({
   }, [cloud, http]);
 
   return (
-    <EuiPanel
-      color="subdued"
-      hasShadow={false}
-      hasBorder
-      paddingSize="l"
-      style={{ maxWidth: MAX_WIDTH, margin: '0 auto' }}
-    >
-      <EuiPanel color="transparent" paddingSize="m">
-        <EuiFlexGroup alignItems="center" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="logoElasticsearch" size="xl" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h1>
-                {i18n.translate('xpack.searchIndices.startPage.pageTitle', {
-                  defaultMessage: 'Elasticsearch',
-                })}
-              </h1>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiTitle size="l">
-          <h2>
-            {i18n.translate('xpack.searchIndices.startPage.pageDescription', {
-              defaultMessage: 'Vectorize, search, and visualize your data',
+    <>
+      <EuiPanel
+        color="subdued"
+        hasShadow={false}
+        hasBorder
+        style={{
+          maxWidth: MAX_WIDTH,
+          margin: '0 auto',
+          padding: euiTheme.size.l,
+          paddingTop: euiTheme.size.m,
+        }}
+      >
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiButtonIcon
+            data-test-subj="closeCreateIndex"
+            iconType="cross"
+            onClick={onClose}
+            color="text"
+            aria-label={i18n.translate('xpack.searchIndices.createIndex.closeAriaLabel', {
+              defaultMessage: 'Close create index',
             })}
-          </h2>
-        </EuiTitle>
-      </EuiPanel>
-      <EuiSpacer />
-      <EuiPanel>
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexGroup alignItems="center">
+          />
+        </EuiFlexGroup>
+        <EuiPanel
+          color="transparent"
+          paddingSize="none"
+          style={{
+            paddingLeft: euiTheme.size.m,
+            paddingRight: euiTheme.size.m,
+          }}
+        >
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="logoElasticsearch" size="xl" />
+            </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="xs">
-                <h4>
-                  {title ??
-                    i18n.translate('xpack.searchIndices.createIndex.title', {
-                      defaultMessage: 'Create an index',
-                    })}
-                </h4>
+                <h1>
+                  {i18n.translate('xpack.searchIndices.startPage.pageTitle', {
+                    defaultMessage: 'Elasticsearch',
+                  })}
+                </h1>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonGroup
-                legend={i18n.translate('xpack.searchIndices.createIndex.viewSelect.legend', {
-                  defaultMessage: 'Create index view selection',
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiTitle size="l">
+            <h2>
+              {i18n.translate('xpack.searchIndices.startPage.pageDescription', {
+                defaultMessage: 'Vectorize, search, and visualize your data',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiPanel>
+        <EuiSpacer size="l" />
+        <EuiPanel>
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h4>
+                    {title ??
+                      i18n.translate('xpack.searchIndices.createIndex.title', {
+                        defaultMessage: 'Create an index',
+                      })}
+                  </h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonGroup
+                  legend={i18n.translate('xpack.searchIndices.createIndex.viewSelect.legend', {
+                    defaultMessage: 'Create index view selection',
+                  })}
+                  options={[
+                    {
+                      id: CreateIndexViewMode.UI,
+                      label: i18n.translate('xpack.searchIndices.createIndex.viewSelect.ui', {
+                        defaultMessage: 'UI',
+                      }),
+                      'data-test-subj': 'createIndexUIViewBtn',
+                    },
+                    {
+                      id: CreateIndexViewMode.Code,
+                      label: i18n.translate('xpack.searchIndices.createIndex.viewSelect.code', {
+                        defaultMessage: 'Code',
+                      }),
+                      'data-test-subj': 'createIndexCodeViewBtn',
+                    },
+                  ]}
+                  buttonSize="compressed"
+                  idSelected={createIndexView}
+                  onChange={onChangeView}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiText color="subdued">
+              <p>
+                {i18n.translate('xpack.searchIndices.createIndex.description', {
+                  defaultMessage:
+                    'An index stores your data and defines the schema, or field mappings, for your searches',
                 })}
-                options={[
+              </p>
+            </EuiText>
+            {children}
+          </EuiFlexGroup>
+        </EuiPanel>
+        <EuiSpacer />
+        <EuiPanel color="transparent">
+          <EuiTextAlign textAlign="center">
+            <EuiTitle size="xs">
+              <h5>
+                {i18n.translate('xpack.searchIndices.startPage.observabilityCallout.title', {
+                  defaultMessage: 'Looking to store your logs or metrics data?',
+                })}
+              </h5>
+            </EuiTitle>
+          </EuiTextAlign>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center" justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="text"
+                iconSide="right"
+                iconType="popout"
+                data-test-subj="analyzeLogsBtn"
+                href={docLinks.analyzeLogs}
+                target="_blank"
+              >
+                {i18n.translate('xpack.searchIndices.startPage.observabilityCallout.logs.button', {
+                  defaultMessage: 'Collect and analyze logs',
+                })}
+              </EuiButtonEmpty>
+              <EuiText color="subdued" size="s" textAlign="center">
+                <small>
+                  {i18n.translate(
+                    'xpack.searchIndices.startPage.observabilityCallout.logs.subTitle',
+                    {
+                      defaultMessage: 'Explore Logstash and Beats',
+                    }
+                  )}
+                </small>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText>or</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="text"
+                iconSide="right"
+                iconType="popout"
+                data-test-subj="startO11yTrialBtn"
+                href={o11yTrialLink}
+                target="_blank"
+              >
+                {i18n.translate(
+                  'xpack.searchIndices.startPage.observabilityCallout.o11yTrial.button',
                   {
-                    id: CreateIndexViewMode.UI,
-                    label: i18n.translate('xpack.searchIndices.createIndex.viewSelect.ui', {
-                      defaultMessage: 'UI',
-                    }),
-                    'data-test-subj': 'createIndexUIViewBtn',
-                  },
-                  {
-                    id: CreateIndexViewMode.Code,
-                    label: i18n.translate('xpack.searchIndices.createIndex.viewSelect.code', {
-                      defaultMessage: 'Code',
-                    }),
-                    'data-test-subj': 'createIndexCodeViewBtn',
-                  },
-                ]}
-                buttonSize="compressed"
-                idSelected={createIndexView}
-                onChange={onChangeView}
-              />
+                    defaultMessage: 'Start an Observability trial',
+                  }
+                )}
+              </EuiButtonEmpty>
+              <EuiText color="subdued" size="s" textAlign="center">
+                <small>
+                  {i18n.translate(
+                    'xpack.searchIndices.startPage.observabilityCallout.o11yTrial.subTitle',
+                    {
+                      defaultMessage: 'Powerful performance monitoring',
+                    }
+                  )}
+                </small>
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiText color="subdued">
-            <p>
-              {i18n.translate('xpack.searchIndices.createIndex.description', {
-                defaultMessage:
-                  'An index stores your data and defines the schema, or field mappings, for your searches',
-              })}
-            </p>
-          </EuiText>
-          {children}
-        </EuiFlexGroup>
+        </EuiPanel>
       </EuiPanel>
-      <EuiSpacer />
-      <EuiPanel color="transparent">
-        <EuiTextAlign textAlign="center">
-          <EuiTitle size="xs">
-            <h5>
-              {i18n.translate('xpack.searchIndices.startPage.observabilityCallout.title', {
-                defaultMessage: 'Looking to store your logs or metrics data?',
-              })}
-            </h5>
-          </EuiTitle>
-        </EuiTextAlign>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup alignItems="center" justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="text"
-              iconSide="right"
-              iconType="popout"
-              data-test-subj="analyzeLogsBtn"
-              href={docLinks.analyzeLogs}
-              target="_blank"
-            >
-              {i18n.translate('xpack.searchIndices.startPage.observabilityCallout.logs.button', {
-                defaultMessage: 'Collect and analyze logs',
+      {showSkip === true && (
+        <>
+          <EuiSpacer />
+          <EuiFlexGroup justifyContent="center">
+            <EuiButtonEmpty onClick={onClose} data-test-subj="createIndexSkipBtn">
+              {i18n.translate('xpack.searchIndices.createIndex.skipLabel', {
+                defaultMessage: 'Skip',
               })}
             </EuiButtonEmpty>
-            <EuiText color="subdued" size="s" textAlign="center">
-              <small>
-                {i18n.translate(
-                  'xpack.searchIndices.startPage.observabilityCallout.logs.subTitle',
-                  {
-                    defaultMessage: 'Explore Logstash and Beats',
-                  }
-                )}
-              </small>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText>or</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="text"
-              iconSide="right"
-              iconType="popout"
-              data-test-subj="startO11yTrialBtn"
-              href={o11yTrialLink}
-              target="_blank"
-            >
-              {i18n.translate(
-                'xpack.searchIndices.startPage.observabilityCallout.o11yTrial.button',
-                {
-                  defaultMessage: 'Start an Observability trial',
-                }
-              )}
-            </EuiButtonEmpty>
-            <EuiText color="subdued" size="s" textAlign="center">
-              <small>
-                {i18n.translate(
-                  'xpack.searchIndices.startPage.observabilityCallout.o11yTrial.subTitle',
-                  {
-                    defaultMessage: 'Powerful performance monitoring',
-                  }
-                )}
-              </small>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </EuiPanel>
+          </EuiFlexGroup>
+        </>
+      )}
+    </>
   );
 };

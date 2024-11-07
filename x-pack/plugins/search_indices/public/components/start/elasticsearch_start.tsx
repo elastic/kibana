@@ -21,6 +21,7 @@ import { CreateIndexCodeView } from '../shared/create_index_code_view';
 import { CreateIndexFormState, CreateIndexViewMode } from '../../types';
 
 import { CreateIndexPanel } from '../shared/create_index_panel';
+import { useKibana } from '../../hooks/use_kibana';
 
 function initCreateIndexState(): CreateIndexFormState {
   const defaultIndexName = generateRandomIndexName();
@@ -37,6 +38,7 @@ export interface ElasticsearchStartProps {
 }
 
 export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) => {
+  const { application } = useKibana().services;
   const [createIndexView, setCreateIndexViewMode] = useState<CreateIndexViewMode>(
     userPrivileges?.privileges.canCreateIndex === false
       ? CreateIndexViewMode.Code
@@ -83,6 +85,9 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
     },
     [usageTracker, formState, setFormState]
   );
+  const onClose = useCallback(() => {
+    application.navigateToApp('management', { deepLinkId: 'index_management' });
+  }, [application]);
 
   return (
     <CreateIndexPanel
@@ -91,6 +96,8 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
       })}
       createIndexView={createIndexView}
       onChangeView={onChangeView}
+      onClose={onClose}
+      showSkip
     >
       {createIndexView === CreateIndexViewMode.UI && (
         <CreateIndexUIView
