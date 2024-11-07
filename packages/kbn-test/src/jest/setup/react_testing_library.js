@@ -33,3 +33,19 @@ jest.mock('@testing-library/react', () => {
     renderHook: (render, options) => actual.renderHook(render, { ...options, legacyRoot: true }),
   };
 });
+
+// This is a workaround to run tests with React 17 and the latest @testing-library/react
+// And prevent the act warnings that were supposed to be muted by @testing-library
+// The testing library mutes the act warnings in some cases by setting IS_REACT_ACT_ENVIRONMENT which is React@18 feature https://github.com/testing-library/react-testing-library/pull/1137/
+// Using this console override we're muting the act warnings as well
+// Tracking issue to clean this up https://github.com/elastic/kibana/issues/199100
+const originalConsoleError = console.error;
+console.error = (...args) => {
+  if (global.IS_REACT_ACT_ENVIRONMENT === false) {
+    if (args[0].includes('Warning: An update to %s inside a test was not wrapped in act')) {
+      return;
+    }
+  }
+
+  originalConsoleError(...args);
+};
