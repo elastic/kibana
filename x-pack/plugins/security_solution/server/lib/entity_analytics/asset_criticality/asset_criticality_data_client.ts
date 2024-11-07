@@ -256,10 +256,13 @@ export class AssetCriticalityDataClient {
       total: 0,
     };
 
-    let streamIndex = 0;
+    let streamIndex = 1; // It corresponds to the line number
     const recordGenerator = async function* () {
+      const processedEntities = new Set<string>();
+
       for await (const untypedRecord of recordsStream) {
         const record = untypedRecord as unknown as AssetCriticalityUpsert | Error;
+
         stats.total++;
         if (record instanceof Error) {
           stats.failed++;
@@ -268,10 +271,20 @@ export class AssetCriticalityDataClient {
             index: streamIndex,
           });
         } else {
-          yield {
-            record,
-            index: streamIndex,
-          };
+          const entityKey = `${record.idField}-${record.idValue}`;
+          if (processedEntities.has(entityKey)) {
+            errors.push({
+              message: 'Duplicated entity',
+              index: streamIndex,
+            });
+            stats.failed++;
+          } else {
+            processedEntities.add(entityKey);
+            yield {
+              record,
+              index: streamIndex,
+            };
+          }
         }
         streamIndex++;
       }
