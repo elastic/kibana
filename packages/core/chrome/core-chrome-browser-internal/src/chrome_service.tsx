@@ -9,8 +9,18 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
-import { mergeMap, map, takeUntil, filter } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  merge,
+  type Observable,
+  of,
+  ReplaySubject,
+  mergeMap,
+  map,
+  takeUntil,
+  filter,
+} from 'rxjs';
 import { parse } from 'url';
 import { setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
@@ -54,6 +64,7 @@ import { Header, LoadingIndicator, ProjectHeader } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
+import { ConsoleMessagesService } from './console_messages';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
@@ -88,6 +99,7 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation: ProjectNavigationService;
+  private readonly consoleMessages = new ConsoleMessagesService();
   private mutationObserver: MutationObserver | undefined;
   private readonly isSideNavCollapsed$ = new BehaviorSubject(
     localStorage.getItem(IS_SIDENAV_COLLAPSED_KEY) === 'true'
@@ -295,6 +307,13 @@ export class ChromeService {
         ].filter((className) => !!className);
       })
     );
+
+    this.consoleMessages.start({
+      isDev: this.params.coreContext.env.mode.dev,
+      mode: injectedMetadata.isConsoleMessagesEnabled(),
+      warn: (title, text) => notifications.toasts.addWarning(title, { text }),
+      error: (title, text) => notifications.toasts.addDanger(title, { text }),
+    });
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });

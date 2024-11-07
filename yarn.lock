@@ -3830,6 +3830,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-console-messages-common@link:packages/core/console-messages/core-console-messages-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-console-messages-server-internal@link:packages/core/console-messages/core-console-messages-server-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-custom-branding-browser-internal@link:packages/core/custom-branding/core-custom-branding-browser-internal":
   version "0.0.0"
   uid ""

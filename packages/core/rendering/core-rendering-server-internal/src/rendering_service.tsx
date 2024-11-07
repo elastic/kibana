@@ -25,6 +25,7 @@ import {
   type UiSettingsParams,
   type UserProvidedValues,
 } from '@kbn/core-ui-settings-common';
+import { ConsoleMessagesSetting } from '@kbn/core-console-messages-common';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -41,6 +42,7 @@ import {
   getThemeStylesheetPaths,
   getScriptPaths,
   getBrowserLoggingConfig,
+  getSurfaceConsoleMessagesConfig,
 } from './render_utils';
 import { filterUiPlugins } from './filter_ui_plugins';
 import { getApmConfig } from './get_apm_config';
@@ -238,6 +240,12 @@ export class RenderingService {
     const apmConfig = getApmConfig(request.url.pathname);
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
+    let consoleMessages: ConsoleMessagesSetting = false;
+
+    if (this.coreContext.env.mode.dev) {
+      consoleMessages = await getSurfaceConsoleMessagesConfig(this.coreContext.configService);
+    }
+
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
@@ -302,6 +310,7 @@ export class RenderingService {
           uiSettings: settings,
           globalUiSettings: globalSettings,
         },
+        consoleMessages,
       },
     };
 
