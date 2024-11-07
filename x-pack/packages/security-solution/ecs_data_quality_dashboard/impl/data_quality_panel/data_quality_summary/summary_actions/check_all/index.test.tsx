@@ -403,8 +403,7 @@ describe('CheckAll', () => {
 
       // simulate the wall clock advancing
       for (let i = 0; i < totalIndexNames + 1; i++) {
-        await waitFor(() => {});
-        act(() => {
+        await act(async () => {
           jest.advanceTimersByTime(1000 * 10);
         });
         await waitFor(() => {});
