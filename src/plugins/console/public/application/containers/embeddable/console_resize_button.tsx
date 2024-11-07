@@ -61,6 +61,14 @@ export const EmbeddedConsoleResizeButton = ({
   const initialConsoleHeight = useRef(consoleHeight);
   const initialMouseY = useRef(0);
 
+  // When the height changes, simulate a window resize to prompt
+  // the current onboarding tour step to adjust its layouts
+  useEffect(() => {
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 350);
+  }, [consoleHeight]);
+
   useEffect(() => {
     function handleResize() {
       const newMaxConsoleHeight = getCurrentConsoleMaxSize(euiTheme);
