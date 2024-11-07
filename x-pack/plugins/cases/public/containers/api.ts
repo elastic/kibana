@@ -669,7 +669,7 @@ export const getSimilarCases = async ({
     INTERNAL_CASE_SIMILAR_CASES_URL.replace('{case_id}', caseId),
     {
       method: 'POST',
-      body: JSON.stringify({ perPage, page }),
+      body: JSON.stringify({ page, perPage }),
       signal,
     }
   );

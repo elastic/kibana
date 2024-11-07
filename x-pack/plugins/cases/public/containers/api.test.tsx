@@ -1201,19 +1201,18 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(allCasesSnake);
     });
 
-    it('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct url, method, signal', async () => {
       await getSimilarCases({
         caseId: mockCase.id,
         signal: abortCtrl.signal,
-        perPage: 10,
         page: 0,
+        perPage: 10,
       });
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_similar`, {
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_similar/${mockCase.id}`, {
         method: 'POST',
         body: JSON.stringify({
-          case_id: mockCase.id,
-          pageSize: 10,
-          pageIndex: 0,
+          page: 0,
+          perPage: 10,
         }),
         signal: abortCtrl.signal,
       });
@@ -1223,8 +1222,8 @@ describe('Cases API', () => {
       const resp = await getSimilarCases({
         caseId: mockCase.id,
         signal: abortCtrl.signal,
+        page: 1,
         perPage: 10,
-        page: 0,
       });
       expect(resp).toEqual(similarCases);
     });

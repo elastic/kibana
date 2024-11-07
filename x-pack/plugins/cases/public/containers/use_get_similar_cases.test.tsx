@@ -44,8 +44,8 @@ describe('useGetSimilarCases', () => {
     expect(spyOnGetCases).toBeCalledWith({
       caseId: mockCase.id,
       signal: abortCtrl.signal,
-      pageIndex: 0,
-      pageSize: 10,
+      page: 1,
+      perPage: 10,
     });
   });
 
