@@ -385,7 +385,6 @@ packages/kbn-dev-proc-runner @elastic/kibana-operations
 src/plugins/dev_tools @elastic/kibana-management
 packages/kbn-dev-utils @elastic/kibana-operations
 examples/developer_examples @elastic/appex-sharedux
-packages/kbn-discover-contextual-components @elastic/obs-ux-logs-team @elastic/kibana-data-discovery
 examples/discover_customization_examples @elastic/kibana-data-discovery
 x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 src/plugins/discover @elastic/kibana-data-discovery
@@ -474,13 +473,13 @@ src/plugins/field_formats @elastic/kibana-data-discovery
 packages/kbn-field-types @elastic/kibana-data-discovery
 packages/kbn-field-utils @elastic/kibana-data-discovery
 x-pack/plugins/fields_metadata @elastic/obs-ux-logs-team
-x-pack/plugins/file_upload @elastic/kibana-presentation @elastic/ml-ui
+x-pack/plugins/file_upload @elastic/kibana-gis @elastic/ml-ui
 examples/files_example @elastic/appex-sharedux
 src/plugins/files_management @elastic/appex-sharedux
 src/plugins/files @elastic/appex-sharedux
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 x-pack/plugins/fleet @elastic/fleet
-packages/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
+packages/kbn-flot-charts @elastic/kibana-operations
 x-pack/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 packages/kbn-formatters @elastic/obs-ux-logs-team
 src/plugins/ftr_apis @elastic/kibana-core
@@ -535,14 +534,12 @@ x-pack/plugins/integration_assistant @elastic/security-scalability
 src/plugins/interactive_setup @elastic/kibana-security
 test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-interpreter @elastic/kibana-visualizations
-x-pack/plugins/observability_solution/inventory/e2e @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/inventory @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/investigate_app @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/investigate @elastic/obs-ux-management-team
 packages/kbn-investigation-shared @elastic/obs-ux-management-team
 packages/kbn-io-ts-utils @elastic/obs-knowledge-team
 packages/kbn-ipynb @elastic/search-kibana
-packages/kbn-item-buffer @elastic/appex-sharedux
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
@@ -598,12 +595,11 @@ packages/kbn-management/settings/types @elastic/kibana-management
 packages/kbn-management/settings/utilities @elastic/kibana-management
 packages/kbn-management/storybook/config @elastic/kibana-management
 test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
-packages/kbn-manifest @elastic/kibana-core
-packages/kbn-mapbox-gl @elastic/kibana-presentation
-x-pack/examples/third_party_maps_source_example @elastic/kibana-presentation
-src/plugins/maps_ems @elastic/kibana-presentation
-x-pack/plugins/maps @elastic/kibana-presentation
-x-pack/packages/maps/vector_tile_utils @elastic/kibana-presentation
+packages/kbn-mapbox-gl @elastic/kibana-gis
+x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
+src/plugins/maps_ems @elastic/kibana-gis
+x-pack/plugins/maps @elastic/kibana-gis
+x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
 x-pack/plugins/observability_solution/metrics_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
@@ -730,7 +726,6 @@ packages/kbn-resizable-layout @elastic/kibana-data-discovery
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 packages/response-ops/feature_flag_service @elastic/response-ops
-packages/response-ops/rule_params @elastic/response-ops
 examples/response_stream @elastic/ml-ui
 packages/kbn-rison @elastic/kibana-operations
 x-pack/packages/rollup @elastic/kibana-management
@@ -903,6 +898,7 @@ packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-sort-predicates @elastic/kibana-visualizations
 x-pack/plugins/spaces @elastic/kibana-security
 x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
+packages/kbn-spec-to-console @elastic/kibana-management
 packages/kbn-sse-utils @elastic/obs-knowledge-team
 packages/kbn-sse-utils-client @elastic/obs-knowledge-team
 packages/kbn-sse-utils-server @elastic/obs-knowledge-team
@@ -932,9 +928,9 @@ packages/kbn-test-eui-helpers @elastic/kibana-visualizations
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
-x-pack/test_serverless
-test
-x-pack/test
+x-pack/test_serverless 
+test 
+x-pack/test 
 x-pack/performance @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
