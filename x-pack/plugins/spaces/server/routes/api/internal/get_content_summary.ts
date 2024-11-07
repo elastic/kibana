@@ -38,8 +38,10 @@ export function initGetSpaceContentSummaryApi(deps: InternalRouteDeps) {
   router.get(
     {
       path: '/internal/spaces/{spaceId}/content_summary',
-      options: {
-        tags: ['access:manage_spaces'],
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_spaces'],
+        },
       },
       validate: {
         params: schema.object({

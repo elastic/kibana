@@ -17951,6 +17951,31 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLFunction.operator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "operator",
+            "description": [
+              "\nA node representing the function or operator being called."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLParamLiteral",
+                "text": "ESQLParamLiteral"
+              },
+              "<string> | ",
+              "ESQLIdentifier",
+              " | undefined"
+            ],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.ESQLFunction.args",
             "type": "Array",
             "tags": [],
@@ -19533,6 +19558,8 @@
             "text": "ESQLParamLiteral"
           },
           "<string> | ",
+          "ESQLIdentifier",
+          " | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -19667,6 +19694,8 @@
             "section": "def-common.ESQLLiteral",
             "text": "ESQLLiteral"
           },
+          " | ",
+          "ESQLIdentifier",
           " | ",
           {
             "pluginId": "@kbn/esql-ast",
