@@ -433,6 +433,7 @@ describe('TaskClaiming', () => {
         tasksConflicted: 0,
         tasksErrors: 0,
         tasksUpdated: 3,
+        staleTasks: 0,
         tasksLeftUnclaimed: 3,
       });
       expect(result.docs.length).toEqual(3);
@@ -529,6 +530,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 1,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(1);
     });
@@ -640,6 +642,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 1,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(1);
     });
@@ -737,6 +740,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 1,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(1);
     });
@@ -792,6 +796,7 @@ describe('TaskClaiming', () => {
         tasksClaimed: 0,
         tasksConflicted: 0,
         tasksUpdated: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(0);
     });
@@ -885,6 +890,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 2,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(2);
     });
@@ -978,6 +984,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 2,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(2);
     });
@@ -1031,7 +1038,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 2; stale: 1; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
+        'task claimer claimed: 2; stale: 1; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
@@ -1067,10 +1074,11 @@ describe('TaskClaiming', () => {
 
       expect(result.stats).toEqual({
         tasksClaimed: 2,
-        tasksConflicted: 1,
+        tasksConflicted: 0,
         tasksErrors: 0,
         tasksUpdated: 2,
         tasksLeftUnclaimed: 0,
+        staleTasks: 1,
       });
       expect(result.docs.length).toEqual(2);
     });
@@ -1197,6 +1205,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 4,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(4);
     });
@@ -1330,19 +1339,20 @@ describe('TaskClaiming', () => {
         tasksErrors: 1,
         tasksUpdated: 3,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(3);
     });
 
-    test('should assign startedAt value if bulkGet returns task with null startedAt', async () => {
+    test('should skip tasks where bulkGet returns a newer task document than the bulkPartialUpdate', async () => {
       const store = taskStoreMock.create({ taskManagerId: 'test-test' });
       store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
 
       const fetchedTasks = [
-        mockInstance({ id: `id-1`, taskType: 'report' }),
-        mockInstance({ id: `id-2`, taskType: 'report' }),
-        mockInstance({ id: `id-3`, taskType: 'yawn' }),
-        mockInstance({ id: `id-4`, taskType: 'report' }),
+        mockInstance({ id: `id-1`, taskType: 'report', version: '123' }),
+        mockInstance({ id: `id-2`, taskType: 'report', version: '123' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn', version: '123' }),
+        mockInstance({ id: `id-4`, taskType: 'report', version: '123' }),
       ];
 
       const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
@@ -1355,7 +1365,7 @@ describe('TaskClaiming', () => {
       );
       store.bulkGet.mockResolvedValueOnce([
         asOk({ ...fetchedTasks[0], startedAt: new Date() }),
-        asOk(fetchedTasks[1]),
+        asOk({ ...fetchedTasks[1], startedAt: new Date(), version: 'abc' }),
         asOk({ ...fetchedTasks[2], startedAt: new Date() }),
         asOk({ ...fetchedTasks[3], startedAt: new Date() }),
       ]);
@@ -1389,11 +1399,11 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 4; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
+        'task claimer claimed: 3; stale: 0; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.warn).toHaveBeenCalledWith(
-        'Task id-2 has a null startedAt value, setting to current time - ownerId null, status idle',
+        'Task id-2 was modified during the claiming phase, skipping until the next claiming cycle.',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
@@ -1453,13 +1463,14 @@ describe('TaskClaiming', () => {
       expect(store.bulkGet).toHaveBeenCalledWith(['id-1', 'id-2', 'id-3', 'id-4']);
 
       expect(result.stats).toEqual({
-        tasksClaimed: 4,
-        tasksConflicted: 0,
+        tasksClaimed: 3,
+        tasksConflicted: 1,
         tasksErrors: 0,
-        tasksUpdated: 4,
+        tasksUpdated: 3,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
-      expect(result.docs.length).toEqual(4);
+      expect(result.docs.length).toEqual(3);
       for (const r of result.docs) {
         expect(r.startedAt).not.toBeNull();
       }
@@ -1699,6 +1710,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 1,
         tasksUpdated: 3,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(3);
     });
@@ -1829,6 +1841,7 @@ describe('TaskClaiming', () => {
         tasksErrors: 0,
         tasksUpdated: 3,
         tasksLeftUnclaimed: 0,
+        staleTasks: 0,
       });
       expect(result.docs.length).toEqual(3);
     });
