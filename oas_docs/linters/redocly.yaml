@@ -41,17 +41,11 @@ rules:
   tags-alphabetical: off
   operation-singular-tag: off
 # Custom rules
-  operation-summary-max-length:
+  rule/operation-summary-length:
     subject:
       type: Operation
       property: summary
-    message: Operation summary must have a maximum of 45 characters
+    message: Operation summary must have a minimum of 5 and maximum of 45 characters
     assertions:
       maxLength: 45
-  operation-summary-min-length:
-    subject:
-      type: Operation
-      property: summary
-    message: Operation summary must have minimum of 5 chars length
-    assertions:
       minLength: 5
