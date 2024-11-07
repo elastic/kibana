@@ -18,7 +18,7 @@ import { appActions } from '../../common/store/app';
 import { SourcererScopeName } from '../../sourcerer/store/model';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { TestProviders, mockGlobalState } from '../../common/mock';
-import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
+import { defaultUdtHeaders } from '../components/timeline/body/column_headers/default_headers';
 
 jest.mock('../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../common/containers/use_global_time', () => {
