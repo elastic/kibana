@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
@@ -17,9 +17,15 @@ import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
 
 import { CreateIndex } from './create_index';
+import { usePageChrome } from '../../hooks/use_page_chrome';
+import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
+
+const CreateIndexLabel = i18n.translate('xpack.searchIndices.createIndex.docTitle', {
+  defaultMessage: 'Create Index',
+});
 
 export const CreateIndexPage = () => {
-  const { console: consolePlugin, chrome } = useKibana().services;
+  const { console: consolePlugin } = useKibana().services;
   const {
     data: indicesData,
     isInitialLoading,
@@ -32,12 +38,7 @@ export const CreateIndexPage = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
-  useEffect(() => {
-    // Set Page Title
-    chrome.docTitle.change(
-      i18n.translate('xpack.searchIndices.createIndex.docTitle', { defaultMessage: 'Create Index' })
-    );
-  }, [chrome]);
+  usePageChrome(CreateIndexLabel, [...IndexManagementBreadcrumbs, { text: CreateIndexLabel }]);
 
   return (
     <EuiPageTemplate

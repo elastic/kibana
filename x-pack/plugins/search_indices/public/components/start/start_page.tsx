@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
@@ -18,9 +18,15 @@ import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 import { useIndicesRedirect } from './hooks/use_indices_redirect';
 import { ElasticsearchStart } from './elasticsearch_start';
 import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
+import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
+import { usePageChrome } from '../../hooks/use_page_chrome';
+
+const PageTitle = i18n.translate('xpack.searchIndices.startPage.docTitle', {
+  defaultMessage: 'Create Your First Index',
+});
 
 export const ElasticsearchStartPage = () => {
-  const { console: consolePlugin, chrome } = useKibana().services;
+  const { console: consolePlugin } = useKibana().services;
   const {
     data: indicesData,
     isInitialLoading,
@@ -28,14 +34,7 @@ export const ElasticsearchStartPage = () => {
     error: indicesFetchError,
   } = useIndicesStatusQuery();
   const { data: userPrivileges } = useUserPrivilegesQuery();
-  useEffect(() => {
-    // Set Page Title
-    chrome.docTitle.change(
-      i18n.translate('xpack.searchIndices.startPage.docTitle', {
-        defaultMessage: 'Create Your First Index',
-      })
-    );
-  }, [chrome]);
+  usePageChrome(PageTitle, [...IndexManagementBreadcrumbs, { text: PageTitle }]);
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
