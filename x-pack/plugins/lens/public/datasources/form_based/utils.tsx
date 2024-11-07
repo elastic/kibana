@@ -337,6 +337,9 @@ export function getUnsupportedOperationsWarningMessage(
     // filter layers without dataView loaded yet
     .filter(({ indexPatternId }) => dataViews.indexPatterns[indexPatternId])
     .flatMap((layer) => {
+      if (layer.query) {
+        return [];
+      }
       const dataView = dataViews.indexPatterns[layer.indexPatternId];
       const columnsEntries = Object.entries(layer.columns);
       return columnsEntries

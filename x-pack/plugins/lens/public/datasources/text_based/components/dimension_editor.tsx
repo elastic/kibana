@@ -31,7 +31,10 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
       if (query) {
         const table = await fetchFieldsFromESQL(
           { esql: `${query.esql} | limit 0` },
-          props.expressions
+          props.expressions,
+          { from: props.dateRange.fromDate, to: props.dateRange.toDate },
+          undefined,
+          props.indexPatterns[0]
         );
         if (table) {
           const hasNumberTypeColumns = table.columns?.some(isNumeric);

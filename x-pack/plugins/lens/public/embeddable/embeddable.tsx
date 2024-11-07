@@ -915,9 +915,7 @@ export class Embeddable
           panelId={this.id}
           savedObjectId={this.savedVis?.savedObjectId}
           updateByRefInput={this.updateByRefInput.bind(this)}
-          navigateToLensEditor={
-            !this.isTextBasedLanguage() ? this.navigateToLensEditor.bind(this) : undefined
-          }
+          navigateToLensEditor={this.navigateToLensEditor.bind(this)}
           displayFlyoutHeader
           canEditTextBasedQuery={this.isTextBasedLanguage()}
           isNewPanel={isNewPanel}

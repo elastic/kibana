@@ -341,7 +341,7 @@ export interface Datasource<T = unknown, P = unknown> {
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
 
-  insertLayer: (state: T, newLayerId: string, linkToLayers?: string[]) => T;
+  insertLayer: (state: T, newLayerId: string, linkToLayers?: string[], layerType?: string) => T;
   createEmptyLayer: (indexPatternId: string) => T;
   removeLayer: (state: T, layerId: string) => { newState: T; removedLayerIds: string[] };
   clearLayer: (state: T, layerId: string) => { newState: T; removedLayerIds: string[] };

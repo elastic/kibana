@@ -476,7 +476,7 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
-          {isOfAggregateQueryType(query) && canEditTextBasedQuery && (
+          {isOfAggregateQueryType(query) && canEditTextBasedQuery && false && (
             <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
               <ESQLLangEditor
                 query={query}
@@ -509,7 +509,7 @@ export function LensEditConfigurationFlyout({
               />
             </EuiFlexItem>
           )}
-          {isOfAggregateQueryType(query) && canEditTextBasedQuery && dataGridAttrs && (
+          {isOfAggregateQueryType(query) && canEditTextBasedQuery && dataGridAttrs && false && (
             <ESQLDataGridAccordion
               dataGridAttrs={dataGridAttrs}
               isAccordionOpen={isESQLResultsAccordionOpen}

@@ -35,7 +35,11 @@ export function fetchFieldsFromESQL(
   })
     .then((ast) => {
       if (ast) {
-        const executionContract = expressions.execute(ast, null);
+        const executionContract = expressions.execute(ast, null, {
+          searchContext: {
+            timeRange: time,
+          },
+        });
 
         if (abortController) {
           abortController.signal.onabort = () => {

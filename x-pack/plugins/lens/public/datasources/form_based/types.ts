@@ -5,8 +5,11 @@
  * 2.0.
  */
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
-import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
+import { AggregateQuery } from '@kbn/es-query';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { TextBasedLayerColumn } from '../text_based/types';
 import type { IndexPattern, IndexPatternField, DragDropOperation } from '../../types';
+import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
 
 export type {
   GenericIndexPatternColumn,
@@ -56,6 +59,15 @@ export interface FormBasedLayer {
   incompleteColumns?: Record<string, IncompleteColumn | undefined>;
   sampling?: number;
   ignoreGlobalFilters?: boolean;
+}
+
+interface TextBasedLayer {
+  index?: string;
+  query?: AggregateQuery | undefined;
+  table?: Datatable;
+  columns: TextBasedLayerColumn[];
+  timeField?: string;
+  errors?: Error[];
 }
 
 export interface FormBasedPersistedState {
