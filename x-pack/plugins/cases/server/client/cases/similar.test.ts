@@ -108,7 +108,7 @@ describe('similar', () => {
             "function": "nested",
             "type": "function",
           },
-          "page": 2,
+          "page": 1,
           "perPage": 10,
           "rootSearchFields": Array [
             "_id",

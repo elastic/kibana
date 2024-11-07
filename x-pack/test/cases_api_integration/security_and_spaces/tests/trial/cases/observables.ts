@@ -71,7 +71,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { cases } = await similarCases({
           supertest,
-          body: { case_id: caseA.id, pageSize: 10, pageIndex: 0 },
+          body: { perPage: 10, page: 1 },
+          caseId: caseA.id,
         });
         expect(cases.length).to.be(0);
 
