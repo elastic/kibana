@@ -1,0 +1,39 @@
+extends:
+  - recommended
+rules:
+# Built-in rules
+ # Descriptions
+  parameter-description: warn
+  tag-description: warn
+ # Document info
+  info-contact: warn
+  info-license: warn
+ # Examples
+  no-invalid-media-type-examples:
+    severity: warn
+    allowAdditionalProperties: false
+  no-invalid-schema-examples:
+    severity: warn
+    allowAdditionalProperties: false
+ # Operations
+  operation-operationId: error
+  operation-operationId-unique: error
+  operation-operationId-url-safe: warn
+  operation-summary: error
+ # Parameters
+  path-parameters-defined: error
+ # Paths
+  no-ambiguous-paths: warn
+  no-identical-paths: error
+  path-excludes-patterns:
+    severity: error
+    patterns:
+      - ^\/internal
+ # Responses
+  operation-4xx-response: off
+  operation-2xx-response: off
+ # Schema
+  spec: off
+ # Tags
+  operation-tag-defined: off
+  tags-alphabetical: off
