@@ -8,9 +8,8 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { of } from 'rxjs';
 
 import type {
-  TelemetryEvent,
-  TelemetryEventTypes,
   TelemetryEventTypeData,
+  TelemetryEventTypes,
   TelemetryServiceSetupParams,
 } from './types';
 import { telemetryEvents } from './events/telemetry_events';
@@ -46,8 +45,8 @@ export class TelemetryService {
         },
       });
     }
-    telemetryEvents.forEach((eventConfig: TelemetryEvent) =>
-      analytics.registerEventType<TelemetryEventTypeData<typeof eventConfig.eventType>>(eventConfig)
+    telemetryEvents.forEach((eventConfig) =>
+      analytics.registerEventType<TelemetryEventTypeData<TelemetryEventTypes>>(eventConfig)
     );
   }
 

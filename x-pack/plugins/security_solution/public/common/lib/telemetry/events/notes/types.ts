@@ -15,29 +15,17 @@ interface AddNoteFromExpandableFlyoutClickedParams {
   isRelatedToATimeline: boolean;
 }
 
-export type NotesTelemetryEventParams =
-  | OpenNoteInExpandableFlyoutClickedParams
-  | AddNoteFromExpandableFlyoutClickedParams;
-
 export enum NotesEventTypes {
   OpenNoteInExpandableFlyoutClicked = 'Open Note In Expandable Flyout Clicked',
   AddNoteFromExpandableFlyoutClicked = 'Add Note From Expandable Flyout Clicked',
 }
 
-export type NotesEventTypeData = {
-  [K in NotesEventTypes]: K extends NotesEventTypes.OpenNoteInExpandableFlyoutClicked
-    ? OpenNoteInExpandableFlyoutClickedParams
-    : K extends NotesEventTypes.AddNoteFromExpandableFlyoutClicked
-    ? AddNoteFromExpandableFlyoutClickedParams
-    : never;
-};
+export interface NotesTelemetryEventsMap {
+  [NotesEventTypes.OpenNoteInExpandableFlyoutClicked]: OpenNoteInExpandableFlyoutClickedParams;
+  [NotesEventTypes.AddNoteFromExpandableFlyoutClicked]: AddNoteFromExpandableFlyoutClickedParams;
+}
 
-export type NotesTelemetryEvents =
-  | {
-      eventType: NotesEventTypes.OpenNoteInExpandableFlyoutClicked;
-      schema: RootSchema<OpenNoteInExpandableFlyoutClickedParams>;
-    }
-  | {
-      eventType: NotesEventTypes.AddNoteFromExpandableFlyoutClicked;
-      schema: RootSchema<AddNoteFromExpandableFlyoutClickedParams>;
-    };
+export interface NotesTelemetryEvent {
+  eventType: NotesEventTypes;
+  schema: RootSchema<NotesTelemetryEventsMap[NotesEventTypes]>;
+}

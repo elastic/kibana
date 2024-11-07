@@ -38,32 +38,14 @@ export interface ReportAssistantSettingToggledParams {
   assistantStreamingEnabled?: boolean;
 }
 
-export type AssistantEventTypeData = {
-  [K in AssistantEventTypes]: K extends AssistantEventTypes.AssistantInvoked
-    ? ReportAssistantInvokedParams
-    : K extends AssistantEventTypes.AssistantMessageSent
-    ? ReportAssistantMessageSentParams
-    : K extends AssistantEventTypes.AssistantQuickPrompt
-    ? ReportAssistantQuickPromptParams
-    : K extends AssistantEventTypes.AssistantSettingToggled
-    ? ReportAssistantSettingToggledParams
-    : never;
-};
+export interface AssistantTelemetryEventsMap {
+  [AssistantEventTypes.AssistantInvoked]: ReportAssistantInvokedParams;
+  [AssistantEventTypes.AssistantMessageSent]: ReportAssistantMessageSentParams;
+  [AssistantEventTypes.AssistantQuickPrompt]: ReportAssistantQuickPromptParams;
+  [AssistantEventTypes.AssistantSettingToggled]: ReportAssistantSettingToggledParams;
+}
 
-export type AssistantTelemetryEvent =
-  | {
-      eventType: AssistantEventTypes.AssistantInvoked;
-      schema: RootSchema<ReportAssistantInvokedParams>;
-    }
-  | {
-      eventType: AssistantEventTypes.AssistantSettingToggled;
-      schema: RootSchema<ReportAssistantSettingToggledParams>;
-    }
-  | {
-      eventType: AssistantEventTypes.AssistantMessageSent;
-      schema: RootSchema<ReportAssistantMessageSentParams>;
-    }
-  | {
-      eventType: AssistantEventTypes.AssistantQuickPrompt;
-      schema: RootSchema<ReportAssistantQuickPromptParams>;
-    };
+export interface AssistantTelemetryEvent {
+  eventType: AssistantEventTypes;
+  schema: RootSchema<AssistantTelemetryEventsMap[AssistantEventTypes]>;
+}

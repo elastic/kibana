@@ -27,26 +27,13 @@ interface ReportManualRuleRunCancelJobParams {
   errorTasks: number;
 }
 
-export type ManualRuleRunEventTypeData = {
-  [K in ManualRuleRunEventTypes]: K extends ManualRuleRunEventTypes.ManualRuleRunOpenModal
-    ? ReportManualRuleRunOpenModalParams
-    : K extends ManualRuleRunEventTypes.ManualRuleRunExecute
-    ? ReportManualRuleRunExecuteParams
-    : K extends ManualRuleRunEventTypes.ManualRuleRunCancelJob
-    ? ReportManualRuleRunCancelJobParams
-    : never;
-};
+export interface ManualRuleRunTelemetryEventsMap {
+  [ManualRuleRunEventTypes.ManualRuleRunOpenModal]: ReportManualRuleRunOpenModalParams;
+  [ManualRuleRunEventTypes.ManualRuleRunExecute]: ReportManualRuleRunExecuteParams;
+  [ManualRuleRunEventTypes.ManualRuleRunCancelJob]: ReportManualRuleRunCancelJobParams;
+}
 
-export type ManualRuleRunTelemetryEvent =
-  | {
-      eventType: ManualRuleRunEventTypes.ManualRuleRunOpenModal;
-      schema: RootSchema<ReportManualRuleRunOpenModalParams>;
-    }
-  | {
-      eventType: ManualRuleRunEventTypes.ManualRuleRunExecute;
-      schema: RootSchema<ReportManualRuleRunExecuteParams>;
-    }
-  | {
-      eventType: ManualRuleRunEventTypes.ManualRuleRunCancelJob;
-      schema: RootSchema<ReportManualRuleRunCancelJobParams>;
-    };
+export interface ManualRuleRunTelemetryEvent {
+  eventType: ManualRuleRunEventTypes;
+  schema: RootSchema<ManualRuleRunTelemetryEventsMap[ManualRuleRunEventTypes]>;
+}

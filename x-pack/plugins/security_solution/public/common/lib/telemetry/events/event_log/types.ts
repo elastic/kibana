@@ -17,24 +17,12 @@ interface ReportEventLogShowSourceEventDateRangeParams {
   isVisible: boolean;
 }
 
-export type ReportEventLogTelemetryEventParams =
-  | ReportEventLogFilterByRunTypeParams
-  | ReportEventLogShowSourceEventDateRangeParams;
+export interface EventLogTelemetryEventsMap {
+  [EventLogEventTypes.EventLogFilterByRunType]: ReportEventLogFilterByRunTypeParams;
+  [EventLogEventTypes.EventLogShowSourceEventDateRange]: ReportEventLogShowSourceEventDateRangeParams;
+}
 
-export type EventLogEventTypeData = {
-  [K in EventLogEventTypes]: K extends EventLogEventTypes.EventLogFilterByRunType
-    ? ReportEventLogFilterByRunTypeParams
-    : K extends EventLogEventTypes.EventLogShowSourceEventDateRange
-    ? ReportEventLogShowSourceEventDateRangeParams
-    : never;
-};
-
-export type EventLogTelemetryEvent =
-  | {
-      eventType: EventLogEventTypes.EventLogFilterByRunType;
-      schema: RootSchema<ReportEventLogFilterByRunTypeParams>;
-    }
-  | {
-      eventType: EventLogEventTypes.EventLogShowSourceEventDateRange;
-      schema: RootSchema<ReportEventLogShowSourceEventDateRangeParams>;
-    };
+export interface EventLogTelemetryEvent {
+  eventType: EventLogEventTypes;
+  schema: RootSchema<EventLogTelemetryEventsMap[EventLogEventTypes]>;
+}

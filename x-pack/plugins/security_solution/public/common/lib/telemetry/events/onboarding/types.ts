@@ -6,6 +6,12 @@
  */
 import type { RootSchema } from '@kbn/core/public';
 
+export enum OnboardingHubEventTypes {
+  OnboardingHubStepOpen = 'Onboarding Hub Step Open',
+  OnboardingHubStepFinished = 'Onboarding Hub Step Finished',
+  OnboardingHubStepLinkClicked = 'Onboarding Hub Step Link Clicked',
+}
+
 type OnboardingHubStepOpenTrigger = 'navigation' | 'click';
 
 interface OnboardingHubStepOpenParams {
@@ -13,35 +19,9 @@ interface OnboardingHubStepOpenParams {
   trigger: OnboardingHubStepOpenTrigger;
 }
 
-export enum OnboardingHubEventTypes {
-  OnboardingHubStepOpen = 'Onboarding Hub Step Open',
-  OnboardingHubStepFinished = 'Onboarding Hub Step Finished',
-  OnboardingHubStepLinkClicked = 'Onboarding Hub Step Link Clicked',
-}
-
-export type OnboardingHubEventTypeData = {
-  [K in OnboardingHubEventTypes]: K extends OnboardingHubEventTypes.OnboardingHubStepOpen
-    ? OnboardingHubStepOpenParams
-    : K extends OnboardingHubEventTypes.OnboardingHubStepFinished
-    ? OnboardingHubStepFinishedParams
-    : K extends OnboardingHubEventTypes.OnboardingHubStepLinkClicked
-    ? OnboardingHubStepLinkClickedParams
-    : never;
-};
-
-export interface OnboardingHubStepOpen {
-  eventType: OnboardingHubEventTypes.OnboardingHubStepOpen;
-  schema: RootSchema<OnboardingHubStepOpenParams>;
-}
-
 export interface OnboardingHubStepLinkClickedParams {
   originStepId: string;
   stepLinkId: string;
-}
-
-export interface OnboardingHubStepLinkClicked {
-  eventType: OnboardingHubEventTypes.OnboardingHubStepLinkClicked;
-  schema: RootSchema<OnboardingHubStepLinkClickedParams>;
 }
 
 export type OnboardingHubStepFinishedTrigger = 'auto_check' | 'click';
@@ -52,12 +32,13 @@ export interface OnboardingHubStepFinishedParams {
   trigger: OnboardingHubStepFinishedTrigger;
 }
 
-export interface OnboardingHubStepFinished {
-  eventType: OnboardingHubEventTypes.OnboardingHubStepFinished;
-  schema: RootSchema<OnboardingHubStepFinishedParams>;
+export interface OnboardingHubTelemetryEventsMap {
+  [OnboardingHubEventTypes.OnboardingHubStepOpen]: OnboardingHubStepOpenParams;
+  [OnboardingHubEventTypes.OnboardingHubStepFinished]: OnboardingHubStepFinishedParams;
+  [OnboardingHubEventTypes.OnboardingHubStepLinkClicked]: OnboardingHubStepLinkClickedParams;
 }
 
-export type OnboardingHubTelemetryEvent =
-  | OnboardingHubStepOpen
-  | OnboardingHubStepFinished
-  | OnboardingHubStepLinkClicked;
+export interface OnboardingHubTelemetryEvent {
+  eventType: OnboardingHubEventTypes;
+  schema: RootSchema<OnboardingHubTelemetryEventsMap[OnboardingHubEventTypes]>;
+}

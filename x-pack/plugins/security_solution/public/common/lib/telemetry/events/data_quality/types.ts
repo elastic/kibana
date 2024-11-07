@@ -38,24 +38,12 @@ export interface ReportDataQualityCheckAllCompletedParams {
   timeConsumedMs?: number;
 }
 
-export type DataQualityEventTypeData = {
-  [K in DataQualityEventTypes]: K extends DataQualityEventTypes.DataQualityIndexChecked
-    ? ReportDataQualityIndexCheckedParams
-    : K extends DataQualityEventTypes.DataQualityCheckAllCompleted
-    ? ReportDataQualityCheckAllCompletedParams
-    : never;
-};
-
-export interface DataQualityTelemetryIndexCheckedEvent {
-  eventType: DataQualityEventTypes.DataQualityIndexChecked;
-  schema: RootSchema<ReportDataQualityIndexCheckedParams>;
+export interface DataQualityTelemetryEventsMap {
+  [DataQualityEventTypes.DataQualityIndexChecked]: ReportDataQualityIndexCheckedParams;
+  [DataQualityEventTypes.DataQualityCheckAllCompleted]: ReportDataQualityCheckAllCompletedParams;
 }
 
-export interface DataQualityTelemetryCheckAllCompletedEvent {
-  eventType: DataQualityEventTypes.DataQualityCheckAllCompleted;
-  schema: RootSchema<ReportDataQualityCheckAllCompletedParams>;
+export interface DataQualityTelemetryEvents {
+  eventType: DataQualityEventTypes;
+  schema: RootSchema<DataQualityTelemetryEventsMap[DataQualityEventTypes]>;
 }
-
-export type DataQualityTelemetryEvents =
-  | DataQualityTelemetryIndexCheckedEvent
-  | DataQualityTelemetryCheckAllCompletedEvent;

@@ -23,20 +23,12 @@ interface ReportBreadcrumbClickedParams {
   title: string;
 }
 
-export type AppEventTypeData = {
-  [K in AppEventTypes]: K extends AppEventTypes.CellActionClicked
-    ? ReportCellActionClickedParams
-    : K extends AppEventTypes.BreadcrumbClicked
-    ? ReportBreadcrumbClickedParams
-    : never;
-};
+export interface AppTelemetryEventsMap {
+  [AppEventTypes.CellActionClicked]: ReportCellActionClickedParams;
+  [AppEventTypes.BreadcrumbClicked]: ReportBreadcrumbClickedParams;
+}
 
-export type AppTelemetryEvents =
-  | {
-      eventType: AppEventTypes.CellActionClicked;
-      schema: RootSchema<ReportCellActionClickedParams>;
-    }
-  | {
-      eventType: AppEventTypes.BreadcrumbClicked;
-      schema: RootSchema<ReportBreadcrumbClickedParams>;
-    };
+export interface AppTelemetryEvent {
+  eventType: AppEventTypes;
+  schema: RootSchema<AppTelemetryEventsMap[AppEventTypes]>;
+}

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { NotesTelemetryEvents } from './types';
+import type { NotesTelemetryEvent } from './types';
 import { NotesEventTypes } from './types';
 
-export const openNoteInExpandableFlyoutClickedEvent: NotesTelemetryEvents = {
+export const openNoteInExpandableFlyoutClickedEvent: NotesTelemetryEvent = {
   eventType: NotesEventTypes.OpenNoteInExpandableFlyoutClicked,
   schema: {
     location: {
@@ -21,7 +21,7 @@ export const openNoteInExpandableFlyoutClickedEvent: NotesTelemetryEvents = {
   },
 };
 
-export const addNoteFromExpandableFlyoutClickedEvent: NotesTelemetryEvents = {
+export const addNoteFromExpandableFlyoutClickedEvent: NotesTelemetryEvent = {
   eventType: NotesEventTypes.AddNoteFromExpandableFlyoutClicked,
   schema: {
     isRelatedToATimeline: {

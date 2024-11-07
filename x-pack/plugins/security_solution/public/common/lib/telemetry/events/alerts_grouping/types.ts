@@ -31,32 +31,13 @@ interface ReportAlertsTakeActionParams {
   groupByField: string;
 }
 
-// Mapping for Alerts events
-export type AlertsEventTypeData = {
-  [K in AlertsEventTypes]: K extends AlertsEventTypes.AlertsGroupingChanged
-    ? ReportAlertsGroupingChangedParams
-    : K extends AlertsEventTypes.AlertsGroupingToggled
-    ? ReportAlertsGroupingToggledParams
-    : K extends AlertsEventTypes.AlertsGroupingTakeAction
-    ? ReportAlertsTakeActionParams
-    : never;
-};
+export interface AlertsGroupingTelemetryEventsMap {
+  [AlertsEventTypes.AlertsGroupingChanged]: ReportAlertsGroupingChangedParams;
+  [AlertsEventTypes.AlertsGroupingToggled]: ReportAlertsGroupingToggledParams;
+  [AlertsEventTypes.AlertsGroupingTakeAction]: ReportAlertsTakeActionParams;
+}
 
-export type ReportAlertsGroupingTelemetryEventParams =
-  | ReportAlertsGroupingChangedParams
-  | ReportAlertsGroupingToggledParams
-  | ReportAlertsTakeActionParams;
-
-export type AlertsGroupingTelemetryEvent =
-  | {
-      eventType: AlertsEventTypes.AlertsGroupingToggled;
-      schema: RootSchema<ReportAlertsGroupingToggledParams>;
-    }
-  | {
-      eventType: AlertsEventTypes.AlertsGroupingChanged;
-      schema: RootSchema<ReportAlertsGroupingChangedParams>;
-    }
-  | {
-      eventType: AlertsEventTypes.AlertsGroupingTakeAction;
-      schema: RootSchema<ReportAlertsTakeActionParams>;
-    };
+export interface AlertsGroupingTelemetryEvent {
+  eventType: AlertsEventTypes;
+  schema: RootSchema<AlertsGroupingTelemetryEventsMap[AlertsEventTypes]>;
+}

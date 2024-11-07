@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TelemetryEvent } from '../types';
 import { assistantTelemetryEvents } from './ai_assistant';
 import { alertsTelemetryEvents } from './alerts_grouping';
 import { appTelemetryEvents } from './app';
@@ -17,7 +16,7 @@ import { notesTelemetryEvents } from './notes';
 import { onboardingHubTelemetryEvents } from './onboarding';
 import { previewRuleTelemetryEvents } from './preview_rule';
 
-export const telemetryEvents: TelemetryEvent[] = [
+export const telemetryEvents = [
   ...assistantTelemetryEvents,
   ...alertsTelemetryEvents,
   ...previewRuleTelemetryEvents,

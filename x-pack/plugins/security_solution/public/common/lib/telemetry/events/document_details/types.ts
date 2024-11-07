@@ -23,20 +23,12 @@ interface ReportDetailsFlyoutTabClickedParams {
   tabId: string;
 }
 
-export type DocumentEventTypeData = {
-  [K in DocumentEventTypes]: K extends DocumentEventTypes.DetailsFlyoutOpened
-    ? ReportDetailsFlyoutOpenedParams
-    : K extends DocumentEventTypes.DetailsFlyoutTabClicked
-    ? ReportDetailsFlyoutTabClickedParams
-    : never;
-};
+export interface DocumentDetailsTelemetryEventsMap {
+  [DocumentEventTypes.DetailsFlyoutOpened]: ReportDetailsFlyoutOpenedParams;
+  [DocumentEventTypes.DetailsFlyoutTabClicked]: ReportDetailsFlyoutTabClickedParams;
+}
 
-export type DocumentDetailsTelemetryEvents =
-  | {
-      eventType: DocumentEventTypes.DetailsFlyoutOpened;
-      schema: RootSchema<ReportDetailsFlyoutOpenedParams>;
-    }
-  | {
-      eventType: DocumentEventTypes.DetailsFlyoutTabClicked;
-      schema: RootSchema<ReportDetailsFlyoutTabClickedParams>;
-    };
+export interface DocumentDetailsTelemetryEvent {
+  eventType: DocumentEventTypes;
+  schema: RootSchema<DocumentDetailsTelemetryEventsMap[DocumentEventTypes]>;
+}

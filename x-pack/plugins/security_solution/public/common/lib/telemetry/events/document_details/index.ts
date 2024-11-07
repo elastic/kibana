@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { DocumentDetailsTelemetryEvents } from './types';
+import type { DocumentDetailsTelemetryEvent } from './types';
 import { DocumentEventTypes } from './types';
 
-export const DocumentDetailsFlyoutOpenedEvent: DocumentDetailsTelemetryEvents = {
+export const DocumentDetailsFlyoutOpenedEvent: DocumentDetailsTelemetryEvent = {
   eventType: DocumentEventTypes.DetailsFlyoutOpened,
   schema: {
     location: {
@@ -28,7 +28,7 @@ export const DocumentDetailsFlyoutOpenedEvent: DocumentDetailsTelemetryEvents = 
   },
 };
 
-export const DocumentDetailsTabClickedEvent: DocumentDetailsTelemetryEvents = {
+export const DocumentDetailsTabClickedEvent: DocumentDetailsTelemetryEvent = {
   eventType: DocumentEventTypes.DetailsFlyoutTabClicked,
   schema: {
     location: {

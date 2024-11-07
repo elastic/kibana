@@ -7,56 +7,37 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type {
-  AlertsEventTypeData,
   AlertsEventTypes,
-  AlertsGroupingTelemetryEvent,
+  AlertsGroupingTelemetryEventsMap,
 } from './events/alerts_grouping/types';
 import type {
-  DataQualityEventTypeData,
   DataQualityEventTypes,
-  DataQualityTelemetryEvents,
+  DataQualityTelemetryEventsMap,
 } from './events/data_quality/types';
 import type {
-  EntityAnalyticsTelemetryEvent,
-  EntityEventTypeData,
+  EntityAnalyticsTelemetryEventsMap,
   EntityEventTypes,
 } from './events/entity_analytics/types';
+import type { AssistantEventTypes, AssistantTelemetryEventsMap } from './events/ai_assistant/types';
 import type {
-  AssistantEventTypeData,
-  AssistantEventTypes,
-  AssistantTelemetryEvent,
-} from './events/ai_assistant/types';
-import type {
-  DocumentDetailsTelemetryEvents,
-  DocumentEventTypeData,
+  DocumentDetailsTelemetryEventsMap,
   DocumentEventTypes,
 } from './events/document_details/types';
 import type {
-  OnboardingHubEventTypeData,
   OnboardingHubEventTypes,
-  OnboardingHubTelemetryEvent,
+  OnboardingHubTelemetryEventsMap,
 } from './events/onboarding/types';
 import type {
-  ManualRuleRunEventTypeData,
   ManualRuleRunEventTypes,
-  ManualRuleRunTelemetryEvent,
+  ManualRuleRunTelemetryEventsMap,
 } from './events/manual_rule_run/types';
+import type { EventLogEventTypes, EventLogTelemetryEventsMap } from './events/event_log/types';
+import type { NotesEventTypes, NotesTelemetryEventsMap } from './events/notes/types';
 import type {
-  EventLogEventTypeData,
-  EventLogEventTypes,
-  EventLogTelemetryEvent,
-} from './events/event_log/types';
-import type {
-  NotesEventTypeData,
-  NotesEventTypes,
-  NotesTelemetryEvents,
-} from './events/notes/types';
-import type {
-  PreviewRuleEventTypeData,
   PreviewRuleEventTypes,
-  PreviewRuleTelemetryEvent,
+  PreviewRuleTelemetryEventsMap,
 } from './events/preview_rule/types';
-import type { AppEventTypeData, AppEventTypes, AppTelemetryEvents } from './events/app/types';
+import type { AppEventTypes, AppTelemetryEventsMap } from './events/app/types';
 
 export * from './events/app/types';
 export * from './events/ai_assistant/types';
@@ -74,65 +55,30 @@ export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
 }
 
-export enum ML_JOB_TELEMETRY_STATUS {
-  started = 'started',
-  startError = 'start_error',
-  stopped = 'stopped',
-  stopError = 'stop_error',
-  moduleInstalled = 'module_installed',
-  installationError = 'installationError',
-}
-
-export interface ReportMLJobUpdateParams {
-  jobId: string;
-  isElasticJob: boolean;
-  status: ML_JOB_TELEMETRY_STATUS;
-  moduleId?: string;
-  errorMessage?: string;
-}
-
-export interface ReportAnomaliesCountClickedParams {
-  jobId: string;
-  count: number;
-}
-
 // Combine all event type data
 export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends AssistantEventTypes
-  ? AssistantEventTypeData[T]
+  ? AssistantTelemetryEventsMap[T]
   : T extends AlertsEventTypes
-  ? AlertsEventTypeData[T]
+  ? AlertsGroupingTelemetryEventsMap[T]
   : T extends PreviewRuleEventTypes
-  ? PreviewRuleEventTypeData[T]
+  ? PreviewRuleTelemetryEventsMap[T]
   : T extends EntityEventTypes
-  ? EntityEventTypeData[T]
+  ? EntityAnalyticsTelemetryEventsMap[T]
   : T extends DataQualityEventTypes
-  ? DataQualityEventTypeData[T]
+  ? DataQualityTelemetryEventsMap[T]
   : T extends DocumentEventTypes
-  ? DocumentEventTypeData[T]
+  ? DocumentDetailsTelemetryEventsMap[T]
   : T extends OnboardingHubEventTypes
-  ? OnboardingHubEventTypeData[T]
+  ? OnboardingHubTelemetryEventsMap[T]
   : T extends ManualRuleRunEventTypes
-  ? ManualRuleRunEventTypeData[T]
+  ? ManualRuleRunTelemetryEventsMap[T]
   : T extends EventLogEventTypes
-  ? EventLogEventTypeData[T]
+  ? EventLogTelemetryEventsMap[T]
   : T extends NotesEventTypes
-  ? NotesEventTypeData[T]
+  ? NotesTelemetryEventsMap[T]
   : T extends AppEventTypes
-  ? AppEventTypeData[T]
+  ? AppTelemetryEventsMap[T]
   : never;
-
-export type TelemetryEvent =
-  | AssistantTelemetryEvent
-  | AlertsGroupingTelemetryEvent
-  | PreviewRuleTelemetryEvent
-  | EntityAnalyticsTelemetryEvent
-  | DataQualityTelemetryEvents
-  | DocumentDetailsTelemetryEvents
-  | AppTelemetryEvents
-  | OnboardingHubTelemetryEvent
-  | ManualRuleRunTelemetryEvent
-  | EventLogTelemetryEvent
-  | NotesTelemetryEvents;
 
 export type TelemetryEventTypes =
   | AssistantEventTypes

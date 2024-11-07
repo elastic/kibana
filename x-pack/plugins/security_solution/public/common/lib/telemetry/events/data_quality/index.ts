@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import {
-  DataQualityEventTypes,
-  type DataQualityTelemetryCheckAllCompletedEvent,
-  type DataQualityTelemetryIndexCheckedEvent,
-} from './types';
+import { DataQualityEventTypes, type DataQualityTelemetryEvents } from './types';
 
-export const dataQualityIndexCheckedEvent: DataQualityTelemetryIndexCheckedEvent = {
+export const dataQualityIndexCheckedEvent: DataQualityTelemetryEvents = {
   eventType: DataQualityEventTypes.DataQualityIndexChecked,
   schema: {
     batchId: {
@@ -163,7 +159,7 @@ export const dataQualityIndexCheckedEvent: DataQualityTelemetryIndexCheckedEvent
   },
 };
 
-export const dataQualityCheckAllClickedEvent: DataQualityTelemetryCheckAllCompletedEvent = {
+export const dataQualityCheckAllClickedEvent: DataQualityTelemetryEvents = {
   eventType: DataQualityEventTypes.DataQualityCheckAllCompleted,
   schema: {
     batchId: {

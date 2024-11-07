@@ -17,13 +17,11 @@ export enum PreviewRuleEventTypes {
   PreviewRule = 'Preview rule',
 }
 
-export interface PreviewRuleTelemetryEvent {
-  eventType: PreviewRuleEventTypes.PreviewRule;
-  schema: RootSchema<PreviewRuleParams>;
+export interface PreviewRuleTelemetryEventsMap {
+  [PreviewRuleEventTypes.PreviewRule]: PreviewRuleParams;
 }
 
-export type PreviewRuleEventTypeData = {
-  [K in PreviewRuleEventTypes.PreviewRule]: K extends PreviewRuleEventTypes.PreviewRule
-    ? PreviewRuleParams
-    : never;
-};
+export interface PreviewRuleTelemetryEvent {
+  eventType: PreviewRuleEventTypes;
+  schema: RootSchema<PreviewRuleTelemetryEventsMap[PreviewRuleEventTypes]>;
+}

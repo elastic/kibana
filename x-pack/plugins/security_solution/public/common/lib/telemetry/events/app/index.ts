@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { AppTelemetryEvents } from './types';
+import type { AppTelemetryEvent } from './types';
 import { AppEventTypes } from './types';
 
-const cellActionClickedEvent: AppTelemetryEvents = {
+const cellActionClickedEvent: AppTelemetryEvent = {
   eventType: AppEventTypes.CellActionClicked,
   schema: {
     fieldName: {
@@ -42,7 +42,7 @@ const cellActionClickedEvent: AppTelemetryEvents = {
   },
 };
 
-const breadCrumbClickedEvent: AppTelemetryEvents = {
+const breadCrumbClickedEvent: AppTelemetryEvent = {
   eventType: AppEventTypes.BreadcrumbClicked,
   schema: {
     title: {
