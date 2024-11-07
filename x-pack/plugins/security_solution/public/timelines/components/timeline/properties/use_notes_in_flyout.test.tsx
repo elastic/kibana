@@ -202,7 +202,7 @@ describe('useNotesInFlyout', () => {
     expect(result.current.isNotesFlyoutVisible).toBe(false);
   });
 
-  it('should close the flyout when activeTab is changed', () => {
+  it('should close the flyout when activeTab is changed', async () => {
     const { result, rerender } = renderTestHook();
 
     act(() => {
@@ -226,8 +226,6 @@ describe('useNotesInFlyout', () => {
       rerender({ activeTab: TimelineTabs.eql });
     });
 
-    waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current.isNotesFlyoutVisible).toBe(false);
+    await waitFor(() => expect(result.current.isNotesFlyoutVisible).toBe(false));
   });
 });
