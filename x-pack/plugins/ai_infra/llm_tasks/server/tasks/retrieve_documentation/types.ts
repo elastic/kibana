@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { FunctionCallingMode } from '@kbn/inference-plugin/common/chat_complete';
+import type { FunctionCallingMode } from '@kbn/inference-common';
 import type { ProductName } from '@kbn/product-doc-common';
 
 export interface RetrieveDocumentationParams {

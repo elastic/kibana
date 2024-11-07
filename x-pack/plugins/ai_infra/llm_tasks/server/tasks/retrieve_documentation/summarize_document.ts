@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
-import type { ToolSchema } from '@kbn/inference-plugin/common';
-import type { FunctionCallingMode } from '@kbn/inference-plugin/common/chat_complete';
-import type { OutputAPI } from '@kbn/inference-plugin/common/output';
-import { withoutOutputUpdateEvents } from '@kbn/inference-plugin/common/output/without_output_update_events';
+import type { ToolSchema, FunctionCallingMode, OutputAPI } from '@kbn/inference-common';
 
 const summarizeDocumentSchema = {
   type: 'object',
@@ -43,11 +39,11 @@ export const summarizeDocument = async ({
   connectorId: string;
   functionCalling?: FunctionCallingMode;
 }): Promise<SummarizeDocumentResponse> => {
-  const result = await lastValueFrom(
-    outputAPI('summarize_document', {
-      connectorId,
-      functionCalling,
-      system: `You are an helpful Elastic assistant, and your current task is to help answering the user question.
+  const result = await outputAPI({
+    id: 'summarize_document',
+    connectorId,
+    functionCalling,
+    system: `You are an helpful Elastic assistant, and your current task is to help answering the user question.
 
       Given a question and a document, please provide a condensed version of the document
       that can be used to answer the question.
@@ -56,7 +52,7 @@ export const summarizeDocument = async ({
         can't be done without exceeding the 800 words limit requirement, then only include the information that you think
         are the most relevant and the most helpful to answer the question.
       - If you think the document isn't relevant at all to answer the question, just return an empty text`,
-      input: `
+    input: `
       ## User question
 
       ${searchTerm}
@@ -65,10 +61,8 @@ export const summarizeDocument = async ({
 
       ${documentContent}
       `,
-      schema: summarizeDocumentSchema,
-    }).pipe(withoutOutputUpdateEvents())
-  );
-
+    schema: summarizeDocumentSchema,
+  });
   return {
     summary: result.output.summary ?? '',
   };

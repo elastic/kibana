@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { OutputAPI } from '@kbn/inference-plugin/common/output';
+import type { OutputAPI } from '@kbn/inference-common';
 import type { ProductDocSearchAPI } from '@kbn/product-doc-base-plugin/server';
 import { truncate, count as countTokens } from '../../utils/tokens';
 import type { RetrieveDocumentationAPI } from './types';
