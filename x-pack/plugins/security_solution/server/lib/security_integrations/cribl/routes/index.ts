@@ -20,7 +20,7 @@ export const getFleetManagedIndexTemplatesRoute = (router: IRouter) => {
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: 'Route delegates authorization to the scoped ES Client',
           },
         },
         validate: {},
