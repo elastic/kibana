@@ -11,6 +11,7 @@ import { AppMenuActionId, AppMenuActionType, AppMenuRegistry } from '@kbn/discov
 import { DATA_QUALITY_LOCATOR_ID, DataQualityLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { isOfQueryType } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { AppMenuExtensionParams } from '../../../..';
 import type { RootProfileProvider } from '../../../../profiles';
 import { ProfileProviderServices } from '../../../profile_provider_services';
@@ -46,7 +47,9 @@ const registerDatasetQualityLink = (
       id: 'dataset-quality-link',
       type: AppMenuActionType.custom,
       controlProps: {
-        label: 'Data sets',
+        label: i18n.translate('discover.observabilitySolution.appMenu.datasets', {
+          defaultMessage: 'Data sets',
+        }),
         testId: 'dataset-quality-link',
         onClick: ({ onFinishAction }) => {
           const refresh = timefilter.getRefreshInterval();
@@ -79,7 +82,9 @@ const registerCustomThresholdRuleAction = (
     type: AppMenuActionType.custom,
     order: 101,
     controlProps: {
-      label: 'Create custom threshold rule',
+      label: i18n.translate('discover.observabilitySolution.appMenu.customThresholdRule', {
+        defaultMessage: 'Create custom threshold rule',
+      }),
       iconType: 'visGauge',
       testId: 'custom-threshold-rule',
       onClick: ({ onFinishAction }) => {
@@ -119,7 +124,9 @@ const registerCreateSLOAction = (
       type: AppMenuActionType.custom,
       order: 102,
       controlProps: {
-        label: 'Create SLO',
+        label: i18n.translate('discover.observabilitySolution.appMenu.slo', {
+          defaultMessage: 'Create SLO',
+        }),
         iconType: 'bell',
         testId: 'create-slo',
         onClick: ({ onFinishAction }) => {
