@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiButtonColor } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -274,23 +273,6 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             />
           </>
         )}
-
-        {this.requiresGlobalPrivilegeWarning() && (
-          <Fragment>
-            <EuiSpacer size="l" />
-            <EuiCallOut
-              color="warning"
-              iconType="warning"
-              data-test-subj="globalPrivilegeWarning"
-              title={
-                <FormattedMessage
-                  id="xpack.security.management.editRole.spacePrivilegeForm.globalPrivilegeWarning"
-                  defaultMessage="Creating a global privilege might impact your other space privileges."
-                />
-              }
-            />
-          </Fragment>
-        )}
       </EuiForm>
     );
   };
@@ -319,17 +301,12 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         throw new Error(`Unsupported mode: ${mode}`);
     }
 
-    let buttonColor: EuiButtonColor = 'primary';
-    if (this.requiresGlobalPrivilegeWarning()) {
-      buttonColor = 'warning';
-    }
-
     return (
       <EuiButton
         onClick={this.onSaveClick}
         fill
         disabled={!this.canSave()}
-        color={buttonColor}
+        color="primary"
         data-test-subj={'createSpacePrivilegeButton'}
       >
         {buttonText}
@@ -515,13 +492,4 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   };
 
   private isDefiningGlobalPrivilege = () => this.state.selectedSpaceIds.includes('*');
-
-  private requiresGlobalPrivilegeWarning = () => {
-    const hasOtherSpacePrivilegesDefined = this.props.role.kibana.length > 0;
-    return (
-      this.state.mode === 'create' &&
-      this.isDefiningGlobalPrivilege() &&
-      hasOtherSpacePrivilegesDefined
-    );
-  };
 }
