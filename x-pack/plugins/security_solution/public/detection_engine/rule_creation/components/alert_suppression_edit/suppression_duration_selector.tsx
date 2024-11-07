@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiFormRow, EuiRadioGroup, EuiToolTip } from '@elastic/eui';
+import type { FieldHook } from '../../../../shared_imports';
 import { UseMultiFields } from '../../../../shared_imports';
 import { AlertSuppressionDurationType } from '../../../../detections/pages/detection_engine/rules/types';
 import { DurationInput } from '../duration_input';
@@ -25,7 +26,7 @@ interface AlertSuppressionDurationProps {
 }
 
 export function SuppressionDurationSelector({
-  onlyPerTimePeriod = false,
+  onlyPerTimePeriod,
   onlyPerTimePeriodReasonMessage,
   disabled,
 }: AlertSuppressionDurationProps): JSX.Element {
@@ -49,50 +50,87 @@ export function SuppressionDurationSelector({
         }}
       >
         {({ suppressionDurationSelector, suppressionDurationValue, suppressionDurationUnit }) => (
-          <EuiRadioGroup
+          <SuppressionDurationSelectorFields
+            suppressionDurationSelectorField={suppressionDurationSelector}
+            suppressionDurationValueField={suppressionDurationValue}
+            suppressionDurationUnitField={suppressionDurationUnit}
+            onlyPerTimePeriod={onlyPerTimePeriod}
+            onlyPerTimePeriodReasonMessage={onlyPerTimePeriodReasonMessage}
             disabled={disabled}
-            idSelected={suppressionDurationSelector.value}
-            options={[
-              {
-                id: AlertSuppressionDurationType.PerRuleExecution,
-                label: onlyPerTimePeriod ? (
-                  <EuiToolTip content={onlyPerTimePeriodReasonMessage}>
-                    <> {i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION}</>
-                  </EuiToolTip>
-                ) : (
-                  i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION
-                ),
-                disabled: onlyPerTimePeriod ? true : disabled,
-              },
-              {
-                id: AlertSuppressionDurationType.PerTimePeriod,
-                disabled,
-                label: (
-                  <>
-                    {i18n.ALERT_SUPPRESSION_DURATION_PER_TIME_PERIOD_OPTION}
-                    <DurationInput
-                      data-test-subj="alertSuppressionDurationInput"
-                      durationValueField={suppressionDurationValue}
-                      durationUnitField={suppressionDurationUnit}
-                      // Suppression duration is also disabled suppression by rule execution is selected in radio button
-                      isDisabled={
-                        disabled ||
-                        suppressionDurationSelector.value !==
-                          AlertSuppressionDurationType.PerTimePeriod
-                      }
-                      minimumValue={1}
-                    />
-                  </>
-                ),
-              },
-            ]}
-            onChange={(id) => {
-              suppressionDurationSelector.setValue(id);
-            }}
-            data-test-subj="alertSuppressionDurationOptions"
           />
         )}
       </UseMultiFields>
     </EuiFormRow>
+  );
+}
+
+interface SuppressionDurationSelectorFieldsProps {
+  suppressionDurationSelectorField: FieldHook<string, string>;
+  suppressionDurationValueField: FieldHook<number | undefined, number | undefined>;
+  suppressionDurationUnitField: FieldHook<string, string>;
+  onlyPerTimePeriod?: boolean;
+  onlyPerTimePeriodReasonMessage?: string;
+  disabled?: boolean;
+}
+
+function SuppressionDurationSelectorFields({
+  suppressionDurationSelectorField,
+  suppressionDurationValueField,
+  suppressionDurationUnitField,
+  onlyPerTimePeriod = false,
+  onlyPerTimePeriodReasonMessage,
+  disabled,
+}: SuppressionDurationSelectorFieldsProps): JSX.Element {
+  const { value: durationType, setValue: setDurationType } = suppressionDurationSelectorField;
+
+  useEffect(() => {
+    if (onlyPerTimePeriod && durationType !== AlertSuppressionDurationType.PerTimePeriod) {
+      setDurationType(AlertSuppressionDurationType.PerTimePeriod);
+    }
+  }, [onlyPerTimePeriod, durationType, setDurationType]);
+
+  return (
+    <EuiRadioGroup
+      disabled={disabled}
+      idSelected={suppressionDurationSelectorField.value}
+      options={[
+        {
+          id: AlertSuppressionDurationType.PerRuleExecution,
+          label: onlyPerTimePeriod ? (
+            <EuiToolTip content={onlyPerTimePeriodReasonMessage}>
+              <> {i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION}</>
+            </EuiToolTip>
+          ) : (
+            i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION
+          ),
+          disabled: onlyPerTimePeriod ? true : disabled,
+        },
+        {
+          id: AlertSuppressionDurationType.PerTimePeriod,
+          disabled,
+          label: (
+            <>
+              {i18n.ALERT_SUPPRESSION_DURATION_PER_TIME_PERIOD_OPTION}
+              <DurationInput
+                data-test-subj="alertSuppressionDurationInput"
+                durationValueField={suppressionDurationValueField}
+                durationUnitField={suppressionDurationUnitField}
+                // Suppression duration is also disabled suppression by rule execution is selected in radio button
+                isDisabled={
+                  disabled ||
+                  suppressionDurationSelectorField.value !==
+                    AlertSuppressionDurationType.PerTimePeriod
+                }
+                minimumValue={1}
+              />
+            </>
+          ),
+        },
+      ]}
+      onChange={(id) => {
+        suppressionDurationSelectorField.setValue(id);
+      }}
+      data-test-subj="alertSuppressionDurationOptions"
+    />
   );
 }

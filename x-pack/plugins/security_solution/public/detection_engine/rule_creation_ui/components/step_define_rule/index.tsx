@@ -39,10 +39,7 @@ import type {
   DefineStepRule,
   RuleStepProps,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import {
-  DataSourceType,
-  AlertSuppressionDurationType,
-} from '../../../../detections/pages/detection_engine/rules/types';
+import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import type { QueryBarDefineRuleProps } from '../query_bar';
 import { QueryBarDefineRule } from '../query_bar';
@@ -96,7 +93,7 @@ import { RelatedIntegrations } from '../../../rule_creation/components/related_i
 import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_rule_config';
 import { AlertSuppressionEdit } from '../../../rule_creation/components/alert_suppression_edit';
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
-import { ALERT_SUPPRESSION_DURATION_TYPE } from '../../../rule_creation/components/alert_suppression_edit/fields';
+import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -380,17 +377,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
   }, [ruleType, previousRuleType, getFields]);
 
-  /**
-   * for threshold rule suppression only time interval suppression mode is available
-   */
-  useEffect(() => {
-    if (isThresholdRule) {
-      form.setFieldValue(
-        ALERT_SUPPRESSION_DURATION_TYPE,
-        AlertSuppressionDurationType.PerTimePeriod
-      );
-    }
-  }, [isThresholdRule, form]);
+  usePersistentAlertSuppressionState({ form });
 
   // if saved query failed to load:
   // - reset shouldLoadFormDynamically to false, as non existent query cannot be used for loading and execution
@@ -1025,6 +1012,6 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
 };
 export const StepDefineRuleReadOnly = memo(StepDefineRuleReadOnlyComponent);
 
-export function aggregatableFields<T extends { aggregatable: boolean }>(browserFields: T[]): T[] {
+function aggregatableFields<T extends { aggregatable: boolean }>(browserFields: T[]): T[] {
   return browserFields.filter((field) => field.aggregatable === true);
 }
