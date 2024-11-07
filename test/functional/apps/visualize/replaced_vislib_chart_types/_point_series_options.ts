@@ -331,7 +331,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         // wait some time before trying to check for rendering count
         await header.awaitKibanaChrome();
-        await visualize.clickRefresh(true);
+        await visualize.clickRefresh();
         await visChart.waitForRenderingCount();
         log.debug('getXAxisLabels');
 
