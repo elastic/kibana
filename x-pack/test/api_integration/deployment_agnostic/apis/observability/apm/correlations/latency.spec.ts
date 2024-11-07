@@ -15,6 +15,7 @@ import type {
 } from '@kbn/apm-plugin/common/correlations/latency_correlations/types';
 import { LatencyDistributionChartType } from '@kbn/apm-plugin/common/latency_distribution_chart_types';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { ARCHIVER_ROUTES } from '../constants/archiver';
 
 // These tests go through the full sequence of queries required
 // to get the final results for a latency correlation analysis.
@@ -107,12 +108,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('with data and opbeans-node args', () => {
       // this is failing
       before(async () => {
-        await esArchiver.load('x-pack/test/apm_api_integration/common/fixtures/es_archiver/8.0.0');
+        await esArchiver.load(ARCHIVER_ROUTES['8.0.0']);
       });
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/test/apm_api_integration/common/fixtures/es_archiver/8.0.0'
-        );
+        await esArchiver.unload(ARCHIVER_ROUTES['8.0.0']);
       });
 
       // putting this into a single `it` because the responses depend on each other

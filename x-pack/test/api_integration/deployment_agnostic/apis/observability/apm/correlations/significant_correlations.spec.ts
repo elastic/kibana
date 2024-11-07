@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { ARCHIVER_ROUTES } from '../constants/archiver';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
@@ -81,12 +82,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('with data and default args', () => {
       // this is failing
       before(async () => {
-        await esArchiver.load('x-pack/test/apm_api_integration/common/fixtures/es_archiver/8.0.0');
+        await esArchiver.load(ARCHIVER_ROUTES['8.0.0']);
       });
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/test/apm_api_integration/common/fixtures/es_archiver/8.0.0'
-        );
+        await esArchiver.unload(ARCHIVER_ROUTES['8.0.0']);
       });
 
       it('returns significant correlations', async () => {
