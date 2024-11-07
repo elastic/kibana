@@ -19,6 +19,7 @@ import type {
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '../../../common';
 import { createMockedDataUsageContext } from '../../mocks';
 import { getMeteringStats } from '../../utils/get_metering_stats';
+import { CustomHttpRequestError } from '../../utils';
 
 jest.mock('../../utils/get_metering_stats');
 const mockGetMeteringStats = getMeteringStats as jest.Mock;
@@ -82,6 +83,24 @@ describe('registerDataStreamsRoute', () => {
           storageSizeBytes: 100,
         },
       ],
+    });
+  });
+
+  it('should return correct error if metering stats request fails', async () => {
+    // using custom error for test here to avoid having to import the actual error class
+    mockGetMeteringStats.mockRejectedValue(
+      new CustomHttpRequestError('Error getting metring stats!')
+    );
+    const mockRequest = httpServerMock.createKibanaRequest({ body: {} });
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockRouter = mockCore.http.createRouter.mock.results[0].value;
+    const [[, handler]] = mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls;
+    await handler(context, mockRequest, mockResponse);
+
+    expect(mockResponse.customError).toHaveBeenCalledTimes(1);
+    expect(mockResponse.customError).toHaveBeenCalledWith({
+      body: new CustomHttpRequestError('Error getting metring stats!'),
+      statusCode: 500,
     });
   });
 
