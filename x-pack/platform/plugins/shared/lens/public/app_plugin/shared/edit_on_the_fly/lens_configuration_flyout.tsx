@@ -524,7 +524,55 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
-          <EuiFlexItem grow={false}>
+          {isOfAggregateQueryType(query) && canEditTextBasedQuery && false && (
+            <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
+              <ESQLLangEditor
+                query={query}
+                onTextLangQueryChange={(q) => {
+                  setQuery(q);
+                }}
+                detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
+                hideTimeFilterInfo={hideTimeFilterInfo}
+                errors={errors}
+                warning={
+                  suggestsLimitedColumns
+                    ? i18n.translate('xpack.lens.config.configFlyoutCallout', {
+                        defaultMessage:
+                          'Displaying a limited portion of the available fields. Add more from the configuration panel.',
+                      })
+                    : undefined
+                }
+                editorIsInline
+                hideRunQueryText
+                onTextLangQuerySubmit={async (q, a) => {
+                  // do not run the suggestions if the query is the same as the previous one
+                  if (q && !isEqual(q, prevQuery.current)) {
+                    setIsVisualizationLoading(true);
+                    await runQuery(q, a);
+                  }
+                }}
+                isDisabled={false}
+                allowQueryCancellation
+                isLoading={isVisualizationLoading}
+              />
+            </EuiFlexItem>
+          )}
+          {isOfAggregateQueryType(query) && canEditTextBasedQuery && dataGridAttrs && false && (
+            <ESQLDataGridAccordion
+              dataGridAttrs={dataGridAttrs}
+              isAccordionOpen={isESQLResultsAccordionOpen}
+              setIsAccordionOpen={setIsESQLResultsAccordionOpen}
+              query={query}
+              isTableView={attributes.visualizationType !== 'lnsDatatable'}
+              onAccordionToggleCb={(status) => {
+                if (status && isSuggestionsAccordionOpen) {
+                  setIsSuggestionsAccordionOpen(!status);
+                }
+                if (status && isLayerAccordionOpen) {
+                  setIsLayerAccordionOpen(!status);
+                }
+              }} />
+                     <EuiFlexItem grow={false}>
             <EuiFlexGroup
               css={css`
                 > * {
@@ -534,7 +582,7 @@ export function LensEditConfigurationFlyout({
               gutterSize="none"
               direction="column"
               ref={editorContainer}
-            />
+ />
           </EuiFlexItem>
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
