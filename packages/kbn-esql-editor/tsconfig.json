@@ -30,7 +30,8 @@
     "@kbn/esql-utils",
     "@kbn/content-management-favorites-public",
     "@kbn/usage-collection-plugin",
-    "@kbn/content-management-favorites-common"
+    "@kbn/content-management-favorites-common",
+    "@kbn/kibana-utils-plugin",
   ],
   "exclude": [
     "target/**/*",

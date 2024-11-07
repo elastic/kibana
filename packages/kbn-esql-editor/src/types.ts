@@ -14,6 +14,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export interface ESQLEditorProps {
   /** The aggregate type query */
@@ -74,4 +75,5 @@ export interface ESQLEditorDeps {
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  storage: Storage;
 }

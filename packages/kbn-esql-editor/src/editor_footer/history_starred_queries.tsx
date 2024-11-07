@@ -39,6 +39,7 @@ import {
 import type { ESQLEditorDeps } from '../types';
 import { getReducedSpaceStyling, swapArrayElements } from './history_starred_queries_helpers';
 import { EsqlStarredQueriesService, StarredQueryItem } from './esql_starred_queries_service';
+import { DiscardStarredQueryModal } from './discard_starred_query';
 
 export function QueryHistoryAction({
   toggleHistory,
@@ -252,6 +253,7 @@ export function QueryList({
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [isDiscardQueryModalVisible, setIsDiscardQueryModalVisible] = useState(false);
 
   const actions: Array<CustomItemAction<QueryHistoryItem>> = useMemo(() => {
     return [
@@ -360,6 +362,12 @@ export function QueryList({
     ${starredQueriesCellStyling}
   `;
 
+  starredQueriesService?.discardModalVisibility$.subscribe((nextVisibility) => {
+    if (isDiscardQueryModalVisible !== nextVisibility) {
+      setIsDiscardQueryModalVisible(nextVisibility);
+    }
+  });
+
   return (
     <div data-test-subj={dataTestSubj ?? 'ESQLEditor-queryList'} css={containerCSS}>
       <EuiInMemoryTable
@@ -377,6 +385,14 @@ export function QueryList({
         css={tableStyling}
         tableLayout={containerWidth < 560 ? 'auto' : 'fixed'}
       />
+      {isDiscardQueryModalVisible && (
+        <DiscardStarredQueryModal
+          onClose={async (dismissFlag, removeQuery) =>
+            (await starredQueriesService?.onDiscardModalClose(dismissFlag, removeQuery)) ??
+            Promise.resolve()
+          }
+        />
+      )}
     </div>
   );
 }
@@ -456,7 +472,8 @@ export function HistoryAndStarredQueriesTabs({
   height: number;
 }) {
   const kibana = useKibana<ESQLEditorDeps>();
-  const { core, usageCollection } = kibana.services;
+  const { core, usageCollection, storage } = kibana.services;
+
   const [starredQueriesService, setStarredQueriesService] = useState<EsqlStarredQueriesService>();
   const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
 
@@ -465,13 +482,14 @@ export function HistoryAndStarredQueriesTabs({
       const starredService = await EsqlStarredQueriesService.initialize({
         http: core.http,
         usageCollection,
+        storage,
       });
       setStarredQueriesService(starredService);
     };
     if (!starredQueriesService) {
       initializeService();
     }
-  }, [core.http, starredQueriesService, usageCollection]);
+  }, [core.http, starredQueriesService, storage, usageCollection]);
 
   starredQueriesService?.queries$.subscribe((nextQueries) => {
     if (nextQueries.length !== starredQueries.length) {

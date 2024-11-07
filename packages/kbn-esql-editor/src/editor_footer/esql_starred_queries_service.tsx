@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiButtonIcon } from '@elastic/eui';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import {
@@ -21,6 +22,8 @@ import {
   getMomentTimeZone,
   getTrimmedQuery,
 } from '../history_local_storage';
+
+const STARRED_QUERIES_DISCARD_KEY = 'esqlEditor.starredQueriesDiscard';
 
 /**
  * EsqlStarredQueriesService is a service that manages the starred queries in the ES|QL editor.
@@ -44,12 +47,14 @@ export interface StarredQueryItem extends QueryHistoryItem {
 
 interface EsqlStarredQueriesServices {
   http: CoreStart['http'];
+  storage: Storage;
   usageCollection?: UsageCollectionStart;
 }
 
 interface EsqlStarredQueriesParams {
   client: FavoritesClient<QueryHistoryItem>;
   starredQueries: StarredQueryItem[];
+  storage: Storage;
 }
 
 function generateId() {
@@ -59,12 +64,16 @@ function generateId() {
 export class EsqlStarredQueriesService {
   private client: FavoritesClient<QueryHistoryItem>;
   private starredQueries: StarredQueryItem[] = [];
+  private queryToEdit: string = '';
+  private storage: Storage;
   queries$: BehaviorSubject<StarredQueryItem[]>;
+  discardModalVisibility$: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
-  constructor({ client, starredQueries }: EsqlStarredQueriesParams) {
+  constructor({ client, starredQueries, storage }: EsqlStarredQueriesParams) {
     this.client = client;
     this.starredQueries = starredQueries;
     this.queries$ = new BehaviorSubject(starredQueries);
+    this.storage = storage;
   }
 
   static async initialize(services: EsqlStarredQueriesServices) {
@@ -77,7 +86,11 @@ export class EsqlStarredQueriesService {
     const retrievedQueries: StarredQueryItem[] = [];
 
     if (!favoriteMetadata) {
-      return new EsqlStarredQueriesService({ client, starredQueries: [] });
+      return new EsqlStarredQueriesService({
+        client,
+        starredQueries: [],
+        storage: services.storage,
+      });
     }
     Object.keys(favoriteMetadata).forEach((id) => {
       const item = favoriteMetadata[id];
@@ -88,6 +101,7 @@ export class EsqlStarredQueriesService {
     return new EsqlStarredQueriesService({
       client,
       starredQueries: retrievedQueries,
+      storage: services.storage,
     });
   }
 
@@ -143,8 +157,22 @@ export class EsqlStarredQueriesService {
     this.client.reportRemoveFavoriteClick();
   }
 
+  async onDiscardModalClose(shouldDismissModal?: boolean, removeQuery?: boolean) {
+    if (shouldDismissModal) {
+      // set the local storage flag to not show the modal again
+      this.storage.set(STARRED_QUERIES_DISCARD_KEY, true);
+    }
+    this.discardModalVisibility$.next(false);
+
+    if (removeQuery) {
+      // remove the query
+      await this.removeStarredQuery(this.queryToEdit);
+    }
+  }
+
   renderStarredButton(item: QueryHistoryItem) {
     const trimmedQueryString = getTrimmedQuery(item.queryString);
+    this.queryToEdit = trimmedQueryString;
     const isStarred = this.checkIfQueryIsStarred(trimmedQueryString);
     return (
       <EuiButtonIcon
@@ -170,7 +198,12 @@ export class EsqlStarredQueriesService {
         iconType={isStarred ? 'starFilled' : 'starEmpty'}
         onClick={async () => {
           if (isStarred) {
-            await this.removeStarredQuery(trimmedQueryString);
+            // show the discard modal only if the user has not dismissed it
+            if (!this.storage.get(STARRED_QUERIES_DISCARD_KEY)) {
+              this.discardModalVisibility$.next(true);
+            } else {
+              await this.removeStarredQuery(item.queryString);
+            }
           } else {
             await this.addStarredQuery(item);
           }

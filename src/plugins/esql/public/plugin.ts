@@ -15,6 +15,7 @@ import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-ty
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   updateESQLQueryTrigger,
   UpdateESQLQueryAction,
@@ -51,12 +52,14 @@ export class EsqlPlugin implements Plugin<{}, void> {
     core: CoreStart,
     { dataViews, expressions, data, uiActions, fieldsMetadata, usageCollection }: EsqlPluginStart
   ): void {
+    const storage = new Storage(localStorage);
     const appendESQLAction = new UpdateESQLQueryAction(data);
     uiActions.addTriggerAction(UPDATE_ESQL_QUERY_TRIGGER, appendESQLAction);
     setKibanaServices(
       core,
       dataViews,
       expressions,
+      storage,
       this.indexManagement,
       fieldsMetadata,
       usageCollection

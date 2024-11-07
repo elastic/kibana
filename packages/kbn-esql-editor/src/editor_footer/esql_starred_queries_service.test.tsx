@@ -9,13 +9,35 @@
 
 import { EsqlStarredQueriesService } from './esql_starred_queries_service';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+
+class LocalStorageMock {
+  public store: Record<string, unknown>;
+  constructor(defaultStore: Record<string, unknown>) {
+    this.store = defaultStore;
+  }
+  clear() {
+    this.store = {};
+  }
+  get(key: string) {
+    return this.store[key] || null;
+  }
+  set(key: string, value: unknown) {
+    this.store[key] = String(value);
+  }
+  remove(key: string) {
+    delete this.store[key];
+  }
+}
 
 describe('EsqlStarredQueriesService', () => {
   const core = coreMock.createStart();
+  const storage = new LocalStorageMock({}) as unknown as Storage;
 
   it('should initialize', async () => {
     const service = await EsqlStarredQueriesService.initialize({
       http: core.http,
+      storage,
     });
     expect(service).toBeDefined();
     expect(service.queries$.value).toEqual([]);
@@ -24,6 +46,7 @@ describe('EsqlStarredQueriesService', () => {
   it('should add a new starred query', async () => {
     const service = await EsqlStarredQueriesService.initialize({
       http: core.http,
+      storage,
     });
     const query = {
       queryString: 'SELECT * FROM test',
@@ -45,6 +68,7 @@ describe('EsqlStarredQueriesService', () => {
   it('should not add the same query twice', async () => {
     const service = await EsqlStarredQueriesService.initialize({
       http: core.http,
+      storage,
     });
     const query = {
       queryString: 'SELECT * FROM   test',
@@ -72,6 +96,7 @@ describe('EsqlStarredQueriesService', () => {
   it('should add the query trimmed', async () => {
     const service = await EsqlStarredQueriesService.initialize({
       http: core.http,
+      storage,
     });
     const query = {
       queryString: `SELECT * FROM test |
@@ -95,6 +120,7 @@ describe('EsqlStarredQueriesService', () => {
   it('should remove a query', async () => {
     const service = await EsqlStarredQueriesService.initialize({
       http: core.http,
+      storage,
     });
     const query = {
       queryString: `SELECT * FROM test | WHERE field != 'value'`,
@@ -120,6 +146,7 @@ describe('EsqlStarredQueriesService', () => {
   it('should return the button correctly', async () => {
     const service = await EsqlStarredQueriesService.initialize({
       http: core.http,
+      storage,
     });
     const query = {
       queryString: 'SELECT * FROM test',
@@ -131,5 +158,43 @@ describe('EsqlStarredQueriesService', () => {
     const button = service.renderStarredButton(query);
     expect(button.props.title).toEqual('Remove ES|QL query from Starred');
     expect(button.props.iconType).toEqual('starFilled');
+  });
+
+  it('should display the modal when the Remove button is clicked', async () => {
+    const service = await EsqlStarredQueriesService.initialize({
+      http: core.http,
+      storage,
+    });
+    const query = {
+      queryString: 'SELECT * FROM test',
+      timeRan: '2021-09-01T00:00:00Z',
+      status: 'success' as const,
+    };
+
+    await service.addStarredQuery(query);
+    const button = service.renderStarredButton(query);
+    expect(button.props.title).toEqual('Remove ES|QL query from Starred');
+    button.props.onClick();
+
+    expect(service.discardModalVisibility$.value).toEqual(true);
+  });
+
+  it('should NOT display the modal when Remove the button is clicked but the user has dismissed the modal permanently', async () => {
+    storage.set('esqlEditor.starredQueriesDiscard', true);
+    const service = await EsqlStarredQueriesService.initialize({
+      http: core.http,
+      storage,
+    });
+    const query = {
+      queryString: 'SELECT * FROM test',
+      timeRan: '2021-09-01T00:00:00Z',
+      status: 'success' as const,
+    };
+
+    await service.addStarredQuery(query);
+    const button = service.renderStarredButton(query);
+    button.props.onClick();
+
+    expect(service.discardModalVisibility$.value).toEqual(false);
   });
 });

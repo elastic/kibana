@@ -25,6 +25,7 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/content-management-plugin",
+    "@kbn/kibana-utils-plugin",
   ],
   "exclude": [
     "target/**/*",
