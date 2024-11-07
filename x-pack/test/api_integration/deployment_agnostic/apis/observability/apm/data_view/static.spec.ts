@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let supertest: SupertestWithRoleScope;
 
     before(async () => {
-      supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+      supertest = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
         withInternalHeaders: true,
       });
     });
