@@ -17,7 +17,6 @@ import {
   useStartServices,
   useFlyoutContext,
   useFleetServerStandalone,
-  useListPoliciesByOutputs,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, UninstallCommandFlyout } from '../../../components';
 import { policyHasFleetServer } from '../../../services';

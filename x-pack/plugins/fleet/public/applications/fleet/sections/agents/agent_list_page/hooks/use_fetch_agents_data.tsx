@@ -6,7 +6,7 @@
  */
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEqual, uniq } from 'lodash';
+import { isEqual } from 'lodash';
 import { useHistory } from 'react-router-dom';
 
 import { agentStatusesToSummary } from '../../../../../../../common/services';
@@ -347,6 +347,7 @@ export function useFetchAgentsData() {
               selectedAgentPolicies: managedAgentPolicies.map((policy) => policy.id),
               selectedTags,
               selectedStatus,
+              selectedPoliciesByOutputs,
             });
             const response = await sendGetAgents({
               kuery: `${managedPoliciesKuery}`,
@@ -403,6 +404,7 @@ export function useFetchAgentsData() {
       search,
       selectedTags,
       selectedStatus,
+      selectedPoliciesByOutputs,
       notifications.toasts,
     ]
   );
