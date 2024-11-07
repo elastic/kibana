@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { DataSourceCategory, DataSourceProfileProvider, SolutionType } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
 import {
   getCellRenderers,
@@ -26,6 +26,10 @@ export const createLogsDataSourceProfileProvider = (
     getRowAdditionalLeadingControls,
   },
   resolve: (params) => {
+    if (params.rootContext.solutionType !== SolutionType.Observability) {
+      return { isMatch: false };
+    }
+
     const indexPattern = extractIndexPatternFrom(params);
 
     if (!services.logsContextService.isLogsIndexPattern(indexPattern)) {
