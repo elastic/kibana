@@ -224,6 +224,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         cond: 'isDataStreamIsPartOfIntegration',
                       },
                       {
+                        actions: 'storeDataStreamIntegration',
                         target: 'done',
                       },
                     ],
