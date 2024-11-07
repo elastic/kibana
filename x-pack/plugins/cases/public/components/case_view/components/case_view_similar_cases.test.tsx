@@ -31,6 +31,6 @@ describe('Case View Page files tab', () => {
   it('should render the similar cases table', async () => {
     appMockRender.render(<CaseViewSimilarCases caseData={caseData} />);
 
-    expect(await screen.findByTestId('cases-table')).toBeInTheDocument();
+    expect(await screen.findByTestId('similar-cases-table')).toBeInTheDocument();
   });
 });
