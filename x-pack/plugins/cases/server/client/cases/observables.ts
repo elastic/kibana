@@ -119,7 +119,6 @@ export const updateObservable = async (
     if (observableIndex === -1) {
       throw createCaseError({
         message: `Failed to update observable: ${JSON.stringify(params)}: observable not found`,
-        error,
         logger,
       });
     }
