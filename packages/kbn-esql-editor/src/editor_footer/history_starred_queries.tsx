@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
-import { FAVORITES_LIMIT } from '@kbn/content-management-favorites-common';
+import { FAVORITES_LIMIT as ESQL_STARRED_QUERIES_LIMIT } from '@kbn/content-management-favorites-common';
 import { css, Interpolation, Theme } from '@emotion/react';
 import {
   type QueryHistoryItem,
@@ -614,7 +614,7 @@ export function HistoryAndStarredQueriesTabs({
                       defaultMessage:
                         'Showing {starredItemsCount} queries (max {starredItemsLimit})',
                       values: {
-                        starredItemsLimit: FAVORITES_LIMIT,
+                        starredItemsLimit: ESQL_STARRED_QUERIES_LIMIT,
                         starredItemsCount: starredQueries.length ?? 0,
                       },
                     })}
