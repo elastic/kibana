@@ -282,3 +282,14 @@ export const TIMELINE_FILTER_DROP_AREA = 'timeline-filter-drop-area';
 
 export const getNonDropAreaFilters = (filters: Filter[] = []) =>
   filters.filter((f: Filter) => f.meta.controlledBy !== TIMELINE_FILTER_DROP_AREA);
+
+export const isFullScreen = ({
+  globalFullScreen,
+  isActiveTimelines,
+  timelineFullScreen,
+}: {
+  globalFullScreen: boolean;
+  isActiveTimelines: boolean;
+  timelineFullScreen: boolean;
+}) =>
+  (isActiveTimelines && timelineFullScreen) || (isActiveTimelines === false && globalFullScreen);
