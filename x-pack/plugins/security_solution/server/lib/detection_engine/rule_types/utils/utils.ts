@@ -85,10 +85,6 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
-import type {
-  EqlBuildingBlockAlert800,
-  EqlShellAlert800,
-} from '../../../../../common/api/detection_engine/model/alerts/8.0.0';
 import { ALERT_GROUP_ID } from '../../../../../common/field_maps/field_names';
 import type {
   ExtraFieldsForShellAlert,
@@ -1058,13 +1054,15 @@ export const getDisabledActionsWarningText = ({
 };
 
 export const isEqlBuildingBlockAlert = (
-  alertObject: unknown
-): alertObject is EqlBuildingBlockAlert800 =>
-  (alertObject as EqlBuildingBlockAlert800)?.[ALERT_BUILDING_BLOCK_TYPE] != null;
+  alertObject: BaseFieldsLatest
+): alertObject is EqlBuildingBlockFieldsLatest =>
+  (alertObject as EqlBuildingBlockFieldsLatest)?.[ALERT_BUILDING_BLOCK_TYPE] != null;
 
-export const isEqlShellAlert = (alertObject: unknown): alertObject is EqlShellAlert800 =>
-  (alertObject as EqlShellAlert800)?.[ALERT_UUID] != null &&
-  (alertObject as EqlShellAlert800)?.[ALERT_GROUP_ID] != null;
+export const isEqlShellAlert = (
+  alertObject: BaseFieldsLatest
+): alertObject is EqlShellFieldsLatest =>
+  (alertObject as EqlShellFieldsLatest)?.[ALERT_UUID] != null &&
+  (alertObject as EqlShellFieldsLatest)?.[ALERT_GROUP_ID] != null;
 
 export type RuleWithInMemorySuppression =
   | ThreatRuleParams
