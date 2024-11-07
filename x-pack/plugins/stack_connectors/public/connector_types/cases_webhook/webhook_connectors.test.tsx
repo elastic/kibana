@@ -564,35 +564,6 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       expect(await screen.findByText(i18n.GET_INCIDENT_REQUIRED)).toBeInTheDocument();
     });
 
-    it('validates get incident json variable correctly', async () => {
-      const connector = {
-        ...actionConnector,
-        config: {
-          ...actionConnector.config,
-          getIncidentUrl: 'https://coolsite.net/rest/api/2/issue',
-          getIncidentMethod: 'post',
-          getIncidentJson: '{"id": "wrong_external_id" }',
-          headers: [],
-        },
-      };
-
-      render(
-        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
-          <CasesWebhookActionConnectorFields
-            readOnly={false}
-            isEdit={false}
-            registerPreSubmitValidator={() => {}}
-          />
-        </ConnectorFormTestProvider>
-      );
-
-      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
-      await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false }));
-      expect(
-        await screen.findByText(i18n.MISSING_VARIABLES(['{{{external.system.id}}}']))
-      ).toBeInTheDocument();
-    });
-
     it('validation succeeds get incident url with post correctly', async () => {
       const connector = {
         ...actionConnector,

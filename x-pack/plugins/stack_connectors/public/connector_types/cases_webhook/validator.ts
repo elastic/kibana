@@ -96,20 +96,6 @@ export const requiredJsonForPost =
     return method === WebhookMethods.POST && (value === null || isEmpty(value)) ? error : undefined;
   };
 
-export const containsExternalIdForPost =
-  (method?: string) =>
-  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-    const [{ value, path }] = args;
-
-    const id = templateActionVariable(
-      urlVars.find((actionVariable) => actionVariable.name === 'external.system.id')!
-    );
-
-    return method === WebhookMethods.POST && !containsChars(id)(value as string).doesContain
-      ? missingVariableErrorMessage(path, [id])
-      : undefined;
-  };
-
 export const containsCommentsOrEmpty =
   (message: string) =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {

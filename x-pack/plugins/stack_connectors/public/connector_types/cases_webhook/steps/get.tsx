@@ -19,7 +19,6 @@ import { JsonFieldWrapper, MustacheTextFieldWrapper } from '@kbn/triggers-action
 import { WebhookMethods } from '../../../../common/auth/constants';
 import {
   containsExternalIdForGet,
-  containsExternalIdForPost,
   containsExternalIdOrTitle,
   requiredJsonForPost,
 } from '../validator';
@@ -117,9 +116,6 @@ export const GetStep: FunctionComponent<Props> = ({ display, readOnly }) => {
                 validations: [
                   {
                     validator: requiredJsonForPost(getIncidentMethod),
-                  },
-                  {
-                    validator: containsExternalIdForPost(getIncidentMethod),
                   },
                 ],
               }}
