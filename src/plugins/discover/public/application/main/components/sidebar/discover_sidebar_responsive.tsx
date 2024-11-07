@@ -39,6 +39,7 @@ import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_fie
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const EMPTY_FIELD_COUNTS = {};
+const DEFAULT_SIDEBAR_TOGGLE_STATE = { value: false, lastChangedBy: undefined };
 
 const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOptions'] = () => {
   return {
@@ -349,17 +350,27 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [onRemoveField]
   );
 
-  const isSidebarCollapsed = useObservable(
-    unifiedFieldListSidebarContainerApi?.sidebarVisibility.isCollapsed$ ?? of(false),
-    false
+  const isSidebarCollapsedState = useObservable(
+    unifiedFieldListSidebarContainerApi?.sidebarVisibility.isCollapsed$ ??
+      of(DEFAULT_SIDEBAR_TOGGLE_STATE),
+    DEFAULT_SIDEBAR_TOGGLE_STATE
   );
+
+  const isSidebarCollapsed = isSidebarCollapsedState.value;
+  const sidebarStateLastChangedBy = isSidebarCollapsedState.lastChangedBy;
 
   useEffect(() => {
     sidebarToggleState$.next({
       isCollapsed: isSidebarCollapsed,
+      lastChangedBy: sidebarStateLastChangedBy,
       toggle: unifiedFieldListSidebarContainerApi?.sidebarVisibility.toggle,
     });
-  }, [isSidebarCollapsed, unifiedFieldListSidebarContainerApi, sidebarToggleState$]);
+  }, [
+    isSidebarCollapsed,
+    sidebarStateLastChangedBy,
+    unifiedFieldListSidebarContainerApi,
+    sidebarToggleState$,
+  ]);
 
   return (
     <EuiFlexGroup

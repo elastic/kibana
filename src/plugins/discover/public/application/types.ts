@@ -10,6 +10,7 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { UnifiedFieldListSidebarContainerApi } from '@kbn/unified-field-list';
 
 export enum FetchStatus {
   UNINITIALIZED = 'uninitialized',
@@ -29,5 +30,6 @@ export interface RecordsFetchResponse {
 
 export interface SidebarToggleState {
   isCollapsed: boolean;
-  toggle: undefined | ((isCollapsed: boolean) => void);
+  lastChangedBy?: string;
+  toggle: undefined | UnifiedFieldListSidebarContainerApi['sidebarVisibility']['toggle'];
 }

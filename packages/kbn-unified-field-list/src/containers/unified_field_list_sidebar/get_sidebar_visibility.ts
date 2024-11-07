@@ -9,9 +9,17 @@
 
 import { BehaviorSubject } from 'rxjs';
 
+export interface SidebarVisibilityIsCollapsedObservable {
+  value: boolean;
+  lastChangedBy: string | undefined; // `undefined` is for the default behaviour
+}
+
 export interface SidebarVisibility {
-  isCollapsed$: BehaviorSubject<boolean>;
-  toggle: (isCollapsed: boolean) => void;
+  isCollapsed$: BehaviorSubject<SidebarVisibilityIsCollapsedObservable>;
+  toggle: (
+    isCollapsed: boolean,
+    options?: { lastChangedBy?: string; skipPersisting?: boolean }
+  ) => void;
 }
 
 export interface GetSidebarStateParams {
@@ -25,15 +33,19 @@ export interface GetSidebarStateParams {
 export const getSidebarVisibility = ({
   localStorageKey,
 }: GetSidebarStateParams): SidebarVisibility => {
-  const isCollapsed$ = new BehaviorSubject<boolean>(
-    localStorageKey ? getIsCollapsed(localStorageKey) : false
-  );
+  const isCollapsed$ = new BehaviorSubject<SidebarVisibilityIsCollapsedObservable>({
+    value: localStorageKey ? getIsCollapsed(localStorageKey) : false,
+    lastChangedBy: undefined,
+  });
 
   return {
     isCollapsed$,
-    toggle: (isCollapsed) => {
-      isCollapsed$.next(isCollapsed);
-      if (localStorageKey) {
+    toggle: (isCollapsed, options) => {
+      isCollapsed$.next({
+        value: isCollapsed,
+        lastChangedBy: options?.lastChangedBy,
+      });
+      if (localStorageKey && !options?.skipPersisting) {
         setIsCollapsed(localStorageKey, isCollapsed);
       }
     },

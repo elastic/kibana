@@ -16,6 +16,8 @@ import { useAppStateSelector } from '../../application/main/state_management/dis
 import { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { SidebarToggleState } from '../../application/types';
 
+export const PANELS_TOGGLE_LAST_CHANGED_BY = 'panels_toggle';
+
 export interface PanelsToggleProps {
   stateContainer: DiscoverStateContainer;
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
@@ -61,7 +63,8 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
             'data-test-subj': 'dscShowSidebarButton',
             'aria-expanded': !isSidebarCollapsed,
             'aria-controls': 'discover-sidebar',
-            onClick: () => sidebarToggleState?.toggle?.(false),
+            onClick: () =>
+              sidebarToggleState?.toggle?.(false, { lastChangedBy: PANELS_TOGGLE_LAST_CHANGED_BY }),
           },
         ]
       : []),

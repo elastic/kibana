@@ -51,6 +51,8 @@ import type {
   SearchMode,
 } from '../../types';
 
+const DEFAULT_SIDEBAR_TOGGLE_STATE = { value: false, lastChangedBy: undefined };
+
 export interface UnifiedFieldListSidebarContainerApi {
   sidebarVisibility: SidebarVisibility;
   refetchFieldsExistenceInfo: ExistingFieldsFetcher['refetchFieldsExistenceInfo'];
@@ -131,7 +133,10 @@ const UnifiedFieldListSidebarContainer = memo(
             : undefined,
         })
       );
-      const isSidebarCollapsed = useObservable(sidebarVisibility.isCollapsed$, false);
+      const isSidebarCollapsedState = useObservable(
+        sidebarVisibility.isCollapsed$,
+        DEFAULT_SIDEBAR_TOGGLE_STATE
+      );
 
       const canEditDataView =
         Boolean(dataViewFieldEditor?.userPermissions.editIndexPattern()) ||
@@ -274,7 +279,7 @@ const UnifiedFieldListSidebarContainer = memo(
       };
 
       if (stateService.creationOptions.showSidebarToggleButton) {
-        commonSidebarProps.isSidebarCollapsed = isSidebarCollapsed;
+        commonSidebarProps.isSidebarCollapsed = isSidebarCollapsedState.value;
         commonSidebarProps.onToggleSidebar = sidebarVisibility.toggle;
       }
 

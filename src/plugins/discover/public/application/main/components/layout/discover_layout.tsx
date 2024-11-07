@@ -20,7 +20,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
+import { appendWhereClauseToESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -306,8 +306,42 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [onAddColumnWithTracking, draggingFieldName, currentColumns]);
 
   const [sidebarToggleState$] = useState<BehaviorSubject<SidebarToggleState>>(
-    () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
+    () =>
+      new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: false,
+        toggle: undefined,
+      })
   );
+
+  const sidebarToggle = sidebarToggleState$.getValue().toggle;
+
+  useEffect(() => {
+    const sidebarToggleState = sidebarToggleState$.getValue();
+
+    const lastChangedBy = 'esql:transformationalQuery';
+    const isTransformationalEsqlQuery =
+      isEsqlMode && isOfAggregateQueryType(query) && hasTransformationalCommand(query.esql);
+
+    if (
+      isTransformationalEsqlQuery &&
+      !sidebarToggleState.isCollapsed &&
+      !sidebarToggleState.lastChangedBy &&
+      sidebarToggle
+    ) {
+      // auto-collapse sidebar (unless user has manually expanded it)
+      sidebarToggle(true, { lastChangedBy, skipPersisting: true });
+      return;
+    }
+
+    if (
+      !isTransformationalEsqlQuery &&
+      sidebarToggleState.isCollapsed &&
+      sidebarToggleState.lastChangedBy === lastChangedBy
+    ) {
+      // auto-expand sidebar when switching back to a normal case (unless user has manually collapsed it)
+      sidebarToggleState.toggle?.(false);
+    }
+  }, [isEsqlMode, query, sidebarToggleState$, sidebarToggle]);
 
   const panelsToggle: ReactElement<PanelsToggleProps> = useMemo(() => {
     return (

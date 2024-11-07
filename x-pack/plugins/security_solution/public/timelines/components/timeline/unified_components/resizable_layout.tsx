@@ -21,6 +21,8 @@ import { of } from 'rxjs';
 
 export const SIDEBAR_WIDTH_KEY = 'timeline:sidebarWidth';
 
+const DEFAULT_SIDEBAR_TOGGLE_STATE = { value: true, lastChangedBy: undefined };
+
 // TODO: This is almost a duplicate of the logic here: src/plugins/discover/public/application/main/components/layout/discover_resizable_layout.tsx
 // Should this layout be a shared package or just an accepted dupe since the <ResizeableLayout /> is already shared?
 
@@ -51,10 +53,13 @@ export const TimelineResizableLayoutComponent = ({
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
-  const isSidebarCollapsed = useObservable(
-    unifiedFieldListSidebarContainerApi?.sidebarVisibility.isCollapsed$ ?? of(true),
-    true
+  const isSidebarCollapsedState = useObservable(
+    unifiedFieldListSidebarContainerApi?.sidebarVisibility.isCollapsed$ ??
+      of(DEFAULT_SIDEBAR_TOGGLE_STATE),
+    DEFAULT_SIDEBAR_TOGGLE_STATE
   );
+
+  const isSidebarCollapsed = isSidebarCollapsedState.value;
   const layoutMode =
     isMobile || isSidebarCollapsed ? ResizableLayoutMode.Static : ResizableLayoutMode.Resizable;
   const layoutDirection = isMobile
