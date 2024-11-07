@@ -9,11 +9,8 @@ import type { Logger } from '@kbn/core/server';
 import { ReplaySubject, type Subject } from 'rxjs';
 import type { ConfigType } from '../../config';
 import { SiemRuleMigrationsService } from './rules/siem_rule_migrations_service';
-import type {
-  SiemMigrationsClient,
-  SiemMigrationsSetupParams,
-  SiemMigrationsGetClientParams,
-} from './types';
+import type { SiemMigrationsSetupParams, SiemMigrationsCreateClientParams } from './types';
+import type { SiemRuleMigrationsClient } from './rules/types';
 
 export class SiemMigrationsService {
   private pluginStop$: Subject<void>;
@@ -30,13 +27,12 @@ export class SiemMigrationsService {
     }
   }
 
-  createClient(params: SiemMigrationsGetClientParams): SiemMigrationsClient {
-    return {
-      rules: this.rules.getClient(params),
-    };
+  createRulesClient(params: SiemMigrationsCreateClientParams): SiemRuleMigrationsClient {
+    return this.rules.createClient(params);
   }
 
   stop() {
+    this.rules.stop();
     this.pluginStop$.next();
     this.pluginStop$.complete();
   }

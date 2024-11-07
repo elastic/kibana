@@ -45,17 +45,13 @@ export interface RootContext {
   solutionType: SolutionType;
 }
 
-export type RootProfileProvider = AsyncProfileProvider<
+export type RootProfileProvider<TProviderContext = {}> = AsyncProfileProvider<
   RootProfile,
   RootProfileProviderParams,
-  RootContext
+  RootContext & TProviderContext
 >;
 
-export class RootProfileService extends AsyncProfileService<
-  RootProfile,
-  RootProfileProviderParams,
-  RootContext
-> {
+export class RootProfileService extends AsyncProfileService<RootProfileProvider> {
   constructor() {
     super({
       profileId: 'default-root-profile',
