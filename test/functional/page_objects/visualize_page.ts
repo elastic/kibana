@@ -517,14 +517,6 @@ export class VisualizePageObject extends FtrService {
     await this.testSubjects.click('visualizesaveAndReturnButton');
   }
 
-  public async getDeprecationWarningStatus() {
-    if (await this.visChart.isNewChartsLibraryEnabled()) {
-      await this.testSubjects.missingOrFail('vizDeprecationWarning');
-    } else {
-      await this.testSubjects.existOrFail('vizDeprecationWarning');
-    }
-  }
-
   public async linkedToOriginatingApp() {
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.existOrFail('visualizesaveAndReturnButton');
