@@ -25,7 +25,8 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   const utils = getService('securitySolutionUtils');
 
-  describe('Network Top N Flow', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/199363
+  describe.skip('Network Top N Flow', () => {
     let supertest: TestAgent;
     let search: SearchService;
     describe('With filebeat', () => {
