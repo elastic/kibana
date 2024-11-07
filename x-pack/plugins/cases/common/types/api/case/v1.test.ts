@@ -18,7 +18,6 @@ import {
   MAX_CATEGORY_LENGTH,
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
-  MAX_OBSERVABLES_PER_CASE,
 } from '../../../constants';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AttachmentType } from '../../domain/attachment/v1';
@@ -747,21 +746,6 @@ describe('CasePatchRequestRt', () => {
     expect(
       PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, assignees }))
     ).toContain('The length of the field assignees is too long. Array must be of length <= 10.');
-  });
-
-  it(`throws an error when the observables are more than ${MAX_OBSERVABLES_PER_CASE}`, async () => {
-    const observables = Array(MAX_OBSERVABLES_PER_CASE + 1).fill({
-      value: 'foobar',
-      typeKey: '3e6d12f8-bd77-4483-ad99-96bb0edfcc2d',
-      hasBeenSighted: false,
-      isIoc: false,
-      createdAt: '2024-10-04 12:51',
-      updatedAt: '2024-10-04 12:51',
-    });
-
-    expect(
-      PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, observables }))
-    ).toContain('The length of the field observables is too long. Array must be of length <= 50.');
   });
 
   it('does not throw an error with empty assignees', async () => {

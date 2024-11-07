@@ -14,7 +14,24 @@ describe('similar', () => {
   describe('find similar cases', () => {
     const clientArgs = createCasesClientMockArgs();
 
-    jest.mocked(clientArgs.services.caseService.getCase).mockResolvedValue(mockCases[0]);
+    jest.mocked(clientArgs.services.caseService.getCase).mockResolvedValue({
+      ...mockCases[0],
+      attributes: {
+        ...mockCases[0].attributes,
+        observables: [
+          {
+            id: 'ddfb207d-4b46-4545-bae8-5193c1551e50',
+            value: 'test',
+            typeKey: 'e47bb0d9-665a-43ea-a9aa-4d07c728e666',
+            createdAt: '2024-11-07',
+            updatedAt: '2024-11-07',
+            isIoc: false,
+            hasBeenSighted: false,
+            description: '',
+          },
+        ],
+      },
+    });
 
     clientArgs.services.caseService.findCases.mockResolvedValue({
       page: 1,
@@ -43,8 +60,52 @@ describe('similar', () => {
       expect(call).toMatchInlineSnapshot(`
         Object {
           "filter": Object {
-            "arguments": Array [],
-            "function": "or",
+            "arguments": Array [
+              Object {
+                "isQuoted": false,
+                "type": "literal",
+                "value": "cases.attributes.observables",
+              },
+              Object {
+                "arguments": Array [
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": "value",
+                      },
+                      Object {
+                        "isQuoted": true,
+                        "type": "literal",
+                        "value": "test",
+                      },
+                    ],
+                    "function": "is",
+                    "type": "function",
+                  },
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": "typeKey",
+                      },
+                      Object {
+                        "isQuoted": true,
+                        "type": "literal",
+                        "value": "e47bb0d9-665a-43ea-a9aa-4d07c728e666",
+                      },
+                    ],
+                    "function": "is",
+                    "type": "function",
+                  },
+                ],
+                "function": "and",
+                "type": "function",
+              },
+            ],
+            "function": "nested",
             "type": "function",
           },
           "page": 2,
