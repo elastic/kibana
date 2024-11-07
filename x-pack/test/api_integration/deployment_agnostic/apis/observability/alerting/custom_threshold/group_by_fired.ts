@@ -37,7 +37,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const isServerless = config.get('serverless');
   const expectedConsumer = isServerless ? 'observability' : 'logs';
 
-  describe('GROUP_BY - FIRED', () => {
+  describe('GROUP_BY - FIRED', function () {
+    // see details: https://github.com/elastic/kibana/issues/199275
+    this.tags(['failsOnMKI']);
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
