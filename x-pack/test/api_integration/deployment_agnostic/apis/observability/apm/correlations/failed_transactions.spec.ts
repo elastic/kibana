@@ -106,7 +106,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('with data', () => {
-      // this is failing
       before(async () => {
         await esArchiver.load(ARCHIVER_ROUTES['8.0.0']);
       });
