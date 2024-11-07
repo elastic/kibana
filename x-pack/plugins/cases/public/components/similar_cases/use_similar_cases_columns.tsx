@@ -76,7 +76,7 @@ export const useSimilarCasesColumns = (): UseCasesColumnsReturnValue => {
           if (tags != null && tags.length > 0) {
             const clampedBadges = (
               <EuiBadgeGroup
-                data-test-subj="case-table-column-tags"
+                data-test-subj="similar-cases-table-column-tags"
                 css={getLineClampedCss}
                 gutterSize="xs"
               >
@@ -87,7 +87,7 @@ export const useSimilarCasesColumns = (): UseCasesColumnsReturnValue => {
                     `}
                     color="hollow"
                     key={`${tag}-${i}`}
-                    data-test-subj={`case-table-column-tags-${tag}`}
+                    data-test-subj={`similar-cases-table-column-tags-${tag}`}
                   >
                     {tag}
                   </EuiBadge>
@@ -96,12 +96,12 @@ export const useSimilarCasesColumns = (): UseCasesColumnsReturnValue => {
             );
 
             const unclampedBadges = (
-              <EuiBadgeGroup data-test-subj="case-table-column-tags">
+              <EuiBadgeGroup data-test-subj="similar-cases-table-column-tags">
                 {tags.map((tag: string, i: number) => (
                   <EuiBadge
                     color="hollow"
                     key={`${tag}-${i}`}
-                    data-test-subj={`case-table-column-tags-${tag}`}
+                    data-test-subj={`similar-cases-table-column-tags-${tag}`}
                   >
                     {tag}
                   </EuiBadge>
@@ -111,7 +111,7 @@ export const useSimilarCasesColumns = (): UseCasesColumnsReturnValue => {
 
             return (
               <EuiToolTip
-                data-test-subj="case-table-column-tags-tooltip"
+                data-test-subj="similar-cases-table-column-tags-tooltip"
                 position="left"
                 content={unclampedBadges}
               >
@@ -129,7 +129,7 @@ export const useSimilarCasesColumns = (): UseCasesColumnsReturnValue => {
         align: RIGHT_ALIGNMENT,
         render: (totalAlerts: CaseUI['totalAlerts']) =>
           totalAlerts != null
-            ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+            ? renderStringField(`${totalAlerts}`, `similar-cases-table-column-alertsCount`)
             : getEmptyCellValue(),
         width: '80px',
       },
@@ -139,7 +139,7 @@ export const useSimilarCasesColumns = (): UseCasesColumnsReturnValue => {
         align: RIGHT_ALIGNMENT,
         render: (totalComment: CaseUI['totalComment']) =>
           totalComment != null
-            ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
+            ? renderStringField(`${totalComment}`, `similar-cases-table-column-commentCount`)
             : getEmptyCellValue(),
         width: '90px',
       },
@@ -150,7 +150,9 @@ export const useSimilarCasesColumns = (): UseCasesColumnsReturnValue => {
         render: (category: CaseUI['category']) => {
           if (category != null) {
             return (
-              <span data-test-subj={`case-table-column-category-${category}`}>{category}</span>
+              <span data-test-subj={`similar-cases-table-column-category-${category}`}>
+                {category}
+              </span>
             );
           }
           return getEmptyCellValue();
@@ -164,7 +166,7 @@ export const useSimilarCasesColumns = (): UseCasesColumnsReturnValue => {
         render: (closedAt: CaseUI['closedAt']) => {
           if (closedAt != null) {
             return (
-              <span data-test-subj={`case-table-column-closedAt`}>
+              <span data-test-subj={`similar-cases-table-column-closedAt`}>
                 <FormattedRelativePreferenceDate value={closedAt} />
               </span>
             );
@@ -179,7 +181,7 @@ export const useSimilarCasesColumns = (): UseCasesColumnsReturnValue => {
         render: (createdAt: CaseUI['createdAt']) => {
           if (createdAt != null) {
             return (
-              <span data-test-subj={`case-table-column-createdAt`}>
+              <span data-test-subj={`similar-cases-table-column-createdAt`}>
                 <FormattedRelativePreferenceDate value={createdAt} stripMs={true} />
               </span>
             );
@@ -194,7 +196,7 @@ export const useSimilarCasesColumns = (): UseCasesColumnsReturnValue => {
         render: (updatedAt: CaseUI['updatedAt']) => {
           if (updatedAt != null) {
             return (
-              <span data-test-subj="case-table-column-updatedAt">
+              <span data-test-subj="similar-cases-table-column-updatedAt">
                 <FormattedRelativePreferenceDate value={updatedAt} stripMs={true} />
               </span>
             );
@@ -224,7 +226,7 @@ export const useSimilarCasesColumns = (): UseCasesColumnsReturnValue => {
             const severityData = severities[severity ?? CaseSeverity.LOW];
             return (
               <EuiHealth
-                data-test-subj={`case-table-column-severity-${severity}`}
+                data-test-subj={`similar-cases-table-column-severity-${severity}`}
                 color={severityData.color}
               >
                 {severityData.label}
