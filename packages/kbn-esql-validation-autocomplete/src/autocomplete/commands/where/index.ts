@@ -37,9 +37,14 @@ export async function suggest(
   getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
   _getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
 ): Promise<SuggestionRawDefinition[]> {
-  const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
-
   const suggestions: SuggestionRawDefinition[] = [];
+
+  /**
+   * The logic for WHERE suggestions is basically the logic for expression suggestions.
+   * I assume we will eventually extract much of this to be a shared function among WHERE and EVAL
+   * and anywhere else the user can enter a generic expression.
+   */
+  const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
 
   switch (getPosition(innerText, command)) {
     /**
