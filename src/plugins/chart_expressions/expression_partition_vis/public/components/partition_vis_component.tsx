@@ -41,6 +41,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser-internal';
 import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
@@ -77,7 +78,6 @@ import {
 import { filterOutConfig } from '../utils/filter_out_config';
 import { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
 import { getMultiFilterCells } from '../utils/filter_helpers';
-import { useAppFixedViewport } from '@kbn/core-rendering-browser-internal';
 
 declare global {
   interface Window {
