@@ -474,13 +474,13 @@ src/plugins/field_formats @elastic/kibana-data-discovery
 packages/kbn-field-types @elastic/kibana-data-discovery
 packages/kbn-field-utils @elastic/kibana-data-discovery
 x-pack/plugins/fields_metadata @elastic/obs-ux-logs-team
-x-pack/plugins/file_upload @elastic/kibana-presentation @elastic/ml-ui
+x-pack/plugins/file_upload @elastic/kibana-gis @elastic/ml-ui
 examples/files_example @elastic/appex-sharedux
 src/plugins/files_management @elastic/appex-sharedux
 src/plugins/files @elastic/appex-sharedux
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 x-pack/plugins/fleet @elastic/fleet
-packages/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
+packages/kbn-flot-charts @elastic/kibana-operations
 x-pack/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 packages/kbn-formatters @elastic/obs-ux-logs-team
 src/plugins/ftr_apis @elastic/kibana-core
@@ -525,6 +525,7 @@ x-pack/plugins/index_management @elastic/kibana-management
 x-pack/packages/index-management/index_management_shared_types @elastic/kibana-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 x-pack/packages/ml/inference_integration_flyout @elastic/ml-ui
+x-pack/packages/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/plugins/inference @elastic/appex-ai-infra
 x-pack/packages/kbn-infra-forge @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
@@ -542,7 +543,6 @@ x-pack/plugins/observability_solution/investigate @elastic/obs-ux-management-tea
 packages/kbn-investigation-shared @elastic/obs-ux-management-team
 packages/kbn-io-ts-utils @elastic/obs-knowledge-team
 packages/kbn-ipynb @elastic/search-kibana
-packages/kbn-item-buffer @elastic/appex-sharedux
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
@@ -599,11 +599,11 @@ packages/kbn-management/settings/utilities @elastic/kibana-management
 packages/kbn-management/storybook/config @elastic/kibana-management
 test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 packages/kbn-manifest @elastic/kibana-core
-packages/kbn-mapbox-gl @elastic/kibana-presentation
-x-pack/examples/third_party_maps_source_example @elastic/kibana-presentation
-src/plugins/maps_ems @elastic/kibana-presentation
-x-pack/plugins/maps @elastic/kibana-presentation
-x-pack/packages/maps/vector_tile_utils @elastic/kibana-presentation
+packages/kbn-mapbox-gl @elastic/kibana-gis
+x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
+src/plugins/maps_ems @elastic/kibana-gis
+x-pack/plugins/maps @elastic/kibana-gis
+x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
 x-pack/plugins/observability_solution/metrics_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
@@ -745,7 +745,7 @@ x-pack/plugins/runtime_fields @elastic/kibana-management
 packages/kbn-safer-lodash-set @elastic/kibana-security
 x-pack/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
 x-pack/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
-x-pack/test/task_manager_claimer_mget/plugins/sample_task_plugin_mget @elastic/response-ops
+x-pack/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget @elastic/response-ops
 test/plugin_functional/plugins/saved_object_export_transforms @elastic/kibana-core
 test/plugin_functional/plugins/saved_object_import_warnings @elastic/kibana-core
 x-pack/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
@@ -792,7 +792,6 @@ x-pack/packages/security/plugin_types_common @elastic/kibana-security
 x-pack/packages/security/plugin_types_public @elastic/kibana-security
 x-pack/packages/security/plugin_types_server @elastic/kibana-security
 x-pack/packages/security/role_management_model @elastic/kibana-security
-x-pack/packages/security-solution/common @elastic/security-threat-hunting-investigations
 x-pack/packages/security-solution/distribution_bar @elastic/kibana-cloud-security-posture
 x-pack/plugins/security_solution_ess @elastic/security-solution
 x-pack/packages/security-solution/features @elastic/security-threat-hunting-explore
@@ -903,6 +902,7 @@ packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-sort-predicates @elastic/kibana-visualizations
 x-pack/plugins/spaces @elastic/kibana-security
 x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
+packages/kbn-spec-to-console @elastic/kibana-management
 packages/kbn-sse-utils @elastic/obs-knowledge-team
 packages/kbn-sse-utils-client @elastic/obs-knowledge-team
 packages/kbn-sse-utils-server @elastic/obs-knowledge-team
@@ -947,6 +947,7 @@ packages/kbn-tinymath @elastic/kibana-visualizations
 packages/kbn-tooling-log @elastic/kibana-operations
 x-pack/plugins/transform @elastic/ml-ui
 x-pack/plugins/translations @elastic/kibana-localization
+packages/kbn-transpose-utils @elastic/kibana-visualizations
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 packages/kbn-triggers-actions-ui-types @elastic/response-ops
@@ -2019,4 +2020,3 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
-
