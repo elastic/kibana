@@ -12,10 +12,8 @@ import { truncate, count as countTokens } from '../../utils/tokens';
 import type { RetrieveDocumentationAPI } from './types';
 import { summarizeDocument } from './summarize_document';
 
-// if document content length greater, then we'll trigger the summary task
-const MIN_TOKENS_TO_SUMMARIZE = 1000;
-// maximum token length of generated summaries - will truncate if greater
-const MAX_SUMMARY_TOKEN_LENGTH = 1000;
+const MAX_DOCUMENTS_DEFAULT = 3;
+const MAX_TOKENS_DEFAULT = 1000;
 
 export const retrieveDocumentation =
   ({
@@ -27,7 +25,15 @@ export const retrieveDocumentation =
     searchDocAPI: ProductDocSearchAPI;
     logger: Logger;
   }): RetrieveDocumentationAPI =>
-  async ({ searchTerm, connectorId, products, functionCalling, max = 3 }) => {
+  async ({
+    searchTerm,
+    connectorId,
+    products,
+    functionCalling,
+    max = MAX_DOCUMENTS_DEFAULT,
+    maxDocumentTokens = MAX_TOKENS_DEFAULT,
+    tokenReductionStrategy = 'summarize',
+  }) => {
     try {
       const { results } = await searchDocAPI({ query: searchTerm, products, max });
 
@@ -36,23 +42,25 @@ export const retrieveDocumentation =
       const processedDocuments = await Promise.all(
         results.map(async (document) => {
           const tokenCount = countTokens(document.content);
-          const summarize = tokenCount >= MIN_TOKENS_TO_SUMMARIZE;
+          const docHasTooManyTokens = tokenCount >= maxDocumentTokens;
           log.debug(
-            `processing doc [${document.url}] - tokens : [${tokenCount}] - summarize: [${summarize}]`
+            `processing doc [${document.url}] - tokens : [${tokenCount}] - tooManyTokens: [${docHasTooManyTokens}]`
           );
 
-          let content: string;
-          if (summarize) {
-            const extractResponse = await summarizeDocument({
-              searchTerm,
-              documentContent: document.content,
-              outputAPI,
-              connectorId,
-              functionCalling,
-            });
-            content = truncate(extractResponse.summary, MAX_SUMMARY_TOKEN_LENGTH);
-          } else {
-            content = document.content;
+          let content = document.content;
+          if (docHasTooManyTokens) {
+            if (tokenReductionStrategy === 'summarize') {
+              const extractResponse = await summarizeDocument({
+                searchTerm,
+                documentContent: document.content,
+                outputAPI,
+                connectorId,
+                functionCalling,
+              });
+              content = truncate(extractResponse.summary, maxDocumentTokens);
+            } else {
+              content = truncate(document.content, maxDocumentTokens);
+            }
           }
 
           log.debug(`done processing document [${document.url}]`);
