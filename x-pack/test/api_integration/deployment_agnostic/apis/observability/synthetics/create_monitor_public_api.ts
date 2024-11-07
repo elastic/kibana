@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { LOCATION_REQUIRED_ERROR } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/monitor_validation';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -16,15 +16,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddNewMonitorsPublicAPI', function () {
     this.tags('skipCloud');
 
-    const supertestAPI = getService('supertest');
+    const supertestAPI = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
+    const samlAuth = getService('samlAuth');
+    let editorUser: RoleCredentials;
 
     async function addMonitorAPI(monitor: any, statusCode: number = 200) {
-      return await addMonitorAPIHelper(supertestAPI, monitor, statusCode);
+      return await addMonitorAPIHelper(supertestAPI, monitor, statusCode, editorUser, samlAuth);
     }
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
     });
 
     after(async () => {

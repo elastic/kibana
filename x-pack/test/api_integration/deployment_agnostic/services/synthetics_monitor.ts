@@ -17,27 +17,30 @@ import { omit } from 'lodash';
 import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
+// fix saml auth type
 export class SyntheticsMonitorTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
   private getService: DeploymentAgnosticFtrProviderContext['getService'];
   private supertestWithoutAuth: ReturnType<typeof KibanaSupertestProvider>;
   public apiKey: string | undefined = '';
+  public samlAuth: any;
 
   constructor(getService: DeploymentAgnosticFtrProviderContext['getService']) {
-    this.supertest = getService('supertest');
-    this.supertest = getService('supertest');
+    this.supertest = getService('supertestWithoutAuth');
+    this.samlAuth = getService('samlAuth');
     this.getService = getService;
     this.supertestWithoutAuth = getService('supertestWithoutAuth');
   }
 
-  generateProjectAPIKey = async (accessToPublicLocations = true) => {
+  generateProjectAPIKey = async (accessToPublicLocations = true, user) => {
     const res = await this.supertest
       .get(
         SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY +
           '?accessToElasticManagedLocations=' +
           accessToPublicLocations
       )
-      .set('kbn-xsrf', 'true')
+      .set(user.apiKeyHeader)
+      .set(samlAuth.getInternalRequestHeader())
       .expect(200);
     const result = res.body as ProjectAPIKeyResponse;
     expect(result).to.have.property('apiKey');
@@ -53,10 +56,12 @@ export class SyntheticsMonitorTestService {
       statusCode = 200,
       space,
       internal,
+      user,
     }: {
       statusCode?: number;
       space?: string;
       internal?: boolean;
+      user;
     } = {}
   ) {
     let url = SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId);
@@ -66,7 +71,11 @@ export class SyntheticsMonitorTestService {
     if (internal) {
       url += `?internal=${internal}`;
     }
-    const apiResponse = await this.supertest.get(url).expect(200);
+    const apiResponse = await this.supertest
+      .get(url)
+      .set(user.apiKeyHeader)
+      .set(this.samlAuth.getInternalRequestHeader())
+      .expect(200);
 
     expect(apiResponse.status).eql(statusCode, JSON.stringify(apiResponse.body));
 
@@ -99,20 +108,22 @@ export class SyntheticsMonitorTestService {
     return apiResponse.body;
   }
 
-  async addMonitor(monitor: any) {
+  async addMonitor(monitor: any, user) {
     const res = await this.supertest
       .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-      .set('kbn-xsrf', 'true')
+      .set(user.apiKeyHeader)
+      .set(this.samlAuth.getInternalRequestHeader())
       .send(monitor)
       .expect(200);
 
     return res.body as EncryptedSyntheticsSavedMonitor;
   }
 
-  async inspectMonitor(monitor: any, hideParams: boolean = true) {
+  async inspectMonitor(monitor: any, hideParams: boolean = true, user) {
     const res = await this.supertest
       .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT)
-      .set('kbn-xsrf', 'true')
+      .set(user.apiKeyHeader)
+      .set(this.samlAuth.getInternalRequestHeader())
       .send(monitor)
       .expect(200);
 
@@ -128,13 +139,13 @@ export class SyntheticsMonitorTestService {
     return res.body as { result: MonitorInspectResponse; decodedCode: string };
   }
 
-  async addProjectMonitors(project: string, monitors: any) {
+  async addProjectMonitors(project: string, monitors: any, user) {
     if (this.apiKey) {
       return this.supertestWithoutAuth
         .put(
           SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
         )
-        .set('kbn-xsrf', 'true')
+        .set(this.samlAuth.getInternalRequestHeader())
         .set('authorization', `ApiKey ${this.apiKey}`)
         .send({ monitors });
     } else {
@@ -142,7 +153,8 @@ export class SyntheticsMonitorTestService {
         .put(
           SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
         )
-        .set('kbn-xsrf', 'true')
+        .set(user.apiKeyHeader)
+        .set(this.samlAuth.getInternalRequestHeader())
         .send({ monitors });
     }
   }
@@ -151,7 +163,8 @@ export class SyntheticsMonitorTestService {
     projectMonitors: any,
     journeyId: string,
     projectId: string,
-    space: string = 'default'
+    space: string = 'default',
+    user
   ) {
     try {
       const response = await this.supertest
@@ -159,14 +172,17 @@ export class SyntheticsMonitorTestService {
         .query({
           filter: `${syntheticsMonitorType}.attributes.journey_id: "${journeyId}" AND ${syntheticsMonitorType}.attributes.project_id: "${projectId}"`,
         })
-        .set('kbn-xsrf', 'true')
+        .set(user.apiKeyHeader)
+        .set(this.samlAuth.getInternalRequestHeader())
         .expect(200);
+
       const { monitors } = response.body;
       if (monitors[0]?.id) {
-        await this.supertest
-          .delete(`/s/${space}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitors[0].id}`)
-          .set('kbn-xsrf', 'true')
-          .send(projectMonitors)
+        const response2 = await this.supertest
+          .delete(`/s/${space}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
+          .set(user.apiKeyHeader)
+          .set(this.samlAuth.getInternalRequestHeader())
+          .send({ ids: [monitors[0].id] })
           .expect(200);
       }
     } catch (e) {
@@ -205,7 +221,7 @@ export class SyntheticsMonitorTestService {
     return { username, password, SPACE_ID };
   }
 
-  async deleteMonitor(monitorId?: string | string[], statusCode = 200, spaceId?: string) {
+  async deleteMonitor(monitorId?: string | string[], statusCode = 200, spaceId?: string, user) {
     const deleteResponse = await this.supertest
       .delete(
         spaceId
@@ -213,12 +229,14 @@ export class SyntheticsMonitorTestService {
           : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS
       )
       .send({ ids: Array.isArray(monitorId) ? monitorId : [monitorId] })
-      .set('kbn-xsrf', 'true');
-    expect(deleteResponse.status).to.eql(statusCode);
+      .set(user.apiKeyHeader)
+      .set(this.samlAuth.getInternalRequestHeader())
+      .expect(statusCode);
+
     return deleteResponse;
   }
 
-  async deleteMonitorByIdParam(monitorId?: string, statusCode = 200, spaceId?: string) {
+  async deleteMonitorByIdParam(monitorId?: string, statusCode = 200, spaceId?: string, user) {
     const deleteResponse = await this.supertest
       .delete(
         spaceId
@@ -226,8 +244,10 @@ export class SyntheticsMonitorTestService {
           : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId
       )
       .send()
-      .set('kbn-xsrf', 'true');
-    expect(deleteResponse.status).to.eql(statusCode);
+      .set(user.apiKeyHeader)
+      .set(this.samlAuth.getInternalRequestHeader())
+      .expect(statusCode);
+
     return deleteResponse;
   }
 }

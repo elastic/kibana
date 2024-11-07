@@ -6,6 +6,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
@@ -33,17 +34,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddProjectMonitors', function () {
     this.tags('skipCloud');
 
-    const supertest = getService('supertest');
-    const supertestWithoutAuth = getService('supertestWithoutAuth');
+    const supertest = getService('supertestWithoutAuth');
+    const supertestWithAuth = getService('supertest');
     const security = getService('security');
     const kibanaServer = getService('kibanaServer');
     const monitorTestService = new SyntheticsMonitorTestService(getService);
     const testPrivateLocations = new PrivateLocationTestService(getService);
+    const samlAuth = getService('samlAuth');
 
     let projectMonitors: ProjectMonitorsRequest;
     let httpProjectMonitors: ProjectMonitorsRequest;
     let tcpProjectMonitors: ProjectMonitorsRequest;
     let icmpProjectMonitors: ProjectMonitorsRequest;
+    let editorUser: RoleCredentials;
+    let viewerUser: RoleCredentials;
 
     let testPolicyId = '';
     const testPolicyName = 'Fleet test server policy' + Date.now();
@@ -66,12 +70,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .query({
             filter: `${syntheticsMonitorType}.attributes.journey_id: "${journeyId}" AND ${syntheticsMonitorType}.attributes.project_id: "${projectId}"`,
           })
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         const { monitors } = response.body;
         if (monitors[0]?.config_id) {
-          await monitorTestService.deleteMonitor(monitors[0].config_id, 200, space);
+          await monitorTestService.deleteMonitor(monitors[0].config_id, 200, space, editorUser);
         }
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -81,9 +86,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      viewerUser = await samlAuth.createM2mApiKeyWithRoleScope('viewer');
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-        .set('kbn-xsrf', 'true')
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       await testPrivateLocations.installSyntheticsPackage();
 
@@ -92,12 +100,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await testPrivateLocations.setTestLocations([testPolicyId]);
       await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
-        .set('kbn-xsrf', 'true')
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send({ key: 'testGlobalParam', value: 'testGlobalParamValue' })
         .expect(200);
       await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
-        .set('kbn-xsrf', 'true')
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send({ key: 'testGlobalParam2', value: 'testGlobalParamValue2' })
         .expect(200);
     });
@@ -126,135 +136,133 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             project
           )}`
         )
-        .set('kbn-xsrf', 'true')
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send(projectMonitors)
         .expect(404);
     });
 
-    it('project monitors - returns forbidden if no access to public locations', async () => {
-      const project = `test-project-${uuidv4()}`;
+    // KEEP TEST IN STATEFUL
+    // it.only('project monitors - returns forbidden if no access to public locations', async () => {
+    //   const project = `test-project-${uuidv4()}`;
 
-      await monitorTestService.generateProjectAPIKey(false);
-      const response = await monitorTestService.addProjectMonitors(
-        project,
-        projectMonitors.monitors
-      );
-      expect(response.status).to.eql(403);
-      expect(response.body.message).to.eql(ELASTIC_MANAGED_LOCATIONS_DISABLED);
-    });
+    //   await monitorTestService.generateProjectAPIKey(false, editorUser);
+    //   const response = await monitorTestService.addProjectMonitors(
+    //     project,
+    //     projectMonitors.monitors,
+    //     editorUser
+    //   );
+    //   expect(response.status).to.eql(403);
+    //   expect(response.body.message).to.eql(ELASTIC_MANAGED_LOCATIONS_DISABLED);
+    // });
 
     it('project monitors - handles browser monitors', async () => {
       const successfulMonitors = [projectMonitors.monitors[0]];
       const project = `test-project-${uuidv4()}`;
 
-      try {
-        const { body } = await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set('kbn-xsrf', 'true')
-          .send(projectMonitors)
+      const { body } = await supertest
+        .put(
+          SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+        )
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(projectMonitors)
+        .expect(200);
+      expect(body).eql({
+        updatedMonitors: [],
+        createdMonitors: successfulMonitors.map((monitor) => monitor.id),
+        failedMonitors: [],
+      });
+
+      for (const monitor of successfulMonitors) {
+        const journeyId = monitor.id;
+        const createdMonitorsResponse = await supertest
+          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+          .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
-        expect(body).eql({
-          updatedMonitors: [],
-          createdMonitors: successfulMonitors.map((monitor) => monitor.id),
-          failedMonitors: [],
-        });
 
-        for (const monitor of successfulMonitors) {
-          const journeyId = monitor.id;
-          const createdMonitorsResponse = await supertest
-            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-            .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
-            .set('kbn-xsrf', 'true')
-            .expect(200);
+        const decryptedCreatedMonitor = await monitorTestService.getMonitor(
+          createdMonitorsResponse.body.monitors[0].config_id,
+          {
+            internal: true,
+            user: editorUser,
+          }
+        );
 
-          const decryptedCreatedMonitor = await monitorTestService.getMonitor(
-            createdMonitorsResponse.body.monitors[0].config_id,
+        expect(decryptedCreatedMonitor.rawBody).to.eql({
+          __ui: {
+            script_source: {
+              file_name: '',
+              is_generated_script: false,
+            },
+          },
+          config_id: decryptedCreatedMonitor.rawBody.config_id,
+          custom_heartbeat_id: `${journeyId}-${project}-default`,
+          enabled: true,
+          alert: {
+            status: {
+              enabled: true,
+            },
+            tls: {
+              enabled: true,
+            },
+          },
+          'filter_journeys.match': 'check if title is present',
+          'filter_journeys.tags': [],
+          form_monitor_type: 'multistep',
+          ignore_https_errors: false,
+          journey_id: journeyId,
+          locations: [
             {
-              internal: true,
-            }
-          );
-
-          expect(decryptedCreatedMonitor.rawBody).to.eql({
-            __ui: {
-              script_source: {
-                file_name: '',
-                is_generated_script: false,
+              geo: {
+                lat: 0,
+                lon: 0,
               },
+              id: 'dev',
+              isServiceManaged: true,
+              label: 'Dev Service',
             },
-            config_id: decryptedCreatedMonitor.rawBody.config_id,
-            custom_heartbeat_id: `${journeyId}-${project}-default`,
-            enabled: true,
-            alert: {
-              status: {
-                enabled: true,
-              },
-              tls: {
-                enabled: true,
-              },
-            },
-            'filter_journeys.match': 'check if title is present',
-            'filter_journeys.tags': [],
-            form_monitor_type: 'multistep',
-            ignore_https_errors: false,
-            journey_id: journeyId,
-            locations: [
-              {
-                geo: {
-                  lat: 0,
-                  lon: 0,
-                },
-                id: 'dev',
-                isServiceManaged: true,
-                label: 'Dev Service',
-              },
-            ],
-            name: 'check if title is present',
-            namespace: 'default',
-            origin: 'project',
-            original_space: 'default',
-            playwright_options: '{"headless":true,"chromiumSandbox":false}',
-            playwright_text_assertion: '',
-            project_id: project,
-            params: '',
-            revision: 1,
-            schedule: {
-              number: '10',
-              unit: 'm',
-            },
-            screenshots: 'on',
-            'service.name': '',
-            synthetics_args: [],
-            tags: [],
-            throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
-            'ssl.certificate': '',
-            'ssl.certificate_authorities': '',
-            'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-            'ssl.verification_mode': 'full',
-            'ssl.key': '',
-            'ssl.key_passphrase': '',
-            'source.inline.script': '',
-            'source.project.content':
-              'UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA',
-            timeout: null,
-            type: 'browser',
-            'url.port': null,
-            urls: '',
-            id: `${journeyId}-${project}-default`,
-            hash: 'ekrjelkjrelkjre',
-            max_attempts: 2,
-            updated_at: decryptedCreatedMonitor.rawBody.updated_at,
-            created_at: decryptedCreatedMonitor.rawBody.created_at,
-            labels: {},
-          });
-        }
-      } finally {
-        await Promise.all([
-          successfulMonitors.map((monitor) => {
-            // return deleteMonitor(monitor.id, project);
-          }),
-        ]);
+          ],
+          name: 'check if title is present',
+          namespace: 'default',
+          origin: 'project',
+          original_space: 'default',
+          playwright_options: '{"headless":true,"chromiumSandbox":false}',
+          playwright_text_assertion: '',
+          project_id: project,
+          params: '',
+          revision: 1,
+          schedule: {
+            number: '10',
+            unit: 'm',
+          },
+          screenshots: 'on',
+          'service.name': '',
+          synthetics_args: [],
+          tags: [],
+          throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
+          'ssl.certificate': '',
+          'ssl.certificate_authorities': '',
+          'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+          'ssl.verification_mode': 'full',
+          'ssl.key': '',
+          'ssl.key_passphrase': '',
+          'source.inline.script': '',
+          'source.project.content':
+            'UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA',
+          timeout: null,
+          type: 'browser',
+          'url.port': null,
+          urls: '',
+          id: `${journeyId}-${project}-default`,
+          hash: 'ekrjelkjrelkjre',
+          max_attempts: 2,
+          updated_at: decryptedCreatedMonitor.rawBody.updated_at,
+          created_at: decryptedCreatedMonitor.rawBody.created_at,
+          labels: {},
+        });
       }
     });
 
@@ -267,7 +275,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             ...projectMonitors,
             monitors: [{ ...projectMonitors.monitors[0], throttling: false }],
@@ -284,11 +293,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const createdMonitorsResponse = await supertest
             .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
             .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
-            .set('kbn-xsrf', 'true')
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
             .expect(200);
 
           const decryptedCreatedMonitor = await monitorTestService.getMonitor(
-            createdMonitorsResponse.body.monitors[0].config_id
+            createdMonitorsResponse.body.monitors[0].config_id,
+            { user: editorUser }
           );
 
           expect(decryptedCreatedMonitor.body.throttling).to.eql({
@@ -316,7 +327,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(httpProjectMonitors)
           .expect(200);
 
@@ -343,13 +355,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const createdMonitorsResponse = await supertest
             .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
             .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
-            .set('kbn-xsrf', 'true')
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
             .expect(200);
 
           const { rawBody: decryptedCreatedMonitor } = await monitorTestService.getMonitor(
             createdMonitorsResponse.body.monitors[0].config_id,
             {
               internal: true,
+              user: editorUser,
             }
           );
 
@@ -460,7 +474,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(tcpProjectMonitors)
           .expect(200);
 
@@ -487,13 +502,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const createdMonitorsResponse = await supertest
             .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
             .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
-            .set('kbn-xsrf', 'true')
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
             .expect(200);
 
           const { rawBody: decryptedCreatedMonitor } = await monitorTestService.getMonitor(
             createdMonitorsResponse.body.monitors[0].config_id,
             {
               internal: true,
+              user: editorUser,
             }
           );
 
@@ -583,7 +600,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(icmpProjectMonitors)
           .expect(200);
         expect(body).eql({
@@ -608,13 +626,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const createdMonitorsResponse = await supertest
             .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
             .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
-            .set('kbn-xsrf', 'true')
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
             .expect(200);
 
           const { rawBody: decryptedCreatedMonitor } = await monitorTestService.getMonitor(
             createdMonitorsResponse.body.monitors[0].config_id,
             {
               internal: true,
+              user: editorUser,
             }
           );
 
@@ -700,7 +720,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(projectMonitors)
           .expect(200);
 
@@ -726,14 +747,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(projectMonitors)
           .expect(200);
         const { body } = await supertest
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(projectMonitors)
           .expect(200);
 
@@ -759,7 +782,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: [{ ...projectMonitors.monitors[0], schedule: '3m', tags: '' }] })
           .expect(200);
 
@@ -808,156 +832,102 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
+    // KEEP TEST IN STATEFUL
     it('project monitors - saves space as data stream namespace', async () => {
       const project = `test-project-${uuidv4()}`;
-      const username = 'admin';
-      const roleName = `synthetics_admin`;
-      const password = `${username}-password`;
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
-        await security.role.create(roleName, {
-          kibana: [
-            {
-              feature: {
-                uptime: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-        await security.user.create(username, {
-          password,
-          roles: [roleName],
-          full_name: 'a kibana user',
-        });
-        await supertestWithoutAuth
+        await supertest
           .put(
             `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
               '{projectName}',
               project
             )}`
           )
-          .auth(username, password)
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(projectMonitors)
           .expect(200);
         // expect monitor not to have been deleted
-        const getResponse = await supertestWithoutAuth
+        const getResponse = await supertest
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-          .auth(username, password)
           .query({
             filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
         expect(monitors[0][ConfigKey.NAMESPACE]).eql(formatKibanaNamespace(SPACE_ID));
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID);
-        await security.user.delete(username);
-        await security.role.delete(roleName);
       }
     });
 
+    // KEEP TEST IN STATEFUL
     it('project monitors - browser - handles custom namespace', async () => {
       const project = `test-project-${uuidv4()}`;
-      const username = 'admin';
-      const roleName = `synthetics_admin`;
-      const password = `${username}-password`;
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const customNamespace = 'custom.namespace';
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
-        await security.role.create(roleName, {
-          kibana: [
-            {
-              feature: {
-                uptime: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-        await security.user.create(username, {
-          password,
-          roles: [roleName],
-          full_name: 'a kibana user',
-        });
-        await supertestWithoutAuth
+        await supertest
           .put(
             `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
               '{projectName}',
               project
             )}`
           )
-          .auth(username, password)
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: [{ ...projectMonitors.monitors[0], namespace: customNamespace }] })
           .expect(200);
         // expect monitor not to have been deleted
-        const getResponse = await supertestWithoutAuth
+        const getResponse = await supertest
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-          .auth(username, password)
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .query({
             filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
-          .set('kbn-xsrf', 'true')
           .expect(200);
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
         expect(monitors[0][ConfigKey.NAMESPACE]).eql(customNamespace);
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID);
-        await security.user.delete(username);
-        await security.role.delete(roleName);
       }
     });
 
+    // KEEP TEST IN STATEFUL
     it('project monitors - lightweight - handles custom namespace', async () => {
       const project = `test-project-${uuidv4()}`;
-      const username = 'admin';
-      const roleName = `synthetics_admin`;
-      const password = `${username}-password`;
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const customNamespace = 'custom.namespace';
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
-        await security.role.create(roleName, {
-          kibana: [
-            {
-              feature: {
-                uptime: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-        await security.user.create(username, {
-          password,
-          roles: [roleName],
-          full_name: 'a kibana user',
-        });
-        await supertestWithoutAuth
+        await supertest
           .put(
             `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
               '{projectName}',
               project
             )}`
           )
-          .auth(username, password)
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: [{ ...httpProjectMonitors.monitors[1], namespace: customNamespace }] })
           .expect(200);
 
         // expect monitor not to have been deleted
-        const getResponse = await supertestWithoutAuth
+        const getResponse = await supertest
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-          .auth(username, password)
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .query({
             filter: `${syntheticsMonitorType}.attributes.journey_id: ${httpProjectMonitors.monitors[1].id}`,
           })
@@ -968,158 +938,96 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(monitors[0][ConfigKey.NAMESPACE]).eql(customNamespace);
       } finally {
         await deleteMonitor(httpProjectMonitors.monitors[1].id, project, SPACE_ID);
-        await security.user.delete(username);
-        await security.role.delete(roleName);
       }
     });
 
+    // KEEP TEST IN STATEFUL
     it('project monitors - browser - handles custom namespace errors', async () => {
       const project = `test-project-${uuidv4()}`;
-      const username = 'admin';
-      const roleName = `synthetics_admin`;
-      const password = `${username}-password`;
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const customNamespace = 'custom-namespace';
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-      try {
-        await security.role.create(roleName, {
-          kibana: [
-            {
-              feature: {
-                uptime: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-        await security.user.create(username, {
-          password,
-          roles: [roleName],
-          full_name: 'a kibana user',
-        });
-        const { body } = await supertestWithoutAuth
-          .put(
-            `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
-              '{projectName}',
-              project
-            )}`
-          )
-          .auth(username, password)
-          .set('kbn-xsrf', 'true')
-          .send({ monitors: [{ ...projectMonitors.monitors[0], namespace: customNamespace }] })
-          .expect(200);
-        // expect monitor not to have been deleted
-        expect(body).to.eql({
-          createdMonitors: [],
-          failedMonitors: [
-            {
-              details: 'Namespace contains invalid characters',
-              id: projectMonitors.monitors[0].id,
-              reason: 'Invalid namespace',
-            },
-          ],
-          updatedMonitors: [],
-        });
-      } finally {
-        await security.user.delete(username);
-        await security.role.delete(roleName);
-      }
+      const { body } = await supertest
+        .put(
+          `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+            '{projectName}',
+            project
+          )}`
+        )
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ monitors: [{ ...projectMonitors.monitors[0], namespace: customNamespace }] })
+        .expect(200);
+      // expect monitor not to have been deleted
+      expect(body).to.eql({
+        createdMonitors: [],
+        failedMonitors: [
+          {
+            details: 'Namespace contains invalid characters',
+            id: projectMonitors.monitors[0].id,
+            reason: 'Invalid namespace',
+          },
+        ],
+        updatedMonitors: [],
+      });
     });
 
+    // KEEP TEST IN STATEFUL
     it('project monitors - lightweight - handles custom namespace errors', async () => {
       const project = `test-project-${uuidv4()}`;
-      const username = 'admin';
-      const roleName = `synthetics_admin`;
-      const password = `${username}-password`;
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const customNamespace = 'custom-namespace';
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-      try {
-        await security.role.create(roleName, {
-          kibana: [
-            {
-              feature: {
-                uptime: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-        await security.user.create(username, {
-          password,
-          roles: [roleName],
-          full_name: 'a kibana user',
-        });
-        const { body } = await supertestWithoutAuth
-          .put(
-            `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
-              '{projectName}',
-              project
-            )}`
-          )
-          .auth(username, password)
-          .set('kbn-xsrf', 'true')
-          .send({ monitors: [{ ...httpProjectMonitors.monitors[1], namespace: customNamespace }] })
-          .expect(200);
-        // expect monitor not to have been deleted
-        expect(body).to.eql({
-          createdMonitors: [],
-          failedMonitors: [
-            {
-              details: 'Namespace contains invalid characters',
-              id: httpProjectMonitors.monitors[1].id,
-              reason: 'Invalid namespace',
-            },
-          ],
-          updatedMonitors: [],
-        });
-      } finally {
-        await security.user.delete(username);
-        await security.role.delete(roleName);
-      }
+      const { body } = await supertest
+        .put(
+          `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+            '{projectName}',
+            project
+          )}`
+        )
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ monitors: [{ ...httpProjectMonitors.monitors[1], namespace: customNamespace }] })
+        .expect(200);
+      // expect monitor not to have been deleted
+      expect(body).to.eql({
+        createdMonitors: [],
+        failedMonitors: [
+          {
+            details: 'Namespace contains invalid characters',
+            id: httpProjectMonitors.monitors[1].id,
+            reason: 'Invalid namespace',
+          },
+        ],
+        updatedMonitors: [],
+      });
     });
 
+    // KEEP TEST IN STATEFUL
     it('project monitors - handles editing with spaces', async () => {
       const project = `test-project-${uuidv4()}`;
-      const username = 'admin';
-      const roleName = `synthetics_admin`;
-      const password = `${username}-password`;
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
-        await security.role.create(roleName, {
-          kibana: [
-            {
-              feature: {
-                uptime: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-        await security.user.create(username, {
-          password,
-          roles: [roleName],
-          full_name: 'a kibana user',
-        });
-        await supertestWithoutAuth
+        await supertest
           .put(
             `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
               '{projectName}',
               project
             )}`
           )
-          .auth(username, password)
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(projectMonitors)
           .expect(200);
         // expect monitor not to have been deleted
-        const getResponse = await supertestWithoutAuth
+        const getResponse = await supertest
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-          .auth(username, password)
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .query({
             filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
@@ -1128,7 +1036,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const decryptedCreatedMonitor = await monitorTestService.getMonitor(
           getResponse.body.monitors[0].config_id,
-          { internal: true, space: SPACE_ID }
+          { internal: true, space: SPACE_ID, user: editorUser }
         );
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
@@ -1138,85 +1046,65 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const updatedSource = 'updatedSource';
         // update monitor
-        await supertestWithoutAuth
+        await supertest
           .put(
             `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
               '{projectName}',
               project
             )}`
           )
-          .auth(username, password)
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             ...projectMonitors,
             monitors: [{ ...projectMonitors.monitors[0], content: updatedSource }],
           })
           .expect(200);
-        const getResponseUpdated = await supertestWithoutAuth
+        const getResponseUpdated = await supertest
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-          .auth(username, password)
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .query({
             filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
-          .set('kbn-xsrf', 'true')
           .expect(200);
         const { monitors: monitorsUpdated } = getResponseUpdated.body;
         expect(monitorsUpdated.length).eql(1);
 
         const decryptedUpdatedMonitor = await monitorTestService.getMonitor(
           monitorsUpdated[0].config_id,
-          { internal: true, space: SPACE_ID }
+          { internal: true, space: SPACE_ID, user: editorUser }
         );
         expect(decryptedUpdatedMonitor.body[ConfigKey.SOURCE_PROJECT_CONTENT]).eql(updatedSource);
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID);
-        await security.user.delete(username);
-        await security.role.delete(roleName);
       }
     });
 
     it('project monitors - formats custom id appropriately', async () => {
       const project = `test project ${uuidv4()}`;
-      const username = 'admin';
-      const roleName = `synthetics_admin`;
-      const password = `${username}-password`;
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
-        await security.role.create(roleName, {
-          kibana: [
-            {
-              feature: {
-                uptime: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-        await security.user.create(username, {
-          password,
-          roles: [roleName],
-          full_name: 'a kibana user',
-        });
-        await supertestWithoutAuth
+        await supertest
           .put(
             `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
               '{projectName}',
               project
             )}`
           )
-          .auth(username, password)
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(projectMonitors)
           .expect(200);
-        const getResponse = await supertestWithoutAuth
+        const getResponse = await supertest
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-          .auth(username, password)
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .query({
             filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
-          .set('kbn-xsrf', 'true')
           .expect(200);
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
@@ -1225,8 +1113,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID);
-        await security.user.delete(username);
-        await security.role.delete(roleName);
       }
     });
 
@@ -1237,7 +1123,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(projectMonitors)
           .expect(200);
 
@@ -1246,7 +1133,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .query({
             filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         const { monitors } = response.body;
@@ -1256,7 +1144,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(projectMonitors)
           .expect(200);
 
@@ -1267,7 +1156,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         // ensure that monitor can still be decrypted
-        await monitorTestService.getMonitor(monitors[0]?.config_id);
+        await monitorTestService.getMonitor(monitors[0]?.config_id, { user: editorUser });
       } finally {
         await Promise.all([
           projectMonitors.monitors.map((monitor) => deleteMonitor(monitor.id, project)),
@@ -1283,14 +1172,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(projectMonitors);
 
         await supertest
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             ...projectMonitors,
             monitors: [
@@ -1306,7 +1197,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .query({
             filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
         const { monitors } = response.body;
         expect(monitors[0].enabled).eql(false);
@@ -1319,6 +1211,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
+    // keep test in stateful
     it('project monitors - cannot update project monitors with read only privileges', async () => {
       const project = `test-project-${uuidv4()}`;
 
@@ -1328,91 +1221,68 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         privateLocations: ['Test private location 0'],
       };
       const testMonitors = [projectMonitors.monitors[0], secondMonitor];
-      const username = 'admin';
-      const roleName = 'uptime read only';
-      const password = `${username}-password`;
-      try {
-        await security.role.create(roleName, {
-          kibana: [
-            {
-              feature: {
-                uptime: ['read'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-        await security.user.create(username, {
-          password,
-          roles: [roleName],
-          full_name: 'a kibana user',
-        });
-
-        await supertestWithoutAuth
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .auth(username, password)
-          .set('kbn-xsrf', 'true')
-          .send({ monitors: testMonitors })
-          .expect(403);
-      } finally {
-        await security.user.delete(username);
-        await security.role.delete(roleName);
-      }
+      await supertest
+        .put(
+          SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+        )
+        .set(viewerUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ monitors: testMonitors })
+        .expect(403);
     });
 
-    it('project monitors - returns a successful monitor when user defines a private location, even without fleet permissions', async () => {
-      const project = `test-project-${uuidv4()}`;
-      const secondMonitor = {
-        ...projectMonitors.monitors[0],
-        id: 'test-id-2',
-        privateLocations: ['Test private location 0'],
-      };
-      const testMonitors = [projectMonitors.monitors[0], secondMonitor];
-      const username = 'admin';
-      const roleName = 'uptime with fleet';
-      const password = `${username}-password`;
-      try {
-        await security.role.create(roleName, {
-          kibana: [
-            {
-              feature: {
-                uptime: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-        await security.user.create(username, {
-          password,
-          roles: [roleName],
-          full_name: 'a kibana user',
-        });
-        const { body } = await supertestWithoutAuth
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .auth(username, password)
-          .set('kbn-xsrf', 'true')
-          .send({ monitors: testMonitors })
-          .expect(200);
+    // STATEFUL ONLY TEST
+    // it('project monitors - returns a successful monitor when user defines a private location, even without fleet permissions', async () => {
+    //   const project = `test-project-${uuidv4()}`;
+    //   const secondMonitor = {
+    //     ...projectMonitors.monitors[0],
+    //     id: 'test-id-2',
+    //     privateLocations: ['Test private location 0'],
+    //   };
+    //   const testMonitors = [projectMonitors.monitors[0], secondMonitor];
+    //   const username = 'admin';
+    //   const roleName = 'uptime with fleet';
+    //   const password = `${username}-password`;
+    //   try {
+    //     await security.role.create(roleName, {
+    //       kibana: [
+    //         {
+    //           feature: {
+    //             uptime: ['all'],
+    //           },
+    //           spaces: ['*'],
+    //         },
+    //       ],
+    //     });
+    //     await security.user.create(username, {
+    //       password,
+    //       roles: [roleName],
+    //       full_name: 'a kibana user',
+    //     });
+    //     const { body } = await supertest
+    //       .put(
+    //         SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+    //       )
+    //       .set(editorUser.apiKeyHeader)
+    //       .set(samlAuth.getInternalRequestHeader())
+    //       .send({ monitors: testMonitors })
+    //       .expect(200);
 
-        expect(body).to.eql({
-          createdMonitors: [testMonitors[0].id, 'test-id-2'],
-          updatedMonitors: [],
-          failedMonitors: [],
-        });
-      } finally {
-        await Promise.all([
-          testMonitors.map((monitor) => {
-            return deleteMonitor(monitor.id, project, 'default');
-          }),
-        ]);
-        await security.user.delete(username);
-        await security.role.delete(roleName);
-      }
-    });
+    //     expect(body).to.eql({
+    //       createdMonitors: [testMonitors[0].id, 'test-id-2'],
+    //       updatedMonitors: [],
+    //       failedMonitors: [],
+    //     });
+    //   } finally {
+    //     await Promise.all([
+    //       testMonitors.map((monitor) => {
+    //         return deleteMonitor(monitor.id, project, 'default');
+    //       }),
+    //     ]);
+    //     await security.user.delete(username);
+    //     await security.role.delete(roleName);
+    //   }
+    // });
 
     it('creates integration policies for project monitors with private locations', async () => {
       const project = `test-project-${uuidv4()}`;
@@ -1422,7 +1292,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             ...projectMonitors,
             monitors: [
@@ -1436,10 +1307,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .query({
             filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
-        const apiResponsePolicy = await supertest.get(
+        const apiResponsePolicy = await supertestWithAuth.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
 
@@ -1471,7 +1343,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, project);
 
-        const packagesResponse = await supertest.get(
+        const packagesResponse = await supertestWithAuth.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
         expect(packagesResponse.body.items.length).eql(0);
@@ -1486,7 +1358,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             ...httpProjectMonitors,
             monitors: [
@@ -1504,10 +1377,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .query({
             filter: `${syntheticsMonitorType}.attributes.journey_id: ${httpProjectMonitors.monitors[1].id}`,
           })
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
-        const apiResponsePolicy = await supertest.get(
+        const apiResponsePolicy = await supertestWithAuth.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
 
@@ -1539,7 +1413,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       } finally {
         await deleteMonitor(httpProjectMonitors.monitors[1].id, project);
 
-        const packagesResponse = await supertest.get(
+        const packagesResponse = await supertestWithAuth.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
         expect(packagesResponse.body.items.length).eql(0);
@@ -1559,7 +1433,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(monitorRequest)
           .expect(200);
 
@@ -1568,10 +1443,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .query({
             filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitorRequest.monitors[0].id}`,
           })
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
-        const apiResponsePolicy = await supertest.get(
+        const apiResponsePolicy = await supertestWithAuth.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
 
@@ -1587,13 +1463,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: [{ ...monitorRequest.monitors[0], privateLocations: [] }],
           })
           .expect(200);
 
-        const apiResponsePolicy2 = await supertest.get(
+        const apiResponsePolicy2 = await supertestWithAuth.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
 
@@ -1617,7 +1494,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: [
               { ...projectMonitors.monitors[0], privateLocations: ['Test private location 0'] },
@@ -1630,10 +1508,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .query({
             filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
-        const apiResponsePolicy = await supertest.get(
+        const apiResponsePolicy = await supertestWithAuth.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
 
@@ -1665,13 +1544,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: [{ ...projectMonitors.monitors[0], privateLocations: [] }],
           })
           .expect(200);
 
-        const apiResponsePolicy2 = await supertest.get(
+        const apiResponsePolicy2 = await supertestWithAuth.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
 
@@ -1685,7 +1565,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, project);
 
-        const apiResponsePolicy2 = await supertest.get(
+        const apiResponsePolicy2 = await supertestWithAuth.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
         expect(apiResponsePolicy2.body.items.length).eql(0);
@@ -1700,7 +1580,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: [
               {
@@ -1715,10 +1596,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .query({
             filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
-        const apiResponsePolicy = await supertest.get(
+        const apiResponsePolicy = await supertestWithAuth.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
 
@@ -1749,7 +1631,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: [
               {
@@ -1761,7 +1644,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ],
           });
 
-        const apiResponsePolicy2 = await supertest.get(
+        const apiResponsePolicy2 = await supertestWithAuth.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
 
@@ -1789,7 +1672,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, project);
 
-        const apiResponsePolicy2 = await supertest.get(
+        const apiResponsePolicy2 = await supertestWithAuth.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
         expect(apiResponsePolicy2.body.items.length).eql(0);
@@ -1803,7 +1686,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: [
               { ...projectMonitors.monitors[0], privateLocations: ['Test private location 0'] },
@@ -1818,7 +1702,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}`,
                 internal: true,
               })
-              .set('kbn-xsrf', 'true')
+              .set(editorUser.apiKeyHeader)
+              .set(samlAuth.getInternalRequestHeader())
               .expect(200);
           })
         );
@@ -1870,7 +1755,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors,
           })
@@ -1882,7 +1768,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ ...projectMonitors, project });
       }
     });
@@ -1895,14 +1782,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(projectMonitors)
           .expect(200);
         const { body } = await supertest
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: [{ ...httpProjectMonitors.monitors[1], id: projectMonitors.monitors[0].id }],
           })
@@ -1982,7 +1871,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               project
             )}`
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: [
               {
@@ -1997,7 +1887,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .query({
             filter: `${syntheticsMonitorType}.attributes.journey_id: ${httpProjectMonitors.monitors[1].id}`,
           })
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
@@ -2024,7 +1915,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               project
             )}`
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: [
               {
@@ -2103,7 +1995,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               project
             )}`
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: [
               {
@@ -2182,7 +2075,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               project
             )}`
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: [
               {

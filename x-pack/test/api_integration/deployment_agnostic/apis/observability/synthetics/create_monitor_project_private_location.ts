@@ -6,6 +6,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -17,10 +18,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddProjectMonitorsPrivateLocations', function () {
     this.tags('skipCloud');
 
-    const supertest = getService('supertest');
+    const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
+    const samlAuth = getService('samlAuth');
 
     let projectMonitors: ProjectMonitorsRequest;
+    let editorUser: RoleCredentials;
 
     const monitorTestService = new SyntheticsMonitorTestService(getService);
 
@@ -36,9 +39,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     before(async () => {
+      editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-        .set('kbn-xsrf', 'true')
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       await testPrivateLocations.installSyntheticsPackage();
 
@@ -73,7 +78,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       ];
       try {
-        const { body, status } = await monitorTestService.addProjectMonitors(project, testMonitors);
+        const { body, status } = await monitorTestService.addProjectMonitors(
+          project,
+          testMonitors,
+          editorUser
+        );
         expect(status).eql(200);
         expect(body.createdMonitors.length).eql(1);
         expect(body.failedMonitors[0].reason).eql(
@@ -82,7 +91,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       } finally {
         await Promise.all([
           testMonitors.map((monitor) => {
-            return monitorTestService.deleteMonitorByJourney(projectMonitors, monitor.id, project);
+            return monitorTestService.deleteMonitorByJourney(
+              projectMonitors,
+              monitor.id,
+              project,
+              'default',
+              editorUser
+            );
           }),
         ]);
       }
@@ -99,13 +114,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const testMonitors = [projectMonitors.monitors[0], secondMonitor];
       const { body, status: status0 } = await monitorTestService.addProjectMonitors(
         project,
-        testMonitors
+        testMonitors,
+        editorUser
       );
       expect(status0).eql(200);
 
       expect(body.createdMonitors.length).eql(2);
       const { body: editedBody, status: editedStatus } =
-        await monitorTestService.addProjectMonitors(project, testMonitors);
+        await monitorTestService.addProjectMonitors(project, testMonitors, editorUser);
       expect(editedStatus).eql(200);
 
       expect(editedBody.createdMonitors.length).eql(0);
@@ -116,7 +132,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const { body: editedBodyError, status } = await monitorTestService.addProjectMonitors(
         project,
-        testMonitors
+        testMonitors,
+        editorUser
       );
       expect(status).eql(200);
       expect(editedBodyError.createdMonitors.length).eql(0);

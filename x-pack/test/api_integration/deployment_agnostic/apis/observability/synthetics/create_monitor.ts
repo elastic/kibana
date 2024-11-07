@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { join } from 'path';
 import expect from '@kbn/expect';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import epct from 'expect';
 import moment from 'moment/moment';
 import { v4 as uuidv4 } from 'uuid';
@@ -32,13 +32,20 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_cont
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
 
-export const addMonitorAPIHelper = async (supertestAPI: any, monitor: any, statusCode = 200) => {
+// adjust the type of samlAuth
+export const addMonitorAPIHelper = async (
+  supertestAPI: any,
+  monitor: any,
+  statusCode = 200,
+  roleAuthc: RoleCredentials,
+  samlAuth: any
+) => {
   const result = await supertestAPI
     .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-    .set('kbn-xsrf', 'true')
-    .send(monitor);
-
-  expect(result.status).eql(statusCode, JSON.stringify(result.body));
+    .set(roleAuthc.apiKeyHeader)
+    .set(samlAuth.getInternalRequestHeader())
+    .send(monitor)
+    .expect(statusCode);
 
   if (statusCode === 200) {
     const { created_at: createdAt, updated_at: updatedAt, id, config_id: configId } = result.body;
@@ -72,17 +79,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddNewMonitorsUI', function () {
     this.tags('skipCloud');
 
-    const supertestAPI = getService('supertest');
-    const supertestWithoutAuth = getService('supertestWithoutAuth');
+    const supertestAPI = getService('supertestWithoutAuth');
+    const supertestWithAuth = getService('supertest');
     const security = getService('security');
+    const samlAuth = getService('samlAuth');
     const kibanaServer = getService('kibanaServer');
     const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
+    let editorRoleAuthc: RoleCredentials;
+    let viewerRoleAuthc: RoleCredentials;
 
     const addMonitorAPI = async (monitor: any, statusCode = 200) => {
-      return addMonitorAPIHelper(supertestAPI, monitor, statusCode);
+      return addMonitorAPIHelper(supertestAPI, monitor, statusCode, editorRoleAuthc, samlAuth);
     };
 
     const deleteMonitor = async (
@@ -90,17 +100,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       statusCode = 200,
       spaceId?: string
     ) => {
-      return monitorTestService.deleteMonitor(monitorId, statusCode, spaceId);
+      return monitorTestService.deleteMonitor(monitorId, statusCode, spaceId, editorRoleAuthc);
     };
 
     before(async () => {
       _httpMonitorJson = getFixtureJson('http_monitor');
       await kibanaServer.savedObjects.cleanStandardList();
+      editorRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      viewerRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('viewer');
     });
 
-    beforeEach(() => {
+    beforeEach(async () => {
       httpMonitorJson = _httpMonitorJson;
-      console.log('httpMonitorJson', httpMonitorJson);
     });
 
     it('returns the newly added monitor', async () => {
@@ -222,7 +233,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
     });
 
-    // it.only('can create monitor with API key with proper permissions', async () => {
+    // KEEP TEST IN STATEFUL
+    // it('can create monitor with API key with proper permissions', async () => {
     //   const response: Record<string, any> = await supertestAPI
     //     .post('/internal/security/api_key')
     //     .set('kbn-xsrf', 'xxx')
@@ -265,53 +277,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     //   expect(apiResponse.status).eql(200, JSON.stringify(apiResponse.body));
     // });
 
+    // KEEP TEST IN STATEFUL
     // it('can not create monitor with API key without proper permissions', async () => {
-    //   await supertestAPI
-    //     .post('/internal/security/api_key')
-    //     .set('kbn-xsrf', 'xxx')
-    //     .send({
-    //       name: 'test_api_key',
-    //       expiration: '12d',
-    //       kibana_role_descriptors: {
-    //         uptime_save: {
-    //           elasticsearch: getServiceApiKeyPrivileges(false),
-    //           kibana: [
-    //             {
-    //               base: [],
-    //               spaces: [ALL_SPACES_ID],
-    //               feature: {
-    //                 uptime: ['read'],
-    //               },
-    //             },
-    //           ],
-    //         },
-    //       },
-    //     })
-    //     .expect(200)
-    //     .then(async (response: Record<string, any>) => {
-    //       const { name, encoded: apiKey } = response.body;
-    //       expect(name).to.eql('test_api_key');
+    //   const apiResponse = await supertestAPI
+    //     .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+    //     .set(viewerRoleAuthc.apiKeyHeader)
+    //     .set(samlAuth.getInternalRequestHeader())
+    //     .send(httpMonitorJson);
 
-    //       const config = getService('config');
-
-    //       const { hostname, protocol, port } = config.get('servers.kibana');
-    //       const kibanaServerUrl = formatUrl({ hostname, protocol, port });
-    //       const supertestNoAuth = supertest(kibanaServerUrl);
-
-    //       const apiResponse = await supertestNoAuth
-    //         .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-    //         .auth(name, apiKey)
-    //         .set('kbn-xsrf', 'true')
-    //         .set('Authorization', `ApiKey ${apiKey}`)
-    //         .send(httpMonitorJson);
-
-    //       expect(apiResponse.status).eql(403);
-    //       expect(apiResponse.body.message).eql(
-    //         'API [POST /api/synthetics/monitors] is unauthorized for user, this action is granted by the Kibana privileges [uptime-write]'
-    //       );
-    //     });
+    //   expect(apiResponse.status).eql(403);
+    //   expect(apiResponse.body.message).eql('Forbidden');
     // });
 
+    // KEEP TEST IN STATEFUL
     // it.only('handles private location errors and immediately deletes monitor if integration policy is unable to be saved', async () => {
     //   const name = `Monitor with private location ${uuidv4()}`;
     //   const newMonitor = {
@@ -394,7 +372,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const apiResponse = await supertestAPI
           .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-          .set('kbn-xsrf', 'true')
+          .set(editorRoleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(monitor)
           .expect(200);
         monitorId = apiResponse.body.id;
@@ -412,13 +391,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         [ConfigKey.NAMESPACE]: 'default',
       };
       let monitorId = '';
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
 
       try {
-        await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
         const apiResponse = await supertestAPI
           .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .query({ preserve_namespace: true })
-          .set('kbn-xsrf', 'true')
+          .set(editorRoleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(monitor)
           .expect(200);
         monitorId = apiResponse.body.id;
@@ -439,7 +419,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const apiResponse = await supertestAPI
           .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-          .set('kbn-xsrf', 'true')
+          .set(editorRoleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send(monitor)
           .expect(200);
         monitorId = apiResponse.body.id;

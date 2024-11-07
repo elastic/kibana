@@ -15,5 +15,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./create_monitor_project_private_location'));
     loadTestFile(require.resolve('./create_monitor_public_api'));
     loadTestFile(require.resolve('./create_update_params'));
+    loadTestFile(require.resolve('./delete_monitor_project'));
+    loadTestFile(require.resolve('./delete_monitor'));
   });
 }
