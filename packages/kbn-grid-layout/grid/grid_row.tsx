@@ -199,7 +199,6 @@ export const GridRow = forwardRef<
                 interactionStart={(type, e) => {
                   if (e.button !== 0) return;
 
-                  e.preventDefault();
                   e.stopPropagation();
                   const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
                   if (!panelRef) return;

@@ -28,7 +28,6 @@ export const useGridLayoutEvents = ({
     const { runtimeSettings$, interactionEvent$, gridLayout$ } = gridLayoutStateManager;
     const calculateUserEvent = (e: Event) => {
       if (!interactionEvent$.value) return;
-      e.preventDefault();
       e.stopPropagation();
 
       const gridRowElements = gridLayoutStateManager.rowRefs.current;
@@ -157,8 +156,8 @@ export const useGridLayoutEvents = ({
       calculateUserEvent(e);
     };
 
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('scroll', calculateUserEvent);
+    document.addEventListener('mousemove', onMouseMove, { passive: true });
+    document.addEventListener('scroll', calculateUserEvent, { passive: true });
     return () => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('scroll', calculateUserEvent);

@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import React, { PropsWithChildren, useEffect, useRef } from 'react';
-import { combineLatest } from 'rxjs';
+import { combineLatest, debounceTime, distinctUntilChanged, map } from 'rxjs';
 import { GridLayoutStateManager } from './types';
 
 export const GridHeightSmoother = ({
@@ -19,7 +19,7 @@ export const GridHeightSmoother = ({
   // set the parent div size directly to smooth out height changes.
   const smoothHeightRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    const subscription = combineLatest([
+    const heightSubscription = combineLatest([
       gridLayoutStateManager.gridDimensions$,
       gridLayoutStateManager.interactionEvent$,
     ]).subscribe(([dimensions, interactionEvent]) => {
@@ -39,7 +39,21 @@ export const GridHeightSmoother = ({
         smoothHeightRef.current.getBoundingClientRect().height
       )}px`;
     });
-    return () => subscription.unsubscribe();
+
+    const marginSubscription = gridLayoutStateManager.runtimeSettings$
+      .pipe(
+        map(({ gutterSize }) => gutterSize),
+        distinctUntilChanged()
+      )
+      .subscribe((gutterSize) => {
+        if (!smoothHeightRef.current) return;
+        smoothHeightRef.current.style.margin = `${gutterSize}px`;
+      });
+
+    return () => {
+      marginSubscription.unsubscribe();
+      heightSubscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

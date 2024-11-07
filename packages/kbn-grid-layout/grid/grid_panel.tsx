@@ -60,6 +60,7 @@ export const GridPanel = forwardRef<
          */
         document.addEventListener('mouseup', onDropEventHandler, {
           once: true,
+          passive: true,
         });
       });
 
@@ -76,6 +77,7 @@ export const GridPanel = forwardRef<
      */
     const onMouseDown = useCallback(
       (e: MouseEvent) => {
+        e.stopPropagation();
         interactionStart('drag', e);
       },
       [interactionStart]
@@ -87,7 +89,7 @@ export const GridPanel = forwardRef<
 
         for (const handle of dragHandles) {
           if (handle === null) return;
-          handle.addEventListener('mousedown', onMouseDown);
+          handle.addEventListener('mousedown', onMouseDown, { passive: true });
         }
 
         removeEventListenersRef.current = () => {
@@ -129,6 +131,7 @@ export const GridPanel = forwardRef<
         ])
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
           .subscribe(([activePanel, gridLayout, runtimeSettings]) => {
+            // console.log('SUBSCRIBE!!!!');
             const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
             const panel = gridLayout[rowIndex].panels[panelId];
             if (!ref || !panel) return;
