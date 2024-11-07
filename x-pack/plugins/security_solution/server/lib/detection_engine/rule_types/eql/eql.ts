@@ -26,11 +26,8 @@ import type {
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
-  WrapSuppressedHits,
-  WrapSuppressedSequences,
   CreateRuleOptions,
 } from '../types';
-import type { SequenceSuppressionTermsAndFieldsFactory } from '../utils/utils';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
@@ -55,7 +52,7 @@ import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { logEqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
-import type { AlertGroupFromSequenceBuilder } from './build_alert_group_from_sequence';
+import type { IEqlUtils } from './eql_utils';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -67,15 +64,12 @@ interface EqlExecutorParams {
   version: string;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  eqlUtils: IEqlUtils;
   wrapSequences: WrapSequences;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
-  wrapSuppressedHits: WrapSuppressedHits;
-  wrapSuppressedSequences: WrapSuppressedSequences;
-  alertGroupFromSequenceBuilder: AlertGroupFromSequenceBuilder;
-  addSequenceSuppressionTermsAndFields: SequenceSuppressionTermsAndFieldsFactory;
   alertTimestampOverride: Date | undefined;
   alertWithSuppression: SuppressedAlertService;
   isAlertSuppressionActive: boolean;
@@ -99,10 +93,7 @@ export const eqlExecutor = async ({
   secondaryTimestamp,
   exceptionFilter,
   unprocessedExceptions,
-  wrapSuppressedHits,
-  wrapSuppressedSequences,
-  alertGroupFromSequenceBuilder,
-  addSequenceSuppressionTermsAndFields,
+  eqlUtils,
   alertTimestampOverride,
   alertWithSuppression,
   isAlertSuppressionActive,
@@ -185,7 +176,7 @@ export const eqlExecutor = async ({
             ruleExecutionLogger,
             tuple,
             alertSuppression: completeRule.ruleParams.alertSuppression,
-            wrapSuppressedHits,
+            wrapSuppressedHits: eqlUtils.wrapSuppressedHits,
             alertTimestampOverride,
             alertWithSuppression,
             experimentalFeatures,
@@ -201,20 +192,16 @@ export const eqlExecutor = async ({
           await bulkCreateSuppressedSequencesInMemory({
             sequences,
             toReturn: result,
-            wrapSequences,
             bulkCreate,
             services,
             buildReasonMessage: buildReasonMessageForEqlAlert,
             ruleExecutionLogger,
             tuple,
             alertSuppression: completeRule.ruleParams.alertSuppression,
-            wrapSuppressedSequences,
-            alertGroupFromSequenceBuilder,
-            addSequenceSuppressionTermsAndFields,
+            eqlUtils,
             alertTimestampOverride,
             alertWithSuppression,
             experimentalFeatures,
-            mergeSourceAndFields: true,
           });
         } else {
           newSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);

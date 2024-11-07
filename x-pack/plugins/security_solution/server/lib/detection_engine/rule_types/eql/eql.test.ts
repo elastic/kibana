@@ -18,6 +18,7 @@ import { getCompleteRuleMock, getEqlRuleParams } from '../../rule_schema/mocks';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { eqlExecutor } from './eql';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
+import type { IEqlUtils } from './eql_utils';
 
 jest.mock('../../routes/index/get_index_version');
 jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
@@ -38,6 +39,7 @@ describe('eql_executor', () => {
   };
   const mockExperimentalFeatures = {} as ExperimentalFeatures;
   const mockScheduleNotificationResponseActionsService = jest.fn();
+  const mockEqlUtils = {} as IEqlUtils;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -65,12 +67,11 @@ describe('eql_executor', () => {
           bulkCreate: jest.fn(),
           wrapHits: jest.fn(),
           wrapSequences: jest.fn(),
-          wrapSuppressedSequences: jest.fn(),
           primaryTimestamp: '@timestamp',
           exceptionFilter: undefined,
           unprocessedExceptions: [getExceptionListItemSchemaMock()],
-          wrapSuppressedHits: jest.fn(),
           alertTimestampOverride: undefined,
+          eqlUtils: mockEqlUtils,
           alertWithSuppression: jest.fn(),
           isAlertSuppressionActive: false,
           experimentalFeatures: mockExperimentalFeatures,
@@ -102,11 +103,10 @@ describe('eql_executor', () => {
         bulkCreate: jest.fn(),
         wrapHits: jest.fn(),
         wrapSequences: jest.fn(),
-        wrapSuppressedSequences: jest.fn(),
         primaryTimestamp: '@timestamp',
         exceptionFilter: undefined,
         unprocessedExceptions: [],
-        wrapSuppressedHits: jest.fn(),
+        eqlUtils: mockEqlUtils,
         alertTimestampOverride: undefined,
         alertWithSuppression: jest.fn(),
         isAlertSuppressionActive: true,
@@ -131,8 +131,7 @@ describe('eql_executor', () => {
         primaryTimestamp: '@timestamp',
         exceptionFilter: undefined,
         unprocessedExceptions: [],
-        wrapSuppressedHits: jest.fn(),
-        wrapSuppressedSequences: jest.fn(),
+        eqlUtils: mockEqlUtils,
         alertTimestampOverride: undefined,
         alertWithSuppression: jest.fn(),
         isAlertSuppressionActive: false,
@@ -169,11 +168,10 @@ describe('eql_executor', () => {
         bulkCreate: jest.fn(),
         wrapHits: jest.fn(),
         wrapSequences: jest.fn(),
-        wrapSuppressedSequences: jest.fn(),
         primaryTimestamp: '@timestamp',
         exceptionFilter: undefined,
         unprocessedExceptions: [],
-        wrapSuppressedHits: jest.fn(),
+        eqlUtils: mockEqlUtils,
         alertTimestampOverride: undefined,
         alertWithSuppression: jest.fn(),
         isAlertSuppressionActive: true,
