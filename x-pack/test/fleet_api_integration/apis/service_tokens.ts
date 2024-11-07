@@ -45,10 +45,6 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    it('should work with deprecated api', async () => {
-      await supertest.post(`/api/fleet/service-tokens`).set('kbn-xsrf', 'xxxx').expect(200);
-    });
-
     it('should create a valid remote service account token', async () => {
       const { body: apiResponse } = await supertest
         .post(`/api/fleet/service_tokens`)

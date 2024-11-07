@@ -6,7 +6,7 @@
  */
 
 import { TestScheduler } from 'rxjs/testing';
-import { ChatCompletionEventType } from '../../../../common/chat_complete';
+import { ChatCompletionEventType } from '@kbn/inference-common';
 import { processVertexStream } from './process_vertex_stream';
 import type { GenerateContentResponseChunk } from './types';
 

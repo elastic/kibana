@@ -195,15 +195,15 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }
 
   // perform the task object updates, deal with errors
-  const updatedTaskIds: string[] = [];
-  let conflicts = staleTasks.length;
+  const updatedTasks: Record<string, PartialConcreteTaskInstance> = {};
+  let conflicts = 0;
   let bulkUpdateErrors = 0;
   let bulkGetErrors = 0;
 
   const updateResults = await taskStore.bulkPartialUpdate(taskUpdates);
   for (const updateResult of updateResults) {
     if (isOk(updateResult)) {
-      updatedTaskIds.push(updateResult.value.id);
+      updatedTasks[updateResult.value.id] = updateResult.value;
     } else {
       const { id, type, error, status } = updateResult.error;
 
@@ -218,29 +218,23 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }
 
   // perform an mget to get the full task instance for claiming
-  const fullTasksToRun = (await taskStore.bulkGet(updatedTaskIds)).reduce<ConcreteTaskInstance[]>(
-    (acc, task) => {
-      if (isOk(task)) {
-        acc.push(task.value);
-      } else {
-        const { id, type, error } = task.error;
-        logger.error(`Error getting full task ${id}:${type} during claim: ${error.message}`);
-        bulkGetErrors++;
-      }
-      return acc;
-    },
-    []
-  );
-
-  // Look for tasks that have a null startedAt value, log them and manually set a startedAt field
-  for (const task of fullTasksToRun) {
-    if (task.startedAt == null) {
+  const fullTasksToRun = (await taskStore.bulkGet(Object.keys(updatedTasks))).reduce<
+    ConcreteTaskInstance[]
+  >((acc, task) => {
+    if (isOk(task) && task.value.version !== updatedTasks[task.value.id].version) {
       logger.warn(
-        `Task ${task.id} has a null startedAt value, setting to current time - ownerId ${task.ownerId}, status ${task.status}`
+        `Task ${task.value.id} was modified during the claiming phase, skipping until the next claiming cycle.`
       );
-      task.startedAt = now;
+      conflicts++;
+    } else if (isOk(task)) {
+      acc.push(task.value);
+    } else {
+      const { id, type, error } = task.error;
+      logger.error(`Error getting full task ${id}:${type} during claim: ${error.message}`);
+      bulkGetErrors++;
     }
-  }
+    return acc;
+  }, []);
 
   // separate update for removed tasks; shouldn't happen often, so unlikely
   // a performance concern, and keeps the rest of the logic simpler
@@ -288,6 +282,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       tasksClaimed: fullTasksToRun.length,
       tasksLeftUnclaimed: leftOverTasks.length,
       tasksErrors: bulkUpdateErrors + bulkGetErrors,
+      staleTasks: staleTasks.length,
     },
     docs: fullTasksToRun,
     timing: stopTaskTimer(),

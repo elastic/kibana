@@ -21,8 +21,16 @@ import {
   MetricsExplorerLocatorParams,
   ObservabilityTriggerId,
 } from '@kbn/observability-shared-plugin/common';
-import { BehaviorSubject, combineLatest, from } from 'rxjs';
-import { map } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  from,
+  of,
+  switchMap,
+  map,
+  firstValueFrom,
+} from 'rxjs';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
@@ -132,14 +140,18 @@ export class Plugin implements InfraClientPluginClass {
       messageFields: this.config.sources?.default?.fields?.message,
     });
 
-    const startDep$AndHostViewFlag$ = combineLatest([from(core.getStartServices())]);
+    const startDep$AndAccessibleFlag$ = from(core.getStartServices()).pipe(
+      switchMap(([{ application }]) =>
+        combineLatest([of(application), getLogsExplorerAccessible$(application)])
+      )
+    );
 
     const logRoutes = getLogsAppRoutes({ isLogsStreamEnabled });
 
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
-      startDep$AndHostViewFlag$.pipe(
-        map(([[{ application }]]) => {
+      startDep$AndAccessibleFlag$.pipe(
+        map(([application, isLogsExplorerAccessible]) => {
           const { infrastructure, logs } = application.capabilities;
           return [
             ...(logs.show
@@ -148,7 +160,7 @@ export class Plugin implements InfraClientPluginClass {
                     label: logsTitle,
                     sortKey: 200,
                     entries: getLogsNavigationEntries({
-                      application,
+                      isLogsExplorerAccessible,
                       config: this.config,
                       routes: logRoutes,
                     }),
@@ -220,8 +232,12 @@ export class Plugin implements InfraClientPluginClass {
           // mount callback should not use setup dependencies, get start dependencies instead
           const [coreStart, plugins, pluginStart] = await core.getStartServices();
 
+          const isLogsExplorerAccessible = await firstValueFrom(
+            getLogsExplorerAccessible$(coreStart.application)
+          );
+
           const { renderApp } = await import('./apps/logs_app');
-          return renderApp(coreStart, plugins, pluginStart, params);
+          return renderApp(coreStart, plugins, pluginStart, isLogsExplorerAccessible, params);
         },
       });
     }
@@ -310,16 +326,13 @@ export class Plugin implements InfraClientPluginClass {
         );
       },
     });
-
-    startDep$AndHostViewFlag$.subscribe(
-      ([_startServices]: [[CoreStart, InfraClientStartDeps, InfraClientStartExports]]) => {
-        this.appUpdater$.next(() => ({
-          deepLinks: getInfraDeepLinks({
-            metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
-          }),
-        }));
-      }
-    );
+    startDep$AndAccessibleFlag$.subscribe(([_applicationStart, _isLogsExplorerAccessible]) => {
+      this.appUpdater$.next(() => ({
+        deepLinks: getInfraDeepLinks({
+          metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
+        }),
+      }));
+    });
 
     // Setup telemetry events
     this.telemetry.setup({ analytics: core.analytics });
@@ -382,11 +395,11 @@ export class Plugin implements InfraClientPluginClass {
 }
 
 const getLogsNavigationEntries = ({
-  application,
+  isLogsExplorerAccessible,
   config,
   routes,
 }: {
-  application: CoreStart['application'];
+  isLogsExplorerAccessible: boolean;
   config: InfraPublicConfig;
   routes: LogsAppRoutes;
 }) => {
@@ -394,16 +407,14 @@ const getLogsNavigationEntries = ({
 
   if (!config.featureFlags.logsUIEnabled) return entries;
 
-  getLogsExplorerAccessibility$(application).subscribe((isAccessible) => {
-    if (isAccessible) {
-      entries.push({
-        label: 'Explorer',
-        app: 'observability-logs-explorer',
-        path: '/',
-        isBetaFeature: true,
-      });
-    }
-  });
+  if (isLogsExplorerAccessible) {
+    entries.push({
+      label: 'Explorer',
+      app: 'observability-logs-explorer',
+      path: '/',
+      isBetaFeature: true,
+    });
+  }
 
   // Display Stream nav entry when Logs Stream is enabled
   if (routes.stream) entries.push(createNavEntryFromRoute(routes.stream));
@@ -416,16 +427,15 @@ const getLogsNavigationEntries = ({
   return entries;
 };
 
-const getLogsExplorerAccessibility$ = (application: CoreStart['application']) => {
-  const { capabilities, applications$ } = application;
+const getLogsExplorerAccessible$ = (application: CoreStart['application']) => {
+  const { applications$ } = application;
   return applications$.pipe(
     map(
       (apps) =>
         (apps.get(OBSERVABILITY_LOGS_EXPLORER_APP_ID)?.status ?? AppStatus.inaccessible) ===
-          AppStatus.accessible &&
-        capabilities.discover?.show &&
-        capabilities.fleet?.read
-    )
+        AppStatus.accessible
+    ),
+    distinctUntilChanged()
   );
 };
 

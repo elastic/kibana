@@ -15,6 +15,7 @@ import {
   EuiLoadingLogo,
   EuiPanel,
   EuiImage,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -50,8 +51,24 @@ const EntityStoreDashboardPanelsComponent = () => {
   const entityStore = useEntityEngineStatus();
   const riskEngineStatus = useRiskEngineStatus();
 
-  const { enable: enableStore } = useEntityStoreEnablement();
+  const { enable: enableStore, query } = useEntityStoreEnablement();
+
   const { mutate: initRiskEngine } = useInitRiskEngineMutation();
+
+  const callouts = entityStore.errors.map((err) => (
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.entityStore.enablement.errors.title"
+          defaultMessage={'An error occurred during entity store resource initialization'}
+        />
+      }
+      color="danger"
+      iconType="error"
+    >
+      <p>{err?.message}</p>
+    </EuiCallOut>
+  ));
 
   const enableEntityStore = (enable: Enablements) => () => {
     setModalState({ visible: false });
@@ -66,12 +83,33 @@ const EntityStoreDashboardPanelsComponent = () => {
       };
       setRiskEngineInitializing(true);
       initRiskEngine(undefined, options);
+      return;
     }
 
     if (enable.entityStore) {
       enableStore();
     }
   };
+
+  if (query.error) {
+    return (
+      <>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityStore.enablement.errors.queryErrorTitle"
+              defaultMessage={'There was a problem initializing the entity store'}
+            />
+          }
+          color="danger"
+          iconType="error"
+        >
+          <p>{(query.error as { body: { message: string } }).body.message}</p>
+        </EuiCallOut>
+        {callouts}
+      </>
+    );
+  }
 
   if (entityStore.status === 'loading') {
     return (
@@ -103,12 +141,36 @@ const EntityStoreDashboardPanelsComponent = () => {
     );
   }
 
+  // TODO Rename variable because the Risk score could be installed but disabled
   const isRiskScoreAvailable =
     riskEngineStatus.data &&
     riskEngineStatus.data.risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED;
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="entityStorePanelsGroup">
+      {entityStore.status === 'error' && isRiskScoreAvailable && (
+        <>
+          {callouts}
+          <EuiFlexItem>
+            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
+          </EuiFlexItem>
+        </>
+      )}
+      {entityStore.status === 'error' && !isRiskScoreAvailable && (
+        <>
+          {callouts}
+          <EuiFlexItem>
+            <EnableEntityStore
+              onEnable={() => setModalState({ visible: true })}
+              loadingRiskEngine={riskEngineInitializing}
+              enablements="riskScore"
+            />
+          </EuiFlexItem>
+        </>
+      )}
       {entityStore.status === 'enabled' && isRiskScoreAvailable && (
         <>
           <EuiFlexItem>
@@ -138,35 +200,37 @@ const EntityStoreDashboardPanelsComponent = () => {
         </>
       )}
 
-      {entityStore.status === 'not_installed' && !isRiskScoreAvailable && (
-        // TODO: Move modal inside EnableEntityStore component, eliminating the onEnable prop in favour of forwarding the riskScoreEnabled status
-        <EnableEntityStore
-          enablements="both"
-          onEnable={() => setModalState({ visible: true })}
-          loadingRiskEngine={riskEngineInitializing}
-        />
-      )}
+      {(entityStore.status === 'not_installed' || entityStore.status === 'stopped') &&
+        !isRiskScoreAvailable && (
+          // TODO: Move modal inside EnableEntityStore component, eliminating the onEnable prop in favour of forwarding the riskScoreEnabled status
+          <EnableEntityStore
+            enablements="both"
+            onEnable={() => setModalState({ visible: true })}
+            loadingRiskEngine={riskEngineInitializing}
+          />
+        )}
 
-      {entityStore.status === 'not_installed' && isRiskScoreAvailable && (
-        <>
-          <EuiFlexItem>
-            <EnableEntityStore
-              enablements="store"
-              onEnable={() =>
-                setModalState({
-                  visible: true,
-                })
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
-          </EuiFlexItem>
-        </>
-      )}
+      {(entityStore.status === 'not_installed' || entityStore.status === 'stopped') &&
+        isRiskScoreAvailable && (
+          <>
+            <EuiFlexItem>
+              <EnableEntityStore
+                enablements="store"
+                onEnable={() =>
+                  setModalState({
+                    visible: true,
+                  })
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
+            </EuiFlexItem>
+          </>
+        )}
 
       <EntityStoreEnablementModal
         visible={modal.visible}
