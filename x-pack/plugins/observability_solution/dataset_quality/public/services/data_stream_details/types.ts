@@ -49,7 +49,7 @@ export interface IDataStreamDetailsClient {
   getDataStreamDegradedFieldValues(
     params: GetDataStreamDegradedFieldValuesPathParams
   ): Promise<DegradedFieldValues>;
-  checkAndLoadIntegration(params: CheckAndLoadIntegrationParams): IntegrationType;
+  checkAndLoadIntegration(params: CheckAndLoadIntegrationParams): Promise<IntegrationType>;
   getIntegrationDashboards(params: GetIntegrationDashboardsParams): Promise<Dashboard[]>;
   analyzeDegradedField(params: AnalyzeDegradedFieldsParams): Promise<DegradedFieldAnalysis>;
   setNewFieldLimit(params: UpdateFieldLimitParams): Promise<UpdateFieldLimitResponse>;

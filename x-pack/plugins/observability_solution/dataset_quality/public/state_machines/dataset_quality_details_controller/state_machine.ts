@@ -28,6 +28,8 @@ import {
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
+
+import { IntegrationType } from '../../../common/data_stream_details';
 import {
   fetchDataStreamDetailsFailedNotifier,
   assertBreakdownFieldEcsFailedNotifier,
@@ -37,7 +39,6 @@ import {
   updateFieldLimitFailedNotifier,
   rolloverDataStreamFailedNotifier,
 } from './notifications';
-import { Integration } from '../../../common/data_streams_stats/integration';
 
 export const createPureDatasetQualityDetailsControllerStateMachine = (
   initialContext: DatasetQualityDetailsControllerContext
@@ -507,7 +508,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               }
             : {};
         }),
-        storeDataStreamIntegration: assign((context, event: DoneInvokeEvent<Integration>) => {
+        storeDataStreamIntegration: assign((context, event: DoneInvokeEvent<IntegrationType>) => {
           return 'data' in event
             ? {
                 integration: event.data,
@@ -588,7 +589,12 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
           );
         },
         isDataStreamIsPartOfIntegration: (_, event) => {
-          return 'data' in event;
+          return (
+            'data' in event &&
+            typeof event.data === 'object' &&
+            'isIntegration' in event.data &&
+            event.data.isIntegration
+          );
         },
       },
     }
@@ -727,9 +733,9 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         });
       },
       loadIntegrationDashboards: (context) => {
-        if ('integration' in context && context.integration) {
+        if ('integration' in context && context.integration && context.integration.integration) {
           return dataStreamDetailsClient.getIntegrationDashboards({
-            integration: context.integration.name,
+            integration: context.integration.integration.name,
           });
         }
 
