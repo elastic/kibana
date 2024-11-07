@@ -153,8 +153,8 @@ export const LinkEditor = ({
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              flush="left"
               onClick={() => onClose()}
-              iconType="cross"
               data-test-subj="links--linkEditor--closeBtn"
             >
               {LinksStrings.editor.getCancelButtonLabel()}
@@ -162,6 +162,7 @@ export const LinkEditor = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              fill
               disabled={!linkDestination}
               onClick={() => {
                 // this check should always be true, since the button is disabled otherwise - this is just for type safety

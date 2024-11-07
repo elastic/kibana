@@ -399,10 +399,10 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={props.onCancel} flush="left">
+            <EuiButtonEmpty onClick={props.onCancel} flush="left">
               <FormattedMessage
                 id="imageEmbeddable.imageEditor.imageBackgroundCloseButtonText"
-                defaultMessage="Close"
+                defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

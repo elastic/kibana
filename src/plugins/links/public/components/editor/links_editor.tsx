@@ -252,7 +252,6 @@ const LinksEditor = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={onClose}
-              iconType="cross"
               flush="left"
               data-test-subj="links--panelEditor--closeBtn"
             >
