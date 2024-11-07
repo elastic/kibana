@@ -92,6 +92,11 @@ const buildIngestPipeline = ({
           },
         ]
       : []),
+    {
+      pipeline: {
+        name: 'entity_metadata_extractor_entity_store_poc',
+      },
+    },
   ];
 };
 
@@ -136,7 +141,7 @@ export const createPlatformPipeline = async ({
     },
   };
 
-  logger.debug(`Attempting to create pipeline: ${JSON.stringify(pipeline)}`);
+  console.log(`Attempting to create pipeline: ${JSON.stringify(pipeline)}`);
 
   await esClient.ingest.putPipeline(pipeline);
 };
