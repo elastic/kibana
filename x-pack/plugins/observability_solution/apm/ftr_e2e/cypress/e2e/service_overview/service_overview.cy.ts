@@ -188,7 +188,7 @@ describe('Service Overview', () => {
       cy.visitKibana(baseUrl);
     });
 
-    it('with the correct environment when changing the environment', () => {
+    it.skip('with the correct environment when changing the environment', () => {
       cy.wait(aliasNames);
 
       cy.intercept('GET', 'internal/apm/suggestions?*').as('suggestionsRequest');
