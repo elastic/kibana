@@ -130,6 +130,6 @@ describe('EsqlStarredQueriesService', () => {
     await service.addStarredQuery(query);
     const button = service.renderStarredButton(query);
     expect(button.props.title).toEqual('Remove ES|QL query from Starred');
-    expect(button.props.iconType).toEqual('starMinusFilled');
+    expect(button.props.iconType).toEqual('starFilled');
   });
 });

@@ -28,6 +28,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
 import { FAVORITES_LIMIT } from '@kbn/content-management-favorites-common';
 import { css, Interpolation, Theme } from '@emotion/react';
 import {
@@ -124,7 +125,7 @@ export const getTableColumns = (
         }
         return StarredQueryButton;
       },
-      width: isOnReducedSpaceLayout ? 'auto' : '30px',
+      width: isOnReducedSpaceLayout ? 'auto' : '40px',
     },
     {
       field: 'status',
@@ -336,6 +337,8 @@ export function QueryList({
   const { euiTheme } = theme;
   const extraStyling = isOnReducedSpaceLayout ? getReducedSpaceStyling() : '';
 
+  const starredQueriesCellStyling = cssFavoriteHoverWithinEuiTableRow(theme.euiTheme);
+
   const tableStyling = css`
     .euiTable {
       background-color: ${euiTheme.colors.lightestShade};
@@ -354,6 +357,7 @@ export function QueryList({
     overflow-y: auto;
     ${scrollBarStyles}
     ${extraStyling}
+    ${starredQueriesCellStyling}
   `;
 
   return (

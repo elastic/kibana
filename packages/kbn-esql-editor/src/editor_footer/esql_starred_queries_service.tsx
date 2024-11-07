@@ -11,7 +11,6 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
-import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { EuiButtonIcon } from '@elastic/eui';
@@ -158,7 +157,7 @@ export class EsqlStarredQueriesService {
                 defaultMessage: 'Add ES|QL query to Starred',
               })
         }
-        className="esqlStarredButton"
+        className={!isStarred ? 'cm-favorite-button--empty' : ''}
         aria-label={
           isStarred
             ? i18n.translate('esqlEditor.query.querieshistory.removeFavoriteTitle', {
@@ -168,7 +167,7 @@ export class EsqlStarredQueriesService {
                 defaultMessage: 'Add ES|QL query to Starred',
               })
         }
-        iconType={isStarred ? 'starMinusFilled' : 'starPlusFilled'}
+        iconType={isStarred ? 'starFilled' : 'starEmpty'}
         onClick={async () => {
           if (isStarred) {
             await this.removeStarredQuery(trimmedQueryString);
@@ -177,14 +176,6 @@ export class EsqlStarredQueriesService {
           }
         }}
         data-test-subj="ESQLFavoriteButton"
-        css={css`
-          opacity: 0.3;
-
-          &:hover {
-            visibility: visible;
-            opacity: 1;
-          }
-        `}
       />
     );
   }

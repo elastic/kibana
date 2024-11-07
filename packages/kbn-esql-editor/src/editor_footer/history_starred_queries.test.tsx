@@ -60,7 +60,7 @@ describe('Starred and History queries components', () => {
         {
           'data-test-subj': 'favoriteBtn',
           render: expect.anything(),
-          width: '30px',
+          width: '40px',
         },
         {
           css: {
@@ -102,7 +102,7 @@ describe('Starred and History queries components', () => {
         {
           'data-test-subj': 'favoriteBtn',
           render: expect.anything(),
-          width: '30px',
+          width: '40px',
         },
         {
           css: {
