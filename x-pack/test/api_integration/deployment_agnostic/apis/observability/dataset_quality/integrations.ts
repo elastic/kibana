@@ -48,7 +48,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let adminRoleAuthc: RoleCredentials;
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
     let preExistingIntegrations: List<string>;
-    let preExistingCustomIntegrations: List<string>;
 
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
