@@ -25,7 +25,7 @@ import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
-import { Alert } from '@kbn/alerts-as-data-utils';
+import type { Alert, DynamicTemplate } from '@kbn/alerts-as-data-utils';
 import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import { AlertsHealth } from '@kbn/alerting-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
@@ -196,6 +196,7 @@ export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
 interface ComponentTemplateSpec {
   dynamic?: 'strict' | false; // defaults to 'strict'
   fieldMap: FieldMap;
+  dynamicTemplates?: DynamicTemplate[];
 }
 
 export type FormatAlert<AlertData extends RuleAlertData> = (

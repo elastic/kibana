@@ -54,6 +54,7 @@ export type CustomThresholdAlertState = AlertState; // no specific instance stat
 export type CustomThresholdAlertContext = AlertContext & {
   alertDetailsUrl: string;
   group?: object;
+  grouping?: object;
   reason?: string;
   timestamp: string; // ISO string
   // String type is for [NO DATA]
@@ -80,4 +81,5 @@ export type CustomThresholdAlert = Omit<
   [ALERT_EVALUATION_VALUES]?: Array<number | null>;
   [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
   [ALERT_GROUP]?: Group[];
+  [ALERT_GROUPING]?: Record<string, string>;
 };
