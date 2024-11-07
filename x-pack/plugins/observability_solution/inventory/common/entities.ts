@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
+import { z } from '@kbn/zod';
+import { ENTITY_LATEST, entitiesAliasPattern, entityLatestSchema } from '@kbn/entities-schema';
 import {
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
@@ -93,4 +94,8 @@ export type EntityGroup = {
   count: number;
 } & {
   [key: string]: string;
+};
+
+export type InventoryEntityLatest = z.infer<typeof entityLatestSchema> & {
+  alertsCount?: number;
 };

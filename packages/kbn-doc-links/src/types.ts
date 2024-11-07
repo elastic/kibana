@@ -240,9 +240,6 @@ export interface DocLinks {
     readonly base: string;
     readonly inputElasticAgent: string;
   };
-  readonly functionbeat: {
-    readonly base: string;
-  };
   readonly winlogbeat: {
     readonly base: string;
   };

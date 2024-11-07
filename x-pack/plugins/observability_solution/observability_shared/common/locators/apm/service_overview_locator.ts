@@ -16,9 +16,10 @@ export interface ServiceOverviewParams extends SerializableRecord {
 }
 
 export type ServiceOverviewLocator = LocatorPublic<ServiceOverviewParams>;
+export const SERVICE_OVERVIEW_LOCATOR_ID = 'serviceOverviewLocator';
 
 export class ServiceOverviewLocatorDefinition implements LocatorDefinition<ServiceOverviewParams> {
-  public readonly id = 'serviceOverviewLocator';
+  public readonly id = SERVICE_OVERVIEW_LOCATOR_ID;
 
   public readonly getLocation = async ({
     rangeFrom,
