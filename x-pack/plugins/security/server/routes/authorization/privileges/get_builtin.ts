@@ -10,7 +10,7 @@ import type { RouteDefinitionParams } from '../..';
 export function defineGetBuiltinPrivilegesRoutes({ router }: RouteDefinitionParams) {
   router.get(
     {
-      path: '/internal/security/esPrivileges/builtin adcv',
+      path: '/internal/security/esPrivileges/builtin',
       security: {
         authz: {
           enabled: false,

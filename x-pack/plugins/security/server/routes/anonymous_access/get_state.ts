@@ -23,7 +23,7 @@ export function defineAnonymousAccessGetStateRoutes({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'This route is used for anonymous access',
         },
       },
       validate: false,
