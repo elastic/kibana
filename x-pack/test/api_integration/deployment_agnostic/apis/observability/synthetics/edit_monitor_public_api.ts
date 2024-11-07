@@ -6,62 +6,72 @@
  */
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-
+import { RouteCredentials } from '@kbn/ftr-common-functional-services';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import moment from 'moment';
 import { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
 import { LOCATION_REQUIRED_ERROR } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/monitor_validation';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
-import { PrivateLocationTestService } from './services/private_location_test_service';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
+import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 
-export const editMonitorAPIHelper = async (
-  supertestAPI: any,
-  monitorId: string,
-  monitor: any,
-  statusCode = 200
-) => {
-  const result = await supertestAPI
-    .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + `/${monitorId}`)
-    .set('kbn-xsrf', 'true')
-    .send(monitor);
-
-  expect(result.status).eql(statusCode, JSON.stringify(result.body));
-
-  if (statusCode === 200) {
-    const { created_at: createdAt, updated_at: updatedAt, id, config_id: configId } = result.body;
-    expect(id).not.empty();
-    expect(configId).not.empty();
-    expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
-    return {
-      rawBody: result.body,
-      body: {
-        ...omit(result.body, ['created_at', 'updated_at', 'id', 'config_id', 'form_monitor_type']),
-      },
-    };
-  }
-  return result.body;
-};
-
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('EditMonitorsPublicAPI', function () {
     this.tags('skipCloud');
 
-    const supertestAPI = getService('supertest');
+    const supertestAPI = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
+    const samlAuth = getService('samlAuth');
     const testPrivateLocations = new PrivateLocationTestService(getService);
+    let editorUser: RouteCredentials;
 
     async function addMonitorAPI(monitor: any, statusCode: number = 200) {
-      return await addMonitorAPIHelper(supertestAPI, monitor, statusCode);
+      return await addMonitorAPIHelper(supertestAPI, monitor, statusCode, editorUser, samlAuth);
     }
 
     async function editMonitorAPI(id: string, monitor: any, statusCode: number = 200) {
-      return await editMonitorAPIHelper(supertestAPI, id, monitor, statusCode);
+      return await editMonitorAPIHelper(id, monitor, statusCode);
+    }
+
+    async function editMonitorAPIHelper(monitorId: string, monitor: any, statusCode = 200) {
+      const result = await supertestAPI
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + `/${monitorId}`)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(monitor);
+
+      expect(result.status).eql(statusCode, JSON.stringify(result.body));
+
+      if (statusCode === 200) {
+        const {
+          created_at: createdAt,
+          updated_at: updatedAt,
+          id,
+          config_id: configId,
+        } = result.body;
+        expect(id).not.empty();
+        expect(configId).not.empty();
+        expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+        return {
+          rawBody: result.body,
+          body: {
+            ...omit(result.body, [
+              'created_at',
+              'updated_at',
+              'id',
+              'config_id',
+              'form_monitor_type',
+            ]),
+          },
+        };
+      }
+      return result.body;
     }
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
     });
 
     after(async () => {

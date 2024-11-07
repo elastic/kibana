@@ -6,9 +6,10 @@
  */
 
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { RouteCredentials } from '@kbn/ftr-common-functional-services';
 import expect from '@kbn/expect';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export const LOCAL_LOCATION = {
   id: 'dev',
@@ -19,12 +20,14 @@ export const LOCAL_LOCATION = {
   },
   isServiceManaged: true,
 };
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('getMonitorFilters', function () {
     this.tags('skipCloud');
     const kibanaServer = getService('kibanaServer');
+    const supertest = getService('supertestWithoutAuth');
+    const samlAuth = getService('samlAuth');
 
-    const supertest = getService('supertest');
+    let editorUser: RouteCredentials;
 
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: [syntheticsMonitorType] });
@@ -32,10 +35,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.clean({ types: [syntheticsMonitorType] });
+      editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
     });
 
     it('get list of filters', async () => {
-      const apiResponse = await supertest.get(SYNTHETICS_API_URLS.FILTERS).expect(200);
+      const apiResponse = await supertest
+        .get(SYNTHETICS_API_URLS.FILTERS)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
 
       expect(apiResponse.body).eql({
         monitorTypes: [],
@@ -57,11 +65,16 @@ export default function ({ getService }: FtrProviderContext) {
 
       await supertest
         .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-        .set('kbn-xsrf', 'true')
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send(newMonitor)
         .expect(200);
 
-      const apiResponse = await supertest.get(SYNTHETICS_API_URLS.FILTERS).expect(200);
+      const apiResponse = await supertest
+        .get(SYNTHETICS_API_URLS.FILTERS)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
 
       expect(apiResponse.body).eql({
         monitorTypes: [{ label: 'http', count: 1 }],

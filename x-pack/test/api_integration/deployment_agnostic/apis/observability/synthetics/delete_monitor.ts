@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuidv4 } from 'uuid';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import {
   EncryptedSyntheticsSavedMonitor,
@@ -21,7 +20,7 @@ import { PrivateLocationTestService } from '../../../services/synthetics_private
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe.only('DeleteMonitorRoute', function () {
+  describe('DeleteMonitorRoute', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertestWithoutAuth');

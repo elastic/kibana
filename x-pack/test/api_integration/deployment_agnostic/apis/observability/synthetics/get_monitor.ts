@@ -7,6 +7,7 @@
 
 import { omit } from 'lodash';
 import moment from 'moment';
+import { RouteCredentials } from '@kbn/ftr-common-functional-services';
 import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
@@ -17,29 +18,35 @@ import expect from '@kbn/expect';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { v4 as uuidv4 } from 'uuid';
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
-import { omitMonitorKeys } from './add_monitor';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
+import { omitMonitorKeys } from './create_monitor';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { getFixtureJson } from './helpers/get_fixture_json';
 import { LOCAL_LOCATION } from './get_filters';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('getSyntheticsMonitors', function () {
     this.tags('skipCloud');
 
-    const supertest = getService('supertest');
+    const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const retry = getService('retry');
+    const samlAuth = getService('samlAuth');
     const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     let _monitors: MonitorFields[];
     let monitors: MonitorFields[];
+    let editorUser: RouteCredentials;
 
     const saveMonitor = async (monitor: MonitorFields, spaceId?: string) => {
       let url = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?internal=true';
       if (spaceId) {
         url = '/s/' + spaceId + url;
       }
-      const res = await supertest.post(url).set('kbn-xsrf', 'true').send(monitor);
+      const res = await supertest
+        .post(url)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(monitor);
 
       expect(res.status).eql(200, JSON.stringify(res.body));
 
@@ -48,9 +55,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-        .set('kbn-xsrf', 'true')
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
       _monitors = [
@@ -108,9 +117,13 @@ export default function ({ getService }: FtrProviderContext) {
         await retry.try(async () => {
           const firstPageResp = await supertest
             .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=2`)
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
             .expect(200);
           const secondPageResp = await supertest
             .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=2&perPage=3`)
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
             .expect(200);
 
           expect(firstPageResp.body.total).greaterThan(6);
@@ -130,6 +143,8 @@ export default function ({ getService }: FtrProviderContext) {
           .get(
             `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&monitorQueryIds=${id2}`
           )
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         const resultMonitorIds = resp.body.monitors.map(({ id }: Partial<MonitorFields>) => id);
@@ -146,6 +161,8 @@ export default function ({ getService }: FtrProviderContext) {
           .get(
             `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&sortField=name.keyword&sortOrder=asc&monitorQueryIds=${id2}&monitorQueryIds=${id3}`
           )
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         const resultMonitorIds = resp.body.monitors.map(({ id }: Partial<MonitorFields>) => id);
@@ -176,6 +193,8 @@ export default function ({ getService }: FtrProviderContext) {
           .get(
             `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=10&sortField=name.keyword&sortOrder=asc&monitorQueryIds=${customHeartbeatId0}&monitorQueryIds=${customHeartbeatId1}`
           )
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         const resultMonitorIds = resp.body.monitors
@@ -197,6 +216,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const firstPageResp = await supertest
           .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=1000`)
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
         const defaultSpaceMons = firstPageResp.body.monitors.filter(
           ({ spaceId }: { spaceId: string }) => spaceId === 'default'
@@ -212,6 +233,8 @@ export default function ({ getService }: FtrProviderContext) {
           .get(
             `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=1000&showFromAllSpaces=true`
           )
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         const defaultSpaceMons1 = res.body.monitors.filter(
@@ -232,7 +255,7 @@ export default function ({ getService }: FtrProviderContext) {
           monitors.map((mon) => ({ ...mon, name: mon.name + '4' })).map((monT) => saveMonitor(monT))
         );
 
-        const apiResponse = await monitorTestService.getMonitor(id1);
+        const apiResponse = await monitorTestService.getMonitor(id1, { user: editorUser });
 
         expect(apiResponse.body).eql(
           omitMonitorKeys({
@@ -251,7 +274,10 @@ export default function ({ getService }: FtrProviderContext) {
           monitors.map((mon) => ({ ...mon, name: mon.name + '5' })).map((monT) => saveMonitor(monT))
         );
 
-        const apiResponse = await monitorTestService.getMonitor(id1, { internal: true });
+        const apiResponse = await monitorTestService.getMonitor(id1, {
+          internal: true,
+          user: editorUser,
+        });
 
         expect(apiResponse.body).eql(
           omit(
@@ -278,9 +304,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         const getResponse = await supertest
           .get(SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', invalidMonitorId))
-          .set('kbn-xsrf', 'true');
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .expect(404);
 
-        expect(getResponse.status).eql(404);
         expect(getResponse.body.message).eql(expected404Message);
       });
 
@@ -289,7 +316,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertest
           .get(SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', veryLargeMonId))
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(400);
       });
     });

@@ -17,5 +17,11 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./create_update_params'));
     loadTestFile(require.resolve('./delete_monitor_project'));
     loadTestFile(require.resolve('./delete_monitor'));
+    loadTestFile(require.resolve('./edit_monitor'));
+    loadTestFile(require.resolve('./edit_monitor_public_api'));
+    loadTestFile(require.resolve('./enable_default_alerting'));
+    loadTestFile(require.resolve('./get_filters'));
+    loadTestFile(require.resolve('./get_monitor_project'));
+    loadTestFile(require.resolve('./get_monitor'));
   });
 }

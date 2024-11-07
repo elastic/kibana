@@ -5,28 +5,31 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { RouteCredentials } from '@kbn/ftr-common-functional-services';
 import { omit } from 'lodash';
 import { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '@kbn/synthetics-plugin/common/constants/settings_defaults';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
-import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { getFixtureJson } from './helpers/get_fixture_json';
+import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('EnableDefaultAlerting', function () {
     this.tags('skipCloud');
 
-    const supertest = getService('supertest');
+    const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const retry = getService('retry');
+    const samlAuth = getService('samlAuth');
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
+    let editorUser: RouteCredentials;
 
     const addMonitorAPI = async (monitor: any, statusCode = 200) => {
-      return addMonitorAPIHelper(supertest, monitor, statusCode);
+      return addMonitorAPIHelper(supertest, monitor, statusCode, editorUser, samlAuth);
     };
 
     after(async () => {
@@ -35,8 +38,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-
       _httpMonitorJson = getFixtureJson('http_monitor');
+      editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
     });
 
     beforeEach(async () => {
@@ -44,7 +47,8 @@ export default function ({ getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await supertest
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
-        .set('kbn-xsrf', 'true')
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send(DYNAMIC_SETTINGS_DEFAULTS)
         .expect(200);
     });
@@ -52,7 +56,8 @@ export default function ({ getService }: FtrProviderContext) {
     it('returns the created alerted when called', async () => {
       const apiResponse = await supertest
         .post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-        .set('kbn-xsrf', 'true')
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send()
         .expect(200);
 
@@ -86,7 +91,8 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.tryForTime(30 * 1000, async () => {
         const res = await supertest
           .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         expect(res.body.statusRule.ruleTypeId).eql('xpack.synthetics.alerts.monitorStatus');
@@ -104,7 +110,8 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.tryForTime(30 * 1000, async () => {
         const res = await supertest
           .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         expect(res.body.statusRule.ruleTypeId).eql('xpack.synthetics.alerts.monitorStatus');
@@ -112,7 +119,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
       const settings = await supertest
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
-        .set('kbn-xsrf', 'true')
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send({
           defaultStatusRuleEnabled: false,
           defaultTLSRuleEnabled: false,
@@ -123,14 +131,16 @@ export default function ({ getService }: FtrProviderContext) {
 
       await supertest
         .put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-        .set('kbn-xsrf', 'true')
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send()
         .expect(200);
 
       await retry.tryForTime(30 * 1000, async () => {
         const res = await supertest
           .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         expect(res.body.statusRule).eql(null);
@@ -139,7 +149,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const settings2 = await supertest
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
-        .set('kbn-xsrf', 'true')
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send({
           defaultStatusRuleEnabled: true,
           defaultTLSRuleEnabled: true,
@@ -151,14 +162,16 @@ export default function ({ getService }: FtrProviderContext) {
 
       await supertest
         .put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-        .set('kbn-xsrf', 'true')
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send()
         .expect(200);
 
       await retry.tryForTime(30 * 1000, async () => {
         const res = await supertest
           .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         expect(res.body.statusRule.ruleTypeId).eql('xpack.synthetics.alerts.monitorStatus');
@@ -176,7 +189,9 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.tryForTime(30 * 1000, async () => {
         const res = await supertest
           .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-          .set('kbn-xsrf', 'true');
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .expect(200);
 
         expect(res.body.statusRule.ruleTypeId).eql('xpack.synthetics.alerts.monitorStatus');
         expect(res.body.tlsRule.ruleTypeId).eql('xpack.synthetics.alerts.tls');
@@ -184,24 +199,29 @@ export default function ({ getService }: FtrProviderContext) {
 
       const settings = await supertest
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
-        .set('kbn-xsrf', 'true')
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send({
           defaultStatusRuleEnabled: false,
           defaultTLSRuleEnabled: false,
-        });
+        })
+        .expect(200);
 
       expect(settings.body.defaultStatusRuleEnabled).eql(false);
       expect(settings.body.defaultTLSRuleEnabled).eql(false);
 
       await supertest
         .put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-        .set('kbn-xsrf', 'true')
-        .send();
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
 
       await retry.tryForTime(30 * 1000, async () => {
         const res = await supertest
           .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         expect(res.body.statusRule).eql(null);
@@ -211,14 +231,16 @@ export default function ({ getService }: FtrProviderContext) {
       // call api again with the same settings, make sure its 200
       await supertest
         .put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-        .set('kbn-xsrf', 'true')
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send()
         .expect(200);
 
       await retry.tryForTime(30 * 1000, async () => {
         const res = await supertest
           .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         expect(res.body.statusRule).eql(null);
@@ -238,10 +260,10 @@ const defaultAlertRules = {
     name: 'Synthetics status internal rule',
     enabled: true,
     throttle: null,
-    apiKeyOwner: 'elastic',
-    apiKeyCreatedByUser: false,
-    createdBy: 'elastic',
-    updatedBy: 'elastic',
+    apiKeyOwner: 'elastic_admin',
+    apiKeyCreatedByUser: true,
+    createdBy: 'elastic_admin',
+    updatedBy: 'elastic_admin',
     muteAll: false,
     mutedInstanceIds: [],
     revision: 0,
@@ -270,10 +292,10 @@ const defaultAlertRules = {
     name: 'Synthetics internal TLS rule',
     enabled: true,
     throttle: null,
-    apiKeyOwner: 'elastic',
-    apiKeyCreatedByUser: false,
-    createdBy: 'elastic',
-    updatedBy: 'elastic',
+    apiKeyOwner: 'elastic_admin',
+    apiKeyCreatedByUser: true,
+    createdBy: 'elastic_admin',
+    updatedBy: 'elastic_admin',
     muteAll: false,
     mutedInstanceIds: [],
     revision: 0,

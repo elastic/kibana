@@ -6,6 +6,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import type SuperTest from 'supertest';
+import { RouteCredentials } from '@kbn/ftr-common-functional-services';
 import {
   LegacyProjectMonitorsRequest,
   ProjectMonitor,
@@ -13,22 +14,24 @@ import {
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from './helper/get_fixture_json';
-import { PrivateLocationTestService } from './services/private_location_test_service';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { getFixtureJson } from './helpers/get_fixture_json';
+import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('GetProjectMonitors', function () {
     this.tags('skipCloud');
 
-    const supertest = getService('supertest');
+    const supertest = getService('supertestWithoutAuth');
+    const samlAuth = getService('samlAuth');
 
     let projectMonitors: LegacyProjectMonitorsRequest;
     let httpProjectMonitors: LegacyProjectMonitorsRequest;
     let tcpProjectMonitors: LegacyProjectMonitorsRequest;
     let icmpProjectMonitors: LegacyProjectMonitorsRequest;
-
     let testPolicyId = '';
+    let editorUser: RouteCredentials;
+
     const testPrivateLocations = new PrivateLocationTestService(getService);
 
     const setUniqueIds = (request: LegacyProjectMonitorsRequest) => {
@@ -45,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
       await testPrivateLocations.setTestLocations([testPolicyId]);
+      editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
     });
 
     beforeEach(() => {
@@ -70,7 +74,8 @@ export default function ({ getService }: FtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(0, 250),
           })
@@ -80,7 +85,8 @@ export default function ({ getService }: FtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(250, 500),
           })
@@ -89,7 +95,8 @@ export default function ({ getService }: FtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(500, 600),
           })
@@ -97,7 +104,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const firstPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send()
           .expect(200);
 
@@ -108,7 +116,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const secondPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .query({
             search_after: afterKey,
           })
@@ -124,21 +133,24 @@ export default function ({ getService }: FtrProviderContext) {
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(0, 250) })
           .expect(200);
         await supertest
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(250, 500) })
           .expect(200);
         await supertest
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(500, 600) })
           .expect(200);
       }
@@ -160,7 +172,8 @@ export default function ({ getService }: FtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(0, 250),
           })
@@ -170,7 +183,8 @@ export default function ({ getService }: FtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(250, 500),
           })
@@ -179,7 +193,8 @@ export default function ({ getService }: FtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(500, 600),
           })
@@ -187,7 +202,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const firstPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send()
           .expect(200);
 
@@ -202,7 +218,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const secondPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .query({
             search_after: afterKey,
           })
@@ -218,21 +235,24 @@ export default function ({ getService }: FtrProviderContext) {
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(0, 250) })
           .expect(200);
         await supertest
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(250, 500) })
           .expect(200);
         await supertest
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(500, 600) })
           .expect(200);
       }
@@ -254,7 +274,8 @@ export default function ({ getService }: FtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(0, 250),
           })
@@ -264,7 +285,8 @@ export default function ({ getService }: FtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(250, 500),
           })
@@ -273,7 +295,8 @@ export default function ({ getService }: FtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(500, 600),
           })
@@ -281,7 +304,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const firstPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send()
           .expect(200);
 
@@ -296,7 +320,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const secondPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .query({
             search_after: afterKey,
           })
@@ -312,21 +337,24 @@ export default function ({ getService }: FtrProviderContext) {
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(0, 250) })
           .expect(200);
         await supertest
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(250, 500) })
           .expect(200);
         await supertest
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(500, 600) })
           .expect(200);
       }
@@ -348,7 +376,8 @@ export default function ({ getService }: FtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(0, 250),
           })
@@ -358,7 +387,8 @@ export default function ({ getService }: FtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(250, 500),
           })
@@ -367,14 +397,16 @@ export default function ({ getService }: FtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(500, 600),
           })
           .expect(200);
         const firstPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send()
           .expect(200);
 
@@ -389,7 +421,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const secondPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .query({
             search_after: afterKey,
           })
@@ -406,21 +439,24 @@ export default function ({ getService }: FtrProviderContext) {
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(0, 250) })
           .expect(200);
         await supertest
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(250, 500) })
           .expect(200);
         await supertest
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(500, 600) })
           .expect(200);
       }
@@ -445,7 +481,8 @@ export default function ({ getService }: FtrProviderContext) {
               projectName
             )
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(0, 250),
           })
@@ -458,7 +495,8 @@ export default function ({ getService }: FtrProviderContext) {
               projectName
             )
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(250, 500),
           })
@@ -470,7 +508,8 @@ export default function ({ getService }: FtrProviderContext) {
               projectName
             )
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(500, 600),
           })
@@ -483,7 +522,8 @@ export default function ({ getService }: FtrProviderContext) {
               encodeURI(projectName)
             )
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send()
           .expect(200);
 
@@ -503,7 +543,8 @@ export default function ({ getService }: FtrProviderContext) {
               encodeURI(projectName)
             )
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .query({
             search_after: afterKey,
           })
@@ -523,7 +564,8 @@ export default function ({ getService }: FtrProviderContext) {
               encodeURI(projectName)
             )
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(0, 250) })
           .expect(200);
         await supertest
@@ -533,7 +575,8 @@ export default function ({ getService }: FtrProviderContext) {
               encodeURI(projectName)
             )
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(250, 500) })
           .expect(200);
         await supertest
@@ -543,7 +586,8 @@ export default function ({ getService }: FtrProviderContext) {
               encodeURI(projectName)
             )
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(500, 600) })
           .expect(200);
       }
@@ -566,7 +610,8 @@ export default function ({ getService }: FtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(0, 250),
           })
@@ -576,7 +621,8 @@ export default function ({ getService }: FtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(250, 500),
           })
@@ -585,7 +631,8 @@ export default function ({ getService }: FtrProviderContext) {
           .put(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: monitors.slice(500, 600),
           })
@@ -598,7 +645,8 @@ export default function ({ getService }: FtrProviderContext) {
         while (count >= 250) {
           const response: SuperTest.Response = await supertest
             .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-            .set('kbn-xsrf', 'true')
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
             .query({
               per_page: perPage,
               search_after: afterId,
@@ -628,21 +676,24 @@ export default function ({ getService }: FtrProviderContext) {
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(0, 250) })
           .expect(200);
         await supertest
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(250, 500) })
           .expect(200);
         await supertest
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
-          .set('kbn-xsrf', 'true')
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .send({ monitors: monitorsToDelete.slice(500, 600) })
           .expect(200);
       }
