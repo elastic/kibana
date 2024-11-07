@@ -744,6 +744,8 @@ export function XYChart({
     formatFactory
   );
 
+  const appFixedViewport = useAppFixedViewport();
+
   return (
     <div css={chartContainerStyle}>
       {showLegend !== undefined && uiState && (
@@ -767,7 +769,7 @@ export function XYChart({
       >
         <Chart ref={chartRef} {...getOverridesFor(overrides, 'chart')}>
           <Tooltip<Record<string, string | number>, XYChartSeriesIdentifier>
-            boundary={document.getElementById('app-fixed-viewport') ?? undefined}
+            boundary={appFixedViewport}
             headerFormatter={
               !args.detailedTooltip && xAxisColumn
                 ? ({ value }) => (

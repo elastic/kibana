@@ -41,7 +41,7 @@ export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
   return { ref, width };
 };
 
-export const DashboardViewport = () => {
+export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?: HTMLElement }) => {
   const dashboardApi = useDashboardApi();
   const [hasControls, setHasControls] = useState(false);
   const [
@@ -160,7 +160,9 @@ export const DashboardViewport = () => {
             otherwise, there is a race condition where the panels can end up being squashed 
             TODO only render when dashboardInitialized
         */}
-        {viewportWidth !== 0 && <DashboardGrid viewportWidth={viewportWidth} />}
+        {viewportWidth !== 0 && (
+          <DashboardGrid dashboardContainer={dashboardContainer} viewportWidth={viewportWidth} />
+        )}
       </div>
     </div>
   );

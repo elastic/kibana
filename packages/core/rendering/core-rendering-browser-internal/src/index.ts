@@ -8,3 +8,4 @@
  */
 
 export { RenderingService } from './rendering_service';
+export { useAppFixedViewport } from './use_app_fixed_viewport';

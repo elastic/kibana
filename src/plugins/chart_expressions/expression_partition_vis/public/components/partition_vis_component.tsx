@@ -77,6 +77,7 @@ import {
 import { filterOutConfig } from '../utils/filter_out_config';
 import { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
 import { getMultiFilterCells } from '../utils/filter_helpers';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser-internal';
 
 declare global {
   interface Window {
@@ -385,7 +386,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     [visType, visParams, containerDimensions, rescaleFactor, hasOpenedOnAggBasedEditor]
   );
 
-  const fixedViewPort = document.getElementById('app-fixed-viewport');
+  const fixedViewPort = useAppFixedViewport();
 
   const legendPosition = visParams.legendPosition ?? Position.Right;
 
