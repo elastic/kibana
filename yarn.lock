@@ -5328,6 +5328,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/index-lifecycle-management-common-shared@link:x-pack/packages/index-lifecycle-management/index-lifecycle-management-common-shared":
+  version "0.0.0"
+  uid ""
+
 "@kbn/index-management-plugin@link:x-pack/plugins/index_management":
   version "0.0.0"
   uid ""
