@@ -26,6 +26,7 @@ export const GridHeightSmoother = ({
       if (!smoothHeightRef.current) return;
       if (!interactionEvent) {
         smoothHeightRef.current.style.height = `${dimensions.height}px`;
+        smoothHeightRef.current.style.userSelect = 'auto';
         return;
       }
 
@@ -38,6 +39,7 @@ export const GridHeightSmoother = ({
         dimensions.height ?? 0,
         smoothHeightRef.current.getBoundingClientRect().height
       )}px`;
+      smoothHeightRef.current.style.userSelect = 'none';
     });
 
     const marginSubscription = gridLayoutStateManager.runtimeSettings$
