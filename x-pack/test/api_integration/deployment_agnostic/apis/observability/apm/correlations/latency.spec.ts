@@ -14,13 +14,13 @@ import type {
   LatencyCorrelationsResponse,
 } from '@kbn/apm-plugin/common/correlations/latency_correlations/types';
 import { LatencyDistributionChartType } from '@kbn/apm-plugin/common/latency_distribution_chart_types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 // These tests go through the full sequence of queries required
 // to get the final results for a latency correlation analysis.
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiClient = getService('apmApiClient');
-  const registry = getService('registry');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const esArchiver = getService('esArchiver');
 
   // This matches the parameters used for the other tab's queries in `../correlations/*`.
   const getOptions = () => ({
@@ -30,10 +30,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     kuery: '',
   });
 
-  registry.when(
-    'correlations latency overall without data',
-    { config: 'trial', archives: [] },
-    () => {
+  describe('latency', () => {
+    describe('overall without data', () => {
       it('handles the empty state', async () => {
         const overallDistributionResponse = await apmApiClient.readUser({
           endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
@@ -104,13 +102,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(finalRawResponse?.overallHistogram).to.be(undefined);
         expect(finalRawResponse?.latencyCorrelations?.length).to.be(0);
       });
-    }
-  );
+    });
 
-  registry.when(
-    'correlations latency with data and opbeans-node args',
-    { config: 'trial', archives: ['8.0.0'] },
-    () => {
+    describe('with data and opbeans-node args', () => {
+      // this is failing
+      before(async () => {
+        await esArchiver.load('x-pack/test/apm_api_integration/common/fixtures/es_archiver/8.0.0');
+      });
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/apm_api_integration/common/fixtures/es_archiver/8.0.0'
+        );
+      });
+
       // putting this into a single `it` because the responses depend on each other
       it('runs queries and returns results', async () => {
         const overallDistributionResponse = await apmApiClient.readUser({
@@ -250,6 +254,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(correlation?.ksTest).to.be(1.9848961005439386e-12);
         expect(correlation?.histogram?.length).to.be(101);
       });
-    }
-  );
+    });
+  });
 }
