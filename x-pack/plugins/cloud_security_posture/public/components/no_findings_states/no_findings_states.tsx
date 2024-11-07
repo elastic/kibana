@@ -26,6 +26,7 @@ import type { IndexDetails, CspStatusCode } from '@kbn/cloud-security-posture-co
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { useLocation } from 'react-router-dom';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
+import { EmptyStatesIllustrationContainer } from '../empty_states_illustration_container';
 import { useAdd3PIntegrationRoute } from '../../common/api/use_wiz_integration_route';
 import { FullSizeCenteredPage } from '../full_size_centered_page';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
@@ -191,7 +192,11 @@ const EmptySecurityFindingsPrompt = () => {
         <EuiEmptyPrompt
           style={{ padding: euiTheme.size.l }}
           data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
-          icon={<EuiImage size="fullWidth" src={cloudsSVG} alt="clouds" role="presentation" />}
+          icon={
+            <EmptyStatesIllustrationContainer>
+              <EuiImage size="fullWidth" src={cloudsSVG} alt="clouds" role="presentation" />
+            </EmptyStatesIllustrationContainer>
+          }
           title={
             <h2>
               <FormattedMessage
@@ -264,12 +269,14 @@ const EmptySecurityFindingsPrompt = () => {
             style={{ padding: euiTheme.size.l }}
             data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_MISCONFIGURATIONS_FINDINGS_PROMPT}
             icon={
-              <EuiImage
-                size="fullWidth"
-                src={misconfigurationsVendorsSVG}
-                alt="misconfigurationsVendorsSVG"
-                role="presentation"
-              />
+              <EmptyStatesIllustrationContainer>
+                <EuiImage
+                  size="fullWidth"
+                  src={misconfigurationsVendorsSVG}
+                  alt="misconfigurationsVendorsSVG"
+                  role="presentation"
+                />
+              </EmptyStatesIllustrationContainer>
             }
             title={
               <h2>

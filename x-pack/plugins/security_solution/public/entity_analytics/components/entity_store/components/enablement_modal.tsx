@@ -72,20 +72,13 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.enablements.modal.title"
-            defaultMessage="Additional charges may apply"
+            defaultMessage="Entity Analytics Enablement"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiFlexGroup direction="column">
-          <EuiText>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.enablements.modal.description"
-              defaultMessage="Please be aware that activating these features may incur additional charges depending on your subscription plan. Review your plan details carefully to avoid unexpected costs before proceeding."
-            />
-          </EuiText>
-          <EuiHorizontalRule margin="none" />
           <EuiFlexItem>
             <EuiSwitch
               label={

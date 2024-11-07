@@ -117,7 +117,9 @@ describe('logsDataSourceProfileProvider', () => {
       const row = buildDataTableRecord({ fields: { 'log.level': 'info' } });
       const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
       const getRowIndicatorProvider =
-        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined);
+        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
+          context: { category: DataSourceCategory.Logs },
+        });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
       });
@@ -130,7 +132,9 @@ describe('logsDataSourceProfileProvider', () => {
       const row = buildDataTableRecord({ fields: { other: 'info' } });
       const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
       const getRowIndicatorProvider =
-        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined);
+        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
+          context: { category: DataSourceCategory.Logs },
+        });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
       });
@@ -141,7 +145,9 @@ describe('logsDataSourceProfileProvider', () => {
 
     it('should not set the color indicator handler if data view does not have log level field', () => {
       const getRowIndicatorProvider =
-        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined);
+        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
+          context: { category: DataSourceCategory.Logs },
+        });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithoutLogLevel,
       });
@@ -152,7 +158,12 @@ describe('logsDataSourceProfileProvider', () => {
 
   describe('getCellRenderers', () => {
     it('should return cell renderers for log level fields', () => {
-      const getCellRenderers = logsDataSourceProfileProvider.profile.getCellRenderers?.(() => ({}));
+      const getCellRenderers = logsDataSourceProfileProvider.profile.getCellRenderers?.(
+        () => ({}),
+        {
+          context: { category: DataSourceCategory.Logs },
+        }
+      );
       const getCellRenderersParams = {
         actions: { addFilter: jest.fn() },
         dataView: dataViewWithTimefieldMock,
@@ -172,7 +183,9 @@ describe('logsDataSourceProfileProvider', () => {
   describe('getRowAdditionalLeadingControls', () => {
     it('should return the passed additional controls', () => {
       const getRowAdditionalLeadingControls =
-        logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined);
+        logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined, {
+          context: { category: DataSourceCategory.Logs },
+        });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
         dataView: dataViewWithLogLevel,
       });
