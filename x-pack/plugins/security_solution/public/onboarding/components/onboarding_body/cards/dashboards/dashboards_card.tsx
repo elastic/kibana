@@ -5,33 +5,24 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-  COLOR_MODES_STANDARD,
-} from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
 import { CardCallOut } from '../common/card_callout';
 import { CardLinkButton } from '../common/card_link_button';
-import dashboardsImageSrc from './images/dashboards.png';
 import * as i18n from './translations';
+import { StepSelector } from '../common/step_selector';
+import { dashboardIntroSteps } from './constants';
 
 export const DashboardsCard: OnboardingCardComponent = ({
   isCardComplete,
   setComplete,
   setExpandedCardId,
 }) => {
-  const { colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  const [selectedStep, setSelectedStep] = useState(dashboardIntroSteps[0]);
 
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
@@ -43,10 +34,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
   }, [setExpandedCardId]);
 
   return (
-    <OnboardingCardContentImagePanel
-      imageSrc={dashboardsImageSrc}
-      imageAlt={i18n.DASHBOARDS_CARD_TITLE}
-    >
+    <OnboardingCardContentImagePanel media={selectedStep.asset}>
       <EuiFlexGroup
         direction="column"
         gutterSize="xl"
@@ -54,13 +42,15 @@ export const DashboardsCard: OnboardingCardComponent = ({
         alignItems="flexStart"
       >
         <EuiFlexItem grow={false}>
-          <EuiText
-            data-test-subj="dashboardsDescription"
-            size="s"
-            color={isDarkMode ? 'text' : 'subdued'}
-          >
+          <EuiText data-test-subj="dashboardsDescription" size="s">
             {i18n.DASHBOARDS_CARD_DESCRIPTION}
           </EuiText>
+          <EuiSpacer />
+          <StepSelector
+            steps={dashboardIntroSteps}
+            onSelect={setSelectedStep}
+            selectedStep={selectedStep}
+          />
           {!isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />

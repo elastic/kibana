@@ -18,23 +18,33 @@ export const DASHBOARDS_CARD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.onboarding.dashboardsCard.description',
   {
     defaultMessage:
-      "Use dashboards to visualize data and stay up-to-date with key information. Create your own, or use Elastic's default dashboards — including alerts, user authentication events, known vulnerabilities, and more.",
+      'View and analyze data in Discover by exploring, filtering, and visualizing to identify threats and investigate incidents efficiently.',
   }
 );
+
 export const DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_TEXT = i18n.translate(
   'xpack.securitySolution.onboarding.dashboardsCard.calloutIntegrationsText',
   {
     defaultMessage: 'To view dashboards add integrations first.',
   }
 );
+
 export const DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_BUTTON = i18n.translate(
   'xpack.securitySolution.onboarding.dashboardsCard.calloutIntegrationsButton',
   {
     defaultMessage: 'Add integrations step',
   }
 );
+
 export const DASHBOARDS_CARD_GO_TO_DASHBOARDS_BUTTON = i18n.translate(
   'xpack.securitySolution.onboarding.dashboardsCard.goToDashboardsButton',
+  {
+    defaultMessage: 'Go to dashboards',
+  }
+);
+
+export const DASHBOARDS_CARD_STEP_SELECTOR_TITLE = i18n.translate(
+  'xpack.securitySolution.onboarding.dashboardsCard.stepSelectorTitle',
   {
     defaultMessage: 'Go to dashboards',
   }

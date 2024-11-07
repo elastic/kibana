@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,8 +22,9 @@ import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
 import { CardCallOut } from '../common/card_callout';
-import alertsImageSrc from './images/alerts.png';
 import * as i18n from './translations';
+import { StepSelector } from '../common/step_selector';
+import { alertsIntroSteps } from './constants';
 
 export const AlertsCard: OnboardingCardComponent = ({
   isCardComplete,
@@ -31,7 +32,7 @@ export const AlertsCard: OnboardingCardComponent = ({
   setComplete,
 }) => {
   const { colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  const [selectedStep, setSelectedStep] = useState(alertsIntroSteps[0]);
 
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
@@ -43,7 +44,7 @@ export const AlertsCard: OnboardingCardComponent = ({
   }, [setExpandedCardId]);
 
   return (
-    <OnboardingCardContentImagePanel imageSrc={alertsImageSrc} imageAlt={i18n.ALERTS_CARD_TITLE}>
+    <OnboardingCardContentImagePanel media={selectedStep.asset}>
       <EuiFlexGroup
         direction="column"
         gutterSize="xl"
@@ -51,13 +52,16 @@ export const AlertsCard: OnboardingCardComponent = ({
         alignItems="flexStart"
       >
         <EuiFlexItem grow={false}>
-          <EuiText
-            data-test-subj="alertsCardDescription"
-            size="s"
-            color={isDarkMode ? 'text' : 'subdued'}
-          >
+          <EuiText data-test-subj="alertsCardDescription" size="s">
             {i18n.ALERTS_CARD_DESCRIPTION}
           </EuiText>
+          <EuiSpacer />
+          <StepSelector
+            title={i18n.ALERTS_CARD_STEP_SELECTOR_TITLE}
+            steps={alertsIntroSteps}
+            onSelect={setSelectedStep}
+            selectedStep={selectedStep}
+          />
           {!isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />

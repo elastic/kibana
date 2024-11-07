@@ -16,10 +16,16 @@ export const useCardContentImagePanelStyles = () => {
     padding-top: 8px;
     ${isDarkMode ? `background-color: ${euiTheme.colors.lightestShade}` : ''};
     .cardSpacer {
-      width: 8%;
+      width: 48px;
     }
     .cardImage {
-      width: 50%;
+      width: 488px;
+      height: 275px;
+      iframe {
+        border-radius: ${euiTheme.size.s};
+        ${shadowStyles}
+        overflor: hidden;
+      }
       img {
         width: 100%;
         border-radius: ${euiTheme.size.s};

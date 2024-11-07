@@ -4,15 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { type PropsWithChildren } from 'react';
+import React, { useMemo, type PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { OnboardingCardContentPanel } from './card_content_panel';
 import { useCardContentImagePanelStyles } from './card_content_image_panel.styles';
 
 export const OnboardingCardContentImagePanel = React.memo<
-  PropsWithChildren<{ imageSrc: string; imageAlt: string }>
->(({ children, imageSrc, imageAlt }) => {
+  PropsWithChildren<{ media: { type: 'video' | 'image'; source: string; alt: string } }>
+>(({ children, media: { type, source, alt } }) => {
   const styles = useCardContentImagePanelStyles();
+
+  const renderMediaContent = useMemo(() => {
+    if (type === 'video')
+      return (
+        <iframe
+          allowFullScreen
+          height="275px"
+          width="488px"
+          allow="autoplay"
+          referrerPolicy="no-referrer"
+          sandbox="allow-scripts allow-same-origin"
+          src={source}
+          title={'title'}
+        />
+      );
+    return <img src={source} alt={alt} />;
+  }, [alt, source, type]);
+
   return (
     <OnboardingCardContentPanel className={styles}>
       <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="none">
@@ -21,7 +39,7 @@ export const OnboardingCardContentImagePanel = React.memo<
           <EuiSpacer size="xl" />
         </EuiFlexItem>
         <EuiFlexItem className="cardImage" grow={false}>
-          <img src={imageSrc} alt={imageAlt} />
+          {renderMediaContent}
         </EuiFlexItem>
       </EuiFlexGroup>
     </OnboardingCardContentPanel>

@@ -5,29 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-  COLOR_MODES_STANDARD,
-} from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
 import { CardCallOut } from '../common/card_callout';
-import rulesImageSrc from './images/rules.png';
+
 import * as i18n from './translations';
+import { StepSelector } from '../common/step_selector';
+import { rulesIntroSteps } from './constants';
 
 export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpandedCardId }) => {
-  const { colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  const [selectedStep, setSelectedStep] = useState(rulesIntroSteps[0]);
 
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
@@ -39,7 +31,7 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
   }, [setExpandedCardId]);
 
   return (
-    <OnboardingCardContentImagePanel imageSrc={rulesImageSrc} imageAlt={i18n.RULES_CARD_TITLE}>
+    <OnboardingCardContentImagePanel media={selectedStep.asset}>
       <EuiFlexGroup
         direction="column"
         gutterSize="xl"
@@ -47,13 +39,20 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
         alignItems="flexStart"
       >
         <EuiFlexItem grow={false}>
-          <EuiText
-            data-test-subj="rulesCardDescription"
-            size="s"
-            color={isDarkMode ? 'text' : 'subdued'}
-          >
+          <EuiText data-test-subj="rulesCardDescription" size="s">
             {i18n.RULES_CARD_DESCRIPTION}
           </EuiText>
+          <EuiSpacer />
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <StepSelector
+                title={i18n.RULES_CARD_STEP_SELECTOR_TITLE}
+                steps={rulesIntroSteps}
+                onSelect={setSelectedStep}
+                selectedStep={selectedStep}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           {!isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />
