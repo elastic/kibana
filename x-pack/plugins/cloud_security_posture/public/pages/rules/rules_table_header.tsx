@@ -192,7 +192,8 @@ const CurrentPageOfTotal = () => {
   const {
     selectedRules,
     setSelectedRules,
-    rulesPageData,
+    rulesShown,
+    total,
     setSelectAllRules,
     toggleSelectedRulesStates,
   } = useRules();
@@ -243,9 +244,6 @@ const CurrentPageOfTotal = () => {
     </EuiContextMenuItem>,
   ];
 
-  const pageSize = rulesPageData.rules_page.length;
-  const total = rulesPageData.all_rules.length;
-
   return (
     <EuiFlexItem grow={false}>
       <EuiSpacer size="s" />
@@ -254,9 +252,9 @@ const CurrentPageOfTotal = () => {
           <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
             <FormattedMessage
               id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
-              defaultMessage="Showing {pageSize} of {total, plural, one {# rule} other {# rules}} {pipe} Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
+              defaultMessage="Showing {rulesShown} of {total, plural, one {# rule} other {# rules}} {pipe} Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
               values={{
-                pageSize,
+                rulesShown,
                 total,
                 selectedRulesAmount: selectedRules.length || 0,
                 pipe: '\u2000|\u2000',

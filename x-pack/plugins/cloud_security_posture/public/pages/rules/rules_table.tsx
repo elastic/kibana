@@ -48,18 +48,18 @@ export const RulesTable = ({ selectedRuleId, onRuleClick }: RulesTableProps) => 
   const { euiTheme } = useEuiTheme();
   const {
     page,
+    setPage,
     setSelectedRules,
     selectedRules,
-    rulesPageData,
+    rules: items,
+    total,
+    error,
+    loading,
     pageSize,
     setPageSize,
     sortOrder,
     setSortOrder,
   } = useRules();
-  const items = rulesPageData.all_rules;
-  const total = rulesPageData.total;
-  const error = rulesPageData.error;
-  const loading = rulesPageData.loading;
 
   const euiPagination: EuiBasicTableProps<CspBenchmarkRulesWithStates>['pagination'] = {
     pageIndex: page,
@@ -78,7 +78,7 @@ export const RulesTable = ({ selectedRuleId, onRuleClick }: RulesTableProps) => 
     if (!pagination) return;
     if (pagination && (pagination.index !== page || pagination.size !== pageSize)) {
       setPageSize(pagination.size);
-      setPageSize(pagination.index);
+      setPage(pagination.index);
     }
     if (sort && sort.direction !== sortOrder) {
       setSortOrder(sort.direction);
