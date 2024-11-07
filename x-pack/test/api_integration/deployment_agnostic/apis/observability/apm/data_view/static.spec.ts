@@ -43,16 +43,21 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('Data view static', () => {
     let supertest: SupertestWithRoleScope;
+
     before(async () => {
-      supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin');
+      supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+      });
+    });
+
+    after(async () => {
+      await supertest.destroy();
     });
 
     function deleteDataView(spaceId: string) {
-      return supertest
-        .delete(
-          `/s/${spaceId}/api/saved_objects/index-pattern/${getStaticDataViewId(spaceId)}?force=true`
-        )
-        .set('kbn-xsrf', 'foo');
+      return supertest.delete(
+        `/s/${spaceId}/api/saved_objects/index-pattern/${getStaticDataViewId(spaceId)}?force=true`
+      );
     }
 
     function getDataView({ spaceId }: { spaceId: string }) {
@@ -65,10 +70,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     function getDataViewSuggestions(field: string) {
       return supertest
         .post(`/internal/kibana/suggestions/values/${dataViewPattern}`)
-        .set('kbn-xsrf', 'foo')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send({ query: '', field, method: 'terms_agg' });
     }
+
     describe('no mappings exist', () => {
       let response: SupertestReturnType<'POST /internal/apm/data_view/static'>;
       before(async () => {
