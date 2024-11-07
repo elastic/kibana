@@ -43,18 +43,21 @@ interface LabelEdges {
 interface GetGraphParams {
   services: GraphContextServices;
   query: {
-    showUnknownTarget: boolean;
     eventIds: string[];
     spaceId?: string;
     start: string | number;
     end: string | number;
     esQuery?: EsQuery;
   };
+  showUnknownTarget: boolean;
+  nodesLimit?: number;
 }
 
 export const getGraph = async ({
   services: { esClient, logger },
-  query: { eventIds, showUnknownTarget, spaceId = 'default', start, end, esQuery },
+  query: { eventIds, spaceId = 'default', start, end, esQuery },
+  showUnknownTarget,
+  nodesLimit,
 }: GetGraphParams): Promise<{
   nodes: NodeDataModel[];
   edges: EdgeDataModel[];
@@ -72,22 +75,31 @@ export const getGraph = async ({
   });
 
   // Convert results into set of nodes and edges
-  const graphContext = parseRecords(logger, results.records);
+  const graphContext = parseRecords(logger, results.records, nodesLimit);
 
   return { nodes: graphContext.nodes, edges: graphContext.edges };
 };
 
 interface ParseContext {
-  nodesMap: Record<string, NodeDataModel>;
-  edgesMap: Record<string, EdgeDataModel>;
-  edgeLabelsNodes: Record<string, string[]>;
-  labelEdges: Record<string, LabelEdges>;
+  readonly nodesLimit?: number;
+  readonly nodesMap: Record<string, NodeDataModel>;
+  readonly edgesMap: Record<string, EdgeDataModel>;
+  readonly edgeLabelsNodes: Record<string, string[]>;
+  readonly labelEdges: Record<string, LabelEdges>;
+  readonly logger: Logger;
 }
 
-const parseRecords = (logger: Logger, records: GraphEdge[]): GraphContext => {
-  const ctx: ParseContext = { nodesMap: {}, edgeLabelsNodes: {}, edgesMap: {}, labelEdges: {} };
+const parseRecords = (logger: Logger, records: GraphEdge[], nodesLimit?: number): GraphContext => {
+  const ctx: ParseContext = {
+    nodesLimit,
+    logger,
+    nodesMap: {},
+    edgeLabelsNodes: {},
+    edgesMap: {},
+    labelEdges: {},
+  };
 
-  logger.trace(`Parsing records [length: ${records.length}]`);
+  logger.trace(`Parsing records [length: ${records.length}] [nodesLimit: ${nodesLimit ?? 'none'}]`);
 
   createNodes(records, ctx);
   createEdgesAndGroups(ctx);
@@ -205,6 +217,15 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
   const { nodesMap, edgeLabelsNodes, labelEdges } = context;
 
   for (const record of records) {
+    if (context.nodesLimit !== undefined && Object.keys(nodesMap).length >= context.nodesLimit) {
+      context.logger.debug(
+        `Reached nodes limit [limit: ${context.nodesLimit}] [current: ${
+          Object.keys(nodesMap).length
+        }]`
+      );
+      break;
+    }
+
     const { ips, hosts, users, actorIds, action, targetIds, isAlert, eventOutcome } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);

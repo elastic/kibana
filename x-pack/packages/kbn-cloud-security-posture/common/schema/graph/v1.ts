@@ -8,9 +8,10 @@
 import { schema } from '@kbn/config-schema';
 
 export const graphRequestSchema = schema.object({
+  nodesLimit: schema.maybe(schema.number()),
+  showUnknownTarget: schema.maybe(schema.boolean()),
   query: schema.object({
     eventIds: schema.arrayOf(schema.string()),
-    showUnknownTarget: schema.maybe(schema.boolean()),
     // TODO: use zod for range validation instead of config schema
     start: schema.oneOf([schema.number(), schema.string()]),
     end: schema.oneOf([schema.number(), schema.string()]),

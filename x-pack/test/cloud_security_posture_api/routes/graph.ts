@@ -416,11 +416,11 @@ export default function (providerContext: FtrProviderContext) {
 
       it('Should return unknown targets', async () => {
         const response = await postGraph(supertest, {
+          showUnknownTarget: true,
           query: {
             eventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
-            showUnknownTarget: true,
             esQuery: {
               bool: {
                 filter: [
@@ -436,6 +436,31 @@ export default function (providerContext: FtrProviderContext) {
         }).expect(result(200));
 
         expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
+      });
+
+      it('Should limit number of nodes', async () => {
+        const response = await postGraph(supertest, {
+          nodesLimit: 1,
+          query: {
+            eventIds: [],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+            esQuery: {
+              bool: {
+                filter: [
+                  {
+                    exists: {
+                      field: 'actor.entity.id',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes').length(3); // Minimal number of nodes in a single relationship
         expect(response.body).to.have.property('edges').length(2);
       });
     });
