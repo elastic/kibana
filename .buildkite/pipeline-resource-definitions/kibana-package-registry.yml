@@ -16,7 +16,7 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / package registry verify and promote
-      description: Verify and promote docker.elastic.co/package-registry/distribution:lite for Kibana tests
+      description: Verify and promote docker.elastic.co/package-registry/distribution:lite
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: "#kibana-operations-alerts"
