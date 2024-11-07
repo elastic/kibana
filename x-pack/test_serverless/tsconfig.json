@@ -93,5 +93,7 @@
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/ai-assistant-common",
     "@kbn/data-usage-plugin",
+    "@kbn/infra-plugin",
+    "@kbn/observability-plugin",
   ]
 }
