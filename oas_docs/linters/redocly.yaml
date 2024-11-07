@@ -5,6 +5,7 @@ rules:
  # Descriptions
   parameter-description: warn
   tag-description: warn
+  operation-description: off
  # Document info
   info-contact: warn
   info-license: warn
@@ -34,6 +35,23 @@ rules:
   operation-2xx-response: off
  # Schema
   spec: off
+  spec-strict-refs: off
  # Tags
   operation-tag-defined: off
   tags-alphabetical: off
+  operation-singular-tag: off
+# Custom rules
+  operation-summary-max-length:
+    subject:
+      type: Operation
+      property: summary
+    message: Operation summary must have a maximum of 45 characters
+    assertions:
+      maxLength: 45
+  operation-summary-min-length:
+    subject:
+      type: Operation
+      property: summary
+    message: Operation summary must have minimum of 5 chars length
+    assertions:
+      minLength: 5
