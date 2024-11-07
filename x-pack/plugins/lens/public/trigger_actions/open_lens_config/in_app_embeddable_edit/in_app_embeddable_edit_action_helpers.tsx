@@ -59,6 +59,7 @@ export async function executeEditEmbeddableAction({
     canBeCreatedInline: false, // this is the edit action
   });
   const openInlineEditor = prepareInlineEditPanel(
+    { attributes },
     () => ({ attributes }),
     (newState: LensRuntimeState) =>
       onUpdate(newState.attributes as TypedLensByValueInput['attributes']),
@@ -79,7 +80,10 @@ export async function executeEditEmbeddableAction({
     { coreStart: core, ...deps }
   );
 
-  const ConfigPanel = await openInlineEditor();
+  const ConfigPanel = await openInlineEditor({
+    onApply,
+    onCancel,
+  });
   if (ConfigPanel) {
     // no need to pass the uuid in this use case
     mountInlineEditPanel(ConfigPanel, core, undefined, undefined, container);
