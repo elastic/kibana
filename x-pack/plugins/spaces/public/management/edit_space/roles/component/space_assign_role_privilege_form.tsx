@@ -416,9 +416,9 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                     iconType="iInCircle"
                     data-test-subj="privilege-info-callout"
                     title={i18n.translate(
-                      'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.title',
+                      'xpack.spaces.management.spaceDetails.roles.assign.privilegeCombinationMsg.title',
                       {
-                        defaultMessage: 'Privileges will apply only to this space.',
+                        defaultMessage: `The user's resulting access depends on a combination of their role's global space privileges and specific privileges applied to this space.`,
                       }
                     )}
                   />

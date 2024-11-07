@@ -203,16 +203,13 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
                 iconType="iInCircle"
                 size="s"
                 title={i18n.translate(
-                  'xpack.security.management.editRole.spacePrivilegeForm.featurePrivilegeSummaryDescription',
+                  'xpack.security.management.editRole.spacePrivilegeForm.privilegeCombinationMsg.title',
                   {
-                    defaultMessage:
-                      'Some features might be hidden by the space or affected by a global space privilege.',
+                    defaultMessage: `The user's resulting access depends on a combination of their role's global space privileges and specific privileges applied to this space.`,
                   }
                 )}
               />
             </EuiFormRow>
-
-            {this.getPrivilegeCallout()}
 
             <EuiFormRow
               fullWidth
@@ -338,28 +335,6 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         {buttonText}
       </EuiButton>
     );
-  };
-
-  private getPrivilegeCallout = () => {
-    if (this.isDefiningGlobalPrivilege()) {
-      return (
-        <EuiFormRow fullWidth>
-          <EuiCallOut
-            color="primary"
-            iconType="iInCircle"
-            size="s"
-            title={i18n.translate(
-              'xpack.security.management.editRole.spacePrivilegeForm.globalPrivilegeNotice',
-              {
-                defaultMessage: 'These privileges will apply to all current and future spaces.',
-              }
-            )}
-          />
-        </EuiFormRow>
-      );
-    }
-
-    return null;
   };
 
   private closeFlyout = () => {
