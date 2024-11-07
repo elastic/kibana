@@ -37,6 +37,9 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
   /** Last sent message */
   private sentMessages: string[] = [];
 
+  /** Last sent EBT events */
+  private ebtEventsSent: Array<{ eventType: string; eventData: object }> = [];
+
   /** Logger for this class  */
   private logger: Logger;
 
@@ -85,6 +88,10 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
 
   public getSentMessages() {
     return this.sentMessages;
+  }
+
+  public getEbtEventsSent(): Array<{ eventType: string; eventData: object }> {
+    return this.ebtEventsSent;
   }
 
   public setup(
@@ -176,6 +183,10 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
   }
 
   public reportEBT(eventType: EventType, eventData: object): void {
+    this.ebtEventsSent.push({
+      eventType,
+      eventData,
+    });
     this.composite.reportEBT(eventType, eventData);
   }
 }

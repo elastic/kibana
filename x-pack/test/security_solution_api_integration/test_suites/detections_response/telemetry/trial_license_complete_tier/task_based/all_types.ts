@@ -47,40 +47,63 @@ export default ({ getService }: FtrProviderContext) => {
       await retry.try(async () => {
         const stats = await getSecurityTelemetryStats(supertest, log);
         removeExtraFieldsFromTelemetryStats(stats);
-        expect(stats).to.eql({
-          detection_rules: [
-            [
-              {
-                name: 'security:telemetry-detection-rules',
-                passed: true,
-              },
-            ],
+
+        expect(stats.detection_rules).to.eql([
+          [
+            {
+              name: 'security:telemetry-detection-rules',
+              passed: true,
+            },
           ],
-          security_lists: [
-            [
-              {
-                name: 'security:telemetry-lists',
-                passed: true,
-              },
-            ],
+        ]);
+
+        expect(stats.security_lists).to.eql([
+          [
+            {
+              name: 'security:telemetry-lists',
+              passed: true,
+            },
           ],
-          endpoints: [
-            [
-              {
-                name: 'security:endpoint-meta-telemetry',
-                passed: true,
-              },
-            ],
+        ]);
+
+        expect(stats.endpoints).to.eql([
+          [
+            {
+              name: 'security:endpoint-meta-telemetry',
+              passed: true,
+            },
           ],
-          diagnostics: [
-            [
-              {
-                name: 'security:endpoint-diagnostics',
-                passed: true,
-              },
-            ],
+        ]);
+
+        expect(stats.diagnostics).to.eql([
+          [
+            {
+              name: 'security:endpoint-diagnostics',
+              passed: true,
+            },
           ],
-        });
+        ]);
+
+        expect(stats.indices_metadata).to.be.an('array');
+        const events = stats.indices_metadata as any[];
+        expect(events).to.not.be.empty();
+
+        const eventTypes = events.map((e) => e.eventType);
+        expect(eventTypes).to.contain('telemetry_index_stats_event');
+        expect(eventTypes).to.contain('telemetry_data_stream_event');
+
+        const indexStats = events.find((e) => e.eventType === 'telemetry_index_stats_event');
+        expect(indexStats.eventData).to.have.keys(
+          'index_name',
+          'query_total',
+          'query_time_in_millis',
+          'docs_count',
+          'docs_deleted',
+          'docs_total_size_in_bytes'
+        );
+
+        const dataStreamStats = events.find((e) => e.eventType === 'telemetry_data_stream_event');
+        expect(dataStreamStats.eventData).to.have.keys('datastream_name', 'indices');
       });
     });
   });
