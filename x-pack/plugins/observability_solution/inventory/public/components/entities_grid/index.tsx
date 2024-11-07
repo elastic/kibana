@@ -89,7 +89,7 @@ export function EntitiesGrid({
 
       const columnEntityTableId = columnId as EntityColumnIds;
       const entityType = entity[ENTITY_TYPE];
-      const discoverUrl = getDiscoverRedirectUrl({ entity });
+      const discoverUrl = getDiscoverRedirectUrl(entity);
 
       switch (columnEntityTableId) {
         case 'alertsCount':

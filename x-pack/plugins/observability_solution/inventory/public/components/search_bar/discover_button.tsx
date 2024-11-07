@@ -14,7 +14,7 @@ import { useDiscoverRedirect } from '../../hooks/use_discover_redirect';
 export function DiscoverButton({ dataView }: { dataView: DataView }) {
   const { getDiscoverRedirectUrl } = useDiscoverRedirect();
 
-  const discoverLink = getDiscoverRedirectUrl({dataView});
+  const discoverLink = getDiscoverRedirectUrl();
 
   if (!discoverLink) {
     return null;

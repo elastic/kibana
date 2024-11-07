@@ -12,11 +12,12 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import { useCallback } from 'react';
 import { type PhrasesFilter, buildPhrasesFilter } from '@kbn/es-query';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { Entity, EntityColumnIds } from '../../common/entities';
 import { unflattenEntity } from '../../common/utils/unflatten_entity';
 import { useKibana } from './use_kibana';
 import { useInventoryParams } from './use_inventory_params';
+import { useInventorySearchBarContext } from '../context/inventory_search_bar_context_provider';
 
 const ACTIVE_COLUMNS: EntityColumnIds[] = [ENTITY_DISPLAY_NAME, ENTITY_TYPE, ENTITY_LAST_SEEN];
 
@@ -28,10 +29,12 @@ export const useDiscoverRedirect = () => {
     query: { kuery, entityTypes },
   } = useInventoryParams('/*');
 
+  const { dataView } = useInventorySearchBarContext();
+
   const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
 
   const getDiscoverEntitiesRedirectUrl = useCallback(
-    ({ entity, dataView }: { entity?: Entity; dataView?: DataView }) => {
+    (entity?: Entity) => {
       const filters: PhrasesFilter[] = [];
 
       const entityTypeField = (dataView?.getFieldByName(ENTITY_TYPE) ??
@@ -69,12 +72,12 @@ export const useDiscoverRedirect = () => {
       entityManager.entityClient,
       entityTypes,
       kuery,
+      dataView,
     ]
   );
 
   const getDiscoverRedirectUrl = useCallback(
-    ({ entity, dataView }: { entity?: Entity; dataView?: DataView }) =>
-      getDiscoverEntitiesRedirectUrl({ entity, dataView }),
+    (entity?: Entity) => getDiscoverEntitiesRedirectUrl(entity),
     [getDiscoverEntitiesRedirectUrl]
   );
 
