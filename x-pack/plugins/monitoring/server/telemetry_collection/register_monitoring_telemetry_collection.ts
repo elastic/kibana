@@ -122,11 +122,6 @@ export function registerMonitoringTelemetryCollection(
                   endpoints: { type: 'long' },
                 },
               },
-              functionbeat: {
-                functions: {
-                  count: { type: 'long' },
-                },
-              },
             },
           },
           collection: { type: 'keyword' },

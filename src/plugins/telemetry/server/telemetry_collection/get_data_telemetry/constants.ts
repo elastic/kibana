@@ -44,8 +44,6 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: 'metricbeat-*', patternName: 'metricbeat', shipper: 'metricbeat' },
   { pattern: '*metricbeat*', patternName: 'generic-metricbeat' },
   { pattern: 'apm-*', patternName: 'apm', shipper: 'apm' },
-  { pattern: 'functionbeat-*', patternName: 'functionbeat', shipper: 'functionbeat' },
-  { pattern: '*functionbeat*', patternName: 'generic-functionbeat' },
   { pattern: 'heartbeat-*', patternName: 'heartbeat', shipper: 'heartbeat' },
   { pattern: '*heartbeat*', patternName: 'generic-heartbeat' },
   { pattern: 'logstash-*', patternName: 'logstash', shipper: 'logstash' },
