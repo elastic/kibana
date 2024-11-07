@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
 import { GraphPreview } from './graph_preview';
 import { useFetchGraphData } from '../hooks/use_fetch_graph_data';
 import { useGraphPreview } from '../hooks/use_graph_preview';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 
 const DEFAULT_FROM = 'now-60d/d';
 const DEFAULT_TO = 'now/d';
