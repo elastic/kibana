@@ -35,6 +35,15 @@ export const similar = async (
     const paramArgs = decodeWithExcessOrThrow(SimilarCasesSearchRequestRt)(params);
     const retrievedCase = await caseService.getCase({ id: paramArgs.case_id });
 
+    if (!retrievedCase.attributes.observables.length) {
+      return {
+        cases: [],
+        page: 1,
+        per_page: params.pageSize,
+        total: 0,
+      };
+    }
+
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findCases);
 

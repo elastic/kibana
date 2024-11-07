@@ -146,10 +146,6 @@ export const ObservableActionsPopoverButton: React.FC<{
         <EditObservableModal
           isLoading={isLoading}
           handleUpdateObservable={async (updatedObservable) => {
-            if (!updatedObservable.id) {
-              throw new Error('invalid observable');
-            }
-
             patchObservable({
               observable: updatedObservable,
             }).then(() => {

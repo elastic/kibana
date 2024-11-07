@@ -8,7 +8,6 @@
 import * as rt from 'io-ts';
 
 export const CaseObservableBaseRt = rt.strict({
-  id: rt.union([rt.string, rt.undefined]),
   typeKey: rt.string,
   value: rt.string,
   description: rt.union([rt.string, rt.undefined]),
@@ -18,6 +17,7 @@ export const CaseObservableBaseRt = rt.strict({
 
 export const CaseObservableRt = rt.intersection([
   rt.strict({
+    id: rt.union([rt.string, rt.undefined]),
     createdAt: rt.string,
     updatedAt: rt.union([rt.string, rt.undefined]),
   }),
@@ -32,6 +32,5 @@ export const CaseObservableTypeRt = rt.strict({
 export type Observable = rt.TypeOf<typeof CaseObservableRt>;
 export type ObservableType = rt.TypeOf<typeof CaseObservableTypeRt>;
 
-export const ObservablePatch = CaseObservableRt;
-
+export const ObservablePatch = CaseObservableBaseRt;
 export type ObservablePatchType = rt.TypeOf<typeof ObservablePatch>;

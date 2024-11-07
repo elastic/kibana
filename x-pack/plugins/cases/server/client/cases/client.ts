@@ -119,7 +119,11 @@ export interface CasesSubClient {
   /**
    * Updates observable
    */
-  updateObservable(caseId: string, params: UpdateObservableRequest): Promise<Case>;
+  updateObservable(
+    caseId: string,
+    observableId: string,
+    params: UpdateObservableRequest
+  ): Promise<Case>;
   /**
    * Removes observable
    */
@@ -155,8 +159,8 @@ export const createCasesSubClient = (
     similar: (params: SimilarCasesSearchRequest) => similar(params, clientArgs),
     addObservable: (caseId: string, params: AddObservableRequest) =>
       addObservable(caseId, params, clientArgs, casesClient),
-    updateObservable: (caseId: string, params: UpdateObservableRequest) =>
-      updateObservable(caseId, params, clientArgs, casesClient),
+    updateObservable: (caseId: string, observableId: string, params: UpdateObservableRequest) =>
+      updateObservable(caseId, observableId, params, clientArgs, casesClient),
     deleteObservable: (caseId: string, observableId: string) =>
       deleteObservable(caseId, observableId, clientArgs, casesClient),
   };

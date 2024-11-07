@@ -120,13 +120,10 @@ export const ObservableForm: FC<ObservableFormProps> = ({
       if (isValid) {
         return onSubmit({
           ...data,
-          id: observable?.id,
-          createdAt: observable?.createdAt ?? new Date().toISOString(),
-          updatedAt: observable?.updatedAt ?? new Date().toISOString(),
         });
       }
     },
-    [form, observable?.createdAt, observable?.id, observable?.updatedAt, onSubmit]
+    [form, onSubmit]
   );
 
   return (

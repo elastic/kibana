@@ -22,7 +22,6 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
-  MAX_OBSERVABLES_PER_CASE,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -34,7 +33,6 @@ import {
   CaseCustomFieldToggleRt,
   CustomFieldTextTypeRt,
   CustomFieldNumberTypeRt,
-  ObservablePatch,
 } from '../../domain';
 import {
   CaseRt,
@@ -465,19 +463,6 @@ export const CasePatchRequestRt = rt.intersection([
     id: rt.string,
     version: rt.string,
   }),
-  rt.exact(
-    rt.partial({
-      /*
-       * Observables assigned to this case
-       */
-      observables: limitedArraySchema({
-        codec: ObservablePatch,
-        fieldName: 'observables',
-        min: 0,
-        max: MAX_OBSERVABLES_PER_CASE,
-      }),
-    })
-  ),
 ]);
 
 export const CasesPatchRequestRt = rt.strict({

@@ -29,9 +29,11 @@ export const patchObservableRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
+      const observableId = request.params.observable_id;
+
       const { observable } = request.body as observableApiV1.UpdateObservableRequest;
 
-      const theCase = await casesClient.cases.updateObservable(caseId, {
+      const theCase = await casesClient.cases.updateObservable(caseId, observableId, {
         observable,
       });
 

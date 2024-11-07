@@ -43,7 +43,6 @@ import {
   fillMissingCustomFields,
   getClosedInfoForUpdate,
   getDurationForUpdate,
-  updateObservables,
 } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
@@ -570,14 +569,7 @@ const createPatchCasesPayload = ({
   return {
     cases: casesToUpdate.map(({ updateReq, originalCase }) => {
       // intentionally removing owner from the case so that we don't accidentally allow it to be updated
-      const {
-        id: caseId,
-        version,
-        owner,
-        assignees,
-        observables,
-        ...updateCaseAttributes
-      } = updateReq;
+      const { id: caseId, version, owner, assignees, ...updateCaseAttributes } = updateReq;
 
       const dedupedAssignees = dedupAssignees(assignees);
 
@@ -604,7 +596,6 @@ const createPatchCasesPayload = ({
           }),
           updated_at: updatedDt,
           updated_by: user,
-          ...updateObservables(originalCase, updatedDt, observables),
         },
         version,
       };

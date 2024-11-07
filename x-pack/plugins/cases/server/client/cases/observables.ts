@@ -61,7 +61,15 @@ export const addObservable = async (
       caseId: retrievedCase.id,
       originalCase: retrievedCase,
       updatedAttributes: {
-        observables: [...currentObservables, { ...paramArgs.observable, id: v4() }],
+        observables: [
+          ...currentObservables,
+          {
+            ...paramArgs.observable,
+            id: v4(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        ],
       },
     });
 
@@ -86,6 +94,7 @@ export const addObservable = async (
 
 export const updateObservable = async (
   caseId: string,
+  observableId: string,
   params: UpdateObservableRequest,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
@@ -104,11 +113,15 @@ export const updateObservable = async (
     const currentObservables = retrievedCase.attributes.observables ?? [];
 
     const observableIndex = currentObservables.findIndex(
-      (observable) => observable.id === paramArgs.observable.id
+      (observable) => observable.id === observableId
     );
 
     const updatedObservables = [...currentObservables];
-    updatedObservables[observableIndex] = paramArgs.observable;
+    updatedObservables[observableIndex] = {
+      ...updatedObservables[observableIndex],
+      ...paramArgs.observable,
+      updatedAt: new Date().toISOString(),
+    };
 
     const updatedCase = await caseService.patchCase({
       caseId: retrievedCase.id,
