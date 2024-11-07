@@ -5,26 +5,88 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { first, last } from 'lodash';
+import { first, last, uniq } from 'lodash';
 import moment from 'moment';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
   APIReturnType,
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
-import { dataConfig, generateData } from './generate_data';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 type ColdStartRate =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate'>;
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export const dataConfig = {
+  serviceName: 'synth-go',
+  coldStartTransaction: {
+    name: 'GET /apple 🍎',
+    duration: 1000,
+  },
+  warmStartTransaction: {
+    name: 'GET /banana 🍌',
+    duration: 2000,
+  },
+};
 
-  const { serviceName, transactionName } = dataConfig;
+export async function generateData({
+  apmSynthtraceEsClient,
+  start,
+  end,
+  coldStartRate,
+  warmStartRate,
+}: {
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
+  start: number;
+  end: number;
+  coldStartRate: number;
+  warmStartRate: number;
+}) {
+  const { coldStartTransaction, warmStartTransaction, serviceName } = dataConfig;
+  const instance = apm
+    .service({ name: serviceName, environment: 'production', agentName: 'go' })
+    .instance('instance-a');
+
+  const traceEvents = [
+    timerange(start, end)
+      .interval('1m')
+      .rate(coldStartRate)
+      .generator((timestamp) =>
+        instance
+          .transaction({ transactionName: coldStartTransaction.name })
+          .defaults({
+            'faas.coldstart': true,
+          })
+          .timestamp(timestamp)
+          .duration(coldStartTransaction.duration)
+          .success()
+      ),
+    timerange(start, end)
+      .interval('1m')
+      .rate(warmStartRate)
+      .generator((timestamp) =>
+        instance
+          .transaction({ transactionName: warmStartTransaction.name })
+          .defaults({
+            'faas.coldstart': false,
+          })
+          .timestamp(timestamp)
+          .duration(warmStartTransaction.duration)
+          .success()
+      ),
+  ];
+
+  await apmSynthtraceEsClient.index(traceEvents);
+}
+
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
+
+  const { serviceName } = dataConfig;
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
@@ -34,13 +96,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     >
   ) {
     return await apmApiClient.readUser({
-      endpoint:
-        'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name',
+      endpoint: 'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate',
       params: {
         path: { serviceName },
         query: {
           transactionType: 'request',
-          transactionName,
           environment: 'ENVIRONMENT_ALL',
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
@@ -51,10 +111,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when(
-    'Cold start rate by transaction name when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
+  describe('Cold start', () => {
+    describe('Cold start rate when data is not loaded', () => {
       it('handles empty state', async () => {
         const { status, body } = await callApi();
 
@@ -65,14 +123,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(body.previousPeriod.transactionColdstartRate).to.empty();
         expect(body.previousPeriod.average).to.be(null);
       });
-    }
-  );
+    });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177616
-  registry.when(
-    'Cold start rate by transaction name when data is generated',
-    { config: 'basic', archives: [] },
-    () => {
+    describe('Cold start rate when data is generated', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+      });
+
+      // FLAKY: https://github.com/elastic/kibana/issues/177113
       describe('without comparison', () => {
         let body: ColdStartRate;
         let status: number;
@@ -186,15 +246,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns an array of transaction cold start rates', () => {
-          expect(body.currentPeriod.transactionColdstartRate).to.have.length(3);
-          expect(body.currentPeriod.transactionColdstartRate.every(({ y }) => y === 0.25)).to.be(
-            true
+          const currentValuesUnique = uniq(
+            body.currentPeriod.transactionColdstartRate.map(({ y }) => y)
+          );
+          const prevValuesUnique = uniq(
+            body.previousPeriod.transactionColdstartRate.map(({ y }) => y)
           );
 
+          expect(currentValuesUnique).to.eql([0.25]);
+          expect(body.currentPeriod.transactionColdstartRate).to.have.length(3);
+
+          expect(prevValuesUnique).to.eql([0.5]);
           expect(body.previousPeriod.transactionColdstartRate).to.have.length(3);
-          expect(body.previousPeriod.transactionColdstartRate.every(({ y }) => y === 0.5)).to.be(
-            true
-          );
         });
 
         it('has same average value for both periods', () => {
@@ -202,6 +265,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(body.previousPeriod.average).to.be(0.5);
         });
       });
-    }
-  );
+    });
+  });
 }
