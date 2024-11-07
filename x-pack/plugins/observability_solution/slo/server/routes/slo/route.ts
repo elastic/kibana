@@ -14,7 +14,6 @@ import {
   deleteSLOInstancesParamsSchema,
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
-  fetchHistoricalSummaryResponseSchema,
   fetchSLOHealthParamsSchema,
   findSLOGroupsParamsSchema,
   findSLOParamsSchema,
@@ -31,6 +30,7 @@ import {
 } from '@kbn/slo-schema';
 import { getOverviewParamsSchema } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
 import type { IndicatorTypes } from '../../domain/models';
+import { executeWithErrorHandler } from '../../errors';
 import {
   CreateSLO,
   DefaultBurnRatesClient,
@@ -104,7 +104,7 @@ const createSLORoute = createSloServerRoute({
     access: 'public',
   },
   params: createSLOParamsSchema,
-  handler: async ({ context, params, logger, request, plugins, corePlugins }) => {
+  handler: async ({ context, response, params, logger, request, plugins, corePlugins }) => {
     await assertPlatinumLicense(plugins);
 
     const dataViews = await plugins.dataViews.start();
@@ -142,7 +142,7 @@ const createSLORoute = createSloServerRoute({
       basePath
     );
 
-    return await createSLO.execute(params.body);
+    return await executeWithErrorHandler(() => createSLO.execute(params.body));
   },
 });
 
@@ -189,7 +189,7 @@ const inspectSLORoute = createSloServerRoute({
       basePath
     );
 
-    return createSLO.inspect(params.body);
+    return await executeWithErrorHandler(() => createSLO.inspect(params.body));
   },
 });
 
@@ -237,9 +237,7 @@ const updateSLORoute = createSloServerRoute({
       basePath
     );
 
-    const response = await updateSLO.execute(params.path.id, params.body);
-
-    return response;
+    return await executeWithErrorHandler(() => updateSLO.execute(params.path.id, params.body));
   },
 });
 
@@ -290,7 +288,7 @@ const deleteSLORoute = createSloServerRoute({
       rulesClient
     );
 
-    await deleteSLO.execute(params.path.id);
+    await executeWithErrorHandler(() => deleteSLO.execute(params.path.id));
     return response.noContent();
   },
 });
@@ -315,7 +313,9 @@ const getSLORoute = createSloServerRoute({
     const defintionClient = new SloDefinitionClient(repository, esClient, logger);
     const getSLO = new GetSLO(defintionClient, summaryClient);
 
-    return await getSLO.execute(params.path.id, spaceId, params.query);
+    return await executeWithErrorHandler(() =>
+      getSLO.execute(params.path.id, spaceId, params.query)
+    );
   },
 });
 
@@ -353,7 +353,7 @@ const enableSLORoute = createSloServerRoute({
 
     const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager);
 
-    await manageSLO.enable(params.path.id);
+    await executeWithErrorHandler(() => manageSLO.enable(params.path.id));
 
     return response.noContent();
   },
@@ -393,8 +393,7 @@ const disableSLORoute = createSloServerRoute({
 
     const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager);
 
-    await manageSLO.disable(params.path.id);
-
+    await executeWithErrorHandler(() => manageSLO.disable(params.path.id));
     return response.noContent();
   },
 });
@@ -443,9 +442,7 @@ const resetSLORoute = createSloServerRoute({
       basePath
     );
 
-    const response = await resetSLO.execute(params.path.id);
-
-    return response;
+    return await executeWithErrorHandler(() => resetSLO.execute(params.path.id));
   },
 });
 
@@ -467,7 +464,7 @@ const findSLORoute = createSloServerRoute({
 
     const findSLO = new FindSLO(repository, summarySearchClient);
 
-    return await findSLO.execute(params?.query ?? {});
+    return await executeWithErrorHandler(() => findSLO.execute(params?.query ?? {}));
   },
 });
 
@@ -486,8 +483,7 @@ const findSLOGroupsRoute = createSloServerRoute({
     const coreContext = context.core;
     const esClient = (await coreContext).elasticsearch.client.asCurrentUser;
     const findSLOGroups = new FindSLOGroups(esClient, soClient, logger, spaceId);
-    const response = await findSLOGroups.execute(params?.query ?? {});
-    return response;
+    return await executeWithErrorHandler(() => findSLOGroups.execute(params?.query ?? {}));
   },
 });
 
@@ -502,7 +498,7 @@ const getSLOSuggestionsRoute = createSloServerRoute({
 
     const soClient = (await context.core).savedObjects.client;
     const getSLOSuggestions = new GetSLOSuggestions(soClient);
-    return await getSLOSuggestions.execute();
+    return await executeWithErrorHandler(() => getSLOSuggestions.execute());
   },
 });
 
@@ -519,8 +515,7 @@ const deleteSloInstancesRoute = createSloServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const deleteSloInstances = new DeleteSLOInstances(esClient);
 
-    await deleteSloInstances.execute(params.body);
-
+    await executeWithErrorHandler(() => deleteSloInstances.execute(params.body));
     return response.noContent();
   },
 });
@@ -539,9 +534,7 @@ const findSloDefinitionsRoute = createSloServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const findSloDefinitions = new FindSLODefinitions(repository);
 
-    const response = await findSloDefinitions.execute(params?.query ?? {});
-
-    return response;
+    return await executeWithErrorHandler(() => findSloDefinitions.execute(params?.query ?? {}));
   },
 });
 
@@ -558,9 +551,7 @@ const fetchHistoricalSummary = createSloServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const historicalSummaryClient = new DefaultHistoricalSummaryClient(esClient);
 
-    const historicalSummary = await historicalSummaryClient.fetch(params.body);
-
-    return fetchHistoricalSummaryResponseSchema.encode(historicalSummary);
+    return await executeWithErrorHandler(() => historicalSummaryClient.fetch(params.body));
   },
 });
 
@@ -577,12 +568,9 @@ const getSLOInstancesRoute = createSloServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-
     const getSLOInstances = new GetSLOInstances(repository, esClient);
 
-    const response = await getSLOInstances.execute(params.path.id);
-
-    return response;
+    return await executeWithErrorHandler(() => getSLOInstances.execute(params.path.id));
   },
 });
 
@@ -627,7 +615,7 @@ const fetchSloHealthRoute = createSloServerRoute({
 
     const getSLOHealth = new GetSLOHealth(esClient, scopedClusterClient, repository);
 
-    return await getSLOHealth.execute(params.body);
+    return await executeWithErrorHandler(() => getSLOHealth.execute(params.body));
   },
 });
 
@@ -647,18 +635,20 @@ const getSloBurnRates = createSloServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const { instanceId, windows, remoteName } = params.body;
 
-    return await getBurnRates({
-      instanceId,
-      spaceId,
-      windows,
-      remoteName,
-      sloId: params.path.id,
-      services: {
-        soClient,
-        esClient,
-        logger,
-      },
-    });
+    return await executeWithErrorHandler(() =>
+      getBurnRates({
+        instanceId,
+        spaceId,
+        windows,
+        remoteName,
+        sloId: params.path.id,
+        services: {
+          soClient,
+          esClient,
+          logger,
+        },
+      })
+    );
   },
 });
 
@@ -693,7 +683,8 @@ const getSloSettingsRoute = createSloServerRoute({
     await assertPlatinumLicense(plugins);
 
     const soClient = (await context.core).savedObjects.client;
-    return await getSloSettings(soClient);
+
+    return await executeWithErrorHandler(() => getSloSettings(soClient));
   },
 });
 
@@ -709,7 +700,9 @@ const putSloSettings = (isServerless?: boolean) =>
       await assertPlatinumLicense(plugins);
 
       const soClient = (await context.core).savedObjects.client;
-      return await storeSloSettings(soClient, params.body as PutSLOSettingsParams);
+      return await executeWithErrorHandler(() =>
+        storeSloSettings(soClient, params.body as PutSLOSettingsParams)
+      );
     },
   });
 
@@ -742,7 +735,8 @@ const getSLOsOverview = createSloServerRoute({
       rulesClient,
       racClient
     );
-    return await slosOverview.execute(params?.query ?? {});
+
+    return await executeWithErrorHandler(() => slosOverview.execute(params?.query ?? {}));
   },
 });
 
