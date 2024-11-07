@@ -267,10 +267,9 @@ describe('WHERE <expression>', () => {
       const { assertSuggestions } = await setup();
 
       await assertSuggestions('FROM index | WHERE doubleField + doubleField /', [
-        '+ $0',
-        '- $0',
-        'IS NOT NULL',
-        'IS NULL',
+        ...getFunctionSignaturesByReturnType('where', 'any', { builtin: true, skipAssign: true }, [
+          'double',
+        ]),
       ]);
     });
 
