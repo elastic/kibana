@@ -37,7 +37,6 @@
     "@kbn/server-route-repository",
     "@kbn/core-chrome-browser",
     "@kbn/security-plugin",
-    "@kbn/security-solution-plugin",
     "@kbn/security-solution-plugin/public/management/cypress",
     "@kbn/tooling-log",
     "@kbn/cases-plugin",
