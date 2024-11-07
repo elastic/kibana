@@ -180,7 +180,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await selectFilterTags('tag-3');
         await expectSavedSearches(
           'A Different Saved Search\nA Different Saved Search Description',
-          'A Saved Search\nA Saved Search Description'
+          'A Saved Search\nA Saved Search Description',
+          'A Third Saved Search\nAn Untagged Saved Search Description'
         );
       });
     });
