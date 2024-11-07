@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-import type { RecalledEntry } from '../../service/knowledge_base_service';
+export const RULE_UPGRADE_TABLE_MODIFICATION_FILTER_BUTTON =
+  '[data-test-subj="rule-customization-filter-popover-button"]';
 
-export type RetrievedSuggestion = Omit<RecalledEntry, 'labels' | 'is_correction'>;
+export const RULE_UPGRADE_TABLE_MODIFICATION_FILTER_PANEL =
+  '[data-test-subj="rule-customization-filter-popover"]';

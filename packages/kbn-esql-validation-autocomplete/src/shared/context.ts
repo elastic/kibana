@@ -26,6 +26,7 @@ import {
   isSettingItem,
   pipePrecedesCurrentWord,
   getFunctionDefinition,
+  isIdentifier,
 } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
@@ -87,7 +88,9 @@ function findCommandSubType<T extends ESQLCommandMode | ESQLCommandOption>(
 
 function isMarkerNode(node: ESQLSingleAstItem | undefined): boolean {
   return Boolean(
-    node && (isColumnItem(node) || isSourceItem(node)) && node.name.endsWith(EDITOR_MARKER)
+    node &&
+      (isColumnItem(node) || isIdentifier(node) || isSourceItem(node)) &&
+      node.name.endsWith(EDITOR_MARKER)
   );
 }
 

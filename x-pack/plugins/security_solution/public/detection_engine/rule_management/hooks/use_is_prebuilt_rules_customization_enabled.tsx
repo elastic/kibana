@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SortColumnTimeline } from '../../../../../../common/types/timeline';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
-/** Specifies which column the timeline is sorted on */
-export type Sort = SortColumnTimeline;
+export const useIsPrebuiltRulesCustomizationEnabled = () => {
+  return useIsExperimentalFeatureEnabled('prebuiltRulesCustomizationEnabled');
+};
