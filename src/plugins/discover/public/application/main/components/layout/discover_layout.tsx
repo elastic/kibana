@@ -339,7 +339,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       sidebarToggleState.lastChangedBy === lastChangedBy
     ) {
       // auto-expand sidebar when switching back to a normal case (unless user has manually collapsed it)
-      sidebarToggleState.toggle?.(false);
+      sidebarToggleState.toggle?.(false, { skipPersisting: true });
     }
   }, [isEsqlMode, query, sidebarToggleState$, sidebarToggle]);
 
