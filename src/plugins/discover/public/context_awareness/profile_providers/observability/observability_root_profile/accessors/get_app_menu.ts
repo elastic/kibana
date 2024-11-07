@@ -50,7 +50,7 @@ const registerDatasetQualityLink = (
         label: i18n.translate('discover.observabilitySolution.appMenu.datasets', {
           defaultMessage: 'Data sets',
         }),
-        testId: 'dataset-quality-link',
+        testId: 'discoverAppMenuDatasetQualityLink',
         onClick: ({ onFinishAction }) => {
           const refresh = timefilter.getRefreshInterval();
           const { from, to } = timefilter.getTime();
@@ -86,7 +86,7 @@ const registerCustomThresholdRuleAction = (
         defaultMessage: 'Create custom threshold rule',
       }),
       iconType: 'visGauge',
-      testId: 'custom-threshold-rule',
+      testId: 'discoverAppMenuCustomThresholdRule',
       onClick: ({ onFinishAction }) => {
         const index = dataView?.getIndexPattern();
         const { filters, query } = data.query.getState();
@@ -128,7 +128,7 @@ const registerCreateSLOAction = (
           defaultMessage: 'Create SLO',
         }),
         iconType: 'bell',
-        testId: 'create-slo',
+        testId: 'discoverAppMenuCreateSlo',
         onClick: ({ onFinishAction }) => {
           const index = dataView?.getIndexPattern();
           const timestampField = dataView?.timeFieldName;
