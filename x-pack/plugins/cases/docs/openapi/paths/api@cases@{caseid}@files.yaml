@@ -8,7 +8,7 @@ post:
     feature privileges, depending on the owner of the case you're updating.
     The request must include:
         - The `Content-Type: multipart/form-data` HTTP header.
-        - A link to the file tzhat is being uploaded.
+        - A link to the file that is being uploaded.
   tags:
     - cases
   parameters:
