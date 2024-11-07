@@ -4,7 +4,8 @@
   margin-top: $euiSizeS;
 
   .embPanel__content,
-  .dshDashboardGrid__item--highlighted,
+  .dshDashboardGrid__item,
+  .embPanel__hoverActionsAnchor,
   .lnsExpressionRenderer {
     border-radius: 0;
   }
