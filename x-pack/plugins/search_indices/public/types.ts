@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
 import type {
   MappingProperty,
   MappingPropertyBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import type {
+  IndexManagementPluginSetup,
+  IndexManagementPluginStart,
+} from '@kbn/index-management-shared-types';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { AvailableLanguages } from './code_examples';
 
 export interface SearchIndicesPluginSetup {
@@ -32,14 +37,20 @@ export interface SearchIndicesPluginStart {
   startRoute: string;
 }
 
-export interface AppPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
+export interface AppPluginSetupDependencies {
+  console?: ConsolePluginSetup;
+  cloud?: CloudSetup;
+  indexManagement: IndexManagementPluginSetup;
+  share: SharePluginSetup;
+  serverless?: ServerlessPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface SearchIndicesAppPluginStartDependencies {
   console?: ConsolePluginStart;
   cloud?: CloudStart;
   share: SharePluginStart;
+  serverless?: ServerlessPluginStart;
   usageCollection?: UsageCollectionStart;
   indexManagement: IndexManagementPluginStart;
 }
@@ -51,8 +62,6 @@ export interface SearchIndicesServicesContextDeps {
 export type SearchIndicesServicesContext = CoreStart &
   SearchIndicesAppPluginStartDependencies & {
     history: AppMountParameters['history'];
-    indexManagement: IndexManagementPluginStart;
-    serverless: ServerlessPluginStart;
   };
 
 export interface AppUsageTracker {
