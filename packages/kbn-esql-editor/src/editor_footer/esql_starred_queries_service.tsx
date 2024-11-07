@@ -19,11 +19,12 @@ import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { FAVORITES_LIMIT as ESQL_STARRED_QUERIES_LIMIT } from '@kbn/content-management-favorites-common';
 import {
   type QueryHistoryItem,
-  dateFormat,
   getMomentTimeZone,
   getTrimmedQuery,
 } from '../history_local_storage';
 import { TooltipWrapper } from './tooltip_wrapper';
+
+const ISO8601_TZ_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
 
 const STARRED_QUERIES_DISCARD_KEY = 'esqlEditor.starredQueriesDiscard';
 
@@ -121,7 +122,7 @@ export class EsqlStarredQueriesService {
       id: generateId(),
       metadata: {
         queryString: getTrimmedQuery(item.queryString),
-        timeRan: moment().tz(tz).format(dateFormat),
+        timeRan: moment().tz(tz).format(ISO8601_TZ_FORMAT),
         status: item.status,
       },
     };

@@ -10,7 +10,7 @@
 import moment from 'moment';
 import 'moment-timezone';
 const QUERY_HISTORY_ITEM_KEY = 'QUERY_HISTORY_ITEM_KEY';
-export const dateFormat = 'MMM. D, YY HH:mm:ss.SSS';
+export const dateFormat = 'MMM. D, YY HH:mm:ss';
 
 /**
  * We show maximum 20 ES|QL queries in the Query history component

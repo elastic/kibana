@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -35,6 +36,7 @@ import {
   type QueryHistoryItem,
   getHistoryItems,
   MAX_HISTORY_QUERIES_NUMBER,
+  dateFormat,
 } from '../history_local_storage';
 import type { ESQLEditorDeps } from '../types';
 import { getReducedSpaceStyling, swapArrayElements } from './history_starred_queries_helpers';
@@ -214,7 +216,7 @@ export const getTableColumns = (
             defaultMessage: 'Time ran',
           }),
       sortable: true,
-      render: (timeRan: QueryHistoryItem['timeRan']) => timeRan,
+      render: (timeRan: QueryHistoryItem['timeRan']) => moment(timeRan).format(dateFormat),
       width: isOnReducedSpaceLayout ? 'auto' : '240px',
     },
     {
