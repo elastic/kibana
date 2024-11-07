@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { screen, fireEvent, render, within, act, waitFor } from '@testing-library/react';
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase } from '@kbn/es-query';
-import { StepDefineRule, aggregatableFields } from '.';
+import { StepDefineRule } from '.';
 import type { StepDefineRuleProps } from '.';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
@@ -149,53 +149,6 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_from_timeline');
-
-test('aggregatableFields', function () {
-  expect(
-    aggregatableFields([
-      {
-        name: 'error.message',
-        type: 'string',
-        esTypes: ['text'],
-        searchable: true,
-        aggregatable: false,
-        readFromDocValues: false,
-      },
-    ])
-  ).toEqual([]);
-});
-
-test('aggregatableFields with aggregatable: true', function () {
-  expect(
-    aggregatableFields([
-      {
-        name: 'error.message',
-        type: 'string',
-        esTypes: ['text'],
-        searchable: true,
-        aggregatable: false,
-        readFromDocValues: false,
-      },
-      {
-        name: 'file.path',
-        type: 'string',
-        esTypes: ['keyword'],
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: false,
-      },
-    ])
-  ).toEqual([
-    {
-      name: 'file.path',
-      type: 'string',
-      esTypes: ['keyword'],
-      searchable: true,
-      aggregatable: true,
-      readFromDocValues: false,
-    },
-  ]);
-});
 
 const mockUseRuleFromTimeline = useRuleFromTimeline as jest.Mock;
 const onOpenTimeline = jest.fn();
