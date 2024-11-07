@@ -476,7 +476,9 @@ export const PresentationPanelHoverActions = ({
         height: 100%;
 
         .embPanel {
-          ${showBorder ? `outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};` : ''}
+          ${showBorder ? `
+            outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
+          ` : ''}
         }
 
         .embPanel__hoverActions {
