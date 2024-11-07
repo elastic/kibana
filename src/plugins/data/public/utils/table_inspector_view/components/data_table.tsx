@@ -198,7 +198,7 @@ class DataTableFormatClass extends Component<
     const { pageSize, sorting, onTableChange } = this.props.euiTablePersist;
     const pagination = {
       pageSizeOptions: PAGE_SIZE_OPTIONS,
-      initialPageSize: pageSize,
+      pageSize,
     };
 
     return (
