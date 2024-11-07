@@ -11,7 +11,7 @@ import React from 'react';
 import { useBoolean } from '@kbn/react-hooks';
 
 interface Props {
-  discoverUrl?: string;
+  discoverUrl: string;
 }
 
 export const EntityActions = ({ discoverUrl }: Props) => {

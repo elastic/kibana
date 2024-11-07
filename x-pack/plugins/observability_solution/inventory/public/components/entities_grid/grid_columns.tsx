@@ -72,8 +72,10 @@ const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipCon
 
 export const getColumns = ({
   showAlertsColumn,
+  showActions,
 }: {
   showAlertsColumn: boolean;
+  showActions: boolean;
 }): EuiDataGridColumn[] => {
   return [
     ...(showAlertsColumn
@@ -113,12 +115,18 @@ export const getColumns = ({
       isSortable: true,
       schema: 'datetime',
     },
-    {
-      id: 'actions',
-      // keep it for accessibility purposes
-      displayAsText: entityActionsLabel,
-      display: <CustomHeaderCell title={entityActionsLabel} tooltipContent={entityActionsLabel} />,
-      initialWidth: 100,
-    },
+    ...(showActions
+      ? [
+          {
+            id: 'actions',
+            // keep it for accessibility purposes
+            displayAsText: entityActionsLabel,
+            display: (
+              <CustomHeaderCell title={entityActionsLabel} tooltipContent={entityActionsLabel} />
+            ),
+            initialWidth: 100,
+          },
+        ]
+      : []),
   ];
 };

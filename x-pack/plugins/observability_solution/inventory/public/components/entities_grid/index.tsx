@@ -72,12 +72,15 @@ export function EntitiesGrid({
     [entities]
   );
 
+  // For now this is the only option so once we add more we need to change this check as well
+  const showActions = useMemo(() => !!getDiscoverRedirectUrl(), [getDiscoverRedirectUrl]);
+
   const columnVisibility = useMemo(
     () => ({
-      visibleColumns: getColumns({ showAlertsColumn }).map(({ id }) => id),
+      visibleColumns: getColumns({ showAlertsColumn, showActions }).map(({ id }) => id),
       setVisibleColumns: () => {},
     }),
-    [showAlertsColumn]
+    [showAlertsColumn, showActions]
   );
 
   const renderCellValue = useCallback(
@@ -133,7 +136,7 @@ export function EntitiesGrid({
         case ENTITY_DISPLAY_NAME:
           return <EntityName entity={entity} />;
         case 'actions':
-          return <EntityActions discoverUrl={discoverUrl} />;
+          return discoverUrl && <EntityActions discoverUrl={discoverUrl} />;
         default:
           return entity[columnId as EntityColumnIds] || '';
       }
@@ -153,7 +156,7 @@ export function EntitiesGrid({
         'xpack.inventory.entitiesGrid.euiDataGrid.inventoryEntitiesGridLabel',
         { defaultMessage: 'Inventory entities grid' }
       )}
-      columns={getColumns({ showAlertsColumn })}
+      columns={getColumns({ showAlertsColumn, showActions })}
       columnVisibility={columnVisibility}
       rowCount={entities.length}
       renderCellValue={renderCellValue}
