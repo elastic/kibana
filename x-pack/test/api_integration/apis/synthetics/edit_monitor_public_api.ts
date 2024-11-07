@@ -270,7 +270,7 @@ export default function ({ getService }: FtrProviderContext) {
           ...updates,
           revision: 4,
           url: 'https://www.google.com',
-          locations: [localLoc, pvtLoc],
+          locations: [pvtLoc],
         })
       );
     });
