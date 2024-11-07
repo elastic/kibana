@@ -22,6 +22,7 @@ export function ControlGroups() {
     useInventorySearchBarContext();
   const { controlPanels, setControlPanels } = useControlPanels(dataView);
   const { searchState, setSearchState } = useUnifiedSearch();
+  console.log('### caue  ControlGroups  searchState:', searchState);
   const subscriptions = useRef<Subscription>(new Subscription());
 
   const getInitialInput = useCallback(

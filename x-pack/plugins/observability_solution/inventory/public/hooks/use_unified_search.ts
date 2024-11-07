@@ -15,6 +15,7 @@ import * as t from 'io-ts';
 import { useEffect, useMemo } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { map, Subscription, tap } from 'rxjs';
+import { generateFilters } from '@kbn/data-plugin/public';
 import { useInventorySearchBarContext } from '../context/inventory_search_bar_context_provider';
 import { useKibana } from './use_kibana';
 
@@ -138,9 +139,34 @@ export function useUnifiedSearch() {
     }
   }, [dataView, searchState.controlFilters, searchState.filters, searchState.query]);
 
+  function addFilter({
+    fieldName,
+    operation,
+    value,
+  }: {
+    fieldName: string;
+    value: string;
+    operation: '+' | '-';
+  }) {
+    if (dataView) {
+      const newFilters = generateFilters(
+        filterManagerService,
+        fieldName,
+        value,
+        operation,
+        dataView
+      );
+      setSearchState((state) => ({
+        ...state,
+        filters: [...state.filters, ...newFilters],
+      }));
+    }
+  }
+
   return {
     searchState,
     setSearchState,
     stringifiedEsQuery,
+    addFilter,
   };
 }
