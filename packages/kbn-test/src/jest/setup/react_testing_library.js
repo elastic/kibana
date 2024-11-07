@@ -39,6 +39,7 @@ jest.mock('@testing-library/react', () => {
 // The testing library mutes the act warnings in some cases by setting IS_REACT_ACT_ENVIRONMENT which is React@18 feature https://github.com/testing-library/react-testing-library/pull/1137/
 // Using this console override we're muting the act warnings as well
 // Tracking issue to clean this up https://github.com/elastic/kibana/issues/199100
+// NOTE: we're not muting all the act warnings but only those that testing-library wanted to mute
 const originalConsoleError = console.error;
 console.error = (...args) => {
   if (global.IS_REACT_ACT_ENVIRONMENT === false) {
