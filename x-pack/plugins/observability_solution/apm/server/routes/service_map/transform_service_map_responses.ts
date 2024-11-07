@@ -51,7 +51,7 @@ function addMessagingConnections(
   const newConnections = messagingDestinations
     .map((node) => {
       const matchedService = discoveredServices.find(
-        ({ from, to }) =>
+        ({ from }) =>
           node[SPAN_DESTINATION_SERVICE_RESOURCE] === from[SPAN_DESTINATION_SERVICE_RESOURCE]
       )?.to;
       if (matchedService) {
@@ -127,13 +127,13 @@ export function transformServiceMapResponses({
   const serviceNodes = getServiceNodes(allNodes, discoveredServices);
 
   // List of nodes that are externals
-  const externalNodes = [
-    ...new Set(
+  const externalNodes = Array.from(
+    new Set(
       allNodes.filter(
         (node) => SPAN_DESTINATION_SERVICE_RESOURCE in node
       ) as ExternalConnectionNode[]
-    ),
-  ];
+    )
+  );
 
   // 1. Map external nodes to internal services
   // 2. Collapse external nodes into one node based on span.destination.service.resource

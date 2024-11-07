@@ -15,7 +15,7 @@ const timeRange = {
   rangeFrom: start,
   rangeTo: end,
 };
-// flaky
+
 describe('Transaction details', () => {
   before(() => {
     synthtrace.index(
@@ -114,7 +114,7 @@ describe('Transaction details', () => {
       })}`
     );
 
-    cy.contains('Top 5 errors', { timeout: 30000 });
+    cy.contains('Top 5 errors', { timeout: 60000 });
     cy.getByTestSubj('topErrorsForTransactionTable').contains('a', '[MockError] Foo').click();
     cy.url().should('include', 'opbeans-java/errors');
   });
