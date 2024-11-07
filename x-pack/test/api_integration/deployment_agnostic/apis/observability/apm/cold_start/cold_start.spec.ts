@@ -20,7 +20,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 type ColdStartRate =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate'>;
 
-export const dataConfig = {
+const dataConfig = {
   serviceName: 'synth-go',
   coldStartTransaction: {
     name: 'GET /apple 🍎',
@@ -32,7 +32,7 @@ export const dataConfig = {
   },
 };
 
-export async function generateData({
+async function generateData({
   apmSynthtraceEsClient,
   start,
   end,
@@ -132,7 +132,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/177113
       describe('without comparison', () => {
         let body: ColdStartRate;
         let status: number;

@@ -20,13 +20,13 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 type ColdStartRate =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name'>;
 
-export const dataConfig = {
+const dataConfig = {
   serviceName: 'synth-go',
   transactionName: 'GET /apple 🍎',
   duration: 1000,
 };
 
-export async function generateData({
+async function generateData({
   apmSynthtraceEsClient,
   start,
   end,
@@ -121,7 +121,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177616
     describe('when data is generated', () => {
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
