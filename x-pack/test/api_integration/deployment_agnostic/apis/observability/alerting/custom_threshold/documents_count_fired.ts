@@ -247,7 +247,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           docCountTarget: 1,
         });
 
-        const { protocol, hostname, port } = kbnTestConfig.getUrlParts();
+        const { protocol, hostname, port } = kbnTestConfig.getUrlPartsWithStrippedDefaultPort();
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
