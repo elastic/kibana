@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       isNewChartsLibraryEnabled = await visChart.isNewChartsLibraryEnabled(
         'visualization:visualize:legacyHeatmapChartsLibrary'
       );
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests(!isNewChartsLibraryEnabled);
       log.debug('navigateToApp visualize');
       await visualize.navigateToNewAggBasedVisualization();
       log.debug('clickHeatmapChart');

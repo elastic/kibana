@@ -22,10 +22,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('XY', function describeIndexTests() {
-    const isNewChartsLibraryEnabled = true;
-
     before(async () => {
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
     });
 
     beforeEach(async () => {

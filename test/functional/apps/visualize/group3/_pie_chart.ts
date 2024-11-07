@@ -28,11 +28,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('pie chart', function () {
     // Used to track flag before and after reset
-    let isNewChartsLibraryEnabled = false;
     const vizName1 = 'Visualization PieChart';
     before(async function () {
-      isNewChartsLibraryEnabled = await visChart.isNewChartsLibraryEnabled();
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
 
       log.debug('navigateToApp visualize');
       await visualize.navigateToNewAggBasedVisualization();

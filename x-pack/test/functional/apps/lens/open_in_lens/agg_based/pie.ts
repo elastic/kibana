@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     const isNewChartsLibraryEnabled = true;
 
     before(async () => {
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
     });
 
     beforeEach(async () => {
