@@ -389,7 +389,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('query history-meow', () => {
+    describe('query history', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
         await timePicker.setDefaultAbsoluteRange();
