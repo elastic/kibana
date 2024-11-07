@@ -7,7 +7,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { buildPhrasesFilter, PhrasesFilter } from '@kbn/es-query';
+import { PhrasesFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
@@ -18,8 +18,8 @@ import {
   ENTITY_TYPE,
 } from '@kbn/observability-shared-plugin/common';
 import { EntityColumnIds } from '../../../common/entities';
-import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
 
 const ACTIVE_COLUMNS: EntityColumnIds[] = [ENTITY_DISPLAY_NAME, ENTITY_TYPE, ENTITY_LAST_SEEN];
 
@@ -27,9 +27,7 @@ export function DiscoverButton({ dataView }: { dataView: DataView }) {
   const {
     services: { share, application },
   } = useKibana();
-  const {
-    query: { kuery, entityTypes },
-  } = useInventoryParams('/*');
+  const { searchState } = useUnifiedSearchContext();
 
   const discoverLocator = useMemo(
     () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
@@ -38,14 +36,10 @@ export function DiscoverButton({ dataView }: { dataView: DataView }) {
 
   const filters: PhrasesFilter[] = [];
 
-  const entityTypeField = dataView.getFieldByName(ENTITY_TYPE);
-
-  if (entityTypes && entityTypeField) {
-    const entityTypeFilter = buildPhrasesFilter(entityTypeField, entityTypes, dataView);
-    filters.push(entityTypeFilter);
-  }
-
-  const kueryWithEntityDefinitionFilters = [kuery, `${ENTITY_DEFINITION_ID} : builtin*`]
+  const kueryWithEntityDefinitionFilters = [
+    searchState.query.query as string,
+    `${ENTITY_DEFINITION_ID} : builtin*`,
+  ]
     .filter(Boolean)
     .join(' AND ');
 
