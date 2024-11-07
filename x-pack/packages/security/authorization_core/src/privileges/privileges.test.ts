@@ -606,9 +606,6 @@ describe('features', () => {
       ),
       actions.ui.get('navLinks', 'all-beta-app'),
       actions.ui.get('beta', 'all-beta-ui'),
-      ...alertingOperations.map((operation) =>
-        actions.alerting.get('rule-type-1', 'beta', 'rule', operation)
-      ),
     ];
 
     const expectedReadPrivileges = [

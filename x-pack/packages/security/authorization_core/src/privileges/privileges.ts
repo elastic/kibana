@@ -94,17 +94,15 @@ export function privilegesFactory(
         // If a privilege is configured with `replacedBy`, it's part of the deprecated feature and
         // should be complemented with the subset of actions from the referenced privileges to
         // maintain backward compatibility. Namely, deprecated privileges should grant the same UI
-        // capabilities and alerting actions as the privileges that replace them, so that the
-        // client-side code can safely use only non-deprecated UI capabilities and users can still
-        // access previously created alerting rules and alerts.
+        // capabilities as the privileges that replace them, so that the client-side code can safely
+        // use only non-deprecated UI capabilities.
         const replacedBy = getReplacedByForPrivilege(privilegeId, privilege);
         if (replacedBy) {
           composablePrivileges.push({
             featureId: feature.id,
             privilegeId,
             references: replacedBy,
-            actionsFilter: (action) =>
-              actions.ui.isValid(action) || actions.alerting.isValid(action),
+            actionsFilter: (action) => actions.ui.isValid(action),
           });
         }
       };
