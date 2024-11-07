@@ -1020,7 +1020,10 @@ describe('TaskStore', () => {
         refresh: false,
       });
 
-      expect(result).toEqual([asOk(task)]);
+      expect(result).toEqual([
+        // New version returned after update
+        asOk({ ...task, version: 'Wzg0LDFd' }),
+      ]);
     });
 
     test(`should perform partial update with minimal fields`, async () => {
@@ -1062,7 +1065,8 @@ describe('TaskStore', () => {
         refresh: false,
       });
 
-      expect(result).toEqual([asOk(task)]);
+      // New version returned after update
+      expect(result).toEqual([asOk({ ...task, version: 'Wzg0LDFd' })]);
     });
 
     test(`should perform partial update with no version`, async () => {
@@ -1100,7 +1104,8 @@ describe('TaskStore', () => {
         refresh: false,
       });
 
-      expect(result).toEqual([asOk(task)]);
+      // New version returned after update
+      expect(result).toEqual([asOk({ ...task, version: 'Wzg0LDFd' })]);
     });
 
     test(`should gracefully handle errors within the response`, async () => {
@@ -1183,7 +1188,8 @@ describe('TaskStore', () => {
       });
 
       expect(result).toEqual([
-        asOk(task1),
+        // New version returned after update
+        asOk({ ...task1, version: 'Wzg0LDFd' }),
         asErr({
           type: 'task',
           id: '45343254',
@@ -1267,7 +1273,8 @@ describe('TaskStore', () => {
       });
 
       expect(result).toEqual([
-        asOk(task1),
+        // New version returned after update
+        asOk({ ...task1, version: 'Wzg0LDFd' }),
         asErr({
           type: 'task',
           id: 'unknown',
