@@ -15,7 +15,7 @@ export interface StartPageErrorProps {
   error: unknown;
 }
 
-export const StartPageError = ({ error }: StartPageErrorProps) => {
+export const LoadIndicesStatusError = ({ error }: StartPageErrorProps) => {
   return (
     <EuiEmptyPrompt
       iconType="error"

@@ -4,61 +4,55 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
-import { AnalyticsEvents } from '../../analytics/constants';
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
 
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { useKibana } from '../../hooks/use_kibana';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
-import { CodeSample } from '../shared/code_sample';
-import { LanguageSelector } from '../shared/language_selector';
-
-import { CreateIndexFormState } from './types';
-import { useStartPageCodingExamples } from './hooks/use_coding_examples';
 import { APIKeyCallout } from './api_key_callout';
+import { CodeSample } from './code_sample';
+import { useCreateIndexCodingExamples } from './hooks/use_create_index_coding_examples';
+import { LanguageSelector } from './language_selector';
 
 export interface CreateIndexCodeViewProps {
-  createIndexForm: CreateIndexFormState;
+  selectedLanguage: AvailableLanguages;
+  indexName: string;
   changeCodingLanguage: (language: AvailableLanguages) => void;
   canCreateApiKey?: boolean;
+  analyticsEvents: {
+    runInConsole: string;
+    installCommands: string;
+    createIndex: string;
+  };
 }
 
 export const CreateIndexCodeView = ({
-  createIndexForm,
-  changeCodingLanguage,
+  analyticsEvents,
   canCreateApiKey,
+  changeCodingLanguage,
+  indexName,
+  selectedLanguage,
 }: CreateIndexCodeViewProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
   const usageTracker = useUsageTracker();
-  const selectedCodeExamples = useStartPageCodingExamples();
+  const selectedCodeExamples = useCreateIndexCodingExamples();
 
-  const { codingLanguage: selectedLanguage } = createIndexForm;
-  const onSelectLanguage = useCallback(
-    (value: AvailableLanguages) => {
-      changeCodingLanguage(value);
-      usageTracker.count([
-        AnalyticsEvents.startCreateIndexLanguageSelect,
-        `${AnalyticsEvents.startCreateIndexLanguageSelect}_${value}`,
-      ]);
-    },
-    [usageTracker, changeCodingLanguage]
-  );
   const elasticsearchUrl = useElasticsearchUrl();
   const { apiKey, apiKeyIsVisible } = useSearchApiKey();
 
   const codeParams = useMemo(() => {
     return {
-      indexName: createIndexForm.indexName || undefined,
+      indexName: indexName || undefined,
       elasticsearchURL: elasticsearchUrl,
       apiKey: apiKeyIsVisible && apiKey ? apiKey : undefined,
     };
-  }, [createIndexForm.indexName, elasticsearchUrl, apiKeyIsVisible, apiKey]);
+  }, [indexName, elasticsearchUrl, apiKeyIsVisible, apiKey]);
   const selectedCodeExample = useMemo(() => {
     return selectedCodeExamples[selectedLanguage];
   }, [selectedLanguage, selectedCodeExamples]);
@@ -75,7 +69,7 @@ export const CreateIndexCodeView = ({
           <LanguageSelector
             options={LanguageOptions}
             selectedLanguage={selectedLanguage}
-            onSelectLanguage={onSelectLanguage}
+            onSelectLanguage={changeCodingLanguage}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -87,8 +81,8 @@ export const CreateIndexCodeView = ({
             telemetryId={`${selectedLanguage}_create_index`}
             onClick={() => {
               usageTracker.click([
-                AnalyticsEvents.startCreateIndexRunInConsole,
-                `${AnalyticsEvents.startCreateIndexRunInConsole}_${selectedLanguage}`,
+                analyticsEvents.runInConsole,
+                `${analyticsEvents.runInConsole}_${selectedLanguage}`,
               ]);
             }}
           />
@@ -102,8 +96,8 @@ export const CreateIndexCodeView = ({
           code={selectedCodeExample.installCommand}
           onCodeCopyClick={() => {
             usageTracker.click([
-              AnalyticsEvents.startCreateIndexCodeCopyInstall,
-              `${AnalyticsEvents.startCreateIndexCodeCopyInstall}_${selectedLanguage}`,
+              analyticsEvents.installCommands,
+              `${analyticsEvents.installCommands}_${selectedLanguage}`,
             ]);
           }}
         />
@@ -116,9 +110,9 @@ export const CreateIndexCodeView = ({
         code={selectedCodeExample.createIndex(codeParams)}
         onCodeCopyClick={() => {
           usageTracker.click([
-            AnalyticsEvents.startCreateIndexCodeCopy,
-            `${AnalyticsEvents.startCreateIndexCodeCopy}_${selectedLanguage}`,
-            `${AnalyticsEvents.startCreateIndexCodeCopy}_${selectedLanguage}_${selectedCodeExamples.exampleType}`,
+            analyticsEvents.createIndex,
+            `${analyticsEvents.createIndex}_${selectedLanguage}`,
+            `${analyticsEvents.createIndex}_${selectedLanguage}_${selectedCodeExamples.exampleType}`,
           ]);
         }}
       />

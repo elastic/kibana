@@ -56,7 +56,7 @@ export class SearchIndicesPlugin
       }),
       async mount({ element, history }) {
         const { renderApp } = await import('./application');
-        const { SearchIndicesRouter } = await import('./components/indices/indices_router');
+        const { SearchIndicesRouter } = await import('./components/indices_router');
         const [coreStart, depsStart] = await core.getStartServices();
         const startDeps: SearchIndicesServicesContextDeps = {
           ...depsStart,

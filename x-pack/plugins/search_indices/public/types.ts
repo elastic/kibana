@@ -17,7 +17,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { AvailableLanguages } from './code_examples';
 
 export interface SearchIndicesPluginSetup {
   enabled: boolean;
@@ -122,4 +123,15 @@ export interface IngestDataCodeExamples {
   curl: IngestDataCodeDefinition;
   python: IngestDataCodeDefinition;
   javascript: IngestDataCodeDefinition;
+}
+
+export interface CreateIndexFormState {
+  indexName: string;
+  defaultIndexName: string;
+  codingLanguage: AvailableLanguages;
+}
+
+export enum CreateIndexViewMode {
+  UI = 'ui',
+  Code = 'code',
 }

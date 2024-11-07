@@ -14,12 +14,11 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../../hooks/use_kibana';
 import { useIndicesStatusQuery } from '../../hooks/api/use_indices_status';
 import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
-
-import { useIndicesRedirect } from './hooks/use_indices_redirect';
-import { ElasticsearchStart } from './elasticsearch_start';
 import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
 
-export const ElasticsearchStartPage = () => {
+import { CreateIndex } from './create_index';
+
+export const CreateIndexPage = () => {
   const { console: consolePlugin, chrome } = useKibana().services;
   const {
     data: indicesData,
@@ -28,33 +27,30 @@ export const ElasticsearchStartPage = () => {
     error: indicesFetchError,
   } = useIndicesStatusQuery();
   const { data: userPrivileges } = useUserPrivilegesQuery();
-  useEffect(() => {
-    // Set Page Title
-    chrome.docTitle.change(
-      i18n.translate('xpack.searchIndices.startPage.docTitle', {
-        defaultMessage: 'Create Your First Index',
-      })
-    );
-  }, [chrome]);
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
-  useIndicesRedirect(indicesData);
+  useEffect(() => {
+    // Set Page Title
+    chrome.docTitle.change(
+      i18n.translate('xpack.searchIndices.createIndex.docTitle', { defaultMessage: 'Create Index' })
+    );
+  }, [chrome]);
 
   return (
     <EuiPageTemplate
       offset={0}
       restrictWidth={false}
-      data-test-subj="elasticsearchStartPage"
+      data-test-subj="elasticsearchCreateIndexPage"
       grow={false}
     >
       <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
         {isInitialLoading && <EuiLoadingLogo />}
         {hasIndicesStatusFetchError && <LoadIndicesStatusError error={indicesFetchError} />}
         {!isInitialLoading && !hasIndicesStatusFetchError && (
-          <ElasticsearchStart indicesData={indicesData} userPrivileges={userPrivileges} />
+          <CreateIndex indicesData={indicesData} userPrivileges={userPrivileges} />
         )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}
