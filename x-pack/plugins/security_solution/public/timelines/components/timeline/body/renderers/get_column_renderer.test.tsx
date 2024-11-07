@@ -13,13 +13,13 @@ import type { TimelineNonEcsData } from '../../../../../../common/search_strateg
 import { mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
-import { defaultHeaders } from '../column_headers/default_headers';
 
 import { columnRenderers } from '.';
 import { getColumnRenderer } from './get_column_renderer';
 import { getValues, findItem, deleteItemIdx } from './helpers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { TimelineId } from '../../../../../../common/types/timeline';
+import { defaultUdtHeaders } from '../column_headers/default_headers';
 
 jest.mock('../../../../../common/lib/kibana');
 
@@ -47,7 +47,7 @@ describe('get_column_renderer', () => {
       columnName,
       eventId: _id,
       values: getValues(columnName, nonSuricata),
-      field: defaultHeaders[1],
+      field: defaultUdtHeaders[1],
       scopeId: TimelineId.test,
     });
 
@@ -62,7 +62,7 @@ describe('get_column_renderer', () => {
       columnName,
       eventId: _id,
       values: getValues(columnName, nonSuricata),
-      field: defaultHeaders[1],
+      field: defaultUdtHeaders[1],
       scopeId: TimelineId.test,
     });
     const wrapper = mount(
@@ -82,7 +82,7 @@ describe('get_column_renderer', () => {
       columnName,
       eventId: _id,
       values: getValues(columnName, nonSuricata),
-      field: defaultHeaders[7],
+      field: defaultUdtHeaders[7],
       scopeId: TimelineId.test,
     });
     const wrapper = mount(
@@ -100,7 +100,7 @@ describe('get_column_renderer', () => {
       columnName,
       eventId: _id,
       values: getValues(columnName, nonSuricata),
-      field: defaultHeaders[7],
+      field: defaultUdtHeaders[7],
       scopeId: TimelineId.test,
     });
     const wrapper = mount(
