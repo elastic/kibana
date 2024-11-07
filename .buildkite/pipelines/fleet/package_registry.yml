@@ -53,6 +53,9 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
+    depends_on:
+      - ftr-configs
+      - jest-integration
 
   - wait: ~
     continue_on_failure: true
