@@ -139,7 +139,7 @@ pageLoadAssetSize:
   screenshotMode: 17856
   screenshotting: 22870
   searchAssistant: 19831
-  searchConnectors: 30000
+  searchConnectors: 65000
   searchHomepage: 19831
   searchIndices: 20519
   searchInferenceEndpoints: 20470

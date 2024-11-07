@@ -14,18 +14,32 @@ import {
   createProxyActionConnector,
   deleteActionConnector,
 } from '../../../common/action_connectors';
+import {
+  clearKnowledgeBase,
+  createKnowledgeBaseModel,
+  deleteKnowledgeBaseModel,
+} from '../../knowledge_base/helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
+  const ml = getService('ml');
+  const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  // Skipped until Elser is available in tests
-  describe.skip('when calling summarize function', () => {
+  describe('when calling summarize function', () => {
     let proxy: LlmProxy;
     let connectorId: string;
 
     before(async () => {
+      await clearKnowledgeBase(es);
+      await createKnowledgeBaseModel(ml);
+      await observabilityAIAssistantAPIClient
+        .editorUser({
+          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+        })
+        .expect(200);
+
       proxy = await createLlmProxy(log);
       connectorId = await createProxyActionConnector({ supertest, log, port: proxy.getPort() });
 
@@ -44,7 +58,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             id: 'my-id',
             text: 'Hello world',
             is_correction: false,
-            confidence: 1,
+            confidence: 'high',
             public: false,
           }),
         },
@@ -55,7 +69,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     after(async () => {
       proxy.close();
+
       await deleteActionConnector({ supertest, connectorId, log });
+      await deleteKnowledgeBaseModel(ml);
     });
 
     it('persists entry in knowledge base', async () => {
@@ -70,6 +86,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       });
 
+      const { role, public: isPublic, text, type, user, id } = res.body.entries[0];
+
+      expect(role).to.eql('assistant_summarization');
+      expect(isPublic).to.eql(false);
+      expect(text).to.eql('Hello world');
+      expect(type).to.eql('contextual');
+      expect(user?.name).to.eql('editor');
+      expect(id).to.eql('my-id');
       expect(res.body.entries).to.have.length(1);
     });
   });

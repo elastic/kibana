@@ -68,7 +68,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
       systemMessage: getSystemMessageFromInstructions({
         applicationInstructions: functionClient.getInstructions(),
         userInstructions,
-        adHocInstructions: [],
+        adHocInstructions: functionClient.getAdhocInstructions(),
         availableFunctionNames,
       }),
     };

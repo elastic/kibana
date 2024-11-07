@@ -87,7 +87,7 @@ run(
     const kibanaRootPaths = ['./src', './packages', './x-pack'];
     const rootPaths = Array().concat(path || kibanaRootPaths);
 
-    const list = new Listr<I18nCheckTaskContext, 'default' | 'silent' | 'verbose'>(
+    const list = new Listr<I18nCheckTaskContext>(
       [
         {
           title: 'Checking .i18nrc.json files',
@@ -129,7 +129,8 @@ run(
         concurrent: false,
         exitOnError: true,
         forceTTY: false,
-        renderer: silent ? 'silent' : process.env.CI ? 'verbose' : 'default',
+        renderer:
+          ((silent || quiet) && 'silent') || (process.env.CI ? 'verbose' : ('default' as any)),
       }
     );
 
