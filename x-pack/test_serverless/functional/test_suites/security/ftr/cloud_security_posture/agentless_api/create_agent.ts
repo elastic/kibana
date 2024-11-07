@@ -7,7 +7,7 @@
 
 import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { setupMockServer } from './mock_agentless_api';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -25,8 +25,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
   describe('Agentless API Serverless', function () {
-    // see details: https://github.com/elastic/kibana/issues/199091
-    this.tags(['failsOnMKI']);
     let mockApiServer: http.Server;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
