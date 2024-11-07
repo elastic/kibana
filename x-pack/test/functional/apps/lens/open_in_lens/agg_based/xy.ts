@@ -9,13 +9,13 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, visEditor, lens, header, visChart } = getPageObjects([
+  const { visualize, visEditor, lens, header, visChart, timePicker } = getPageObjects([
     'visualize',
     'lens',
     'visEditor',
-
     'header',
     'visChart',
+    'timePicker',
   ]);
 
   const testSubjects = getService('testSubjects');
@@ -23,6 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('XY', function describeIndexTests() {
     before(async () => {
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await visualize.initTests();
     });
 
