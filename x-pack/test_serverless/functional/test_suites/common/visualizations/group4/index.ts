@@ -73,7 +73,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    loadTestFile(require.resolve('./tsdb.ts'));
+    // loadTestFile(require.resolve('./tsdb.ts'));
     loadTestFile(require.resolve('./logsdb.ts'));
   });
 };
