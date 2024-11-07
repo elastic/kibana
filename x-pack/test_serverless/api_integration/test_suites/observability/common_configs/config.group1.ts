@@ -32,6 +32,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('../../common/console'),
       require.resolve('../../common/saved_objects_management'),
       require.resolve('../../common/telemetry'),
+      require.resolve('../../common/data_usage'),
     ],
     junit: {
       reportName: 'Serverless Observability API Integration Tests - Common Group 1',
