@@ -20,7 +20,7 @@ export const DetailsPageMappings: FunctionComponent<{
   index?: Index;
   showAboutMappings?: boolean;
   hasUpdateMappingsPrivilege?: boolean;
-}> = ({ index, showAboutMappings = true, hasUpdateMappingsPrivilege = undefined }) => {
+}> = ({ index, showAboutMappings = true, hasUpdateMappingsPrivilege }) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexMappings(index?.name || '');
   const [jsonError, setJsonError] = useState<boolean>(false);
 

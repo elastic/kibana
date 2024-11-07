@@ -191,7 +191,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
             position="bottom"
             content={
               /* for serverless search users hasUpdateSettingsPrivilege flag indicates if user has privilege to update index settings, for stack hasUpdateSettingsPrivilege would be undefined */
-              hasUpdateSettingsPrivilege !== undefined && !hasUpdateSettingsPrivilege
+              hasUpdateSettingsPrivilege === false
                 ? i18n.translate('xpack.idxMgmt.indexDetails.settings.saveSettingsErrorMessage', {
                     defaultMessage: 'You do not have permission to update index settings',
                   })
@@ -209,7 +209,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
               }
               checked={isEditMode}
               onChange={onEditModeChange}
-              disabled={hasUpdateSettingsPrivilege !== undefined && !hasUpdateSettingsPrivilege}
+              disabled={hasUpdateSettingsPrivilege === false}
             />
           </EuiToolTip>
 

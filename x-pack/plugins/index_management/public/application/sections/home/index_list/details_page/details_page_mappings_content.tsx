@@ -482,7 +482,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                     data-test-subj="indexDetailsMappingsAddFieldTooltip"
                     content={
                       /* for serverless search users hasUpdateMappingsPrivilege flag indicates if user has privilege to update index mappings, for stack hasUpdateMappingsPrivilege would be undefined */
-                      hasUpdateMappingsPrivilege !== undefined && !hasUpdateMappingsPrivilege
+                      hasUpdateMappingsPrivilege === false
                         ? i18n.translate('xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip', {
                             defaultMessage: 'You do not have permission to add fields in an Index',
                           })
@@ -495,9 +495,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                       color="text"
                       size="m"
                       data-test-subj="indexDetailsMappingsAddField"
-                      isDisabled={
-                        hasUpdateMappingsPrivilege !== undefined && !hasUpdateMappingsPrivilege
-                      }
+                      isDisabled={hasUpdateMappingsPrivilege === false}
                     >
                       <FormattedMessage
                         id="xpack.idxMgmt.indexDetails.mappings.addNewField"

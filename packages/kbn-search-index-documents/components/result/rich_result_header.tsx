@@ -61,7 +61,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   onDocumentDelete,
   score,
   showScore = false,
-  hasDeleteDocumentsPrivilege = undefined,
+  hasDeleteDocumentsPrivilege,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const closePopover = () => setPopoverIsOpen(false);
@@ -123,7 +123,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
           <EuiToolTip
             content={
               /* for serverless search users hasDeleteDocumentsPrivilege flag indicates if user has privilege to delete documents, for stack hasDeleteDocumentsPrivilege would be undefined */
-              hasDeleteDocumentsPrivilege !== undefined && !hasDeleteDocumentsPrivilege
+              hasDeleteDocumentsPrivilege === false
                 ? i18n.translate(
                     'searchIndexDocuments.result.header.metadata.deleteDocumentToolTip',
                     {
@@ -139,7 +139,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
               iconType="trash"
               color="danger"
               size="s"
-              isDisabled={hasDeleteDocumentsPrivilege !== undefined && !hasDeleteDocumentsPrivilege}
+              isDisabled={hasDeleteDocumentsPrivilege === false}
               data-test-subj="deleteDocumentButton"
               onClick={(e: React.MouseEvent<HTMLElement>) => {
                 e.stopPropagation();
