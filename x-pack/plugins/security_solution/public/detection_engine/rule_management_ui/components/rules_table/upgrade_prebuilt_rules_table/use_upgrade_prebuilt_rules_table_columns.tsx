@@ -143,13 +143,16 @@ const MODIFIED_COLUMN: TableColumn = {
 const createUpgradeButtonColumn = (
   upgradeRules: UpgradePrebuiltRulesTableActions['upgradeRules'],
   loadingRules: RuleSignatureId[],
-  isDisabled: boolean
+  isDisabled: boolean,
+  isPrebuiltRulesCustomizationEnabled: boolean
 ): TableColumn => ({
   field: 'rule_id',
   name: <RulesTableEmptyColumnName name={i18n.UPDATE_RULE_BUTTON} />,
   render: (ruleId: RuleSignatureId, record) => {
     const isRuleUpgrading = loadingRules.includes(ruleId);
-    const isUpgradeButtonDisabled = isRuleUpgrading || isDisabled || record.hasUnresolvedConflicts;
+    const isDisabledByConflicts =
+      isPrebuiltRulesCustomizationEnabled && record.hasUnresolvedConflicts;
+    const isUpgradeButtonDisabled = isRuleUpgrading || isDisabled || isDisabledByConflicts;
     const spinner = (
       <EuiLoadingSpinner
         size="s"
@@ -177,7 +180,12 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
-    state: { loadingRules, isRefetching, isUpgradingSecurityPackages },
+    state: {
+      loadingRules,
+      isRefetching,
+      isUpgradingSecurityPackages,
+      isPrebuiltRulesCustomizationEnabled,
+    },
     actions: { upgradeRules },
   } = useUpgradePrebuiltRulesTableContext();
   const isDisabled = isRefetching || isUpgradingSecurityPackages;
@@ -215,9 +223,23 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         width: '12%',
       },
       ...(hasCRUDPermissions
-        ? [createUpgradeButtonColumn(upgradeRules, loadingRules, isDisabled)]
+        ? [
+            createUpgradeButtonColumn(
+              upgradeRules,
+              loadingRules,
+              isDisabled,
+              isPrebuiltRulesCustomizationEnabled
+            ),
+          ]
         : []),
     ],
-    [hasCRUDPermissions, loadingRules, isDisabled, showRelatedIntegrations, upgradeRules]
+    [
+      isPrebuiltRulesCustomizationEnabled,
+      showRelatedIntegrations,
+      hasCRUDPermissions,
+      upgradeRules,
+      loadingRules,
+      isDisabled,
+    ]
   );
 };
