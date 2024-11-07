@@ -21,6 +21,8 @@ import { createAppContextStartContractMock } from '../../../../../mocks';
 import { auditLoggingService } from '../../../../audit_logging';
 import { packagePolicyService } from '../../../../package_policy';
 
+import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
+
 import { stepSaveSystemObject } from './step_save_system_object';
 
 jest.mock('../../../../audit_logging');
@@ -67,6 +69,7 @@ describe('updateLatestExecutedState', () => {
       logger,
       packageInstallContext: {
         assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
           title: 'title',
@@ -91,7 +94,7 @@ describe('updateLatestExecutedState', () => {
         'epm-packages',
         'test-integration',
         {
-          install_format_schema_version: '1.2.0',
+          install_format_schema_version: '1.3.0',
           install_status: 'installed',
           install_version: '1.0.0',
           latest_install_failed_attempts: [],
@@ -133,6 +136,7 @@ describe('updateLatestExecutedState', () => {
       logger,
       packageInstallContext: {
         assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
           title: 'title',
@@ -157,7 +161,7 @@ describe('updateLatestExecutedState', () => {
         'epm-packages',
         'test-integration',
         {
-          install_format_schema_version: '1.2.0',
+          install_format_schema_version: '1.3.0',
           install_status: 'installed',
           install_version: '1.0.0',
           latest_install_failed_attempts: [],

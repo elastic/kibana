@@ -23,8 +23,16 @@ import {
   MetricsExplorerLocatorParams,
   ObservabilityTriggerId,
 } from '@kbn/observability-shared-plugin/common';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, from, of, switchMap } from 'rxjs';
-import { map } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  from,
+  of,
+  switchMap,
+  map,
+  firstValueFrom,
+} from 'rxjs';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
@@ -237,8 +245,12 @@ export class Plugin implements InfraClientPluginClass {
           // mount callback should not use setup dependencies, get start dependencies instead
           const [coreStart, plugins, pluginStart] = await core.getStartServices();
 
+          const isLogsExplorerAccessible = await firstValueFrom(
+            getLogsExplorerAccessible$(coreStart.application)
+          );
+
           const { renderApp } = await import('./apps/logs_app');
-          return renderApp(coreStart, plugins, pluginStart, params);
+          return renderApp(coreStart, plugins, pluginStart, isLogsExplorerAccessible, params);
         },
       });
     }
