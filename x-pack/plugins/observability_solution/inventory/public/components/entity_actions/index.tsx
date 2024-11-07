@@ -12,13 +12,23 @@ import { useBoolean } from '@kbn/react-hooks';
 
 interface Props {
   discoverUrl: string;
+  entityIdentifyingValue?: string;
 }
 
-export const EntityActions = ({ discoverUrl }: Props) => {
+export const EntityActions = ({ discoverUrl, entityIdentifyingValue }: Props) => {
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
+  const actionButtonTestSubject = entityIdentifyingValue
+    ? `inventoryEntityActionsButton-${entityIdentifyingValue}`
+    : 'inventoryEntityActionsButton';
 
   const actions = [
-    <EuiContextMenuItem key="openInDiscover" color="text" icon="discoverApp" href={discoverUrl}>
+    <EuiContextMenuItem
+      data-test-subj="inventoryEntityActionOpenInDiscover"
+      key={`openInDiscover-${entityIdentifyingValue}`}
+      color="text"
+      icon="discoverApp"
+      href={discoverUrl}
+    >
       {i18n.translate('xpack.inventory.entityActions.discoverLink', {
         defaultMessage: 'Open in discover',
       })}
@@ -33,7 +43,7 @@ export const EntityActions = ({ discoverUrl }: Props) => {
         anchorPosition="upCenter"
         button={
           <EuiButtonIcon
-            data-test-subj="inventoryEntityActionsButton"
+            data-test-subj={actionButtonTestSubject}
             aria-label={i18n.translate(
               'xpack.inventory.entityActions.euiButtonIcon.showActionsLabel',
               { defaultMessage: 'Show actions' }

@@ -136,7 +136,14 @@ export function EntitiesGrid({
         case ENTITY_DISPLAY_NAME:
           return <EntityName entity={entity} />;
         case 'actions':
-          return discoverUrl && <EntityActions discoverUrl={discoverUrl} />;
+          return (
+            discoverUrl && (
+              <EntityActions
+                discoverUrl={discoverUrl}
+                entityIdentifyingValue={entity[ENTITY_DISPLAY_NAME]}
+              />
+            )
+          );
         default:
           return entity[columnId as EntityColumnIds] || '';
       }
