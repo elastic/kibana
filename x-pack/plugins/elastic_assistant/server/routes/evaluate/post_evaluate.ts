@@ -93,15 +93,13 @@ export const postEvaluateRoute = (
 
         // Perform license, authenticated user and evaluation FF checks
         const checkResponse = performChecks({
-          authenticatedUser: true,
           capability: 'assistantModelEvaluation',
           context: ctx,
-          license: true,
           request,
           response,
         });
-        if (checkResponse) {
-          return checkResponse;
+        if (!checkResponse.isSuccess) {
+          return checkResponse.response;
         }
 
         try {

@@ -32,6 +32,18 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: .buildkite/scripts/steps/checks.sh
+    label: 'Checks'
+    key: checks
+    agents:
+      machineType: n2-standard-2
+      preemptible: true
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
@@ -98,18 +110,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-
-  - command: .buildkite/scripts/steps/checks.sh
-    label: 'Checks'
-    key: checks
-    agents:
-      machineType: n2-standard-2
-      preemptible: true
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
 
   - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
     label: 'Build API Docs'

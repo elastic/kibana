@@ -85,6 +85,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantKnowledgeBaseDataClient({
           spaceId: getSpaceId(),
+          licensing: context.licensing,
           logger: this.logger,
           currentUser,
         });
@@ -94,6 +95,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         const currentUser = getCurrentUser();
         return this.assistantService.createAttackDiscoveryDataClient({
           spaceId: getSpaceId(),
+          licensing: context.licensing,
           logger: this.logger,
           currentUser,
         });
@@ -103,6 +105,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantPromptsDataClient({
           spaceId: getSpaceId(),
+          licensing: context.licensing,
           logger: this.logger,
           currentUser,
         });
@@ -112,6 +115,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantAnonymizationFieldsDataClient({
           spaceId: getSpaceId(),
+          licensing: context.licensing,
           logger: this.logger,
           currentUser,
         });
@@ -121,6 +125,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantConversationsDataClient({
           spaceId: getSpaceId(),
+          licensing: context.licensing,
           logger: this.logger,
           currentUser,
         });
