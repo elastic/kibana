@@ -8,13 +8,14 @@
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 
+import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials, SupertestWithRoleScopeType } from '../../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const synthtrace = getService('logsSynthtraceEsClient');
+  const synthtrace = getService('synthtrace');
   const packageApi = getService('packageApi');
   const start = '2024-11-04T11:00:00.000Z';
   const end = '2024-11-04T11:01:00.000Z';
@@ -48,8 +49,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Check and load integrations', function () {
     let adminRoleAuthc: RoleCredentials;
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
+    let synthtraceLogsEsClient: LogsSynthtraceEsClient;
 
     before(async () => {
+      synthtraceLogsEsClient = await synthtrace.createLogsSynthtraceEsClient();
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
         'admin',
@@ -64,7 +67,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         pkg,
       });
 
-      await synthtrace.index([
+      await synthtraceLogsEsClient.index([
         // Ingest degraded data in Nginx data stream
         timerange(start, end)
           .interval('1m')
@@ -121,7 +124,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
-      await synthtrace.clean();
+      await synthtraceLogsEsClient.clean();
       await packageApi.uninstallPackage({
         roleAuthc: adminRoleAuthc,
         pkg,
