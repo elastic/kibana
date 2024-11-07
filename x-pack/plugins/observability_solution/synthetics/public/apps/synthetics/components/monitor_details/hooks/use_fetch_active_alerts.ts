@@ -8,7 +8,7 @@
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import {
   AlertConsumers,
-  UPTIME_RULE_TYPE_IDS,
+  SYNTHETICS_RULE_TYPE_IDS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -28,7 +28,7 @@ export function useFetchActiveAlerts() {
   const { loading, data } = useFetcher(async () => {
     return await http.post<ESSearchResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
       body: JSON.stringify({
-        ruleTypeIds: UPTIME_RULE_TYPE_IDS,
+        ruleTypeIds: SYNTHETICS_RULE_TYPE_IDS,
         consumers: [AlertConsumers.UPTIME, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
         size: 0,
         track_total_hits: true,
