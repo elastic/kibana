@@ -547,7 +547,13 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   ];
                 });
 
-                let enrichedAlerts = newAlerts;
+                // we can now augment and enrich
+                // the sub alerts (if any) the same as we would
+                // any other newAlert
+                let enrichedAlerts = newAlerts.reduce((acc, newAlert) => {
+                  const { subAlerts, ...everything } = newAlert;
+                  return [...acc, everything, ...(subAlerts ?? [])];
+                }, [] as typeof newAlerts);
 
                 if (enrichAlerts) {
                   try {
@@ -571,24 +577,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   currentTimeOverride,
                 });
 
-                const augmentedBuildingBlockAlerts =
-                  newAlerts != null && newAlerts.length > 0
-                    ? await augmentAlerts({
-                        alerts: newAlerts.flatMap((alert) =>
-                          alert.subAlerts != null ? alert.subAlerts : []
-                        ),
-                        options,
-                        kibanaVersion: ruleDataClient.kibanaVersion,
-                        currentTimeOverride,
-                      })
-                    : [];
-
                 const bulkResponse = await ruleDataClientWriter.bulk({
-                  body: [
-                    ...duplicateAlertUpdates,
-                    ...mapAlertsToBulkCreate(augmentedAlerts),
-                    ...mapAlertsToBulkCreate(augmentedBuildingBlockAlerts),
-                  ],
+                  body: [...duplicateAlertUpdates, ...mapAlertsToBulkCreate(augmentedAlerts)],
                   refresh: true,
                 });
 

@@ -3128,7 +3128,7 @@ export default ({ getService }: FtrProviderContext) => {
           { ...secondSequenceEvent, '@timestamp': secondTimestampEventSequence3 },
         ]);
         await patchRule(supertest, log, { id: createdRule.id, enabled: true });
-        const afterTimestamp2 = new Date(dateNow2 + 2000);
+        const afterTimestamp2 = new Date(dateNow2 + 10000);
         const secondAlerts = await getOpenAlerts(
           supertest,
           log,
