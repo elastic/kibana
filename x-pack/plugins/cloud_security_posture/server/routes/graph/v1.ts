@@ -43,6 +43,7 @@ interface LabelEdges {
 interface GetGraphParams {
   services: GraphContextServices;
   query: {
+    showUnknownTarget: boolean;
     eventIds: string[];
     spaceId?: string;
     start: string | number;
@@ -53,14 +54,22 @@ interface GetGraphParams {
 
 export const getGraph = async ({
   services: { esClient, logger },
-  query: { eventIds, spaceId = 'default', start, end, esQuery },
+  query: { eventIds, showUnknownTarget, spaceId = 'default', start, end, esQuery },
 }: GetGraphParams): Promise<{
   nodes: NodeDataModel[];
   edges: EdgeDataModel[];
 }> => {
   logger.trace(`Fetching graph for [eventIds: ${eventIds.join(', ')}] in [spaceId: ${spaceId}]`);
 
-  const results = await fetchGraph({ esClient, logger, start, end, eventIds, esQuery });
+  const results = await fetchGraph({
+    esClient,
+    showUnknownTarget,
+    logger,
+    start,
+    end,
+    eventIds,
+    esQuery,
+  });
 
   // Convert results into set of nodes and edges
   const graphContext = parseRecords(logger, results.records);
@@ -101,6 +110,7 @@ const fetchGraph = async ({
   start,
   end,
   eventIds,
+  showUnknownTarget,
   esQuery,
 }: {
   esClient: IScopedClusterClient;
@@ -108,6 +118,7 @@ const fetchGraph = async ({
   start: string | number;
   end: string | number;
   eventIds: string[];
+  showUnknownTarget: boolean;
   esQuery?: EsQuery;
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const query = `from logs-*
@@ -134,7 +145,7 @@ const fetchGraph = async ({
   return await esClient.asCurrentUser.helpers
     .esql({
       columnar: false,
-      filter: buildDslFilter(eventIds, start, end, esQuery),
+      filter: buildDslFilter(eventIds, showUnknownTarget, start, end, esQuery),
       query,
       // @ts-ignore - types are not up to date
       params: [...eventIds.map((id, idx) => ({ [`al_id${idx}`]: id }))],
@@ -144,6 +155,7 @@ const fetchGraph = async ({
 
 const buildDslFilter = (
   eventIds: string[],
+  showUnknownTarget: boolean,
   start: string | number,
   end: string | number,
   esQuery?: EsQuery
@@ -158,6 +170,15 @@ const buildDslFilter = (
           },
         },
       },
+      ...(showUnknownTarget
+        ? []
+        : [
+            {
+              exists: {
+                field: 'target.entity.id',
+              },
+            },
+          ]),
       {
         bool: {
           should: [

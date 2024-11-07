@@ -389,6 +389,55 @@ export default function (providerContext: FtrProviderContext) {
           );
         });
       });
+
+      it('Should filter unknown targets', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            eventIds: [],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+            esQuery: {
+              bool: {
+                filter: [
+                  {
+                    match_phrase: {
+                      'actor.entity.id': 'admin5@example.com',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes').length(0);
+        expect(response.body).to.have.property('edges').length(0);
+      });
+
+      it('Should return unknown targets', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            eventIds: [],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+            showUnknownTarget: true,
+            esQuery: {
+              bool: {
+                filter: [
+                  {
+                    match_phrase: {
+                      'actor.entity.id': 'admin5@example.com',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
+      });
     });
   });
 }
