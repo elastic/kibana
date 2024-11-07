@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
+import type { HorizontalAlignment } from '@elastic/eui';
 import { EuiBadge, EuiBasicTable, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
@@ -164,6 +165,7 @@ export const AgentlessPackagePoliciesTable = ({
                       defaultMessage: 'Status',
                     }
                   ),
+                  align: 'left' as HorizontalAlignment,
                   render({
                     agentPolicies,
                   }: {
@@ -201,7 +203,7 @@ export const AgentlessPackagePoliciesTable = ({
               defaultMessage: 'Actions',
             }),
             width: '8ch',
-            align: 'right',
+            align: 'right' as HorizontalAlignment,
             render({
               agentPolicies,
               packagePolicy,

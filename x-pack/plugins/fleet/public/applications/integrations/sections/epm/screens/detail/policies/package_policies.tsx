@@ -88,6 +88,8 @@ export const PackagePoliciesPage = ({ packageInfo }: { packageInfo: PackageInfo 
   );
 
   // States and data for agent-based policies table
+  // If agentless is not supported or not an agentless integration, skip the
+  // conditional in the kuery
   const {
     pagination: agentBasedPagination,
     pageSizeOptions: agentBasedPageSizeOptions,
@@ -107,7 +109,11 @@ export const PackagePoliciesPage = ({ packageInfo }: { packageInfo: PackageInfo 
   } = usePackagePoliciesWithAgentPolicy({
     page: agentBasedPagination.currentPage,
     perPage: agentBasedPagination.pageSize,
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${name}" AND NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.supports_agentless: true`,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${name}" ${
+      canHaveAgentlessPolicies
+        ? `AND NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.supports_agentless: true`
+        : ``
+    }`,
   });
   useEffect(() => {
     setAgentBasedPackageAndAgentPolicies(
@@ -116,6 +122,8 @@ export const PackagePoliciesPage = ({ packageInfo }: { packageInfo: PackageInfo 
   }, [agentBasedData, mapPoliciesData]);
 
   // States and data for agentless policies table
+  // If agentless is not supported or not an agentless integration, this block and
+  // initial request is unnessary but reduces code complexity
   const {
     pagination: agentlessPagination,
     pageSizeOptions: agentlessPageSizeOptions,
@@ -176,7 +184,7 @@ export const PackagePoliciesPage = ({ packageInfo }: { packageInfo: PackageInfo 
                 setPagination: agentBasedSetPagination,
               }}
               addAgentToPolicyIdFromParams={addAgentToPolicyIdFromParams}
-              addAgentHelpPolicyId={showAddAgentHelpForPolicyId}
+              showAddAgentHelpForPolicyId={showAddAgentHelpForPolicyId}
             />
           ) : (
             <>
@@ -265,7 +273,7 @@ export const PackagePoliciesPage = ({ packageInfo }: { packageInfo: PackageInfo 
                       setPagination: agentBasedSetPagination,
                     }}
                     addAgentToPolicyIdFromParams={addAgentToPolicyIdFromParams}
-                    addAgentHelpPolicyId={showAddAgentHelpForPolicyId}
+                    showAddAgentHelpForPolicyId={showAddAgentHelpForPolicyId}
                   />
                 </EuiPanel>
               </EuiAccordion>

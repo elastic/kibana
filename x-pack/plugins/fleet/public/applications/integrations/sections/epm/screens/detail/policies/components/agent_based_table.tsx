@@ -40,7 +40,7 @@ export const AgentBasedPackagePoliciesTable = ({
   refreshPackagePolicies,
   pagination,
   addAgentToPolicyIdFromParams,
-  addAgentHelpPolicyId,
+  showAddAgentHelpForPolicyId,
 }: {
   isLoading: boolean;
   packagePolicies: Array<{
@@ -52,7 +52,7 @@ export const AgentBasedPackagePoliciesTable = ({
   refreshPackagePolicies: () => void;
   pagination: ReturnType<typeof usePagination>;
   addAgentToPolicyIdFromParams?: string | null;
-  addAgentHelpPolicyId?: string | null;
+  showAddAgentHelpForPolicyId?: string | null;
 }) => {
   const { getHref } = useLink();
   const { search } = useLocation();
@@ -67,8 +67,8 @@ export const AgentBasedPackagePoliciesTable = ({
     canUseMultipleAgentPolicies && canReadIntegrationPolicies && canReadAgentPolicies;
 
   // Show tour help for adding agents to a policy
-  const showAddAgentHelpForPolicyId = packagePolicies.find(({ agentPolicies }) =>
-    agentPolicies.find((agentPolicy) => agentPolicy.id === addAgentHelpPolicyId)
+  const addAgentHelpForPolicyId = packagePolicies.find(({ agentPolicies }) =>
+    agentPolicies.find((agentPolicy) => agentPolicy.id === showAddAgentHelpForPolicyId)
   )?.packagePolicy?.id;
 
   // Handle the "add agent" link displayed in post-installation toast notifications in the case
@@ -259,7 +259,7 @@ export const AgentBasedPackagePoliciesTable = ({
                     setSelectedTableIndex(rowIndex);
                     setFlyoutOpenForPolicyId(agentPolicies[0].id);
                   }}
-                  hasHelpPopover={showAddAgentHelpForPolicyId === packagePolicy.id}
+                  hasHelpPopover={addAgentHelpForPolicyId === packagePolicy.id}
                 />
               );
             },
