@@ -2,10 +2,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-package-registry-promote
+  name: bk-kibana-package-registry-verify-and-promote
   description: Promote package-registry/distribution:lite
   links:
-    - url: 'https://buildkite.com/elastic/kibana-package-registry-promote'
+    - url: 'https://buildkite.com/elastic/kibana-package-registry-verify-and-promote'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
@@ -15,8 +15,8 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana / package registry promote
-      description: Promote docker.elastic.co/package-registry/distribution:lite for Kibana CI
+      name: kibana / package registry verify and promote
+      description: Verify and promote docker.elastic.co/package-registry/distribution:lite for Kibana tests
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: "#kibana-operations-alerts"
