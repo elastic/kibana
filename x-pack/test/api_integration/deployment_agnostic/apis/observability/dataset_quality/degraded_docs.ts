@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
+import rison from '@kbn/rison';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
-import { DegradedDocs } from '@kbn/dataset-quality-plugin/common/api_types';
+import { DataStreamDocsStat } from '@kbn/dataset-quality-plugin/common/api_types';
 import { SupertestWithRoleScopeType } from '../../../services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { DatasetQualitySupertestUser, getDatasetQualityMonitorSupertestUser } from './utils';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const synthtrace = getService('logsSynthtraceEsClient');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
   const start = '2023-12-11T18:00:00.000Z';
   const end = '2023-12-11T18:01:00.000Z';
 
@@ -21,7 +23,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     return roleScopedSupertestWithCookieCredentials
       .get(`/internal/dataset_quality/data_streams/degraded_docs`)
       .query({
-        type: 'logs',
+        types: rison.encodeArray(['logs']),
         start,
         end,
       });
@@ -29,21 +31,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Degraded docs', function () {
     describe('Querying', function () {
-      let supertestDatasetQualityMonitorUser: DatasetQualitySupertestUser;
+      let synthtraceLogsEsClient: LogsSynthtraceEsClient;
+      let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
 
       before(async () => {
-        supertestDatasetQualityMonitorUser = await getDatasetQualityMonitorSupertestUser({
-          getService,
-        });
+        synthtraceLogsEsClient = await synthtrace.createLogsSynthtraceEsClient();
+        supertestViewerWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+          'viewer',
+          {
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          }
+        );
       });
 
       after(async () => {
-        await supertestDatasetQualityMonitorUser.clean();
+        await supertestViewerWithCookieCredentials.destroy();
       });
 
       describe('and there are log documents', () => {
         before(async () => {
-          await synthtrace.index([
+          await synthtraceLogsEsClient.index([
             timerange(start, end)
               .interval('1m')
               .rate(1)
@@ -75,38 +83,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('returns stats correctly', async () => {
-          const stats = await callApiAs(supertestDatasetQualityMonitorUser.user);
-          expect(stats.body.degradedDocs.length).to.be(2);
+          const stats = await callApiAs(supertestViewerWithCookieCredentials);
+          expect(stats.body.degradedDocs.length).to.be(1);
 
           const degradedDocsStats = stats.body.degradedDocs.reduce(
-            (acc: Record<string, { percentage: number; count: number }>, curr: DegradedDocs) => ({
+            (acc: Record<string, { count: number }>, curr: DataStreamDocsStat) => ({
               ...acc,
               [curr.dataset]: {
-                percentage: curr.percentage,
                 count: curr.count,
               },
             }),
             {}
           );
 
-          expect(degradedDocsStats['logs-synth.1-default']).to.eql({
-            percentage: 0,
-            count: 0,
-          });
           expect(degradedDocsStats['logs-synth.2-default']).to.eql({
-            percentage: 100,
             count: 1,
           });
         });
 
         after(async () => {
-          await synthtrace.clean();
+          await synthtraceLogsEsClient.clean();
         });
       });
 
       describe('and there are not log documents', () => {
         it('returns stats correctly', async () => {
-          const stats = await callApiAs(supertestDatasetQualityMonitorUser.user);
+          const stats = await callApiAs(supertestViewerWithCookieCredentials);
 
           expect(stats.body.degradedDocs.length).to.be(0);
         });
@@ -120,7 +122,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         before(async () => {
           for (const space of spaces) {
             for (const dataset of datasetsWithNoDegradedDocs) {
-              await synthtrace.index([
+              await synthtraceLogsEsClient.index([
                 timerange(start, end)
                   .interval('1m')
                   .rate(1)
@@ -136,7 +138,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             }
 
             for (const dataset of datasetsWithDegradedDocs) {
-              await synthtrace.index([
+              await synthtraceLogsEsClient.index([
                 timerange(start, end)
                   .interval('1m')
                   .rate(2)
@@ -155,118 +157,46 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('returns counts and list of datasets correctly', async () => {
-          const stats = await callApiAs(supertestDatasetQualityMonitorUser.user);
-          expect(stats.body.degradedDocs.length).to.be(18);
+          const stats = await callApiAs(supertestViewerWithCookieCredentials);
+          expect(stats.body.degradedDocs.length).to.be(9);
 
           const expected = {
             degradedDocs: [
               {
-                dataset: 'logs-apache.access-default',
-                count: 0,
-                docsCount: 1,
-                percentage: 0,
-              },
-              {
-                dataset: 'logs-apache.access-space1',
-                count: 0,
-                docsCount: 1,
-                percentage: 0,
-              },
-              {
-                dataset: 'logs-apache.access-space2',
-                count: 0,
-                docsCount: 1,
-                percentage: 0,
-              },
-              {
                 dataset: 'logs-apache.error-default',
                 count: 1,
-                docsCount: 2,
-                percentage: 50,
               },
               {
                 dataset: 'logs-apache.error-space1',
                 count: 1,
-                docsCount: 2,
-                percentage: 50,
               },
               {
                 dataset: 'logs-apache.error-space2',
                 count: 1,
-                docsCount: 2,
-                percentage: 50,
-              },
-              {
-                dataset: 'logs-mysql.access-default',
-                count: 0,
-                docsCount: 1,
-                percentage: 0,
-              },
-              {
-                dataset: 'logs-mysql.access-space1',
-                count: 0,
-                docsCount: 1,
-                percentage: 0,
-              },
-              {
-                dataset: 'logs-mysql.access-space2',
-                count: 0,
-                docsCount: 1,
-                percentage: 0,
               },
               {
                 dataset: 'logs-mysql.error-default',
                 count: 1,
-                docsCount: 2,
-                percentage: 50,
               },
               {
                 dataset: 'logs-mysql.error-space1',
                 count: 1,
-                docsCount: 2,
-                percentage: 50,
               },
               {
                 dataset: 'logs-mysql.error-space2',
                 count: 1,
-                docsCount: 2,
-                percentage: 50,
-              },
-              {
-                dataset: 'logs-nginx.access-default',
-                count: 0,
-                docsCount: 1,
-                percentage: 0,
-              },
-              {
-                dataset: 'logs-nginx.access-space1',
-                count: 0,
-                docsCount: 1,
-                percentage: 0,
-              },
-              {
-                dataset: 'logs-nginx.access-space2',
-                count: 0,
-                docsCount: 1,
-                percentage: 0,
               },
               {
                 dataset: 'logs-nginx.error-default',
                 count: 1,
-                docsCount: 2,
-                percentage: 50,
               },
               {
                 dataset: 'logs-nginx.error-space1',
                 count: 1,
-                docsCount: 2,
-                percentage: 50,
               },
               {
                 dataset: 'logs-nginx.error-space2',
                 count: 1,
-                docsCount: 2,
-                percentage: 50,
               },
             ],
           };
@@ -275,7 +205,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         after(async () => {
-          await synthtrace.clean();
+          await synthtraceLogsEsClient.clean();
         });
       });
     });

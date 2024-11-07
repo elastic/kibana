@@ -5,23 +5,20 @@
  * 2.0.
  */
 
+import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { DegradedField } from '@kbn/dataset-quality-plugin/common/api_types';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { SupertestWithRoleScopeType } from '../../../services';
-import {
-  rolloverDataStream,
-  createBackingIndexNameWithoutVersion,
-  DatasetQualitySupertestUser,
-  getDatasetQualityReadSupertestUser,
-} from './utils';
+import { rolloverDataStream, createBackingIndexNameWithoutVersion } from './utils';
 
 const MORE_THAN_1024_CHARS =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const synthtrace = getService('logsSynthtraceEsClient');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
   const esClient = getService('es');
   const start = '2024-05-22T08:00:00.000Z';
   const end = '2024-05-23T08:02:00.000Z';
@@ -45,21 +42,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   }
 
   describe('Degraded Fields per DataStream', function () {
-    let supertestDatasetQualityMonitorUser: DatasetQualitySupertestUser;
+    let synthtraceLogsEsClient: LogsSynthtraceEsClient;
+    let supertestEditorWithCookieCredentials: SupertestWithRoleScopeType;
 
     before(async () => {
-      supertestDatasetQualityMonitorUser = await getDatasetQualityReadSupertestUser({
-        getService,
-      });
+      synthtraceLogsEsClient = await synthtrace.createLogsSynthtraceEsClient();
+      supertestEditorWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'editor',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        }
+      );
     });
 
     after(async () => {
-      await supertestDatasetQualityMonitorUser.clean();
+      await supertestEditorWithCookieCredentials.destroy();
     });
 
     describe('gets the degraded fields per data stream', () => {
       before(async () => {
-        await synthtrace.index([
+        await synthtraceLogsEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(1)
@@ -97,12 +100,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
-        await synthtrace.clean();
+        await synthtraceLogsEsClient.clean();
       });
 
       it('returns no results when dataStream does not have any degraded fields', async () => {
         const resp = await callApiAs(
-          supertestDatasetQualityMonitorUser.user,
+          supertestEditorWithCookieCredentials,
           `${type}-${dataset}-${namespace}`
         );
         expect(resp.body.degradedFields.length).to.be(0);
@@ -111,7 +114,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('returns results when dataStream do have degraded fields', async () => {
         const expectedDegradedFields = ['log.level', 'trace.id'];
         const resp = await callApiAs(
-          supertestDatasetQualityMonitorUser.user,
+          supertestEditorWithCookieCredentials,
           `${type}-${degradedFieldDataset}-${namespace}`
         );
         const degradedFields = resp.body.degradedFields.map((field: DegradedField) => field.name);
@@ -134,7 +137,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ];
 
         const resp = await callApiAs(
-          supertestDatasetQualityMonitorUser.user,
+          supertestEditorWithCookieCredentials,
           `${type}-${degradedFieldDataset}-${namespace}`
         );
 
@@ -147,7 +150,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should return the backing index where the ignored field was last seen', async () => {
         await rolloverDataStream(esClient, `${type}-${degradedFieldDataset}-${namespace}`);
-        await synthtrace.index([
+        await synthtraceLogsEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(1)
@@ -167,7 +170,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
 
         const resp = await callApiAs(
-          supertestDatasetQualityMonitorUser.user,
+          supertestEditorWithCookieCredentials,
           `${type}-${degradedFieldDataset}-${namespace}`
         );
 

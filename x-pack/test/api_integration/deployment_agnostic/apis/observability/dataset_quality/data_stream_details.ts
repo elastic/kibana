@@ -5,19 +5,16 @@
  * 2.0.
  */
 
+import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 
 import { SupertestWithRoleScopeType } from '../../../services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import {
-  DatasetQualitySupertestUser,
-  getDatasetQualityMonitorSupertestUser,
-  getDatasetQualityReadSupertestUser,
-} from './utils';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const synthtrace = getService('logsSynthtraceEsClient');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
   const start = '2023-12-11T18:00:00.000Z';
   const end = '2023-12-11T18:01:00.000Z';
   const type = 'logs';
@@ -39,8 +36,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   }
 
   describe('DataStream Details', function () {
+    let synthtraceLogsEsClient: LogsSynthtraceEsClient;
+
     before(async () => {
-      await synthtrace.index([
+      synthtraceLogsEsClient = await synthtrace.createLogsSynthtraceEsClient();
+
+      await synthtraceLogsEsClient.index([
         timerange(start, end)
           .interval('1m')
           .rate(1)
@@ -61,25 +62,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
-      await synthtrace.clean();
+      await synthtraceLogsEsClient.clean();
     });
 
-    describe('viewerUser', function () {
-      let supertestDatasetQualityReadUser: DatasetQualitySupertestUser;
+    describe('Viewer User', function () {
+      let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
 
       before(async () => {
-        supertestDatasetQualityReadUser = await getDatasetQualityReadSupertestUser({
-          getService,
-        });
+        supertestViewerWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+          'viewer',
+          {
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          }
+        );
       });
 
       after(async () => {
-        await supertestDatasetQualityReadUser.clean();
+        await supertestViewerWithCookieCredentials.destroy();
       });
 
       it('returns lastActivity as undefined when user does not have access to the data stream', async () => {
         const resp = await callApiAs(
-          supertestDatasetQualityReadUser.user,
+          supertestViewerWithCookieCredentials,
           `${type}-${dataset}-${namespace}`
         );
         expect(resp.body.lastActivity).to.be(undefined);
@@ -89,25 +94,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('datasetQualityMonitorUser', function () {
-      let supertestDatasetQualityMonitorUser: DatasetQualitySupertestUser;
+    describe('Editor User', function () {
+      let supertestEditorWithCookieCredentials: SupertestWithRoleScopeType;
 
       before(async () => {
-        supertestDatasetQualityMonitorUser = await getDatasetQualityMonitorSupertestUser({
-          getService,
-        });
+        supertestEditorWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+          'editor',
+          {
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          }
+        );
       });
 
       after(async () => {
-        await supertestDatasetQualityMonitorUser.clean();
+        await supertestEditorWithCookieCredentials.destroy();
       });
 
       it('returns error when dataStream param is not provided', async () => {
         const expectedMessage = 'Data Stream name cannot be empty';
-        const resp = await callApiAs(
-          supertestDatasetQualityMonitorUser.user,
-          encodeURIComponent(' ')
-        );
+        const resp = await callApiAs(supertestEditorWithCookieCredentials, encodeURIComponent(' '));
         expect(resp.status).to.be(400);
         expect(resp.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
       });
@@ -115,16 +121,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('returns {} if matching data stream is not available', async () => {
         const nonExistentDataSet = 'Non-existent';
         const nonExistentDataStream = `${type}-${nonExistentDataSet}-${namespace}`;
-        const resp = await callApiAs(
-          supertestDatasetQualityMonitorUser.user,
-          nonExistentDataStream
-        );
+        const resp = await callApiAs(supertestEditorWithCookieCredentials, nonExistentDataStream);
         expect(resp.body).empty();
       });
 
       it('returns service.name and host.name correctly', async () => {
         const resp = await callApiAs(
-          supertestDatasetQualityMonitorUser.user,
+          supertestEditorWithCookieCredentials,
           `${type}-${dataset}-${namespace}`
         );
         expect(resp.body.services).to.eql({ ['service.name']: [serviceName] });
