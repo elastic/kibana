@@ -157,7 +157,7 @@ export function SearchSessionsMgmtTable({
       )}
       items={tableData}
       pagination={{
-        initialPageSize: pageSize,
+        pageSize,
       }}
       search={search}
       sorting={sorting}

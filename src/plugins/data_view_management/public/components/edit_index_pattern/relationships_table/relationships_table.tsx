@@ -151,7 +151,7 @@ export const RelationshipsTable = ({
         items={relationships}
         columns={columns}
         pagination={{
-          initialPageSize: pageSize,
+          pageSize,
         }}
         onTableChange={onTableChange}
         search={search}
