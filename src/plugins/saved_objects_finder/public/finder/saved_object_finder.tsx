@@ -213,12 +213,6 @@ export class SavedObjectFinderUi extends React.Component<
 
   public render() {
     const { onChoose, savedObjectMetaData } = this.props;
-    const descriptionsDefined =
-      this.state.items.filter(
-        (item) =>
-          item.simple.attributes.description !== '' &&
-          item.simple.attributes.description !== undefined
-      ).length > 0;
     const taggingApi = this.props.services.savedObjectsTagging;
     const originalTagColumn = taggingApi?.ui.getTableColumnDefinition();
     const tagColumn: EuiTableFieldDataColumnType<SavedObjectCommon> | undefined = originalTagColumn
@@ -314,7 +308,7 @@ export class SavedObjectFinderUi extends React.Component<
           );
 
           const tooltipText = this.props.getTooltipText?.(item);
-          const description = descriptionsDefined && (
+          const description = !!item.simple.attributes.description && (
             <EuiText size="xs" color="subdued" className="eui-textTruncate">
               {item.simple.attributes.description}
             </EuiText>
