@@ -479,7 +479,7 @@ export const PresentationPanelHoverActions = ({
         ${hasHoverActions
           ? `&:hover {
           outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
-          z-index: 2;
+          z-index: ${euiThemeVars.euiZLevel2};
         }`
           : ''}
       `}
