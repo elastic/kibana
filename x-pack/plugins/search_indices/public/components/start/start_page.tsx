@@ -22,7 +22,7 @@ import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
 import { usePageChrome } from '../../hooks/use_page_chrome';
 
 const PageTitle = i18n.translate('xpack.searchIndices.startPage.docTitle', {
-  defaultMessage: 'Create Your First Index',
+  defaultMessage: 'Create your first index',
 });
 
 export const ElasticsearchStartPage = () => {
