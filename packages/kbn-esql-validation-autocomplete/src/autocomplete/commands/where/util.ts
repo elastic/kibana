@@ -8,7 +8,7 @@
  */
 
 import { ESQLCommand, ESQLSingleAstItem } from '@kbn/esql-ast';
-import { endsInWhitespace, isColumnItem, isFunctionItem } from '../../../shared/helpers';
+import { isColumnItem, isFunctionItem } from '../../../shared/helpers';
 
 export type CaretPosition =
   | 'after_column'
@@ -25,15 +25,11 @@ export const getPosition = (innerText: string, command: ESQLCommand): CaretPosit
   const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
 
   if (expressionRoot) {
-    if (isColumnItem(expressionRoot) && endsInWhitespace(innerText)) {
+    if (isColumnItem(expressionRoot)) {
       return 'after_column';
     }
 
-    if (
-      isFunctionItem(expressionRoot) &&
-      expressionRoot.subtype === 'variadic-call' &&
-      endsInWhitespace(innerText)
-    ) {
+    if (isFunctionItem(expressionRoot) && expressionRoot.subtype === 'variadic-call') {
       return 'after_function';
     }
 

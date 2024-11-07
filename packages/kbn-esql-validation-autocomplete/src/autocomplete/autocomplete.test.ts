@@ -617,6 +617,21 @@ describe('autocomplete', () => {
         ['and', 'or', 'not']
       )
     );
+
+    // WHERE function <suggest>
+    testSuggestions(
+      'FROM index1 | WHERE ABS(integerField) i/',
+      getFunctionSignaturesByReturnType(
+        'where',
+        'any',
+        {
+          builtin: true,
+          skipAssign: true,
+        },
+        ['integer'],
+        ['and', 'or', 'not']
+      )
+    );
   });
 
   describe('advancing the cursor and opening the suggestion menu automatically ✨', () => {
