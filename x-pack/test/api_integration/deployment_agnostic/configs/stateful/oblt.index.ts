@@ -10,10 +10,10 @@ import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('apis', () => {
     // load new oblt deployment-agnostic test here
-    // loadTestFile(require.resolve('../../apis/observability/alerting'));
+    loadTestFile(require.resolve('../../apis/observability/alerting'));
     loadTestFile(require.resolve('../../apis/observability/dataset_quality'));
-    // loadTestFile(require.resolve('../../apis/observability/slo'));
-    // loadTestFile(require.resolve('../../apis/observability/infra'));
-    // loadTestFile(require.resolve('../../apis/observability/apm'));
+    loadTestFile(require.resolve('../../apis/observability/slo'));
+    loadTestFile(require.resolve('../../apis/observability/infra'));
+    loadTestFile(require.resolve('../../apis/observability/apm'));
   });
 }

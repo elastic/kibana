@@ -198,10 +198,6 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       expect(status).to.be(200);
     },
 
-    getCustomRole() {
-      return CUSTOM_ROLE;
-    },
-
     async setCustomRole(descriptors: KibanaRoleDescriptors) {
       if (!isCustomRoleEnabled) {
         throw new Error(`Custom roles are not supported for the current deployment`);
