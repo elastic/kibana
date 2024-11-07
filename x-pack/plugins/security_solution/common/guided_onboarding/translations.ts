@@ -87,6 +87,6 @@ export const CASES_MANUAL_TITLE = i18n.translate(
 export const CASES_MANUAL_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.guideConfig.alertsStep.manualCompletion.description',
   {
-    defaultMessage: `A toast message is shown with a link to the created case. Related cases are also shown under the Insights Correlations section of the alert details flyout. After you've explored the case, continue.`,
+    defaultMessage: `View the case's details by clicking View case in the confirmation message that appears. Alternatively, go to the Insights section of the alert details flyout, find the case you created, and select it. After you've explored the case, continue.`,
   }
 );
