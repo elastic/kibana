@@ -662,14 +662,14 @@ export const deleteObservable = async (
 export const getSimilarCases = async ({
   caseId,
   signal,
-  pageSize,
-  pageIndex,
+  perPage,
+  page,
 }: SimilarCasesProps): Promise<CasesSimilarResponseUI> => {
   const response = await KibanaServices.get().http.fetch<CasesSimilarResponse>(
     INTERNAL_CASE_SIMILAR_CASES_URL.replace('{case_id}', caseId),
     {
       method: 'POST',
-      body: JSON.stringify({ pageSize, pageIndex }),
+      body: JSON.stringify({ perPage, page }),
       signal,
     }
   );

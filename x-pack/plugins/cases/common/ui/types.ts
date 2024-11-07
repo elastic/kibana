@@ -198,8 +198,8 @@ export interface FetchCasesProps extends ApiProps {
 
 export interface SimilarCasesProps extends ApiProps {
   caseId: string;
-  pageSize: number;
-  pageIndex: number;
+  perPage: number;
+  page: number;
 }
 
 export interface ApiProps {

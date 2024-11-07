@@ -1205,8 +1205,8 @@ describe('Cases API', () => {
       await getSimilarCases({
         caseId: mockCase.id,
         signal: abortCtrl.signal,
-        pageSize: 10,
-        pageIndex: 0,
+        perPage: 10,
+        page: 0,
       });
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_similar`, {
         method: 'POST',
@@ -1223,8 +1223,8 @@ describe('Cases API', () => {
       const resp = await getSimilarCases({
         caseId: mockCase.id,
         signal: abortCtrl.signal,
-        pageSize: 10,
-        pageIndex: 0,
+        perPage: 10,
+        page: 0,
       });
       expect(resp).toEqual(similarCases);
     });
