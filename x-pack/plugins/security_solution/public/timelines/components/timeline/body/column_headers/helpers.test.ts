@@ -111,7 +111,7 @@ describe('helpers', () => {
           searchable: true,
           type: 'date',
           esTypes: ['date'],
-          initialWidth: 190,
+          initialWidth: 215,
         },
         {
           aggregatable: true,
@@ -121,7 +121,6 @@ describe('helpers', () => {
           searchable: true,
           type: 'ip',
           esTypes: ['ip'],
-          initialWidth: 180,
         },
         {
           aggregatable: true,
@@ -131,7 +130,6 @@ describe('helpers', () => {
           searchable: true,
           type: 'ip',
           esTypes: ['ip'],
-          initialWidth: 180,
         },
       ];
       const mockHeader = defaultUdtHeaders.filter((h) =>
