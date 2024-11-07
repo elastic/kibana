@@ -162,17 +162,17 @@ function extractKafkaOutputSecrets(
 }
 
 export function extractDefaultStaticKafkaTopic(o: KafkaOutput): string {
-  if (o.topic?.includes('%{[')) {
+  if (o?.topic?.includes('%{[')) {
     return '';
   }
 
-  return o.topic || '';
+  return o?.topic || '';
 }
 
 export function extractDefaultDynamicKafkaTopics(
   o: KafkaOutput
 ): Array<EuiComboBoxOptionOption<string>> {
-  if (!o?.topic || (o.topic && !o.topic?.includes('%{['))) {
+  if (!o?.topic || (o?.topic && !o.topic?.includes('%{['))) {
     return [];
   }
   const matched = o.topic.match(/(%\{\[)(\S*)(\]\})/);
