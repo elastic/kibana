@@ -87,8 +87,6 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
     const alerts = await getLatestEntitiesAlerts({
       identityFieldsPerEntityType,
       alertsClient,
-      // TODO: caue fix this
-      kuery: '',
     });
 
     const joined = joinByKey(
