@@ -15,7 +15,7 @@ import { PossibleMitigationTitle } from './title';
 export function PossibleMitigations() {
   const { degradedFieldAnalysis, isAnalysisInProgress } = useDegradedFields();
   const { integrationDetails } = useDatasetQualityDetailsState();
-  const isIntegration = Boolean(integrationDetails?.integration);
+  const areIntegrationAssetsAvailable = !!integrationDetails?.integration?.areAssetsAvailable;
 
   return (
     !isAnalysisInProgress && (
@@ -24,7 +24,7 @@ export function PossibleMitigations() {
         <EuiSpacer size="m" />
         {degradedFieldAnalysis?.isFieldLimitIssue && (
           <>
-            <FieldMappingLimit isIntegration={isIntegration} />
+            <FieldMappingLimit areIntegrationAssetsAvailable={areIntegrationAssetsAvailable} />
             <EuiSpacer size="m" />
           </>
         )}

@@ -17,7 +17,7 @@ export function ManualMitigations() {
     integrationDetails,
     loadingState: { integrationDetailsLoaded },
   } = useDatasetQualityDetailsState();
-  const isIntegration = !!integrationDetails?.integration;
+  const areIntegrationAssetsAvailable = !!integrationDetails?.integration?.areAssetsAvailable;
 
   return (
     <EuiSkeletonRectangle
@@ -29,9 +29,11 @@ export function ManualMitigations() {
       data-test-subj="datasetQualityDetailsFlyoutManualMitigationsLoading"
       className="datasetQualityDetailsFlyoutManualMitigationsLoading"
     >
-      <CreateEditComponentTemplateLink isIntegration={isIntegration} />
+      <CreateEditComponentTemplateLink
+        areIntegrationAssetsAvailable={areIntegrationAssetsAvailable}
+      />
       <EuiSpacer size="s" />
-      <CreateEditPipelineLink isIntegration={isIntegration} />
+      <CreateEditPipelineLink areIntegrationAssetsAvailable={areIntegrationAssetsAvailable} />
     </EuiSkeletonRectangle>
   );
 }

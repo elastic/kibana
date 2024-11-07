@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Integration } from '../data_streams_stats/integration';
+
 export interface AnalyzeDegradedFieldsParams {
   dataStream: string;
   lastBackingIndex: string;
@@ -18,4 +20,10 @@ export interface UpdateFieldLimitParams {
 
 export interface CheckAndLoadIntegrationParams {
   dataStream: string;
+}
+
+export interface IntegrationType {
+  isIntegration: boolean;
+  areAssetsAvailable: boolean;
+  integration?: Integration;
 }

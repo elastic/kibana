@@ -77,8 +77,12 @@ export const integrationRt = rt.intersection([
 export type IntegrationType = rt.TypeOf<typeof integrationRt>;
 
 export const checkAndLoadIntegrationResponseRt = rt.union([
-  rt.type({ isIntegration: rt.literal(false) }),
-  rt.type({ isIntegration: rt.literal(true), integration: integrationRt }),
+  rt.type({ isIntegration: rt.literal(false), areAssetsAvailable: rt.boolean }),
+  rt.type({
+    isIntegration: rt.literal(true),
+    areAssetsAvailable: rt.literal(true),
+    integration: integrationRt,
+  }),
 ]);
 
 export type CheckAndLoadIntegrationResponse = rt.TypeOf<typeof checkAndLoadIntegrationResponseRt>;

@@ -157,7 +157,12 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
         new DatasetQualityError(`Failed to decode integration check response: ${message}"`)
     )(response);
 
-    if (decodedResponse.isIntegration) return Integration.create(decodedResponse.integration);
+    return {
+      ...decodedResponse,
+      integration: decodedResponse.isIntegration
+        ? Integration.create(decodedResponse.integration)
+        : undefined,
+    };
   }
 
   public async getIntegrationDashboards({ integration }: GetIntegrationDashboardsParams) {

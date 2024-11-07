@@ -220,7 +220,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       {
                         target: 'loadingIntegrationDashboards',
                         actions: 'storeDataStreamIntegration',
-                        cond: 'dataStreamIsPartOfIntegration',
+                        cond: 'isDataStreamIsPartOfIntegration',
                       },
                       {
                         target: 'done',
@@ -587,7 +587,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             !event.data.isLatestBackingIndexUpdated
           );
         },
-        dataStreamIsPartOfIntegration: (_, event) => {
+        isDataStreamIsPartOfIntegration: (_, event) => {
           return 'data' in event;
         },
       },

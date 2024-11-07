@@ -34,7 +34,11 @@ const AccordionTitle = () => (
   </EuiTitle>
 );
 
-export function CreateEditPipelineLink({ isIntegration }: { isIntegration: boolean }) {
+export function CreateEditPipelineLink({
+  areIntegrationAssetsAvailable,
+}: {
+  areIntegrationAssetsAvailable: boolean;
+}) {
   const {
     services: {
       share: {
@@ -51,8 +55,8 @@ export function CreateEditPipelineLink({ isIntegration }: { isIntegration: boole
   const { type, name } = datasetDetails;
 
   const pipelineName = useMemo(
-    () => (isIntegration ? `${type}-${name}@custom` : `${type}@custom`),
-    [isIntegration, type, name]
+    () => (areIntegrationAssetsAvailable ? `${type}-${name}@custom` : `${type}@custom`),
+    [areIntegrationAssetsAvailable, type, name]
   );
 
   const ingestPipelineLocator = locators.get('INGEST_PIPELINES_APP_LOCATOR');

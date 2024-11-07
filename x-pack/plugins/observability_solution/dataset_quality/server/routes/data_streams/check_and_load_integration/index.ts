@@ -14,6 +14,10 @@ import { getComponentTemplatePrefixFromIndexTemplate } from '../../../../common/
 import { CheckAndLoadIntegrationResponse } from '../../../../common/api_types';
 import { dataStreamService } from '../../../services';
 
+// The function works on 2 conditions:
+// 1. It checks if integration name is present in meta field response of the datastream.
+// If yes, it considers it to be an integration. No further checks
+// 2. If not, then it does the various checks
 export async function checkAndLoadIntegration({
   esClient,
   packageClient,
@@ -36,7 +40,7 @@ export async function checkAndLoadIntegration({
   // integration name should be present
   // Else it's not an integration
   if ((!indexTemplate || !isManaged) && !integrationNameFromDataStream) {
-    return { isIntegration: false };
+    return { isIntegration: false, areAssetsAvailable: false };
   }
 
   const allIntegrations = await getIntegrations({ packageClient, logger });
@@ -48,10 +52,18 @@ export async function checkAndLoadIntegration({
     );
 
     if (integrationDetailsMatchingDataStream) {
-      return { isIntegration: true, integration: integrationDetailsMatchingDataStream };
+      return {
+        isIntegration: true,
+        integration: integrationDetailsMatchingDataStream,
+        areAssetsAvailable: true,
+      };
     }
 
-    return { isIntegration: false };
+    // This should ideally not happen. As integration name is present in Data stream
+    // meta response but the integration itself is not found
+    // Worst case i could think of is, may be the integration is deleted from the
+    // system at a later point of time
+    return { isIntegration: false, areAssetsAvailable: false };
   }
 
   // cleaning the index template name as some have @template suffix
@@ -63,7 +75,7 @@ export async function checkAndLoadIntegration({
   // If only 1 part exists, then it's not a dedicated index template
   // Data stream name must starts with this index template, then it's a dedicated index template else not
   if (!isDedicatedComponentTemplate || !dataStream.startsWith(indexTemplateNameWithoutSuffix)) {
-    return { isIntegration: false };
+    return { isIntegration: false, areAssetsAvailable: false };
   }
 
   const isValidCustomComponentTemplate = await validateCustomComponentTemplate({
@@ -72,7 +84,7 @@ export async function checkAndLoadIntegration({
   });
 
   if (!isValidCustomComponentTemplate) {
-    return { isIntegration: false };
+    return { isIntegration: false, areAssetsAvailable: false };
   }
 
   const datasetName = indexTemplateNameWithoutSuffix.split('-')[1];
@@ -82,8 +94,9 @@ export async function checkAndLoadIntegration({
   );
 
   if (integrationFromDataset) {
-    return { isIntegration: true, integration: integrationFromDataset };
+    return { isIntegration: true, integration: integrationFromDataset, areAssetsAvailable: true };
   }
 
-  return { isIntegration: false };
+  // Since the logic reached the last statement, it means it passed all checks for assets being available
+  return { isIntegration: false, areAssetsAvailable: true };
 }

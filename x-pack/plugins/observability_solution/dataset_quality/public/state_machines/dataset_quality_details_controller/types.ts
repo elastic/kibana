@@ -20,7 +20,7 @@ import {
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
 import { TableCriteria, TimeRangeConfig } from '../../../common/types';
-import { Integration } from '../../../common/data_streams_stats/integration';
+import { IntegrationType } from '../../../common/data_stream_details';
 
 export interface DataStream {
   name: string;
@@ -53,7 +53,7 @@ export interface WithDefaultControllerState {
   breakdownField?: string;
   isBreakdownFieldEcs?: boolean;
   isIndexNotFoundError?: boolean;
-  integration?: Integration;
+  integration?: IntegrationType;
   expandedDegradedField?: string;
   isNonAggregatable?: boolean;
   fieldLimit?: FieldLimit;
@@ -84,7 +84,7 @@ export interface WithDataStreamSettings {
 }
 
 export interface WithIntegration {
-  integration: Integration;
+  integration: IntegrationType;
 }
 
 export interface WithIntegrationDashboards {
@@ -235,8 +235,8 @@ export type DatasetQualityDetailsControllerEvent =
   | DoneInvokeEvent<DegradedFieldResponse>
   | DoneInvokeEvent<DegradedFieldValues>
   | DoneInvokeEvent<DataStreamSettings>
-  | DoneInvokeEvent<Integration>
   | DoneInvokeEvent<Dashboard[]>
   | DoneInvokeEvent<DegradedFieldAnalysis>
   | DoneInvokeEvent<UpdateFieldLimitResponse>
-  | DoneInvokeEvent<DataStreamRolloverResponse>;
+  | DoneInvokeEvent<DataStreamRolloverResponse>
+  | DoneInvokeEvent<IntegrationType>;

@@ -6,7 +6,6 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { Integration } from '../../../common/data_streams_stats/integration';
 import {
   GetDataStreamSettingsParams,
   DataStreamSettings,
@@ -19,6 +18,7 @@ import {
 } from '../../../common/data_streams_stats';
 import {
   AnalyzeDegradedFieldsParams,
+  IntegrationType,
   CheckAndLoadIntegrationParams,
   UpdateFieldLimitParams,
 } from '../../../common/data_stream_details/types';
@@ -49,7 +49,7 @@ export interface IDataStreamDetailsClient {
   getDataStreamDegradedFieldValues(
     params: GetDataStreamDegradedFieldValuesPathParams
   ): Promise<DegradedFieldValues>;
-  checkAndLoadIntegration(params: CheckAndLoadIntegrationParams): Promise<Integration | undefined>;
+  checkAndLoadIntegration(params: CheckAndLoadIntegrationParams): IntegrationType;
   getIntegrationDashboards(params: GetIntegrationDashboardsParams): Promise<Dashboard[]>;
   analyzeDegradedField(params: AnalyzeDegradedFieldsParams): Promise<DegradedFieldAnalysis>;
   setNewFieldLimit(params: UpdateFieldLimitParams): Promise<UpdateFieldLimitResponse>;

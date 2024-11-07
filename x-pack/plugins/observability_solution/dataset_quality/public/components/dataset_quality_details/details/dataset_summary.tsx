@@ -52,7 +52,7 @@ export function DatasetSummary() {
       <Fragment>
         <FieldsList
           fields={[
-            ...(integrationDetails?.integration
+            ...(integrationDetails?.integration?.integration
               ? [
                   {
                     fieldTitle: integrationNameText,
@@ -64,14 +64,18 @@ export function DatasetSummary() {
                         `}
                       >
                         <EuiFlexGroup gutterSize="xs" alignItems="center">
-                          <IntegrationIcon integration={integrationDetails.integration} />
-                          <EuiText size="s">{integrationDetails.integration?.name}</EuiText>
+                          <IntegrationIcon
+                            integration={integrationDetails.integration.integration}
+                          />
+                          <EuiText size="s">
+                            {integrationDetails.integration.integration?.name}
+                          </EuiText>
                         </EuiFlexGroup>
                       </EuiBadge>
                     ),
                     actionsMenu: (
                       <IntegrationActionsMenu
-                        integration={integrationDetails.integration}
+                        integration={integrationDetails.integration.integration}
                         dashboards={integrationDetails.dashboard}
                         dashboardsLoading={integrationDashboardsLoading}
                       />
@@ -80,7 +84,7 @@ export function DatasetSummary() {
                   },
                   {
                     fieldTitle: integrationVersionText,
-                    fieldValue: integrationDetails.integration?.version,
+                    fieldValue: integrationDetails.integration.integration?.version,
                     isLoading: integrationDetailsLoading,
                   },
                 ]
