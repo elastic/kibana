@@ -14,11 +14,13 @@ import {
   type ESQLSingleAstItem,
   type ESQLFunction,
 } from '@kbn/esql-ast';
+import { logicalOperators } from '../../../definitions/builtin';
 import { isParameterType, type SupportedDataType } from '../../../definitions/types';
 import { isFunctionItem } from '../../../shared/helpers';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
 import {
   getFunctionSuggestions,
+  getOperatorSuggestion,
   getOperatorSuggestions,
   getSuggestionsAfterNot,
 } from '../../factories';
@@ -101,6 +103,9 @@ export async function suggest(
 
       break;
 
+    /**
+     * After an operator (e.g. AND, OR, IS NULL, +, etc.)
+     */
     case 'after_operator':
       if (!expressionRoot) {
         break;
@@ -120,6 +125,11 @@ export async function suggest(
         },
       });
       walker.walkFunction(expressionRoot);
+
+      if (rightmostOperator.name.endsWith('null')) {
+        suggestions.push(...logicalOperators.map(getOperatorSuggestion));
+        break;
+      }
 
       suggestions.push(
         ...(await getSuggestionsToRightOfOperatorExpression({
