@@ -19,4 +19,6 @@ steps:
 EOF
 else
   echo "Skipping promotion for untracked branch $BUILDKITE_BRANCH"
+  echo "Dry run:"
+  docker buildx imagetools create -t "$PACKAGE_REGISTRY_TARGET_IMAGE" "$PACKAGE_REGISTRY_BASE_IMAGE" --dry-run
 fi
