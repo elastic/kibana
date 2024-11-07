@@ -14,7 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const dataUsageAppUrl = 'management/data/data_usage';
 
-  describe('Main page', function () {
+  describe('privileges', function () {
     // - plugin needs to be anbled in serverless
     // - observability needs to support custom roles otherwise we'll need to seprate the custom role test out
     // which is being enabled by feature flag config not available in MKI (x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts)
