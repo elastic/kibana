@@ -10,12 +10,12 @@ import {
   DataStreamDetails,
   DataStreamSettings,
   DataStreamStat,
-  DegradedDocs,
   NonAggregatableDatasets,
   DegradedFieldResponse,
   DatasetUserPrivileges,
   DegradedFieldValues,
   DegradedFieldAnalysis,
+  DataStreamDocsStat,
   UpdateFieldLimitResponse,
   DataStreamRolloverResponse,
   CheckAndLoadIntegrationResponse,
@@ -32,6 +32,7 @@ import { getDegradedFields } from './get_degraded_fields';
 import { getDegradedFieldValues } from './get_degraded_field_values';
 import { analyzeDegradedField } from './get_degraded_field_analysis';
 import { getDataStreamsMeteringStats } from './get_data_streams_metering_stats';
+import { getAggregatedDatasetPaginatedResults } from './get_dataset_aggregated_paginated_results';
 import { updateFieldLimit } from './update_field_limit';
 import { createDatasetQualityESClient } from '../../utils';
 import { getDataStreamSettings } from './get_datastream_settings';
@@ -100,7 +101,7 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
   params: t.type({
     query: t.intersection([
       rangeRt,
-      typeRt,
+      t.type({ types: typesRt }),
       t.partial({
         datasetQuery: t.string,
       }),
@@ -110,18 +111,12 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
     tags: [],
   },
   async handler(resources): Promise<{
-    degradedDocs: DegradedDocs[];
+    degradedDocs: DataStreamDocsStat[];
   }> {
     const { context, params } = resources;
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
-
-    await datasetQualityPrivileges.throwIfCannotReadDataset(
-      esClient,
-      params.query.type,
-      params.query.datasetQuery
-    );
 
     const degradedDocs = await getDegradedDocsPaginated({
       esClient,
@@ -130,6 +125,39 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
 
     return {
       degradedDocs,
+    };
+  },
+});
+
+const totalDocsRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/total_docs',
+  params: t.type({
+    query: t.intersection([rangeRt, typeRt]),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<{
+    totalDocs: DataStreamDocsStat[];
+  }> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    await datasetQualityPrivileges.throwIfCannotReadDataset(esClient, params.query.type);
+
+    const { type, start, end } = params.query;
+
+    const totalDocs = await getAggregatedDatasetPaginatedResults({
+      esClient,
+      start,
+      end,
+      index: `${type}-*-*`,
+    });
+
+    return {
+      totalDocs,
     };
   },
 });
@@ -420,6 +448,7 @@ const rolloverDataStream = createDatasetQualityServerRoute({
 export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
+  ...totalDocsRoute,
   ...nonAggregatableDatasetsRoute,
   ...nonAggregatableDatasetRoute,
   ...degradedFieldsRoute,

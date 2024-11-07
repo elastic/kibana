@@ -15,5 +15,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./data_stream_rollover'));
     loadTestFile(require.resolve('./update_field_limit'));
     loadTestFile(require.resolve('./check_and_load_integration'));
+    loadTestFile(require.resolve('./data_stream_total_docs'));
   });
 }
