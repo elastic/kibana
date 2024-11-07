@@ -8,7 +8,7 @@
  */
 
 import { DataGridDensity } from '@kbn/unified-data-table';
-import { ComposableProfile, getMergedAccessor } from './composable_profile';
+import { AppliedProfile, getMergedAccessor } from './composable_profile';
 import { Profile } from './types';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 
@@ -30,13 +30,13 @@ describe('getMergedAccessor', () => {
 
   it('should merge the accessors in the correct order', () => {
     const baseImpl: Profile['getCellRenderers'] = jest.fn(() => ({ base: jest.fn() }));
-    const profile1: ComposableProfile = {
+    const profile1: AppliedProfile = {
       getCellRenderers: jest.fn((prev) => (params) => ({
         ...prev(params),
         profile1: jest.fn(),
       })),
     };
-    const profile2: ComposableProfile = {
+    const profile2: AppliedProfile = {
       getCellRenderers: jest.fn((prev) => (params) => ({
         ...prev(params),
         profile2: jest.fn(),
@@ -57,10 +57,10 @@ describe('getMergedAccessor', () => {
 
   it('should allow overwriting previous accessors', () => {
     const baseImpl: Profile['getCellRenderers'] = jest.fn(() => ({ base: jest.fn() }));
-    const profile1: ComposableProfile = {
+    const profile1: AppliedProfile = {
       getCellRenderers: jest.fn(() => () => ({ profile1: jest.fn() })),
     };
-    const profile2: ComposableProfile = {
+    const profile2: AppliedProfile = {
       getCellRenderers: jest.fn((prev) => (params) => ({
         ...prev(params),
         profile2: jest.fn(),

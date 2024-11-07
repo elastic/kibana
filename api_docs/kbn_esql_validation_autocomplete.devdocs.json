@@ -480,7 +480,7 @@
             "section": "def-common.ESQLAst",
             "text": "ESQLAst"
           },
-          ", offset: number) => { type: \"value\"; command: ",
+          ", offset: number) => { type: \"comment\"; command?: undefined; node?: undefined; option?: undefined; setting?: undefined; } | { type: \"value\"; command: ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
