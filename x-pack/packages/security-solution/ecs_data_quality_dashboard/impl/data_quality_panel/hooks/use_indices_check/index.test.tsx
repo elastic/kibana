@@ -250,7 +250,7 @@ describe('useIndicesCheck', () => {
       });
 
       describe('when mappings are loading', () => {
-        it('it should set isLoadingMappings to true', () => {
+        it('it should set isLoadingMappings to true', async () => {
           const { checkIndexSpy } = getSpies();
 
           checkIndexSpy.mockImplementation(async ({ onStart, onLoadMappingsStart }) => {
@@ -271,7 +271,7 @@ describe('useIndicesCheck', () => {
             })
           );
 
-          waitFor(() =>
+          await waitFor(() =>
             expect(result.current.checkState['auditbeat-custom-index-1']).toEqual({
               ...getInitialCheckStateValue(),
               isChecking: true,

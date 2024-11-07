@@ -319,7 +319,7 @@ describe('global query string', () => {
         store.dispatch(globalUrlParamActions.deregisterUrlParam({ key: urlParamKey }));
       });
 
-      waitFor(() =>
+      await waitFor(() =>
         expect(mockHistory.replace).toHaveBeenCalledWith({
           search: ``,
         })

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { fireEvent, render, act, waitFor, screen } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
 import { useTimelineTypes } from './use_timeline_types';
 import { TestProviders } from '../../../common/mock';
@@ -96,15 +96,13 @@ describe('useTimelineTypes', () => {
 
       const { container } = render(result.current.timelineTabs);
 
-      act(() => {
-        fireEvent(
-          container.querySelector('[data-test-subj="timeline-tab-template"]')!,
-          new MouseEvent('click', {
-            bubbles: true,
-            cancelable: true,
-          })
-        );
-      });
+      fireEvent(
+        container.querySelector('[data-test-subj="timeline-tab-template"]')!,
+        new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+        })
+      );
 
       expect(mockNavigateToUrl).toHaveBeenCalled();
     });
@@ -128,12 +126,12 @@ describe('useTimelineTypes', () => {
         })
       );
 
-      waitFor(() => new Promise((resolve) => resolve(null)));
-
-      expect(result.current).toEqual({
-        timelineType: 'default',
-        timelineTabs: result.current.timelineTabs,
-        timelineFilters: result.current.timelineFilters,
+      await waitFor(() => {
+        expect(result.current).toEqual({
+          timelineType: 'default',
+          timelineTabs: result.current.timelineTabs,
+          timelineFilters: result.current.timelineFilters,
+        });
       });
     });
   });
@@ -196,15 +194,13 @@ describe('useTimelineTypes', () => {
 
       const { container } = render(<>{result.current.timelineFilters}</>);
 
-      act(() => {
-        fireEvent(
-          container.querySelector('[data-test-subj="open-timeline-modal-body-filter-default"]')!,
-          new MouseEvent('click', {
-            bubbles: true,
-            cancelable: true,
-          })
-        );
-      });
+      fireEvent(
+        container.querySelector('[data-test-subj="open-timeline-modal-body-filter-default"]')!,
+        new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+        })
+      );
 
       await waitFor(() => new Promise((resolve) => resolve(null)));
 

@@ -26,7 +26,7 @@ describe('useCaseViewNavigation', () => {
     useKibanaMock().services.application.navigateToApp = navigateToApp;
   });
 
-  it('calls navigateToApp with correct arguments', () => {
+  it('calls navigateToApp with correct arguments', async () => {
     const { result } = renderHook(() => useCaseViewNavigation(), {
       wrapper: appMockRender.AppWrapper,
     });
@@ -35,7 +35,7 @@ describe('useCaseViewNavigation', () => {
       result.current.navigateToCaseView({ caseId: 'test-id' });
     });
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(navigateToApp).toHaveBeenCalledWith('testAppId', {
         deepLinkId: 'cases',
         path: '/test-id',
@@ -43,7 +43,7 @@ describe('useCaseViewNavigation', () => {
     });
   });
 
-  it('calls navigateToApp with correct arguments and bypass current app id', () => {
+  it('calls navigateToApp with correct arguments and bypass current app id', async () => {
     const { result } = renderHook(() => useCaseViewNavigation('superAppId'), {
       wrapper: appMockRender.AppWrapper,
     });
@@ -52,7 +52,7 @@ describe('useCaseViewNavigation', () => {
       result.current.navigateToCaseView({ caseId: 'test-id' });
     });
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(navigateToApp).toHaveBeenCalledWith('superAppId', {
         deepLinkId: 'cases',
         path: '/test-id',
