@@ -244,13 +244,13 @@ describe('commands.sort', () => {
         args: [
           {
             type: 'column',
-            parts: ['b', 'a'],
+            args: [{ name: 'b' }, { name: 'a' }],
           },
         ],
       });
       expect(node2).toMatchObject({
         type: 'column',
-        parts: ['a', 'b'],
+        args: [{ name: 'a' }, { name: 'b' }],
       });
     });
 
