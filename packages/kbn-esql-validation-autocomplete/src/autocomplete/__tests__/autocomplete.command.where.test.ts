@@ -8,6 +8,7 @@
  */
 
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
+import { pipeCompleteItem } from '../complete_items';
 import { getDateLiterals } from '../factories';
 import { log10ParameterTypes, powParameterTypes } from './constants';
 import {
@@ -220,6 +221,7 @@ describe('WHERE <expression>', () => {
       ]);
       await assertSuggestions('FROM index | WHERE NOT ENDS_WITH(keywordField, "foo") /', [
         ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['boolean']),
+        pipeCompleteItem,
       ]);
     });
 
@@ -249,37 +251,41 @@ describe('WHERE <expression>', () => {
         ...getFunctionSignaturesByReturnType('where', 'double', { scalar: true }),
       ]);
     });
-  });
 
-  test('suggestions after IS (NOT) NULL', async () => {
-    const { assertSuggestions } = await setup();
+    test('suggestions after IS (NOT) NULL', async () => {
+      const { assertSuggestions } = await setup();
 
-    await assertSuggestions('FROM index | WHERE tags.keyword IS NULL /', ['AND $0', 'OR $0', '| ']);
+      await assertSuggestions('FROM index | WHERE tags.keyword IS NULL /', [
+        'AND $0',
+        'OR $0',
+        '| ',
+      ]);
 
-    await assertSuggestions('FROM index | WHERE tags.keyword IS NOT NULL /', [
-      'AND $0',
-      'OR $0',
-      '| ',
-    ]);
-  });
+      await assertSuggestions('FROM index | WHERE tags.keyword IS NOT NULL /', [
+        'AND $0',
+        'OR $0',
+        '| ',
+      ]);
+    });
 
-  test('suggestions after an arithmetic expression', async () => {
-    const { assertSuggestions } = await setup();
+    test('suggestions after an arithmetic expression', async () => {
+      const { assertSuggestions } = await setup();
 
-    await assertSuggestions('FROM index | WHERE doubleField + doubleField /', [
-      '+ $0',
-      '- $0',
-      'IS NOT NULL',
-      'IS NULL',
-    ]);
-  });
+      await assertSuggestions('FROM index | WHERE doubleField + doubleField /', [
+        '+ $0',
+        '- $0',
+        'IS NOT NULL',
+        'IS NULL',
+      ]);
+    });
 
-  test('pipe suggestion after complete expression', async () => {
-    const { suggest } = await setup();
-    expect(await suggest('from index | WHERE doubleField != doubleField /')).toContainEqual(
-      expect.objectContaining({
-        label: '|',
-      })
-    );
+    test('pipe suggestion after complete expression', async () => {
+      const { suggest } = await setup();
+      expect(await suggest('from index | WHERE doubleField != doubleField /')).toContainEqual(
+        expect.objectContaining({
+          label: '|',
+        })
+      );
+    });
   });
 });

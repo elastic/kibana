@@ -179,7 +179,7 @@ export interface CommandBaseDefinition<CommandName extends string> {
     getColumnsByType: GetColumnsByTypeFn,
     columnExists: (column: string) => boolean,
     getSuggestedVariableName: () => string,
-    getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown',
+    getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
     getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
   ) => Promise<SuggestionRawDefinition[]>;
   /** @deprecated this property will disappear in the future */

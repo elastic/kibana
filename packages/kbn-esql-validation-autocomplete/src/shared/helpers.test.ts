@@ -57,6 +57,10 @@ describe('getExpressionType', () => {
     return root.commands[1].args[0];
   };
 
+  test('empty expression', () => {
+    expect(getExpressionType(getASTForExpression(''))).toBe('unknown');
+  });
+
   describe('literal expressions', () => {
     const cases: Array<{ expression: string; expectedType: SupportedDataType }> = [
       {

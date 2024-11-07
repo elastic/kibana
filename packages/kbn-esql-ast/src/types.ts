@@ -122,6 +122,10 @@ export type FunctionSubtype =
   | 'postfix-unary-expression' // a IS NULL, a IS NOT NULL, ...
   | 'binary-expression'; // a + b, a - b, a * b, ...
 
+export type ESQLOperator = ESQLFunction<
+  'binary-expression' | 'unary-expression' | 'postfix-unary-expression'
+>;
+
 export interface ESQLFunction<
   Subtype extends FunctionSubtype = FunctionSubtype,
   Name extends string = string

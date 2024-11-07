@@ -15,7 +15,7 @@ import {
   type ESQLFunction,
 } from '@kbn/esql-ast';
 import { isParameterType, type SupportedDataType } from '../../../definitions/types';
-import { endsInWhitespace, isColumnItem, isFunctionItem } from '../../../shared/helpers';
+import { isFunctionItem } from '../../../shared/helpers';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
 import {
   getFunctionSuggestions,
@@ -23,6 +23,8 @@ import {
   getSuggestionsAfterNot,
 } from '../../factories';
 import { getSuggestionsToRightOfOperatorExpression } from '../../helper';
+import { getPosition } from './util';
+import { pipeCompleteItem } from '../../complete_items';
 
 export async function suggest(
   innerText: string,
@@ -30,107 +32,123 @@ export async function suggest(
   getColumnsByType: GetColumnsByTypeFn,
   _columnExists: (column: string) => boolean,
   _getSuggestedVariableName: () => string,
-  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown',
+  getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
   _getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
 ): Promise<SuggestionRawDefinition[]> {
-  const lastArg = command.args[command.args.length - 1] as ESQLSingleAstItem;
+  const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
 
-  /**
-   * Suggest after a column name
-   */
-  if (isColumnItem(lastArg) && endsInWhitespace(innerText)) {
-    const columnType = getExpressionType(lastArg);
+  const suggestions: SuggestionRawDefinition[] = [];
 
-    if (!isParameterType(columnType)) {
-      return [];
-    }
+  switch (getPosition(innerText, command)) {
+    /**
+     * After a column name
+     */
+    case 'after_column':
+      const columnType = getExpressionType(expressionRoot);
 
-    return getOperatorSuggestions({
-      command: 'where',
-      leftParamType: columnType,
-      // no assignments allowed in WHERE
-      ignored: ['='],
-    });
+      if (!isParameterType(columnType)) {
+        break;
+      }
+
+      suggestions.push(
+        ...getOperatorSuggestions({
+          command: 'where',
+          leftParamType: columnType,
+          // no assignments allowed in WHERE
+          ignored: ['='],
+        })
+      );
+      break;
+
+    /**
+     * After a complete (non-operator) function call
+     */
+    case 'after_function':
+      const returnType = getExpressionType(expressionRoot);
+
+      if (!isParameterType(returnType)) {
+        break;
+      }
+
+      suggestions.push(
+        ...getOperatorSuggestions({
+          command: 'where',
+          leftParamType: returnType,
+          ignored: ['='],
+        })
+      );
+
+      break;
+
+    /**
+     * After a NOT keyword
+     *
+     * the NOT function is a special operator that can be used in different ways,
+     * and not all these are mapped within the AST data structure: in particular
+     * <COMMAND> <field> NOT <here>
+     * is an incomplete statement and it results in a missing AST node, so we need to detect
+     * from the query string itself
+     */
+    case 'after_not':
+      if (!command.args.some((arg) => isFunctionItem(arg) && arg.name === 'not')) {
+        suggestions.push(...getSuggestionsAfterNot());
+      } else {
+        suggestions.push(
+          ...getFunctionSuggestions({ command: 'where', returnTypes: ['boolean'] }),
+          ...(await getColumnsByType('boolean', [], { advanceCursor: true, openSuggestions: true }))
+        );
+      }
+
+      break;
+
+    case 'after_operator':
+      if (!expressionRoot) {
+        break;
+      }
+
+      if (!isFunctionItem(expressionRoot) || expressionRoot.subtype === 'variadic-call') {
+        // this is already guaranteed in the getPosition function, but TypeScript doesn't know
+        break;
+      }
+
+      let rightmostOperator = expressionRoot;
+      // get rightmost function
+      const walker = new Walker({
+        visitFunction: (fn: ESQLFunction) => {
+          if (fn.location.min > rightmostOperator.location.min && fn.subtype !== 'variadic-call')
+            rightmostOperator = fn;
+        },
+      });
+      walker.walkFunction(expressionRoot);
+
+      suggestions.push(
+        ...(await getSuggestionsToRightOfOperatorExpression({
+          queryText: innerText,
+          commandName: 'where',
+          rootOperator: rightmostOperator,
+          preferredExpressionType: 'boolean',
+          getExpressionType,
+          getColumnsByType,
+        }))
+      );
+
+      break;
+
+    case 'empty_expression':
+      const columnSuggestions = await getColumnsByType('any', [], {
+        advanceCursor: true,
+        openSuggestions: true,
+      });
+      suggestions.push(...columnSuggestions, ...getFunctionSuggestions({ command: 'where' }));
+
+      break;
   }
 
-  /**
-   * Suggest after a complete (non-operator) function call
-   */
-  if (
-    isFunctionItem(lastArg) &&
-    lastArg.subtype === 'variadic-call' &&
-    endsInWhitespace(innerText)
-  ) {
-    const returnType = getExpressionType(lastArg);
-
-    if (!isParameterType(returnType)) {
-      return [];
-    }
-
-    return getOperatorSuggestions({
-      command: 'where',
-      leftParamType: returnType,
-      ignored: ['='],
-    });
+  // Is this a complete expression of the right type?
+  // If so, we can call it done and suggest a pipe
+  if (getExpressionType(expressionRoot) === 'boolean') {
+    suggestions.push(pipeCompleteItem);
   }
 
-  /**
-   * Suggest after a NOT keyword
-   *
-   * the NOT function is a special operator that can be used in different ways,
-   * and not all these are mapped within the AST data structure: in particular
-   * <COMMAND> <field> NOT <here>
-   * is an incomplete statement and it results in a missing AST node, so we need to detect
-   * from the query string itself
-   *
-   * TODO - revisit
-   */
-  const endsWithNot = / not$/i.test(innerText.trimEnd());
-  if (endsWithNot) {
-    if (!command.args.some((arg) => isFunctionItem(arg) && arg.name === 'not')) {
-      return getSuggestionsAfterNot();
-    } else {
-      return [
-        ...getFunctionSuggestions({ command: 'where', returnTypes: ['boolean'] }),
-        ...(await getColumnsByType('boolean', [], { advanceCursor: true, openSuggestions: true })),
-      ];
-    }
-  }
-
-  /**
-   * This branch deals with operators
-   */
-  if (isFunctionItem(lastArg) && lastArg.subtype !== 'variadic-call') {
-    // 1 + 1 /
-    // 1 + 1 + /
-    // 1 + 1 AND foo + /
-    // 1 AND foo + 1 OR 3 + /
-    // 1 AND foo IS NOT NULL /
-    // keywordField >= keywordField ${op} doubleField /
-
-    let rightmostOperator = lastArg;
-    // get rightmost function
-    const walker = new Walker({
-      visitFunction: (fn: ESQLFunction) => {
-        if (fn.location.min > rightmostOperator.location.min && fn.subtype !== 'variadic-call')
-          rightmostOperator = fn;
-      },
-    });
-    walker.walkFunction(lastArg);
-
-    return getSuggestionsToRightOfOperatorExpression({
-      queryText: innerText,
-      commandName: 'where',
-      rootOperator: rightmostOperator,
-      preferredExpressionType: 'boolean',
-      getExpressionType,
-      getColumnsByType,
-    });
-  }
-
-  const columnSuggestions = await getColumnsByType('any', [], {
-    advanceCursor: true,
-    openSuggestions: true,
-  });
-  return [...columnSuggestions, ...getFunctionSuggestions({ command: 'where' })];
+  return suggestions;
 }

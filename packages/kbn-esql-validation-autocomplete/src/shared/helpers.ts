@@ -764,10 +764,14 @@ export function getParamAtPosition(
  * Determines the type of the expression
  */
 export function getExpressionType(
-  root: ESQLAstItem,
+  root: ESQLAstItem | undefined,
   fields?: Map<string, ESQLRealField>,
   variables?: Map<string, ESQLVariable[]>
 ): SupportedDataType | 'unknown' {
+  if (!root) {
+    return 'unknown';
+  }
+
   if (!isSingleItem(root)) {
     if (root.length === 0) {
       return 'unknown';
