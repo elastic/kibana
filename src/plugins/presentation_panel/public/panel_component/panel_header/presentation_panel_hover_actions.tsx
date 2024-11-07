@@ -41,9 +41,8 @@ import {
 } from '@kbn/presentation-publishing';
 import { Subscription } from 'rxjs';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { css, CSSObject } from '@emotion/react';
+import { css } from '@emotion/react';
 import { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
-import { DASHED_OUTLINE, SOLID_OUTLINE } from '../../../common';
 import { uiActions } from '../../kibana_services';
 import {
   contextMenuTrigger,
@@ -54,6 +53,9 @@ import {
 import { getContextMenuAriaLabel } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { AnyApiAction } from '../../panel_actions/types';
+
+const DASHED_OUTLINE = `1px dashed ${euiThemeVars.euiColorMediumShade}`;
+const SOLID_OUTLINE = `1px solid ${euiThemeVars.euiBorderColor}`;
 
 const QUICK_ACTION_IDS = {
   edit: [
@@ -68,16 +70,14 @@ const QUICK_ACTION_IDS = {
 
 const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'] as const;
 
-const ALL_ROUNDED_CORNERS: CSSObject = {
-  borderRadius: euiThemeVars.euiBorderRadius,
-  borderWidth: '1px',
-};
-const TOP_ROUNDED_CORNERS: CSSObject = {
-  borderTopLeftRadius: euiThemeVars.euiBorderRadius,
-  borderTopRightRadius: euiThemeVars.euiBorderRadius,
-  borderWidth: '1px',
-  borderBottom: '0px',
-};
+const ALL_ROUNDED_CORNERS = `
+  border-radius: ${euiThemeVars.euiBorderRadius};
+`;
+const TOP_ROUNDED_CORNERS = `
+  border-top-left-radius: ${euiThemeVars.euiBorderRadius};
+  border-top-right-radius: ${euiThemeVars.euiBorderRadius};
+  border-bottom: 0px;
+`;
 
 const createClickHandler =
   (action: AnyApiAction, context: ActionExecutionContext<EmbeddableApiContext>) =>
@@ -128,7 +128,7 @@ export const PresentationPanelHoverActions = ({
   const leftHoverActionsRef = useRef<HTMLDivElement | null>(null);
   const rightHoverActionsRef = useRef<HTMLDivElement | null>(null);
   const [combineHoverActions, setCombineHoverActions] = useState<boolean>(false);
-  const [borderStyles, setBorderStyles] = useState<CSSObject>(TOP_ROUNDED_CORNERS);
+  const [borderStyles, setBorderStyles] = useState<string>(TOP_ROUNDED_CORNERS);
 
   const updateCombineHoverActions = () => {
     if (!hoverActionsRef.current || !anchorRef.current) return;
@@ -472,15 +472,40 @@ export const PresentationPanelHoverActions = ({
       )}`}
       css={css`
         border-radius: ${euiThemeVars.euiBorderRadius};
+        position: relative;
+        height: 100%;
 
         .embPanel {
           ${showBorder ? `outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};` : ''}
+        }
+
+        .embPanel__hoverActions {
+          opacity: 0;
+          padding: calc(${euiThemeVars.euiSizeXS} - 1px);
+          display: flex;
+          flex-wrap: nowrap;
+
+          background-color: ${euiThemeVars.euiColorEmptyShade};
+          height: ${euiThemeVars.euiSizeXL};
+
+          pointer-events: all; // Re-enable pointer-events for hover actions
         }
 
         &:hover {
           .embPanel {
             outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
             z-index: ${euiThemeVars.euiZLevel2};
+          }
+        }
+
+        &:hover .embPanel__hoverActionsWrapper,
+        &:focus-within .embPanel__hoverActionsWrapper,
+        .embPanel__hoverActionsWrapper--lockHoverActions {
+          z-index: ${euiThemeVars.euiZLevel9};
+          top: -${euiThemeVars.euiSizeXL};
+
+          .embPanel__hoverActions {
+            opacity: 1;
           }
         }
       `}
@@ -492,6 +517,18 @@ export const PresentationPanelHoverActions = ({
           className={classNames('embPanel__hoverActionsWrapper', {
             'embPanel__hoverActionsWrapper--lockHoverActions': hasLockedHoverActions,
           })}
+          css={css`
+            height: ${euiThemeVars.euiSizeXL};
+            position: absolute;
+            top: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 ${euiThemeVars.euiSize};
+            flex-wrap: nowrap;
+            min-width: 100%;
+            z-index: -1;
+            pointer-events: none; // Prevent hover actions wrapper from blocking interactions with other panels
+          `}
         >
           {viewMode === 'edit' && !combineHoverActions ? (
             <div
@@ -502,14 +539,10 @@ export const PresentationPanelHoverActions = ({
                 'embPanel__hoverActionsLeft',
                 className
               )}
-              css={{
-                ...borderStyles,
-                borderStyle: viewMode === 'edit' ? 'dashed' : 'solid',
-                borderColor:
-                  viewMode === 'edit'
-                    ? euiThemeVars.euiColorMediumShade
-                    : euiThemeVars.euiBorderColor,
-              }}
+              css={css`
+                border: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
+                ${borderStyles}
+              `}
             >
               {dragHandle}
             </div>
@@ -525,10 +558,10 @@ export const PresentationPanelHoverActions = ({
                 'embPanel__hoverActionsRight',
                 className
               )}
-              css={{
-                border: viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE,
-                ...borderStyles,
-              }}
+              css={css`
+                border: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
+                ${borderStyles}
+              `}
             >
               {viewMode === 'edit' && combineHoverActions && dragHandle}
               {showNotifications && notificationElements}
