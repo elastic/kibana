@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import { AlertSuppressionEdit } from '../../../../../../../rule_creation/components/alert_suppression_edit';
 import { getTermsAggregationFields } from '../../../../../../../rule_creation_ui/components/step_define_rule/utils';
 import { isEsqlRule, isMlRule } from '../../../../../../../../../common/detection_engine/utils';
-import { aggregatableFields } from '../../../../../../../rule_creation_ui/components/step_define_rule';
 import { useAllEsqlRuleFields } from '../../../../../../../rule_creation_ui/hooks';
 import { useMLRuleConfig } from '../../../../../../../../common/components/ml/hooks/use_ml_rule_config';
 import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
@@ -48,7 +47,9 @@ export function AlertSuppressionEditAdapter({
     } else if (isMlRule(finalDiffableRule.type)) {
       return mlSuppressionFields;
     } else {
-      return getTermsAggregationFields(aggregatableFields(dataView?.fields ?? []));
+      return getTermsAggregationFields(
+        (dataView?.fields ?? []).filter((field) => field.aggregatable === true)
+      );
     }
   }, [finalDiffableRule.type, esqlSuppressionFields, mlSuppressionFields, dataView?.fields]);
 
