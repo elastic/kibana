@@ -105,7 +105,8 @@
     "@kbn/slo-plugin",
     "@kbn/ebt-tools",
     "@kbn/alerting-types",
-    "@kbn/core-chrome-browser"
+    "@kbn/core-chrome-browser",
+    "@kbn/core-rendering-browser-internal"
   ],
   "exclude": ["target/**/*"]
 }
