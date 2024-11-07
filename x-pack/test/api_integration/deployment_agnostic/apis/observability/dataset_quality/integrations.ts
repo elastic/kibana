@@ -91,8 +91,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           preExistingIntegrations.concat(['synthetics', 'system'])
         );
 
-        expect(body.integrations[0].datasets).not.empty();
-        expect(body.integrations[1].datasets).not.empty();
+        expect(
+          body.integrations.find((integration: Integration) => integration.name === 'synthetics')
+            .datasets
+        ).not.empty();
+        expect(
+          body.integrations.find((integration: Integration) => integration.name === 'system')
+            .datasets
+        ).not.empty();
       });
 
       after(
