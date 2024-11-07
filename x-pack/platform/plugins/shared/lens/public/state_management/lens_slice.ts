@@ -973,7 +973,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
               ? activeDatasource.insertLayer(
                   state.datasourceStates[state.activeDatasourceId].state,
                   layerId,
-                  layersToLinkTo
+                  layersToLinkTo,
+                  layerType
                 )
               : state.datasourceStates[state.activeDatasourceId].state;
 
