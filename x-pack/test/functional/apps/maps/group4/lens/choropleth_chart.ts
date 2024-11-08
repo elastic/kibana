@@ -23,7 +23,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow creation of choropleth chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.switchToVisualization('lnsChoropleth', 'Region map');
 
@@ -49,7 +48,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should create choropleth chart from suggestion', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.dragFieldToWorkspace('geo.dest', 'xyVisChart');
 

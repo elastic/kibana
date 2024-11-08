@@ -31,12 +31,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ['global_discover_read', 'global_visualize_read', 'test_logstash_reader'],
         { skipBrowserRefresh: true }
       );
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
     describe('Navigation search', () => {

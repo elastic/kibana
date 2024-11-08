@@ -75,7 +75,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualize.gotoVisualizationLandingPage();
           await visualize.navigateToNewVisualization();
           await visualize.clickVisType('lens');
-          await lens.goToTimeRange();
 
           await lens.configureDimension({
             dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

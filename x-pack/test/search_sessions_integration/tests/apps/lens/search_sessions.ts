@@ -32,7 +32,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await lens.clickVisualizeListItemTitle('lnsXYvis');
-      await lens.goToTimeRange();
       await header.waitUntilLoadingHasFinished();
       expect(await lens.isShowingNoResults()).to.be(false);
 
