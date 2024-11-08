@@ -17,7 +17,6 @@ import {
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
-import { installStreamsTemplates } from './templates/manage_index_templates';
 import { StreamsRouteRepository } from './routes';
 import { RouteDependencies } from './routes/types';
 import {
@@ -117,11 +116,6 @@ export class StreamsPlugin
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.taskManager = plugins.taskManager;
     }
-
-    const esClient = core.elasticsearch.client.asInternalUser;
-    installStreamsTemplates({ esClient, logger: this.logger }).catch((err) =>
-      this.logger.error(err)
-    );
 
     return {};
   }

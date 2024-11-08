@@ -11,21 +11,19 @@ import { Logger } from '@kbn/logging';
 import { StreamDefinition } from '../../../common/types';
 import { STREAMS_INDEX } from '../../../common/constants';
 import { DefinitionNotFound, IndexTemplateNotFound } from './errors';
-import {
-  deleteTemplate,
-  upsertComponent,
-  upsertIngestPipeline,
-  upsertTemplate,
-} from '../../templates/manage_index_templates';
+import { deleteTemplate, upsertTemplate } from './index_templates/manage_index_templates';
 import { generateLayer } from './component_templates/generate_layer';
 import { generateIngestPipeline } from './ingest_pipelines/generate_ingest_pipeline';
 import { generateReroutePipeline } from './ingest_pipelines/generate_reroute_pipeline';
 import { generateIndexTemplate } from './index_templates/generate_index_template';
-import { deleteComponent } from './component_templates/manage_component_templates';
-import { deleteIngestPipeline } from './ingest_pipelines/manage_ingest_pipelines';
+import { deleteComponent, upsertComponent } from './component_templates/manage_component_templates';
 import { getIndexTemplateName } from './index_templates/name';
 import { getComponentTemplateName } from './component_templates/name';
 import { getProcessingPipelineName, getReroutePipelineName } from './ingest_pipelines/name';
+import {
+  deleteIngestPipeline,
+  upsertIngestPipeline,
+} from './ingest_pipelines/manage_ingest_pipelines';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
