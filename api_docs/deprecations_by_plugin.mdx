@@ -7,7 +7,7 @@ id: kibDevDocsDeprecationsByPlugin
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-plugin
 title: Deprecated API usage by plugin
 description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2024-11-05
+date: 2024-11-07
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
 
@@ -399,23 +399,6 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | Deprecated API | Reference location(s) | Remove By |
 | ---------------|-----------|-----------|
 | <DocLink id="kibKibanaReactPluginApi" section="def-common.KibanaStyledComponentsThemeProviderDecorator" text="KibanaStyledComponentsThemeProviderDecorator"/> | [index.ts](https://github.com/elastic/kibana/tree/main/packages/react/kibana_context/styled/index.ts#:~:text=KibanaStyledComponentsThemeProviderDecorator) | - |
-
-
-
-## @kbn/reporting-csv-share-panel
-
-| Deprecated API | Reference location(s) | Remove By |
-| ---------------|-----------|-----------|
-| <DocLink id="kibKbnReportingPublicPluginApi" section="def-public.ReportingAPIClient.createImmediateReport" text="createImmediateReport"/> | [get_csv_panel_action.tsx](https://github.com/elastic/kibana/tree/main/packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx#:~:text=createImmediateReport), [get_csv_panel_action.test.ts](https://github.com/elastic/kibana/tree/main/packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.test.ts#:~:text=createImmediateReport) | - |
-
-
-
-## @kbn/reporting-export-types-csv
-
-| Deprecated API | Reference location(s) | Remove By |
-| ---------------|-----------|-----------|
-| <DocLink id="kibKbnReportingExportTypesCsvCommonPluginApi" section="def-common.JobParamsDownloadCSV" text="JobParamsDownloadCSV"/> | [csv_searchsource_immediate.ts](https://github.com/elastic/kibana/tree/main/packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts#:~:text=JobParamsDownloadCSV), [csv_searchsource_immediate.ts](https://github.com/elastic/kibana/tree/main/packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts#:~:text=JobParamsDownloadCSV), [csv_searchsource_immediate.ts](https://github.com/elastic/kibana/tree/main/packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts#:~:text=JobParamsDownloadCSV), [csv_searchsource_immediate.ts](https://github.com/elastic/kibana/tree/main/packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts#:~:text=JobParamsDownloadCSV) | - |
-| <DocLink id="kibKbnReportingExportTypesCsvCommonPluginApi" section="def-common.CSV_SEARCHSOURCE_IMMEDIATE_TYPE" text="CSV_SEARCHSOURCE_IMMEDIATE_TYPE"/> | [csv_searchsource_immediate.ts](https://github.com/elastic/kibana/tree/main/packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts#:~:text=CSV_SEARCHSOURCE_IMMEDIATE_TYPE), [csv_searchsource_immediate.ts](https://github.com/elastic/kibana/tree/main/packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts#:~:text=CSV_SEARCHSOURCE_IMMEDIATE_TYPE), [csv_searchsource_immediate.ts](https://github.com/elastic/kibana/tree/main/packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts#:~:text=CSV_SEARCHSOURCE_IMMEDIATE_TYPE), [csv_searchsource_immediate.ts](https://github.com/elastic/kibana/tree/main/packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts#:~:text=CSV_SEARCHSOURCE_IMMEDIATE_TYPE) | - |
 
 
 
@@ -1219,9 +1202,6 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 
 | Deprecated API | Reference location(s) | Remove By |
 | ---------------|-----------|-----------|
-| <DocLink id="kibKbnReportingExportTypesCsvPluginApi" section="def-server.CsvSearchSourceImmediateExportType" text="CsvSearchSourceImmediateExportType"/> | [core.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/reporting/server/core.ts#:~:text=CsvSearchSourceImmediateExportType), [core.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/reporting/server/core.ts#:~:text=CsvSearchSourceImmediateExportType) | - |
-| <DocLink id="kibKbnReportingExportTypesCsvCommonPluginApi" section="def-common.JobParamsDownloadCSV" text="JobParamsDownloadCSV"/> | [csv_searchsource_immediate.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts#:~:text=JobParamsDownloadCSV), [csv_searchsource_immediate.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts#:~:text=JobParamsDownloadCSV) | - |
-| <DocLink id="kibKbnReportingExportTypesCsvCommonPluginApi" section="def-common.CSV_SEARCHSOURCE_IMMEDIATE_TYPE" text="CSV_SEARCHSOURCE_IMMEDIATE_TYPE"/> | [csv_searchsource_immediate.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts#:~:text=CSV_SEARCHSOURCE_IMMEDIATE_TYPE), [csv_searchsource_immediate.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts#:~:text=CSV_SEARCHSOURCE_IMMEDIATE_TYPE), [csv_searchsource_immediate.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts#:~:text=CSV_SEARCHSOURCE_IMMEDIATE_TYPE) | - |
 | <DocLink id="kibKbnReportingExportTypesCsvCommonPluginApi" section="def-common.CSV_JOB_TYPE_DEPRECATED" text="CSV_JOB_TYPE_DEPRECATED"/> | [get_document_payload.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/reporting/server/routes/common/jobs/get_document_payload.ts#:~:text=CSV_JOB_TYPE_DEPRECATED), [get_document_payload.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/reporting/server/routes/common/jobs/get_document_payload.ts#:~:text=CSV_JOB_TYPE_DEPRECATED) | - |
 | <DocLink id="kibKbnReportingExportTypesPdfPluginApi" section="def-server.PdfV1ExportType" text="PdfV1ExportType"/> | [core.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/reporting/server/core.ts#:~:text=PdfV1ExportType), [core.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/reporting/server/core.ts#:~:text=PdfV1ExportType) | - |
 
