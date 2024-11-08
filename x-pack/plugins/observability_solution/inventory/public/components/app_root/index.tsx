@@ -43,7 +43,7 @@ export function AppRoot({
   return (
     <InventoryContextProvider context={context}>
       <RedirectAppLinks coreStart={coreStart}>
-        <RouterProvider history={history} router={inventoryRouter}>
+        <RouterProvider history={history} router={inventoryRouter as any}>
           <UnifiedSearchProvider>
             <RouteRenderer />
             <InventoryHeaderActionMenu appMountParameters={appMountParameters} />

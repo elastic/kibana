@@ -15,7 +15,7 @@ import { defaultEntitySortField, entityColumnIdsRt, entityViewRt } from '../../c
  * The array of route definitions to be used when the application
  * creates the routes.
  */
-const inventoryRoutes: Record<string, Route> = {
+const inventoryRoutes = {
   '/': {
     element: (
       <InventoryPageTemplate>
