@@ -13,6 +13,7 @@ import { StreamDefinition } from '../../../../common/types';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { isRoot } from '../helpers/hierarchy';
+import { getComponentTemplateName } from './name';
 
 export function generateLayer(
   id: string,
@@ -25,7 +26,7 @@ export function generateLayer(
     };
   });
   return {
-    name: `${id}@stream.layer`,
+    name: getComponentTemplateName(id),
     template: {
       settings: isRoot(definition.id) ? logsSettings : {},
       mappings: {

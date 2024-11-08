@@ -10,10 +10,11 @@ import { ASSET_VERSION } from '../../../../common/constants';
 import { conditionToPainless } from '../helpers/condition_to_painless';
 import { logsDefaultPipelineProcessors } from './logs_default_pipeline';
 import { isRoot } from '../helpers/hierarchy';
+import { getProcessingPipelineName } from './name';
 
 export function generateIngestPipeline(id: string, definition: StreamDefinition) {
   return {
-    id: `${id}@stream.default-pipeline`,
+    id: getProcessingPipelineName(id),
     processors: [
       ...(isRoot(definition.id) ? logsDefaultPipelineProcessors : []),
       ...definition.processing.map((processor) => {

@@ -8,6 +8,7 @@
 import { StreamDefinition } from '../../../../common/types';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { conditionToPainless } from '../helpers/condition_to_painless';
+import { getReroutePipelineName } from './name';
 
 interface GenerateReroutePipelineParams {
   definition: StreamDefinition;
@@ -15,7 +16,7 @@ interface GenerateReroutePipelineParams {
 
 export async function generateReroutePipeline({ definition }: GenerateReroutePipelineParams) {
   return {
-    id: `${definition.id}@stream.reroutes`,
+    id: getReroutePipelineName(definition.id),
     processors: definition.children.map((child) => {
       return {
         reroute: {

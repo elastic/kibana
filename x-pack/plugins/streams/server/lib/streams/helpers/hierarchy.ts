@@ -11,7 +11,6 @@ export function isDescendandOf(parent: StreamDefinition, child: StreamDefinition
   return child.id.startsWith(parent.id);
 }
 
-// streams are named by dots: logs.a.b.c - a child means there is only one level of dots added
 export function isChildOf(parent: StreamDefinition, child: StreamDefinition) {
   return (
     isDescendandOf(parent, child) && child.id.split('.').length === parent.id.split('.').length + 1

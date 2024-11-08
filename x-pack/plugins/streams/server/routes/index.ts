@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { deleteStreamRoute } from './streams/delete';
 import { editStreamRoute } from './streams/edit';
 import { enableStreamsRoute } from './streams/enable';
 import { forkStreamsRoute } from './streams/fork';
+import { listStreamsRoute } from './streams/list';
 import { readStreamRoute } from './streams/read';
 
 export const StreamsRouteRepository = {
@@ -15,6 +17,8 @@ export const StreamsRouteRepository = {
   ...forkStreamsRoute,
   ...readStreamRoute,
   ...editStreamRoute,
+  ...deleteStreamRoute,
+  ...listStreamsRoute,
 };
 
 export type StreamsRouteRepository = typeof StreamsRouteRepository;

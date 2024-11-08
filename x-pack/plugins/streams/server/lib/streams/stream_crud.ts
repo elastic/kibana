@@ -12,6 +12,7 @@ import { StreamDefinition } from '../../../common/types';
 import { STREAMS_INDEX } from '../../../common/constants';
 import { DefinitionNotFound, IndexTemplateNotFound } from './errors';
 import {
+  deleteTemplate,
   upsertComponent,
   upsertIngestPipeline,
   upsertTemplate,
@@ -20,6 +21,11 @@ import { generateLayer } from './component_templates/generate_layer';
 import { generateIngestPipeline } from './ingest_pipelines/generate_ingest_pipeline';
 import { generateReroutePipeline } from './ingest_pipelines/generate_reroute_pipeline';
 import { generateIndexTemplate } from './index_templates/generate_index_template';
+import { deleteComponent } from './component_templates/manage_component_templates';
+import { deleteIngestPipeline } from './ingest_pipelines/manage_ingest_pipelines';
+import { getIndexTemplateName } from './index_templates/name';
+import { getComponentTemplateName } from './component_templates/name';
+import { getProcessingPipelineName, getReroutePipelineName } from './ingest_pipelines/name';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
@@ -29,6 +35,39 @@ interface BaseParamsWithDefinition extends BaseParams {
   definition: StreamDefinition;
 }
 
+interface DeleteStreamParams extends BaseParams {
+  id: string;
+  logger: Logger;
+}
+
+export async function deleteStreamObjects({ id, scopedClusterClient, logger }: DeleteStreamParams) {
+  await scopedClusterClient.asCurrentUser.delete({
+    id,
+    index: STREAMS_INDEX,
+    refresh: 'wait_for',
+  });
+  await deleteTemplate({
+    esClient: scopedClusterClient.asSecondaryAuthUser,
+    name: getIndexTemplateName(id),
+    logger,
+  });
+  await deleteComponent({
+    esClient: scopedClusterClient.asSecondaryAuthUser,
+    name: getComponentTemplateName(id),
+    logger,
+  });
+  await deleteIngestPipeline({
+    esClient: scopedClusterClient.asSecondaryAuthUser,
+    id: getProcessingPipelineName(id),
+    logger,
+  });
+  await deleteIngestPipeline({
+    esClient: scopedClusterClient.asSecondaryAuthUser,
+    id: getReroutePipelineName(id),
+    logger,
+  });
+}
+
 async function upsertStream({ definition, scopedClusterClient }: BaseParamsWithDefinition) {
   return scopedClusterClient.asCurrentUser.index({
     id: definition.id,
@@ -36,6 +75,19 @@ async function upsertStream({ definition, scopedClusterClient }: BaseParamsWithD
     document: definition,
     refresh: 'wait_for',
   });
+}
+
+type ListStreamsParams = BaseParams;
+
+export async function listStreams({ scopedClusterClient }: ListStreamsParams) {
+  const response = await scopedClusterClient.asCurrentUser.search<StreamDefinition>({
+    index: STREAMS_INDEX,
+    size: 10000,
+    fields: ['id'],
+    _source: false,
+  });
+  const definitions = response.hits.hits.map((hit) => hit.fields as { id: string[] });
+  return definitions;
 }
 
 interface ReadStreamParams extends BaseParams {

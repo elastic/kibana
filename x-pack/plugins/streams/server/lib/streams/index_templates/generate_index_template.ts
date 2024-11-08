@@ -6,6 +6,8 @@
  */
 
 import { ASSET_VERSION } from '../../../../common/constants';
+import { getProcessingPipelineName } from '../ingest_pipelines/name';
+import { getIndexTemplateName } from './name';
 
 export function generateIndexTemplate(
   id: string,
@@ -13,7 +15,7 @@ export function generateIndexTemplate(
   ignoreMissing: string[] = []
 ) {
   return {
-    name: `${id}@stream`,
+    name: getIndexTemplateName(id),
     index_patterns: [id],
     composed_of: [...composedOf, `${id}@stream.layer`],
     priority: 200,
@@ -28,7 +30,7 @@ export function generateIndexTemplate(
     template: {
       settings: {
         index: {
-          default_pipeline: `${id}@stream.default-pipeline`,
+          default_pipeline: getProcessingPipelineName(id),
         },
       },
     },
