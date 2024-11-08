@@ -250,7 +250,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
 
     return (
       <div data-test-subj="control-editor-custom-settings">
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
         <CustomSettings
           initialState={initialState}
           field={fieldRegistry[editorState.fieldName].field}

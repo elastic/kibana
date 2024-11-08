@@ -257,7 +257,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                 `}
               />
             )}
-            <EuiSpacer size="m"/>
+            <EuiSpacer size="m" />
             <EuiFormRow
               label={
                 <FormattedMessage
