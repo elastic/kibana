@@ -355,13 +355,29 @@ describe('location', () => {
     ]);
   });
 
-  it('with comment after function name identifier', () => {
+  it('with the simplest comment after function name identifier', () => {
+    const texts1 = getFunctionTexts('FROM index | STATS agg/* */()');
+    expect(texts1).toEqual(['agg/* */()']);
+
+    const texts2 = getFunctionTexts('FROM index | STATS agg/* A */()');
+    expect(texts2).toEqual(['agg/* A */()']);
+
+    const texts3 = getFunctionTexts('FROM index | STATS agg /* A */ ()');
+    expect(texts3).toEqual(['agg /* A */ ()']);
+  });
+
+  it('with the simplest emoji comment after function name identifier', () => {
+    const texts = getFunctionTexts('FROM index | STATS agg/* 😎 */()');
+    expect(texts).toEqual(['agg/* 😎 */()']);
+  });
+
+  it('with comment and emoji after function name identifier', () => {
     const texts = getFunctionTexts('FROM index | STATS agg /* haha 😅 */ ()');
 
     expect(texts).toEqual(['agg /* haha 😅 */ ()']);
   });
 
-  it('with comment inside argumetn list', () => {
+  it('with comment inside argument list', () => {
     const texts = getFunctionTexts('FROM index | STATS agg  ( /* haha 😅 */ )');
 
     expect(texts).toEqual(['agg  ( /* haha 😅 */ )']);
