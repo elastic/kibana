@@ -26,6 +26,7 @@ import type { Agent, AgentPolicy, PackageInfo, PackagePolicy } from '../../types
 import { sendGetAgents, useStartServices, useGetPackageInfoByKeyQuery } from '../../hooks';
 
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
+import { AgentlessStepConfirmData } from './step_confirm_data';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -180,7 +181,14 @@ export const AgentlessEnrollmentFlyout = ({
               title: i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.stepConfirmDataTitle', {
                 defaultMessage: 'Confirm incoming data',
               }),
-              children: null,
+              // children: agentData && confirmEnrollmentStatus === 'complete' && (
+              children: agentData && (
+                <AgentlessStepConfirmData
+                  agent={agentData}
+                  packagePolicy={packagePolicy}
+                  setConfirmDataStatus={setConfirmDataStatus}
+                />
+              ),
               status: confirmDataStatus,
             },
           ]}

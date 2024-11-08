@@ -32,3 +32,6 @@ export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: stri
   }
   return { pkgName, pkgVersion };
 }
+
+export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
+  `${name}-${version}`;
