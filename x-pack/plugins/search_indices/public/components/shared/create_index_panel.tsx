@@ -75,7 +75,7 @@ export const CreateIndexPanel = ({
             iconType="cross"
             onClick={onClose}
             color="text"
-            aria-label={i18n.translate('xpack.searchIndices.createIndex.closeAriaLabel', {
+            aria-label={i18n.translate('xpack.searchIndices.shared.createIndex.closeAriaLabel', {
               defaultMessage: 'Close create index',
             })}
           />
@@ -95,7 +95,7 @@ export const CreateIndexPanel = ({
             <EuiFlexItem>
               <EuiTitle size="xs">
                 <h1>
-                  {i18n.translate('xpack.searchIndices.startPage.pageTitle', {
+                  {i18n.translate('xpack.searchIndices.shared.createIndex.pageTitle', {
                     defaultMessage: 'Elasticsearch',
                   })}
                 </h1>
@@ -105,7 +105,7 @@ export const CreateIndexPanel = ({
           <EuiSpacer size="m" />
           <EuiTitle size="l">
             <h2>
-              {i18n.translate('xpack.searchIndices.startPage.pageDescription', {
+              {i18n.translate('xpack.searchIndices.shared.createIndex.pageDescription', {
                 defaultMessage: 'Vectorize, search, and visualize your data',
               })}
             </h2>
@@ -119,7 +119,7 @@ export const CreateIndexPanel = ({
                 <EuiTitle size="xs">
                   <h4>
                     {title ??
-                      i18n.translate('xpack.searchIndices.createIndex.title', {
+                      i18n.translate('xpack.searchIndices.shared.createIndex.defaultTitle', {
                         defaultMessage: 'Create an index',
                       })}
                   </h4>
@@ -127,22 +127,31 @@ export const CreateIndexPanel = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonGroup
-                  legend={i18n.translate('xpack.searchIndices.createIndex.viewSelect.legend', {
-                    defaultMessage: 'Create index view selection',
-                  })}
+                  legend={i18n.translate(
+                    'xpack.searchIndices.shared.createIndex.viewSelect.legend',
+                    {
+                      defaultMessage: 'Create index view selection',
+                    }
+                  )}
                   options={[
                     {
                       id: CreateIndexViewMode.UI,
-                      label: i18n.translate('xpack.searchIndices.createIndex.viewSelect.ui', {
-                        defaultMessage: 'UI',
-                      }),
+                      label: i18n.translate(
+                        'xpack.searchIndices.shared.createIndex.viewSelect.ui',
+                        {
+                          defaultMessage: 'UI',
+                        }
+                      ),
                       'data-test-subj': 'createIndexUIViewBtn',
                     },
                     {
                       id: CreateIndexViewMode.Code,
-                      label: i18n.translate('xpack.searchIndices.createIndex.viewSelect.code', {
-                        defaultMessage: 'Code',
-                      }),
+                      label: i18n.translate(
+                        'xpack.searchIndices.shared.createIndex.viewSelect.code',
+                        {
+                          defaultMessage: 'Code',
+                        }
+                      ),
                       'data-test-subj': 'createIndexCodeViewBtn',
                     },
                   ]}
@@ -154,7 +163,7 @@ export const CreateIndexPanel = ({
             </EuiFlexGroup>
             <EuiText color="subdued">
               <p>
-                {i18n.translate('xpack.searchIndices.createIndex.description', {
+                {i18n.translate('xpack.searchIndices.shared.createIndex.description', {
                   defaultMessage:
                     'An index stores your data and defines the schema, or field mappings, for your searches',
                 })}
@@ -168,9 +177,12 @@ export const CreateIndexPanel = ({
           <EuiTextAlign textAlign="center">
             <EuiTitle size="xs">
               <h5>
-                {i18n.translate('xpack.searchIndices.startPage.observabilityCallout.title', {
-                  defaultMessage: 'Looking to store your logs or metrics data?',
-                })}
+                {i18n.translate(
+                  'xpack.searchIndices.shared.createIndex.observabilityCallout.title',
+                  {
+                    defaultMessage: 'Looking to store your logs or metrics data?',
+                  }
+                )}
               </h5>
             </EuiTitle>
           </EuiTextAlign>
@@ -185,14 +197,17 @@ export const CreateIndexPanel = ({
                 href={docLinks.analyzeLogs}
                 target="_blank"
               >
-                {i18n.translate('xpack.searchIndices.startPage.observabilityCallout.logs.button', {
-                  defaultMessage: 'Collect and analyze logs',
-                })}
+                {i18n.translate(
+                  'xpack.searchIndices.shared.createIndex.observabilityCallout.logs.button',
+                  {
+                    defaultMessage: 'Collect and analyze logs',
+                  }
+                )}
               </EuiButtonEmpty>
               <EuiText color="subdued" size="s" textAlign="center">
                 <small>
                   {i18n.translate(
-                    'xpack.searchIndices.startPage.observabilityCallout.logs.subTitle',
+                    'xpack.searchIndices.shared.createIndex.observabilityCallout.logs.subTitle',
                     {
                       defaultMessage: 'Explore Logstash and Beats',
                     }
@@ -213,7 +228,7 @@ export const CreateIndexPanel = ({
                 target="_blank"
               >
                 {i18n.translate(
-                  'xpack.searchIndices.startPage.observabilityCallout.o11yTrial.button',
+                  'xpack.searchIndices.shared.createIndex.observabilityCallout.o11yTrial.button',
                   {
                     defaultMessage: 'Start an Observability trial',
                   }
@@ -222,7 +237,7 @@ export const CreateIndexPanel = ({
               <EuiText color="subdued" size="s" textAlign="center">
                 <small>
                   {i18n.translate(
-                    'xpack.searchIndices.startPage.observabilityCallout.o11yTrial.subTitle',
+                    'xpack.searchIndices.shared.createIndex.observabilityCallout.o11yTrial.subTitle',
                     {
                       defaultMessage: 'Powerful performance monitoring',
                     }
@@ -238,7 +253,7 @@ export const CreateIndexPanel = ({
           <EuiSpacer />
           <EuiFlexGroup justifyContent="center">
             <EuiButtonEmpty onClick={onClose} data-test-subj="createIndexSkipBtn">
-              {i18n.translate('xpack.searchIndices.createIndex.skipLabel', {
+              {i18n.translate('xpack.searchIndices.shared.createIndex.skipLabel', {
                 defaultMessage: 'Skip',
               })}
             </EuiButtonEmpty>

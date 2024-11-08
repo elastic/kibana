@@ -56,10 +56,10 @@ export const CreateIndexForm = ({
         onSubmit={onCreateIndex}
       >
         <EuiFormRow
-          label={i18n.translate('xpack.searchIndices.startPage.createIndex.name.label', {
+          label={i18n.translate('xpack.searchIndices.shared.createIndex.name.label', {
             defaultMessage: 'Name your index',
           })}
-          helpText={i18n.translate('xpack.searchIndices.startPage.createIndex.name.helpText', {
+          helpText={i18n.translate('xpack.searchIndices.shared.createIndex.name.helpText', {
             defaultMessage:
               'Index names must be lowercase and can only contain hyphens and numbers',
           })}
@@ -75,12 +75,9 @@ export const CreateIndexForm = ({
             isInvalid={indexNameHasError}
             disabled={userPrivileges?.privileges?.canCreateIndex === false}
             onChange={onIndexNameChange}
-            placeholder={i18n.translate(
-              'xpack.searchIndices.startPage.createIndex.name.placeholder',
-              {
-                defaultMessage: 'Enter a name for your index',
-              }
-            )}
+            placeholder={i18n.translate('xpack.searchIndices.shared.createIndex.name.placeholder', {
+              defaultMessage: 'Enter a name for your index',
+            })}
           />
         </EuiFormRow>
         <EuiSpacer />
@@ -90,7 +87,7 @@ export const CreateIndexForm = ({
               content={
                 userPrivileges?.privileges?.canCreateIndex === false ? (
                   <p>
-                    {i18n.translate('xpack.searchIndices.startPage.createIndex.permissionTooltip', {
+                    {i18n.translate('xpack.searchIndices.shared.createIndex.permissionTooltip', {
                       defaultMessage: 'You do not have permission to create an index.',
                     })}
                   </p>
@@ -111,7 +108,7 @@ export const CreateIndexForm = ({
                 isLoading={isLoading}
                 type="submit"
               >
-                {i18n.translate('xpack.searchIndices.startPage.createIndex.action.text', {
+                {i18n.translate('xpack.searchIndices.shared.createIndex.action.text', {
                   defaultMessage: 'Create my index',
                 })}
               </EuiButton>
@@ -124,7 +121,7 @@ export const CreateIndexForm = ({
                 <EuiText size="s" data-test-subj="apiKeyLabel">
                   <p>
                     {i18n.translate(
-                      'xpack.searchIndices.startPage.createIndex.apiKeyCreation.description',
+                      'xpack.searchIndices.shared.createIndex.apiKeyCreation.description',
                       {
                         defaultMessage: "We'll create an API key for this index",
                       }
@@ -146,17 +143,14 @@ export const CreateIndexForm = ({
             <EuiText color="subdued" size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.searchIndices.startPage.createIndex.fileUpload.text"
+                  id="xpack.searchIndices.shared.createIndex.fileUpload.text"
                   defaultMessage="Already have some data? {link}"
                   values={{
                     link: (
                       <EuiLink data-test-subj="uploadFileLink" onClick={onFileUpload}>
-                        {i18n.translate(
-                          'xpack.searchIndices.startPage.createIndex.fileUpload.link',
-                          {
-                            defaultMessage: 'Upload a file',
-                          }
-                        )}
+                        {i18n.translate('xpack.searchIndices.shared.createIndex.fileUpload.link', {
+                          defaultMessage: 'Upload a file',
+                        })}
                       </EuiLink>
                     ),
                   }}
