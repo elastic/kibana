@@ -140,12 +140,6 @@ export const push = async (
       operation: Operations.pushCase,
     });
 
-    if (theCase?.status === CaseStatuses.closed) {
-      throw Boom.conflict(
-        `The ${theCase.title} case is closed. Pushing a closed case is not allowed.`
-      );
-    }
-
     const alertsInfo = getAlertInfoFromComments(theCase?.comments);
     const alerts = await getAlerts(alertsInfo, clientArgs);
     const profiles = await getProfiles(theCase, securityStartPlugin);
