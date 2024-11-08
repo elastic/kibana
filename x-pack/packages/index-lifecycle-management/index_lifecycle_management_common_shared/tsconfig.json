@@ -16,8 +16,5 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-application-browser",
-    "@kbn/utility-types",
-    "@kbn/share-plugin",
   ]
 }
