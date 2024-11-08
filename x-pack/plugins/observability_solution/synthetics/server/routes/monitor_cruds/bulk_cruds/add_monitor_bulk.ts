@@ -10,7 +10,6 @@ import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { deleteMonitorBulk } from './delete_monitor_bulk';
 import { SyntheticsServerSetup } from '../../../types';
 import { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
@@ -190,9 +189,10 @@ export const deleteMonitorIfCreated = async ({
       newMonitorId
     );
     if (encryptedMonitor) {
-      await deleteMonitorBulk({
+      const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
+
+      await deleteMonitorAPI.deleteMonitorBulk({
         monitors: [encryptedMonitor],
-        routeContext,
       });
     }
   } catch (e) {

@@ -9,6 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
+import { LeafPrinter } from '../pretty_print';
 import {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
@@ -125,16 +126,23 @@ export namespace Builder {
     };
 
     export const column = (
-      template: Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted'>,
+      template: Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted' | 'parts'>,
       fromParser?: Partial<AstNodeParserFields>
     ): ESQLColumn => {
-      return {
+      const node: ESQLColumn = {
         ...template,
         ...Builder.parserFields(fromParser),
+        parts: template.args.map((arg) =>
+          arg.type === 'identifier' ? arg.name : LeafPrinter.param(arg)
+        ),
         quoted: false,
-        name: template.parts.join('.'),
+        name: '',
         type: 'column',
       };
+
+      node.name = LeafPrinter.column(node);
+
+      return node;
     };
 
     export const order = (
