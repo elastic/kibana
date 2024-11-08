@@ -130,7 +130,7 @@ export const AgentlessEnrollmentFlyout = ({
       const enabledInputs = packagePolicy.inputs?.filter((input) => input.enabled);
 
       // If only one input is enabled, find the input name from the package info and
-      // and use that name. Otherwise, use the package name.
+      // and use that for integration title. Otherwise, use the package name.
       if (enabledInputs.length === 1 && enabledInputs[0].policy_template) {
         const policyTemplate = packageInfoData.item.policy_templates?.find(
           (template) => template.name === enabledInputs[0].policy_template

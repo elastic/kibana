@@ -44,6 +44,9 @@ import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics'
 import { getAgentStatusForAgentPolicy } from '../../services/agents';
 import { isAgentInNamespace } from '../../services/spaces/agent_namespaces';
 import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
+import { getPackageInfo } from '../../services/epm/packages';
+import { splitPkgKey } from '../../services/epm/registry';
+import { generateTemplateIndexPattern } from '../../services/epm/elasticsearch/template/template';
 
 async function verifyNamespace(agent: Agent, namespace?: string) {
   if (!(await isAgentInNamespace(agent, namespace))) {
@@ -331,15 +334,31 @@ export const getAgentDataHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
   try {
     const returnDataPreview = request.query.previewData;
-    const agentIds = isStringArray(request.query.agentsIds)
+    const agentsIds = isStringArray(request.query.agentsIds)
       ? request.query.agentsIds
       : [request.query.agentsIds];
+    const pkgKey = request.query.pkgKey;
 
-    const { items, dataPreview } = await AgentService.getIncomingDataByAgentsId(
+    // If a package is specified, get data stream patterns for that package
+    // and scope incoming data query to that pattern
+    let dataStreamPattern: string | undefined;
+    if (pkgKey) {
+      const packageInfo = await getPackageInfo({
+        savedObjectsClient: coreContext.savedObjects.client,
+        prerelease: true,
+        ...splitPkgKey(pkgKey),
+      });
+      dataStreamPattern = (packageInfo.data_streams || [])
+        .map((ds) => generateTemplateIndexPattern(ds))
+        .join(',');
+    }
+
+    const { items, dataPreview } = await AgentService.getIncomingDataByAgentsId({
       esClient,
-      agentIds,
-      returnDataPreview
-    );
+      agentsIds,
+      dataStreamPattern,
+      returnDataPreview,
+    });
 
     const body = { items, dataPreview };
 
