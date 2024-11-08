@@ -58,12 +58,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           withInternalHeaders: true,
         }
       );
-      const body = await callApiAs({
-        roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
-      });
-      preExistingIntegrations = body.integrations.map(
-        (integration: Integration) => integration.name
-      );
+
+      preExistingIntegrations = (
+        await callApiAs({
+          roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
+        })
+      ).integrations.map((integration: Integration) => integration.name);
     });
 
     after(async () => {
@@ -93,11 +93,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(
           body.integrations.find((integration: Integration) => integration.name === 'synthetics')
-            .datasets
+            ?.datasets
         ).not.empty();
         expect(
           body.integrations.find((integration: Integration) => integration.name === 'system')
-            .datasets
+            ?.datasets
         ).not.empty();
       });
 
