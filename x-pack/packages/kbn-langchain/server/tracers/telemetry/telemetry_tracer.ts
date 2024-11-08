@@ -75,12 +75,7 @@ export class TelemetryTracer extends BaseTracer implements LangChainTracerFields
           : {}),
       };
       this.logger.debug(
-        () =>
-          `Invoke ${eventType} telemetry onChainEnd: run:\n${JSON.stringify(
-            telemetryValue,
-            null,
-            2
-          )}`
+        () => `Invoke ${eventType} telemetry:\n${JSON.stringify(telemetryValue, null, 2)}`
       );
       this.telemetry.reportEvent(eventType, telemetryValue);
     }
