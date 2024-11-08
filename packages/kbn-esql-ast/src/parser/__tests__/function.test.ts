@@ -8,6 +8,7 @@
  */
 
 import { parse } from '..';
+import { EsqlQuery } from '../../query';
 import { Walker } from '../../walker';
 
 describe('function AST nodes', () => {
@@ -321,5 +322,60 @@ describe('function AST nodes', () => {
         args: [expect.any(Object), expect.any(Object)],
       });
     });
+  });
+});
+
+describe('location', () => {
+  const getFunctionTexts = (src: string) => {
+    const query = EsqlQuery.fromSrc(src);
+    const functions = Walker.matchAll(query.ast, { type: 'function' });
+    const texts: string[] = functions.map((fn) => src.slice(fn.location.min, fn.location.max + 1));
+
+    return texts;
+  };
+
+  it('correctly cuts out function source texts', () => {
+    const texts = getFunctionTexts(
+      'FROM index | LIMIT 1 | STATS agg() | LIMIT 2 | STATS max(a, b, c), max2(d.e)'
+    );
+
+    expect(texts).toEqual(['agg()', 'max(a, b, c)', 'max2(d.e)']);
+  });
+
+  it('functions in binary expressions', () => {
+    const texts = getFunctionTexts('FROM index | STATS foo = agg(f1) + agg(f2), a.b = agg(f3)');
+
+    expect(texts).toEqual([
+      'foo = agg(f1) + agg(f2)',
+      'agg(f1) + agg(f2)',
+      'agg(f1)',
+      'agg(f2)',
+      'a.b = agg(f3)',
+      'agg(f3)',
+    ]);
+  });
+
+  it('with comment after function name identifier', () => {
+    const texts = getFunctionTexts('FROM index | STATS agg /* haha 😅 */ ()');
+
+    expect(texts).toEqual(['agg /* haha 😅 */ ()']);
+  });
+
+  it('with comment inside argumetn list', () => {
+    const texts = getFunctionTexts('FROM index | STATS agg  ( /* haha 😅 */ )');
+
+    expect(texts).toEqual(['agg  ( /* haha 😅 */ )']);
+  });
+
+  it('with emoji and comment in argument lists', () => {
+    const texts = getFunctionTexts(
+      'FROM index | STATS agg( /* haha 😅 */ max(foo), bar, baz), test( /* asdf */ * /* asdf */)'
+    );
+
+    expect(texts).toEqual([
+      'agg( /* haha 😅 */ max(foo), bar, baz)',
+      'max(foo)',
+      'test( /* asdf */ * /* asdf */)',
+    ]);
   });
 });
