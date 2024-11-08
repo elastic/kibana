@@ -108,7 +108,7 @@ export const ApiKeyPanelContent: React.FC<ApiKeyPanelContent> = ({ apiKeys, open
               >
                 <FormattedMessage
                   id="xpack.enterpriseSearch.apiKey.activeKeys"
-                  defaultMessage="{number} active API keys."
+                  defaultMessage="{number} active API keys"
                   values={{
                     number: apiKeys?.length || 0,
                   }}

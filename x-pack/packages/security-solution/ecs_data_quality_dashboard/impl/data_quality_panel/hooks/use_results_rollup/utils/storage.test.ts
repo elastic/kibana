@@ -200,4 +200,26 @@ describe('getStorageResults', () => {
     expect(toasts.addError).toHaveBeenCalledWith('test-error', { title: expect.any(String) });
     expect(results).toEqual([]);
   });
+
+  it('should provide stad and end date', async () => {
+    await getStorageResults({
+      httpFetch: fetch,
+      abortController: new AbortController(),
+      pattern: 'auditbeat-*',
+      toasts,
+      startTime: 'now-7d',
+      endTime: 'now',
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/internal/ecs_data_quality_dashboard/results_latest/auditbeat-*',
+      expect.objectContaining({
+        method: 'GET',
+        query: {
+          startDate: 'now-7d',
+          endDate: 'now',
+        },
+      })
+    );
+  });
 });
