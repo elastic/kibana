@@ -229,7 +229,7 @@ export function transformServiceMapResponses({
   const dedupedNodes: typeof nodes = [];
 
   nodes.forEach((node) => {
-    if (!dedupedNodes.find((dedupedNode) => node.id === dedupedNode.id)) {
+    if (!dedupedNodes.find((dedupedNode) => node['service.name'] === dedupedNode['service.name'])) {
       dedupedNodes.push(node);
     }
   });
