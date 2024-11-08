@@ -5,40 +5,22 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { StreamDefinition } from '../../../../common/types';
-import { ASSET_VERSION, STREAMS_INDEX } from '../../../../common/constants';
-import { rerouteConditionToPainless } from '../helpers/reroute_condition_to_painless';
+import { ASSET_VERSION } from '../../../../common/constants';
+import { conditionToPainless } from '../helpers/condition_to_painless';
 
 interface GenerateReroutePipelineParams {
-  esClient: ElasticsearchClient;
   definition: StreamDefinition;
 }
 
-export async function generateReroutePipeline({
-  esClient,
-  definition,
-}: GenerateReroutePipelineParams) {
-  const response = await esClient.search<StreamDefinition>({
-    index: STREAMS_INDEX,
-    query: { match: { forked_from: definition.id } },
-  });
-
+export async function generateReroutePipeline({ definition }: GenerateReroutePipelineParams) {
   return {
     id: `${definition.id}@stream.reroutes`,
-    processors: response.hits.hits.map((doc) => {
-      if (!doc._source) {
-        throw new Error('Source missing for stream definiton document');
-      }
-      if (!doc._source.condition) {
-        throw new Error(
-          `Reroute condition missing from forked stream definition ${doc._source.id}`
-        );
-      }
+    processors: definition.children.map((child) => {
       return {
         reroute: {
-          destination: doc._source.id,
-          if: rerouteConditionToPainless(doc._source.condition),
+          destination: child.id,
+          if: conditionToPainless(child.condition),
         },
       };
     }),

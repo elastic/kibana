@@ -9,31 +9,61 @@ import { z } from '@kbn/zod';
 
 const stringOrNumberOrBoolean = z.union([z.string(), z.number(), z.boolean()]);
 
-export const rerouteFilterConditionSchema = z.object({
+export const filterConditionSchema = z.object({
   field: z.string(),
   operator: z.enum(['eq', 'neq', 'lt', 'lte', 'gt', 'gte', 'contains', 'startsWith', 'endsWith']),
   value: stringOrNumberOrBoolean,
 });
 
-export type RerouteFilterCondition = z.infer<typeof rerouteFilterConditionSchema>;
+export type FilterCondition = z.infer<typeof filterConditionSchema>;
 
-export interface RerouteAndCondition {
-  and: RerouteCondition[];
+export interface AndCondition {
+  and: Condition[];
 }
 
 export interface RerouteOrCondition {
-  or: RerouteCondition[];
+  or: Condition[];
 }
 
-export type RerouteCondition = RerouteFilterCondition | RerouteAndCondition | RerouteOrCondition;
+export type Condition = FilterCondition | AndCondition | RerouteOrCondition | undefined;
 
-export const rerouteConditionSchema: z.ZodType<RerouteCondition> = z.lazy(() =>
+export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
   z.union([
-    rerouteFilterConditionSchema,
-    z.object({ and: z.array(rerouteConditionSchema) }),
-    z.object({ or: z.array(rerouteConditionSchema) }),
+    filterConditionSchema,
+    z.object({ and: z.array(conditionSchema) }),
+    z.object({ or: z.array(conditionSchema) }),
   ])
 );
+
+export const grokProcessingDefinitionSchema = z.object({
+  type: z.literal('grok'),
+  field: z.string(),
+  patterns: z.array(z.string()),
+  pattern_definitions: z.optional(z.record(z.string())),
+});
+
+export const dissectProcessingDefinitionSchema = z.object({
+  type: z.literal('dissect'),
+  field: z.string(),
+  pattern: z.string(),
+});
+
+export const processingDefinitionSchema = z.object({
+  condition: z.optional(conditionSchema),
+  config: z.discriminatedUnion('type', [
+    grokProcessingDefinitionSchema,
+    dissectProcessingDefinitionSchema,
+  ]),
+});
+
+export type ProcessingDefinition = z.infer<typeof processingDefinitionSchema>;
+
+export const fieldDefinitionSchema = z.object({
+  name: z.string(),
+  type: z.enum(['keyword', 'text', 'long', 'double', 'date', 'boolean', 'ip']),
+});
+
+export type FieldDefinition = z.infer<typeof fieldDefinitionSchema>;
 
 /**
  * Example of a "root" stream
@@ -51,9 +81,16 @@ export const rerouteConditionSchema: z.ZodType<RerouteCondition> = z.lazy(() =>
 
 export const streamDefinitonSchema = z.object({
   id: z.string(),
-  forked_from: z.optional(z.string()),
-  condition: z.optional(rerouteConditionSchema),
-  root: z.boolean().default(false),
+  processing: z.array(processingDefinitionSchema).default([]),
+  fields: z.array(fieldDefinitionSchema).default([]),
+  children: z
+    .array(
+      z.object({
+        id: z.string(),
+        condition: conditionSchema,
+      })
+    )
+    .default([]),
 });
 
 export type StreamDefinition = z.infer<typeof streamDefinitonSchema>;

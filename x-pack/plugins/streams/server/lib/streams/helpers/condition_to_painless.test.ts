@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rerouteConditionToPainless } from './reroute_condition_to_painless';
+import { conditionToPainless } from './condition_to_painless';
 
 const operatorConditionAndResutls = [
   {
@@ -46,11 +46,11 @@ const operatorConditionAndResutls = [
   },
 ];
 
-describe('rerouteConditionToPainless', () => {
+describe('conditionToPainless', () => {
   describe('operators', () => {
     operatorConditionAndResutls.forEach((setup) => {
       test(`${setup.condition.operator}`, () => {
-        expect(rerouteConditionToPainless(setup.condition)).toEqual(setup.result);
+        expect(conditionToPainless(setup.condition)).toEqual(setup.result);
       });
     });
   });
@@ -64,7 +64,7 @@ describe('rerouteConditionToPainless', () => {
         ],
       };
       expect(
-        expect(rerouteConditionToPainless(condition)).toEqual(
+        expect(conditionToPainless(condition)).toEqual(
           'ctx.log?.logger == "nginx_proxy" && ctx.log?.level == "error"'
         )
       );
@@ -80,7 +80,7 @@ describe('rerouteConditionToPainless', () => {
         ],
       };
       expect(
-        expect(rerouteConditionToPainless(condition)).toEqual(
+        expect(conditionToPainless(condition)).toEqual(
           'ctx.log?.logger == "nginx_proxy" || ctx.log?.level == "error"'
         )
       );
@@ -101,7 +101,7 @@ describe('rerouteConditionToPainless', () => {
         ],
       };
       expect(
-        expect(rerouteConditionToPainless(condition)).toEqual(
+        expect(conditionToPainless(condition)).toEqual(
           'ctx.log?.logger == "nginx_proxy" && (ctx.log?.level == "error" || ctx.log?.level == "ERROR")'
         )
       );
@@ -124,7 +124,7 @@ describe('rerouteConditionToPainless', () => {
         ],
       };
       expect(
-        expect(rerouteConditionToPainless(condition)).toEqual(
+        expect(conditionToPainless(condition)).toEqual(
           '(ctx.log?.logger == "nginx_proxy" || ctx.service?.name == "nginx") && (ctx.log?.level == "error" || ctx.log?.level == "ERROR")'
         )
       );

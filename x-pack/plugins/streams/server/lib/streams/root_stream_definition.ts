@@ -10,4 +10,24 @@ import { StreamDefinition } from '../../../common/types';
 export const rootStreamDefinition: StreamDefinition = {
   id: 'logs',
   root: true,
+  processing: [],
+  children: [],
+  fields: [
+    {
+      name: '@timestamp',
+      type: 'date',
+    },
+    {
+      name: 'message',
+      type: 'text',
+    },
+    {
+      name: 'host.name',
+      type: 'keyword',
+    },
+    {
+      name: 'log.level',
+      type: 'keyword',
+    },
+  ],
 };

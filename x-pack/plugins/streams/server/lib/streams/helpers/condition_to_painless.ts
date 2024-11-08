@@ -7,30 +7,30 @@
 
 import { isBoolean, isString } from 'lodash';
 import {
-  RerouteAndCondition,
-  RerouteCondition,
-  rerouteConditionSchema,
-  RerouteFilterCondition,
-  rerouteFilterConditionSchema,
+  AndCondition,
+  Condition,
+  conditionSchema,
+  FilterCondition,
+  filterConditionSchema,
   RerouteOrCondition,
 } from '../../../../common/types';
 
-function isFilterCondition(subject: any): subject is RerouteFilterCondition {
-  const result = rerouteFilterConditionSchema.safeParse(subject);
+function isFilterCondition(subject: any): subject is FilterCondition {
+  const result = filterConditionSchema.safeParse(subject);
   return result.success;
 }
 
-function isAndCondition(subject: any): subject is RerouteAndCondition {
-  const result = rerouteConditionSchema.safeParse(subject);
+function isAndCondition(subject: any): subject is AndCondition {
+  const result = conditionSchema.safeParse(subject);
   return result.success && subject.and != null;
 }
 
 function isOrCondition(subject: any): subject is RerouteOrCondition {
-  const result = rerouteConditionSchema.safeParse(subject);
+  const result = conditionSchema.safeParse(subject);
   return result.success && subject.or != null;
 }
 
-function safePainlessField(condition: RerouteFilterCondition) {
+function safePainlessField(condition: FilterCondition) {
   return `ctx.${condition.field.split('.').join('?.')}`;
 }
 
@@ -44,7 +44,7 @@ function encodeValue(value: string | number | boolean) {
   return value;
 }
 
-function toPainless(condition: RerouteFilterCondition) {
+function toPainless(condition: FilterCondition) {
   switch (condition.operator) {
     case 'neq':
       return `${safePainlessField(condition)} != ${encodeValue(condition.value)}`;
@@ -67,19 +67,17 @@ function toPainless(condition: RerouteFilterCondition) {
   }
 }
 
-export function rerouteConditionToPainless(condition: RerouteCondition, nested = false): string {
+export function conditionToPainless(condition: Condition, nested = false): string {
   if (isFilterCondition(condition)) {
     return toPainless(condition);
   }
   if (isAndCondition(condition)) {
-    const and = condition.and
-      .map((filter) => rerouteConditionToPainless(filter, true))
-      .join(' && ');
+    const and = condition.and.map((filter) => conditionToPainless(filter, true)).join(' && ');
     return nested ? `(${and})` : and;
   }
   if (isOrCondition(condition)) {
-    const or = condition.or.map((filter) => rerouteConditionToPainless(filter, true)).join(' || ');
+    const or = condition.or.map((filter) => conditionToPainless(filter, true)).join(' || ');
     return nested ? `(${or})` : or;
   }
-  return '';
+  return 'false';
 }

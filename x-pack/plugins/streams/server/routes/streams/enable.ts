@@ -8,8 +8,7 @@
 import { z } from '@kbn/zod';
 import { SecurityException } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
-import { bootstrapRootEntity } from '../../lib/streams/bootstrap_root_assets';
-import { createStream } from '../../lib/streams/stream_crud';
+import { syncStream } from '../../lib/streams/stream_crud';
 import { rootStreamDefinition } from '../../lib/streams/root_stream_definition';
 
 export const enableStreamsRoute = createServerRoute({
@@ -26,13 +25,10 @@ export const enableStreamsRoute = createServerRoute({
   handler: async ({ request, response, logger, getScopedClients }) => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
-      await bootstrapRootEntity({
-        esClient: scopedClusterClient.asSecondaryAuthUser,
-        logger,
-      });
-      await createStream({
+      await syncStream({
         scopedClusterClient,
         definition: rootStreamDefinition,
+        logger,
       });
       return response.ok({ body: { acknowledged: true } });
     } catch (e) {

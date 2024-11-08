@@ -7,9 +7,19 @@
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { get } from 'lodash';
+import { Logger } from '@kbn/logging';
 import { StreamDefinition } from '../../../common/types';
 import { STREAMS_INDEX } from '../../../common/constants';
-import { ComponentTemplateNotFound, DefinitionNotFound, IndexTemplateNotFound } from './errors';
+import { DefinitionNotFound, IndexTemplateNotFound } from './errors';
+import {
+  upsertComponent,
+  upsertIngestPipeline,
+  upsertTemplate,
+} from '../../templates/manage_index_templates';
+import { generateLayer } from './component_templates/generate_layer';
+import { generateIngestPipeline } from './ingest_pipelines/generate_ingest_pipeline';
+import { generateReroutePipeline } from './ingest_pipelines/generate_reroute_pipeline';
+import { generateIndexTemplate } from './index_templates/generate_index_template';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
@@ -19,7 +29,7 @@ interface BaseParamsWithDefinition extends BaseParams {
   definition: StreamDefinition;
 }
 
-export async function createStream({ definition, scopedClusterClient }: BaseParamsWithDefinition) {
+async function upsertStream({ definition, scopedClusterClient }: BaseParamsWithDefinition) {
   return scopedClusterClient.asCurrentUser.index({
     id: definition.id,
     index: STREAMS_INDEX,
@@ -39,18 +49,24 @@ export async function readStream({ id, scopedClusterClient }: ReadStreamParams) 
       index: STREAMS_INDEX,
     });
     const definition = response._source as StreamDefinition;
-    const indexTemplate = await readIndexTemplate({ scopedClusterClient, definition });
-    const componentTemplate = await readComponentTemplate({ scopedClusterClient, definition });
-    const ingestPipelines = await readIngestPipelines({ scopedClusterClient, definition });
     return {
       definition,
-      index_template: indexTemplate,
-      component_template: componentTemplate,
-      ingest_pipelines: ingestPipelines,
     };
   } catch (e) {
     if (e.meta?.statusCode === 404) {
       throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
+    }
+    throw e;
+  }
+}
+
+export async function checkStreamExists({ id, scopedClusterClient }: ReadStreamParams) {
+  try {
+    await readStream({ id, scopedClusterClient });
+    return true;
+  } catch (e) {
+    if (e instanceof DefinitionNotFound) {
+      return false;
     }
     throw e;
   }
@@ -72,33 +88,6 @@ export async function readIndexTemplate({
   return indexTemplate;
 }
 
-export async function readComponentTemplate({
-  scopedClusterClient,
-  definition,
-}: BaseParamsWithDefinition) {
-  const response = await scopedClusterClient.asSecondaryAuthUser.cluster.getComponentTemplate({
-    name: `${definition.id}@stream.layer`,
-  });
-  const componentTemplate = response.component_templates.find(
-    (doc) => doc.name === `${definition.id}@stream.layer`
-  );
-  if (!componentTemplate) {
-    throw new ComponentTemplateNotFound(`Unable to find component_template for ${definition.id}`);
-  }
-  return componentTemplate;
-}
-
-export async function readIngestPipelines({
-  scopedClusterClient,
-  definition,
-}: BaseParamsWithDefinition) {
-  const response = await scopedClusterClient.asSecondaryAuthUser.ingest.getPipeline({
-    id: `${definition.id}@stream.*`,
-  });
-
-  return response;
-}
-
 export async function getIndexTemplateComponents({
   scopedClusterClient,
   definition,
@@ -112,4 +101,66 @@ export async function getIndexTemplateComponents({
       []
     ) as string[],
   };
+}
+
+interface SyncStreamParams {
+  scopedClusterClient: IScopedClusterClient;
+  definition: StreamDefinition;
+  rootDefinition?: StreamDefinition;
+  logger: Logger;
+}
+
+export async function syncStream({
+  scopedClusterClient,
+  definition,
+  rootDefinition,
+  logger,
+}: SyncStreamParams) {
+  await upsertStream({
+    scopedClusterClient,
+    definition,
+  });
+  await upsertComponent({
+    esClient: scopedClusterClient.asSecondaryAuthUser,
+    logger,
+    component: generateLayer(definition.id, definition),
+  });
+  await upsertIngestPipeline({
+    esClient: scopedClusterClient.asSecondaryAuthUser,
+    logger,
+    pipeline: generateIngestPipeline(definition.id, definition),
+  });
+  const reroutePipeline = await generateReroutePipeline({
+    definition,
+  });
+  await upsertIngestPipeline({
+    esClient: scopedClusterClient.asSecondaryAuthUser,
+    logger,
+    pipeline: reroutePipeline,
+  });
+  if (rootDefinition) {
+    const { composedOf, ignoreMissing } = await getIndexTemplateComponents({
+      scopedClusterClient,
+      definition: rootDefinition,
+    });
+    const parentReroutePipeline = await generateReroutePipeline({
+      definition: rootDefinition,
+    });
+    await upsertIngestPipeline({
+      esClient: scopedClusterClient.asSecondaryAuthUser,
+      logger,
+      pipeline: parentReroutePipeline,
+    });
+    await upsertTemplate({
+      esClient: scopedClusterClient.asSecondaryAuthUser,
+      logger,
+      template: generateIndexTemplate(definition.id, composedOf, ignoreMissing),
+    });
+  } else {
+    await upsertTemplate({
+      esClient: scopedClusterClient.asSecondaryAuthUser,
+      logger,
+      template: generateIndexTemplate(definition.id),
+    });
+  }
 }

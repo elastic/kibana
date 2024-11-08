@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { editStreamRoute } from './streams/edit';
 import { enableStreamsRoute } from './streams/enable';
 import { forkStreamsRoute } from './streams/fork';
 import { readStreamRoute } from './streams/read';
@@ -13,6 +14,7 @@ export const StreamsRouteRepository = {
   ...enableStreamsRoute,
   ...forkStreamsRoute,
   ...readStreamRoute,
+  ...editStreamRoute,
 };
 
 export type StreamsRouteRepository = typeof StreamsRouteRepository;

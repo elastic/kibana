@@ -13,10 +13,10 @@ import {
   SecurityException,
 } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
-import { streamDefinitonSchema } from '../../../common/types';
-import { bootstrapStream } from '../../lib/streams/bootstrap_stream';
-import { createStream, readStream } from '../../lib/streams/stream_crud';
+import { conditionSchema, streamDefinitonSchema } from '../../../common/types';
+import { syncStream, readStream } from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
+import { isChildOf } from '../../lib/streams/helpers/hierarchy';
 
 export const forkStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{id}/_fork 2023-10-31',
@@ -32,7 +32,7 @@ export const forkStreamsRoute = createServerRoute({
     path: z.object({
       id: z.string(),
     }),
-    body: streamDefinitonSchema,
+    body: z.object({ stream: streamDefinitonSchema, condition: conditionSchema }),
   }),
   handler: async ({ response, params, logger, request, getScopedClients }) => {
     try {
@@ -47,20 +47,36 @@ export const forkStreamsRoute = createServerRoute({
         id: params.path.id,
       });
 
-      if (!params.body.id.startsWith(rootDefinition.id)) {
+      const childDefinition = { ...params.body.stream, root: false };
+
+      // check whether root stream has a child of the given name already
+      if (rootDefinition.children.some((child) => child.id === childDefinition.id)) {
         throw new MalformedStreamId(
-          `The ID (${params.body.id}) from the new stream must start with the parent's id (${rootDefinition.id})`
+          `The stream with ID (${params.body.stream.id}) already exists as a child of the parent stream`
         );
       }
 
-      await createStream({
-        scopedClusterClient,
-        definition: { ...params.body, forked_from: rootDefinition.id, root: false },
+      if (!isChildOf(rootDefinition, childDefinition)) {
+        throw new MalformedStreamId(
+          `The ID (${params.body.stream.id}) from the new stream must start with the parent's id (${rootDefinition.id}), followed by a dot and a name`
+        );
+      }
+
+      rootDefinition.children.push({
+        id: params.body.stream.id,
+        condition: params.body.condition,
       });
 
-      await bootstrapStream({
+      await syncStream({
         scopedClusterClient,
-        definition: params.body,
+        definition: rootDefinition,
+        rootDefinition,
+        logger,
+      });
+
+      await syncStream({
+        scopedClusterClient,
+        definition: params.body.stream,
         rootDefinition,
         logger,
       });

@@ -5,41 +5,19 @@
  * 2.0.
  */
 
-import { ASSET_VERSION } from '../../../../common/constants';
-
-export const logsDefaultPipeline = {
-  id: 'logs@stream.default-pipeline',
-  processors: [
-    {
-      set: {
-        description: "If '@timestamp' is missing, set it with the ingest timestamp",
-        field: '@timestamp',
-        override: false,
-        copy_from: '_ingest.timestamp',
-      },
+export const logsDefaultPipelineProcessors = [
+  {
+    set: {
+      description: "If '@timestamp' is missing, set it with the ingest timestamp",
+      field: '@timestamp',
+      override: false,
+      copy_from: '_ingest.timestamp',
     },
-    {
-      set: {
-        field: 'event.ingested',
-        value: '{{{_ingest.timestamp}}}',
-      },
-    },
-    {
-      pipeline: {
-        name: 'logs@stream.json-pipeline',
-        ignore_missing_pipeline: true,
-      },
-    },
-    {
-      pipeline: {
-        name: 'logs@stream.reroutes',
-        ignore_missing_pipeline: true,
-      },
-    },
-  ],
-  _meta: {
-    description: 'Default pipeline for the logs stream',
-    managed: true,
   },
-  version: ASSET_VERSION,
-};
+  {
+    pipeline: {
+      name: 'logs@json-pipeline',
+      ignore_missing_pipeline: true,
+    },
+  },
+];
