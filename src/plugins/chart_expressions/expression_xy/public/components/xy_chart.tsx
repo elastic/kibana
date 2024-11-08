@@ -233,6 +233,7 @@ export function XYChart({
   const chartRef = useRef<Chart>(null);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
+  const appFixedViewport = useAppFixedViewport();
   const filteredLayers = getFilteredLayers(layers);
   const layersById = filteredLayers.reduce<Record<string, CommonXYLayerConfig>>(
     (hashMap, layer) => ({ ...hashMap, [layer.layerId]: layer }),
@@ -744,8 +745,6 @@ export function XYChart({
     referenceLineLayers,
     formatFactory
   );
-
-  const appFixedViewport = useAppFixedViewport();
 
   return (
     <div css={chartContainerStyle}>
