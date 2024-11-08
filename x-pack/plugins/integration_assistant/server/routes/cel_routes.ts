@@ -40,7 +40,7 @@ export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRoute
       },
       withAvailability(async (context, req, res): Promise<IKibanaResponse<CelInputResponse>> => {
         const { dataStreamName, apiDefinition, langSmithOptions } = req.body;
-        const { getStartServices, logger } = await context.integrationAssistant;
+        const { getStartServices, logger, packageInfo } = await context.integrationAssistant;
         const [, { actions: actionsPlugin }] = await getStartServices();
 
         try {
@@ -68,6 +68,7 @@ export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRoute
           const parameters = {
             dataStreamName,
             apiDefinition,
+            packageInfo,
           };
 
           const options = {

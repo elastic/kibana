@@ -77,6 +77,7 @@ export interface CelInputState {
   stateSettings: object;
   redactVars: string[];
   results: object;
+  packageInfo: object;
 }
 
 export interface EcsMappingState {

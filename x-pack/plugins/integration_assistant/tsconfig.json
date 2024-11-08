@@ -13,7 +13,7 @@
     "scripts/**/*.ts",
     "__jest__/**/*",
     "../../typings/**/*"
-, "server/graphs/cel/validation/validation.js"  ],
+, "server/graphs/cel/validation/wasm_exec_node.js"  ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",

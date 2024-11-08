@@ -10,7 +10,7 @@ import { CelInputState } from '../../types';
 import { EX_ANSWER_PROGRAM, SAMPLE_CEL_PROGRAMS } from './constants';
 import { CEL_BASE_PROGRAM_PROMPT } from './prompts';
 import { CelInputNodeParams } from './types';
-import { loadWasm } from './validation/validate';
+import { CelValidator } from './validation/validate';
 
 export async function handleBuildProgram({
   state,
@@ -27,12 +27,11 @@ export async function handleBuildProgram({
     ex_answer: EX_ANSWER_PROGRAM,
   });
 
-  const validated = await loadWasm(program.trim());
-
+  const validator = new CelValidator(false);
+  const validated = await validator.validate(program.trim());
   console.log(validated);
-
   return {
-    currentProgram: program.trim(),
+    currentProgram: validated.trim(),
     lastExecutedChain: 'buildCelProgram',
   };
 }

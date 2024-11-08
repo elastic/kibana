@@ -59,6 +59,10 @@ const graphState: StateGraphArgs<CelInputState>['channels'] = {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
   },
+  packageInfo: {
+    value: (x: object, y?: object) => y ?? x,
+    default: () => ({}),
+  },
 };
 
 function modelInput({ state }: CelInputBaseNodeParams): Partial<CelInputState> {

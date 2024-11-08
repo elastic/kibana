@@ -1062,6 +1062,15 @@ module.exports = {
         ],
       },
     },
+    {
+      // Turning off eslint rules for the wsm_exec.js generated for running wasm modules from Golang.
+      files: [
+        'x-pack/plugins/integration_assistant/server/graphs/cel/validation/wasm/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        '*': 'off',
+      },
+    },
 
     /**
      * ML overrides
