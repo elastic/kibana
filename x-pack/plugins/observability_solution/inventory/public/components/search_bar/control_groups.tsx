@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import {
   ControlGroupRenderer,
   ControlGroupRendererApi,
   ControlGroupRuntimeState,
 } from '@kbn/controls-plugin/public';
+import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
+import { ControlPanels, useControlPanels } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { skip, Subscription } from 'rxjs';
-import { ControlPanels, useControlPanels } from '@kbn/observability-shared-plugin/public';
-import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
 
 const controlPanelDefinitions: ControlPanels = {
@@ -86,17 +85,7 @@ export function ControlGroups() {
   }
 
   return (
-    <div
-      css={css`
-        .controlsWrapper {
-          align-items: flex-start;
-          min-height: initial;
-        }
-        .controlGroup {
-          min-height: initial;
-        }
-      `}
-    >
+    <div>
       <ControlGroupRenderer
         getCreationOptions={getInitialInput()}
         onApiAvailable={loadCompleteHandler}
