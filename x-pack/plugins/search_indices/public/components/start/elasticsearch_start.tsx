@@ -62,7 +62,6 @@ export const ElasticsearchStart: React.FC<ElasticsearchStartProps> = () => {
   const [createIndexView, setCreateIndexView] = useState<CreateIndexView>(
     userPrivileges?.privileges.canManageIndex === false ? CreateIndexView.Code : CreateIndexView.UI
   );
-
   const usageTracker = useUsageTracker();
 
   useEffect(() => {

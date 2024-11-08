@@ -87,7 +87,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   return (
     <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover}>
       <EuiPopoverTitle>
-        {i18n.translate('searchIndexDocuments.result.header.metadata.title', {
+        {i18n.translate('searchIndexDocuments.result.compactCard.header.metadata.title', {
           defaultMessage: 'Document metadata',
         })}
       </EuiPopoverTitle>
@@ -109,9 +109,12 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
               <Term
-                label={i18n.translate('searchIndexDocuments.result.header.metadata.score', {
-                  defaultMessage: 'Score',
-                })}
+                label={i18n.translate(
+                  'searchIndexDocuments.result.header.compactCard.metadata.score',
+                  {
+                    defaultMessage: 'Score',
+                  }
+                )}
               />
               <Definition label={score?.toString()} />
             </EuiFlexGroup>
@@ -125,7 +128,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
               /* for serverless search users hasDeleteDocumentsPrivilege flag indicates if user has privilege to delete documents, for stack hasDeleteDocumentsPrivilege would be undefined */
               hasDeleteDocumentsPrivilege === false
                 ? i18n.translate(
-                    'searchIndexDocuments.result.header.metadata.deleteDocumentToolTip',
+                    'searchIndexDocuments.result.header.compactCard.metadata.deleteDocumentToolTip',
                     {
                       defaultMessage: 'You do not have permision to delete documents',
                     }
@@ -148,9 +151,10 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
               }}
               fullWidth
             >
-              {i18n.translate('searchIndexDocuments.result.header.metadata.deleteDocument', {
-                defaultMessage: 'Delete document',
-              })}
+              <FormattedMessage
+                id="searchIndexDocuments.result.header.compactCard.metadata.deleteDocument"
+                defaultMessage="Delete document"
+              />
             </EuiButton>
           </EuiToolTip>
         </EuiPopoverFooter>
