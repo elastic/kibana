@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { apiHasParentApi, apiPublishesTimeRange } from '@kbn/presentation-publishing';
 import moment from 'moment';
 import { BehaviorSubject, Subscription, skip } from 'rxjs';
+import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { getTimeRangeMeta, getTimezone, TimeRangeMeta } from './get_time_range_meta';
 import { getMomentTimezone } from './time_utils';
-import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 
 export function initTimeRangeSubscription(controlGroupApi: unknown) {
   const timeRange$ =
