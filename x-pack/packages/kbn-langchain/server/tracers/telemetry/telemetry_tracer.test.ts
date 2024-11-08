@@ -62,6 +62,24 @@ const mockRun = {
         },
         observation: '"Wow this is totally cool."',
       },
+      {
+        action: {
+          tool: 'CustomIndexTool',
+          toolInput: {
+            query: 'query about index',
+          },
+        },
+        observation: '"Wow this is totally cool."',
+      },
+      {
+        action: {
+          tool: 'CustomIndexTool',
+          toolInput: {
+            query: 'query about index',
+          },
+        },
+        observation: '"Wow this is totally cool."',
+      },
     ],
     hasRespondStep: false,
     agentOutcome: {
@@ -176,14 +194,11 @@ describe('TelemetryTracer', () => {
       model: 'test_model',
       isOssModel: false,
       durationMs: 8077,
-      elasticTools,
-      customTools: 3,
-      toolsInvoked: [
-        'KnowledgeBaseRetrievalTool',
-        'NaturalLanguageESQLTool',
-        'KnowledgeBaseRetrievalTool',
-        'CustomTool',
-      ],
+      toolsInvoked: {
+        KnowledgeBaseRetrievalTool: 2,
+        NaturalLanguageESQLTool: 1,
+        CustomTool: 3,
+      },
     });
   });
 });

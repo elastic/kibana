@@ -77,9 +77,13 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   actionTypeId: string;
   isEnabledKnowledgeBase: boolean;
   durationMs: number;
-  elasticTools: string[];
-  customTools: number;
-  toolsInvoked: string[];
+  ['toolsInvoked.AlertCountsTool']?: number;
+  ['toolsInvoked.NaturalLanguageESQLTool']?: number;
+  ['toolsInvoked.KnowledgeBaseRetrievalTool']?: number;
+  ['toolsInvoked.KnowledgeBaseWriteTool']?: number;
+  ['toolsInvoked.OpenAndAcknowledgedAlertsTool']?: number;
+  ['toolsInvoked.SecurityLabsKnowledgeBaseTool']?: number;
+  ['toolsInvoked.CustomTool']?: number;
   model?: string;
   isOssModel?: boolean;
 }> = {
@@ -118,39 +122,58 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
       },
     },
     durationMs: {
-      type: 'float',
+      type: 'integer',
       _meta: {
         description: 'The duration of the request.',
       },
     },
-    elasticTools: {
-      type: 'array',
-      items: {
-        type: 'keyword',
-        _meta: {
-          description: 'The tool name',
-        },
-      },
+    'toolsInvoked.AlertCountsTool': {
+      type: 'long',
       _meta: {
-        description: 'The Elastic Security tools provided to the agent.',
+        description: 'Number of times tool was invoked.',
+        optional: true,
       },
     },
-    customTools: {
-      type: 'float',
+    'toolsInvoked.NaturalLanguageESQLTool': {
+      type: 'long',
       _meta: {
-        description: 'Custom tools provided to the agent.',
+        description: 'Number of times tool was invoked.',
+        optional: true,
       },
     },
-    toolsInvoked: {
-      type: 'array',
-      items: {
-        type: 'keyword',
-        _meta: {
-          description: 'The tool name',
-        },
-      },
+    'toolsInvoked.KnowledgeBaseRetrievalTool': {
+      type: 'long',
       _meta: {
-        description: 'Tools called by the agent, in order of use.',
+        description: 'Number of times tool was invoked.',
+        optional: true,
+      },
+    },
+    'toolsInvoked.KnowledgeBaseWriteTool': {
+      type: 'long',
+      _meta: {
+        description: 'Number of times tool was invoked.',
+        optional: true,
+      },
+    },
+    'toolsInvoked.OpenAndAcknowledgedAlertsTool': {
+      type: 'long',
+      _meta: {
+        description: 'Number of times tool was invoked.',
+        optional: true,
+      },
+    },
+    'toolsInvoked.SecurityLabsKnowledgeBaseTool': {
+      type: 'long',
+      _meta: {
+        description: 'Number of times tool was invoked.',
+        optional: true,
+      },
+    },
+    'toolsInvoked.CustomTool': {
+      type: 'long',
+      _meta: {
+        description: 'Number of times tool was invoked.',
+        optional: true,
       },
     },
   },
