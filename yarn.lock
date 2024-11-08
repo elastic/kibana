@@ -1748,20 +1748,20 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.0.1_97.3.0_001_testing.tgz":
+"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.0.1_97.3.0_prerelease_004.tgz":
   version "0.0.1"
-  resolved "file:./elastic_eui_theme_borealis_0.0.1_97.3.0_001_testing.tgz#abbaf5dc8392f1ff64819230252aeeb92235f083"
+  resolved "file:./elastic_eui_theme_borealis_0.0.1_97.3.0_prerelease_004.tgz#e0d269f202097d72dad41cdf5168fcd78f97a99a"
 
-"@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.0.1_97.3.0_001_testing.tgz":
+"@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.0.1_97.3.0_prerelease_001.tgz":
   version "0.0.1"
-  resolved "file:./elastic_eui_theme_common_0.0.1_97.3.0_001_testing.tgz#91cd7e3fe9ac581a2aa1fbe4f10b24dc6be972c4"
+  resolved "file:./elastic_eui_theme_common_0.0.1_97.3.0_prerelease_001.tgz#fed94a21eeac809d5659b9fcd6e703ec89cf66d6"
   dependencies:
     "@types/lodash" "^4.14.202"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./elastic_eui_97.3.0_borealis_002_testing.tgz":
+"@elastic/eui@file:./elastic_eui_97.3.0_borealis_prerelease_004.tgz":
   version "97.3.0"
-  resolved "file:./elastic_eui_97.3.0_borealis_002_testing.tgz#1efd3f2c797cf1748ca3fcacd05e97486b10b26f"
+  resolved "file:./elastic_eui_97.3.0_borealis_prerelease_004.tgz#34b59adff0ebb7a779b2b6a2a8898471c785fd17"
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
