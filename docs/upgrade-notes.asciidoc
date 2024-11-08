@@ -1433,6 +1433,35 @@ The `/agent_status` Fleet API now returns the following statuses:
 ====
 
 [discrete]
+[[kibana-150267]]
+.Deprecated Saved objects APIs. (8.7)
+[%collapsible]
+====
+*Details* +
+The following saved objects APIs have been deprecated.
+
+[source,text]
+--
+/api/saved_objects/{type}/{id}
+/api/saved_objects/resolve/{type}/{id}
+/api/saved_objects/{type}/{id?}
+/api/saved_objects/{type}/{id}
+/api/saved_objects/_find
+/api/saved_objects/{type}/{id}
+/api/saved_objects/_bulk_get
+/api/saved_objects/_bulk_create
+/api/saved_objects/_bulk_resolve
+/api/saved_objects/_bulk_update
+/api/saved_objects/_bulk_delete
+--
+
+For more information, refer to ({kibana-pull}150267[#150267]).
+
+*Impact* +
+Use dedicated public APIs instead, for example use <<data-views-api>> to manage Data Views.
+====
+
+[discrete]
 [[deprecation-119494]]
 .Updates Fleet API to improve consistency. (8.0)
 [%collapsible]
