@@ -26282,6 +26282,73 @@ paths:
       summary: ''
       tags:
         - Fleet outputs
+  /api/fleet/outputs/agent_policies:
+    post:
+      description: Get agent policies associated with outputs by output ids
+      operationId: post-fleet-outputs-agent-policies
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                ids:
+                  description: list of output ids
+                  items:
+                    type: string
+                  type: array
+              required:
+                - ids
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      type: string
+                    type: array
+                required:
+                  - items
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+      summary: ''
+      tags:
+        - Fleet outputs
   /api/fleet/package_policies:
     get:
       description: List package policies
