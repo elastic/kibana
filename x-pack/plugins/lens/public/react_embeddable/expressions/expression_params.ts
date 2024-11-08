@@ -172,7 +172,7 @@ export async function getExpressionRendererParams(
     addUserMessages([getSearchContextIncompatibleMessage()]);
   }
 
-  if (expression && services.spaces) {
+  if (expression) {
     const params: ExpressionWrapperProps = {
       expression,
       syncColors,
