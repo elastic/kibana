@@ -22,16 +22,12 @@ api-docs-stateful: ## Generate only kibana.yaml
 	@node scripts/merge_ess_oas.js
 
 .PHONY: api-docs-lint
-api-docs-lint: ## Run spectral API docs linter
-	@npx @stoplight/spectral-cli lint "output/*.yaml" --ruleset ".spectral.yaml"
-
-.PHONY: api-docs-lint-errs
-api-docs-lint-errs: ## Run spectral API docs linter and return only errors
-	@npx @stoplight/spectral-cli lint "output/*.yaml" --ruleset ".spectral.yaml" -D
+api-docs-lint: ## Run redocly API docs linter
+	@npx @redocly/cli lint "output/*.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
 
 .PHONY: api-docs-lint-stateful
-api-docs-lint-stateful: ## Run spectral API docs linter on kibana.yaml
-	@npx @stoplight/spectral-cli lint "output/kibana.yaml" --ruleset ".spectral.yaml"
+api-docs-lint-stateful: ## Run redocly API docs linter on kibana.yaml
+	@npx @redocly/cli lint "output/kibana.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
 
 .PHONY: api-docs-overlay
 api-docs-overlay: ## Run spectral API docs linter 
