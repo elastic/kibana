@@ -84,7 +84,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
             open={open}
             setOpen={setOpen}
             icon="documents"
-            iconColor="black"
+            iconColor={euiTheme.colors.fullShade}
             title={i18n.translate('xpack.searchIndices.quickStats.document_count_heading', {
               defaultMessage: 'Document count',
             })}
@@ -112,7 +112,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
             open={open}
             setOpen={setOpen}
             icon="sparkles"
-            iconColor="black"
+            iconColor={euiTheme.colors.fullShade}
             title={i18n.translate('xpack.searchIndices.quickStats.ai_search_heading', {
               defaultMessage: 'AI Search',
             })}
