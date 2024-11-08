@@ -116,7 +116,7 @@ describe('status api lib', function () {
   });
 
   describe('fetchUserStartPrivileges', function () {
-    const testIndexName = 'search-zbd1'
+    const testIndexName = 'search-zbd1';
     it('should return privileges true', async () => {
       const result: SecurityHasPrivilegesResponse = {
         application: {},
