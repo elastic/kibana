@@ -3819,7 +3819,7 @@
         "label": "ChromeHelpExtensionLinkBase",
         "description": [],
         "signature": [
-          "{ rel?: string | undefined; 'data-test-subj'?: string | undefined; iconType?: ",
+          "{ 'data-test-subj'?: string | undefined; rel?: string | undefined; iconType?: ",
           "IconType",
           " | undefined; target?: string | (string & {}) | undefined; }"
         ],

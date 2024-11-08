@@ -7,7 +7,7 @@
 import type { BrowserFields, ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
 import memoizeOne from 'memoize-one';
 import type { ControlColumnProps } from '../../../../../../common/types';
-import type { Sort } from '../../body/sort';
+import type { SortColumnTimeline as Sort } from '../../../../../../common/types/timeline';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
 import type { inputsModel } from '../../../../../common/store';
 import { getColumnHeaders } from '../../body/column_headers/helpers';

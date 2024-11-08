@@ -27,6 +27,7 @@ import {
   isAssignment,
   isColumnItem,
   isFunctionItem,
+  isIdentifier,
   isLiteralItem,
   isTimeIntervalItem,
 } from '../shared/helpers';
@@ -457,15 +458,13 @@ export function extractTypeFromASTArg(
   if (Array.isArray(arg)) {
     return extractTypeFromASTArg(arg[0], references);
   }
-  if (isColumnItem(arg) || isLiteralItem(arg)) {
-    if (isLiteralItem(arg)) {
-      return arg.literalType;
-    }
-    if (isColumnItem(arg)) {
-      const hit = getColumnForASTNode(arg, references);
-      if (hit) {
-        return hit.type;
-      }
+  if (isLiteralItem(arg)) {
+    return arg.literalType;
+  }
+  if (isColumnItem(arg) || isIdentifier(arg)) {
+    const hit = getColumnForASTNode(arg, references);
+    if (hit) {
+      return hit.type;
     }
   }
   if (isTimeIntervalItem(arg)) {
