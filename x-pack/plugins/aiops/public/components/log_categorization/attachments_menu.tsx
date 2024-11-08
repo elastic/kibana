@@ -18,9 +18,6 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import type { CasesPublicStart } from '@kbn/cases-plugin/public';
-import type { Capabilities } from '@kbn/core-capabilities-common';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
@@ -36,28 +33,29 @@ import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { PatternAnalysisEmbeddableState } from '../../embeddables/pattern_analysis/types';
 import type { RandomSamplerOption, RandomSamplerProbability } from './sampling_menu/random_sampler';
 import { useCasesModal } from '../../hooks/use_cases_modal';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 interface AttachmentsMenuProps {
-  dataView: DataView;
   randomSamplerMode: RandomSamplerOption;
   randomSamplerProbability: RandomSamplerProbability;
-  embeddable?: EmbeddableStart;
-  cases?: CasesPublicStart;
-  capabilities?: Capabilities;
+  dataView: DataView;
   selectedField?: string;
 }
 
 export const AttachmentsMenu = ({
-  embeddable,
-  cases,
-  capabilities,
-  dataView,
-  selectedField,
   randomSamplerMode,
   randomSamplerProbability,
+  dataView,
+  selectedField,
 }: AttachmentsMenuProps) => {
+  const {
+    application: { capabilities },
+    cases,
+    embeddable,
+  } = useAiopsAppContext();
+
   const [applyTimeRange, setApplyTimeRange] = useState(false);
 
   const [dashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);

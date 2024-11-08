@@ -63,10 +63,7 @@ const DEFAULT_SELECTED_FIELD = 'message';
 export const LogCategorizationPage: FC = () => {
   const {
     notifications: { toasts },
-    application: { capabilities },
     embeddingOrigin,
-    embeddable,
-    cases,
   } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
@@ -339,9 +336,6 @@ export const LogCategorizationPage: FC = () => {
   const actions = getActions(true);
 
   const attachmentsMenuProps = {
-    embeddable,
-    cases,
-    capabilities,
     dataView,
     selectedField,
     randomSamplerMode: randomSampler.getMode(),
