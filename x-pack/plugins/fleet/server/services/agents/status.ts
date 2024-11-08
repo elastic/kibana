@@ -250,9 +250,9 @@ export async function getIncomingDataByAgentsId({
     if (!searchResult.aggregations?.agent_ids) {
       return {
         items: agentsIds.map((id) => {
-          return { items: { [id]: { data: false } } };
+          return { [id]: { data: false } };
         }),
-        data: [],
+        dataPreview: [],
       };
     }
 
