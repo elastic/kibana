@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Outlet, Route, createRouter } from '@kbn/typed-react-router-config';
+import { Outlet, createRouter } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
