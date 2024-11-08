@@ -120,24 +120,7 @@ export const deleteConnectors = () => {
 };
 
 export const deletePrebuiltRulesAssets = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'security-rule',
-              },
-            },
-          ],
-        },
-      },
-    },
-  });
+  cy.task('deleteSecurityRulesFromKibana');
 };
 
 export const postDataView = (indexPattern: string, name?: string, id?: string) => {

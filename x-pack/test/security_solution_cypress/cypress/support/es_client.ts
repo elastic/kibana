@@ -80,6 +80,17 @@ export const esClient = (
         return { success: false, error: error.message };
       }
     },
+    deleteIndex: async (index) => {
+      try {
+        await client.indices.delete({
+          index,
+        });
+
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
     deleteDocuments: async (index: string) => {
       await client.deleteByQuery({
         index,
@@ -113,6 +124,27 @@ export const esClient = (
       });
 
       return result;
+    },
+    deleteSecurityRulesFromKibana: async () => {
+      await client.deleteByQuery({
+        index: '.kibana_*',
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  match: {
+                    type: 'security-rule',
+                  },
+                },
+              ],
+            },
+          },
+        },
+        conflicts: 'proceed',
+        refresh: true,
+      });
+      return null;
     },
   });
 

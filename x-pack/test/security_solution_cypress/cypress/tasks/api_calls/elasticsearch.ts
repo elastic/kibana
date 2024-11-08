@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const deleteIndex = (index: string) => {};
+export const deleteIndex = (index: string) => {
+  cy.task('deleteIndex', index);
+};
 
 export const deleteDataStream = (dataStreamName: string) => {
   cy.task('deleteDataStream', dataStreamName);
