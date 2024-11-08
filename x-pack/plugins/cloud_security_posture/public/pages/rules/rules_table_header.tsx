@@ -34,10 +34,7 @@ export const RULES_CLEAR_ALL_RULES_SELECTION = 'clear-rules-selection-button';
 export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
 export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
 
-interface RulesTableToolbarProps {
-  isSearching: boolean;
-}
-export const RulesTableHeader = ({ isSearching }: RulesTableToolbarProps) => {
+export const RulesTableHeader = () => {
   const {
     section,
     setSection,
@@ -71,7 +68,7 @@ export const RulesTableHeader = ({ isSearching }: RulesTableToolbarProps) => {
     <EuiFlexGroup direction="column">
       <EuiFlexGroup wrap={true}>
         <EuiFlexItem grow={1}>
-          <SearchField isSearching={isSearching} />
+          <SearchField />
         </EuiFlexItem>
         <EuiFlexItem grow={0}>
           <EuiFlexGroup gutterSize="s" direction="row">
@@ -164,8 +161,8 @@ export const RulesTableHeader = ({ isSearching }: RulesTableToolbarProps) => {
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-const SearchField = ({ isSearching }: Pick<RulesTableToolbarProps, 'isSearching'>) => {
-  const { search, setSearch } = useRules();
+const SearchField = () => {
+  const { search, setSearch, loading } = useRules();
   const [localValue, setLocalValue] = useState(search);
 
   useDebounce(() => setSearch(localValue), SEARCH_DEBOUNCE_MS, [localValue]);
@@ -174,7 +171,7 @@ const SearchField = ({ isSearching }: Pick<RulesTableToolbarProps, 'isSearching'
     <div>
       <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
         <EuiFieldSearch
-          isLoading={isSearching}
+          isLoading={loading}
           placeholder={i18n.translate('xpack.csp.rules.rulesTable.searchPlaceholder', {
             defaultMessage: 'Search by Rule Name',
           })}

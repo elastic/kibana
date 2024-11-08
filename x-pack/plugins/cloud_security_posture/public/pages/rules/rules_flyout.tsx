@@ -35,7 +35,6 @@ export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
 
 interface RuleFlyoutProps {
   onClose(): void;
-  rule: CspBenchmarkRulesWithStates;
 }
 
 const tabs = [
@@ -57,9 +56,13 @@ const tabs = [
 
 type RuleTab = (typeof tabs)[number]['id'];
 
-export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
+export const RuleFlyout = ({ onClose }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
-  const { toggleRuleState } = useRules();
+  const { toggleRuleState, rulesFlyoutData: rule } = useRules();
+
+  if (!rule) {
+    return null;
+  }
 
   const isRuleMuted = rule?.state === 'muted';
 

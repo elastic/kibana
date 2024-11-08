@@ -14,12 +14,11 @@ import { RulesTableHeader } from './rules_table_header';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
 import { RulesCounters } from './rules_counters';
-import { useRules } from './rules_context';
+import { RulesProvider } from './rules_context';
 
 export const RulesContainer = () => {
   const params = useParams<PageUrlParams>();
   const history = useHistory();
-  const { rulesFlyoutData } = useRules();
 
   const navToRuleFlyout = (ruleId: string) => {
     history.push(
@@ -42,14 +41,14 @@ export const RulesContainer = () => {
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
-      <RulesCounters />
-      <EuiSpacer />
-      <RulesTableHeader isSearching={status === 'loading'} />
-      <EuiSpacer />
-      <RulesTable selectedRuleId={params.ruleId} onRuleClick={navToRuleFlyout} />
-      {params.ruleId && rulesFlyoutData.metadata && (
-        <RuleFlyout rule={rulesFlyoutData} onClose={navToRulePage} />
-      )}
+      <RulesProvider>
+        <RulesCounters />
+        <EuiSpacer />
+        <RulesTableHeader />
+        <EuiSpacer />
+        <RulesTable selectedRuleId={params.ruleId} onRuleClick={navToRuleFlyout} />
+        <RuleFlyout onClose={navToRulePage} />
+      </RulesProvider>
     </div>
   );
 };

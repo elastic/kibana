@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { createContext, useContext, useMemo, useCallback, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import {
@@ -82,7 +82,7 @@ interface RulesContextValue {
   toggleSelectedRulesStates: (state: 'mute' | 'unmute') => void;
   enabledDisabledItemsFilter: string;
   mutedRulesCount?: number;
-  rulesFlyoutData: CspBenchmarkRulesWithStates;
+  rulesFlyoutData: CspBenchmarkRulesWithStates | undefined;
 }
 
 const RulesContext = createContext<RulesContextValue | undefined>(undefined);
@@ -120,18 +120,10 @@ export function RulesProvider({ children }: RulesProviderProps) {
     params.benchmarkVersion
   );
 
-  const sectionList = useMemo(
-    () => allRules?.data?.items.map((rule) => rule.metadata.section),
-    [allRules]
-  );
+  const sectionList = allRules?.data?.items.map((rule) => rule.metadata.section) || [];
 
-  const ruleNumberSelectOptions = useMemo(
-    () =>
-      allRules.data
-        ? allRules.data.items.map((rule) => rule.metadata.benchmark.rule_number || '')
-        : [],
-    [allRules]
-  );
+  const ruleNumberSelectOptions =
+    allRules?.data?.items.map((rule) => rule.metadata.benchmark.rule_number || '') || [];
 
   const sectionSelectOptions = [...new Set(sectionList)].sort((a, b) => {
     return a.localeCompare(b, 'en', { sensitivity: 'base' });
@@ -171,69 +163,65 @@ export function RulesProvider({ children }: RulesProviderProps) {
   const total = filteredRulesWithStates.length;
   const loading = status === 'loading';
 
-  const toggleRuleState = useCallback(
-    (rule: CspBenchmarkRulesWithStates) => {
-      if (rule.metadata.benchmark.rule_number) {
-        uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, CHANGE_RULE_STATE);
-        const nextRuleStates = rule.state === 'muted' ? 'unmute' : 'mute';
-        const rulesObjectRequest: RuleStateAttributesWithoutStates = {
-          benchmark_id: rule.metadata.benchmark.id,
-          benchmark_version: rule.metadata.benchmark.version,
-          rule_number: rule.metadata.benchmark.rule_number,
-          rule_id: rule.metadata.id,
-        };
-        mutateRuleState({
-          newState: nextRuleStates,
-          ruleIds: [rulesObjectRequest],
-        });
-      }
-    },
-    [mutateRuleState]
-  );
+  const toggleRuleState = (rule: CspBenchmarkRulesWithStates) => {
+    if (rule.metadata.benchmark.rule_number) {
+      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, CHANGE_RULE_STATE);
+      const nextRuleStates = rule.state === 'muted' ? 'unmute' : 'mute';
+      const rulesObjectRequest: RuleStateAttributesWithoutStates = {
+        benchmark_id: rule.metadata.benchmark.id,
+        benchmark_version: rule.metadata.benchmark.version,
+        rule_number: rule.metadata.benchmark.rule_number,
+        rule_id: rule.metadata.id,
+      };
+      mutateRuleState({
+        newState: nextRuleStates,
+        ruleIds: [rulesObjectRequest],
+      });
+    }
+  };
 
-  const toggleSelectedRulesStates = useCallback(
-    (state: 'mute' | 'unmute') => {
-      const bulkSelectedRules: RuleStateAttributesWithoutStates[] = selectedRules.map(
-        (e: CspBenchmarkRulesWithStates) => ({
-          benchmark_id: e?.metadata.benchmark.id,
-          benchmark_version: e?.metadata.benchmark.version,
-          rule_number: e?.metadata.benchmark.rule_number!,
-          rule_id: e?.metadata.id,
-        })
-      );
-      // Only do the API Call IF there are no undefined value for rule number in the selected rules
-      if (!bulkSelectedRules.some((rule) => rule.rule_number === undefined)) {
-        uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, CHANGE_MULTIPLE_RULE_STATE);
-        mutateRuleState({
-          newState: state,
-          ruleIds: bulkSelectedRules,
-        });
-      }
-      setSelectedRules([]);
-    },
-    [selectedRules, mutateRuleState]
-  );
+  const toggleSelectedRulesStates = (state: 'mute' | 'unmute') => {
+    const bulkSelectedRules: RuleStateAttributesWithoutStates[] = selectedRules.map(
+      (e: CspBenchmarkRulesWithStates) => ({
+        benchmark_id: e?.metadata.benchmark.id,
+        benchmark_version: e?.metadata.benchmark.version,
+        rule_number: e?.metadata.benchmark.rule_number!,
+        rule_id: e?.metadata.id,
+      })
+    );
+    // Only do the API Call IF there are no undefined value for rule number in the selected rules
+    if (!bulkSelectedRules.some((rule) => rule.rule_number === undefined)) {
+      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, CHANGE_MULTIPLE_RULE_STATE);
+      mutateRuleState({
+        newState: state,
+        ruleIds: bulkSelectedRules,
+      });
+    }
+    setSelectedRules([]);
+  };
 
-  const setSelectAllRules = useCallback(() => {
+  const setSelectAllRules = () => {
     setSelectedRules(filteredRulesWithStates);
-  }, [filteredRulesWithStates]);
+  };
 
-  const rulesFlyoutData: CspBenchmarkRulesWithStates = useMemo(() => {
-    const arrayRulesStates: RuleStateAttributes[] = Object.values(rulesStates.data || {});
-    return {
-      ...{
-        state:
-          arrayRulesStates.find((filteredRuleState) => filteredRuleState.rule_id === params.ruleId)
-            ?.muted === true
-            ? 'muted'
-            : 'unmuted',
-      },
-      ...{
-        metadata: allRules?.data?.items.find((rule) => rule.metadata.id === params.ruleId)
-          ?.metadata!,
-      },
-    };
-  }, [rulesStates, params.ruleId, allRules]);
+  const arrayRulesStates: RuleStateAttributes[] = Object.values(rulesStates.data || {});
+  const rulesFlyoutData: CspBenchmarkRulesWithStates | undefined =
+    !arrayRulesStates || !params.ruleId
+      ? undefined
+      : {
+          ...{
+            state:
+              arrayRulesStates.find(
+                (filteredRuleState) => filteredRuleState.rule_id === params.ruleId
+              )?.muted === true
+                ? 'muted'
+                : 'unmuted',
+          },
+          ...{
+            metadata: allRules?.data?.items.find((rule) => rule.metadata.id === params.ruleId)
+              ?.metadata!,
+          },
+        };
 
   // This useEffect is in charge of auto paginating to the correct page of a rule from the url params
   useEffect(() => {
@@ -255,75 +243,39 @@ export function RulesProvider({ children }: RulesProviderProps) {
     setPage(getPageByRuleId());
   }, [allRules?.data?.items, params.ruleId, pageSize]);
 
-  const contextValue = useMemo<RulesContextValue>(
-    () => ({
-      section,
-      setSection,
-      page,
-      pageSize,
-      setPageSize,
-      sortField,
-      setSortField,
-      sortOrder,
-      setSortOrder,
-      ruleNumber,
-      setRuleNumber,
-      search,
-      setSearch,
-      // rulesPageData,
-      loading,
-      error: error ? extractErrorMessage(error) : undefined,
-      total,
-      rules,
-      rulesShown,
-      setPage,
-      sectionList,
-      ruleNumberSelectOptions,
-      sectionSelectOptions,
-      selectedRules,
-      setSelectedRules,
-      setSelectAllRules,
-      setEnabledDisabledItemsFilter,
-      toggleRuleState,
-      toggleSelectedRulesStates,
-      enabledDisabledItemsFilter,
-      mutedRulesCount,
-      rulesFlyoutData,
-    }),
-    [
-      rules,
-      error,
-      loading,
-      rulesShown,
-      total,
-      sortField,
-      setSortField,
-      sortOrder,
-      setSortOrder,
-      pageSize,
-      setPageSize,
-      page,
-      setPage,
-      section,
-      setSection,
-      search,
-      setSearch,
-      sectionList,
-      ruleNumber,
-      setRuleNumber,
-      ruleNumberSelectOptions,
-      sectionSelectOptions,
-      selectedRules,
-      setSelectedRules,
-      setSelectAllRules,
-      setEnabledDisabledItemsFilter,
-      enabledDisabledItemsFilter,
-      toggleRuleState,
-      toggleSelectedRulesStates,
-      mutedRulesCount,
-      rulesFlyoutData,
-    ]
-  );
+  const contextValue = {
+    section,
+    setSection,
+    page,
+    pageSize,
+    setPageSize,
+    sortField,
+    setSortField,
+    sortOrder,
+    setSortOrder,
+    ruleNumber,
+    setRuleNumber,
+    search,
+    setSearch,
+    loading,
+    error: error ? extractErrorMessage(error) : undefined,
+    total,
+    rules,
+    rulesShown,
+    setPage,
+    sectionList,
+    ruleNumberSelectOptions,
+    sectionSelectOptions,
+    selectedRules,
+    setSelectedRules,
+    setSelectAllRules,
+    setEnabledDisabledItemsFilter,
+    toggleRuleState,
+    toggleSelectedRulesStates,
+    enabledDisabledItemsFilter,
+    mutedRulesCount,
+    rulesFlyoutData,
+  };
 
   return <RulesContext.Provider value={contextValue}>{children}</RulesContext.Provider>;
 }

@@ -19,7 +19,6 @@ import { useSecuritySolutionContext } from '../../application/security_solution_
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
 import { getBenchmarkCisName } from '../../../common/utils/helpers';
-import { RulesProvider } from './rules_context';
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const benchmarksInfo = useCspBenchmarkIntegrationsV2();
@@ -64,9 +63,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
         }
       />
       <EuiSpacer />
-      <RulesProvider>
-        <RulesContainer />
-      </RulesProvider>
+      <RulesContainer />
       {SpyRoute && (
         <SpyRoute
           pageName={cloudPosturePages.benchmarks.id}
