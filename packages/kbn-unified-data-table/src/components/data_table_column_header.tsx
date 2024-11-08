@@ -61,7 +61,7 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
         </ColumnHeaderTruncateContainer>
       </EuiFlexItem>
       {typeof renderCustomGridColumnInfoPopover === 'function' && columnName ? (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} className="unifiedDataTable__columnHeaderInfoButton">
           {renderCustomGridColumnInfoPopover({ dataView, columnName, columnsMeta })}
         </EuiFlexItem>
       ) : null}

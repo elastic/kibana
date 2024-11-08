@@ -73,18 +73,7 @@ export const getDiscoverGridColumnInfoPopover =
         `}
       >
         <UnifiedFieldListItemPopover
-          ButtonComponent={({ onTogglePopover }) => (
-            <EuiButtonIcon
-              iconType="expand"
-              color="text"
-              size="xs"
-              iconSize="s"
-              aria-label={i18n.translate('discover.dataGrid.columnInfoPopoverButtonAriaLabel', {
-                defaultMessage: 'Open column info popover',
-              })}
-              onClick={onTogglePopover}
-            />
-          )}
+          ButtonComponent={InfoButton}
           options={options}
           field={field}
           dataView={dataView}
@@ -104,3 +93,22 @@ export const getDiscoverGridColumnInfoPopover =
       </span>
     );
   };
+
+function InfoButton({ onTogglePopover }: { onTogglePopover: () => void }) {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiButtonIcon
+      iconType="iInCircle"
+      color="text"
+      size="xs"
+      aria-label={i18n.translate('discover.dataGrid.columnInfoPopoverButtonAriaLabel', {
+        defaultMessage: 'Open column info popover',
+      })}
+      css={css`
+        block-size: ${euiTheme.size.base};
+      `}
+      onClick={onTogglePopover}
+    />
+  );
+}
