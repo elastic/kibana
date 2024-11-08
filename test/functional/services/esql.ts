@@ -64,6 +64,20 @@ export class ESQLService extends FtrService {
       });
   }
 
+  public async getStarredItem(rowIndex = 0) {
+    const queryHistory = await this.testSubjects.find('ESQLEditor-starredQueries');
+    const tableBody = await this.retry.try(async () => queryHistory.findByTagName('tbody'));
+    const rows = await this.retry.try(async () => tableBody.findAllByTagName('tr'));
+
+    return rows[rowIndex];
+  }
+
+  public async clickStarredItem(rowIndex = 0) {
+    const row = await this.getStarredItem(rowIndex);
+    const toggle = await row.findByTestSubject('ESQLEditor-history-starred-queries-run-button');
+    await toggle.click();
+  }
+
   public async getHistoryItem(rowIndex = 0) {
     const queryHistory = await this.testSubjects.find('ESQLEditor-queryHistory');
     const tableBody = await this.retry.try(async () => queryHistory.findByTagName('tbody'));
