@@ -62,6 +62,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
     entityStore: !!entityStore.checked,
   });
   const { data: privileges, isLoading: isLoadingPrivileges } = useEntityEnginePrivileges();
+  const isAnyEnabled = enablements.riskScore || enablements.entityStore;
 
   if (!visible) {
     return null;
@@ -135,7 +136,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
         <EuiButton onClick={enableStore(enablements)} fill>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.enablements.modal.enable"
-            defaultMessage="Enable"
+            defaultMessage={isAnyEnabled ? 'Enable' : 'Disable'}
           />
         </EuiButton>
       </EuiModalFooter>
