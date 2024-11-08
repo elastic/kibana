@@ -70,13 +70,13 @@ export const checkEntityDiscoveryEnabledRoute = createEntityManagerServerRoute({
         return response.ok({ body: { enabled: false, reason: ERROR_API_KEY_NOT_VALID } });
       }
 
-      const { clusterClient, soClient } = getClientsFromAPIKey({ apiKey, server });
+      const { esClient, soClient } = getClientsFromAPIKey({ apiKey, server });
 
       const entityDiscoveryState = await Promise.all(
         builtInDefinitions.map(async (builtInDefinition) => {
           const definitions = await findEntityDefinitions({
             soClient,
-            esClient: clusterClient.asSecondaryAuthUser,
+            esClient: esClient,
             id: builtInDefinition.id,
             includeState: true,
           });
