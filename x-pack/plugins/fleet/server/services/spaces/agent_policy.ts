@@ -24,7 +24,7 @@ import { packagePolicyService } from '../package_policy';
 import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { isSpaceAwarenessEnabled } from './helpers';
-import { UninstallTokenSOAttributes } from '../security/uninstall_token_service';
+import type { UninstallTokenSOAttributes } from '../security/uninstall_token_service';
 
 export async function updateAgentPolicySpaces({
   agentPolicyId,
