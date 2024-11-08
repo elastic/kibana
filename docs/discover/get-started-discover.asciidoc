@@ -350,4 +350,7 @@ Also check the following blog post: {blog-ref}troubleshooting-guide-common-issue
 
 **Some fields show as empty while they should not be, why is that?**
 
-This can happen with runtime fields and regular keyword fields when the string exceeds the value set for the {ref}/ignore-above.html[ignore_above] setting used when indexing the data into {es}.
+This can happen in several cases:
+
+* With runtime fields and regular keyword fields, when the string exceeds the value set for the {ref}/ignore-above.html[ignore_above] setting used when indexing the data into {es}.
+* Due to the structure of nested fields, a leaf field added to the table as a column will not contain values in any of its cells. Instead, add the root field as a column to view a JSON representation of its values. Learn more in https://www.elastic.co/de/blog/discover-uses-fields-api-in-7-12[this blog post].
