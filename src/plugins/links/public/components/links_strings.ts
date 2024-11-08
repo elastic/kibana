@@ -135,6 +135,10 @@ export const LinksStrings = {
         i18n.translate('links.linkEditor.linkOptionsLabel', {
           defaultMessage: 'Options',
         }),
+      getLinkSizeLabel: () =>
+        i18n.translate('links.linkEditor.linkSizeLabel', {
+          defaultMessage: 'Size',
+        }),
     },
   },
 };

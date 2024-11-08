@@ -69,6 +69,7 @@ export type ResolvedLink = Link & {
   label?: string;
   description?: string;
   error?: Error;
+  size?: 'xs' | 's' | 'm' | 'l';
 };
 
 export interface DashboardItem {

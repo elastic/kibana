@@ -140,6 +140,9 @@ export const LinkEditor = ({
               data-test-subj="links--linkEditor--linkLabel--input"
             />
           </EuiFormRow>
+          <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkSizeLabel()}>
+            <EuiFlexItem grow={false}>change size</EuiFlexItem>
+          </EuiFormRow>
           <LinkOptionsComponent
             link={link}
             setLinkOptions={setLinkOptions}
