@@ -57,7 +57,6 @@
     "@kbn/dashboard-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/controls-plugin",
-    "@kbn/utility-types",
     "@kbn/securitysolution-io-ts-types"
   ]
 }
