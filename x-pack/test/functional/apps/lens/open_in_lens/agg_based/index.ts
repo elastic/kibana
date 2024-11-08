@@ -38,6 +38,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     let indexPatternString: string;
     before(async () => {
       log.debug('Starting lens before method');
+      log.debug('TEST');
       await browser.setWindowSize(1280, 1200);
       try {
         config.get('esTestCluster.ccs');
