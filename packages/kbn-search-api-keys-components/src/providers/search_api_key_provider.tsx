@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useReducer, createContext, useEffect } from 'react';
+import React, { useCallback, useReducer, createContext } from 'react';
 import { useCreateApiKey } from '../hooks/use_create_api_key';
 import { Status } from '../constants';
 import { useValidateApiKey } from '../hooks/use_validate_api_key';
@@ -77,11 +77,8 @@ export const SearchApiKeyProvider: React.FC<React.PropsWithChildren> = ({ childr
     sessionStorage.setItem(API_KEY_STORAGE_KEY, JSON.stringify({ id, encoded }));
     dispatch({ type: 'SET_API_KEY', apiKey: encoded, status: Status.showHiddenKey });
   }, []);
-  const handleShowKeyVisibility = useCallback(() => {
+  const toggleApiKeyVisibility = useCallback(() => {
     dispatch({ type: 'TOGGLE_API_KEY_VISIBILITY' });
-  }, []);
-  const initialiseKey = useCallback(() => {
-    dispatch({ type: 'SET_STATUS', status: Status.loading });
   }, []);
   const validateApiKey = useValidateApiKey();
   const createApiKey = useCreateApiKey({
@@ -108,45 +105,41 @@ export const SearchApiKeyProvider: React.FC<React.PropsWithChildren> = ({ childr
       }
     },
   });
+  const initialiseKey = useCallback(async () => {
+    try {
+      if (state.status === Status.uninitialized) {
+        dispatch({ type: 'SET_STATUS', status: Status.loading });
+        const storedKey = sessionStorage.getItem(API_KEY_STORAGE_KEY);
 
-  useEffect(() => {
-    const initialiseApiKey = async () => {
-      try {
-        if (state.status === Status.loading) {
-          const storedKey = sessionStorage.getItem(API_KEY_STORAGE_KEY);
+        if (storedKey) {
+          const { id, encoded } = JSON.parse(storedKey);
 
-          if (storedKey) {
-            const { id, encoded } = JSON.parse(storedKey);
-
-            if (await validateApiKey(id)) {
-              dispatch({
-                type: 'SET_API_KEY',
-                apiKey: encoded,
-                status: Status.showHiddenKey,
-              });
-            } else {
-              sessionStorage.removeItem(API_KEY_STORAGE_KEY);
-              dispatch({
-                type: 'CLEAR_API_KEY',
-              });
-              await createApiKey();
-            }
+          if (await validateApiKey(id)) {
+            dispatch({
+              type: 'SET_API_KEY',
+              apiKey: encoded,
+              status: Status.showHiddenKey,
+            });
           } else {
+            sessionStorage.removeItem(API_KEY_STORAGE_KEY);
+            dispatch({
+              type: 'CLEAR_API_KEY',
+            });
             await createApiKey();
           }
+        } else {
+          await createApiKey();
         }
-      } catch (e) {
-        dispatch({ type: 'CLEAR_API_KEY' });
       }
-    };
-
-    initialiseApiKey();
-  }, [state.status, createApiKey, validateApiKey]);
+    } catch (e) {
+      dispatch({ type: 'CLEAR_API_KEY' });
+    }
+  }, [createApiKey, state.status, validateApiKey]);
 
   const value: APIKeyContext = {
     displayedApiKey: state.status === Status.showPreviewKey ? state.apiKey : API_KEY_MASK,
     apiKey: state.apiKey,
-    toggleApiKeyVisibility: handleShowKeyVisibility,
+    toggleApiKeyVisibility,
     updateApiKey,
     status: state.status,
     apiKeyIsVisible: state.status === Status.showPreviewKey,
