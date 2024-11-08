@@ -98,6 +98,11 @@ export const EmptyWebCrawlersPrompt: React.FC = () => {
               <EuiFlexItem>
                 <EuiPanel color="subdued">
                   <EuiFlexItem grow={false}>
+                    {/* This is a presentational component, not intended for user interaction:
+                    pointer-events: none, prevents user interaction with the component.
+                    inert prevents click, focus, and other interactive events, removing it from the tab order.
+                    role="presentation" indicates that this component is purely decorative and not interactive for assistive technologies.
+                    Together, these attributes help ensure the component passes an accessibility audit. */}
                     <EuiStepsHorizontal
                       css={css`
                         pointer-events: none;
