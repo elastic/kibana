@@ -16,13 +16,10 @@ import {
   EuiLink,
   EuiButton,
   EuiBadge,
-  EuiStepsHorizontal,
-  EuiStepsHorizontalProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { css } from '@emotion/react';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
@@ -31,6 +28,7 @@ import {
   BASE_WEB_CRAWLERS_PATH,
   CRAWLER,
 } from '../../constants';
+import { DecorativeHorizontalStepper } from '../common/decorative_horizontal_stepper';
 
 export const EmptyWebCrawlersPrompt: React.FC = () => {
   const {
@@ -40,23 +38,7 @@ export const EmptyWebCrawlersPrompt: React.FC = () => {
   const assetBasePath = useAssetBasePath();
   const webCrawlersIcon = assetBasePath + '/web_crawlers.svg';
   const githubIcon = assetBasePath + '/github_white.svg';
-  const horizontalSteps: EuiStepsHorizontalProps['steps'] = [
-    {
-      title: '',
-      status: 'incomplete',
-      onClick: () => {},
-    },
-    {
-      title: '',
-      status: 'incomplete',
-      onClick: () => {},
-    },
-    {
-      title: '',
-      status: 'incomplete',
-      onClick: () => {},
-    },
-  ];
+
   return (
     <EuiFlexGroup alignItems="center" direction="column">
       <EuiFlexItem>
@@ -98,21 +80,7 @@ export const EmptyWebCrawlersPrompt: React.FC = () => {
               <EuiFlexItem>
                 <EuiPanel color="subdued">
                   <EuiFlexItem grow={false}>
-                    {/* This is a presentational component, not intended for user interaction:
-                    pointer-events: none, prevents user interaction with the component.
-                    inert prevents click, focus, and other interactive events, removing it from the tab order.
-                    role="presentation" indicates that this component is purely decorative and not interactive for assistive technologies.
-                    Together, these attributes help ensure the component passes an accessibility audit. */}
-                    <EuiStepsHorizontal
-                      css={css`
-                        pointer-events: none;
-                      `}
-                      steps={horizontalSteps}
-                      size="s"
-                      role="presentation"
-                      // @ts-ignore overriding a compiler error
-                      inert=""
-                    />
+                    <DecorativeHorizontalStepper stepCount={3} />
                   </EuiFlexItem>
                   <EuiFlexGroup>
                     <EuiFlexItem>

@@ -15,21 +15,18 @@ import {
   EuiLink,
   EuiButton,
   EuiBadge,
-  EuiStepsHorizontal,
-  EuiStepsHorizontalProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { css } from '@emotion/react';
 import { docLinks } from '../../../../common/doc_links';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useCreateConnector } from '../../hooks/api/use_create_connector';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useConnectors } from '../../hooks/api/use_connectors';
-
+import { DecorativeHorizontalStepper } from '../common/decorative_horizontal_stepper';
 import { ConnectorIcon } from './connector_icon';
 
 import { ELASTIC_MANAGED_CONNECTOR_PATH, BASE_CONNECTORS_PATH } from '../../constants';
@@ -50,23 +47,6 @@ export const EmptyConnectorsPrompt: React.FC = () => {
     application: { navigateToUrl },
   } = useKibanaServices();
 
-  const horizontalSteps: EuiStepsHorizontalProps['steps'] = [
-    {
-      title: '',
-      status: 'incomplete',
-      onClick: () => {},
-    },
-    {
-      title: '',
-      status: 'incomplete',
-      onClick: () => {},
-    },
-    {
-      title: '',
-      status: 'incomplete',
-      onClick: () => {},
-    },
-  ];
   return (
     <EuiFlexGroup alignItems="center" direction="column">
       <EuiFlexItem>
@@ -108,21 +88,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
               <EuiFlexItem>
                 <EuiPanel color="subdued">
                   <EuiFlexItem grow={false}>
-                    {/* This is a presentational component, not intended for user interaction:
-                    pointer-events: none, prevents user interaction with the component.
-                    inert prevents click, focus, and other interactive events, removing it from the tab order.
-                    role="presentation" indicates that this component is purely decorative and not interactive for assistive technologies.
-                    Together, these attributes help ensure the component passes an accessibility audit. */}
-                    <EuiStepsHorizontal
-                      css={css`
-                        pointer-events: none;
-                      `}
-                      steps={horizontalSteps}
-                      size="s"
-                      role="presentation"
-                      // @ts-ignore overriding a compiler error
-                      inert=""
-                    />
+                    <DecorativeHorizontalStepper stepCount={3} />
                   </EuiFlexItem>
                   <EuiFlexGroup>
                     <EuiFlexItem>
