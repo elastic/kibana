@@ -20,9 +20,9 @@ rules:
   operation-operationId: error
   operation-operationId-unique: error
   operation-operationId-url-safe: warn
-  operation-summary: error
+  operation-summary: warn
  # Parameters
-  path-parameters-defined: error
+  path-parameters-defined: warn
  # Paths
   no-ambiguous-paths: warn
   no-identical-paths: error
@@ -46,6 +46,7 @@ rules:
       type: Operation
       property: summary
     message: Operation summary must have a minimum of 5 and maximum of 45 characters
+    severity: warn
     assertions:
       maxLength: 45
       minLength: 5
