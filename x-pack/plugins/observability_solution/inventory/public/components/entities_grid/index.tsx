@@ -72,7 +72,6 @@ export function EntitiesGrid({
     [entities]
   );
 
-  // For now this is the only option so once we add more we need to change this check as well
   const showActions = useMemo(() => !!getDiscoverRedirectUrl(), [getDiscoverRedirectUrl]);
 
   const columnVisibility = useMemo(
