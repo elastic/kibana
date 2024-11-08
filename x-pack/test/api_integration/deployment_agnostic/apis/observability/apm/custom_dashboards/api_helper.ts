@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { ApmApiClient } from '../../common/config';
+import { ApmApiProvider } from '../../../../services/apm_api';
+
+export type ApmApiClient = ReturnType<typeof ApmApiProvider>;
 
 export async function getServiceDashboardApi(
   apmApiClient: ApmApiClient,

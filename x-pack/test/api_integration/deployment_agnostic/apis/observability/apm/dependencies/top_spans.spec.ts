@@ -8,12 +8,12 @@ import expect from '@kbn/expect';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { omit, uniq } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -50,10 +50,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when(
-    'Top dependency spans when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
+  describe('Top dependency spans', () => {
+    describe('when data is not loaded', () => {
       it('handles empty state', async () => {
         const { body, status } = await callApi({
           dependencyName: 'elasticsearch',
@@ -63,14 +61,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(status).to.be(200);
         expect(body.spans).to.empty();
       });
-    }
-  );
+    });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177135
-  registry.when(
-    'Top dependency spans when data is loaded',
-    { config: 'basic', archives: [] },
-    () => {
+    describe('when data is loaded', () => {
       const javaInstance = apm
         .service({ name: 'java', environment: 'production', agentName: 'java' })
         .instance('instance-a');
@@ -78,8 +71,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const goInstance = apm
         .service({ name: 'go', environment: 'development', agentName: 'go' })
         .instance('instance-a');
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
       before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+
         await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
@@ -240,6 +236,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(() => apmSynthtraceEsClient.clean());
-    }
-  );
+    });
+  });
 }
