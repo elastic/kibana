@@ -109,8 +109,6 @@ export const bulkCreateWithSuppression = async <
         : undefined,
   }));
 
-  console.error('DO WE HAVE ALERTS TO SUPPRESS?', alerts.length);
-
   const { createdAlerts, errors, suppressedAlerts, alertsWereTruncated } =
     await alertWithSuppression(
       alerts,
