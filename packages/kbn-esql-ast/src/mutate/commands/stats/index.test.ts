@@ -43,7 +43,7 @@ describe('commands.stats', () => {
     });
   });
 
-  describe('.summarizeCommand()', () => {
+  describe('.byIndex()', () => {
     it('retrieves the specific "STATS" command by index', () => {
       const src = 'FROM index | LIMIT 1 | STATS agg() | LIMIT 2 | STATS max()';
       const query = EsqlQuery.fromSrc(src);
@@ -74,7 +74,7 @@ describe('commands.stats', () => {
     });
   });
 
-  describe('.getFieldDefinitions()', () => {
+  describe('.summarizeCommand()', () => {
     it('returns summary of a simple field, defined through assignment', () => {
       const src = 'FROM index | STATS foo = agg(bar)';
       const query = EsqlQuery.fromSrc(src);
@@ -183,9 +183,39 @@ describe('commands.stats', () => {
       expect(summary.fields).toEqual(new Set(['f1', 'f2', 'f3']));
     });
 
-    // TODO: field de-duping
-    // TODO: offset bug
-    // TODO: params
+    it('can get de-duplicated list of used fields', () => {
+      const src = 'FROM index | STATS foo = agg(f1) + agg(f2), a.b = agg(f1)';
+      const query = EsqlQuery.fromSrc(src);
+
+      const command = commands.stats.byIndex(query.ast, 0)!;
+      const summary = commands.stats.summarizeCommand(query, command);
+
+      expect(summary.fields).toEqual(new Set(['f1', 'f2']));
+    });
+
+    describe('params', () => {
+      it('can use params as source field names', () => {
+        const src = 'FROM index | STATS foo = agg(f1.?aha) + agg(?nested.?param), a.b = agg(f1)';
+        const query = EsqlQuery.fromSrc(src);
+
+        const command = commands.stats.byIndex(query.ast, 0)!;
+        const summary = commands.stats.summarizeCommand(query, command);
+
+        expect(summary).toMatchObject({
+          aggregates: {
+            foo: {
+              fields: ['f1.?aha', '?nested.?param'],
+            },
+            'a.b': {
+              fields: ['f1'],
+            },
+          },
+        });
+        expect(summary.fields).toEqual(new Set(['f1.?aha', '?nested.?param', 'f2']));
+      });
+    });
+
+    it.todo('BY fields');
   });
 
   describe('.summarize()', () => {
