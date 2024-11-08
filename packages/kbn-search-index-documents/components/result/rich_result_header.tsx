@@ -30,6 +30,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { MetaDataProps } from './result_types';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   metaData: MetaDataProps;
@@ -87,9 +88,10 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   return (
     <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover}>
       <EuiPopoverTitle>
-        {i18n.translate('searchIndexDocuments.result.compactCard.header.metadata.title', {
-          defaultMessage: 'Document metadata',
-        })}
+        <FormattedMessage
+          id="searchIndexDocuments.result.compactCard.header.metadata.title"
+          defaultMessage="Document metadata"
+        />
       </EuiPopoverTitle>
       <EuiFlexGroup
         gutterSize="s"
