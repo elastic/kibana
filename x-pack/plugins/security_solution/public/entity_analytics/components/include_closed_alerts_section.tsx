@@ -19,11 +19,14 @@ import {
 export const IncludeClosedAlertsSection = ({
   width,
   compressed,
+  includeClosedAlerts,
+  setIncludeClosedAlerts,
 }: {
   width: EuiSuperDatePickerProps['width'];
   compressed: boolean;
+  includeClosedAlerts: boolean;
+  setIncludeClosedAlerts: (value: boolean) => void;
 }) => {
-  const [isToggled, setIsToggled] = useState(false);
   const [start, setStart] = useState('now-30m');
   const [end, setEnd] = useState('now');
 
@@ -33,7 +36,7 @@ export const IncludeClosedAlertsSection = ({
   };
 
   const handleToggle = () => {
-    setIsToggled(!isToggled);
+    setIncludeClosedAlerts(!includeClosedAlerts);
   };
 
   return (
@@ -42,7 +45,7 @@ export const IncludeClosedAlertsSection = ({
         <EuiFlexItem grow={false}>
           <EuiSwitch
             label="Include closed alerts for risk scoring"
-            checked={isToggled}
+            checked={includeClosedAlerts}
             onChange={handleToggle}
           />
         </EuiFlexItem>

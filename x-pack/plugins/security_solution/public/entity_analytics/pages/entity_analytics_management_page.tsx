@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,11 +25,10 @@ import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine
 
 export const EntityAnalyticsManagementPage = () => {
   const privileges = useMissingRiskEnginePrivileges();
-  // const handleStatusChange = (isEnabled) => {
-  //   setIsRiskEngineEnabled(isEnabled);
-  // };
-  const showItem = true;
+  const [includeClosedAlerts, setIncludeClosedAlerts] = useState(false);
   const { euiTheme } = useEuiTheme();
+  const [showItem, setShowItem] = useState(true);
+
   return (
     <>
       <RiskEnginePrivilegesCallOut privileges={privileges} />
@@ -84,7 +83,12 @@ export const EntityAnalyticsManagementPage = () => {
 
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         <EuiFlexItem grow={2}>
-          <IncludeClosedAlertsSection />
+          <IncludeClosedAlertsSection
+            includeClosedAlerts={includeClosedAlerts}
+            setIncludeClosedAlerts={setIncludeClosedAlerts}
+            width={undefined}
+            compressed={false}
+          />
           <EuiHorizontalRule />
           <RiskScoreUsefulLinksSection />
         </EuiFlexItem>
@@ -98,7 +102,10 @@ export const EntityAnalyticsManagementPage = () => {
             padding: '20px',
           }}
         >
-          <RiskScorePreviewSection privileges={privileges} isRiskEngineEnabled={true} />
+          <RiskScorePreviewSection
+            privileges={privileges}
+            includeClosedAlerts={includeClosedAlerts}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
