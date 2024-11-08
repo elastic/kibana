@@ -10,14 +10,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiPanel, EuiText, EuiLink, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
-import type { Agent } from '../../types';
+import type { Agent, AgentPolicy } from '../../types';
 import { useStartServices } from '../../hooks';
+import { AgentDetailsIntegrations } from '../../applications/fleet/sections/agents/agent_details_page/components/agent_details/agent_details_integrations';
 
 export const AgentlessStepConfirmEnrollment = ({
   agent,
+  agentPolicy,
   integrationTitle,
 }: {
-  agent: Agent | undefined;
+  agent?: Agent;
+  agentPolicy?: AgentPolicy;
   integrationTitle: string;
 }) => {
   const { docLinks } = useStartServices();
@@ -73,7 +76,9 @@ export const AgentlessStepConfirmEnrollment = ({
             }
           )}
           iconType="warning"
-        />
+        >
+          {agent?.last_checkin_message && <p>{agent.last_checkin_message}</p>}
+        </EuiCallOut>
         <EuiSpacer size="m" />
         <EuiText>
           <p>
@@ -94,6 +99,12 @@ export const AgentlessStepConfirmEnrollment = ({
             />
           </p>
         </EuiText>
+        {agent && agentPolicy && (
+          <>
+            <EuiSpacer size="m" />
+            <AgentDetailsIntegrations agent={agent} agentPolicy={agentPolicy} linkToLogs={false} />
+          </>
+        )}
       </>
     );
   }

@@ -111,6 +111,7 @@ export const AgentlessPackagePoliciesTable = ({
   // Flyout state
   const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string>();
   const [flyoutPackagePolicy, setFlyoutPackagePolicy] = useState<PackagePolicy>();
+  const [flyoutAgentPolicy, setFlyoutAgentPolicy] = useState<AgentPolicy>();
 
   return (
     <>
@@ -188,14 +189,16 @@ export const AgentlessPackagePoliciesTable = ({
                     }
                     // Use the first agent policy ID associated with the package policy
                     // because agentless package policies are only associated with one agent policy
+                    const agentPolicy = agentPolicies[0];
                     const agent =
-                      (agentPolicies[0]?.id && agentsByPolicyId[agentPolicies[0].id]) || undefined;
+                      (agentPolicy?.id && agentsByPolicyId[agentPolicy.id]) || undefined;
 
                     // Status badge click handler
                     const statusBadgeProps = {
                       onClick: () => {
                         setFlyoutOpenForPolicyId(packagePolicy.id);
                         setFlyoutPackagePolicy(packagePolicy);
+                        setFlyoutAgentPolicy(agentPolicy);
                       },
                       onClickAriaLabel: i18n.translate(
                         'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusAriaLabel',
@@ -285,8 +288,10 @@ export const AgentlessPackagePoliciesTable = ({
           onClose={() => {
             setFlyoutOpenForPolicyId(undefined);
             setFlyoutPackagePolicy(undefined);
+            setFlyoutAgentPolicy(undefined);
           }}
           packagePolicy={flyoutPackagePolicy}
+          agentPolicy={flyoutAgentPolicy}
         />
       )}
     </>

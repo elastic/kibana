@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AGENTS_PREFIX, MAX_FLYOUT_WIDTH } from '../../constants';
-import type { Agent, PackageInfo, PackagePolicy } from '../../types';
+import type { Agent, AgentPolicy, PackageInfo, PackagePolicy } from '../../types';
 import { sendGetAgents, useStartServices, useGetPackageInfoByKeyQuery } from '../../hooks';
 
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
@@ -38,9 +38,11 @@ const REFRESH_INTERVAL_MS = 30000;
 export const AgentlessEnrollmentFlyout = ({
   onClose,
   packagePolicy,
+  agentPolicy,
 }: {
   onClose: () => void;
   packagePolicy: PackagePolicy;
+  agentPolicy?: AgentPolicy;
 }) => {
   const core = useStartServices();
   const { notifications } = core;
@@ -168,6 +170,7 @@ export const AgentlessEnrollmentFlyout = ({
               children: (
                 <AgentlessStepConfirmEnrollment
                   agent={agentData}
+                  agentPolicy={agentPolicy}
                   integrationTitle={integrationTitle}
                 />
               ),
