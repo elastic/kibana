@@ -113,8 +113,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         let message = await testSubjects.find('exampleRootProfileCurrentMessage');
         expect(await message.getVisibleText()).to.be('This is a debug log');
         messageCell = await dataGrid.getCellElementExcludingControlColumns(1, 2);
-        await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
         await retry.try(async () => {
+          await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
           message = await testSubjects.find('exampleRootProfileCurrentMessage');
           expect(await message.getVisibleText()).to.be('This is an error log');
