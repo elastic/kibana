@@ -778,8 +778,11 @@ describe('Test discover state actions', () => {
     };
     savedSearchWithQuery.searchSource.setField('query', query);
     const { state } = await getState('/', { savedSearch: savedSearchWithQuery });
-    await state.actions.transitionFromESQLToDataView('the-data-view-id');
+    state.internalState.transitions.setDataView(dataViewMock);
+    expect(state.internalState.getState().adHocDataViews.length).toBe(0);
+    state.actions.transitionFromESQLToDataView('the-data-view-id');
     expect(state.appState.getState().query).toStrictEqual({ query: '', language: 'kuery' });
+    expect(state.internalState.getState().adHocDataViews[0].id).toBe('the-data-view-id');
   });
 
   test('onChangeDataView', async () => {
