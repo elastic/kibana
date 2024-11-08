@@ -17,7 +17,6 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { castArray } from 'lodash';
 import { isEntityOfType } from '../../common/utils/entity_type_guards';
 import type { InventoryEntity } from '../../common/entities';
-import { toEntityLatest } from '../../common/utils/mappers';
 import { useKibana } from './use_kibana';
 
 const KUBERNETES_DASHBOARDS_IDS: Record<string, string> = {
@@ -43,23 +42,25 @@ export const useDetailViewRedirect = () => {
   const serviceOverviewLocator = locators.get<ServiceOverviewParams>(SERVICE_OVERVIEW_LOCATOR_ID);
 
   const getDetailViewRedirectUrl = useCallback(
-    (latestEntity: InventoryEntity) => {
-      const entityFields = entityManager.entityClient.getIdentityFieldsValue(
-        toEntityLatest(latestEntity)
-      );
-      const identityFields = castArray(latestEntity.entityIdentityFields);
+    (entity: InventoryEntity) => {
+      const entityFields = entityManager.entityClient.getIdentityFieldsValue({
+        entity: {
+          identity_fields: entity.entityIdentityFields,
+        },
+      });
+      const identityFields = castArray(entity.entityIdentityFields);
 
-      if (isEntityOfType('host', latestEntity) || isEntityOfType('container', latestEntity)) {
+      if (isEntityOfType('host', entity) || isEntityOfType('container', entity)) {
         return assetDetailsLocator?.getRedirectUrl({
           assetId: entityFields[identityFields[0]],
-          assetType: latestEntity.entityType,
+          assetType: entity.entityType,
         });
       }
 
-      if (isEntityOfType('service', latestEntity)) {
+      if (isEntityOfType('service', entity)) {
         return serviceOverviewLocator?.getRedirectUrl({
           serviceName: entityFields[identityFields[0]],
-          environment: latestEntity.service?.environment,
+          environment: entity.service?.environment,
         });
       }
 
@@ -69,8 +70,8 @@ export const useDetailViewRedirect = () => {
   );
 
   const getDashboardRedirectUrl = useCallback(
-    (latestEntity: InventoryEntity) => {
-      const type = latestEntity.entityType;
+    (entity: InventoryEntity) => {
+      const type = entity.entityType;
       const dashboardId = KUBERNETES_DASHBOARDS_IDS[type];
 
       return dashboardId
@@ -78,7 +79,12 @@ export const useDetailViewRedirect = () => {
             dashboardId,
             query: {
               language: 'kuery',
-              query: entityManager.entityClient.asKqlFilter(toEntityLatest(latestEntity)),
+              query: entityManager.entityClient.asKqlFilter({
+                entity: {
+                  identity_fields: entity.entityIdentityFields,
+                },
+                ...entity,
+              }),
             },
           })
         : undefined;
