@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { StartServicesAccessor } from '@kbn/core-lifecycle-server';
+import type { StartPlugins } from '../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import type { ConfigType } from '../../..';
 import {
@@ -27,26 +29,30 @@ import { persistNoteRoute, deleteNoteRoute, getNotesRoute } from './notes';
 
 import { persistPinnedEventRoute } from './pinned_events';
 
-export function registerTimelineRoutes(router: SecuritySolutionPluginRouter, config: ConfigType) {
-  createTimelinesRoute(router, config);
-  patchTimelinesRoute(router, config);
+export function registerTimelineRoutes(
+  router: SecuritySolutionPluginRouter,
+  config: ConfigType,
+  startServices: StartServicesAccessor<StartPlugins>
+) {
+  createTimelinesRoute(router);
+  patchTimelinesRoute(router);
 
   importTimelinesRoute(router, config);
   exportTimelinesRoute(router, config);
-  getDraftTimelinesRoute(router, config);
-  getTimelineRoute(router, config);
-  resolveTimelineRoute(router, config);
-  getTimelinesRoute(router, config);
-  cleanDraftTimelinesRoute(router, config);
-  deleteTimelinesRoute(router, config);
-  persistFavoriteRoute(router, config);
-  copyTimelineRoute(router, config);
+  getDraftTimelinesRoute(router);
+  getTimelineRoute(router);
+  resolveTimelineRoute(router);
+  getTimelinesRoute(router);
+  cleanDraftTimelinesRoute(router);
+  deleteTimelinesRoute(router);
+  persistFavoriteRoute(router);
+  copyTimelineRoute(router);
 
   installPrepackedTimelinesRoute(router, config);
 
-  persistNoteRoute(router, config);
-  deleteNoteRoute(router, config);
-  getNotesRoute(router, config);
+  persistNoteRoute(router);
+  deleteNoteRoute(router);
+  getNotesRoute(router, startServices);
 
-  persistPinnedEventRoute(router, config);
+  persistPinnedEventRoute(router);
 }

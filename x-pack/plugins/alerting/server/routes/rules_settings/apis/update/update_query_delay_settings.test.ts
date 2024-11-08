@@ -45,6 +45,7 @@ describe('updateQueryDelaySettingsRoute', () => {
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rules/settings/_query_delay"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
+        "access": "internal",
         "tags": Array [
           "access:write-query-delay-settings",
         ],

@@ -93,7 +93,7 @@
           "\nA simple implementation of `React.Suspense.fallback` that renders a loading spinner."
         ],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
         "path": "packages/kbn-shared-ux-utility/src/fallback.tsx",
         "deprecated": false,
@@ -272,7 +272,7 @@
             "label": "fallback",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
             "deprecated": false,

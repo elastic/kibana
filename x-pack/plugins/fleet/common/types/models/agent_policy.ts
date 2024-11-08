@@ -49,6 +49,9 @@ export interface NewAgentPolicy {
     enabled: boolean;
     host?: string;
     port?: number;
+    buffer?: {
+      enabled: boolean;
+    };
   };
   monitoring_diagnostics?: {
     limit?: {
@@ -258,4 +261,25 @@ export interface FleetServerPolicy {
 export interface AgentlessApiResponse {
   id: string;
   region_id: string;
+}
+
+// Definitions for agent policy outputs endpoints
+export interface MinimalOutput {
+  name?: string;
+  id?: string;
+}
+export interface IntegrationsOutput extends MinimalOutput {
+  pkgName?: string;
+  integrationPolicyName?: string;
+}
+
+export interface OutputsForAgentPolicy {
+  agentPolicyId?: string;
+  monitoring: {
+    output: MinimalOutput;
+  };
+  data: {
+    output: MinimalOutput;
+    integrations?: IntegrationsOutput[];
+  };
 }

@@ -97,38 +97,6 @@ filters.geo_distance = {
   },
 };
 
-filters.geo_distance_range = {
-  __template: {
-    from: 100,
-    to: 200,
-    distance_unit: 'km',
-    FIELD: {
-      lat: 40.73,
-      lon: -74.1,
-    },
-  },
-  from: 100,
-  to: 200,
-
-  distance_unit: {
-    __one_of: ['km', 'miles'],
-  },
-  distance_type: {
-    __one_of: ['arc', 'plane'],
-  },
-  include_lower: {
-    __one_of: [true, false],
-  },
-  include_upper: {
-    __one_of: [true, false],
-  },
-
-  '{field}': {
-    lat: 40.73,
-    lon: -74.1,
-  },
-};
-
 filters.geo_polygon = {
   __template: {
     FIELD: {

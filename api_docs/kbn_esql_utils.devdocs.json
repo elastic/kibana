@@ -75,7 +75,7 @@
         "label": "appendWhereClauseToESQLQuery",
         "description": [],
         "signature": [
-          "(baseESQLQuery: string, field: string, value: unknown, operation: \"+\" | \"-\" | \"is_not_null\" | \"is_null\", fieldType: string | undefined) => string"
+          "(baseESQLQuery: string, field: string, value: unknown, operation: \"+\" | \"-\" | \"is_not_null\" | \"is_null\", fieldType: string | undefined) => string | undefined"
         ],
         "path": "packages/kbn-esql-utils/src/utils/append_to_query.ts",
         "deprecated": false,
@@ -1159,6 +1159,39 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getQueryColumnsFromESQLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getQueryColumnsFromESQLQuery",
+        "description": [],
+        "signature": [
+          "(esql: string) => string[]"
+        ],
+        "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getQueryColumnsFromESQLQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getStartEndParams",
         "type": "Function",
         "tags": [],
@@ -1323,6 +1356,112 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.isESQLColumnGroupable",
+        "type": "Function",
+        "tags": [],
+        "label": "isESQLColumnGroupable",
+        "description": [
+          "\nCheck if a column is groupable (| STATS ... BY <column>).\n"
+        ],
+        "signature": [
+          "(column: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          ") => boolean"
+        ],
+        "path": "packages/kbn-esql-utils/src/utils/esql_fields_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.isESQLColumnGroupable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "column",
+            "description": [
+              "The DatatableColumn of the field."
+            ],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              }
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/esql_fields_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if the column is groupable, false otherwise."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.isESQLColumnSortable",
+        "type": "Function",
+        "tags": [],
+        "label": "isESQLColumnSortable",
+        "description": [
+          "\nCheck if a column is sortable.\n"
+        ],
+        "signature": [
+          "(column: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          ") => boolean"
+        ],
+        "path": "packages/kbn-esql-utils/src/utils/esql_fields_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.isESQLColumnSortable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "column",
+            "description": [
+              "The DatatableColumn of the field."
+            ],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              }
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/esql_fields_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if the column is sortable, false otherwise."
+        ],
         "initialIsOpen": false
       },
       {

@@ -22,6 +22,9 @@ export const bulkCreateAttachmentsRoute = createCasesRoute({
     }),
     body: schema.arrayOf(escapeHatch),
   },
+  routerOptions: {
+    access: 'internal',
+  },
   handler: async ({ context, request, response }) => {
     try {
       const casesContext = await context.cases;

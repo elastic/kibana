@@ -24,7 +24,6 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import { SavedSearchAttributes, SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { once } from 'lodash';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
 import { buildServices, UrlTracker } from './build_services';
@@ -60,7 +59,7 @@ import { RootProfileService } from './context_awareness/profiles/root_profile';
 import { DataSourceProfileService } from './context_awareness/profiles/data_source_profile';
 import { DocumentProfileService } from './context_awareness/profiles/document_profile';
 import { ProfilesManager } from './context_awareness/profiles_manager';
-import { DiscoverEBTContextManager } from './services/discover_ebt_context_manager';
+import { DiscoverEBTManager } from './services/discover_ebt_manager';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -150,8 +149,12 @@ export class DiscoverPlugin
     this.urlTracker = { setTrackedUrl, restorePreviousUrl, setTrackingEnabled };
     this.stopUrlTracking = stopUrlTracker;
 
-    const ebtContextManager = new DiscoverEBTContextManager();
-    ebtContextManager.initialize({ core });
+    const ebtManager = new DiscoverEBTManager();
+    ebtManager.initialize({
+      core,
+      shouldInitializeCustomContext: true,
+      shouldInitializeCustomEvents: true,
+    });
 
     core.application.register({
       id: PLUGIN_ID,
@@ -177,7 +180,7 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
-        ebtContextManager.enable();
+        ebtManager.enableContext();
 
         const services = buildServices({
           core: coreStart,
@@ -190,10 +193,11 @@ export class DiscoverPlugin
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
           profilesManager: await this.createProfilesManager({
+            core: coreStart,
             plugins: discoverStartPlugins,
-            ebtContextManager,
+            ebtManager,
           }),
-          ebtContextManager,
+          ebtManager,
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
 
@@ -209,7 +213,6 @@ export class DiscoverPlugin
           .pipe(
             map((solutionNavId) => ({
               ...defaultCustomizationContext,
-              solutionNavId,
               inlineTopNav:
                 this.inlineTopNav.get(solutionNavId) ??
                 this.inlineTopNav.get(null) ??
@@ -226,7 +229,7 @@ export class DiscoverPlugin
         });
 
         return () => {
-          ebtContextManager.disableAndReset();
+          ebtManager.disableAndResetContext();
           unlistenParentHistory();
           unmount();
           appUnMounted();
@@ -296,11 +299,12 @@ export class DiscoverPlugin
     }
 
     const getDiscoverServicesInternal = () => {
+      const ebtManager = new DiscoverEBTManager(); // It is not initialized outside of Discover
       return this.getDiscoverServices(
         core,
         plugins,
-        this.createEmptyProfilesManager(),
-        new DiscoverEBTContextManager() // it's not enabled outside of Discover
+        this.createEmptyProfilesManager({ ebtManager }),
+        ebtManager
       );
     };
 
@@ -318,48 +322,53 @@ export class DiscoverPlugin
     }
   }
 
-  private createProfileServices = once(async ({ plugins }: { plugins: DiscoverStartPlugins }) => {
-    const { registerProfileProviders } = await import('./context_awareness/profile_providers');
+  private createProfileServices() {
     const rootProfileService = new RootProfileService();
     const dataSourceProfileService = new DataSourceProfileService();
     const documentProfileService = new DocumentProfileService();
+
+    return { rootProfileService, dataSourceProfileService, documentProfileService };
+  }
+
+  private async createProfilesManager({
+    core,
+    plugins,
+    ebtManager,
+  }: {
+    core: CoreStart;
+    plugins: DiscoverStartPlugins;
+    ebtManager: DiscoverEBTManager;
+  }) {
+    const { registerProfileProviders } = await import('./context_awareness/profile_providers');
+    const { rootProfileService, dataSourceProfileService, documentProfileService } =
+      this.createProfileServices();
+
     const enabledExperimentalProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
 
+    const profilesManager = new ProfilesManager(
+      rootProfileService,
+      dataSourceProfileService,
+      documentProfileService,
+      ebtManager
+    );
+
     await registerProfileProviders({
-      plugins,
       rootProfileService,
       dataSourceProfileService,
       documentProfileService,
       enabledExperimentalProfileIds,
+      services: this.getDiscoverServices(core, plugins, profilesManager, ebtManager),
     });
 
-    return { rootProfileService, dataSourceProfileService, documentProfileService };
-  });
-
-  private async createProfilesManager({
-    plugins,
-    ebtContextManager,
-  }: {
-    plugins: DiscoverStartPlugins;
-    ebtContextManager: DiscoverEBTContextManager;
-  }) {
-    const { rootProfileService, dataSourceProfileService, documentProfileService } =
-      await this.createProfileServices({ plugins });
-
-    return new ProfilesManager(
-      rootProfileService,
-      dataSourceProfileService,
-      documentProfileService,
-      ebtContextManager
-    );
+    return profilesManager;
   }
 
-  private createEmptyProfilesManager() {
+  private createEmptyProfilesManager({ ebtManager }: { ebtManager: DiscoverEBTManager }) {
     return new ProfilesManager(
       new RootProfileService(),
       new DataSourceProfileService(),
       new DocumentProfileService(),
-      new DiscoverEBTContextManager() // it's not enabled outside of Discover
+      ebtManager
     );
   }
 
@@ -367,7 +376,7 @@ export class DiscoverPlugin
     core: CoreStart,
     plugins: DiscoverStartPlugins,
     profilesManager: ProfilesManager,
-    ebtContextManager: DiscoverEBTContextManager
+    ebtManager: DiscoverEBTManager
   ) => {
     return buildServices({
       core,
@@ -379,11 +388,13 @@ export class DiscoverPlugin
       history: this.historyService.getHistory(),
       urlTracker: this.urlTracker!,
       profilesManager,
-      ebtContextManager,
+      ebtManager,
     });
   };
 
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
+    const ebtManager = new DiscoverEBTManager(); // It is not initialized outside of Discover
+
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
       return {
@@ -392,19 +403,20 @@ export class DiscoverPlugin
       };
     };
 
-    const getDiscoverServicesInternal = async () => {
+    const getDiscoverServicesForEmbeddable = async () => {
       const [coreStart, deps] = await core.getStartServices();
-      const ebtContextManager = new DiscoverEBTContextManager(); // it's not enabled outside of Discover
+
       const profilesManager = await this.createProfilesManager({
+        core: coreStart,
         plugins: deps,
-        ebtContextManager,
+        ebtManager,
       });
-      return this.getDiscoverServices(coreStart, deps, profilesManager, ebtContextManager);
+      return this.getDiscoverServices(coreStart, deps, profilesManager, ebtManager);
     };
 
     plugins.embeddable.registerReactEmbeddableSavedObject<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
-        const services = await getDiscoverServicesInternal();
+        const services = await getDiscoverServicesForEmbeddable();
         const initialState = await deserializeState({
           serializedState: {
             rawState: { savedObjectId: savedObject.id },
@@ -428,7 +440,7 @@ export class DiscoverPlugin
     plugins.embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
       const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([
         getStartServices(),
-        getDiscoverServicesInternal(),
+        getDiscoverServicesForEmbeddable(),
         import('./embeddable/get_search_embeddable_factory'),
       ]);
 

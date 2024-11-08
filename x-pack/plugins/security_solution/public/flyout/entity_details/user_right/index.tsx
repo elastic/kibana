@@ -8,9 +8,8 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { FlyoutLoading, FlyoutNavigation } from '@kbn/security-solution-common/src/flyout';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
@@ -26,11 +25,13 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
 import { UserDetailsPanelKey } from '../user_details_left';
 import { useObservedUser } from './hooks/use_observed_user';
-import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 
 export interface UserPanelProps extends Record<string, unknown> {
@@ -83,6 +84,7 @@ export const UserPanel = ({
 
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
+  const isRiskScoreExist = !!userRiskData?.user.risk;
 
   const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
   const refetchRiskScore = useCallback(() => {
@@ -149,8 +151,15 @@ export const UserPanel = ({
       hasMisconfigurationFindings,
     ]
   );
-
-  const openPanelFirstTab = useCallback(() => openPanelTab(), [openPanelTab]);
+  const openPanelFirstTab = useCallback(
+    () =>
+      openPanelTab(
+        isRiskScoreExist
+          ? EntityDetailsLeftPanelTab.RISK_INPUTS
+          : EntityDetailsLeftPanelTab.CSP_INSIGHTS
+      ),
+    [isRiskScoreExist, openPanelTab]
+  );
 
   const hasUserDetailsData =
     !!userRiskData?.user.risk ||

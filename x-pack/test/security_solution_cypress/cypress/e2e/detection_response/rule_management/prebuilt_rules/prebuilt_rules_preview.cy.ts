@@ -77,7 +77,7 @@ const PREVIEW_TABS = {
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     const commonProperties: Partial<PrebuiltRuleAsset> = {
       author: ['Elastic', 'Another author'],

@@ -18,6 +18,7 @@ import {
 } from './get_application_user_messages';
 import { cleanup, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { getLongMessage } from '../user_messages_utils';
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => {
   const original = jest.requireActual('@kbn/shared-ux-link-redirect-app');
@@ -164,15 +165,9 @@ describe('application-level user messages', () => {
         visualization: {} as Visualization,
         visualizationState: { activeId: 'foo', state: {} },
       };
+      const firstMessage = getApplicationUserMessages({ ...props, ...propsOverrides }).at(0);
       const rtlRender = render(
-        <I18nProvider>
-          {
-            getApplicationUserMessages({
-              ...props,
-              ...propsOverrides,
-            })[0].longMessage as React.ReactNode
-          }
-        </I18nProvider>
+        <I18nProvider>{firstMessage && getLongMessage(firstMessage)}</I18nProvider>
       );
       return rtlRender;
     };

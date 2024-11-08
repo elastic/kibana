@@ -168,6 +168,8 @@
     "@kbn/reporting-server",
     "@kbn/data-quality-plugin",
     "@kbn/ml-trained-models-utils",
+    "@kbn/observability-synthetics-test-data",
+    "@kbn/ml-trained-models-utils",
     "@kbn/openapi-common",
     "@kbn/securitysolution-lists-common",
     "@kbn/securitysolution-exceptions-common",
@@ -181,6 +183,10 @@
     "@kbn/management-settings-ids",
     "@kbn/mock-idp-utils",
     "@kbn/cloud-security-posture-common",
-    "@kbn/saved-objects-management-plugin"
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/alerting-types",
+    "@kbn/ai-assistant-common",
+    "@kbn/core-deprecations-common",
+    "@kbn/usage-collection-plugin",
   ]
 }

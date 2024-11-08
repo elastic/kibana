@@ -20,6 +20,7 @@ const createInvestigationParamsSchema = z.object({
     }),
     origin: z.union([alertOriginSchema, blankOriginSchema]),
     tags: z.array(z.string()),
+    externalIncidentUrl: z.string().nullable(),
   }),
 });
 

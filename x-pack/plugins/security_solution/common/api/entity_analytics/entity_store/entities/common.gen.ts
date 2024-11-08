@@ -16,59 +16,54 @@
 
 import { z } from '@kbn/zod';
 
+import { EntityRiskScoreRecord } from '../../common/common.gen';
+import { AssetCriticalityLevel } from '../../asset_criticality/common.gen';
+
 export type UserEntity = z.infer<typeof UserEntity>;
 export const UserEntity = z.object({
-  user: z
+  '@timestamp': z.string().datetime(),
+  entity: z.object({
+    name: z.string(),
+    source: z.string(),
+  }),
+  user: z.object({
+    full_name: z.array(z.string()).optional(),
+    domain: z.array(z.string()).optional(),
+    roles: z.array(z.string()).optional(),
+    name: z.string(),
+    id: z.array(z.string()).optional(),
+    email: z.array(z.string()).optional(),
+    hash: z.array(z.string()).optional(),
+    risk: EntityRiskScoreRecord.optional(),
+  }),
+  asset: z
     .object({
-      full_name: z.array(z.string()).optional(),
-      domain: z.array(z.string()).optional(),
-      roles: z.array(z.string()).optional(),
-      name: z.string(),
-      id: z.array(z.string()).optional(),
-      email: z.array(z.string()).optional(),
-      hash: z.array(z.string()).optional(),
-    })
-    .optional(),
-  entity: z
-    .object({
-      lastSeenTimestamp: z.string().datetime(),
-      schemaVersion: z.string(),
-      definitionVersion: z.string(),
-      displayName: z.string(),
-      identityFields: z.array(z.string()),
-      id: z.string(),
-      type: z.literal('node'),
-      firstSeenTimestamp: z.string().datetime(),
-      definitionId: z.string(),
+      criticality: AssetCriticalityLevel,
     })
     .optional(),
 });
 
 export type HostEntity = z.infer<typeof HostEntity>;
 export const HostEntity = z.object({
-  host: z
+  '@timestamp': z.string().datetime(),
+  entity: z.object({
+    name: z.string(),
+    source: z.string(),
+  }),
+  host: z.object({
+    hostname: z.array(z.string()).optional(),
+    domain: z.array(z.string()).optional(),
+    ip: z.array(z.string()).optional(),
+    name: z.string(),
+    id: z.array(z.string()).optional(),
+    type: z.array(z.string()).optional(),
+    mac: z.array(z.string()).optional(),
+    architecture: z.array(z.string()).optional(),
+    risk: EntityRiskScoreRecord.optional(),
+  }),
+  asset: z
     .object({
-      hostname: z.array(z.string()).optional(),
-      domain: z.array(z.string()).optional(),
-      ip: z.array(z.string()).optional(),
-      name: z.string(),
-      id: z.array(z.string()).optional(),
-      type: z.array(z.string()).optional(),
-      mac: z.array(z.string()).optional(),
-      architecture: z.array(z.string()).optional(),
-    })
-    .optional(),
-  entity: z
-    .object({
-      lastSeenTimestamp: z.string().datetime(),
-      schemaVersion: z.string(),
-      definitionVersion: z.string(),
-      displayName: z.string(),
-      identityFields: z.array(z.string()),
-      id: z.string(),
-      type: z.literal('node'),
-      firstSeenTimestamp: z.string().datetime(),
-      definitionId: z.string(),
+      criticality: AssetCriticalityLevel,
     })
     .optional(),
 });

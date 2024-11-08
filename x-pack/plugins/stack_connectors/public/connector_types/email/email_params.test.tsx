@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent, screen, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import EmailParamsFields from './email_params';
 import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
+import { getFormattedEmailOptions } from './email_params';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -27,6 +28,24 @@ const mockKibana = () => {
     },
   });
 };
+
+const emailTestCases = [
+  {
+    field: 'to',
+    fieldValue: 'new1@test.com, new2@test.com , new1@test.com, ',
+    expected: ['test@test.com', 'new1@test.com', 'new2@test.com'],
+  },
+  {
+    field: 'cc',
+    fieldValue: 'newcc1@test.com, newcc2@test.com , newcc1@test.com, ',
+    expected: ['cc@test.com', 'newcc1@test.com', 'newcc2@test.com'],
+  },
+  {
+    field: 'bcc',
+    fieldValue: 'newbcc1@test.com, newbcc2@test.com , newbcc1@test.com, ',
+    expected: ['bcc@test.com', 'newbcc1@test.com', 'newbcc2@test.com'],
+  },
+];
 
 describe('EmailParamsFields renders', () => {
   beforeEach(() => {
@@ -60,6 +79,40 @@ describe('EmailParamsFields renders', () => {
     expect(screen.getByTestId('toEmailAddressInput').textContent).toStrictEqual('test@test.com');
     expect(screen.getByTestId('subjectInput')).toBeVisible();
     expect(await screen.findByTestId('messageTextArea')).toBeVisible();
+  });
+
+  emailTestCases.forEach(({ field, fieldValue, expected }) => {
+    test(`"${field}" field value updates correctly when comma-separated emails are pasted`, async () => {
+      const actionParams = {
+        cc: ['cc@test.com'],
+        bcc: ['bcc@test.com'],
+        to: ['test@test.com'],
+        subject: 'test',
+        message: 'test message',
+      };
+
+      const editAction = jest.fn();
+
+      render(
+        <IntlProvider locale="en">
+          <EmailParamsFields
+            actionParams={actionParams}
+            errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+            editAction={editAction}
+            defaultMessage={'Some default message'}
+            index={0}
+          />
+        </IntlProvider>
+      );
+
+      const euiComboBox = screen.getByTestId(`${field}EmailAddressInput`);
+      const input = within(euiComboBox).getByTestId('comboBoxSearchInput');
+      fireEvent.change(input, { target: { value: fieldValue } });
+      expect(input).toHaveValue(fieldValue);
+
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      expect(editAction).toHaveBeenCalledWith(field, expected, 0);
+    });
   });
 
   test('message param field is rendered with default value if not set', () => {
@@ -232,5 +285,50 @@ describe('EmailParamsFields renders', () => {
     });
 
     expect(editAction).not.toHaveBeenCalled();
+  });
+});
+
+describe('getFormattedEmailOptions', () => {
+  test('should return new options added to previous options', () => {
+    const searchValue = 'test@test.com, other@test.com';
+    const previousOptions = [{ label: 'existing@test.com' }];
+    const newOptions = getFormattedEmailOptions(searchValue, previousOptions);
+
+    expect(newOptions).toEqual([
+      { label: 'existing@test.com' },
+      { label: 'test@test.com' },
+      { label: 'other@test.com' },
+    ]);
+  });
+
+  test('should trim extra spaces in search value', () => {
+    const searchValue = ' test@test.com ,  other@test.com   ,   ';
+    const previousOptions: Array<{ label: string }> = [];
+    const newOptions = getFormattedEmailOptions(searchValue, previousOptions);
+
+    expect(newOptions).toEqual([{ label: 'test@test.com' }, { label: 'other@test.com' }]);
+  });
+
+  test('should prevent duplicate email addresses', () => {
+    const searchValue = 'duplicate@test.com, duplicate@test.com';
+    const previousOptions = [{ label: 'existing@test.com' }, { label: 'duplicate@test.com' }];
+    const newOptions = getFormattedEmailOptions(searchValue, previousOptions);
+
+    expect(newOptions).toEqual([{ label: 'existing@test.com' }, { label: 'duplicate@test.com' }]);
+  });
+
+  test('should return previous options if search value is empty', () => {
+    const searchValue = '';
+    const previousOptions = [{ label: 'existing@test.com' }];
+    const newOptions = getFormattedEmailOptions(searchValue, previousOptions);
+    expect(newOptions).toEqual([{ label: 'existing@test.com' }]);
+  });
+
+  test('should handle single email without comma', () => {
+    const searchValue = 'single@test.com';
+    const previousOptions = [{ label: 'existing@test.com' }];
+    const newOptions = getFormattedEmailOptions(searchValue, previousOptions);
+
+    expect(newOptions).toEqual([{ label: 'existing@test.com' }, { label: 'single@test.com' }]);
   });
 });

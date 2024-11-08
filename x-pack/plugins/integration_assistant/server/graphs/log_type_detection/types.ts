@@ -14,6 +14,7 @@ export interface LogDetectionBaseNodeParams {
 
 export interface LogDetectionNodeParams extends LogDetectionBaseNodeParams {
   model: ChatModels;
+  client: IScopedClusterClient;
 }
 
 export interface LogDetectionGraphParams {

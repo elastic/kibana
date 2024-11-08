@@ -12,7 +12,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { NewTermsRuleParams } from '../../rule_schema';
-import type { CreateRuleOptions, SecurityAlertType, CreateRuleAdditionalOptions } from '../types';
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { singleSearchAfter } from '../utils/single_search_after';
 import { getFilter } from '../utils/get_filter';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
@@ -46,7 +46,7 @@ import { multiTermsComposite } from './multi_terms_composite';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 
 export const createNewTermsAlertType = (
-  createOptions: CreateRuleOptions & CreateRuleAdditionalOptions
+  createOptions: CreateRuleOptions
 ): SecurityAlertType<NewTermsRuleParams, {}, {}, 'default'> => {
   const { logger, licensing, experimentalFeatures, scheduleNotificationResponseActionsService } =
     createOptions;
@@ -110,8 +110,8 @@ export const createNewTermsAlertType = (
           unprocessedExceptions,
           alertTimestampOverride,
           publicBaseUrl,
-          inputIndexFields,
           alertWithSuppression,
+          intendedTimestamp,
         },
         services,
         params,
@@ -135,7 +135,7 @@ export const createNewTermsAlertType = (
         type: params.type,
         query: params.query,
         exceptionFilter,
-        fields: inputIndexFields,
+        loadFields: true,
       };
       const esFilter = await getFilter(filterArgs);
 
@@ -213,6 +213,7 @@ export const createNewTermsAlertType = (
               alertTimestampOverride,
               ruleExecutionLogger,
               publicBaseUrl,
+              intendedTimestamp,
             });
 
           const wrapSuppressedHits = (eventsAndTerms: EventsAndTerms[]) =>
@@ -227,6 +228,7 @@ export const createNewTermsAlertType = (
               publicBaseUrl,
               primaryTimestamp,
               secondaryTimestamp,
+              intendedTimestamp,
             });
 
           const eventsAndTerms: EventsAndTerms[] = (
@@ -416,13 +418,11 @@ export const createNewTermsAlertType = (
         afterKey = searchResultWithAggs.aggregations.new_terms.after_key;
       }
 
-      if (scheduleNotificationResponseActionsService) {
-        scheduleNotificationResponseActionsService({
-          signals: result.createdSignals,
-          signalsCount: result.createdSignalsCount,
-          responseActions: completeRule.ruleParams.responseActions,
-        });
-      }
+      scheduleNotificationResponseActionsService({
+        signals: result.createdSignals,
+        signalsCount: result.createdSignalsCount,
+        responseActions: completeRule.ruleParams.responseActions,
+      });
 
       return { ...result, state };
     },

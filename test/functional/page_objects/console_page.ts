@@ -9,6 +9,7 @@
 
 import { Key } from 'selenium-webdriver';
 import { asyncForEach } from '@kbn/std';
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 export class ConsolePageObject extends FtrService {
@@ -49,6 +50,13 @@ export class ConsolePageObject extends FtrService {
     const textArea = await this.getTextArea();
     await textArea.clickMouseButton();
     await textArea.clearValueWithKeyboard();
+  }
+
+  public async focusOutputEditor() {
+    const outputEditor = await this.testSubjects.find('consoleMonacoOutput');
+    // Simply clicking on the output editor doesn't focus it, so we need to click
+    // on the margin view overlays
+    await (await outputEditor.findByClassName('margin-view-overlays')).click();
   }
 
   public async getOutputText() {
@@ -361,10 +369,12 @@ export class ConsolePageObject extends FtrService {
   public async setFontSizeSetting(newSize: number) {
     // while the settings form opens/loads this may fail, so retry for a while
     await this.retry.try(async () => {
+      const newSizeString = String(newSize);
       const fontSizeInput = await this.testSubjects.find('setting-font-size-input');
       await fontSizeInput.clearValue({ withJS: true });
       await fontSizeInput.click();
-      await fontSizeInput.type(String(newSize));
+      await fontSizeInput.type(newSizeString);
+      expect(await fontSizeInput.getAttribute('value')).to.be(newSizeString);
     });
   }
 

@@ -35,10 +35,8 @@
 }
 
 .visEditor {
-  @include flexParent();
-
   height: 100%;
-
+  @include flexParent();
   @include euiBreakpoint('xs', 's', 'm') {
     .visualization {
       // While we are on a small screen the visualization is below the
@@ -59,7 +57,6 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
 }
 
 .lnsFrameLayout__pageBody {
-  @include euiScrollBar;
   min-width: $lnsPanelMinWidth + $euiSizeXL;
   overflow: hidden auto;
   display: flex;
@@ -73,7 +70,7 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
   z-index: $lnsZLevel1;
   border-left: $euiBorderThin;
   border-right: $euiBorderThin;
-
+  @include euiScrollBar;
   &:first-child {
     padding-left: $euiSize;
   }
@@ -111,10 +108,9 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
   }
 
   .lnsConfigPanel {
-    @include euiYScroll;
     padding: $euiSize $euiSize $euiSizeXL ($euiFormMaxWidth + $euiSize);
     margin-left: -$euiFormMaxWidth;
-
+    @include euiYScroll;
     @include euiBreakpoint('xs', 's', 'm') {
       padding-left: $euiSize;
       margin-left: 0;

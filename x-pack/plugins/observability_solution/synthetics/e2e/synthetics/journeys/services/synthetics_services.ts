@@ -9,10 +9,13 @@ import axios from 'axios';
 import type { Client } from '@elastic/elasticsearch';
 import { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
-import { SyntheticsMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
+import { makeDownSummary, makeUpSummary } from '@kbn/observability-synthetics-test-data';
+import {
+  SyntheticsMonitor,
+  SyntheticsPrivateLocations,
+} from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { journeyStart, journeySummary, step1, step2 } from './data/browser_docs';
-import { firstDownHit, getUpHit } from './data/sample_docs';
 
 export class SyntheticsServices {
   kibanaUrl: string;
@@ -113,22 +116,6 @@ export class SyntheticsServices {
     );
   }
 
-  async enableDefaultAlertingViaApi() {
-    try {
-      await axios.post(
-        this.kibanaUrl + SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
-        { isDisabled: false },
-        {
-          auth: { username: 'elastic', password: 'changeme' },
-          headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'synthetics-e2e' },
-        }
-      );
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(e);
-    }
-  }
-
   async addTestSummaryDocument({
     docType = 'summaryUp',
     timestamp = new Date(Date.now()).toISOString(),
@@ -157,14 +144,22 @@ export class SyntheticsServices {
 
     let index = 'synthetics-http-default';
 
-    const commonData = { timestamp, monitorId, name, testRunId, locationName, configId };
+    const commonData = {
+      timestamp,
+      name,
+      testRunId,
+      location: {
+        id: 'us_central',
+        label: locationName ?? 'North America - US Central',
+      },
+      configId,
+      monitorId: monitorId ?? configId,
+    };
 
     switch (docType) {
       case 'stepEnd':
         index = 'synthetics-browser-default';
-
         const stepDoc = stepIndex === 1 ? step1(commonData) : step2(commonData);
-
         document = { ...stepDoc, ...document };
         break;
       case 'journeyEnd':
@@ -177,19 +172,19 @@ export class SyntheticsServices {
         break;
       case 'summaryDown':
         document = {
-          ...firstDownHit(commonData),
+          ...makeDownSummary(commonData),
           ...document,
         };
         break;
       case 'summaryUp':
         document = {
-          ...getUpHit(commonData),
+          ...makeUpSummary(commonData),
           ...document,
         };
         break;
       default:
         document = {
-          ...getUpHit(commonData),
+          ...makeUpSummary(commonData),
           ...document,
         };
     }
@@ -227,5 +222,44 @@ export class SyntheticsServices {
       // eslint-disable-next-line no-console
       console.log(e);
     }
+  }
+
+  async setupTestConnector() {
+    const indexConnector = {
+      name: 'test index',
+      config: { index: 'test-index' },
+      secrets: {},
+      connector_type_id: '.index',
+    };
+    const connector = await this.requester.request({
+      path: `/api/actions/connector`,
+      method: 'POST',
+      body: indexConnector,
+    });
+    return connector.data as any;
+  }
+
+  async setupSettings(connectorId?: string) {
+    const settings = {
+      certExpirationThreshold: 30,
+      certAgeThreshold: 730,
+      defaultConnectors: [connectorId],
+      defaultEmail: { to: [], cc: [], bcc: [] },
+      defaultStatusRuleEnabled: true,
+    };
+    const connector = await this.requester.request({
+      path: `/api/synthetics/settings`,
+      method: 'PUT',
+      body: settings,
+    });
+    return connector.data;
+  }
+
+  async getPrivateLocations(): Promise<SyntheticsPrivateLocations> {
+    const response = await this.requester.request({
+      path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS,
+      method: 'GET',
+    });
+    return response.data as SyntheticsPrivateLocations;
   }
 }

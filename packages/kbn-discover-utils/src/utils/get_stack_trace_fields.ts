@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getFieldFromDoc, LogDocument, StackTraceFields } from '..';
+import { getFieldValue, LogDocument, StackTraceFields } from '..';
 import {
   ERROR_EXCEPTION_STACKTRACE,
   ERROR_LOG_STACKTRACE,
@@ -15,9 +15,9 @@ import {
 } from '../field_constants';
 
 export const getStacktraceFields = (doc: LogDocument): StackTraceFields => {
-  const errorStackTrace = getFieldFromDoc(doc, ERROR_STACK_TRACE);
-  const errorExceptionStackTrace = getFieldFromDoc(doc, ERROR_EXCEPTION_STACKTRACE);
-  const errorLogStackTrace = getFieldFromDoc(doc, ERROR_LOG_STACKTRACE);
+  const errorStackTrace = getFieldValue(doc, ERROR_STACK_TRACE);
+  const errorExceptionStackTrace = getFieldValue(doc, ERROR_EXCEPTION_STACKTRACE);
+  const errorLogStackTrace = getFieldValue(doc, ERROR_LOG_STACKTRACE);
 
   return {
     [ERROR_STACK_TRACE]: errorStackTrace,

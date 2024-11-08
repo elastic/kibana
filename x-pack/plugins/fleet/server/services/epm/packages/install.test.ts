@@ -17,6 +17,7 @@ import { licenseService } from '../../license';
 import { auditLoggingService } from '../../audit_logging';
 import { appContextService } from '../../app_context';
 import { ConcurrentInstallOperationError, FleetError, PackageNotFoundError } from '../../../errors';
+import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
 import * as Registry from '../registry';
 import { dataStreamService } from '../../data_streams';
@@ -101,6 +102,13 @@ jest.mock('../archive', () => {
   };
 });
 jest.mock('../../audit_logging');
+
+jest.mock('../../utils/agentless', () => {
+  return {
+    isAgentlessEnabled: jest.fn(),
+    isOnlyAgentlessIntegration: jest.fn(),
+  };
+});
 
 const mockGetBundledPackageByPkgKey = jest.mocked(getBundledPackageByPkgKey);
 const mockedAuditLoggingService = jest.mocked(auditLoggingService);
@@ -357,13 +365,72 @@ describe('install', () => {
       expect(response.status).toEqual('already_installed');
     });
 
-    // failing
+    describe('agentless', () => {
+      beforeEach(() => {
+        jest.mocked(appContextService.getConfig).mockClear();
+        jest.spyOn(licenseService, 'hasAtLeast').mockClear();
+        jest.mocked(isAgentlessEnabled).mockClear();
+        jest.mocked(isOnlyAgentlessIntegration).mockClear();
+      });
+
+      it('should not allow to install agentless only integration if agentless is not enabled', async () => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        jest.mocked(isAgentlessEnabled).mockReturnValueOnce(false);
+        jest.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(true);
+
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'test_package',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+        expect(response.error).toBeDefined();
+        expect(response.error!.message).toEqual(
+          'test_package contains agentless policy templates, agentless is not available on this deployment'
+        );
+      });
+
+      it('should allow to install agentless only integration if agentless is not enabled but using force flag', async () => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        jest.mocked(isAgentlessEnabled).mockReturnValueOnce(false);
+        jest.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(true);
+
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'test_package',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+          force: true,
+        });
+        expect(response.error).toBeUndefined();
+      });
+
+      it('should allow to install agentless only integration if agentless is enabled', async () => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        jest.mocked(isAgentlessEnabled).mockReturnValueOnce(true);
+        jest.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(true);
+
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'test_package',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+        expect(response.error).toBeUndefined();
+      });
+    });
+
     it('should allow to install fleet_server if internal.fleetServerStandalone is configured', async () => {
       jest.mocked(appContextService.getConfig).mockReturnValueOnce({
         internal: {
           fleetServerStandalone: true,
         },
       } as any);
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValueOnce(true);
+      jest.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(false);
 
       const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -374,6 +441,24 @@ describe('install', () => {
       });
 
       expect(response.status).toEqual('installed');
+    });
+
+    it('should use streaming installation for the detection rules package', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'security_detection_engine',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeUndefined();
+
+      expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
+        expect.objectContaining({ useStreaming: true })
+      );
     });
   });
 

@@ -63,6 +63,9 @@ export const getActionErrorLogRoute = (
         params: paramSchema,
         query: querySchema,
       },
+      options: {
+        access: 'internal',
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {

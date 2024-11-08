@@ -1007,7 +1007,7 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async getAreaChartData(chartData?: DebugState, nth: number = 0) {
     const areas = (await this.getChartItems(chartData)) as DebugState['areas'];
-    return areas?.[nth]?.lines.y1.points.map(({ x, y }) => [x, y]);
+    return areas?.[nth]?.lines.y1.points.sort((a, b) => a.x - b.x).map(({ x, y }) => [x, y]);
   }
 
   public async getAnnotationsData(chartData?: DebugState) {

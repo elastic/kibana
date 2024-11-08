@@ -106,7 +106,11 @@ export const App: React.FC<AppProps> = ({
         css={{
           position: 'relative',
         }}
-        contentProps={{ css: { display: 'flex', flexGrow: 1, position: 'absolute', inset: 0 } }}
+        contentProps={
+          selectedPageMode === PlaygroundPageMode.search && selectedMode === 'chat'
+            ? undefined
+            : { css: { display: 'flex', flexGrow: 1, position: 'absolute', inset: 0 } }
+        }
         paddingSize={paddingSize}
         className="eui-fullHeight"
       >

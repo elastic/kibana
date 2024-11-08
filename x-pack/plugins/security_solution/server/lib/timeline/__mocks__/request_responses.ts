@@ -6,7 +6,6 @@
  */
 
 import path, { join, resolve } from 'path';
-import type * as rt from 'io-ts';
 
 import {
   TIMELINE_DRAFT_URL,
@@ -17,9 +16,9 @@ import {
 } from '../../../../common/constants';
 import type {
   SavedTimeline,
-  patchTimelineSchema,
-  createTimelineSchema,
-  GetTimelineQuery,
+  PatchTimelineRequestBody,
+  CreateTimelinesRequestBody,
+  GetTimelineRequestQuery,
 } from '../../../../common/api/timeline';
 import {
   type TimelineType,
@@ -135,14 +134,14 @@ export const updateTemplateTimelineWithTimelineId = {
   version: 'WzEyMjUsMV0=',
 };
 
-export const getCreateTimelinesRequest = (mockBody: rt.TypeOf<typeof createTimelineSchema>) =>
+export const getCreateTimelinesRequest = (mockBody: CreateTimelinesRequestBody) =>
   requestMock.create({
     method: 'post',
     path: TIMELINE_URL,
     body: mockBody,
   });
 
-export const getUpdateTimelinesRequest = (mockBody: rt.TypeOf<typeof patchTimelineSchema>) =>
+export const getUpdateTimelinesRequest = (mockBody: PatchTimelineRequestBody) =>
   requestMock.create({
     method: 'patch',
     path: TIMELINE_URL,
@@ -167,7 +166,7 @@ export const cleanDraftTimelinesRequest = (timelineType: TimelineType) =>
     },
   });
 
-export const getTimelineRequest = (query?: GetTimelineQuery) =>
+export const getTimelineRequest = (query?: GetTimelineRequestQuery) =>
   requestMock.create({
     method: 'get',
     path: TIMELINE_URL,

@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
     'svlCommonPage',
     'common',
@@ -29,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
     'timePicker',
     'unifiedFieldList',
+    'unifiedSearch',
   ]);
 
   const defaultSettings = {
@@ -202,7 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
         expect(await cell.getVisibleText()).to.be(' - ');
         expect(await dataGrid.getHeaders()).to.eql([
-          "Select columnPress the Enter key to interact with this cell's contents.", // contains screen reader help text
+          'Select column',
           'Control column',
           'Access to degraded docs',
           'Access to available stacktraces',
@@ -274,6 +276,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should not show switch modal when switching to a data view while a saved search is open', async () => {
         await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
@@ -308,6 +312,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
+      });
+
+      it('should show available data views after switching to classic mode', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedSearch.switchToDataViewMode();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        const availableDataViews = await PageObjects.unifiedSearch.getDataViewList(
+          'discover-dataView-switch-link'
+        );
+        expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+        await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });
 

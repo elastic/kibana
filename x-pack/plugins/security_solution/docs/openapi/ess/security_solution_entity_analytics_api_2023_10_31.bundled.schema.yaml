@@ -351,6 +351,10 @@ paths:
             schema:
               type: object
               properties:
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
                 filter:
                   type: string
                 indexPattern:
@@ -448,6 +452,54 @@ paths:
       summary: Stop an Entity Engine
       tags:
         - Security Entity Analytics API
+  /api/entity_store/engines/apply_dataview_indices:
+    post:
+      operationId: ApplyEntityEngineDataviewIndices
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    items:
+                      $ref: '#/components/schemas/EngineDataviewUpdateResult'
+                    type: array
+                  success:
+                    type: boolean
+          description: Successful response
+        '207':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    items:
+                      type: string
+                    type: array
+                  result:
+                    items:
+                      $ref: '#/components/schemas/EngineDataviewUpdateResult'
+                    type: array
+                  success:
+                    type: boolean
+          description: Partial successful response
+        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Error response
+      summary: Apply DataView indices to all installed engines
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/entities/list:
     get:
       description: List entities records, paging, sorting and filtering as needed.
@@ -524,6 +576,37 @@ paths:
       summary: List Entity Store Entities
       tags:
         - Security Entity Analytics API
+  /api/risk_score/engine/dangerously_delete_data:
+    delete:
+      description: >-
+        Cleaning up the the Risk Engine by removing the indices, mapping and
+        transforms
+      operationId: CleanUpRiskEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cleanup_successful:
+                    type: boolean
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskManagerUnavailableResponse'
+          description: Task manager is unavailable
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleanUpRiskEngineErrorResponse'
+          description: Unexpected error
+      summary: Cleanup the Risk Engine
+      tags:
+        - Security Entity Analytics API
   /api/risk_score/engine/schedule_now:
     post:
       description: >-
@@ -592,6 +675,7 @@ components:
     AssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+        - $ref: '#/components/schemas/AssetCriticalityRecordEcsParts'
         - type: object
           properties:
             '@timestamp':
@@ -601,6 +685,46 @@ components:
               type: string
           required:
             - '@timestamp'
+    AssetCriticalityRecordEcsParts:
+      type: object
+      properties:
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - asset
+        host:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+        user:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+      required:
+        - asset
     AssetCriticalityRecordIdParts:
       type: object
       properties:
@@ -614,6 +738,27 @@ components:
       required:
         - id_value
         - id_field
+    CleanUpRiskEngineErrorResponse:
+      type: object
+      properties:
+        cleanup_successful:
+          example: false
+          type: boolean
+        errors:
+          items:
+            type: object
+            properties:
+              error:
+                type: string
+              seq:
+                type: integer
+            required:
+              - seq
+              - error
+          type: array
+      required:
+        - cleanup_successful
+        - errors
     CreateAssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
@@ -623,9 +768,27 @@ components:
               $ref: '#/components/schemas/AssetCriticalityLevel'
           required:
             - criticality_level
+    EngineDataviewUpdateResult:
+      type: object
+      properties:
+        changes:
+          type: object
+          properties:
+            indexPatterns:
+              items:
+                type: string
+              type: array
+        type:
+          type: string
+      required:
+        - type
     EngineDescriptor:
       type: object
       properties:
+        error:
+          type: object
+        fieldHistoryLength:
+          type: integer
         filter:
           type: string
         indexPattern:
@@ -634,16 +797,112 @@ components:
           $ref: '#/components/schemas/EngineStatus'
         type:
           $ref: '#/components/schemas/EntityType'
+      required:
+        - type
+        - indexPattern
+        - status
+        - fieldHistoryLength
     EngineStatus:
       enum:
         - installing
         - started
         - stopped
+        - updating
+        - error
       type: string
     Entity:
       oneOf:
         - $ref: '#/components/schemas/UserEntity'
         - $ref: '#/components/schemas/HostEntity'
+    EntityRiskLevels:
+      enum:
+        - Unknown
+        - Low
+        - Moderate
+        - High
+        - Critical
+      type: string
+    EntityRiskScoreRecord:
+      type: object
+      properties:
+        '@timestamp':
+          description: The time at which the risk score was calculated.
+          example: '2017-07-21T17:32:28Z'
+          format: date-time
+          type: string
+        calculated_level:
+          $ref: '#/components/schemas/EntityRiskLevels'
+          description: Lexical description of the entity's risk.
+          example: Critical
+        calculated_score:
+          description: The raw numeric value of the given entity's risk score.
+          format: double
+          type: number
+        calculated_score_norm:
+          description: >-
+            The normalized numeric value of the given entity's risk score.
+            Useful for comparing with other entities.
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        category_1_count:
+          description: >-
+            The number of risk input documents that contributed to the Category
+            1 score (`category_1_score`).
+          format: integer
+          type: number
+        category_1_score:
+          description: >-
+            The contribution of Category 1 to the overall risk score
+            (`calculated_score`). Category 1 contains Detection Engine Alerts.
+          format: double
+          type: number
+        category_2_count:
+          format: integer
+          type: number
+        category_2_score:
+          format: double
+          type: number
+        criticality_level:
+          $ref: '#/components/schemas/AssetCriticalityLevel'
+        criticality_modifier:
+          format: double
+          type: number
+        id_field:
+          description: >-
+            The identifier field defining this risk score. Coupled with
+            `id_value`, uniquely identifies the entity being scored.
+          example: host.name
+          type: string
+        id_value:
+          description: >-
+            The identifier value defining this risk score. Coupled with
+            `id_field`, uniquely identifies the entity being scored.
+          example: example.host
+          type: string
+        inputs:
+          description: >-
+            A list of the highest-risk documents contributing to this risk
+            score. Useful for investigative purposes.
+          items:
+            $ref: '#/components/schemas/RiskScoreInput'
+          type: array
+        notes:
+          items:
+            type: string
+          type: array
+      required:
+        - '@timestamp'
+        - id_field
+        - id_value
+        - calculated_level
+        - calculated_score
+        - calculated_score_norm
+        - category_1_score
+        - category_1_count
+        - inputs
+        - notes
     EntityType:
       enum:
         - user
@@ -652,43 +911,26 @@ components:
     HostEntity:
       type: object
       properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
         entity:
           type: object
           properties:
-            definitionId:
+            name:
               type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            firstSeenTimestamp:
-              format: date-time
-              type: string
-            id:
-              type: string
-            identityFields:
-              items:
-                type: string
-              type: array
-            lastSeenTimestamp:
-              format: date-time
-              type: string
-            schemaVersion:
-              type: string
-            type:
-              enum:
-                - node
+            source:
               type: string
           required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
+            - name
+            - source
         host:
           type: object
           properties:
@@ -718,12 +960,18 @@ components:
               type: array
             name:
               type: string
+            risk:
+              $ref: '#/components/schemas/EntityRiskScoreRecord'
             type:
               items:
                 type: string
               type: array
           required:
             - name
+      required:
+        - '@timestamp'
+        - host
+        - entity
     IdField:
       enum:
         - host.name
@@ -760,6 +1008,44 @@ components:
       properties:
         success:
           type: boolean
+    RiskScoreInput:
+      description: A generic representation of a document contributing to a Risk Score.
+      type: object
+      properties:
+        category:
+          description: The risk category of the risk input document.
+          example: category_1
+          type: string
+        contribution_score:
+          format: double
+          type: number
+        description:
+          description: A human-readable description of the risk input document.
+          example: 'Generated from Detection Engine Rule: Malware Prevention Alert'
+          type: string
+        id:
+          description: The unique identifier (`_id`) of the original source document
+          example: 91a93376a507e86cfbf282166275b89f9dbdb1f0be6c8103c6ff2909ca8e1a1c
+          type: string
+        index:
+          description: The unique index (`_index`) of the original source document
+          example: .internal.alerts-security.alerts-default-000001
+          type: string
+        risk_score:
+          description: The weighted risk score of the risk input document.
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        timestamp:
+          description: The @timestamp of the risk input document.
+          example: '2017-07-21T17:32:28Z'
+          type: string
+      required:
+        - id
+        - index
+        - description
+        - category
     TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object
@@ -775,43 +1061,26 @@ components:
     UserEntity:
       type: object
       properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
         entity:
           type: object
           properties:
-            definitionId:
+            name:
               type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            firstSeenTimestamp:
-              format: date-time
-              type: string
-            id:
-              type: string
-            identityFields:
-              items:
-                type: string
-              type: array
-            lastSeenTimestamp:
-              format: date-time
-              type: string
-            schemaVersion:
-              type: string
-            type:
-              enum:
-                - node
+            source:
               type: string
           required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
+            - name
+            - source
         user:
           type: object
           properties:
@@ -837,12 +1106,18 @@ components:
               type: array
             name:
               type: string
+            risk:
+              $ref: '#/components/schemas/EntityRiskScoreRecord'
             roles:
               items:
                 type: string
               type: array
           required:
             - name
+      required:
+        - '@timestamp'
+        - user
+        - entity
   securitySchemes:
     BasicAuth:
       scheme: basic
@@ -852,3 +1127,4 @@ security:
 tags:
   - description: ''
     name: Security Entity Analytics API
+    x-displayName: Security entity analytics

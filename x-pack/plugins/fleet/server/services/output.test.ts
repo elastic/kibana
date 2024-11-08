@@ -1864,11 +1864,43 @@ describe('Output Service', () => {
 
     it('Call removeOutputFromAll before deleting the output', async () => {
       const soClient = getMockedSoClient();
+      await outputService.delete(soClient, 'output-test');
+      expect(mockedAgentPolicyService.removeOutputFromAll).toBeCalledWith(
+        undefined,
+        'output-test',
+        {
+          force: false,
+        }
+      );
+      expect(mockedPackagePolicyService.removeOutputFromAll).toBeCalledWith(
+        undefined,
+        'output-test',
+        {
+          force: false,
+        }
+      );
+      expect(soClient.delete).toBeCalled();
+    });
+
+    it('Call removeOutputFromAll with with force before deleting the output, if deleted from preconfiguration', async () => {
+      const soClient = getMockedSoClient();
       await outputService.delete(soClient, 'existing-preconfigured-default-output', {
         fromPreconfiguration: true,
       });
-      expect(mockedAgentPolicyService.removeOutputFromAll).toBeCalled();
-      expect(mockedPackagePolicyService.removeOutputFromAll).toBeCalled();
+      expect(mockedAgentPolicyService.removeOutputFromAll).toBeCalledWith(
+        undefined,
+        'existing-preconfigured-default-output',
+        {
+          force: true,
+        }
+      );
+      expect(mockedPackagePolicyService.removeOutputFromAll).toBeCalledWith(
+        undefined,
+        'existing-preconfigured-default-output',
+        {
+          force: true,
+        }
+      );
       expect(soClient.delete).toBeCalled();
     });
 

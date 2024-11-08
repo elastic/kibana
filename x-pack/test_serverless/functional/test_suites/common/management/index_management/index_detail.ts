@@ -33,9 +33,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.clickCreateIndexSaveButton();
       await pageObjects.indexManagement.expectIndexToExist(testIndexName);
     });
-    it('index with no documents', async () => {
-      await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
-      await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
+    describe('can view index details', function () {
+      this.tags(['skipSvlSearch']);
+      it('index with no documents', async () => {
+        await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
+        await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
+      });
     });
   });
 };

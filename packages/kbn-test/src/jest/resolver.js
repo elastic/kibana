@@ -51,6 +51,13 @@ module.exports = (request, options) => {
     });
   }
 
+  if (request === '@launchdarkly/js-sdk-common') {
+    return resolve.sync('@launchdarkly/js-sdk-common/dist/cjs/index.cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
   if (request === `elastic-apm-node`) {
     return APM_AGENT_MOCK;
   }
@@ -70,7 +77,7 @@ module.exports = (request, options) => {
       return FILE_MOCK;
     }
 
-    if (reqExt === '.worker' && (reqBasename.endsWith('.ace') || reqBasename.endsWith('.editor'))) {
+    if (reqExt === '.worker' && reqBasename.endsWith('.editor')) {
       return WORKER_MOCK;
     }
   }

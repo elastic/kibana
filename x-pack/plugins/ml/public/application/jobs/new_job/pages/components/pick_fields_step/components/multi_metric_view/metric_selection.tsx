@@ -7,8 +7,9 @@
 
 import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState, useMemo } from 'react';
-import type { AggFieldPair } from '@kbn/ml-anomaly-utils';
+import type { AggFieldPair, Aggregation, Field } from '@kbn/ml-anomaly-utils';
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useUiSettings } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { MultiMetricJobCreator } from '../../../../../common/job_creator';
@@ -64,8 +65,11 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
   function addDetector(selectedOptionsIn: DropDownLabel[]) {
     if (selectedOptionsIn !== null && selectedOptionsIn.length) {
       const option = selectedOptionsIn[0] as DropDownLabel;
-      if (typeof option !== 'undefined') {
-        const newPair = { agg: option.agg, field: option.field };
+      if (typeof option !== 'undefined' && isPopulatedObject(option, ['agg', 'field'])) {
+        const newPair = {
+          agg: option.agg as Aggregation,
+          field: option.field as Field,
+        };
         setAggFieldPairList([...aggFieldPairList, newPair]);
         setSelectedOptions([]);
       } else {

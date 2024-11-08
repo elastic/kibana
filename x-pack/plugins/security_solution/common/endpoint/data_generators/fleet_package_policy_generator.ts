@@ -14,7 +14,7 @@ type PartialPackagePolicy = Partial<Omit<PackagePolicy, 'inputs'>> & {
   inputs?: PackagePolicy['inputs'];
 };
 
-type PartialEndpointPolicyData = Partial<Omit<PolicyData, 'inputs'>> & {
+export type PartialEndpointPolicyData = Partial<Omit<PolicyData, 'inputs'>> & {
   inputs?: PolicyData['inputs'];
 };
 

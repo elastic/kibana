@@ -52,7 +52,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
     );
   }
 
-  const installManagedCommands = StandaloneInstructions(kibanaVersion);
+  const installManagedCommands = StandaloneInstructions({ agentVersion: kibanaVersion });
 
   const steps = [
     ConfigureStandaloneAgentStep({

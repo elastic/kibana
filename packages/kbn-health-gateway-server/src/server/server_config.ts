@@ -44,7 +44,7 @@ const configSchema = schema.object(
       defaultValue: 120000,
     }),
     ssl: sslSchema,
-    restrictInternalApis: schema.boolean({ defaultValue: false }),
+    restrictInternalApis: schema.boolean({ defaultValue: true }),
   },
   {
     validate: (rawConfig) => {

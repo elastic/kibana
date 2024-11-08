@@ -205,15 +205,15 @@ export const THRESHOLD_SUPPRESSION_PER_RULE_EXECUTION_WARNING = i18n.translate(
 export const getEnableThresholdSuppressionLabel = (fields: string[] | undefined) =>
   fields?.length ? (
     <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.enableThresholdSuppressionForFieldsLabel"
-      defaultMessage="Suppress alerts by selected fields: {fieldsString} (Technical Preview)"
+      id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ga.enableThresholdSuppressionForFieldsLabel"
+      defaultMessage="Suppress alerts by selected fields: {fieldsString}"
       values={{ fieldsString: <strong>{fields.join(', ')}</strong> }}
     />
   ) : (
     i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.enableThresholdSuppressionLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ga.enableThresholdSuppressionLabel',
       {
-        defaultMessage: 'Suppress alerts (Technical Preview)',
+        defaultMessage: 'Suppress alerts',
       }
     )
   );

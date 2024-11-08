@@ -10,6 +10,7 @@
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
+import type { ElasticsearchClientWrapperFactory } from './elasticsearch_client_wrapper';
 import {
   currentVersion,
   defaultKibanaIndex,
@@ -80,8 +81,14 @@ export const baselineTypes: Array<SavedObjectsType<any>> = [
   },
 ];
 
-export const getUpToDateBaselineTypes = (filterDeprecated: boolean) =>
-  baselineTypes.filter((type) => !filterDeprecated || type.name !== 'deprecated');
+export const getUpToDateBaselineTypes = (filterDeprecated: boolean) => [
+  ...baselineTypes.filter((type) => !filterDeprecated || type.name !== 'deprecated'),
+  // we add a new SO type
+  {
+    ...defaultType,
+    name: 'recent',
+  },
+];
 
 export const getCompatibleBaselineTypes = (filterDeprecated: boolean) =>
   getUpToDateBaselineTypes(filterDeprecated).map<SavedObjectsType>((type) => {
@@ -267,6 +274,7 @@ interface GetMutatedMigratorParams {
   filterDeprecated?: boolean;
   types?: Array<SavedObjectsType<any>>;
   settings?: Record<string, any>;
+  clientWrapperFactory?: ElasticsearchClientWrapperFactory;
 }
 
 export const getUpToDateMigratorTestKit = async ({
@@ -304,12 +312,48 @@ export const getReindexingMigratorTestKit = async ({
   filterDeprecated = false,
   types = getReindexingBaselineTypes(filterDeprecated),
   kibanaVersion = nextMinor,
+  clientWrapperFactory,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
   return await getKibanaMigratorTestKit({
     logFilePath,
     types,
     kibanaVersion,
+    clientWrapperFactory,
+    settings: {
+      ...settings,
+      migrations: {
+        discardUnknownObjects: nextMinor,
+        discardCorruptObjects: nextMinor,
+        ...settings.migrations,
+      },
+    },
+  });
+};
+
+export const kibanaSplitIndex = `${defaultKibanaIndex}_split`;
+export const getRelocatingMigratorTestKit = async ({
+  logFilePath = defaultLogFilePath,
+  filterDeprecated = false,
+  // relocate 'task' and 'basic' objects to a new SO index
+  relocateTypes = {
+    task: kibanaSplitIndex,
+    basic: kibanaSplitIndex,
+  },
+  types = getReindexingBaselineTypes(filterDeprecated).map((type) => ({
+    ...type,
+    ...(relocateTypes[type.name] && { indexPattern: relocateTypes[type.name] }),
+  })),
+  kibanaVersion = nextMinor,
+  clientWrapperFactory,
+  settings = {},
+}: GetMutatedMigratorParams & { relocateTypes?: Record<string, string> } = {}) => {
+  return await getKibanaMigratorTestKit({
+    logFilePath,
+    types,
+    kibanaVersion,
+    clientWrapperFactory,
+    defaultIndexTypesMap: baselineIndexTypesMap,
     settings: {
       ...settings,
       migrations: {

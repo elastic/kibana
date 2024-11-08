@@ -310,13 +310,6 @@ export const DOCS = i18n.translate('securitySolutionPackages.ecsDataQualityDashb
   defaultMessage: 'Docs',
 });
 
-export const INCOMPATIBLE_FIELDS = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.incompatibleFields',
-  {
-    defaultMessage: 'Incompatible fields',
-  }
-);
-
 export const INDICES = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.indices', {
   defaultMessage: 'Indices',
 });
@@ -387,5 +380,127 @@ export const VIEW_INDEX_METADATA = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.errors.viewIndexMetadata',
   {
     defaultMessage: 'view_index_metadata',
+  }
+);
+
+export const FIELD = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.field', {
+  defaultMessage: 'Field',
+});
+
+export const ECS_MAPPING_TYPE_EXPECTED = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.ecsMappingTypeExpected',
+  {
+    defaultMessage: 'ECS mapping type (expected)',
+  }
+);
+
+export const INDEX_MAPPING_TYPE_ACTUAL = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.indexMappingTypeActual',
+  {
+    defaultMessage: 'Index mapping type (actual)',
+  }
+);
+
+export const DOCUMENT_VALUES_ACTUAL = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.documentValuesActual',
+  {
+    defaultMessage: 'Document values (actual)',
+  }
+);
+
+export const ECS_VALUES_EXPECTED = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.ecsValuesExpected',
+  {
+    defaultMessage: 'ECS values (expected)',
+  }
+);
+
+export const INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE = (indexName: string) =>
+  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.incompatibleFieldMappings', {
+    values: { indexName },
+    defaultMessage: 'Incompatible field mappings - {indexName}',
+  });
+
+export const INCOMPATIBLE_FIELD_VALUES_TABLE_TITLE = (indexName: string) =>
+  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.incompatibleFieldValues', {
+    values: { indexName },
+    defaultMessage: 'Incompatible field values - {indexName}',
+  });
+
+export const SAME_FAMILY_BADGE_LABEL = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.sameFamilyBadgeLabel',
+  {
+    defaultMessage: 'same family',
+  }
+);
+
+export const INCOMPATIBLE_FIELDS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.incompatibleFields',
+  {
+    defaultMessage: 'Incompatible fields',
+  }
+);
+
+export const SAME_FAMILY = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.sameFamily',
+  {
+    defaultMessage: 'Same family',
+  }
+);
+
+export const CUSTOM_FIELDS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.customFields',
+  {
+    defaultMessage: 'Custom fields',
+  }
+);
+
+export const ECS_COMPLIANT_FIELDS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.ecsCompliantFields',
+  {
+    defaultMessage: 'ECS compliant fields',
+  }
+);
+
+export const ALL_FIELDS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.allFields',
+  {
+    defaultMessage: 'All fields',
+  }
+);
+
+export const INCOMPATIBLE_CALLOUT = (version: string) =>
+  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.incompatibleCallout', {
+    values: { version },
+    defaultMessage:
+      "Fields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version {version}.",
+  });
+
+export const INCOMPATIBLE_CALLOUT_TITLE = (fieldCount: number) =>
+  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.incompatibleCalloutTitle', {
+    values: { fieldCount },
+    defaultMessage: '{fieldCount} incompatible {fieldCount, plural, =1 {field} other {fields}}',
+  });
+
+export const DETECTION_ENGINE_RULES_MAY_NOT_MATCH = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.detectionEngineRulesWontWorkMessage',
+  {
+    defaultMessage:
+      '❌ Detection engine rules referencing these fields may not match them correctly',
+  }
+);
+
+export const PAGES_MAY_NOT_DISPLAY_EVENTS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.pagesMayNotDisplayEventsMessage',
+  {
+    defaultMessage:
+      '❌ Pages may not display some events or fields due to unexpected field mappings or values',
+  }
+);
+
+export const MAPPINGS_THAT_CONFLICT_WITH_ECS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.mappingThatConflictWithEcsMessage',
+  {
+    defaultMessage: "❌ Mappings or field values that don't comply with ECS are not supported",
   }
 );

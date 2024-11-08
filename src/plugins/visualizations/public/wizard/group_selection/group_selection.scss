@@ -10,12 +10,11 @@
 }
 
 .visNewVisDialogGroupSelection__footer {
+  padding: 0 $euiSizeXL $euiSizeL;
+  background: $euiColorLightestShade;
   @include euiBreakpoint('xs', 's') {
     background: $euiColorEmptyShade;
   }
-
-  padding: 0 $euiSizeXL $euiSizeL;
-  background: $euiColorLightestShade;
 }
 
 .visNewVisDialogGroupSelection__footerDescriptionList {

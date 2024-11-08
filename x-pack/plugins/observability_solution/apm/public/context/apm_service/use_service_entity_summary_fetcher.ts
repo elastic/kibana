@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useEntityCentricExperienceSetting } from '../../hooks/use_entity_centric_experience_setting';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { APIReturnType } from '../../services/rest/create_call_apm_api';
-import { useEntityManagerEnablementContext } from '../entity_manager_context/use_entity_manager_enablement_context';
 
 export type ServiceEntitySummary =
   APIReturnType<'GET /internal/apm/entities/services/{serviceName}/summary'>;
@@ -21,17 +21,17 @@ export function useServiceEntitySummaryFetcher({
   end?: string;
   environment?: string;
 }) {
-  const { isEntityCentricExperienceViewEnabled } = useEntityManagerEnablementContext();
+  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
 
   const { data, status } = useFetcher(
     (callAPI) => {
-      if (isEntityCentricExperienceViewEnabled && serviceName && environment) {
+      if (isEntityCentricExperienceEnabled && serviceName && environment) {
         return callAPI('GET /internal/apm/entities/services/{serviceName}/summary', {
           params: { path: { serviceName }, query: { environment } },
         });
       }
     },
-    [environment, isEntityCentricExperienceViewEnabled, serviceName]
+    [environment, isEntityCentricExperienceEnabled, serviceName]
   );
 
   return { serviceEntitySummary: data, serviceEntitySummaryStatus: status };

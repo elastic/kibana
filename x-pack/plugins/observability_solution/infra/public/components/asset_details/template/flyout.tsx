@@ -47,7 +47,6 @@ export const Flyout = ({
   return (
     <EuiFlyout
       onClose={handleOnClose}
-      ownFocus={false}
       data-component-name={ASSET_DETAILS_FLYOUT_COMPONENT_NAME}
       data-asset-type={asset.type}
     >

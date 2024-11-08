@@ -8,7 +8,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
-
 import { noop } from 'lodash/fp';
 import { type TimelineType, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { SecurityPageName } from '../../../app/types';
@@ -17,7 +16,7 @@ import * as i18n from './translations';
 import type { TimelineTab } from './types';
 import { TimelineTabsStyle } from './types';
 import { useKibana } from '../../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+
 export interface UseTimelineTypesArgs {
   defaultTimelineCount?: number | null;
   templateTimelineCount?: number | null;
@@ -42,17 +41,11 @@ export const useTimelineTypes = ({
       : TimelineTypeEnum.default
   );
 
-  const notesEnabled = useIsExperimentalFeatureEnabled('securitySolutionNotesEnabled');
-
   const timelineUrl = useMemo(() => {
     return formatUrl(getTimelineTabsUrl(TimelineTypeEnum.default, urlSearch));
   }, [formatUrl, urlSearch]);
   const templateUrl = useMemo(() => {
     return formatUrl(getTimelineTabsUrl(TimelineTypeEnum.template, urlSearch));
-  }, [formatUrl, urlSearch]);
-
-  const notesUrl = useMemo(() => {
-    return formatUrl(getTimelineTabsUrl('notes', urlSearch));
   }, [formatUrl, urlSearch]);
 
   const goToTimeline = useCallback(
@@ -69,14 +62,6 @@ export const useTimelineTypes = ({
       navigateToUrl(templateUrl);
     },
     [navigateToUrl, templateUrl]
-  );
-
-  const goToNotes = useCallback(
-    (ev: React.SyntheticEvent) => {
-      ev.preventDefault();
-      navigateToUrl(notesUrl);
-    },
-    [navigateToUrl, notesUrl]
   );
 
   const getFilterOrTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = useCallback(
@@ -132,17 +117,6 @@ export const useTimelineTypes = ({
               {tab.name}
             </EuiTab>
           ))}
-          {notesEnabled && (
-            <EuiTab
-              data-test-subj="timeline-notes"
-              isSelected={tabName === 'notes'}
-              key="timeline-notes"
-              href={notesUrl}
-              onClick={goToNotes}
-            >
-              {'Notes'}
-            </EuiTab>
-          )}
         </EuiTabs>
         <EuiSpacer size="m" />
       </>

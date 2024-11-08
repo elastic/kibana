@@ -14,6 +14,8 @@ import { createDataViewDataSource, createEsqlDataSource } from '../../../../../c
 import { DataSourceCategory, RootContext, SolutionType } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from './profile';
+import { DataGridDensity } from '@kbn/unified-data-table';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 
 const mockServices = createContextAwarenessMocks().profileProviderServices;
 
@@ -115,7 +117,9 @@ describe('logsDataSourceProfileProvider', () => {
       const row = buildDataTableRecord({ fields: { 'log.level': 'info' } });
       const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
       const getRowIndicatorProvider =
-        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined);
+        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
+          context: { category: DataSourceCategory.Logs },
+        });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
       });
@@ -128,7 +132,9 @@ describe('logsDataSourceProfileProvider', () => {
       const row = buildDataTableRecord({ fields: { other: 'info' } });
       const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
       const getRowIndicatorProvider =
-        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined);
+        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
+          context: { category: DataSourceCategory.Logs },
+        });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
       });
@@ -139,7 +145,9 @@ describe('logsDataSourceProfileProvider', () => {
 
     it('should not set the color indicator handler if data view does not have log level field', () => {
       const getRowIndicatorProvider =
-        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined);
+        logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
+          context: { category: DataSourceCategory.Logs },
+        });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithoutLogLevel,
       });
@@ -150,8 +158,19 @@ describe('logsDataSourceProfileProvider', () => {
 
   describe('getCellRenderers', () => {
     it('should return cell renderers for log level fields', () => {
-      const getCellRenderers = logsDataSourceProfileProvider.profile.getCellRenderers?.(() => ({}));
-      const cellRenderers = getCellRenderers?.();
+      const getCellRenderers = logsDataSourceProfileProvider.profile.getCellRenderers?.(
+        () => ({}),
+        {
+          context: { category: DataSourceCategory.Logs },
+        }
+      );
+      const getCellRenderersParams = {
+        actions: { addFilter: jest.fn() },
+        dataView: dataViewWithTimefieldMock,
+        density: DataGridDensity.COMPACT,
+        rowHeight: 0,
+      };
+      const cellRenderers = getCellRenderers?.(getCellRenderersParams);
 
       expect(cellRenderers).toBeDefined();
       expect(cellRenderers?.['log.level']).toBeDefined();
@@ -164,7 +183,9 @@ describe('logsDataSourceProfileProvider', () => {
   describe('getRowAdditionalLeadingControls', () => {
     it('should return the passed additional controls', () => {
       const getRowAdditionalLeadingControls =
-        logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined);
+        logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined, {
+          context: { category: DataSourceCategory.Logs },
+        });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
         dataView: dataViewWithLogLevel,
       });

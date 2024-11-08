@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { omit } from 'lodash/fp';
@@ -132,9 +133,7 @@ describe('getRequestBody', () => {
       },
     ],
   };
-  const knowledgeBase = {
-    latestAlerts: 20,
-  };
+
   const traceOptions = {
     apmUrl: '/app/apm',
     langSmithProject: '',
@@ -145,7 +144,7 @@ describe('getRequestBody', () => {
     const result = getRequestBody({
       alertsIndexPattern,
       anonymizationFields,
-      knowledgeBase,
+      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       traceOptions,
     });
 
@@ -160,8 +159,8 @@ describe('getRequestBody', () => {
       },
       langSmithProject: undefined,
       langSmithApiKey: undefined,
-      size: knowledgeBase.latestAlerts,
       replacements: {},
+      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       subAction: 'invokeAI',
     });
   });
@@ -170,7 +169,7 @@ describe('getRequestBody', () => {
     const result = getRequestBody({
       alertsIndexPattern: undefined,
       anonymizationFields,
-      knowledgeBase,
+      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       traceOptions,
     });
 
@@ -185,8 +184,8 @@ describe('getRequestBody', () => {
       },
       langSmithProject: undefined,
       langSmithApiKey: undefined,
-      size: knowledgeBase.latestAlerts,
       replacements: {},
+      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       subAction: 'invokeAI',
     });
   });
@@ -195,7 +194,7 @@ describe('getRequestBody', () => {
     const withLangSmith = {
       alertsIndexPattern,
       anonymizationFields,
-      knowledgeBase,
+      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       traceOptions: {
         apmUrl: '/app/apm',
         langSmithProject: 'A project',
@@ -216,7 +215,7 @@ describe('getRequestBody', () => {
       },
       langSmithApiKey: withLangSmith.traceOptions.langSmithApiKey,
       langSmithProject: withLangSmith.traceOptions.langSmithProject,
-      size: knowledgeBase.latestAlerts,
+      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       replacements: {},
       subAction: 'invokeAI',
     });
@@ -226,8 +225,8 @@ describe('getRequestBody', () => {
     const result = getRequestBody({
       alertsIndexPattern,
       anonymizationFields,
-      knowledgeBase,
       selectedConnector: connector, // <-- selectedConnector is provided
+      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       traceOptions,
     });
 
@@ -242,7 +241,7 @@ describe('getRequestBody', () => {
       },
       langSmithProject: undefined,
       langSmithApiKey: undefined,
-      size: knowledgeBase.latestAlerts,
+      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       replacements: {},
       subAction: 'invokeAI',
     });
@@ -258,8 +257,8 @@ describe('getRequestBody', () => {
       alertsIndexPattern,
       anonymizationFields,
       genAiConfig, // <-- genAiConfig is provided
-      knowledgeBase,
       selectedConnector: connector, // <-- selectedConnector is provided
+      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       traceOptions,
     });
 
@@ -274,8 +273,8 @@ describe('getRequestBody', () => {
       },
       langSmithProject: undefined,
       langSmithApiKey: undefined,
-      size: knowledgeBase.latestAlerts,
       replacements: {},
+      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       subAction: 'invokeAI',
     });
   });

@@ -12,6 +12,7 @@ import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { TextBasedLanguages } from '@kbn/esql-utils';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
@@ -24,6 +25,7 @@ import { useAppStateSelector } from '../../state_management/discover_app_state_c
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
+import './top_nav.scss';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -192,6 +194,7 @@ export const DiscoverTopNav = ({
       badges: topNavBadges,
       config: topNavMenu,
       setMenuMountPoint: setHeaderActionMenu,
+      className: 'dscTopNav', // FIXME: Delete the scss file and pass `gutterSize="xxs"` instead (after next Eui release)
     };
   }, [
     setHeaderActionMenu,
@@ -232,6 +235,12 @@ export const DiscoverTopNav = ({
     stateContainer,
     uiSettings,
   ]);
+
+  const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
+    if (isOpen) {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.esqlDocs);
+    }
+  }, []);
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
 
@@ -278,6 +287,7 @@ export const DiscoverTopNav = ({
             <searchBarCustomization.PrependFilterBar />
           ) : undefined
         }
+        onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

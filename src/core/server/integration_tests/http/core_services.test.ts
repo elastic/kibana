@@ -38,6 +38,7 @@ describe('http service', () => {
       root = createRoot({
         plugins: { initialize: false },
         elasticsearch: { skipStartupConnectionCheck: true },
+        server: { restrictInternalApis: false },
       });
       await root.preboot();
     });
@@ -185,6 +186,7 @@ describe('http service', () => {
       root = createRoot({
         plugins: { initialize: false },
         elasticsearch: { skipStartupConnectionCheck: true },
+        server: { restrictInternalApis: false },
       });
       await root.preboot();
     });

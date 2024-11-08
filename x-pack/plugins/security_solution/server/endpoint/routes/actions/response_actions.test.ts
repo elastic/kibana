@@ -71,7 +71,8 @@ import type { HapiReadableStream, SecuritySolutionRequestHandlerContext } from '
 import { createHapiReadableStreamMock } from '../../services/actions/mocks';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { omit, set } from 'lodash';
+import { omit } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { responseActionsClientMock } from '../../services/actions/clients/mocks';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
@@ -142,7 +143,9 @@ describe('Response actions', () => {
       const routerMock = httpServiceMock.createRouter();
       mockResponse = httpServerMock.createResponseFactory();
       const startContract = createMockEndpointAppContextServiceStartContract();
-      (startContract.messageSigningService?.sign as jest.Mock).mockImplementation(() => {
+      (
+        startContract.fleetStartServices.messageSigningService?.sign as jest.Mock
+      ).mockImplementation(() => {
         return {
           data: 'thisisthedata',
           signature: 'thisisasignature',
@@ -163,6 +166,7 @@ describe('Response actions', () => {
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...startContract,
+        esClient: mockScopedClient.asInternalUser,
         licenseService,
       });
 

@@ -34,8 +34,38 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
+    describe('by-value', () => {
+      it('creates new lens embeddable', async () => {
+        await canvas.createNewVis('lens');
+        await lens.goToTimeRange();
+        await lens.configureDimension({
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'date_histogram',
+          field: '@timestamp',
+        });
+        await lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'average',
+          field: 'bytes',
+        });
+        await lens.saveAndReturn();
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.exists('xyVisChart');
+      });
+
+      it('edits lens by-value embeddable', async () => {
+        await header.waitUntilLoadingHasFinished();
+        await dashboardPanelActions.clickEdit();
+        await lens.saveAndReturn();
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.exists('xyVisChart');
+      });
+    });
+
     describe('by-reference', () => {
       it('adds existing lens embeddable from the visualize library', async () => {
+        await canvas.goToListingPageViaBreadcrumbs();
+        await canvas.createNewWorkpad();
         await canvas.clickAddFromLibrary();
         await dashboardAddPanel.addEmbeddable('Artistpreviouslyknownaslens', 'lens');
         await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslens');
@@ -57,39 +87,9 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       });
     });
 
-    describe('by-value', () => {
-      it('creates new lens embeddable', async () => {
-        await canvas.addNewPage();
-        await canvas.createNewVis('lens');
-        await lens.goToTimeRange();
-        await lens.configureDimension({
-          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'date_histogram',
-          field: '@timestamp',
-        });
-        await lens.configureDimension({
-          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'average',
-          field: 'bytes',
-        });
-        await lens.saveAndReturn();
-        await header.waitUntilLoadingHasFinished();
-        await testSubjects.exists('xyVisChart');
-      });
-
-      it('edits lens by-value embeddable', async () => {
-        await header.waitUntilLoadingHasFinished();
-        const panelHeader = await testSubjects.find('embeddablePanelHeading-');
-        await dashboardPanelActions.openContextMenu(panelHeader);
-        await dashboardPanelActions.clickEdit();
-        await lens.saveAndReturn();
-        await header.waitUntilLoadingHasFinished();
-        await testSubjects.exists('xyVisChart');
-      });
-    });
-
     describe('switch page smoke test', () => {
       it('loads embeddables on page change', async () => {
+        await canvas.addNewPage();
         await canvas.goToPreviousPage();
         await header.waitUntilLoadingHasFinished();
         await lens.assertLegacyMetric('Maximum of bytes', '16,788');

@@ -85,7 +85,7 @@ export const getPendingActionsSummary = async (
         // If the metadata documents for all agents has not yet been retrieved, do it now
         if (!endpointMetadataLastUpdated) {
           endpointMetadataLastUpdated = (
-            await metadataService.findHostMetadataForFleetAgents(esClient, agentIDs)
+            await metadataService.findHostMetadataForFleetAgents(agentIDs)
           ).reduce((acc, endpointMetadata) => {
             acc[endpointMetadata.elastic.agent.id] = new Date(endpointMetadata.event.created);
             return acc;

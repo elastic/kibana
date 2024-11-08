@@ -61,6 +61,7 @@ const fieldConfig = schema.maybe(
       by: schema.string(),
       order: schema.maybe(schema.string()),
     }),
+    value: schema.maybe(schema.string()),
   })
 );
 

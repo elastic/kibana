@@ -17,16 +17,23 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { ActionType } from '@kbn/actions-types';
+import { ActionVariable, RulesSettingsFlapping } from '@kbn/alerting-types';
 import {
+  ActionConnector,
+  ActionTypeRegistryContract,
   MinimumScheduleInterval,
   Rule,
+  RuleFormActionsErrors,
   RuleFormBaseErrors,
   RuleFormParamsErrors,
   RuleTypeModel,
   RuleTypeParams,
   RuleTypeRegistryContract,
   RuleTypeWithDescription,
+  RuleUiAction,
 } from '../common/types';
 
 export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
@@ -35,9 +42,11 @@ export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
   params: Rule<Params>['params'];
   schedule: Rule<Params>['schedule'];
   consumer: Rule<Params>['consumer'];
+  actions: RuleUiAction[];
   alertDelay?: Rule<Params>['alertDelay'];
   notifyWhen?: Rule<Params>['notifyWhen'];
   ruleTypeId?: Rule<Params>['ruleTypeId'];
+  flapping?: Rule<Params>['flapping'];
 }
 
 export interface RuleFormPlugins {
@@ -45,28 +54,39 @@ export interface RuleFormPlugins {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   application: ApplicationStart;
-  notification: NotificationsStart;
+  notifications: NotificationsStart;
   charts: ChartsPluginSetup;
+  settings: SettingsStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   docLinks: DocLinksStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
   id?: string;
   formData: RuleFormData<Params>;
   plugins: RuleFormPlugins;
+  connectors: ActionConnector[];
+  connectorTypes: ActionType[];
+  aadTemplateFields: ActionVariable[];
+  availableRuleTypes: RuleTypeWithDescription[];
   baseErrors?: RuleFormBaseErrors;
   paramsErrors?: RuleFormParamsErrors;
+  actionsErrors?: Record<string, RuleFormActionsErrors>;
+  actionsParamsErrors?: Record<string, RuleFormParamsErrors>;
   selectedRuleType: RuleTypeWithDescription;
   selectedRuleTypeModel: RuleTypeModel<Params>;
   multiConsumerSelection?: RuleCreationValidConsumer | null;
+  showMustacheAutocompleteSwitch?: boolean;
   metadata?: Record<string, unknown>;
   minimumScheduleInterval?: MinimumScheduleInterval;
   canShowConsumerSelection?: boolean;
-  validConsumers?: RuleCreationValidConsumer[];
+  validConsumers: RuleCreationValidConsumer[];
+  flappingSettings?: RulesSettingsFlapping;
+  touched?: boolean;
 }
 
 export type InitialRule = Partial<Rule> &

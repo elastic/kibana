@@ -13,9 +13,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
  */
 export const LogTextSeparator: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
-      <EuiFlexItem>
+    <EuiFlexGroup alignItems="center" gutterSize="s" role="row">
+      <EuiFlexItem grow={false} role="cell">
+        {children}
+      </EuiFlexItem>
+      <EuiFlexItem role="cell">
         <EuiHorizontalRule aria-hidden="true" />
       </EuiFlexItem>
     </EuiFlexGroup>

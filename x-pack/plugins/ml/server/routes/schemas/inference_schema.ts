@@ -24,7 +24,7 @@ export const createInferenceSchema = schema.object({
   inferenceId: schema.string(),
 });
 
-export const threadingParamsSchema = schema.maybe(
+export const threadingParamsQuerySchema = schema.maybe(
   schema.object({
     number_of_allocations: schema.maybe(schema.number()),
     threads_per_allocation: schema.maybe(schema.number()),
@@ -33,8 +33,27 @@ export const threadingParamsSchema = schema.maybe(
   })
 );
 
+export const threadingParamsBodySchema = schema.nullable(
+  schema.object({
+    adaptive_allocations: schema.maybe(
+      schema.object({
+        enabled: schema.boolean(),
+        min_number_of_allocations: schema.maybe(schema.number()),
+        max_number_of_allocations: schema.maybe(schema.number()),
+      })
+    ),
+  })
+);
+
 export const updateDeploymentParamsSchema = schema.object({
-  number_of_allocations: schema.number(),
+  number_of_allocations: schema.maybe(schema.number()),
+  adaptive_allocations: schema.maybe(
+    schema.object({
+      enabled: schema.boolean(),
+      min_number_of_allocations: schema.maybe(schema.number()),
+      max_number_of_allocations: schema.maybe(schema.number()),
+    })
+  ),
 });
 
 export const optionalModelIdSchema = schema.object({

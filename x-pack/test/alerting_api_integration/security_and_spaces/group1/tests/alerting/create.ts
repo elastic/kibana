@@ -66,6 +66,10 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                     params: {},
                   },
                 ],
+                flapping: {
+                  look_back_window: 10,
+                  status_change_threshold: 10,
+                },
               })
             );
 
@@ -126,6 +130,10 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
                 revision: 0,
+                flapping: {
+                  look_back_window: 10,
+                  status_change_threshold: 10,
+                },
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });

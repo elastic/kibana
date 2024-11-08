@@ -7,28 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import { useEffect } from 'react';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
-import type { ISearchStart } from '@kbn/data-plugin/public';
 import {
   LensConfigBuilder,
+  LensDataset,
   type LensConfig,
-  type LensMetricConfig,
-  type LensPieConfig,
   type LensGaugeConfig,
-  type LensXYConfig,
   type LensHeatmapConfig,
+  type LensMetricConfig,
   type LensMosaicConfig,
+  type LensPieConfig,
   type LensRegionMapConfig,
   type LensTableConfig,
   type LensTagCloudConfig,
   type LensTreeMapConfig,
-  LensDataset,
+  type LensXYConfig,
 } from '@kbn/lens-embeddable-utils/config_builder';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import { useEffect } from 'react';
 import { DashboardApi } from '../../dashboard_api/types';
+import { dataService, observabilityAssistantService } from '../../services/kibana_services';
 
 const chartTypes = [
   'xy',
@@ -45,25 +43,19 @@ const chartTypes = [
 ] as const;
 
 export function useObservabilityAIAssistantContext({
-  observabilityAIAssistant,
   dashboardApi,
-  search,
-  dataViews,
 }: {
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart | undefined;
   dashboardApi: DashboardApi | undefined;
-  search: ISearchStart;
-  dataViews: DataViewsPublicPluginStart;
 }) {
   useEffect(() => {
-    if (!observabilityAIAssistant) {
+    if (!observabilityAssistantService) {
       return;
     }
 
     const {
       service: { setScreenContext },
       createScreenContextAction,
-    } = observabilityAIAssistant;
+    } = observabilityAssistantService;
 
     return setScreenContext({
       screenDescription:
@@ -122,9 +114,11 @@ export function useObservabilityAIAssistantContext({
                         },
                         metric: {
                           type: 'object',
+                          properties: {},
                         },
                         gauge: {
                           type: 'object',
+                          properties: {},
                         },
                         pie: {
                           type: 'object',
@@ -166,6 +160,7 @@ export function useObservabilityAIAssistantContext({
                         },
                         table: {
                           type: 'object',
+                          properties: {},
                         },
                         tagcloud: {
                           type: 'object',
@@ -205,12 +200,12 @@ export function useObservabilityAIAssistantContext({
                 const [columns] = await Promise.all([
                   getESQLQueryColumns({
                     esqlQuery: query,
-                    search: search.search,
+                    search: dataService.search.search,
                     signal,
                   }),
                 ]);
 
-                const configBuilder = new LensConfigBuilder(dataViews);
+                const configBuilder = new LensConfigBuilder(dataService.dataViews);
 
                 let config: LensConfig;
 
@@ -382,5 +377,5 @@ export function useObservabilityAIAssistantContext({
           ]
         : [],
     });
-  }, [observabilityAIAssistant, dashboardApi, search, dataViews]);
+  }, [dashboardApi]);
 }

@@ -46,9 +46,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     ...buildRuleGroup(
       [
         'dev_metrics',
-        'meta',
         'metadata',
-        'dev_match',
         'mv_expand',
         'stats',
         'dev_inlinestats',
@@ -76,6 +74,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'asc',
         'desc',
         'nulls_order',
+        'match',
       ],
       euiThemeVars.euiColorAccentText,
       true // isBold
@@ -135,8 +134,6 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'lookup_field_multiline_comment',
         'show_line_comment',
         'show_multiline_comment',
-        'meta_line_comment',
-        'meta_multiline_comment',
         'setting',
         'setting_line_comment',
         'settting_multiline_comment',

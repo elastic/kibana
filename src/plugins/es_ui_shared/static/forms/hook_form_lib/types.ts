@@ -141,6 +141,10 @@ export interface FormOptions {
    * Remove empty string field ("") from form data
    */
   stripEmptyFields?: boolean;
+  /**
+   * Remove fields from form data that don't have initial value and are not modified by the user.
+   */
+  stripUnsetFields?: boolean;
 }
 
 export interface FieldHook<T = unknown, I = T> {

@@ -85,7 +85,7 @@
         "label": "FieldDescription",
         "description": [],
         "signature": [
-          "({ fieldsMetadataService, ...props }: React.PropsWithChildren<",
+          "({ fieldsMetadataService, ...props }: ",
           {
             "pluginId": "@kbn/field-utils",
             "scope": "common",
@@ -93,7 +93,7 @@
             "section": "def-common.FieldDescriptionProps",
             "text": "FieldDescriptionProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-field-utils/src/components/field_description/field_description.tsx",
         "deprecated": false,
@@ -102,20 +102,18 @@
           {
             "parentPluginId": "@kbn/field-utils",
             "id": "def-common.FieldDescription.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  fieldsMetadataService,\n  ...props\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/field-utils",
                 "scope": "common",
                 "docId": "kibKbnFieldUtilsPluginApi",
                 "section": "def-common.FieldDescriptionProps",
                 "text": "FieldDescriptionProps"
-              },
-              ">"
+              }
             ],
             "path": "packages/kbn-field-utils/src/components/field_description/field_description.tsx",
             "deprecated": false,
@@ -158,7 +156,7 @@
             "section": "def-common.FieldIconProps",
             "text": "FieldIconProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-field-utils/src/components/field_icon/index.tsx",
         "deprecated": false,

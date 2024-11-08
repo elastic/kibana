@@ -160,7 +160,7 @@ const renderDataTable = async (props: Partial<UnifiedDataTableProps>) => {
   // to "Can't perform a React state update on an unmounted component." warnings in tests,
   // so we need to wait for the next animation frame to avoid this
   await screen.findByTestId('discoverDocTable');
-  await act(() => new Promise((resolve) => requestAnimationFrame(() => resolve())));
+  await act(() => new Promise((resolve) => requestAnimationFrame(() => resolve(void 0))));
 };
 
 async function getComponent(props: UnifiedDataTableProps = getProps()) {
@@ -1107,7 +1107,7 @@ describe('UnifiedDataTable', () => {
       // to "Can't perform a React state update on an unmounted component." warnings in tests,
       // so we need to wait for the next animation frame to avoid this
       await screen.findByTestId('unifiedDataTableCompareDocuments');
-      await act(() => new Promise((resolve) => requestAnimationFrame(() => resolve())));
+      await act(() => new Promise((resolve) => requestAnimationFrame(() => resolve(void 0))));
     };
 
     const getFullScreenButton = () => screen.queryByTestId('dataGridFullScreenButton');
@@ -1351,6 +1351,50 @@ describe('UnifiedDataTable', () => {
         await waitFor(() => {
           expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should have columnVisibility configuration',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          columns: ['message'],
+          canDragAndDropColumns: true,
+        });
+        expect(component.find(EuiDataGrid).last().prop('columnVisibility')).toMatchInlineSnapshot(`
+          Object {
+            "canDragAndDropColumns": true,
+            "setVisibleColumns": [Function],
+            "visibleColumns": Array [
+              "@timestamp",
+              "message",
+            ],
+          }
+        `);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should disable drag&drop if Summary is present',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          columns: [],
+          canDragAndDropColumns: true,
+        });
+        expect(component.find(EuiDataGrid).last().prop('columnVisibility')).toMatchInlineSnapshot(`
+          Object {
+            "canDragAndDropColumns": false,
+            "setVisibleColumns": [Function],
+            "visibleColumns": Array [
+              "@timestamp",
+              "_source",
+            ],
+          }
+        `);
       },
       EXTENDED_JEST_TIMEOUT
     );

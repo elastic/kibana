@@ -7,6 +7,7 @@
 
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { AssociatedFilter } from '../../../common/notes/constants';
 import { ReqStatus } from '../../notes/store/notes.slice';
 import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
 import { InputsModelId } from '../store/inputs/constants';
@@ -527,12 +528,14 @@ export const mockGlobalState: State = {
     ids: ['1'],
     status: {
       fetchNotesByDocumentIds: ReqStatus.Idle,
+      fetchNotesBySavedObjectIds: ReqStatus.Idle,
       createNote: ReqStatus.Idle,
       deleteNotes: ReqStatus.Idle,
       fetchNotes: ReqStatus.Idle,
     },
     error: {
       fetchNotesByDocumentIds: null,
+      fetchNotesBySavedObjectIds: null,
       createNote: null,
       deleteNotes: null,
       fetchNotes: null,
@@ -547,6 +550,8 @@ export const mockGlobalState: State = {
       direction: 'desc' as const,
     },
     filter: '',
+    createdByFilter: '',
+    associatedFilter: AssociatedFilter.all,
     search: '',
     selectedIds: [],
     pendingDeleteIds: [],

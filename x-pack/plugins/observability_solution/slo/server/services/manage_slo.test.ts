@@ -38,7 +38,7 @@ describe('ManageSLO', () => {
 
       expect(mockTransformManager.start).not.toHaveBeenCalled();
       expect(mockSummaryTransformManager.start).not.toHaveBeenCalled();
-      expect(mockRepository.save).not.toHaveBeenCalled();
+      expect(mockRepository.create).not.toHaveBeenCalled();
     });
 
     it('enables the slo when disabled', async () => {
@@ -49,7 +49,9 @@ describe('ManageSLO', () => {
 
       expect(mockTransformManager.start).toMatchSnapshot();
       expect(mockSummaryTransformManager.start).toMatchSnapshot();
-      expect(mockRepository.save).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
+      expect(mockRepository.update).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: true })
+      );
     });
   });
 
@@ -62,7 +64,7 @@ describe('ManageSLO', () => {
 
       expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
-      expect(mockRepository.save).not.toHaveBeenCalled();
+      expect(mockRepository.update).not.toHaveBeenCalled();
     });
 
     it('disables the slo when enabled', async () => {
@@ -73,7 +75,9 @@ describe('ManageSLO', () => {
 
       expect(mockTransformManager.stop).toMatchSnapshot();
       expect(mockSummaryTransformManager.stop).toMatchSnapshot();
-      expect(mockRepository.save).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+      expect(mockRepository.update).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
     });
   });
 });

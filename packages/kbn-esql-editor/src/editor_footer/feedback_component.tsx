@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiIcon, useEuiTheme, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiFlexItem, EuiIcon, useEuiTheme, EuiLink, EuiToolTip, EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
 
@@ -44,27 +44,27 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
         </EuiFlexItem>
       )}
       {!isSpaceReduced && (
-        <>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="editorComment" color="primary" size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              href={FEEDBACK_LINK}
-              external={false}
-              target="_blank"
-              css={css`
-                font-size: 12px;
-                margin-right: ${euiTheme.size.m};
-              `}
-              data-test-subj="ESQLEditor-feedback-link"
-            >
+        <EuiLink
+          href={FEEDBACK_LINK}
+          external={false}
+          target="_blank"
+          css={css`
+            font-size: 12px;
+            margin-right: ${euiTheme.size.m};
+          `}
+          data-test-subj="ESQLEditor-feedback-link"
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="editorComment" color="primary" size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               {i18n.translate('esqlEditor.query.submitFeedback', {
                 defaultMessage: 'Submit feedback',
               })}
-            </EuiLink>
-          </EuiFlexItem>
-        </>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiLink>
       )}
     </>
   );

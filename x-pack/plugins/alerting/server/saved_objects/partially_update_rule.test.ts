@@ -10,16 +10,23 @@ import {
   ISavedObjectsRepository,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-
-import { PartiallyUpdateableRuleAttributes, partiallyUpdateRule } from './partially_update_rule';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  PartiallyUpdateableRuleAttributes,
+  partiallyUpdateRule,
+  partiallyUpdateRuleWithEs,
+} from './partially_update_rule';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '.';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { estypes } from '@elastic/elasticsearch';
+import { RuleExecutionStatuses } from '@kbn/alerting-types';
 
 const MockSavedObjectsClientContract = savedObjectsClientMock.create();
 const MockISavedObjectsRepository =
   MockSavedObjectsClientContract as unknown as jest.Mocked<ISavedObjectsRepository>;
+const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-describe('partially_update_rule', () => {
+describe('partiallyUpdateRule', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -104,6 +111,101 @@ describe('partially_update_rule', () => {
     });
 });
 
+describe('partiallyUpdateRuleWithEs', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.clearAllMocks();
+  });
+
+  test('should work with no options', async () => {
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributesForEsUpdate);
+    expect(esClient.update).toHaveBeenCalledTimes(1);
+    expect(esClient.update).toHaveBeenCalledWith({
+      id: `alert:${MockRuleId}`,
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      doc: {
+        alert: DefaultAttributesForEsUpdate,
+      },
+    });
+  });
+
+  test('should strip unallowed attributes ', async () => {
+    const attributes =
+      AttributesForEsUpdateWithUnallowedFields as unknown as PartiallyUpdateableRuleAttributes;
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await partiallyUpdateRuleWithEs(esClient, MockRuleId, attributes);
+    expect(esClient.update).toHaveBeenCalledWith({
+      id: `alert:${MockRuleId}`,
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      doc: {
+        alert: DefaultAttributesForEsUpdate,
+      },
+    });
+  });
+
+  test('should handle ES errors', async () => {
+    esClient.update.mockRejectedValueOnce(new Error('wops'));
+
+    await expect(
+      partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributes)
+    ).rejects.toThrowError('wops');
+  });
+
+  test('should handle the version option', async () => {
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributesForEsUpdate, {
+      version: 'WzQsMV0=',
+    });
+    expect(esClient.update).toHaveBeenCalledWith({
+      id: `alert:${MockRuleId}`,
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      if_primary_term: 1,
+      if_seq_no: 4,
+      doc: {
+        alert: DefaultAttributesForEsUpdate,
+      },
+    });
+  });
+
+  test('should handle the ignore404 option', async () => {
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributesForEsUpdate, {
+      ignore404: true,
+    });
+    expect(esClient.update).toHaveBeenCalledWith(
+      {
+        id: `alert:${MockRuleId}`,
+        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        doc: {
+          alert: DefaultAttributesForEsUpdate,
+        },
+      },
+      { ignore: [404] }
+    );
+  });
+
+  test('should handle the refresh option', async () => {
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributesForEsUpdate, {
+      refresh: 'wait_for',
+    });
+    expect(esClient.update).toHaveBeenCalledWith({
+      id: `alert:${MockRuleId}`,
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      doc: {
+        alert: DefaultAttributesForEsUpdate,
+      },
+      refresh: 'wait_for',
+    });
+  });
+});
+
 function getMockSavedObjectClients(): Record<
   string,
   jest.Mocked<SavedObjectsClientContract | ISavedObjectsRepository>
@@ -126,6 +228,61 @@ const DefaultAttributes = {
 
 const ExtraneousAttributes = { ...DefaultAttributes, foo: 'bar' };
 
+const DefaultAttributesForEsUpdate: PartiallyUpdateableRuleAttributes = {
+  running: false,
+  executionStatus: {
+    status: 'active' as RuleExecutionStatuses,
+    lastExecutionDate: '2023-01-01T08:44:40.000Z',
+    lastDuration: 12,
+    error: null,
+    warning: null,
+  },
+  monitoring: {
+    run: {
+      calculated_metrics: {
+        success_ratio: 20,
+      },
+      history: [
+        {
+          success: true,
+          timestamp: 1640991880000,
+          duration: 12,
+          outcome: 'succeeded',
+        },
+      ],
+      last_run: {
+        timestamp: '2023-01-01T08:44:40.000Z',
+        metrics: {
+          duration: 12,
+          gap_duration_s: null,
+          total_alerts_created: null,
+          total_alerts_detected: null,
+          total_indexing_duration_ms: null,
+          total_search_duration_ms: null,
+        },
+      },
+    },
+  },
+  snoozeSchedule: [
+    {
+      duration: 1000,
+      id: '1',
+      rRule: {
+        count: 1,
+        dtstart: '2019-02-13T21:01:22.479Z',
+        tzid: 'UTC',
+      },
+    },
+  ],
+};
+
+const AttributesForEsUpdateWithUnallowedFields = {
+  ...DefaultAttributesForEsUpdate,
+  alertTypeId: 'foo',
+  consumer: 'consumer',
+  randomField: 'bar',
+};
+
 const MockRuleId = 'rule-id';
 
 const MockUpdateValue = {
@@ -137,3 +294,13 @@ const MockUpdateValue = {
   },
   references: [],
 };
+
+const MockEsUpdateResponse = (id: string) => ({
+  _index: '.kibana_alerting_cases_9.0.0_001',
+  _id: `alert:${id}`,
+  _version: 3,
+  result: 'updated' as estypes.Result,
+  _shards: { total: 1, successful: 1, failed: 0 },
+  _seq_no: 5,
+  _primary_term: 1,
+});

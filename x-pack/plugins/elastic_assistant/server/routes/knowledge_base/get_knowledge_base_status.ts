@@ -15,23 +15,16 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { KibanaRequest } from '@kbn/core/server';
-import { getKbResource } from './get_kb_resource';
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantPluginRouter, GetElser } from '../../types';
-import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
-import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE } from './constants';
+import { ElasticAssistantPluginRouter } from '../../types';
 import { isV2KnowledgeBaseEnabled } from '../helpers';
 
 /**
  * Get the status of the Knowledge Base index, pipeline, and resources (collection of documents)
  *
  * @param router IRouter for registering routes
- * @param getElser Function to get the default Elser ID
  */
-export const getKnowledgeBaseStatusRoute = (
-  router: ElasticAssistantPluginRouter,
-  getElser: GetElser
-) => {
+export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .get({
       access: 'internal',
@@ -54,39 +47,23 @@ export const getKnowledgeBaseStatusRoute = (
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
         const assistantContext = ctx.elasticAssistant;
         const logger = ctx.elasticAssistant.logger;
-        const telemetry = assistantContext.telemetry;
 
         try {
-          // Use asInternalUser
-          const esClient = (await context.core).elasticsearch.client.asInternalUser;
-          const elserId = await getElser();
-          const kbResource = getKbResource(request);
-
           // FF Check for V2 KB
           const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
 
-          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient(
-            v2KnowledgeBaseEnabled
-          );
+          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient({
+            v2KnowledgeBaseEnabled,
+          });
           if (!kbDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
 
-          // Use old status checks by overriding esStore to use kbDataClient
-          const esStore = new ElasticsearchStore(
-            esClient,
-            kbDataClient.indexTemplateAndPattern.alias,
-            logger,
-            telemetry,
-            elserId,
-            kbResource,
-            kbDataClient
-          );
-
-          const indexExists = await esStore.indexExists();
-          const pipelineExists = await esStore.pipelineExists();
-          const modelExists = await esStore.isModelInstalled(elserId);
+          const indexExists = true; // Installed at startup, always true
+          const pipelineExists = true; // Installed at startup, always true
+          const modelExists = await kbDataClient.isModelInstalled();
           const setupAvailable = await kbDataClient.isSetupAvailable();
+          const isModelDeployed = await kbDataClient.isModelDeployed();
 
           const body: ReadKnowledgeBaseResponse = {
             elser_exists: modelExists,
@@ -96,15 +73,21 @@ export const getKnowledgeBaseStatusRoute = (
             pipeline_exists: pipelineExists,
           };
 
-          if (indexExists && kbResource === ESQL_RESOURCE) {
-            const esqlExists =
-              (
-                await kbDataClient.getKnowledgeBaseDocumentEntries({
-                  query: ESQL_DOCS_LOADED_QUERY,
-                  required: true,
-                })
-              ).length > 0;
-            return response.ok({ body: { ...body, esql_exists: esqlExists } });
+          if (indexExists && isModelDeployed) {
+            const securityLabsExists = v2KnowledgeBaseEnabled
+              ? await kbDataClient.isSecurityLabsDocsLoaded()
+              : true;
+            const userDataExists = v2KnowledgeBaseEnabled
+              ? await kbDataClient.isUserDataExists()
+              : true;
+
+            return response.ok({
+              body: {
+                ...body,
+                security_labs_exists: securityLabsExists,
+                user_data_exists: userDataExists,
+              },
+            });
           }
 
           return response.ok({ body });

@@ -5,61 +5,6 @@
     "functions": [
       {
         "parentPluginId": "@kbn/ml-field-stats-flyout",
-        "id": "def-public.EuiComboBoxWithFieldStats",
-        "type": "Function",
-        "tags": [
-          "component"
-        ],
-        "label": "EuiComboBoxWithFieldStats",
-        "description": [
-          "\nReact component that wraps the EuiComboBox component and adds field statistics functionality.\n"
-        ],
-        "signature": [
-          "(props: React.PropsWithChildren<",
-          {
-            "pluginId": "@kbn/ml-field-stats-flyout",
-            "scope": "public",
-            "docId": "kibKbnMlFieldStatsFlyoutPluginApi",
-            "section": "def-public.EuiComboBoxWithFieldStatsProps",
-            "text": "EuiComboBoxWithFieldStatsProps"
-          },
-          ">) => JSX.Element"
-        ],
-        "path": "x-pack/packages/ml/field_stats_flyout/eui_combo_box_with_field_stats.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ml-field-stats-flyout",
-            "id": "def-public.EuiComboBoxWithFieldStats.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [
-              "- The component props."
-            ],
-            "signature": [
-              "React.PropsWithChildren<",
-              {
-                "pluginId": "@kbn/ml-field-stats-flyout",
-                "scope": "public",
-                "docId": "kibKbnMlFieldStatsFlyoutPluginApi",
-                "section": "def-public.EuiComboBoxWithFieldStatsProps",
-                "text": "EuiComboBoxWithFieldStatsProps"
-              },
-              ">"
-            ],
-            "path": "x-pack/packages/ml/field_stats_flyout/eui_combo_box_with_field_stats.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-field-stats-flyout",
         "id": "def-public.FieldStatsContent",
         "type": "Function",
         "tags": [],
@@ -68,7 +13,7 @@
           "\nRenders the content for the field statistics flyout."
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/ml-field-stats-flyout",
             "scope": "public",
@@ -76,7 +21,7 @@
             "section": "def-public.FieldStatsFlyoutProps",
             "text": "FieldStatsFlyoutProps"
           },
-          ">) => JSX.Element | null"
+          ") => React.JSX.Element | null"
         ],
         "path": "x-pack/packages/ml/field_stats_flyout/field_stats_content.tsx",
         "deprecated": false,
@@ -85,22 +30,20 @@
           {
             "parentPluginId": "@kbn/ml-field-stats-flyout",
             "id": "def-public.FieldStatsContent.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "- The props for the FieldStatsContent component."
             ],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-field-stats-flyout",
                 "scope": "public",
                 "docId": "kibKbnMlFieldStatsFlyoutPluginApi",
                 "section": "def-public.FieldStatsFlyoutProps",
                 "text": "FieldStatsFlyoutProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/packages/ml/field_stats_flyout/field_stats_content.tsx",
             "deprecated": false,
@@ -125,7 +68,7 @@
           "\nRenders a flyout component for displaying field statistics.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/ml-field-stats-flyout",
             "scope": "public",
@@ -133,7 +76,7 @@
             "section": "def-public.FieldStatsFlyoutProps",
             "text": "FieldStatsFlyoutProps"
           },
-          ">) => JSX.Element | null"
+          ") => React.JSX.Element | null"
         ],
         "path": "x-pack/packages/ml/field_stats_flyout/field_stats_flyout.tsx",
         "deprecated": false,
@@ -142,22 +85,20 @@
           {
             "parentPluginId": "@kbn/ml-field-stats-flyout",
             "id": "def-public.FieldStatsFlyout.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "- The component props."
             ],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-field-stats-flyout",
                 "scope": "public",
                 "docId": "kibKbnMlFieldStatsFlyoutPluginApi",
                 "section": "def-public.FieldStatsFlyoutProps",
                 "text": "FieldStatsFlyoutProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/packages/ml/field_stats_flyout/field_stats_flyout.tsx",
             "deprecated": false,
@@ -180,7 +121,7 @@
           "\nProvides field statistics in a flyout component.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/ml-field-stats-flyout",
             "scope": "public",
@@ -188,7 +129,7 @@
             "section": "def-public.FieldStatsFlyoutProviderProps",
             "text": "FieldStatsFlyoutProviderProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/ml/field_stats_flyout/field_stats_flyout_provider.tsx",
         "deprecated": false,
@@ -204,15 +145,13 @@
               "- The component props."
             ],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-field-stats-flyout",
                 "scope": "public",
                 "docId": "kibKbnMlFieldStatsFlyoutPluginApi",
                 "section": "def-public.FieldStatsFlyoutProviderProps",
                 "text": "FieldStatsFlyoutProviderProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/packages/ml/field_stats_flyout/field_stats_flyout_provider.tsx",
             "deprecated": false,
@@ -235,7 +174,7 @@
           "\nRenders a button component for field statistics information.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/ml-field-stats-flyout",
             "scope": "public",
@@ -243,7 +182,7 @@
             "section": "def-public.FieldStatsInfoButtonProps",
             "text": "FieldStatsInfoButtonProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/ml/field_stats_flyout/field_stats_info_button.tsx",
         "deprecated": false,
@@ -252,24 +191,55 @@
           {
             "parentPluginId": "@kbn/ml-field-stats-flyout",
             "id": "def-public.FieldStatsInfoButton.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "- The props for the FieldStatsInfoButton component."
             ],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-field-stats-flyout",
                 "scope": "public",
                 "docId": "kibKbnMlFieldStatsFlyoutPluginApi",
                 "section": "def-public.FieldStatsInfoButtonProps",
                 "text": "FieldStatsInfoButtonProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/packages/ml/field_stats_flyout/field_stats_info_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-field-stats-flyout",
+        "id": "def-public.OptionListWithFieldStats",
+        "type": "Function",
+        "tags": [],
+        "label": "OptionListWithFieldStats",
+        "description": [],
+        "signature": [
+          "({ options, placeholder, singleSelection, onChange, selectedOptions, fullWidth, isDisabled, isLoading, isClearable, prepend, compressed, \"aria-label\": ariaLabel, \"data-test-subj\": dataTestSubj, }: OptionListWithFieldStatsProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/packages/ml/field_stats_flyout/options_list_with_stats/option_list_with_stats.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-field-stats-flyout",
+            "id": "def-public.OptionListWithFieldStats.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  options,\n  placeholder,\n  singleSelection = false,\n  onChange,\n  selectedOptions,\n  fullWidth,\n  isDisabled,\n  isLoading,\n  isClearable = true,\n  prepend,\n  compressed,\n  'aria-label': ariaLabel,\n  'data-test-subj': dataTestSubj,\n}",
+            "description": [],
+            "signature": [
+              "OptionListWithFieldStatsProps"
+            ],
+            "path": "x-pack/packages/ml/field_stats_flyout/options_list_with_stats/option_list_with_stats.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -309,9 +279,7 @@
           "\nCustom hook for managing field statistics trigger functionality.\n"
         ],
         "signature": [
-          "() => { renderOption: (option: ",
-          "EuiComboBoxOptionOption",
-          "<string | number | string[] | undefined>, searchValue: string) => React.ReactNode; setIsFlyoutVisible: (v: boolean) => void; setFieldName: (v: string | undefined) => void; handleFieldStatsButtonClick: (field: ",
+          "() => { renderOption: (option: T) => React.ReactNode; setIsFlyoutVisible: (v: boolean) => void; setFieldName: (v: string | undefined) => void; handleFieldStatsButtonClick: (field: ",
           {
             "pluginId": "@kbn/ml-field-stats-flyout",
             "scope": "public",
@@ -591,19 +559,45 @@
     "misc": [
       {
         "parentPluginId": "@kbn/ml-field-stats-flyout",
-        "id": "def-public.EuiComboBoxWithFieldStatsProps",
+        "id": "def-public.DropDownLabel",
         "type": "Type",
         "tags": [],
-        "label": "EuiComboBoxWithFieldStatsProps",
-        "description": [
-          "\nProps for the EuiComboBoxWithFieldStats component."
-        ],
+        "label": "DropDownLabel",
+        "description": [],
         "signature": [
-          "Omit<",
-          "_EuiComboBoxProps",
-          "<string | number | string[] | undefined>, \"options\" | \"selectedOptions\" | \"optionMatcher\" | \"async\" | \"compressed\" | \"fullWidth\" | \"isClearable\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\"> & Partial<DefaultProps<string | number | string[] | undefined>>"
+          "(",
+          "EuiComboBoxOptionOption",
+          "<string | number | string[] | undefined> & BaseOption<",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.Aggregation",
+            "text": "Aggregation"
+          },
+          ">) | (",
+          "DisambiguateSet",
+          "<",
+          "EuiSelectableGroupLabelOption",
+          "<BaseOption<T>>, ",
+          "EuiSelectableLIOption",
+          "<BaseOption<T>>> & ",
+          "CommonProps",
+          " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"on\" | \"off\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+          "EuiTextTruncateProps",
+          ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+          "EuiToolTipProps",
+          ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & BaseOption<T>) | (",
+          "DisambiguateSet",
+          "<",
+          "EuiSelectableLIOption",
+          "<BaseOption<T>>, ",
+          "EuiSelectableGroupLabelOption",
+          "<BaseOption<T>>> & Omit<",
+          "EuiSelectableOptionBase",
+          ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & BaseOption<T>)"
         ],
-        "path": "x-pack/packages/ml/field_stats_flyout/eui_combo_box_with_field_stats.tsx",
+        "path": "x-pack/packages/ml/field_stats_flyout/options_list_with_stats/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -660,6 +654,14 @@
             "docId": "kibKbnUnifiedFieldListPluginApi",
             "section": "def-public.FieldStatsServices",
             "text": "FieldStatsServices"
+          },
+          "; theme: ",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-public.ThemeServiceSetup",
+            "text": "ThemeServiceSetup"
           },
           "; timeRangeMs?: ",
           {

@@ -62,6 +62,10 @@
   color: $euiColorFullShade;
   vertical-align: top;
 
+  &--highlighted {
+    font-weight: $euiFontWeightBold;
+  }
+
   .euiDataGridRowCell__popover & {
     font-size: $euiFontSizeS;
   }
@@ -86,7 +90,7 @@
   }
 
   & [data-gridcell-column-id='pin_field'] .euiDataGridRowCell__content {
-    padding: $euiSizeXS / 2 0 0 $euiSizeXS;
+    padding: calc($euiSizeXS / 2) 0 0 $euiSizeXS;
   }
 
   .kbnDocViewer__fieldsGrid__pinAction {

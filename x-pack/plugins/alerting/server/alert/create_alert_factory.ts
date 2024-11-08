@@ -156,8 +156,6 @@ export function createAlertFactory<
             autoRecoverAlerts,
             // flappingSettings.enabled is false, as we only want to use this function to get the recovered alerts
             flappingSettings: DISABLE_FLAPPING_SETTINGS,
-            // no maintenance window IDs are passed as we only want to use this function to get recovered alerts
-            maintenanceWindowIds: [],
           });
           return Object.keys(currentRecoveredAlerts ?? {}).map(
             (alertId: string) => currentRecoveredAlerts[alertId]

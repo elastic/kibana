@@ -361,7 +361,7 @@
             "section": "def-public.FavoriteButtonProps",
             "text": "FavoriteButtonProps"
           },
-          ") => JSX.Element | null"
+          ") => React.JSX.Element | null"
         ],
         "path": "packages/content-management/favorites/favorites_public/src/components/favorite_button.tsx",
         "deprecated": false,
@@ -400,7 +400,7 @@
         "label": "FavoritesContextProvider",
         "description": [],
         "signature": [
-          "({ favoritesClient, notifyError, children, }: React.PropsWithChildren<React.PropsWithChildren<FavoritesContextValue>>) => JSX.Element"
+          "({ favoritesClient, notifyError, children, }: React.PropsWithChildren<FavoritesContextValue>) => React.JSX.Element"
         ],
         "path": "packages/content-management/favorites/favorites_public/src/favorites_context.tsx",
         "deprecated": false,
@@ -414,7 +414,7 @@
             "label": "{\n  favoritesClient,\n  notifyError,\n  children,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<FavoritesContextValue>>"
+              "React.PropsWithChildren<FavoritesContextValue>"
             ],
             "path": "packages/content-management/favorites/favorites_public/src/favorites_context.tsx",
             "deprecated": false,
@@ -433,7 +433,7 @@
         "label": "FavoritesEmptyState",
         "description": [],
         "signature": [
-          "({ emptyStateType, entityNamePlural, entityName, }: { emptyStateType: \"noItems\" | \"noMatchingItems\"; entityNamePlural?: string | undefined; entityName?: string | undefined; }) => JSX.Element"
+          "({ emptyStateType, entityNamePlural, entityName, }: { emptyStateType: \"noItems\" | \"noMatchingItems\"; entityNamePlural?: string | undefined; entityName?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/content-management/favorites/favorites_public/src/components/favorites_empty_state.tsx",
         "deprecated": false,

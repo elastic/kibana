@@ -19,11 +19,15 @@ export const useQuickPromptTable = () => {
   const getColumns = useCallback(
     ({
       isActionsDisabled,
+      isDeleteEnabled,
+      isEditEnabled,
       basePromptContexts,
       onEditActionClicked,
       onDeleteActionClicked,
     }: {
       isActionsDisabled: boolean;
+      isDeleteEnabled: (prompt: PromptResponse) => boolean;
+      isEditEnabled: (prompt: PromptResponse) => boolean;
       basePromptContexts: PromptContextTemplate[];
       onEditActionClicked: (prompt: PromptResponse, color?: string) => void;
       onDeleteActionClicked: (prompt: PromptResponse) => void;
@@ -74,6 +78,8 @@ export const useQuickPromptTable = () => {
         align: 'center',
         width: '120px',
         ...getActions({
+          isDeleteEnabled,
+          isEditEnabled,
           onDelete: onDeleteActionClicked,
           onEdit: onEditActionClicked,
         }),

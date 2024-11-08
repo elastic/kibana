@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getCheckState } from '../../../stub/get_check_state';
+import { getCheckStateStub } from '../../../stub/get_check_state_stub';
 import {
   UseIndicesCheckCheckState,
   UseIndicesCheckReturnValue,
@@ -19,7 +19,7 @@ export const getMergedIndicesCheckContextProps = (
     (acc, key) => {
       for (const indexName of patternIndexNames[key]) {
         acc[indexName] = {
-          ...getCheckState(indexName)[indexName],
+          ...getCheckStateStub(indexName)[indexName],
         };
       }
 

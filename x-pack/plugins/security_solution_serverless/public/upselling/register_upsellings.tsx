@@ -76,6 +76,7 @@ const configurePluginsUpsellings = (upsellingService: UpsellingService, services
   const { integrationAssistant } = services;
 
   upsellingService.sections$.subscribe((sections) => {
+    // @ts-expect-error Type 'FunctionComponent<{}>' is not assignable to type 'ReactNode'.
     integrationAssistant?.renderUpselling(sections.get('integration_assistant'));
   });
 };

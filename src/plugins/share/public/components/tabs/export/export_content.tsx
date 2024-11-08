@@ -48,11 +48,16 @@ const ExportContentUi = ({
   const [usePrintLayout, setPrintLayout] = useState(false);
 
   const radioOptions = useMemo(() => {
-    return aggregateReportTypes
-      .filter(({ reportType }) => reportType)
-      .map(({ reportType, label }) => {
-        return { id: reportType, label, 'data-test-subj': `${reportType}-radioOption` };
-      }) as EuiRadioGroupOption[];
+    return aggregateReportTypes.reduce<EuiRadioGroupOption[]>((acc, { reportType, label }) => {
+      if (reportType) {
+        acc.push({
+          id: reportType,
+          label,
+          'data-test-subj': `${reportType}-radioOption`,
+        });
+      }
+      return acc;
+    }, []);
   }, [aggregateReportTypes]);
 
   const [selectedRadio, setSelectedRadio] = useState<SupportedExportTypes>(
@@ -62,9 +67,10 @@ const ExportContentUi = ({
   const {
     generateExportButton,
     helpText,
+    warnings = [],
     renderCopyURLButton,
     generateExport,
-    absoluteUrl,
+    generateExportUrl,
     renderLayoutOptionSwitch,
   } = useMemo(() => {
     return aggregateReportTypes?.find(({ reportType }) => reportType === selectedRadio)!;
@@ -124,7 +130,8 @@ const ExportContentUi = ({
   }, [usePrintLayout, renderLayoutOptionSwitch, handlePrintLayoutChange]);
 
   const showCopyURLButton = useCallback(() => {
-    if (renderCopyURLButton && publicAPIEnabled)
+    if (renderCopyURLButton && publicAPIEnabled) {
+      const absoluteUrl = generateExportUrl?.({ intl, optimizedForPrinting: usePrintLayout });
       return (
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} css={{ flexGrow: 0 }}>
           <EuiFlexItem grow={false}>
@@ -160,48 +167,63 @@ const ExportContentUi = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-  }, [absoluteUrl, renderCopyURLButton, publicAPIEnabled]);
+    }
+  }, [renderCopyURLButton, publicAPIEnabled, usePrintLayout, generateExportUrl, intl]);
 
   const renderGenerateReportButton = useCallback(() => {
     return (
       <EuiButton
         fill
-        color={isDirty ? 'warning' : 'primary'}
+        color={(isDirty && renderCopyURLButton) || warnings.length > 0 ? 'warning' : 'primary'}
         onClick={getReport}
         data-test-subj="generateReportButton"
         isLoading={isCreatingExport}
       >
-        {generateExportButton}
+        {generateExportButton ?? (
+          <FormattedMessage id="share.export.generateButtonLabel" defaultMessage="Export file" />
+        )}
       </EuiButton>
     );
-  }, [generateExportButton, getReport, isCreatingExport, isDirty]);
+  }, [
+    generateExportButton,
+    getReport,
+    isCreatingExport,
+    isDirty,
+    renderCopyURLButton,
+    warnings.length,
+  ]);
 
   const renderRadioOptions = () => {
     if (radioOptions.length > 1) {
       return (
-        <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
-          <EuiRadioGroup
-            options={radioOptions}
-            onChange={(id) => setSelectedRadio(id as SupportedExportTypes)}
-            name="image reporting radio group"
-            idSelected={selectedRadio}
-            legend={{
-              children: <FormattedMessage id="share.fileType" defaultMessage="File type" />,
-            }}
-          />
-        </EuiFlexGroup>
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
+            <EuiRadioGroup
+              options={radioOptions}
+              onChange={(id) => setSelectedRadio(id as SupportedExportTypes)}
+              name="image reporting radio group"
+              idSelected={selectedRadio}
+              legend={{
+                children: <FormattedMessage id="share.fileType" defaultMessage="File type" />,
+              }}
+            />
+          </EuiFlexGroup>
+        </>
       );
     }
   };
 
-  const renderHelpText = () => {
-    const showHelpText = publicAPIEnabled && isDirty;
+  const renderDirtyWarning = () => {
     return (
-      showHelpText && (
+      renderCopyURLButton &&
+      publicAPIEnabled &&
+      isDirty && (
         <>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           <EuiCallOut
             color="warning"
+            iconType="warning"
             title={
               <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
             }
@@ -216,19 +238,35 @@ const ExportContentUi = ({
     );
   };
 
+  const renderWarnings = (warning: { title: string; message: string }) => (
+    <>
+      <EuiSpacer size="m" />
+      <EuiCallOut color="warning" iconType="warning" title={warning.title}>
+        {warning.message}
+      </EuiCallOut>
+    </>
+  );
+
   return (
     <>
       <EuiForm>
-        <>{helpText}</>
-        <EuiSpacer size="m" />
-        <>{renderRadioOptions()}</>
-        {renderHelpText()}
-        <EuiSpacer size="xl" />
+        <EuiText size="s">
+          {helpText ?? (
+            <FormattedMessage
+              id="share.export.helpText"
+              defaultMessage="Select the file type you would like to export for this visualization."
+            />
+          )}
+        </EuiText>
+        {renderRadioOptions()}
+        {renderDirtyWarning()}
+        {warnings.map(renderWarnings)}
+        <EuiSpacer size="l" />
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false} gutterSize="m">
-        <>{renderLayoutOptionsSwitch()}</>
-        <>{showCopyURLButton()}</>
-        <>{renderGenerateReportButton()}</>
+        {renderLayoutOptionsSwitch()}
+        {showCopyURLButton()}
+        {renderGenerateReportButton()}
       </EuiFlexGroup>
     </>
   );

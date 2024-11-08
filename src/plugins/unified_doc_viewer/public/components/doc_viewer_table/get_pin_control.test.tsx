@@ -9,42 +9,39 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { TableRow } from './table_cell_actions';
+import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { FieldRow } from './field_row';
 import { getPinColumnControl } from './get_pin_control';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 
 describe('getPinControl', () => {
-  const rows: TableRow[] = [
-    {
-      action: {
-        onFilter: jest.fn(),
-        flattenedField: 'flattenedField',
-        onToggleColumn: jest.fn(),
-      },
-      field: {
-        pinned: true,
-        onTogglePinned: jest.fn(),
-        field: 'message',
-        fieldMapping: new DataViewField({
-          type: 'keyword',
-          name: 'message',
-          searchable: true,
-          aggregatable: true,
-        }),
-        fieldType: 'keyword',
-        displayName: 'message',
-        scripted: false,
-      },
-      value: {
-        ignored: undefined,
-        formattedValue: 'test',
-      },
-    },
+  const rows: FieldRow[] = [
+    new FieldRow({
+      name: 'message',
+      flattenedValue: 'flattenedField',
+      hit: buildDataTableRecord(
+        {
+          _ignored: [],
+          _index: 'test',
+          _id: '1',
+          _source: {
+            message: 'test',
+          },
+        },
+        dataView
+      ),
+      dataView,
+      fieldFormats: {} as FieldFormatsStart,
+      isPinned: false,
+      columnsMeta: undefined,
+    }),
   ];
 
   it('should render correctly', () => {
-    const control = getPinColumnControl({ rows });
+    const onTogglePinned = jest.fn();
+    const control = getPinColumnControl({ rows, onTogglePinned });
     const Cell = control.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
     render(
       <Cell
@@ -60,6 +57,6 @@ describe('getPinControl', () => {
 
     screen.getByTestId('unifiedDocViewer_pinControlButton_message').click();
 
-    expect(rows[0].field.onTogglePinned).toHaveBeenCalledWith('message');
+    expect(onTogglePinned).toHaveBeenCalledWith('message');
   });
 });

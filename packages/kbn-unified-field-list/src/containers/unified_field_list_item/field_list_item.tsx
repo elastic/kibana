@@ -32,7 +32,7 @@ import type {
   UnifiedFieldListSidebarContainerStateService,
   AddFieldFilterHandler,
 } from '../../types';
-import { canProvideStatsForFieldTextBased } from '../../utils/can_provide_stats';
+import { canProvideStatsForEsqlField } from '../../utils/can_provide_stats';
 
 interface GetCommonFieldItemButtonPropsParams {
   stateService: UnifiedFieldListSidebarContainerStateService;
@@ -309,21 +309,38 @@ function UnifiedFieldListItemComponent({
             />
           </>
         )}
-
-        {searchMode === 'documents' && !!services.uiActions && (
-          <FieldPopoverFooter
-            field={field}
-            dataView={dataView}
-            multiFields={rawMultiFields}
-            trackUiMetric={trackUiMetric}
-            contextualFields={workspaceSelectedFieldNames}
-            originatingApp={stateService.creationOptions.originatingApp}
-            uiActions={services.uiActions}
-          />
-        )}
       </>
     );
   };
+
+  const renderFooter = useMemo(() => {
+    const uiActions = services.uiActions;
+
+    if (searchMode !== 'documents' || !uiActions) {
+      return;
+    }
+
+    return () => (
+      <FieldPopoverFooter
+        field={field}
+        dataView={dataView}
+        multiFields={rawMultiFields}
+        trackUiMetric={trackUiMetric}
+        contextualFields={workspaceSelectedFieldNames}
+        originatingApp={stateService.creationOptions.originatingApp}
+        uiActions={uiActions}
+      />
+    );
+  }, [
+    dataView,
+    field,
+    rawMultiFields,
+    searchMode,
+    services.uiActions,
+    stateService.creationOptions.originatingApp,
+    trackUiMetric,
+    workspaceSelectedFieldNames,
+  ]);
 
   const value = useMemo(
     () => ({
@@ -388,11 +405,12 @@ function UnifiedFieldListItemComponent({
         />
       )}
       renderContent={
-        (searchMode === 'text-based' && canProvideStatsForFieldTextBased(field)) ||
+        (searchMode === 'text-based' && canProvideStatsForEsqlField(field)) ||
         searchMode === 'documents'
           ? renderPopover
           : undefined
       }
+      renderFooter={renderFooter}
     />
   );
 }

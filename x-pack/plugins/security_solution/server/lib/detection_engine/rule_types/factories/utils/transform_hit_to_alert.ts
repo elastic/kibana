@@ -44,6 +44,7 @@ export interface TransformHitToAlertProps {
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   alertUuid: string;
   publicBaseUrl?: string;
+  intendedTimestamp: Date | undefined;
 }
 
 /**
@@ -69,6 +70,7 @@ export const transformHitToAlert = ({
   ruleExecutionLogger,
   alertUuid,
   publicBaseUrl,
+  intendedTimestamp,
 }: TransformHitToAlertProps): BaseFieldsLatest => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields, ignoreFieldsRegexes });
   const thresholdResult = mergedDoc._source?.threshold_result;
@@ -110,6 +112,7 @@ export const transformHitToAlert = ({
       publicBaseUrl,
       alertTimestampOverride,
       overrides,
+      intendedTimestamp,
     });
 
     const { result: validatedSource, removed: removedSourceFields } = traverseAndMutateDoc(

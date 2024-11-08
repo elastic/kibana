@@ -38,20 +38,20 @@ export const agentPolicyFormValidation = (
     errors.namespace = [namespaceValidation.error];
   }
 
-  if (agentPolicy.unenroll_timeout !== undefined && agentPolicy.unenroll_timeout <= 0) {
+  if (agentPolicy.unenroll_timeout && agentPolicy.unenroll_timeout < 0) {
     errors.unenroll_timeout = [
       <FormattedMessage
         id="xpack.fleet.agentPolicyForm.unenrollTimeoutMinValueErrorMessage"
-        defaultMessage="Unenroll timeout must be an integer greater than zero"
+        defaultMessage="Unenroll timeout must be greater than zero."
       />,
     ];
   }
 
-  if (agentPolicy.inactivity_timeout !== undefined && agentPolicy.inactivity_timeout <= 0) {
+  if (agentPolicy.inactivity_timeout && agentPolicy.inactivity_timeout < 0) {
     errors.inactivity_timeout = [
       <FormattedMessage
         id="xpack.fleet.agentPolicyForm.inactivityTimeoutMinValueErrorMessage"
-        defaultMessage="Inactivity timeout must be an integer greater than zero"
+        defaultMessage="Inactivity timeout must be greater than zero."
       />,
     ];
   }

@@ -11,11 +11,14 @@ import React, { FC, PropsWithChildren } from 'react';
 import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
+import { css } from '@emotion/css';
 
 interface Props {
   toggleSideNav: (isVisible: boolean) => void;
   isSideNavCollapsed$: Observable<boolean>;
 }
+
+const PANEL_WIDTH = 290;
 
 export const ProjectNavigation: FC<PropsWithChildren<Props>> = ({
   children,
@@ -29,11 +32,15 @@ export const ProjectNavigation: FC<PropsWithChildren<Props>> = ({
       data-test-subj="projectLayoutSideNav"
       isCollapsed={isCollapsed}
       onCollapseToggle={toggleSideNav}
-      css={
-        isCollapsed
-          ? undefined
-          : { overflow: 'visible', clipPath: 'polygon(0 0, 300% 0, 300% 100%, 0 100%)' }
-      }
+      css={{
+        overflow: 'visible',
+        clipPath: `polygon(0 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 100%, 0 100%)`,
+      }}
+      className={css`
+        .euiFlyoutBody__overflowContent {
+          height: 100%;
+        }
+      `}
     >
       {children}
     </EuiCollapsibleNavBeta>

@@ -43,7 +43,7 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     }
 
     // 2. Try searching for the fiels in the Elastic Package Registry
-    if (!field && integration) {
+    if (!field) {
       field = await this.integrationFieldsRepository.getByName(fieldName, { integration, dataset });
     }
 

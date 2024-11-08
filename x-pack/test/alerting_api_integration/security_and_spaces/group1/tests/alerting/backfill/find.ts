@@ -17,7 +17,8 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('find backfill', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/196226
+  describe.skip('find backfill', () => {
     let backfillIds: Array<{ id: string; spaceId: string }> = [];
     const objectRemover = new ObjectRemover(supertest);
     const start1 = moment().utc().startOf('day').subtract(14, 'days').toISOString();
@@ -135,8 +136,7 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
-      // FLAKY: https://github.com/elastic/kibana/issues/181862
-      describe.skip(scenario.id, () => {
+      describe(scenario.id, () => {
         const apiOptions = {
           spaceId: space.id,
           username: user.username,

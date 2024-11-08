@@ -9,7 +9,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getClusterStats } from './get_cluster_stats';
-import { TIMEOUT } from './constants';
+import { CLUSTER_STAT_TIMEOUT } from './constants';
 
 describe('get_cluster_stats', () => {
   it('uses the esClient to get the response from the `cluster.stats` API', async () => {
@@ -17,12 +17,15 @@ describe('get_cluster_stats', () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     esClient.cluster.stats.mockImplementationOnce(
       // @ts-expect-error the method only cares about the response body
-      async (_params = { timeout: TIMEOUT }) => {
+      async (_params = { timeout: CLUSTER_STAT_TIMEOUT }) => {
         return response;
       }
     );
     const result = await getClusterStats(esClient);
-    expect(esClient.cluster.stats).toHaveBeenCalledWith({ timeout: TIMEOUT });
+    expect(esClient.cluster.stats).toHaveBeenCalledWith(
+      { timeout: CLUSTER_STAT_TIMEOUT, include_remotes: true },
+      { requestTimeout: CLUSTER_STAT_TIMEOUT }
+    );
     expect(result).toStrictEqual(response);
   });
 });

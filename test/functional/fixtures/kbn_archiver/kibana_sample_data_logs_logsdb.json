@@ -1,0 +1,22 @@
+{
+    "attributes": {
+        "fieldFormatMap": "{\"hour_of_day\":{}}",
+        "name": "Kibana Sample Data Logs (LogsDB)",
+        "runtimeFieldMap": "{\"hour_of_day\":{\"type\":\"long\",\"script\":{\"source\":\"emit(doc['timestamp'].value.getHour());\"}}}",
+        "timeFieldName": "timestamp",
+        "title": "kibana_sample_data_logslogsdb"
+    },
+    "coreMigrationVersion": "8.8.0",
+    "created_at": "2023-04-27T13:09:20.333Z",
+    "id": "90943e30-9a47-11e8-b64d-95841ca0c247",
+    "managed": false,
+    "references": [],
+    "sort": [
+        1682600960333,
+        64
+    ],
+    "type": "index-pattern",
+    "typeMigrationVersion": "7.11.0",
+    "updated_at": "2023-04-27T13:09:20.333Z",
+    "version": "WzIxLDFd"
+}

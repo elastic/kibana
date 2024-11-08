@@ -97,6 +97,13 @@ export function systemRoutes(
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: false,
       },
       routeGuard.basicLicenseAPIGuard(async ({ mlClient, request, response }) => {
@@ -166,14 +173,28 @@ export function systemRoutes(
         version: '1',
         validate: false,
       },
-      routeGuard.basicLicenseAPIGuard(async ({ mlClient, response }) => {
+      routeGuard.basicLicenseAPIGuard(async ({ mlClient, response, client }) => {
         try {
           const body = await mlClient.info();
           const cloudId = cloud?.cloudId;
           const isCloudTrial = cloud?.trialEndDate && Date.now() < cloud.trialEndDate.getTime();
 
+          let isMlAutoscalingEnabled = false;
+          try {
+            await client.asInternalUser.autoscaling.getAutoscalingPolicy({ name: 'ml' });
+            isMlAutoscalingEnabled = true;
+          } catch (e) {
+            // If doesn't exist, then keep the false
+          }
+
           return response.ok({
-            body: { ...body, cloudId, isCloudTrial },
+            body: {
+              ...body,
+              cloudId,
+              isCloudTrial,
+              cloudUrl: cloud.baseUrl,
+              isMlAutoscalingEnabled,
+            },
           });
         } catch (error) {
           return response.customError(wrapError(error));
@@ -188,8 +209,9 @@ export function systemRoutes(
       options: {
         tags: ['access:ml:canGetJobs'],
       },
-      deprecated: true,
       summary: 'ES Search wrapper',
+      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
+      deprecated: true,
     })
     .addVersion(
       {

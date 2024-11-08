@@ -23,6 +23,7 @@ const updateInvestigationParamsSchema = z.object({
         timeRange: z.object({ from: z.number(), to: z.number() }),
       }),
       tags: z.array(z.string()),
+      externalIncidentUrl: z.string().nullable(),
     })
     .partial(),
 });

@@ -53,6 +53,8 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   setSelectedAPIKeyId,
   isK8s,
   cloudSecurityIntegration,
+  downloadSource,
+  downloadSourceProxy,
 }) => {
   const { yaml, onCreateApiKey, isCreatingApiKey, apiKey, downloadYaml } = useFetchFullPolicy(
     selectedPolicy,
@@ -62,7 +64,11 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   const agentVersion = useAgentVersion();
 
   const instructionsSteps = useMemo(() => {
-    const standaloneInstallCommands = StandaloneInstructions(agentVersion || '');
+    const standaloneInstallCommands = StandaloneInstructions({
+      agentVersion: agentVersion || '',
+      downloadSource,
+      downloadSourceProxy,
+    });
 
     const steps: EuiContainedStepProps[] = !agentPolicy
       ? [
@@ -107,6 +113,8 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
     return steps;
   }, [
     agentVersion,
+    downloadSource,
+    downloadSourceProxy,
     agentPolicy,
     selectedPolicy,
     agentPolicies,
@@ -143,6 +151,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   fleetServerHost,
   fleetProxy,
   downloadSource,
+  downloadSourceProxy,
   refreshAgentPolicies,
   mode,
   setMode,
@@ -173,6 +182,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     fleetServerHost,
     fleetProxy,
     downloadSource,
+    downloadSourceProxy,
     agentVersion: agentVersion || '',
     gcpProjectId,
     gcpOrganizationId,

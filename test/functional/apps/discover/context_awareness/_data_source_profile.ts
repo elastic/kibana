@@ -12,115 +12,17 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, unifiedFieldList, dashboard, header, timePicker } = getPageObjects([
+  const { common, discover, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
     'unifiedFieldList',
-    'dashboard',
-    'header',
-    'timePicker',
   ]);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
-  const monacoEditor = getService('monacoEditor');
-  const ebtUIHelper = getService('kibana_ebt_ui');
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
-  const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('data source profile', () => {
-    describe('telemetry', () => {
-      before(async () => {
-        await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-        await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-      });
-
-      after(async () => {
-        await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      });
-
-      it('should set EBT context for telemetry events with default profile', async () => {
-        await common.navigateToApp('discover');
-        await discover.selectTextBaseLang();
-        await discover.waitUntilSearchingHasFinished();
-        await monacoEditor.setCodeEditorValue('from my-example-* | sort @timestamp desc');
-        await ebtUIHelper.setOptIn(true);
-        await testSubjects.click('querySubmitButton');
-        await discover.waitUntilSearchingHasFinished();
-
-        const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
-          eventTypes: ['performance_metric'],
-          withTimeoutMs: 500,
-        });
-
-        expect(events[events.length - 1].context.discoverProfiles).to.eql([
-          'example-root-profile',
-          'default-data-source-profile',
-        ]);
-      });
-
-      it('should set EBT context for telemetry events when example profile and reset', async () => {
-        await common.navigateToApp('discover');
-        await discover.selectTextBaseLang();
-        await discover.waitUntilSearchingHasFinished();
-        await monacoEditor.setCodeEditorValue('from my-example-logs | sort @timestamp desc');
-        await ebtUIHelper.setOptIn(true);
-        await testSubjects.click('querySubmitButton');
-        await discover.waitUntilSearchingHasFinished();
-
-        const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
-          eventTypes: ['performance_metric'],
-          withTimeoutMs: 500,
-        });
-
-        expect(events[events.length - 1].context.discoverProfiles).to.eql([
-          'example-root-profile',
-          'example-data-source-profile',
-        ]);
-
-        // should reset the profiles when navigating away from Discover
-        await testSubjects.click('logo');
-        await retry.waitFor('home page to open', async () => {
-          return (await testSubjects.getVisibleText('euiBreadcrumb')) === 'Home';
-        });
-        await testSubjects.click('addSampleData');
-
-        await retry.try(async () => {
-          const eventsAfter = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
-            eventTypes: ['click'],
-            withTimeoutMs: 500,
-          });
-
-          expect(eventsAfter[eventsAfter.length - 1].context.discoverProfiles).to.eql([]);
-        });
-      });
-
-      it('should not set EBT context for embeddables', async () => {
-        await dashboard.navigateToApp();
-        await dashboard.gotoDashboardLandingPage();
-        await dashboard.clickNewDashboard();
-        await timePicker.setDefaultAbsoluteRange();
-        await ebtUIHelper.setOptIn(true);
-        await dashboardAddPanel.addSavedSearch('A Saved Search');
-        await header.waitUntilLoadingHasFinished();
-        await dashboard.waitForRenderComplete();
-        const rows = await dataGrid.getDocTableRows();
-        expect(rows.length).to.be.above(0);
-        await testSubjects.click('dashboardEditorMenuButton');
-
-        const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
-          eventTypes: ['click'],
-          withTimeoutMs: 500,
-        });
-
-        expect(
-          events.every((event) => !(event.context.discoverProfiles as string[])?.length)
-        ).to.be(true);
-      });
-    });
-
     describe('ES|QL mode', () => {
       describe('cell renderers', () => {
         it('should render custom @timestamp but not custom log.level', async () => {
@@ -197,6 +99,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Record #0');
         });
       });
+
+      describe('custom context', () => {
+        it('should render formatted record in doc viewer using formatter from custom context', async () => {
+          const state = kbnRison.encode({
+            dataSource: { type: 'esql' },
+            query: { esql: 'from my-example-logs | sort @timestamp desc' },
+          });
+          await common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
+          });
+          await discover.waitUntilSearchingHasFinished();
+          await dataGrid.clickRowToggle({ rowIndex: 0, defaultTabId: 'doc_view_example' });
+          await retry.try(async () => {
+            const formattedRecord = await testSubjects.find(
+              'exampleDataSourceProfileDocViewRecord'
+            );
+            expect(await formattedRecord.getVisibleText()).to.be(
+              JSON.stringify(
+                {
+                  '@timestamp': '2024-06-10T16:00:00.000Z',
+                  'agent.name': 'java',
+                  'agent.name.text': 'java',
+                  'data_stream.type': 'logs',
+                  'log.level': 'debug',
+                  message: 'This is a debug log',
+                  'service.name': 'product',
+                  'service.name.text': 'product',
+                },
+                null,
+                2
+              )
+            );
+          });
+        });
+      });
     });
 
     describe('data view mode', () => {
@@ -263,6 +200,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be(
             'Record #my-example-logs::XdQFDpABfGznVC1bCHLo::'
           );
+        });
+      });
+
+      describe('custom context', () => {
+        it('should render formatted record in doc viewer using formatter from custom context', async () => {
+          await common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
+          await dataViews.switchTo('my-example-logs');
+          await discover.waitUntilSearchingHasFinished();
+          await dataGrid.clickRowToggle({ rowIndex: 0, defaultTabId: 'doc_view_example' });
+          await retry.try(async () => {
+            const formattedRecord = await testSubjects.find(
+              'exampleDataSourceProfileDocViewRecord'
+            );
+            expect(await formattedRecord.getVisibleText()).to.be(
+              JSON.stringify(
+                {
+                  '@timestamp': ['2024-06-10T16:00:00.000Z'],
+                  'agent.name': ['java'],
+                  'agent.name.text': ['java'],
+                  'data_stream.type': ['logs'],
+                  'log.level': ['debug'],
+                  message: ['This is a debug log'],
+                  'service.name': ['product'],
+                  'service.name.text': ['product'],
+                  _id: 'XdQFDpABfGznVC1bCHLo',
+                  _index: 'my-example-logs',
+                  _score: null,
+                },
+                null,
+                2
+              )
+            );
+          });
         });
       });
     });

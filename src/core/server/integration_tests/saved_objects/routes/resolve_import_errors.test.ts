@@ -12,6 +12,7 @@ jest.mock('uuid');
 import supertest from 'supertest';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger, LogLevelId } from '@kbn/logging';
 import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
@@ -61,6 +62,17 @@ describe(`POST ${URL}`, () => {
     references: [],
     managed: false,
   };
+  const mockLogger: jest.Mocked<Logger> = {
+    debug: jest.fn(),
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    trace: jest.fn(),
+    fatal: jest.fn(),
+    log: jest.fn(),
+    isLevelEnabled: jest.fn((level: LogLevelId) => true),
+    get: jest.fn(() => mockLogger),
+  };
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -82,6 +94,7 @@ describe(`POST ${URL}`, () => {
       savedObjectsClient,
       typeRegistry: handlerContext.savedObjects.typeRegistry,
       importSizeLimit: 10000,
+      logger: mockLogger,
     });
 
     handlerContext.savedObjects.getImporter = jest

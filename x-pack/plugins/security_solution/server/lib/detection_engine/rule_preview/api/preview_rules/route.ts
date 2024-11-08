@@ -89,8 +89,13 @@ export const previewRulesRoute = (
     .post({
       path: DETECTION_ENGINE_RULES_PREVIEW,
       access: 'public',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
+        tags: [routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
       },
     })
     .addVersion(
@@ -300,6 +305,7 @@ export const previewRulesRoute = (
                       abortController,
                       searchSourceClient,
                     }),
+                  getMaintenanceWindowIds: async () => [],
                   uiSettingsClient: coreContext.uiSettings.client,
                   getDataViews: async () => dataViewsService,
                   share,

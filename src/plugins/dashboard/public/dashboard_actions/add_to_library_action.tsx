@@ -8,35 +8,38 @@
  */
 
 import React from 'react';
+
+import { PresentationContainer } from '@kbn/presentation-containers';
 import {
-  apiCanAccessViewMode,
-  apiHasLibraryTransforms,
-  EmbeddableApiContext,
-  getPanelTitle,
-  PublishesPanelTitle,
   CanAccessViewMode,
-  getInheritedViewMode,
+  EmbeddableApiContext,
+  HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
+  HasParentApi,
   HasType,
   HasTypeDisplayName,
-  apiHasType,
   HasUniqueId,
-  HasParentApi,
-  apiHasUniqueId,
-  apiHasParentApi,
-  HasInPlaceLibraryTransforms,
+  PublishesPanelTitle,
+  apiCanAccessViewMode,
   apiHasInPlaceLibraryTransforms,
+  apiHasLibraryTransforms,
+  apiHasParentApi,
+  apiHasType,
+  apiHasUniqueId,
+  getInheritedViewMode,
+  getPanelTitle,
 } from '@kbn/presentation-publishing';
 import {
   OnSaveProps,
-  SavedObjectSaveModal,
   SaveResult,
+  SavedObjectSaveModal,
   showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { PresentationContainer } from '@kbn/presentation-containers';
-import { pluginServices } from '../services/plugin_services';
+
+import { coreServices } from '../services/kibana_services';
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';
+import { DASHBOARD_ACTION_GROUP } from '.';
 
 export const ACTION_ADD_TO_LIBRARY = 'saveToLibrary';
 
@@ -61,14 +64,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_ADD_TO_LIBRARY;
   public readonly id = ACTION_ADD_TO_LIBRARY;
   public order = 8;
-
-  private toastsService;
-
-  constructor() {
-    ({
-      notifications: { toasts: this.toastsService },
-    } = pluginServices.getServices());
-  }
+  public grouping = [DASHBOARD_ACTION_GROUP];
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
@@ -134,12 +130,12 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
           initialState: byRefState,
         });
       }
-      this.toastsService.addSuccess({
+      coreServices.notifications.toasts.addSuccess({
         title: dashboardAddToLibraryActionStrings.getSuccessMessage(title ? `'${title}'` : ''),
         'data-test-subj': 'addPanelToLibrarySuccess',
       });
     } catch (e) {
-      this.toastsService.addDanger({
+      coreServices.notifications.toasts.addDanger({
         title: dashboardAddToLibraryActionStrings.getErrorMessage(title),
         'data-test-subj': 'addPanelToLibraryError',
       });

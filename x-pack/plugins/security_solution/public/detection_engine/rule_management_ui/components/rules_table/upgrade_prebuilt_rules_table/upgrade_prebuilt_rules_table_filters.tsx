@@ -9,10 +9,13 @@ import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
+import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
+import type { RuleCustomizationEnum } from '../../../../rule_management/logic';
 import * as i18n from './translations';
 import { TagsFilterPopover } from '../rules_table_filters/tags_filter_popover';
 import { RuleSearchField } from '../rules_table_filters/rule_search_field';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
+import { RuleCustomizationFilterPopover } from './upgrade_rule_customization_filter_popover';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeM};
@@ -28,7 +31,9 @@ const UpgradePrebuiltRulesTableFiltersComponent = () => {
     actions: { setFilterOptions },
   } = useUpgradePrebuiltRulesTableContext();
 
-  const { tags: selectedTags } = filterOptions;
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
+
+  const { tags: selectedTags, ruleSource: selectedRuleSource = [] } = filterOptions;
 
   const handleOnSearch = useCallback(
     (filterString: string) => {
@@ -52,22 +57,45 @@ const UpgradePrebuiltRulesTableFiltersComponent = () => {
     [selectedTags, setFilterOptions]
   );
 
+  const handleSelectedRuleSource = useCallback(
+    (newRuleSource: RuleCustomizationEnum[]) => {
+      if (!isEqual(newRuleSource, selectedRuleSource)) {
+        setFilterOptions((filters) => ({
+          ...filters,
+          ruleSource: newRuleSource,
+        }));
+      }
+    },
+    [selectedRuleSource, setFilterOptions]
+  );
+
   return (
-    <FilterWrapper gutterSize="m" justifyContent="flexEnd" wrap>
+    <FilterWrapper gutterSize="s" justifyContent="flexEnd" wrap>
       <RuleSearchField
         initialValue={filterOptions.filter}
         onSearch={handleOnSearch}
         placeholder={i18n.SEARCH_PLACEHOLDER}
       />
       <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
-          <TagsFilterPopover
-            onSelectedTagsChanged={handleSelectedTags}
-            selectedTags={selectedTags}
-            tags={tags}
-            data-test-subj="upgradeRulesTagPopover"
-          />
-        </EuiFilterGroup>
+        <EuiFlexGroup gutterSize="s">
+          {isPrebuiltRulesCustomizationEnabled && (
+            <EuiFilterGroup>
+              <RuleCustomizationFilterPopover
+                onSelectedRuleSourceChanged={handleSelectedRuleSource}
+                selectedRuleSource={selectedRuleSource}
+                data-test-subj="upgradeRulesRuleCustomizationPopover"
+              />
+            </EuiFilterGroup>
+          )}
+          <EuiFilterGroup>
+            <TagsFilterPopover
+              onSelectedTagsChanged={handleSelectedTags}
+              selectedTags={selectedTags}
+              tags={tags}
+              data-test-subj="upgradeRulesTagPopover"
+            />
+          </EuiFilterGroup>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </FilterWrapper>
   );

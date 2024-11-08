@@ -31,6 +31,7 @@ const ROOT = resolve(__dirname, '..');
         tags: [
           {
             name: 'Security Exceptions API',
+            'x-displayName': 'Security exceptions',
             description:
               "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
           },
@@ -56,6 +57,7 @@ const ROOT = resolve(__dirname, '..');
         tags: [
           {
             name: 'Security Exceptions API',
+            'x-displayName': 'Security exceptions',
             description:
               "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
           },

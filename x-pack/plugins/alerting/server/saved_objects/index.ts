@@ -23,12 +23,18 @@ import { RawRule } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import { RuleTypeRegistry } from '../rule_type_registry';
-export { partiallyUpdateRule } from './partially_update_rule';
+export { partiallyUpdateRule, partiallyUpdateRuleWithEs } from './partially_update_rule';
 import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../common';
-import { ruleModelVersions, adHocRunParamsModelVersions } from './model_versions';
+import {
+  adHocRunParamsModelVersions,
+  apiKeyPendingInvalidationModelVersions,
+  maintenanceWindowModelVersions,
+  ruleModelVersions,
+  rulesSettingsModelVersions,
+} from './model_versions';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';
@@ -145,6 +151,7 @@ export function setupSavedObjects(
         },
       },
     },
+    modelVersions: apiKeyPendingInvalidationModelVersions,
   });
 
   savedObjects.registerType({
@@ -153,6 +160,7 @@ export function setupSavedObjects(
     hidden: true,
     namespaceType: 'single',
     mappings: rulesSettingsMappings,
+    modelVersions: rulesSettingsModelVersions,
   });
 
   savedObjects.registerType({
@@ -161,6 +169,7 @@ export function setupSavedObjects(
     hidden: true,
     namespaceType: 'multiple-isolated',
     mappings: maintenanceWindowMappings,
+    modelVersions: maintenanceWindowModelVersions,
   });
 
   savedObjects.registerType({
@@ -208,6 +217,11 @@ export function setupSavedObjects(
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: RULE_SAVED_OBJECT_TYPE,
+    /**
+     * We disable enforcing random SO IDs for the rule SO
+     * to allow users creating rules with a predefined ID.
+     */
+    enforceRandomId: false,
     attributesToEncrypt: new Set(RuleAttributesToEncrypt),
     attributesToIncludeInAAD: new Set(RuleAttributesIncludedInAAD),
   });

@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+
 import type { CheckPrivilegesResponse } from './check_privileges';
 
 export type CheckSavedObjectsPrivilegesWithRequest = (

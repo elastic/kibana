@@ -13,7 +13,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
-import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
+import {
+  OPEN_FINDINGS_FLYOUT,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { getVendorName } from '../../../common/utils/get_vendor_name';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { ErrorCallout } from '../layout/error_callout';
@@ -49,7 +54,7 @@ const getCspFinding = (source: Record<string, any> | undefined): CspFinding | un
 const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
   const finding = row.raw._source;
   if (!finding || !isCspFinding(finding)) return <></>;
-
+  uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, OPEN_FINDINGS_FLYOUT);
   return <FindingsRuleFlyout finding={finding} onClose={onCloseFlyout} />;
 };
 
@@ -63,11 +68,13 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
 
     return <CspEvaluationBadge type={finding?.result?.evaluation} />;
   },
-  'data_stream.dataset': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+  'observer.vendor': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);
-    const source = getDatasetDisplayName(finding?.data_stream?.dataset);
+    if (!finding) return <>{''}</>;
 
-    return <>{source || finding?.data_stream?.dataset || ''}</>;
+    const vendor = getVendorName(finding);
+
+    return <>{vendor || ''}</>;
   },
   '@timestamp': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);

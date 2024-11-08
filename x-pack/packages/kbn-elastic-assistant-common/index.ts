@@ -25,3 +25,19 @@ export {
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
 export { parseBedrockBuffer, handleBedrockChunk } from './impl/utils/bedrock';
 export * from './constants';
+
+/** currently the same shape as "fields" property in the ES response */
+export { type MaybeRawData } from './impl/alerts/helpers/types';
+
+/**
+ * This query returns open and acknowledged (non-building block) alerts in the last 24 hours.
+ *
+ * The alerts are ordered by risk score, and then from the most recent to the oldest.
+ */
+export { getOpenAndAcknowledgedAlertsQuery } from './impl/alerts/get_open_and_acknowledged_alerts_query';
+
+/** Returns the raw data if it valid, or a default if it's not */
+export { getRawDataOrDefault } from './impl/alerts/helpers/get_raw_data_or_default';
+
+/** Return true if the provided size is out of range */
+export { sizeIsOutOfRange } from './impl/alerts/helpers/size_is_out_of_range';

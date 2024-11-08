@@ -11,6 +11,7 @@ import { FalsePositivesReadOnly } from './false_positives';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { mockCustomQueryRule } from '../../storybook/mocks';
+import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: FalsePositivesReadOnly,
@@ -22,7 +23,11 @@ interface TemplateProps {
 }
 
 const Template: Story<TemplateProps> = (args) => {
-  return <FieldReadOnly fieldName="false_positives" finalDiffableRule={args.finalDiffableRule} />;
+  return (
+    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
+      <FieldReadOnly fieldName="false_positives" />
+    </ThreeWayDiffStorybookProviders>
+  );
 };
 
 export const Default = Template.bind({});

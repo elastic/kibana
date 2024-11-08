@@ -58,7 +58,7 @@ export const verifyQueryTimeout = (timeout: string) => {
 
 // sometimes the results get stuck in the tests, this is a workaround
 export const checkResults = () => {
-  cy.getBySel('osqueryResultsTable').then(($table) => {
+  cy.getBySel('osqueryResultsTable', { timeout: 120000 }).then(($table) => {
     if ($table.find('div .euiDataGridRow').length > 0) {
       cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
     } else {
@@ -140,7 +140,7 @@ export const addLiveQueryToCase = (actionId: string, caseId: string) => {
   addToCase(caseId);
 };
 
-const casesOsqueryResultRegex = /attached Osquery results[\s]?[\d]+[\s]?seconds ago/;
+const casesOsqueryResultRegex = /attached Osquery results[\s]?[\d]+[\s]?second(?:s)? ago/;
 export const viewRecentCaseAndCheckResults = () => {
   cy.contains('View case').click();
   cy.contains(casesOsqueryResultRegex);
@@ -158,6 +158,7 @@ export const checkActionItemsInResults = ({
   cases: boolean;
   timeline: boolean;
 }) => {
+  checkResults();
   cy.contains('View in Discover').should(discover ? 'exist' : 'not.exist');
   cy.contains('View in Lens').should(lens ? 'exist' : 'not.exist');
   cy.contains('Add to Case').should(cases ? 'exist' : 'not.exist');

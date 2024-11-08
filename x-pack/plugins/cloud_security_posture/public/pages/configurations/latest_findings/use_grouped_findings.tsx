@@ -52,9 +52,6 @@ export interface FindingsGroupingAggregation {
   resourceSubType?: {
     buckets?: GenericBuckets[];
   };
-  resourceType?: {
-    buckets?: GenericBuckets[];
-  };
   benchmarkName?: {
     buckets?: GenericBuckets[];
   };
@@ -70,6 +67,7 @@ export interface FindingsGroupingAggregation {
 export const getGroupedFindingsQuery = (query: GroupingQuery) => ({
   ...query,
   index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+  ignore_unavailable: true,
   size: 0,
 });
 

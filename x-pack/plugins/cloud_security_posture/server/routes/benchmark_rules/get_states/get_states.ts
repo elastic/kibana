@@ -16,8 +16,10 @@ export const defineGetCspBenchmarkRulesStatesRoute = (router: CspRouter) =>
     .get({
       access: 'internal',
       path: CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH,
-      options: {
-        tags: ['access:cloud-security-posture-read'],
+      security: {
+        authz: {
+          requiredPrivileges: ['cloud-security-posture-read'],
+        },
       },
     })
     .addVersion(
@@ -26,9 +28,6 @@ export const defineGetCspBenchmarkRulesStatesRoute = (router: CspRouter) =>
         validate: {},
       },
       async (context, request, response) => {
-        if (!(await context.fleet).authz.fleet.all) {
-          return response.forbidden();
-        }
         const cspContext = await context.csp;
 
         try {

@@ -12,6 +12,7 @@ import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
 import { mockPromptContexts } from '../../../mock/prompt_context';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 
+const mockIsEditEnabled = jest.fn();
 const mockOnEditActionClicked = jest.fn();
 const mockOnDeleteActionClicked = jest.fn();
 
@@ -20,6 +21,8 @@ describe('useQuickPromptTable', () => {
   const props = {
     isActionsDisabled: false,
     basePromptContexts: mockPromptContexts,
+    isDeleteEnabled: (prompt: PromptResponse) => prompt.isDefault !== true,
+    isEditEnabled: mockIsEditEnabled,
     onEditActionClicked: mockOnEditActionClicked,
     onDeleteActionClicked: mockOnDeleteActionClicked,
   };

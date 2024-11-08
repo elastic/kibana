@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import classNames from 'classnames';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+
 import { EuiLoadingChart } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddablePanel, ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import classNames from 'classnames';
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 import { DashboardPanelState } from '../../../../common';
-import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
+import { embeddableService, presentationUtilService } from '../../../services/kibana_services';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
@@ -58,7 +61,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
     const focusPanel = focusedPanelId !== undefined && focusedPanelId === id;
     const blurPanel = focusedPanelId !== undefined && focusedPanelId !== id;
-    const classes = classNames({
+    const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
       'dshDashboardGrid__item--focused': focusPanel,
@@ -89,18 +92,23 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
+    const dashboardContainerTopOffset =
+      (document.querySelector('.dashboardContainer') as HTMLDivElement)?.offsetTop || 0;
+    const globalNavTopOffset =
+      (document.querySelector('#app-fixed-viewport') as HTMLDivElement)?.offsetTop || 0;
+
     const focusStyles = blurPanel
       ? css`
           pointer-events: none;
           opacity: 0.25;
         `
-      : undefined;
+      : css`
+          scroll-margin-top: ${dashboardContainerTopOffset +
+          globalNavTopOffset +
+          DASHBOARD_MARGIN_SIZE}px;
+        `;
 
     const renderedEmbeddable = useMemo(() => {
-      const {
-        embeddable: { reactEmbeddableRegistryHasKey },
-      } = pluginServices.getServices();
-
       const panelProps = {
         showBadges: true,
         showBorder: useMargins,
@@ -109,7 +117,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       };
 
       // render React embeddable
-      if (reactEmbeddableRegistryHasKey(type)) {
+      if (embeddableService.reactEmbeddableRegistryHasKey(type)) {
         return (
           <ReactEmbeddableRenderer
             type={type}
@@ -190,18 +198,20 @@ export const ObservedItem = React.forwardRef<HTMLDivElement, Props>((props, pane
 // ReactGridLayout passes ref to children. Functional component children require forwardRef to avoid react warning
 // https://github.com/react-grid-layout/react-grid-layout#custom-child-components-and-draggable-handles
 export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props, ref) => {
-  const {
-    settings: { isProjectEnabledInLabs },
-  } = pluginServices.getServices();
   const dashboardApi = useDashboardApi();
   const [focusedPanelId, viewMode] = useBatchedPublishingSubjects(
     dashboardApi.focusedPanelId$,
     dashboardApi.viewMode
   );
 
+  const deferBelowFoldEnabled = useMemo(
+    () => presentationUtilService.labsService.isProjectEnabled('labs:dashboard:deferBelowFold'),
+    []
+  );
+
   const isEnabled =
     viewMode !== 'print' &&
-    isProjectEnabledInLabs('labs:dashboard:deferBelowFold') &&
+    deferBelowFoldEnabled &&
     (!focusedPanelId || focusedPanelId === props.id);
 
   return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;

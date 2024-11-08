@@ -29,6 +29,7 @@ describe('PUT /internal/core/_settings', () => {
       logging: {
         loggers: [{ name: loggerName, level: 'error', appenders: ['console'] }],
       },
+      server: { restrictInternalApis: false },
     };
     const { startES, startKibana } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -81,6 +82,9 @@ describe('checking all opted-in dynamic config settings', () => {
     const settings = {
       logging: {
         loggers: [{ name: 'root', level: 'info', appenders: ['console'] }],
+      },
+      server: {
+        restrictInternalApis: false,
       },
     };
 

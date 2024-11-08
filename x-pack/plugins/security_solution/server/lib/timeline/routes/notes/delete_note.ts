@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { NOTE_URL } from '../../../../../common/constants';
-
-import type { ConfigType } from '../../../..';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
@@ -19,7 +18,7 @@ import { buildFrameworkRequest } from '../../utils/common';
 import { DeleteNoteRequestBody, type DeleteNoteResponse } from '../../../../../common/api/timeline';
 import { deleteNote } from '../../saved_object/notes';
 
-export const deleteNoteRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
+export const deleteNoteRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .delete({
       path: NOTE_URL,
@@ -35,7 +34,7 @@ export const deleteNoteRoute = (router: SecuritySolutionPluginRouter, config: Co
         },
         version: '2023-10-31',
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<DeleteNoteResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -55,9 +54,8 @@ export const deleteNoteRoute = (router: SecuritySolutionPluginRouter, config: Co
             noteIds,
           });
 
-          const body: DeleteNoteResponse = { data: {} };
           return response.ok({
-            body,
+            body: { data: {} },
           });
         } catch (err) {
           const error = transformError(err);

@@ -11,7 +11,6 @@ import agent from 'elastic-apm-node';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
-import type { DataViewFieldBase } from '@kbn/es-query';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
@@ -26,8 +25,6 @@ import {
   hasTimestampFields,
   isMachineLearningParams,
   isEsqlParams,
-  isQueryParams,
-  isEqlParams,
   getDisabledActionsWarningText,
 } from './utils/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
@@ -47,7 +44,6 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 import { getInputIndex, DataViewError } from './utils/get_input_output_index';
 import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
-import { getFieldsForWildcard } from './utils/get_fields_for_wildcard';
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
 import { sendAlertSuppressionTelemetryEvent } from './utils/telemetry/send_alert_suppression_telemetry_event';
 
@@ -132,6 +128,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             params,
             previousStartedAt,
             startedAt,
+            startedAtOverridden,
             services,
             spaceId,
             state,
@@ -139,7 +136,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           } = options;
           let runState = state;
           let inputIndex: string[] = [];
-          let inputIndexFields: DataViewFieldBase[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
           const { from, maxSignals, timestampOverride, timestampOverrideFallbackDisabled, to } =
             params;
@@ -337,21 +333,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
           }
 
-          if (
-            !isMachineLearningParams(params) &&
-            !isEsqlParams(params) &&
-            !isQueryParams(params) &&
-            !isEqlParams(params)
-          ) {
-            const dataViews = await services.getDataViews();
-            inputIndexFields = await getFieldsForWildcard({
-              index: inputIndex,
-              dataViews,
-              language: params.language,
-              ruleExecutionLogger,
-            });
-          }
-
           try {
             const { listClient, exceptionsClient } = getListClient({
               esClient: services.scopedClusterClient.asCurrentUser,
@@ -383,6 +364,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             ignoreFieldsStandard.forEach((field) => {
               ignoreFieldsObject[field] = true;
             });
+            const intendedTimestamp = startedAtOverridden ? startedAt : undefined;
             const wrapHits = wrapHitsFactory({
               ignoreFields: ignoreFieldsObject,
               ignoreFieldsRegexes,
@@ -393,6 +375,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               alertTimestampOverride,
               publicBaseUrl,
               ruleExecutionLogger,
+              intendedTimestamp,
             });
 
             const wrapSequences = wrapSequencesFactory({
@@ -404,6 +387,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               publicBaseUrl,
               indicesToQuery: inputIndex,
               alertTimestampOverride,
+              intendedTimestamp,
             });
 
             const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
@@ -426,7 +410,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     inputIndex,
                     exceptionFilter,
                     unprocessedExceptions,
-                    inputIndexFields,
                     runtimeMappings: {
                       ...runtimeMappings,
                       ...timestampRuntimeMappings,
@@ -448,6 +431,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     refreshOnIndexingAlerts: refresh,
                     publicBaseUrl,
                     experimentalFeatures,
+                    intendedTimestamp,
                   },
                 });
 

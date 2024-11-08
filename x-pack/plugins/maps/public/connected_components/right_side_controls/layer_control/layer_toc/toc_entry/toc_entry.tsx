@@ -324,12 +324,7 @@ export class TOCEntry extends Component<Props, State> {
       this.props.depth > 0 ? { paddingLeft: `${8 + this.props.depth * 24}px` } : {};
 
     return (
-      <div
-        style={depthStyle}
-        className={classes}
-        id={this.props.layer.getId()}
-        data-layerid={this.props.layer.getId()}
-      >
+      <div style={depthStyle} className={classes} data-layerid={this.props.layer.getId()}>
         {this._renderLayerHeader()}
 
         {this.props.isLegendDetailsOpen &&

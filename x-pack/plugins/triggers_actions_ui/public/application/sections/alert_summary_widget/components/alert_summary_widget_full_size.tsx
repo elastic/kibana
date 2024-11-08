@@ -133,7 +133,7 @@ export const AlertSummaryWidgetFullSize = ({
                 line: {
                   strokeWidth: 2,
                 },
-                point: { visible: false },
+                point: { visible: 'never' },
               }}
               curve={CurveType.CURVE_MONOTONE_X}
               timeZone={timeZone}

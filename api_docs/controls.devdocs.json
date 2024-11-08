@@ -19,7 +19,7 @@
             "section": "def-public.ControlGroupRendererProps",
             "text": "ControlGroupRendererProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer_lazy.tsx",
         "deprecated": false,
@@ -503,6 +503,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "dataLoading",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupRendererProps.compressed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "compressed",
             "description": [],
             "signature": [
               "boolean | undefined"

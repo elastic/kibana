@@ -62,17 +62,23 @@ export class MonacoEditorActionsProvider {
     private setEditorActionsCss: (css: CSSProperties) => void,
     private isDevMode: boolean
   ) {
+    this.editor.focus();
     this.parsedRequestsProvider = getParsedRequestsProvider(this.editor.getModel());
     this.highlightedLines = this.editor.createDecorationsCollection();
 
     const debouncedHighlightRequests = debounce(
-      () => this.highlightRequests(),
+      async () => {
+        if (editor.hasTextFocus()) {
+          await this.highlightRequests();
+        } else {
+          this.clearEditorDecorations();
+        }
+      },
       DEBOUNCE_HIGHLIGHT_WAIT_MS,
       {
         leading: true,
       }
     );
-    debouncedHighlightRequests();
 
     const debouncedTriggerSuggestions = debounce(
       () => {
@@ -107,6 +113,15 @@ export class MonacoEditorActionsProvider {
       if (this.isDevMode && event.keyCode === monaco.KeyCode.F1) {
         this.editor.trigger(INSPECT_TOKENS_LABEL, INSPECT_TOKENS_HANDLER_ID, {});
       }
+    });
+  }
+
+  private clearEditorDecorations() {
+    // remove the highlighted lines
+    this.highlightedLines.clear();
+    // hide action buttons
+    this.setEditorActionsCss({
+      visibility: 'hidden',
     });
   }
 

@@ -121,7 +121,13 @@ test('DashboardGrid renders expanded panel', async () => {
 
 test('DashboardGrid renders focused panel', async () => {
   const { dashboardApi, component } = await createAndMountDashboardGrid();
-  dashboardApi.setFocusedPanelId('2');
+  const overlayMock = {
+    onClose: new Promise<void>((resolve) => {
+      resolve();
+    }),
+    close: async () => {},
+  };
+  dashboardApi.openOverlay(overlayMock, { focusedPanelId: '2' });
   await new Promise((resolve) => setTimeout(resolve, 1));
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
@@ -130,7 +136,7 @@ test('DashboardGrid renders focused panel', async () => {
   expect(component.find('#mockDashboardGridItem_1').hasClass('blurredPanel')).toBe(true);
   expect(component.find('#mockDashboardGridItem_2').hasClass('focusedPanel')).toBe(true);
 
-  dashboardApi.setFocusedPanelId(undefined);
+  dashboardApi.clearOverlays();
   await new Promise((resolve) => setTimeout(resolve, 1));
   component.update();
   expect(component.find('GridItem').length).toBe(2);

@@ -7,39 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import React from 'react';
+import { EuiToolTip } from '@elastic/eui';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import React from 'react';
+import { css } from '@emotion/react';
 import { getFieldValue } from '@kbn/discover-utils';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { ServiceNameBadgeWithActions } from '@kbn/discover-contextual-components';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import { CellRenderersExtensionParams } from '../../../context_awareness';
 import { AGENT_NAME_FIELD } from '../../../../common/data_types/logs/constants';
 
-const dataTestSubj = 'serviceNameCell';
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
+const dataTestSubj = 'serviceNameCell';
+const agentIconStyle = css`
+  margin-right: ${euiThemeVars.euiSizeXS};
+`;
 
 export const getServiceNameCell =
-  (serviceNameField: string) => (props: DataGridCellValueElementProps) => {
-    const serviceNameValue = getFieldValue(props.row, serviceNameField);
+  (serviceNameField: string, { actions }: CellRenderersExtensionParams) =>
+  (props: DataGridCellValueElementProps) => {
+    const { core, share } = useDiscoverServices();
+    const serviceNameValue = getFieldValue(props.row, serviceNameField) as string;
     const agentName = getFieldValue(props.row, AGENT_NAME_FIELD) as AgentName;
 
     if (!serviceNameValue) {
       return <span data-test-subj={`${dataTestSubj}-empty`}>-</span>;
     }
 
+    const getIcon = () => (
+      <EuiToolTip position="left" content={agentName} repositionOnScroll={true}>
+        <AgentIcon agentName={agentName} size="m" css={agentIconStyle} />
+      </EuiToolTip>
+    );
+
     return (
-      <EuiFlexGroup
-        gutterSize="xs"
-        data-test-subj={`${dataTestSubj}-${agentName || 'unknown'}`}
-        responsive={false}
-        alignItems="center"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiToolTip position="left" content={agentName} repositionOnScroll={true}>
-            <AgentIcon agentName={agentName} size="m" />
-          </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{serviceNameValue}</EuiFlexItem>
-      </EuiFlexGroup>
+      <ServiceNameBadgeWithActions
+        onFilter={actions.addFilter}
+        icon={getIcon}
+        value={serviceNameValue}
+        property={serviceNameField}
+        core={core}
+        share={share}
+      />
     );
   };

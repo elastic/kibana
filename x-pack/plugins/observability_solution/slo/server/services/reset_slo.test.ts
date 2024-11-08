@@ -63,7 +63,7 @@ describe('ResetSLO', () => {
   it('resets all associated resources', async () => {
     const slo = createSLO({ id: 'irrelevant', version: 1 });
     mockRepository.findById.mockResolvedValueOnce(slo);
-    mockRepository.save.mockImplementation((v) => Promise.resolve(v));
+    mockRepository.update.mockImplementation((v) => Promise.resolve(v));
 
     await resetSLO.execute(slo.id);
 
@@ -87,7 +87,7 @@ describe('ResetSLO', () => {
 
     expect(mockEsClient.index).toMatchSnapshot();
 
-    expect(mockRepository.save).toHaveBeenCalledWith({
+    expect(mockRepository.update).toHaveBeenCalledWith({
       ...slo,
       version: SLO_MODEL_VERSION,
       updatedAt: expect.anything(),

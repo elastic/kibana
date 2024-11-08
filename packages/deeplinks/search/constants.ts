@@ -9,7 +9,7 @@
 
 export const ENTERPRISE_SEARCH_APP_ID = 'enterpriseSearch';
 export const ENTERPRISE_SEARCH_CONTENT_APP_ID = 'enterpriseSearchContent';
-export const ENTERPRISE_SEARCH_RELEVANCE_APP_ID = 'enterpriseSearchRelevance';
+export const ENTERPRISE_SEARCH_RELEVANCE_APP_ID = 'searchInferenceEndpoints';
 export const ENTERPRISE_SEARCH_APPLICATIONS_APP_ID = 'enterpriseSearchApplications';
 export const ENTERPRISE_SEARCH_ANALYTICS_APP_ID = 'enterpriseSearchAnalytics';
 export const ENTERPRISE_SEARCH_APPSEARCH_APP_ID = 'appSearch';
@@ -19,3 +19,9 @@ export const SERVERLESS_ES_CONNECTORS_ID = 'serverlessConnectors';
 export const SERVERLESS_ES_SEARCH_PLAYGROUND_ID = 'searchPlayground';
 export const SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID = 'searchInferenceEndpoints';
 export const SEARCH_HOMEPAGE = 'searchHomepage';
+export const SEARCH_INDICES_START = 'elasticsearchStart';
+export const SEARCH_INDICES = 'elasticsearchIndices';
+export const SEARCH_ELASTICSEARCH = 'enterpriseSearchElasticsearch';
+export const SEARCH_VECTOR_SEARCH = 'enterpriseSearchVectorSearch';
+export const SEARCH_SEMANTIC_SEARCH = 'enterpriseSearchSemanticSearch';
+export const SEARCH_AI_SEARCH = 'enterpriseSearchAISearch';

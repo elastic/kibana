@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/rule_form/utils/check_action_type_enabled';
 import { loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -33,7 +34,6 @@ import {
   hasExecuteActionsCapability,
 } from '../../../lib/capabilities';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
-import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
 import './actions_connectors_list.scss';
 import {
   ActionConnector,
@@ -199,9 +199,9 @@ const ActionsConnectorsList = ({
       truncateText: true,
       render: (value: string, item: ActionConnectorTableItem) => {
         const checkEnabledResult = checkActionTypeEnabled(
-          actionTypesIndex && actionTypesIndex[item.actionTypeId]
+          actionTypesIndex && actionTypesIndex[item.actionTypeId],
+          item.isPreconfigured
         );
-
         /**
          * TODO: Remove when connectors can provide their own UX message.
          * Issue: https://github.com/elastic/kibana/issues/114507
@@ -363,7 +363,8 @@ const ActionsConnectorsList = ({
       columns={actionsTableColumns}
       rowProps={(item: ActionConnectorTableItem) => ({
         className:
-          !actionTypesIndex || !actionTypesIndex[item.actionTypeId]?.enabled
+          !item.isPreconfigured &&
+          (!actionTypesIndex || !actionTypesIndex[item.actionTypeId]?.enabled)
             ? 'actConnectorsList__tableRowDisabled'
             : '',
         'data-test-subj': 'connectors-row',

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { SESSION_ERROR_REASON_HEADER } from '@kbn/security-plugin/common/constants';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { parse } from 'url';
-import { FtrProviderContext } from '../../ftr_provider_context';
+
+import expect from '@kbn/expect';
+import { SESSION_ERROR_REASON_HEADER } from '@kbn/security-plugin/common/constants';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');

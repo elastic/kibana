@@ -16,6 +16,9 @@ import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
+import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
+import { handleCustomErrors } from './routes_util';
+import { GenerationErrorCode } from '../../common/constants';
 
 export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -31,6 +34,13 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because the privileges are not defined yet.',
+          },
+        },
         validate: {
           request: {
             body: buildRouteValidationWithZod(RelatedRequestBody),
@@ -87,10 +97,19 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
           };
 
           const graph = await getRelatedGraph({ client, model });
-          const results = await graph.invoke(parameters, options);
+          const results = await graph
+            .withConfig({ runName: 'Related' })
+            .invoke(parameters, options);
           return res.ok({ body: RelatedResponse.parse(results) });
-        } catch (e) {
-          return res.badRequest({ body: e });
+        } catch (err) {
+          try {
+            handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);
+          } catch (e) {
+            if (isErrorThatHandlesItsOwnResponse(e)) {
+              return e.sendResponse(res);
+            }
+          }
+          return res.badRequest({ body: err });
         }
       })
     );

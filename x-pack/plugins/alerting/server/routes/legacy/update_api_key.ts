@@ -22,7 +22,8 @@ const paramSchema = schema.object({
 export const updateApiKeyRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.post(
     {
@@ -31,8 +32,10 @@ export const updateApiKeyRoute = (
         params: paramSchema,
       },
       options: {
+        access: isServerless ? 'internal' : 'public',
         summary: 'Update the API key for an alert',
         tags: ['oas-tag:alerting'],
+        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
         deprecated: true,
       },
     },

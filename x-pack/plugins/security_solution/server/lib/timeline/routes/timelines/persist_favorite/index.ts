@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_FAVORITE_URL } from '../../../../../../common/constants';
-
-import type { ConfigType } from '../../../../..';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
@@ -23,7 +22,7 @@ import {
   TimelineTypeEnum,
 } from '../../../../../../common/api/timeline';
 
-export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .patch({
       path: TIMELINE_FAVORITE_URL,
@@ -39,7 +38,11 @@ export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter, _: Co
           request: { body: buildRouteValidationWithZod(PersistFavoriteRouteRequestBody) },
         },
       },
-      async (context, request, response) => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<PersistFavoriteRouteResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {

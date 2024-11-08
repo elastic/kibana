@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { Spaces } from '../../../scenarios';
 import {
   getUrlPrefix,
@@ -17,6 +17,7 @@ import {
   getEventLog,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { TEST_CACHE_EXPIRATION_TIME } from '../create_test_data';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetAlertSummaryTests({ getService }: FtrProviderContext) {
@@ -308,6 +309,9 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
           true
         );
 
+        // wait so cache expires
+        await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
         // pattern of when the rule should fire
         const pattern = {
           alertA: [true, true, true, true],
@@ -384,6 +388,9 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
     describe('legacy', function () {
       this.tags('skipFIPS');
       it('handles multi-alert status', async () => {
+        // wait so cache expires
+        await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
         // pattern of when the alert should fire
         const pattern = {
           alertA: [true, true, true, true],

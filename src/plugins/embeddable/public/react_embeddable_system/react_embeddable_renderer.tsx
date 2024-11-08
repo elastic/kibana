@@ -102,22 +102,10 @@ export const ReactEmbeddableRenderer = <
        */
       return (async () => {
         const parentApi = getParentApi();
-        const factory = await getReactEmbeddableFactory<SerializedState, RuntimeState, Api>(type);
         const subscriptions = new Subscription();
 
-        const setApi = (
-          apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>
-        ) => {
-          return {
-            ...apiRegistration,
-            uuid,
-            phase$,
-            parentApi,
-            type: factory.type,
-          } as unknown as Api;
-        };
-
         const buildEmbeddable = async () => {
+          const factory = await getReactEmbeddableFactory<SerializedState, RuntimeState, Api>(type);
           const serializedState = parentApi.getSerializedStateForChild(uuid);
           const lastSavedRuntimeState = serializedState
             ? await factory.deserializeState(serializedState)
@@ -130,6 +118,23 @@ export const ReactEmbeddableRenderer = <
             : ({} as Partial<RuntimeState>);
 
           const initialRuntimeState = { ...lastSavedRuntimeState, ...partialRuntimeState };
+
+          const setApi = (
+            apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>
+          ) => {
+            const hasLockedHoverActions$ = new BehaviorSubject(false);
+            return {
+              ...apiRegistration,
+              uuid,
+              phase$,
+              parentApi,
+              hasLockedHoverActions$,
+              lockHoverActions: (lock: boolean) => {
+                hasLockedHoverActions$.next(lock);
+              },
+              type: factory.type,
+            } as unknown as Api;
+          };
 
           const buildApi = (
             apiRegistration: BuildReactEmbeddableApiRegistration<
@@ -179,7 +184,10 @@ export const ReactEmbeddableRenderer = <
               ...unsavedChanges.api,
             } as unknown as SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>);
 
-            cleanupFunction.current = () => unsavedChanges.cleanup();
+            cleanupFunction.current = () => {
+              subscriptions.unsubscribe();
+              unsavedChanges.cleanup();
+            };
             return fullApi as Api & HasSnapshottableState<RuntimeState>;
           };
 

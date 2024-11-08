@@ -14,16 +14,16 @@ import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import {
-  apiHasInspectorAdapters,
   HasInspectorAdapters,
+  apiHasInspectorAdapters,
   type Adapters,
 } from '@kbn/inspector-plugin/public';
 import {
   EmbeddableApiContext,
-  getPanelTitle,
   PublishesPanelTitle,
+  getPanelTitle,
 } from '@kbn/presentation-publishing';
-import { pluginServices } from '../services/plugin_services';
+import { coreServices, fieldFormatService } from '../services/kibana_services';
 import { dashboardExportCsvActionStrings } from './_dashboard_actions_strings';
 
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
@@ -41,17 +41,7 @@ const isApiCompatible = (api: unknown | null): api is ExportCsvActionApi =>
 export class ExportCSVAction implements Action<ExportContext> {
   public readonly id = ACTION_EXPORT_CSV;
   public readonly type = ACTION_EXPORT_CSV;
-  public readonly order = 18; // right after Export in discover which is 19
-
-  private fieldFormats;
-  private uiSettings;
-
-  constructor() {
-    ({
-      data: { fieldFormats: this.fieldFormats },
-      settings: { uiSettings: this.uiSettings },
-    } = pluginServices.getServices());
-  }
+  public readonly order = 18;
 
   public getIconType() {
     return 'exportAction';
@@ -70,9 +60,7 @@ export class ExportCSVAction implements Action<ExportContext> {
   };
 
   private getFormatter = (): FormatFactory | undefined => {
-    if (this.fieldFormats) {
-      return this.fieldFormats.deserialize;
-    }
+    return fieldFormatService.deserialize;
   };
 
   private getDataTableContent = (adapters: Adapters | undefined) => {
@@ -105,8 +93,8 @@ export class ExportCSVAction implements Action<ExportContext> {
 
             memo[`${getPanelTitle(embeddable) || untitledFilename}${postFix}.csv`] = {
               content: exporters.datatableToCSV(datatable, {
-                csvSeparator: this.uiSettings.get('csv:separator', ','),
-                quoteValues: this.uiSettings.get('csv:quoteValues', true),
+                csvSeparator: coreServices.uiSettings.get('csv:separator', ','),
+                quoteValues: coreServices.uiSettings.get('csv:quoteValues', true),
                 formatFactory,
                 escapeFormulaValues: false,
               }),

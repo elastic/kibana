@@ -22,6 +22,11 @@ import type { HttpSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n as kbnI18n } from '@kbn/i18n';
 import { QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  CREATE_DETECTION_FROM_TABLE_ROW_ACTION,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import type { RuleResponse } from '../common/types';
 import { CREATE_RULE_ACTION_SUBJ, TAKE_ACTION_SUBJ } from './test_subjects';
 import { useKibana } from '../common/hooks/use_kibana';
@@ -239,7 +244,10 @@ const CreateDetectionRule = ({
     <EuiContextMenuItem
       key="createRule"
       disabled={isCreateDetectionRuleDisabled}
-      onClick={() => mutate()}
+      onClick={() => {
+        mutate();
+        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, CREATE_DETECTION_FROM_TABLE_ROW_ACTION);
+      }}
       data-test-subj={CREATE_RULE_ACTION_SUBJ}
     >
       <FormattedMessage

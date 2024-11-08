@@ -9,7 +9,7 @@
 
 import { chunk } from 'lodash';
 import { Key } from 'selenium-webdriver';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { WebElementWrapper, CustomCheerioStatic } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export interface TabbedGridData {
@@ -34,12 +34,10 @@ export class DataGridService extends FtrService {
     const table = await this.find.byCssSelector('.euiDataGrid');
     const $ = await table.parseDomContent();
 
-    const columns = $('.euiDataGridHeaderCell')
-      .toArray()
-      .map((cell) => $(cell).text());
+    const columns = this.getHeaderText($);
     const cells = $.findTestSubjects('dataGridRowCell')
       .toArray()
-      .map((cell) => $(cell).text());
+      .map((cell) => $(cell).find('.euiDataGridRowCell__content').text());
 
     const rows = chunk(cells, columns.length);
 
@@ -76,12 +74,25 @@ export class DataGridService extends FtrService {
   /**
    * Returns an array of data grid headers names
    */
-  public async getHeaders() {
-    const header = await this.testSubjects.find('euiDataGridBody > dataGridHeader');
-    const $ = await header.parseDomContent();
+  public getHeaderText(parsedDomContent: CustomCheerioStatic) {
+    const $ = parsedDomContent;
     return $('.euiDataGridHeaderCell')
       .toArray()
-      .map((cell) => $(cell).text());
+      .map((cell) => {
+        const content = $(cell).find('.euiDataGridHeaderCell__content');
+        if (content.length) {
+          return content.text();
+        } else {
+          // Control columns will need hidden text manually stripped
+          $(cell).find('[hidden], [data-tabular-copy-marker]').remove();
+          return $(cell).text();
+        }
+      });
+  }
+
+  public async getHeaders() {
+    const header = await this.testSubjects.find('euiDataGridBody > dataGridHeader');
+    return this.getHeaderText(await header.parseDomContent());
   }
 
   public getHeaderElement(field: string) {
@@ -91,9 +102,38 @@ export class DataGridService extends FtrService {
   public async resizeColumn(field: string, delta: number) {
     const header = await this.getHeaderElement(field);
     const originalWidth = (await header.getSize()).width;
-    const resizer = await header.findByCssSelector(
-      this.testSubjects.getCssSelector('dataGridColumnResizer')
-    );
+
+    let resizer: WebElementWrapper | undefined;
+
+    if (await this.testSubjects.exists('euiDataGridHeaderDroppable')) {
+      // if drag & drop is enabled for data grid columns
+      const headerDraggableColumns = await this.find.allByCssSelector(
+        '[data-test-subj="euiDataGridHeaderDroppable"] > div'
+      );
+      // searching for a common parent of the field column header and its resizer
+      const fieldHeader: WebElementWrapper | null | undefined = (
+        await Promise.all(
+          headerDraggableColumns.map(async (column) => {
+            const hasFieldColumn =
+              (await column.findAllByCssSelector(`[data-gridcell-column-id="${field}"]`)).length >
+              0;
+            return hasFieldColumn ? column : null;
+          })
+        )
+      ).find(Boolean);
+
+      resizer = await fieldHeader?.findByTestSubject('dataGridColumnResizer');
+    } else {
+      // if drag & drop is not enabled for data grid columns
+      resizer = await header.findByCssSelector(
+        this.testSubjects.getCssSelector('dataGridColumnResizer')
+      );
+    }
+
+    if (!resizer) {
+      throw new Error(`Unable to find column resizer for field ${field}`);
+    }
+
     await this.browser.dragAndDrop({ location: resizer }, { location: { x: delta, y: 0 } });
     return { originalWidth, newWidth: (await header.getSize()).width };
   }
@@ -357,7 +397,7 @@ export class DataGridService extends FtrService {
   }
 
   public async clickRowToggle(
-    { defaultTabId, ...options }: SelectOptions & { defaultTabId?: string } = {
+    { defaultTabId, ...options }: SelectOptions & { defaultTabId?: string | false } = {
       isAnchorRow: false,
       rowIndex: 0,
     }
@@ -389,7 +429,9 @@ export class DataGridService extends FtrService {
       throw new Error('Unable to find row toggle element');
     }
 
-    await this.clickDocViewerTab(defaultTabId ?? 'doc_view_table');
+    if (defaultTabId !== false) {
+      await this.clickDocViewerTab(defaultTabId ?? 'doc_view_table');
+    }
   }
 
   public async isShowingDocViewer() {
@@ -700,12 +742,21 @@ export class DataGridService extends FtrService {
     await this.checkCurrentRowsPerPageToBe(newValue);
   }
 
-  public async selectRow(rowIndex: number) {
+  public async selectRow(rowIndex: number, { pressShiftKey }: { pressShiftKey?: boolean } = {}) {
     const checkbox = await this.find.byCssSelector(
       `.euiDataGridRow[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="select"] .euiCheckbox__input`
     );
 
-    await checkbox.click();
+    if (pressShiftKey) {
+      await this.browser
+        .getActions()
+        .keyDown(Key.SHIFT)
+        .click(checkbox._webElement)
+        .keyUp(Key.SHIFT)
+        .perform();
+    } else {
+      await checkbox.click();
+    }
   }
 
   public async getNumberOfSelectedRows() {

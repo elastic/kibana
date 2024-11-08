@@ -21,7 +21,7 @@ import { StorageContextProvider } from '@kbn/ml-local-storage';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { AiopsPluginStartDeps } from '../../types';
 import { LogCategorizationFlyout } from './log_categorization_for_flyout';
-import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
+import { AiopsAppContext, type AiopsAppContextValue } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 const localStorage = new Storage(window.localStorage);
@@ -43,13 +43,14 @@ export async function showCategorizeFlyout(
         resolve();
       };
 
-      const appDependencies: AiopsAppDependencies = {
+      const appContextValue: AiopsAppContextValue = {
+        embeddingOrigin: originatingApp,
         ...coreStart,
         ...plugins,
       };
       const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
       const datePickerDeps: DatePickerDependencies = {
-        ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+        ...pick(appContextValue, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
         i18n,
         uiSettingsKeys: UI_SETTINGS,
       };
@@ -61,7 +62,7 @@ export async function showCategorizeFlyout(
               ...coreStart,
             }}
           >
-            <AiopsAppContext.Provider value={appDependencies}>
+            <AiopsAppContext.Provider value={appContextValue}>
               <DatePickerContextProvider {...datePickerDeps}>
                 <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
                   <LogCategorizationFlyout
@@ -69,7 +70,6 @@ export async function showCategorizeFlyout(
                     savedSearch={null}
                     selectedField={field}
                     onClose={onFlyoutClose}
-                    embeddingOrigin={originatingApp}
                     additionalFilter={additionalFilter}
                   />
                 </StorageContextProvider>

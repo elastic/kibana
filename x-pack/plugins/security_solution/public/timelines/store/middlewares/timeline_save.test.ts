@@ -167,7 +167,7 @@ describe('Timeline save middleware', () => {
   });
 
   it('should show an error message when the call is unauthorized', async () => {
-    (persistTimeline as jest.Mock).mockResolvedValue({ data: { persistTimeline: { code: 403 } } });
+    (persistTimeline as jest.Mock).mockResolvedValue({ status_code: 403 });
     await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: false }));
 
     expect(refreshTimelines as unknown as jest.Mock).not.toHaveBeenCalled();
@@ -175,7 +175,7 @@ describe('Timeline save middleware', () => {
   });
 
   describe('#convertTimelineAsInput ', () => {
-    test('should return a TimelineInput instead of TimelineModel ', () => {
+    test('should return a SavedTimeline instead of TimelineModel ', () => {
       const columns: TimelineModel['columns'] = [
         {
           columnHeaderType: 'not-filtered',

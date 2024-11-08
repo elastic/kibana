@@ -35,6 +35,10 @@ export const ADD_NEW_CONNECTOR = i18n.translate('xpack.cases.configureCases.addN
   defaultMessage: 'Add new connector',
 });
 
+export const ADD_CONNECTOR = i18n.translate('xpack.cases.configureCases.addConnector', {
+  defaultMessage: 'Add connector',
+});
+
 export const CASE_CLOSURE_OPTIONS_TITLE = i18n.translate(
   'xpack.cases.configureCases.caseClosureOptionsTitle',
   {
@@ -168,6 +172,17 @@ export const ADD_CUSTOM_FIELD = i18n.translate(
   }
 );
 
+export const EDIT_CUSTOM_FIELD = i18n.translate(
+  'xpack.cases.configureCases.customFields.editCustomField',
+  {
+    defaultMessage: 'Edit field',
+  }
+);
+
 export const CREATE_TEMPLATE = i18n.translate('xpack.cases.configureCases.templates.flyoutTitle', {
-  defaultMessage: 'Create template',
+  defaultMessage: 'Add template',
+});
+
+export const EDIT_TEMPLATE = i18n.translate('xpack.cases.configureCases.templates.editTemplate', {
+  defaultMessage: 'Edit template',
 });

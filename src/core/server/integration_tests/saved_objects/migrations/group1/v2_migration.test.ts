@@ -22,20 +22,23 @@ import {
   readLog,
   clearLog,
   currentVersion,
+  nextMinor,
 } from '../kibana_migrator_test_kit';
 import {
+  BASELINE_COMPLEX_DOCUMENTS_500K_AFTER,
   BASELINE_DOCUMENTS_PER_TYPE_500K,
   BASELINE_TEST_ARCHIVE_500K,
 } from '../kibana_migrator_archive_utils';
 import {
-  baselineTypes,
   getReindexingBaselineTypes,
   getReindexingMigratorTestKit,
   getUpToDateMigratorTestKit,
 } from '../kibana_migrator_test_kit.fixtures';
-import { delay } from '../test_utils';
+import { delay, getDocVersion } from '../test_utils';
+import { expectDocumentsMigratedToHighestVersion } from '../kibana_migrator_test_kit.expect';
 
 const logFilePath = join(__dirname, 'v2_migration.log');
+const docVersion = getDocVersion();
 
 describe('v2 migration', () => {
   let esServer: TestElasticsearchUtils;
@@ -64,42 +67,55 @@ describe('v2 migration', () => {
       migrationResults = await upToDateKit.runMigrations();
     });
 
+    it('updates the index mappings to account for new SO types', async () => {
+      const res = await upToDateKit.client.indices.getMapping({ index: defaultKibanaIndex });
+      const mappings = res[`${defaultKibanaIndex}_${currentVersion}_001`].mappings;
+
+      expect(mappings._meta?.indexTypesMap[defaultKibanaIndex]).toContain('recent');
+      expect(mappings.properties?.recent).toEqual({
+        properties: {
+          name: {
+            type: 'keyword',
+          },
+        },
+      });
+    });
+
     it('skips UPDATE_TARGET_MAPPINGS_PROPERTIES if there are no changes in the mappings', async () => {
       const logs = await readLog(logFilePath);
       expect(logs).not.toMatch('CREATE_NEW_TARGET');
+
+      // defaultKibana index has a new SO type ('recent'), thus we must update the _meta properties
       expect(logs).toMatch(
-        `[${defaultKibanaIndex}] CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS`
+        `[${defaultKibanaIndex}] CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_META.`
       );
       expect(logs).toMatch(
         `[${defaultKibanaTaskIndex}] CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS`
       );
+
+      // no updated types, so no pickup
       expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS_PROPERTIES');
-      expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK');
-      expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS_META');
     });
 
     it(`returns a 'patched' status for each SO index`, () => {
       // omit elapsedMs as it varies in each execution
-      expect(migrationResults.map((result) => omit(result, 'elapsedMs'))).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "destIndex": ".kibana_migrator_9.0.0_001",
-            "status": "patched",
-          },
-          Object {
-            "destIndex": ".kibana_migrator_tasks_9.0.0_001",
-            "status": "patched",
-          },
-        ]
-      `);
+      expect(migrationResults.map((result) => omit(result, 'elapsedMs'))).toEqual([
+        {
+          destIndex: `${defaultKibanaIndex}_${currentVersion}_001`,
+          status: 'patched',
+        },
+        {
+          destIndex: `${defaultKibanaTaskIndex}_${currentVersion}_001`,
+          status: 'patched',
+        },
+      ]);
     });
 
     it('each migrator takes less than 10 seconds', () => {
-      expect(
-        (migrationResults as Array<{ elapsedMs?: number }>).every(
-          ({ elapsedMs }) => !elapsedMs || elapsedMs < 10000
-        )
-      ).toEqual(true);
+      const painfulMigrator = (migrationResults as Array<{ elapsedMs?: number }>).find(
+        ({ elapsedMs }) => elapsedMs && elapsedMs > 10_000
+      );
+      expect(painfulMigrator).toBeUndefined();
     });
   });
 
@@ -126,7 +142,7 @@ describe('v2 migration', () => {
         await expect(unknownTypesKit.runMigrations()).rejects.toThrowErrorMatchingInlineSnapshot(`
           "Unable to complete saved object migrations for the [.kibana_migrator] index: Migration failed because some documents were found which use unknown saved object types: deprecated
           To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.
-          Please refer to https://www.elastic.co/guide/en/kibana/master/resolve-migrations-failures.html for more information."
+          Please refer to https://www.elastic.co/guide/en/kibana/${docVersion}/resolve-migrations-failures.html for more information."
         `);
         logs = await readLog(logFilePath);
         expect(logs).toMatch(
@@ -214,38 +230,10 @@ describe('v2 migration', () => {
       });
 
       it('migrates documents to the highest version', async () => {
-        const typeMigrationVersions: Record<string, string> = {
-          basic: '10.1.0', // did not define any model versions
-          complex: '10.2.0',
-          task: '10.2.0',
-        };
-
-        const resultSets = await Promise.all(
-          baselineTypes.map(({ name: type }) =>
-            kit.client.search<any>({
-              index: [defaultKibanaIndex, defaultKibanaTaskIndex],
-              query: {
-                bool: {
-                  should: [
-                    {
-                      term: { type },
-                    },
-                  ],
-                },
-              },
-            })
-          )
-        );
-
-        expect(
-          resultSets
-            .flatMap((result) => result.hits.hits)
-            .every(
-              (document) =>
-                document._source.typeMigrationVersion ===
-                typeMigrationVersions[document._source.type]
-            )
-        ).toEqual(true);
+        await expectDocumentsMigratedToHighestVersion(kit.client, [
+          defaultKibanaIndex,
+          defaultKibanaTaskIndex,
+        ]);
       });
 
       describe('a migrator performing a compatible upgrade migration', () => {
@@ -338,39 +326,31 @@ describe('v2 migration', () => {
           });
 
           it('executes the excludeOnUpgrade hook', () => {
-            // we discard the second half with exclude on upgrade (firstHalf !== true)
-            // then we discard half all multiples of 100 (1% of them)
-            expect(primaryIndexCounts.complex).toEqual(
-              BASELINE_DOCUMENTS_PER_TYPE_500K / 2 - BASELINE_DOCUMENTS_PER_TYPE_500K / 2 / 100
-            );
+            expect(primaryIndexCounts.complex).toEqual(BASELINE_COMPLEX_DOCUMENTS_500K_AFTER);
           });
         });
 
         it('returns a migrated status for each SO index', () => {
           // omit elapsedMs as it varies in each execution
-          expect(migrationResults.map((result) => omit(result, 'elapsedMs')))
-            .toMatchInlineSnapshot(`
-                      Array [
-                        Object {
-                          "destIndex": ".kibana_migrator_9.1.0_001",
-                          "sourceIndex": ".kibana_migrator_9.0.0_001",
-                          "status": "migrated",
-                        },
-                        Object {
-                          "destIndex": ".kibana_migrator_tasks_9.0.0_001",
-                          "sourceIndex": ".kibana_migrator_tasks_9.0.0_001",
-                          "status": "migrated",
-                        },
-                      ]
-                  `);
+          expect(migrationResults.map((result) => omit(result, 'elapsedMs'))).toEqual([
+            {
+              destIndex: `${defaultKibanaIndex}_${nextMinor}_001`,
+              sourceIndex: `${defaultKibanaIndex}_${currentVersion}_001`,
+              status: 'migrated',
+            },
+            {
+              destIndex: `${defaultKibanaTaskIndex}_${currentVersion}_001`,
+              sourceIndex: `${defaultKibanaTaskIndex}_${currentVersion}_001`,
+              status: 'migrated',
+            },
+          ]);
         });
 
         it('each migrator takes less than 60 seconds', () => {
-          expect(
-            (migrationResults as Array<{ elapsedMs?: number }>).every(
-              ({ elapsedMs }) => !elapsedMs || elapsedMs < 60000
-            )
-          ).toEqual(true);
+          const painfulMigrator = (migrationResults as Array<{ elapsedMs?: number }>).find(
+            ({ elapsedMs }) => elapsedMs && elapsedMs > 60_000
+          );
+          expect(painfulMigrator).toBeUndefined();
         });
       });
     });

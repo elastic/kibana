@@ -30,6 +30,7 @@ const createStartMock = (): jest.Mocked<LicensingPluginStart> => {
   const license = licenseMock.createLicense();
   const mock = {
     license$: new BehaviorSubject(license),
+    getLicense: jest.fn(),
     refresh: jest.fn(),
     createLicensePoller: jest.fn(),
     featureUsage: featureUsageMock.createStart(),

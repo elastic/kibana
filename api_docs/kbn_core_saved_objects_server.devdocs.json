@@ -3022,6 +3022,44 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsEncryptionExtension.shouldEnforceRandomId",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldEnforceRandomId",
+            "description": [
+              "\nReturns false if ESO type explicitly opts out of highly random UID\n"
+            ],
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsEncryptionExtension.shouldEnforceRandomId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "the string name of the object type"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "boolean, true by default unless explicitly set to false"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-server.ISavedObjectsEncryptionExtension.decryptOrStripResponseAttributes",
             "type": "Function",
             "tags": [],
@@ -5822,10 +5860,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -5836,6 +5870,10 @@
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -6118,44 +6156,8 @@
             "path": "src/core/server/index.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "@kbn/alerting-types",
@@ -6214,24 +6216,64 @@
             "path": "x-pack/plugins/alerting/common/rule.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/types/types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/types/types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/types/types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/create.ts"
           },
           {
             "plugin": "alerting",
@@ -6240,30 +6282,6 @@
           {
             "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
           },
           {
             "plugin": "alerting",
@@ -10389,7 +10407,7 @@
             "tags": [],
             "label": "hidden",
             "description": [
-              "\nIs the type hidden by default. If true, repositories will not have access to this type unless explicitly\ndeclared as an `extraType` when creating the repository.\nIt is recommended to hide the type for better backward compatibility.\nThe hidden types will not be automatically exposed via the HTTP API.\nTherefore, that should prevent unexpected behavior in the client code, as all the interactions will be done via the plugin API.\n\nSee {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}."
+              "\nIs the type hidden by default. If true, repositories will not have access to this type unless explicitly\ndeclared as an `extraType` when creating the repository.\nIt is recommended to hide the type for better backward compatibility.\nThe hidden types will not be automatically exposed via the HTTP API.\nTherefore, that should prevent unexpected behavior in the client code, as all the interactions will be done via the plugin API.\n\nHidden types must be listed to be accessible by the client.\n\n(await context.core).savedObjects.getClient({ includeHiddenTypes: [MY_PLUGIN_HIDDEN_SAVED_OBJECT_TYPE] })\n\nSee {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}.\n"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
             "deprecated": false,
@@ -10598,32 +10616,28 @@
                 "path": "x-pack/plugins/task_manager/server/saved_objects/index.ts"
               },
               {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/saved_objects/data_views.ts"
               },
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts"
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
                 "plugin": "share",
                 "path": "src/plugins/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/saved_objects/data_views.ts"
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
               },
               {
                 "plugin": "data",
@@ -10640,6 +10654,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts"
               },
               {
                 "plugin": "lens",
@@ -10738,12 +10756,12 @@
                 "path": "x-pack/plugins/maps/server/saved_objects/setup_saved_objects.ts"
               },
               {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
-              },
-              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/observability_solution/infra/server/lib/sources/saved_object_type.ts"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
               },
               {
                 "plugin": "apmDataAccess",
@@ -11457,16 +11475,16 @@
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
               },
               {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/saved_objects/data_views.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
               },
               {
                 "plugin": "data",

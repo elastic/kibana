@@ -5,6 +5,11 @@
  * 2.0.
  */
 import type { EventTypeOpts } from '@kbn/core/server';
+import type {
+  ResponseActionAgentType,
+  ResponseActionStatus,
+  ResponseActionsApiCommandNames,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
@@ -122,6 +127,69 @@ export const ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT: EventType
       },
     },
   };
+
+export const FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT: EventTypeOpts<{
+  duration: number;
+  interval: string;
+}> = {
+  eventType: 'field_retention_enrich_policy_execution',
+  schema: {
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration (in seconds) of the field retention enrich policy execution time',
+      },
+    },
+    interval: {
+      type: 'keyword',
+      _meta: {
+        description: 'Configured interval for the field retention enrich policy task',
+      },
+    },
+  },
+};
+
+export const ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
+  error: string;
+}> = {
+  eventType: 'entity_engine_resource_init_failure',
+  schema: {
+    error: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message for a resource initialization failure',
+      },
+    },
+  },
+};
+
+export const ENTITY_ENGINE_INITIALIZATION_EVENT: EventTypeOpts<{
+  duration: number;
+}> = {
+  eventType: 'entity_engine_initialization',
+  schema: {
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration (in seconds) of the entity engine initialization',
+      },
+    },
+  },
+};
+
+export const ENTITY_STORE_USAGE_EVENT: EventTypeOpts<{
+  storeSize: number;
+}> = {
+  eventType: 'entity_store_usage',
+  schema: {
+    storeSize: {
+      type: 'long',
+      _meta: {
+        description: 'Number of entities stored in the entity store',
+      },
+    },
+  },
+};
 
 export const ALERT_SUPPRESSION_EVENT: EventTypeOpts<{
   suppressionAlertsCreated: number;
@@ -250,10 +318,143 @@ const getUploadStatus = (stats?: BulkUpsertAssetCriticalityRecordsResponse['stat
   return 'fail';
 };
 
+export const ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT: EventTypeOpts<{
+  responseActions: {
+    agentType: ResponseActionAgentType;
+    command: ResponseActionsApiCommandNames;
+    error: string;
+  };
+}> = {
+  eventType: 'endpoint_response_action_sent_error',
+  schema: {
+    responseActions: {
+      properties: {
+        agentType: {
+          type: 'keyword',
+          _meta: {
+            description: 'The type of agent that the action was sent to',
+            optional: false,
+          },
+        },
+        command: {
+          type: 'keyword',
+          _meta: {
+            description: 'The command that was sent to the endpoint',
+            optional: false,
+          },
+        },
+        error: {
+          type: 'text',
+          _meta: {
+            description: 'The error message for the response action',
+          },
+        },
+      },
+    },
+  },
+};
+
+export const ENDPOINT_RESPONSE_ACTION_SENT_EVENT: EventTypeOpts<{
+  responseActions: {
+    actionId: string;
+    agentType: ResponseActionAgentType;
+    command: ResponseActionsApiCommandNames;
+    isAutomated: boolean;
+  };
+}> = {
+  eventType: 'endpoint_response_action_sent',
+  schema: {
+    responseActions: {
+      properties: {
+        actionId: {
+          type: 'keyword',
+          _meta: {
+            description: 'The ID of the action that was sent to the endpoint',
+            optional: false,
+          },
+        },
+        agentType: {
+          type: 'keyword',
+          _meta: {
+            description: 'The type of agent that the action was sent to',
+            optional: false,
+          },
+        },
+        command: {
+          type: 'keyword',
+          _meta: {
+            description: 'The command that was sent to the endpoint',
+            optional: false,
+          },
+        },
+        isAutomated: {
+          type: 'boolean',
+          _meta: {
+            description: 'Whether the action was auto-initiated by a pre-configured rule',
+            optional: false,
+          },
+        },
+      },
+    },
+  },
+};
+
+export const ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT: EventTypeOpts<{
+  responseActions: {
+    actionId: string;
+    agentType: ResponseActionAgentType;
+    actionStatus: ResponseActionStatus;
+    command: ResponseActionsApiCommandNames;
+  };
+}> = {
+  eventType: 'endpoint_response_action_status_change_event',
+  schema: {
+    responseActions: {
+      properties: {
+        actionId: {
+          type: 'keyword',
+          _meta: {
+            description: 'The ID of the action that was sent to the endpoint',
+            optional: false,
+          },
+        },
+        agentType: {
+          type: 'keyword',
+          _meta: {
+            description: 'The type of agent that the action was sent to',
+            optional: false,
+          },
+        },
+        actionStatus: {
+          type: 'keyword',
+          _meta: {
+            description: 'The status of the action',
+            optional: false,
+          },
+        },
+        command: {
+          type: 'keyword',
+          _meta: {
+            description: 'The command that was sent to the endpoint',
+            optional: false,
+          },
+        },
+      },
+    },
+  },
+};
+
 export const events = [
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
   ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT,
   ALERT_SUPPRESSION_EVENT,
+  ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
+  ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
+  ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
+  FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
+  ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
+  ENTITY_ENGINE_INITIALIZATION_EVENT,
+  ENTITY_STORE_USAGE_EVENT,
 ];

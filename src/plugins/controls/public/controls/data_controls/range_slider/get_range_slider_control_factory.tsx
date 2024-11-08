@@ -14,6 +14,7 @@ import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { Filter, RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { isCompressed } from '../../../control_group/utils/is_compressed';
 import { RANGE_SLIDER_CONTROL } from '../../../../common';
 import { initializeDataControl } from '../initialize_data_control';
 import type { DataControlFactory } from '../types';
@@ -248,6 +249,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
               step={step ?? 1}
               value={value}
               uuid={uuid}
+              compressed={isCompressed(api)}
             />
           );
         },

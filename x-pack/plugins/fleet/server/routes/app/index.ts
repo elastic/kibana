@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler, RouteValidationResultFactory } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
@@ -16,7 +16,7 @@ import { API_VERSIONS } from '../../../common/constants';
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
 import { defaultFleetErrorHandler, GenerateServiceTokenError } from '../../errors';
-import type { FleetRequestHandler, GenerateServiceTokenRequestSchema } from '../../types';
+import type { FleetRequestHandler } from '../../types';
 import { CheckPermissionsRequestSchema, CheckPermissionsResponseSchema } from '../../types';
 import { enableSpaceAwarenessMigration } from '../../services/spaces/enable_space_awareness';
 import { type FleetConfigType } from '../../config';
@@ -125,7 +125,7 @@ export const generateServiceTokenHandler: RequestHandler<
 > = async (context, request, response) => {
   // Generate the fleet server service token as the current user as the internal user do not have the correct permissions
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-  const serviceAccount = request.body.remote ? 'fleet-server-remote' : 'fleet-server';
+  const serviceAccount = request.body?.remote ? 'fleet-server-remote' : 'fleet-server';
   appContextService
     .getLogger()
     .debug(`Creating service token for account elastic/${serviceAccount}`);
@@ -182,13 +182,12 @@ export const getAgentPoliciesSpacesHandler: FleetRequestHandler<
   }
 };
 
-const serviceTokenBodyValidation = (data: any, validationResult: RouteValidationResultFactory) => {
-  const { ok } = validationResult;
-  if (!data) {
-    return ok({ remote: false });
-  }
-  const { remote } = data;
-  return ok({ remote });
+export const GenerateServiceTokenRequestSchema = {
+  body: schema.nullable(
+    schema.object({
+      remote: schema.boolean({ defaultValue: false }),
+    })
+  ),
 };
 
 export const GenerateServiceTokenResponseSchema = schema.object({
@@ -221,7 +220,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
       description: `Check permissions`,
       options: {
-        tags: ['oas_tag:Fleet internals'],
+        tags: ['oas-tag:Fleet internals'],
       },
     })
     .addVersion(
@@ -266,14 +265,14 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       description: `Create a service token`,
       options: {
-        tags: ['oas_tag:Fleet service tokens'],
+        tags: ['oas-tag:Fleet service tokens'],
       },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
         validate: {
-          request: { body: serviceTokenBodyValidation },
+          request: GenerateServiceTokenRequestSchema,
           response: {
             200: {
               body: () => GenerateServiceTokenResponseSchema,
@@ -283,22 +282,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             },
           },
         },
-      },
-      generateServiceTokenHandler
-    );
-
-  router.versioned
-    .post({
-      path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED,
-      fleetAuthz: {
-        fleet: { allAgents: true },
-      },
-      description: `Create a service token`,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: {},
       },
       generateServiceTokenHandler
     );
