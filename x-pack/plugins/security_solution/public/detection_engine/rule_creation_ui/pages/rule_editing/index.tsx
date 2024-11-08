@@ -69,6 +69,7 @@ import { useRuleForms, useRuleFormsErrors, useRuleIndexPattern } from '../form';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
 import { SaveWithErrorsModal } from '../../components/save_with_errors_confirmation';
+import { useIsPrebuiltRulesCustomizationEnabled } from '../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -85,11 +86,14 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     useListsConfig();
   const { application, triggersActionsUi } = useKibana().services;
   const { navigateToApp } = application;
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
 
   const { detailName: ruleId } = useParams<{ detailName: string }>();
 
   const [activeStep, setActiveStep] = useState<RuleStep>(
-    rule.immutable ? RuleStep.ruleActions : RuleStep.defineRule
+    isPrebuiltRulesCustomizationEnabled === false && rule.immutable
+      ? RuleStep.ruleActions
+      : RuleStep.defineRule
   );
   const { mutateAsync: updateRule, isLoading } = useUpdateRule();
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
@@ -210,7 +214,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-define-tab',
         id: RuleStep.defineRule,
         name: ruleI18n.DEFINITION,
-        disabled: rule?.immutable,
+        disabled: isPrebuiltRulesCustomizationEnabled === false && rule?.immutable,
         content: (
           <div
             style={{
@@ -256,7 +260,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-about-tab',
         id: RuleStep.aboutRule,
         name: ruleI18n.ABOUT,
-        disabled: rule?.immutable,
+        disabled: isPrebuiltRulesCustomizationEnabled === false && rule?.immutable,
         content: (
           <div
             style={{
@@ -288,7 +292,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-schedule-tab',
         id: RuleStep.scheduleRule,
         name: ruleI18n.SCHEDULE,
-        disabled: rule?.immutable,
+        disabled: isPrebuiltRulesCustomizationEnabled === false && rule?.immutable,
         content: (
           <div
             style={{
@@ -340,6 +344,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       },
     ],
     [
+      isPrebuiltRulesCustomizationEnabled,
       rule?.immutable,
       rule?.id,
       activeStep,
@@ -356,15 +361,15 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       isIndexPatternLoading,
       isQueryBarValid,
       defineStepData,
+      memoizedIndex,
       aboutStepData,
       aboutStepForm,
+      esqlQueryForAboutStep,
       scheduleStepData,
       scheduleStepForm,
       actionsStepData,
       actionMessageParams,
       actionsStepForm,
-      memoizedIndex,
-      esqlQueryForAboutStep,
     ]
   );
 
@@ -414,7 +419,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     setNonBlockingRuleErrors([]);
 
     const actionsStepFormValid = await actionsStepForm.validate();
-    if (rule.immutable) {
+    if (isPrebuiltRulesCustomizationEnabled === false && rule.immutable) {
       // Since users cannot edit Define, About and Schedule tabs of the rule, we skip validation of those to avoid
       // user confusion of seeing that those tabs have error and not being able to see or do anything about that.
       // We will need to remove this condition once rule customization work is done.
@@ -451,11 +456,12 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       showSaveWithErrorsModal();
     }
   }, [
+    actionsStepForm,
+    isPrebuiltRulesCustomizationEnabled,
     rule.immutable,
     defineStepForm,
     aboutStepForm,
     scheduleStepForm,
-    actionsStepForm,
     getRuleFormsErrors,
     saveChanges,
     showSaveWithErrorsModal,
