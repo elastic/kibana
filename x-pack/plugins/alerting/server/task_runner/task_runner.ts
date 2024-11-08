@@ -649,6 +649,10 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
+    // throw createTaskRunError(new Error('foo'), TaskErrorSource.USER);
+    // throw createTaskRunError(new Error('foo'), TaskErrorSource.FRAMEWORK);
+    // throw new Error('foo');
+
     this.logger = createTaskRunnerLogger({ logger: this.logger, tags: [ruleId, this.ruleType.id] });
 
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;

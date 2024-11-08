@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { filter, take } from 'rxjs';
 
 import { CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from '../config';
-import { PARTITION_WARNING_INTERVAL } from './strategy_mget';
+import { NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL } from './strategy_mget';
 
 import {
   TaskStatus,
@@ -2264,7 +2264,7 @@ describe('TaskClaiming', () => {
 
     test(`it should log warning on interval when the node has no assigned partitions`, async () => {
       // Reset the warning timer by advancing more
-      fakeTimer.tick(PARTITION_WARNING_INTERVAL);
+      fakeTimer.tick(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL);
 
       jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
       const taskManagerId = uuidv4();
@@ -2296,7 +2296,7 @@ describe('TaskClaiming', () => {
       );
 
       taskManagerLogger.warn.mockReset();
-      fakeTimer.tick(PARTITION_WARNING_INTERVAL - 500);
+      fakeTimer.tick(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL - 500);
 
       await testClaimAvailableTasks({
         storeOpts: {
@@ -2332,7 +2332,7 @@ describe('TaskClaiming', () => {
 
     test(`it should log a message after the node no longer has no assigned partitions`, async () => {
       // Reset the warning timer by advancing more
-      fakeTimer.tick(PARTITION_WARNING_INTERVAL);
+      fakeTimer.tick(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL);
 
       jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
       const taskManagerId = uuidv4();

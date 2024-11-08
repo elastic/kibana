@@ -301,7 +301,7 @@ interface SearchAvailableTasksResponse {
 }
 
 let lastPartitionWarningLog: number | undefined;
-export const PARTITION_WARNING_INTERVAL = 60000;
+export const NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL = 60000;
 
 async function searchAvailableTasks({
   definitions,
@@ -326,7 +326,7 @@ async function searchAvailableTasks({
   if (
     partitions.length === 0 &&
     (lastPartitionWarningLog == null ||
-      lastPartitionWarningLog <= Date.now() - PARTITION_WARNING_INTERVAL)
+      lastPartitionWarningLog <= Date.now() - NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL)
   ) {
     logger.warn(
       `Background task node "${taskPartitioner.getPodName()}" has no assigned partitions, claiming against all partitions`
