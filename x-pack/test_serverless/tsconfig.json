@@ -37,7 +37,6 @@
     "@kbn/server-route-repository",
     "@kbn/core-chrome-browser",
     "@kbn/security-plugin",
-    "@kbn/security-solution-plugin",
     "@kbn/security-solution-plugin/public/management/cypress",
     "@kbn/tooling-log",
     "@kbn/cases-plugin",
@@ -93,6 +92,7 @@
     "@kbn/security-plugin-types-common",
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/ai-assistant-common",
+    "@kbn/data-usage-plugin",
     "@kbn/infra-plugin",
     "@kbn/observability-plugin",
   ]
