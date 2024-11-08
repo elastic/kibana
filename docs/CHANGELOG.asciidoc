@@ -93,7 +93,7 @@ Discover::
 Elastic Observability solution::
 * Changes the slice outcome from bad to good whenever there is no data during the slice window ({kibana-pull}196942[#196942]).
 Elastic Search solution::
-* Fixes a bug with the {ref}/es-connectors-network-drive.html[Network Drive connector] where advanced configuration fields were not displayed for CSV file role mappings with `Drive Type: Linux` selected ({kibana-pull}195567[#195567]).
+* Fixes a bug with the Network Drive connector where advanced configuration fields were not displayed for CSV file role mappings with `Drive Type: Linux` selected ({kibana-pull}195567[#195567]).
 Elastic Security solution::
 For the Elastic Security 8.15.4 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana platform::
