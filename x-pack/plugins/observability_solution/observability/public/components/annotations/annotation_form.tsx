@@ -47,7 +47,6 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
                 // we need to do this to avoid validation errors
                 unregister('event.end');
                 field.onChange(null);
-                setValue('@timestamp', timestampStart);
                 setValue('annotation.style.color', defaultAnnotationColor);
               }
             }}
