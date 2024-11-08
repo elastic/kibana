@@ -17,7 +17,7 @@ The exact number of past APIs and the length of time they are kept available wil
 
 <DocAccordion buttonContent="FAQ: What is the difference between an internal and a public HTTP API?">
   <DocCallOut >
-    We only declare HTTP APIs as public that are intended for 3rd party integration. All other HTTP APIs should be internal. Public HTTP APIs have deprecation windows of 18 months and must go through breaking changes committee before they can be modified in a breaking way (i.e. require a new version, or be removed). Internal HTTP APIs may change more frequently, as long as they adhere to the versioning principles outlined in the rest of this doc.
+    We only declare HTTP APIs as public that are intended for 3rd party integration. All other HTTP APIs should be internal. Public HTTP APIs have minimum deprecation windows of 18 months and must go through breaking changes committee before they can be modified in a breaking way. New API versions to public HTTP APIs cannot be created without prior breaking changes committee approval, because a new API version implies a breaking change. Internal HTTP APIs may change more frequently, as long as they adhere to the versioning principles outlined in the rest of this doc.
   </DocCallOut>
 </DocAccordion>
 
