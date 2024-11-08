@@ -16,7 +16,7 @@ import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { castArray } from 'lodash';
 import { isEntityOfType } from '../../common/utils/entity_type_guards';
-import type { InventoryEntityLatest } from '../../common/entities';
+import type { InventoryEntity } from '../../common/entities';
 import { toEntityLatest } from '../../common/utils/mappers';
 import { useKibana } from './use_kibana';
 
@@ -42,50 +42,34 @@ export const useDetailViewRedirect = () => {
   const dashboardLocator = locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
   const serviceOverviewLocator = locators.get<ServiceOverviewParams>(SERVICE_OVERVIEW_LOCATOR_ID);
 
-  const getSingleIdentityFieldValue = useCallback(
-    (latestEntity: InventoryEntityLatest) => {
-      const identityFields = castArray(latestEntity.entityIdentityFields);
-      if (identityFields.length > 1) {
-        throw new Error(
-          `Multiple identity fields are not supported for ${latestEntity.entityType}`
-        );
-      }
-
-      const identityField = identityFields[0];
-      return entityManager.entityClient.getIdentityFieldsValue(toEntityLatest(latestEntity))[
-        identityField
-      ];
-    },
-    [entityManager.entityClient]
-  );
-
   const getDetailViewRedirectUrl = useCallback(
-    (latestEntity: InventoryEntityLatest) => {
-      const identityValue = getSingleIdentityFieldValue(latestEntity);
+    (latestEntity: InventoryEntity) => {
+      const entityFields = entityManager.entityClient.getIdentityFieldsValue(
+        toEntityLatest(latestEntity)
+      );
+      const identityFields = castArray(latestEntity.entityIdentityFields);
 
       if (isEntityOfType('host', latestEntity) || isEntityOfType('container', latestEntity)) {
         return assetDetailsLocator?.getRedirectUrl({
-          assetId: identityValue,
+          assetId: entityFields[identityFields[0]],
           assetType: latestEntity.entityType,
         });
       }
 
       if (isEntityOfType('service', latestEntity)) {
         return serviceOverviewLocator?.getRedirectUrl({
-          serviceName: identityValue,
-          // service.environemnt is not part of entity.identityFields
-          // we need to manually get its value
+          serviceName: entityFields[identityFields[0]],
           environment: latestEntity.service?.environment,
         });
       }
 
       return undefined;
     },
-    [assetDetailsLocator, getSingleIdentityFieldValue, serviceOverviewLocator]
+    [assetDetailsLocator, entityManager.entityClient, serviceOverviewLocator]
   );
 
   const getDashboardRedirectUrl = useCallback(
-    (latestEntity: InventoryEntityLatest) => {
+    (latestEntity: InventoryEntity) => {
       const type = latestEntity.entityType;
       const dashboardId = KUBERNETES_DASHBOARDS_IDS[type];
 
@@ -103,7 +87,7 @@ export const useDetailViewRedirect = () => {
   );
 
   const getEntityRedirectUrl = useCallback(
-    (entity: InventoryEntityLatest) =>
+    (entity: InventoryEntity) =>
       getDetailViewRedirectUrl(entity) ?? getDashboardRedirectUrl(entity),
     [getDashboardRedirectUrl, getDetailViewRedirectUrl]
   );

@@ -10,11 +10,11 @@ import { type CloudProvider, CloudProviderIcon, AgentIcon } from '@kbn/custom-ic
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { castArray } from 'lodash';
-import type { InventoryEntityLatest } from '../../../common/entities';
+import type { InventoryEntity } from '../../../common/entities';
 import { isEntityOfType } from '../../../common/utils/entity_type_guards';
 
 interface EntityIconProps {
-  entity: InventoryEntityLatest;
+  entity: InventoryEntity;
 }
 
 export function EntityIcon({ entity }: EntityIconProps) {

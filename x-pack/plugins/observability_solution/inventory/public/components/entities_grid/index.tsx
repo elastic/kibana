@@ -124,7 +124,7 @@ export function EntitiesGrid({
         case 'entityDisplayName':
           return <EntityName entity={entity} />;
         default:
-          return 'a';
+          return null;
       }
     },
     [entities, onFilterByType]

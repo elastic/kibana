@@ -9,14 +9,14 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EntityName } from '.';
 import { useDetailViewRedirect } from '../../../hooks/use_detail_view_redirect';
-import type { InventoryEntityLatest } from '../../../../common/entities';
+import type { InventoryEntity } from '../../../../common/entities';
 
 jest.mock('../../../hooks/use_detail_view_redirect');
 
 const useDetailViewRedirectMock = useDetailViewRedirect as jest.Mock;
 
 describe('EntityName', () => {
-  const mockEntity: InventoryEntityLatest = {
+  const mockEntity: InventoryEntity = {
     entityLastSeenTimestamp: '2023-10-09T00:00:00Z',
     entityId: '1',
     entityType: 'service',

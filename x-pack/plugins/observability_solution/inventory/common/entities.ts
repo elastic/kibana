@@ -4,13 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
-import {
-  ENTITY_LATEST,
-  entitiesAliasPattern,
-  entityLatestSchema,
-  entityMetadataSchema,
-} from '@kbn/entities-schema';
+import { ENTITY_LATEST, entitiesAliasPattern, type EntityMetadata } from '@kbn/entities-schema';
 import { decode, encode } from '@kbn/rison';
 import { isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
@@ -105,9 +99,7 @@ export type EntityGroup = {
   [key: string]: any;
 };
 
-export type EntityLatest = z.infer<typeof entityLatestSchema>;
-
-export type InventoryEntityLatest = {
+export type InventoryEntity = {
   entityId: string;
   entityType: string;
   entityIdentityFields: string | string[];
@@ -117,4 +109,4 @@ export type InventoryEntityLatest = {
   entityDefinitionVersion: string;
   entitySchemaVersion: string;
   alertsCount?: number;
-} & z.infer<typeof entityMetadataSchema>;
+} & EntityMetadata;

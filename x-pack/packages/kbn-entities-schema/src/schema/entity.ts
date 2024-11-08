@@ -42,3 +42,6 @@ export const entityLatestSchema = z
     ),
   })
   .and(entityMetadataSchema);
+
+export type EntityInstance = z.infer<typeof entityLatestSchema>;
+export type EntityMetadata = z.infer<typeof entityMetadataSchema>;

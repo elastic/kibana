@@ -14,13 +14,13 @@ import {
   HOST_NAME,
   SERVICE_NAME,
 } from '@kbn/observability-shared-plugin/common';
-import type { InventoryEntityLatest } from '../../common/entities';
+import type { InventoryEntity } from '../../common/entities';
 
 jest.mock('./use_kibana');
 
 const useKibanaMock = useKibana as jest.Mock;
 
-const commonEntityFields: Partial<InventoryEntityLatest> = {
+const commonEntityFields: Partial<InventoryEntity> = {
   entityLastSeenTimestamp: '2023-10-09T00:00:00Z',
   entityId: '1',
   entityDisplayName: 'entity_name',
@@ -59,8 +59,8 @@ describe('useDetailViewRedirect', () => {
   });
 
   it('getEntityRedirectUrl should return the correct URL for host entity', () => {
-    const entity: InventoryEntityLatest = {
-      ...(commonEntityFields as InventoryEntityLatest),
+    const entity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
       entityType: 'host',
       entityIdentityFields: ['host.name'],
       host: {
@@ -82,8 +82,8 @@ describe('useDetailViewRedirect', () => {
   });
 
   it('getEntityRedirectUrl should return the correct URL for container entity', () => {
-    const entity: InventoryEntityLatest = {
-      ...(commonEntityFields as InventoryEntityLatest),
+    const entity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
       entityType: 'container',
       entityIdentityFields: ['container.id'],
       container: {
@@ -108,8 +108,8 @@ describe('useDetailViewRedirect', () => {
   });
 
   it('getEntityRedirectUrl should return the correct URL for service entity', () => {
-    const entity: InventoryEntityLatest = {
-      ...(commonEntityFields as InventoryEntityLatest),
+    const entity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
       entityType: 'service',
       entityIdentityFields: ['service.name'],
       agent: {
@@ -145,8 +145,8 @@ describe('useDetailViewRedirect', () => {
     [ENTITY_TYPES.KUBERNETES.STATEFULSET.ecs, 'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013'],
   ].forEach(([entityType, dashboardId]) => {
     it(`getEntityRedirectUrl should return the correct URL for ${entityType} entity`, () => {
-      const entity: InventoryEntityLatest = {
-        ...(commonEntityFields as InventoryEntityLatest),
+      const entity: InventoryEntity = {
+        ...(commonEntityFields as InventoryEntity),
         entityType,
         entityIdentityFields: ['some.field'],
         some: {

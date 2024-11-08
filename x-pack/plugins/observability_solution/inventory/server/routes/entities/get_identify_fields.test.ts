@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { InventoryEntityLatest } from '../../../common/entities';
+import type { InventoryEntity } from '../../../common/entities';
 import { getIdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
 
-const commonEntityFields: Partial<InventoryEntityLatest> = {
+const commonEntityFields: Partial<InventoryEntity> = {
   entityLastSeenTimestamp: '2023-10-09T00:00:00Z',
   entityId: '1',
   entityDisplayName: 'entity_name',
@@ -22,8 +22,8 @@ describe('getIdentityFields', () => {
     expect(result.size).toBe(0);
   });
   it('should return a Map with unique entity types and their respective identity fields', () => {
-    const serviceEntity: InventoryEntityLatest = {
-      ...(commonEntityFields as InventoryEntityLatest),
+    const serviceEntity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
       entityIdentityFields: ['service.name', 'service.environment'],
       entityType: 'service',
       agent: {
@@ -34,8 +34,8 @@ describe('getIdentityFields', () => {
       },
     };
 
-    const hostEntity: InventoryEntityLatest = {
-      ...(commonEntityFields as InventoryEntityLatest),
+    const hostEntity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
       entityIdentityFields: ['host.name'],
       entityType: 'host',
       cloud: {
@@ -46,8 +46,8 @@ describe('getIdentityFields', () => {
       },
     };
 
-    const containerEntity: InventoryEntityLatest = {
-      ...(commonEntityFields as InventoryEntityLatest),
+    const containerEntity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
       entityIdentityFields: ['container.id'],
       entityType: 'container',
       host: {

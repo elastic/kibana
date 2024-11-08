@@ -13,16 +13,17 @@ import {
   ENTITY_DISPLAY_NAME,
 } from '@kbn/observability-shared-plugin/common';
 import type { ScalarValue } from '@elastic/elasticsearch/lib/api/types';
+import type { EntityInstance } from '@kbn/entities-schema';
 import {
   ENTITIES_LATEST_ALIAS,
   MAX_NUMBER_OF_ENTITIES,
   type EntityColumnIds,
-  type EntityLatest,
-  InventoryEntityLatest,
+  InventoryEntity,
 } from '../../../common/entities';
 import { getBuiltinEntityDefinitionIdESQLWhereClause } from './query_helper';
 
-const SORT_FIELDS_TO_ES_FIELDS: Record<Exclude<EntityColumnIds, 'alertsCount'>, string> = {
+type EntityColumnIdsWithoutAlertsCount = Exclude<EntityColumnIds, 'alertsCount'>;
+const SORT_FIELDS_TO_ES_FIELDS: Record<EntityColumnIdsWithoutAlertsCount, string> = {
   entityLastSeenTimestamp: ENTITY_LAST_SEEN,
   entityDisplayName: ENTITY_DISPLAY_NAME,
   entityType: ENTITY_TYPE,
@@ -40,11 +41,10 @@ export async function getLatestEntities({
   sortField: EntityColumnIds;
   entityTypes?: string[];
   kuery?: string;
-}): Promise<InventoryEntityLatest[]> {
+}): Promise<InventoryEntity[]> {
   // alertsCount doesn't exist in entities index. Ignore it and sort by entity.lastSeenTimestamp by default.
   const entitiesSortField =
-    SORT_FIELDS_TO_ES_FIELDS[sortField as Exclude<EntityColumnIds, 'alertsCount'>] ??
-    ENTITY_LAST_SEEN;
+    SORT_FIELDS_TO_ES_FIELDS[sortField as EntityColumnIdsWithoutAlertsCount] ?? ENTITY_LAST_SEEN;
 
   const from = `FROM ${ENTITIES_LATEST_ALIAS}`;
   const where: string[] = [getBuiltinEntityDefinitionIdESQLWhereClause()];
@@ -60,7 +60,7 @@ export async function getLatestEntities({
 
   const query = [from, ...where, sort, limit].join(' | ');
 
-  const latestEntitiesEsqlResponse = await inventoryEsClient.esql<EntityLatest>(
+  const latestEntitiesEsqlResponse = await inventoryEsClient.esql<EntityInstance>(
     'get_latest_entities',
     {
       query,

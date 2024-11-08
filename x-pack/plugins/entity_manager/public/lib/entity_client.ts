@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import {
   ClientRequestParamsOf,
@@ -14,7 +13,7 @@ import {
   isHttpFetchError,
 } from '@kbn/server-route-repository-client';
 import { type KueryNode, nodeTypes, toKqlExpression } from '@kbn/es-query';
-import { entityLatestSchema } from '@kbn/entities-schema';
+import type { EntityInstance } from '@kbn/entities-schema';
 import { castArray } from 'lodash';
 import {
   DisableManagedEntityResponse,
@@ -38,8 +37,6 @@ type DeleteEntityDefinitionQuery = QueryParamOf<
 type CreateEntityDefinitionQuery = QueryParamOf<
   ClientRequestParamsOf<EntityManagerRouteRepository, 'PUT /internal/entities/managed/enablement'>
 >;
-
-export type EnitityInstance = z.infer<typeof entityLatestSchema>;
 
 export class EntityClient {
   public readonly repositoryClient: EntityManagerRepositoryClient['fetch'];
@@ -90,7 +87,7 @@ export class EntityClient {
     }
   }
 
-  asKqlFilter(entityLatest: EnitityInstance) {
+  asKqlFilter(entityLatest: EntityInstance) {
     const identityFieldsValue = this.getIdentityFieldsValue(entityLatest);
 
     const nodes: KueryNode[] = Object.entries(identityFieldsValue).map(([identityField, value]) => {
@@ -104,7 +101,7 @@ export class EntityClient {
     return toKqlExpression(kqlExpression);
   }
 
-  getIdentityFieldsValue(entityLatest: EnitityInstance) {
+  getIdentityFieldsValue(entityLatest: EntityInstance) {
     const { identity_fields: identityFields } = entityLatest.entity;
 
     if (!identityFields) {

@@ -8,11 +8,11 @@ import React from 'react';
 import rison from '@kbn/rison';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { InventoryEntityLatest } from '../../../common/entities';
+import type { InventoryEntity } from '../../../common/entities';
 import { toEntityLatest } from '../../../common/utils/mappers';
 import { useKibana } from '../../hooks/use_kibana';
 
-export function AlertsBadge({ entity }: { entity: InventoryEntityLatest }) {
+export function AlertsBadge({ entity }: { entity: InventoryEntity }) {
   const {
     services: {
       http: { basePath },

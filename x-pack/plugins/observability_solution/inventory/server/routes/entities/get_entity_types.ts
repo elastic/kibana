@@ -7,7 +7,8 @@
 
 import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import { ENTITIES_LATEST_ALIAS, EntityLatest } from '../../../common/entities';
+import type { EntityInstance } from '@kbn/entities-schema';
+import { ENTITIES_LATEST_ALIAS } from '../../../common/entities';
 import { getBuiltinEntityDefinitionIdESQLWhereClause } from './query_helper';
 
 export async function getEntityTypes({
@@ -15,7 +16,7 @@ export async function getEntityTypes({
 }: {
   inventoryEsClient: ObservabilityElasticsearchClient;
 }) {
-  const entityTypesEsqlResponse = await inventoryEsClient.esql<Pick<EntityLatest, 'entity'>>(
+  const entityTypesEsqlResponse = await inventoryEsClient.esql<Pick<EntityInstance, 'entity'>>(
     'get_entity_types',
     {
       query: `FROM ${ENTITIES_LATEST_ALIAS}

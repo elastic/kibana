@@ -8,12 +8,12 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AlertsBadge } from './alerts_badge';
 import { useKibana } from '../../hooks/use_kibana';
-import type { InventoryEntityLatest } from '../../../common/entities';
+import type { InventoryEntity } from '../../../common/entities';
 
 jest.mock('../../hooks/use_kibana');
 const useKibanaMock = useKibana as jest.Mock;
 
-const commonEntityFields: Partial<InventoryEntityLatest> = {
+const commonEntityFields: Partial<InventoryEntity> = {
   entityLastSeenTimestamp: 'foo',
   entityId: '1',
 };
@@ -45,8 +45,8 @@ describe('AlertsBadge', () => {
   });
 
   it('render alerts badge for a host entity', () => {
-    const entity: InventoryEntityLatest = {
-      ...(commonEntityFields as InventoryEntityLatest),
+    const entity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
       entityType: 'host',
       entityDisplayName: 'foo',
       entityIdentityFields: 'host.name',
@@ -68,8 +68,8 @@ describe('AlertsBadge', () => {
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('1');
   });
   it('render alerts badge for a service entity', () => {
-    const entity: InventoryEntityLatest = {
-      ...(commonEntityFields as InventoryEntityLatest),
+    const entity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
       entityType: 'service',
       entityDisplayName: 'foo',
       entityIdentityFields: 'service.name',
@@ -95,8 +95,8 @@ describe('AlertsBadge', () => {
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('5');
   });
   it('render alerts badge for a service entity with multiple identity fields', () => {
-    const entity: InventoryEntityLatest = {
-      ...(commonEntityFields as InventoryEntityLatest),
+    const entity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
       entityType: 'service',
       entityDisplayName: 'foo',
       entityIdentityFields: ['service.name', 'service.environment'],

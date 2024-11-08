@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EntityLatest, InventoryEntityLatest } from '../entities';
+import { EntityInstance } from '@kbn/entities-schema';
+import { InventoryEntity } from '../entities';
 
-export function toEntityLatest(inventoryEntityLatest: InventoryEntityLatest): EntityLatest {
+export function toEntityLatest(inventoryEntityLatest: InventoryEntity): EntityInstance {
   const {
     entityDefinitionId,
     entityDisplayName,
