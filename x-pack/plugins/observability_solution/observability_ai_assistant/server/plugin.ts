@@ -165,6 +165,8 @@ export class ObservabilityAIAssistantPlugin
       core,
       taskManager: plugins.taskManager,
       logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(`Failed to register migrate knowledge base entries task: ${error}`);
     });
 
     service.register(registerFunctions);
