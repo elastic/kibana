@@ -8,9 +8,12 @@
   "visibility": "shared",
   "plugin": {
     "id": "dashboardEnhanced",
-    "server": true,
     "browser": true,
-    "configPath": ["xpack", "dashboardEnhanced"],
+    "server": true,
+    "configPath": [
+      "xpack",
+      "dashboardEnhanced"
+    ],
     "requiredPlugins": [
       "dashboard",
       "data",

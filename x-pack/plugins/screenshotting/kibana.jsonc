@@ -9,8 +9,8 @@
   "description": "Kibana Screenshotting Plugin",
   "plugin": {
     "id": "screenshotting",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "screenshotting"

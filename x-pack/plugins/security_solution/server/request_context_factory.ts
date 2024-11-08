@@ -135,6 +135,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
+      getDataViewsService: () => dataViewsService,
+
       getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
           license: licensing.license,
@@ -166,9 +168,15 @@ export class RequestContextFactory implements IRequestContextFactory {
         })
       ),
 
-      getSiemMigrationsClient: memoize(() =>
-        siemMigrationsService.createClient({ request, spaceId: getSpaceId() })
+      getSiemRuleMigrationsClient: memoize(() =>
+        siemMigrationsService.createRulesClient({
+          request,
+          currentUser: coreContext.security.authc.getCurrentUser(),
+          spaceId: getSpaceId(),
+        })
       ),
+
+      getInferenceClient: memoize(() => startPlugins.inference.getClient({ request })),
 
       getExceptionListClient: () => {
         if (!lists) {

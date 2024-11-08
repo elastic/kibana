@@ -9,8 +9,11 @@
   "visibility": "shared",
   "plugin": {
     "id": "aiAssistantManagementSelection",
-    "server": true,
     "browser": true,
+    "server": true,
+    "configPath": [
+      "aiAssistantManagementSelection"
+    ],
     "requiredPlugins": [
       "management"
     ],
@@ -21,9 +24,6 @@
     ],
     "requiredBundles": [
       "kibanaReact"
-    ],
-    "configPath": [
-      "aiAssistantManagementSelection"
     ]
   }
 }
