@@ -83,6 +83,7 @@ export async function listStreams({ scopedClusterClient }: ListStreamsParams) {
     size: 10000,
     fields: ['id'],
     _source: false,
+    sort: [{ id: 'asc' }],
   });
   const definitions = response.hits.hits.map((hit) => hit.fields as { id: string[] });
   return definitions;

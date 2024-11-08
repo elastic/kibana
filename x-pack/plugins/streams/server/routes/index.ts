@@ -11,9 +11,11 @@ import { enableStreamsRoute } from './streams/enable';
 import { forkStreamsRoute } from './streams/fork';
 import { listStreamsRoute } from './streams/list';
 import { readStreamRoute } from './streams/read';
+import { resyncStreamsRoute } from './streams/resync';
 
 export const StreamsRouteRepository = {
   ...enableStreamsRoute,
+  ...resyncStreamsRoute,
   ...forkStreamsRoute,
   ...readStreamRoute,
   ...editStreamRoute,
