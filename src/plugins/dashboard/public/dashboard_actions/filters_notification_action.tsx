@@ -35,7 +35,7 @@ export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 export type FiltersNotificationActionApi = HasUniqueId &
   CanAccessViewMode &
   Partial<PublishesUnifiedSearch> &
-  HasParentApi<DashboardPluginInternalFunctions>;
+  HasParentApi<Partial<DashboardPluginInternalFunctions>>;
 
 const isApiCompatible = (api: unknown | null): api is FiltersNotificationActionApi =>
   Boolean(

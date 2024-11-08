@@ -56,7 +56,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
     }
   }, [api, setDisableEditButton]);
 
-  const dataViews = useMemo(() => api.parentApi?.getAllDataViews(), [api]);
+  const dataViews = useMemo(() => api.parentApi?.getAllDataViews?.() ?? [], [api]);
 
   return (
     <EuiPopover
