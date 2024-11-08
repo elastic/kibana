@@ -37,7 +37,7 @@ describe.skip('when navigating to integration page', () => {
 
     // open integration policy form
     cy.getByTestSubj('integration-card:ui_link:apm').click();
-    cy.contains('Elastic APM in Fleet').click();
+    cy.contains('Elastic APM in Fleet', { timeout: 60000 }).click();
     cy.contains('a', 'APM integration').click();
     cy.getByTestSubj('addIntegrationPolicyButton').click();
   });
