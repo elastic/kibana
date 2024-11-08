@@ -29,7 +29,7 @@ function createTestAction<C extends object>(
     type,
     id: type,
     isCompatible: (context: C) => Promise.resolve(checkCompatibility(context)),
-    execute: (context) => executeFn(context),
+    execute: async (context) => executeFn(context),
     shouldAutoExecute: () => Promise.resolve(autoExecutable),
   };
 }
