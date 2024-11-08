@@ -26,8 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const kibanaServer = getService('kibanaServer');
 
-  // Failing: See https://github.com/elastic/kibana/issues/199356
-  describe.skip('extension getRenderAppWrapper', () => {
+  describe('extension getRenderAppWrapper', () => {
     before(async () => {
       await svlCommonPage.loginAsAdmin();
     });
@@ -45,8 +44,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
+        await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
         await unifiedFieldList.clickFieldListItemAdd('message');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         let messageCell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
         await retry.try(async () => {
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
@@ -97,9 +99,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
-        await dataViews.switchTo('my-example-logs');
+        await dataViews.switchToAndValidate('my-example-logs');
+        await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
         await unifiedFieldList.clickFieldListItemAdd('message');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         let messageCell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
         await retry.try(async () => {
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
