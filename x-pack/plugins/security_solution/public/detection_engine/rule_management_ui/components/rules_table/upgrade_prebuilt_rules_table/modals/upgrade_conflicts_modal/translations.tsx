@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const UPGRADE_CONFLICTS_MODAL_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeConflictsModal.messageTitle',
   {
-    defaultMessage: 'Rules with conflicts will not be updated',
+    defaultMessage: 'Update rules without conflicts?',
   }
 );
 
@@ -32,6 +32,6 @@ export const UPGRADE_CONFLICTS_MODAL_BODY = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeConflictsModal.affectedJobsTitle',
   {
     defaultMessage:
-      'Some of the selected rules have conflicts and, for that reason, won't be updated. Resolve the conflicts to properly update the rules. ',
+      "Some of the selected rules have conflicts and, for that reason, won't be updated. Resolve the conflicts to properly update the rules.",
   }
 );
