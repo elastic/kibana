@@ -818,7 +818,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       lowercase: `${ELASTICSEARCH_DOCS}lowercase-processor.html`,
       pipeline: `${ELASTICSEARCH_DOCS}pipeline-processor.html`,
       pipelines: isServerless
-        ? `${SERVERLESS_DOCS}ingest-pipelines.htmls`
+        ? `${SERVERLESS_DOCS}ingest-pipelines.html`
         : `${ELASTICSEARCH_DOCS}ingest.html`,
       csvPipelines: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${ECS_VERSION}/ecs-converting.html`,
       pipelineFailure: `${ELASTICSEARCH_DOCS}ingest.html#handling-pipeline-failures`,
