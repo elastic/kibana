@@ -13,8 +13,8 @@ import type { MaxSignals as MaxSignalsType } from '../../../../../../../../commo
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../../../common/constants';
 import { MaxSignals } from '../../../../../../rule_creation_ui/components/max_signals';
 
-export const maxSignalsSchema = { isMaxSignals: schema.maxSignals } as FormSchema<{
-  isMaxSignals: boolean;
+export const maxSignalsSchema = { maxSignals: schema.maxSignals } as FormSchema<{
+  maxSignals: boolean;
 }>;
 
 const componentProps = {

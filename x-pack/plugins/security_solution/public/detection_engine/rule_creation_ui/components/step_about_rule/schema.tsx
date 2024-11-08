@@ -22,6 +22,7 @@ import { OptionalFieldLabel } from '../optional_field_label';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import * as I18n from './translations';
 import { defaultRiskScoreValidator } from '../../validators/default_risk_score_validator';
+import { maxSignalsValidatorFactory } from '../../validators/max_signals_validator_factory';
 
 const { emptyField } = fieldValidators;
 
@@ -118,6 +119,11 @@ export const schema: FormSchema<AboutStepRule> = {
       }
     ),
     labelAppend: OptionalFieldLabel,
+    validations: [
+      {
+        validator: maxSignalsValidatorFactory(),
+      },
+    ],
   },
   isAssociatedToEndpointList: {
     type: FIELD_TYPES.CHECKBOX,
