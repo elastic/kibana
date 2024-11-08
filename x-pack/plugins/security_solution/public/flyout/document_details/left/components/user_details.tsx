@@ -359,6 +359,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
             name={userName}
             direction="column"
             data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
+            telemetrySuffix={'user-details'}
           />
         </EuiFlexGrid>
         <EuiSpacer size="l" />

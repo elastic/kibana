@@ -70,56 +70,10 @@ export const navigationTree: NavigationTreeDefinition = {
           link: 'slo',
         },
         {
-          id: 'aiops',
-          title: 'AIOps',
-          link: 'ml:anomalyDetection',
-          renderAs: 'accordion',
-          spaceBefore: null,
-          children: [
-            {
-              title: i18n.translate('xpack.serverlessObservability.nav.ml.jobs', {
-                defaultMessage: 'Anomaly detection',
-              }),
-              link: 'ml:anomalyDetection',
-              id: 'ml:anomalyDetection',
-              renderAs: 'item',
-              children: [
-                {
-                  link: 'ml:singleMetricViewer',
-                },
-                {
-                  link: 'ml:anomalyExplorer',
-                },
-                {
-                  link: 'ml:settings',
-                },
-              ],
-            },
-            {
-              title: i18n.translate('xpack.serverlessObservability.ml.logRateAnalysis', {
-                defaultMessage: 'Log rate analysis',
-              }),
-              link: 'ml:logRateAnalysis',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.includes(prepend('/app/ml/aiops/log_rate_analysis'));
-              },
-            },
-            {
-              title: i18n.translate('xpack.serverlessObservability.ml.changePointDetection', {
-                defaultMessage: 'Change point detection',
-              }),
-              link: 'ml:changePointDetections',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.includes(prepend('/app/ml/aiops/change_point_detection'));
-              },
-            },
-            {
-              title: i18n.translate('xpack.serverlessObservability.nav.ml.job.notifications', {
-                defaultMessage: 'Job notifications',
-              }),
-              link: 'ml:notifications',
-            },
-          ],
+          link: 'observabilityAIAssistant',
+          title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
+            defaultMessage: 'AI Assistant',
+          }),
         },
         { link: 'inventory', spaceBefore: 'm' },
         {
@@ -127,31 +81,50 @@ export const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.applications', {
             defaultMessage: 'Applications',
           }),
-          link: 'apm:services',
-          renderAs: 'accordion',
+          renderAs: 'panelOpener',
           children: [
             {
-              link: 'apm:services',
-              getIsActive: ({ pathNameSerialized }) => {
-                const regex = /app\/apm\/.*service.*/;
-                return regex.test(pathNameSerialized);
-              },
-            },
-            {
-              link: 'apm:traces',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/apm/traces'));
-              },
-            },
-            {
-              link: 'apm:dependencies',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
-              },
-            },
-            {
-              link: 'apm:settings',
-              sideNavStatus: 'hidden', // only to be considered in the breadcrumbs
+              children: [
+                {
+                  link: 'apm:services',
+                  title: i18n.translate('xpack.serverlessObservability.nav.apm.services', {
+                    defaultMessage: 'Service inventory',
+                  }),
+                },
+                { link: 'apm:traces' },
+                { link: 'apm:dependencies' },
+                { link: 'apm:settings' },
+                {
+                  id: 'synthetics',
+                  title: i18n.translate('xpack.serverlessObservability.nav.synthetics', {
+                    defaultMessage: 'Synthetics',
+                  }),
+                  children: [
+                    {
+                      title: i18n.translate(
+                        'xpack.serverlessObservability.nav.synthetics.overviewItem',
+                        {
+                          defaultMessage: 'Overview',
+                        }
+                      ),
+                      id: 'synthetics-overview',
+                      link: 'synthetics:overview',
+                      breadcrumbStatus: 'hidden',
+                    },
+                    {
+                      link: 'synthetics:certificates',
+                      title: i18n.translate(
+                        'xpack.serverlessObservability.nav.synthetics.certificatesItem',
+                        {
+                          defaultMessage: 'TLS certificates',
+                        }
+                      ),
+                      id: 'synthetics-certificates',
+                      breadcrumbStatus: 'hidden',
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },
@@ -160,57 +133,195 @@ export const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
             defaultMessage: 'Infrastructure',
           }),
-          link: 'metrics:inventory',
-          renderAs: 'accordion',
+          renderAs: 'panelOpener',
           children: [
             {
-              link: 'metrics:inventory',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
-              },
-            },
-            {
-              link: 'metrics:hosts',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
-              },
-            },
-            {
-              link: 'metrics:settings',
-              sideNavStatus: 'hidden', // only to be considered in the breadcrumbs
-            },
-            {
-              link: 'metrics:assetDetails',
-              sideNavStatus: 'hidden', // only to be considered in the breadcrumbs
+              children: [
+                {
+                  link: 'metrics:inventory',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.infrastructureInventory',
+                    {
+                      defaultMessage: 'Infrastructure inventory',
+                    }
+                  ),
+                },
+                { link: 'metrics:hosts' },
+                { link: 'metrics:settings' },
+                { link: 'metrics:assetDetails' },
+              ],
             },
           ],
         },
         {
-          id: 'synthetics',
-          title: i18n.translate('xpack.serverlessObservability.nav.synthetics', {
-            defaultMessage: 'Synthetics',
+          id: 'machine_learning-landing',
+          renderAs: 'panelOpener',
+          title: i18n.translate('xpack.serverlessObservability.nav.machineLearning', {
+            defaultMessage: 'Machine learning',
           }),
-          renderAs: 'accordion',
-          breadcrumbStatus: 'hidden',
           children: [
             {
-              title: i18n.translate('xpack.serverlessObservability.nav.synthetics.overviewItem', {
-                defaultMessage: 'Overview',
-              }),
-              id: 'synthetics-overview',
-              link: 'synthetics:overview',
-              breadcrumbStatus: 'hidden',
+              children: [
+                {
+                  link: 'ml:overview',
+                },
+                {
+                  link: 'ml:notifications',
+                },
+                {
+                  link: 'ml:memoryUsage',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.machineLearning.memoryUsage',
+                    {
+                      defaultMessage: 'Memory usage',
+                    }
+                  ),
+                },
+              ],
             },
             {
-              link: 'synthetics:certificates',
-              title: i18n.translate(
-                'xpack.serverlessObservability.nav.synthetics.certificatesItem',
-                {
-                  defaultMessage: 'TLS Certificates',
-                }
-              ),
-              id: 'synthetics-certificates',
+              id: 'category-anomaly_detection',
+              title: i18n.translate('xpack.serverlessObservability.nav.ml.anomaly_detection', {
+                defaultMessage: 'Anomaly detection',
+              }),
               breadcrumbStatus: 'hidden',
+              children: [
+                {
+                  link: 'ml:anomalyDetection',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ml.anomaly_detection.jobs',
+                    {
+                      defaultMessage: 'Jobs',
+                    }
+                  ),
+                },
+                {
+                  link: 'ml:anomalyExplorer',
+                },
+                {
+                  link: 'ml:singleMetricViewer',
+                },
+                {
+                  link: 'ml:settings',
+                },
+                {
+                  link: 'ml:suppliedConfigurations',
+                },
+              ],
+            },
+            {
+              id: 'category-data_frame analytics',
+              title: i18n.translate('xpack.serverlessObservability.nav.ml.data_frame_analytics', {
+                defaultMessage: 'Data frame analytics',
+              }),
+              breadcrumbStatus: 'hidden',
+              children: [
+                {
+                  link: 'ml:dataFrameAnalytics',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ml.data_frame_analytics.jobs',
+                    {
+                      defaultMessage: 'Jobs',
+                    }
+                  ),
+                },
+                {
+                  link: 'ml:resultExplorer',
+                },
+                {
+                  link: 'ml:analyticsMap',
+                },
+              ],
+            },
+            {
+              id: 'category-model_management',
+              title: i18n.translate('xpack.serverlessObservability.nav.ml.model_management', {
+                defaultMessage: 'Model management',
+              }),
+              breadcrumbStatus: 'hidden',
+              children: [
+                {
+                  link: 'ml:nodesOverview',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ml.model_management.trainedModels',
+                    {
+                      defaultMessage: 'Trained models',
+                    }
+                  ),
+                },
+              ],
+            },
+            {
+              id: 'category-data_visualizer',
+              title: i18n.translate('xpack.serverlessObservability.nav.ml.data_visualizer', {
+                defaultMessage: 'Data visualizer',
+              }),
+              breadcrumbStatus: 'hidden',
+              children: [
+                {
+                  link: 'ml:fileUpload',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ml.data_visualizer.file_data_visualizer',
+                    {
+                      defaultMessage: 'File data visualizer',
+                    }
+                  ),
+                },
+                {
+                  link: 'ml:indexDataVisualizer',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ml.data_visualizer.data_view_data_visualizer',
+                    {
+                      defaultMessage: 'Data view data visualizer',
+                    }
+                  ),
+                },
+                {
+                  link: 'ml:dataDrift',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ml.data_visualizer.data_drift',
+                    {
+                      defaultMessage: 'Data drift',
+                    }
+                  ),
+                },
+              ],
+            },
+            {
+              id: 'category-aiops_labs',
+              title: i18n.translate('xpack.serverlessObservability.nav.ml.aiops_labs', {
+                defaultMessage: 'Aiops labs',
+              }),
+              breadcrumbStatus: 'hidden',
+              children: [
+                {
+                  link: 'ml:logRateAnalysis',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ml.aiops_labs.log_rate_analysis',
+                    {
+                      defaultMessage: 'Log rate analysis',
+                    }
+                  ),
+                },
+                {
+                  link: 'ml:logPatternAnalysis',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ml.aiops_labs.log_pattern_analysis',
+                    {
+                      defaultMessage: 'Log pattern analysis',
+                    }
+                  ),
+                },
+                {
+                  link: 'ml:changePointDetections',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ml.aiops_labs.change_point_detection',
+                    {
+                      defaultMessage: 'Change point detection',
+                    }
+                  ),
+                },
+              ],
             },
           ],
         },
