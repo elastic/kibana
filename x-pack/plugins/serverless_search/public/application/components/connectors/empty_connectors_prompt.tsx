@@ -131,7 +131,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                       steps={horizontalSteps}
                       size="s"
                       role="presentation"
-                      // @ts-ignore
+                      // @ts-ignore overriding a compiler error
                       inert=""
                     />
                   </EuiFlexItem>

@@ -26,7 +26,6 @@ import { css } from '@emotion/react';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
-// import { FeedbackForm } from '../coming_soon/feedback_form';
 
 import { BACK_LABEL } from '../../../../common/i18n_string';
 
@@ -136,7 +135,7 @@ export const ElasticManagedConnectorComingSoon: React.FC = () => {
                       steps={horizontalSteps}
                       size="s"
                       role="presentation"
-                      // @ts-ignore
+                      // @ts-ignore overriding a compiler error
                       inert=""
                     />
                   </EuiFlexItem>
@@ -226,7 +225,6 @@ export const ElasticManagedConnectorComingSoon: React.FC = () => {
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {/* <FeedbackForm /> */}
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexItem>
