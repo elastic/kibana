@@ -20,6 +20,7 @@ import {
   isAssignment,
   isColumnItem,
   isFunctionItem,
+  isFunctionOperatorParam,
   isLiteralItem,
 } from '../shared/helpers';
 import { ENRICH_MODES } from './settings';
@@ -73,7 +74,7 @@ const statsValidator = (command: ESQLCommand) => {
     function checkAggExistence(arg: ESQLFunction): boolean {
       // TODO the grouping function check may not
       // hold true for all future cases
-      if (isAggFunction(arg)) {
+      if (isAggFunction(arg) || isFunctionOperatorParam(arg)) {
         return true;
       }
       if (isOtherFunction(arg)) {
@@ -314,7 +315,8 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
   {
     name: 'keep',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.keepDoc', {
-      defaultMessage: 'Rearranges fields in the input table by applying the keep clauses in fields',
+      defaultMessage:
+        'Rearranges fields in the Results table by applying the keep clauses in fields',
     }),
     examples: ['… | keep a', '… | keep a,b'],
     suggest: suggestForKeep,

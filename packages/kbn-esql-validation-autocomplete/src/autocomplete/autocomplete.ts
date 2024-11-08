@@ -158,6 +158,11 @@ export async function suggest(
   const { ast } = await astProvider(correctedQuery);
 
   const astContext = getAstContext(innerText, ast, offset);
+
+  if (astContext.type === 'comment') {
+    return [];
+  }
+
   // build the correct query to fetch the list of fields
   const queryForFields = getQueryForFields(
     buildQueryUntilPreviousCommand(ast, correctedQuery),
