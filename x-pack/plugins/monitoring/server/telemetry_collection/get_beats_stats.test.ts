@@ -148,7 +148,7 @@ describe('Get Beats Stats', () => {
             names: ['firehose'],
           },
           queue: {
-            mem: 2,
+            mem: 0,
             spool: 1,
           },
           architecture: {
