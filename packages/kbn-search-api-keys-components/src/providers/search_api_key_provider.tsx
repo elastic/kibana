@@ -7,78 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useReducer, createContext } from 'react';
+import React, { useCallback, createContext, useState, useMemo } from 'react';
 import { useCreateApiKey } from '../hooks/use_create_api_key';
 import { Status } from '../constants';
 import { useValidateApiKey } from '../hooks/use_validate_api_key';
 
 const API_KEY_STORAGE_KEY = 'searchApiKey';
-const API_KEY_MASK = '•'.repeat(60);
-
-interface ApiKeyState {
-  status: Status;
-  apiKey: string | null;
-}
 
 interface APIKeyContext {
-  displayedApiKey: string | null;
   apiKey: string | null;
   toggleApiKeyVisibility: () => void;
   updateApiKey: ({ id, encoded }: { id: string; encoded: string }) => void;
   status: Status;
-  apiKeyIsVisible: boolean;
   initialiseKey: () => void;
 }
 
-type Action =
-  | { type: 'SET_API_KEY'; apiKey: string; status: Status }
-  | { type: 'SET_STATUS'; status: Status }
-  | { type: 'CLEAR_API_KEY' }
-  | { type: 'TOGGLE_API_KEY_VISIBILITY' };
-
-const initialState: ApiKeyState = {
-  apiKey: null,
-  status: Status.uninitialized,
-};
-
-const reducer = (state: ApiKeyState, action: Action): ApiKeyState => {
-  switch (action.type) {
-    case 'SET_API_KEY':
-      return { ...state, apiKey: action.apiKey, status: action.status };
-    case 'SET_STATUS':
-      return { ...state, status: action.status };
-    case 'TOGGLE_API_KEY_VISIBILITY':
-      return {
-        ...state,
-        status:
-          state.status === Status.showHiddenKey ? Status.showPreviewKey : Status.showHiddenKey,
-      };
-    case 'CLEAR_API_KEY':
-      return { ...state, apiKey: null, status: Status.showCreateButton };
-    default:
-      return state;
-  }
-};
-
 export const ApiKeyContext = createContext<APIKeyContext>({
-  displayedApiKey: null,
   apiKey: null,
   toggleApiKeyVisibility: () => {},
   updateApiKey: () => {},
   status: Status.uninitialized,
-  apiKeyIsVisible: false,
   initialiseKey: () => {},
 });
 
 export const SearchApiKeyProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
-
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [status, setStatus] = useState<Status>(Status.uninitialized);
   const updateApiKey = useCallback(({ id, encoded }: { id: string; encoded: string }) => {
     sessionStorage.setItem(API_KEY_STORAGE_KEY, JSON.stringify({ id, encoded }));
-    dispatch({ type: 'SET_API_KEY', apiKey: encoded, status: Status.showHiddenKey });
+    setApiKey(encoded);
+    setStatus(Status.showHiddenKey);
   }, []);
   const toggleApiKeyVisibility = useCallback(() => {
-    dispatch({ type: 'TOGGLE_API_KEY_VISIBILITY' });
+    setStatus((prevStatus) =>
+      prevStatus === Status.showHiddenKey ? Status.showPreviewKey : Status.showHiddenKey
+    );
   }, []);
   const validateApiKey = useValidateApiKey();
   const createApiKey = useCreateApiKey({
@@ -88,18 +51,15 @@ export const SearchApiKeyProvider: React.FC<React.PropsWithChildren> = ({ childr
           API_KEY_STORAGE_KEY,
           JSON.stringify({ id: receivedApiKey.id, encoded: receivedApiKey.encoded })
         );
-        dispatch({
-          type: 'SET_API_KEY',
-          apiKey: receivedApiKey.encoded,
-          status: Status.showHiddenKey,
-        });
+        setApiKey(receivedApiKey.encoded);
+        setStatus(Status.showHiddenKey);
       }
     },
     onError: (err) => {
       if (err.response?.status === 400) {
-        dispatch({ type: 'SET_STATUS', status: Status.showCreateButton });
+        setStatus(Status.showCreateButton);
       } else if (err.response?.status === 403) {
-        dispatch({ type: 'SET_STATUS', status: Status.showUserPrivilegesError });
+        setStatus(Status.showUserPrivilegesError);
       } else {
         throw err;
       }
@@ -107,24 +67,20 @@ export const SearchApiKeyProvider: React.FC<React.PropsWithChildren> = ({ childr
   });
   const initialiseKey = useCallback(async () => {
     try {
-      if (state.status === Status.uninitialized) {
-        dispatch({ type: 'SET_STATUS', status: Status.loading });
+      if (status === Status.uninitialized) {
+        setStatus(Status.loading);
         const storedKey = sessionStorage.getItem(API_KEY_STORAGE_KEY);
 
         if (storedKey) {
           const { id, encoded } = JSON.parse(storedKey);
 
           if (await validateApiKey(id)) {
-            dispatch({
-              type: 'SET_API_KEY',
-              apiKey: encoded,
-              status: Status.showHiddenKey,
-            });
+            setApiKey(encoded);
+            setStatus(Status.showHiddenKey);
           } else {
             sessionStorage.removeItem(API_KEY_STORAGE_KEY);
-            dispatch({
-              type: 'CLEAR_API_KEY',
-            });
+            setApiKey(null);
+            setStatus(Status.showCreateButton);
             await createApiKey();
           }
         } else {
@@ -132,19 +88,21 @@ export const SearchApiKeyProvider: React.FC<React.PropsWithChildren> = ({ childr
         }
       }
     } catch (e) {
-      dispatch({ type: 'CLEAR_API_KEY' });
+      setApiKey(null);
+      setStatus(Status.showCreateButton);
     }
-  }, [createApiKey, state.status, validateApiKey]);
+  }, [createApiKey, status, validateApiKey]);
 
-  const value: APIKeyContext = {
-    displayedApiKey: state.status === Status.showPreviewKey ? state.apiKey : API_KEY_MASK,
-    apiKey: state.apiKey,
-    toggleApiKeyVisibility,
-    updateApiKey,
-    status: state.status,
-    apiKeyIsVisible: state.status === Status.showPreviewKey,
-    initialiseKey,
-  };
+  const value: APIKeyContext = useMemo(
+    () => ({
+      apiKey,
+      toggleApiKeyVisibility,
+      updateApiKey,
+      status,
+      initialiseKey,
+    }),
+    [apiKey, status, toggleApiKeyVisibility, updateApiKey, initialiseKey]
+  );
 
   return <ApiKeyContext.Provider value={value}>{children}</ApiKeyContext.Provider>;
 };

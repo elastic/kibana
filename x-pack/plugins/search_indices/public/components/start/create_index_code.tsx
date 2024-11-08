@@ -50,15 +50,15 @@ export const CreateIndexCodeView = ({
     [usageTracker, changeCodingLanguage]
   );
   const elasticsearchUrl = useElasticsearchUrl();
-  const { apiKey, apiKeyIsVisible } = useSearchApiKey();
+  const { apiKey } = useSearchApiKey();
 
   const codeParams = useMemo(() => {
     return {
       indexName: createIndexForm.indexName || undefined,
       elasticsearchURL: elasticsearchUrl,
-      apiKey: apiKeyIsVisible && apiKey ? apiKey : undefined,
+      apiKey: apiKey || undefined,
     };
-  }, [createIndexForm.indexName, elasticsearchUrl, apiKeyIsVisible, apiKey]);
+  }, [createIndexForm.indexName, elasticsearchUrl, apiKey]);
   const selectedCodeExample = useMemo(() => {
     return selectedCodeExamples[selectedLanguage];
   }, [selectedLanguage, selectedCodeExamples]);
