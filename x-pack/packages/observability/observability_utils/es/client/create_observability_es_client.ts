@@ -17,6 +17,13 @@ type SearchRequest = ESSearchRequest & {
   size: number | boolean;
 };
 
+type EsqlQueryColumnarRequest = EsqlQueryRequest & { columnar: true };
+type EsqlQueryRowBasedRequest = EsqlQueryRequest & { columnar?: false };
+export type InferESQLResponseOf<
+  TDocument = unknown,
+  TSearchRequest extends EsqlQueryRequest = EsqlQueryRequest
+> = TSearchRequest['columnar'] extends true ? ESQLSearchResponse : TDocument[];
+
 /**
  * An Elasticsearch Client with a fully typed `search` method and built-in
  * APM instrumentation.
@@ -26,10 +33,14 @@ export interface ObservabilityElasticsearchClient {
     operationName: string,
     parameters: TSearchRequest
   ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>>;
-  esql<TDocument = unknown>(
+  esql<TDocument = unknown, TSearchRequest extends EsqlQueryRequest = EsqlQueryColumnarRequest>(
     operationName: string,
-    parameters: EsqlQueryRequest
-  ): Promise<TDocument[]>;
+    parameters: TSearchRequest
+  ): Promise<InferESQLResponseOf<TDocument, TSearchRequest>>;
+  esql<TDocument = unknown, TSearchRequest extends EsqlQueryRequest = EsqlQueryRowBasedRequest>(
+    operationName: string,
+    parameters: TSearchRequest
+  ): Promise<InferESQLResponseOf<TDocument, TSearchRequest>>;
   client: ElasticsearchClient;
 }
 
@@ -44,7 +55,10 @@ export function createObservabilityEsClient({
 }): ObservabilityElasticsearchClient {
   return {
     client,
-    esql<TDocument = unknown>(operationName: string, parameters: EsqlQueryRequest) {
+    esql<TDocument = unknown, TSearchRequest extends EsqlQueryRequest = EsqlQueryRequest>(
+      operationName: string,
+      parameters: EsqlQueryRequest
+    ) {
       logger.trace(() => `Request (${operationName}):\n${JSON.stringify(parameters, null, 2)}`);
       return withSpan({ name: operationName, labels: { plugin } }, () => {
         return client.esql.query(
@@ -57,8 +71,12 @@ export function createObservabilityEsClient({
         );
       })
         .then((response) => {
+          const esqlResponse = response as unknown as ESQLSearchResponse;
           logger.trace(() => `Response (${operationName}):\n${JSON.stringify(response, null, 2)}`);
-          return esqlResultToPlainObjects<TDocument>(response as unknown as ESQLSearchResponse);
+
+          return (
+            parameters.columnar ? esqlResponse : esqlResultToPlainObjects(esqlResponse)
+          ) as InferESQLResponseOf<TDocument, TSearchRequest>;
         })
         .catch((error) => {
           throw error;

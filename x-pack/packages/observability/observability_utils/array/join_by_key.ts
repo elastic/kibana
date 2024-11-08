@@ -21,7 +21,7 @@ export type JoinedReturnType<
 function getValueByPath(obj: any, path: string): any {
   return path.split('.').reduce((acc, keyPart) => {
     // Check if acc is a valid object and has the key
-    return acc && acc[keyPart] !== undefined ? acc[keyPart] : undefined;
+    return Object.prototype.hasOwnProperty.call(acc, keyPart) ? acc[keyPart] : undefined;
   }, obj);
 }
 
