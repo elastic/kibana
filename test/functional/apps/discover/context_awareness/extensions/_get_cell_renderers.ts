@@ -17,19 +17,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover',
     'unifiedFieldList',
   ]);
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
 
   describe('extension getCellRenderers', () => {
-    before(async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-    });
-
-    after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-    });
-
     describe('ES|QL mode', () => {
       describe('root profile', () => {
         it('should render custom @timestamp', async () => {

@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe.only('telemetry', () => {
+  describe('telemetry', () => {
     describe('context', () => {
       before(async () => {
         await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
