@@ -120,6 +120,7 @@ export type {
   RouteSecurity,
   RouteSecurityGetter,
   InternalRouteSecurity,
+  RouteDeprecationInfo,
 } from './src/router';
 export {
   validBodyOutput,

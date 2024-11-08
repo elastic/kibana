@@ -700,7 +700,6 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from a_index | dissect textField .', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        'Unknown column [textField.]',
       ]);
       testErrorsAndWarnings('from a_index | dissect textField %a', [
         "SyntaxError: mismatched input '%' expecting QUOTED_STRING",
@@ -751,7 +750,6 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from a_index | grok textField .', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        'Unknown column [textField.]',
       ]);
       testErrorsAndWarnings('from a_index | grok textField %a', [
         "SyntaxError: mismatched input '%' expecting QUOTED_STRING",

@@ -186,8 +186,6 @@ include::{kibana-root}/docs/canvas/canvas-present-workpad.asciidoc[]
 
 include::{kibana-root}/docs/canvas/canvas-tutorial.asciidoc[]
 
-include::{kibana-root}/docs/canvas/canvas-expression-lifecycle.asciidoc[]
-
 include::{kibana-root}/docs/canvas/canvas-function-reference.asciidoc[]
 
 include::{kibana-root}/docs/canvas/canvas-tinymath-functions.asciidoc[]
