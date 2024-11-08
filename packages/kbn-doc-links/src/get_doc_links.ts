@@ -89,11 +89,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     console: {
       guide: `${KIBANA_DOCS}console-kibana.html`,
-<<<<<<< HEAD
-      serverlessGuide: `${SERVERLESS_ELASTICSEARCH_DOCS}dev-tools-console`,
-=======
       serverlessGuide: `${SERVERLESS_DOCS}devtools-run-api-requests-in-the-console.html`,
->>>>>>> 13910194838 (Update serverless link targets (#199396))
     },
     dashboard: {
       guide: `${KIBANA_DOCS}dashboard.html`,
