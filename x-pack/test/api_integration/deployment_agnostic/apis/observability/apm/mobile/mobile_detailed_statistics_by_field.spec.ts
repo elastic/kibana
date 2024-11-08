@@ -75,7 +75,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177388
     describe('when data is loaded', () => {
       before(async () => {
         await generateMobileData({

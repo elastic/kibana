@@ -232,7 +232,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177396
     describe('Location stats with data', () => {
       before(async () => {
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();

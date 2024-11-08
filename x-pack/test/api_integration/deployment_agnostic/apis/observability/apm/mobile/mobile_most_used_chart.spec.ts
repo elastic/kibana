@@ -61,7 +61,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177394
     describe('Mobile stats', () => {
       before(async () => {
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();

@@ -167,7 +167,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       .then(({ body }) => body);
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177389
   describe('Mobile filters', () => {
     describe('when no data', () => {
       it('handles empty state', async () => {
