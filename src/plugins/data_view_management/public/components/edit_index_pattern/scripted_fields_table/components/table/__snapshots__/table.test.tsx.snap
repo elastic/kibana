@@ -75,9 +75,10 @@ exports[`Table should render normally 1`] = `
       },
     ]
   }
+  onTableChange={[Function]}
   pagination={
     Object {
-      "initialPageSize": 10,
+      "pageSize": 10,
       "pageSizeOptions": Array [
         5,
         10,
@@ -87,7 +88,14 @@ exports[`Table should render normally 1`] = `
     }
   }
   searchFormat="eql"
-  sorting={true}
+  sorting={
+    Object {
+      "sort": Object {
+        "direction": "asc",
+        "field": "name",
+      },
+    }
+  }
   tableLayout="fixed"
 />
 `;

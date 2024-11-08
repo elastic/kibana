@@ -161,6 +161,8 @@ class TableClass extends PureComponent<
   }
 }
 
+export const TableWithoutPersist = TableClass; // For testing purposes
+
 export const Table = withEuiTablePersist(TableClass, {
   tableId: 'dataViewsScriptedFields',
   pageSizeOptions: PAGE_SIZE_OPTIONS,
