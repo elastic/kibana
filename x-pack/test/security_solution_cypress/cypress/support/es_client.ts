@@ -45,6 +45,30 @@ export const esClient = (
       });
       return null;
     },
+    refreshIndex: async (index: string) => {
+      try {
+        await client.indices.refresh({ index });
+        return true;
+      } catch (error) {
+        return false;
+      }
+    },
+    searchIndex: async (index) => {
+      try {
+        const response = await client.search({
+          index,
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
+        });
+
+        return response.hits.hits.length;
+      } catch (error) {
+        return null;
+      }
+    },
   });
 
   return Promise.resolve();
