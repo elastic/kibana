@@ -53,7 +53,7 @@ export const CreateArchives: Task = {
 
         case '.gz':
           archives.push({
-            format: 'tar',
+            format: 'tar.gz',
             path: destination,
             fileCount: await compressTar({
               source,
