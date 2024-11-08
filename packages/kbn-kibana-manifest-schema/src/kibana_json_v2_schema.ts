@@ -49,11 +49,10 @@ export const MANIFEST_V2: JSONSchema = {
       `,
     },
     group: {
-      enum: ['common', 'platform', 'observability', 'security', 'search'],
+      enum: ['platform', 'observability', 'security', 'search'],
       description: desc`
         Specifies the group to which this module pertains.
       `,
-      default: 'common',
     },
     devOnly: {
       type: 'boolean',
