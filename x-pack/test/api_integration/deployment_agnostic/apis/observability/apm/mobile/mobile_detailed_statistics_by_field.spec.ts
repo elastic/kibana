@@ -59,6 +59,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   describe('Mobile detailed statistics ', () => {
+    before(async () => {
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+    });
+
+    after(() => apmSynthtraceEsClient.clean());
+
     describe('when data is not loaded', () => {
       it('handles empty state', async () => {
         const response = await getMobileDetailedStatisticsByField({
@@ -70,19 +76,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/177388
-
-    describe.skip('when data is loaded', () => {
+    describe('when data is loaded', () => {
       before(async () => {
-        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-
         await generateMobileData({
           apmSynthtraceEsClient,
           start,
           end,
         });
       });
-
-      after(() => apmSynthtraceEsClient.clean());
 
       describe('when comparison is disable', () => {
         it('returns current period data only', async () => {

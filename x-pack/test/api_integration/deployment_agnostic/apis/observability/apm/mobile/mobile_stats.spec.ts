@@ -185,7 +185,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/177392
-    describe.skip('Mobile stats', () => {
+    describe('Mobile stats', () => {
       before(async () => {
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 

@@ -10,7 +10,6 @@ import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
 import { orderBy } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { config, generateData } from './generate_data';
 
@@ -68,6 +67,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   describe('Group id samples', () => {
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    before(async () => {
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+    });
+
     it('handles the empty state', async () => {
       const response = await callErrorGroupSamplesApi({ groupId: 'foo' });
       expect(response.status).to.be(200);
@@ -75,39 +79,31 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/177654
-    describe.skip('when samples data is loaded', () => {
+    describe('when samples data is loaded', () => {
+      let errorsSamplesResponse: ErrorGroupSamples;
       const { bananaTransaction } = config;
       describe('error group id', () => {
-        let apmSynthtraceEsClient: ApmSynthtraceEsClient;
-
         before(async () => {
-          apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
           await generateData({ serviceName, start, end, apmSynthtraceEsClient });
+          const response = await callErrorGroupSamplesApi({
+            groupId: '0000000000000000000000000Error 1',
+          });
+          errorsSamplesResponse = response.body;
         });
 
         after(() => apmSynthtraceEsClient.clean());
 
-        describe('return correct data', () => {
-          let errorsSamplesResponse: ErrorGroupSamples;
-          before(async () => {
-            const response = await callErrorGroupSamplesApi({
-              groupId: '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
-            });
-            errorsSamplesResponse = response.body;
-          });
-
-          it('displays correct number of occurrences', () => {
-            const numberOfBuckets = 15;
-            expect(errorsSamplesResponse.occurrencesCount).to.equal(
-              bananaTransaction.failureRate * numberOfBuckets
-            );
-          });
+        it('displays correct number of occurrences', () => {
+          const numberOfBuckets = 15;
+          expect(errorsSamplesResponse.occurrencesCount).to.equal(
+            bananaTransaction.failureRate * numberOfBuckets
+          );
         });
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177665
-    describe.skip('when error sample data is loaded', () => {
+    // github.com/elastic/kibana/issues/177665
+    describe('when error sample data is loaded', () => {
       describe('error sample id', () => {
         before(async () => {
           await generateData({ serviceName, start, end, apmSynthtraceEsClient });
@@ -119,7 +115,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           let errorSampleDetailsResponse: ErrorSampleDetails;
           before(async () => {
             const errorsSamplesResponse = await callErrorGroupSamplesApi({
-              groupId: '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+              groupId: '0000000000000000000000000Error 1',
             });
 
             const errorId = errorsSamplesResponse.body.errorSampleIds[0];
@@ -130,7 +126,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           it('displays correct error grouping_key', () => {
             expect(errorSampleDetailsResponse.error.error.grouping_key).to.equal(
-              '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03'
+              '0000000000000000000000000Error 1'
             );
           });
 
@@ -148,7 +144,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         before(async () => {
           const instance = service(serviceName, 'production', 'go').instance('a');
           const errorMessage = 'Error 1';
-          const groupId = getErrorGroupingKey(errorMessage);
+          const groupId = '0000000000000000000000000Error 1';
 
           await apmSynthtraceEsClient.index([
             timerange(start, end)

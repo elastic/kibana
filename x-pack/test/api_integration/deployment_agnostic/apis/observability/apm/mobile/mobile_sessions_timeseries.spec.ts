@@ -49,7 +49,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
   }
 
-  describe.skip('Sessions charts', () => {
+  describe('Sessions charts', () => {
     describe('when no data', () => {
       it('handles empty state', async () => {
         const response = await getSessionsChart({ serviceName: 'foo' });
@@ -60,7 +60,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/177393
-    describe.skip('with data loaded', () => {
+    describe('with data loaded', () => {
       before(async () => {
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 

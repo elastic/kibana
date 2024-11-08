@@ -53,6 +53,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   describe('Distribution', () => {
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+    before(async () => {
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+    });
+
     it('handles the empty state', async () => {
       const response = await callApi();
       expect(response.status).to.be(200);
@@ -61,13 +67,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/177652
-    describe.skip('when data is loaded', () => {
+    describe('when data is loaded', () => {
       describe('errors distribution', () => {
-        let apmSynthtraceEsClient: ApmSynthtraceEsClient;
-
         const { appleTransaction, bananaTransaction } = config;
         before(async () => {
-          apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
           await generateData({ serviceName, start, end, apmSynthtraceEsClient });
         });
 

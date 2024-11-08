@@ -168,7 +168,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   // FLAKY: https://github.com/elastic/kibana/issues/177389
-  describe.skip('Mobile filters', () => {
+  describe('Mobile filters', () => {
     describe('when no data', () => {
       it('handles empty state', async () => {
         const response = await getMobileFilters({ serviceName: 'foo' });

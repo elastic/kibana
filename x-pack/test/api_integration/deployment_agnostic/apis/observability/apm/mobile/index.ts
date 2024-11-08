@@ -8,7 +8,7 @@
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('agent_explorer', () => {
+  describe('Mobile', () => {
     loadTestFile(require.resolve('./crashes/crash_group_list.spec.ts'));
     loadTestFile(require.resolve('./crashes/distribution.spec.ts'));
     loadTestFile(require.resolve('./errors/group_id_samples.spec.ts'));
