@@ -6,7 +6,16 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiText,
+  useEuiTheme,
+  COLOR_MODES_STANDARD,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
@@ -23,6 +32,8 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   checkCompleteMetadata,
   checkComplete,
 }) => {
+  const { euiTheme, colorMode } = useEuiTheme();
+  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
@@ -37,11 +48,16 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   const canCreateConnectors = checkCompleteMetadata?.canCreateConnectors;
 
   return (
-    <OnboardingCardContentPanel style={{ paddingTop: 0 }}>
+    <OnboardingCardContentPanel
+      style={{
+        paddingTop: 0,
+        ...(isDarkMode && { backgroundColor: euiTheme.colors.lightestShade }),
+      }}
+    >
       {canExecuteConnectors ? (
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
+            <EuiText size="s" color={isDarkMode ? 'text' : 'subdued'}>
               {i18n.ASSISTANT_CARD_DESCRIPTION}
             </EuiText>
           </EuiFlexItem>

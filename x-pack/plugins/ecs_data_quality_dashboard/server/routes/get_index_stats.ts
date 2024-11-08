@@ -26,7 +26,11 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
     .get({
       path: GET_INDEX_STATS,
       access: 'internal',
-      options: { tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {
@@ -81,7 +85,7 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
             const meteringStatsIndices = parseMeteringStats(meteringStats.indices);
 
             const availableIndices = await fetchAvailableIndices(esClient, {
-              indexPattern: decodedIndexName,
+              indexNameOrPattern: decodedIndexName,
               startDate: decodedStartDate,
               endDate: decodedEndDate,
             });
