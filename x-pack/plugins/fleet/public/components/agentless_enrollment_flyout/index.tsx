@@ -181,8 +181,7 @@ export const AgentlessEnrollmentFlyout = ({
               title: i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.stepConfirmDataTitle', {
                 defaultMessage: 'Confirm incoming data',
               }),
-              // children: agentData && confirmEnrollmentStatus === 'complete' && (
-              children: agentData && (
+              children: agentData && confirmEnrollmentStatus === 'complete' && (
                 <AgentlessStepConfirmData
                   agent={agentData}
                   packagePolicy={packagePolicy}
