@@ -7,20 +7,20 @@
 
 import { EuiAccordion, EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
+import { buildEntityAlertsQuery } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 import { AlertsPreview } from './alerts/alerts_preview';
-import { useGlobalTime } from '../../common/containers/use_global_time';
-import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
-import { useAlertsByStatus } from '../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
+import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
+import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
 
 export const EntityInsight = <T,>({
   name,
@@ -67,24 +67,13 @@ export const EntityInsight = <T,>({
 
   const { signalIndexName } = useSignalIndex();
 
-  const entityFilter = useMemo(() => ({ field: fieldName, value: name }), [fieldName, name]);
-
-  const { to, from } = useGlobalTime();
-
-  const { items: alertsData } = useAlertsByStatus({
-    entityFilter,
-    signalIndexName,
-    queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
-    to,
-    from,
+  const { data: alertsData } = useQueryAlerts({
+    query: buildEntityAlertsQuery(fieldName, name, 500),
+    queryName: ALERTS_QUERY_NAMES.ALERTS_COUNT_BY_STATUS,
+    indexName: signalIndexName,
   });
 
-  const alertsOpenCount = alertsData?.open?.total || 0;
-
-  const alertsAcknowledgedCount = alertsData?.acknowledged?.total || 0;
-
-  const alertsCount = alertsOpenCount + alertsAcknowledgedCount;
-
+  const alertsCount = alertsData?.hits?.total.value || 0;
   if (alertsCount > 0) {
     insightContent.push(
       <>

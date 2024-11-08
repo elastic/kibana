@@ -10,11 +10,42 @@ import { render } from '@testing-library/react';
 import { AlertsPreview } from './alerts_preview';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { ParsedAlertsData } from '../../../overview/components/detection_response/alerts_by_status/types';
+import type { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
 
-const mockAlertsData: ParsedAlertsData = {
-  closed: { total: 1, severities: [{ key: 'low', value: 1, label: 'Low' }] },
-  open: { total: 1, severities: [{ key: 'low', value: 1, label: 'Low' }] },
+const mockAlertsData: AlertSearchResponse<unknown, unknown> = {
+  took: 0,
+  timeout: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    skipped: 0,
+    failed: 0,
+  },
+  hits: {
+    total: {
+      value: 2,
+      relation: 'eq',
+    },
+    max_score: 0,
+    hits: [
+      {
+        fields: {
+          'signal.rule.name': ['Low Alert'],
+          'kibana.alert.reason': ['Low Alert Reason'],
+          'kibana.alert.rule.uuid': ['Low Alert UUID'],
+          'signal.rule.severity': ['low'],
+        },
+      },
+      {
+        fields: {
+          'signal.rule.name': ['Medium Alert'],
+          'kibana.alert.reason': ['Medium Alert Reason'],
+          'kibana.alert.rule.uuid': ['Medium Alert UUID'],
+          'signal.rule.severity': ['medium'],
+        },
+      },
+    ],
+  },
 };
 
 jest.mock(

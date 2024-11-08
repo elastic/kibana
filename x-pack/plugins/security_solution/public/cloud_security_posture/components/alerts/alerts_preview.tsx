@@ -12,12 +12,20 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
+import type { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
-import type {
-  AlertsByStatus,
-  ParsedAlertsData,
-} from '../../../overview/components/detection_response/alerts_by_status/types';
+
+interface CspAlertsField {
+  'kibana.alert.rule.uuid': string[];
+  'kibana.alert.reason': string[];
+  'signal.rule.name': string[];
+  'signal.rule.severity': string[];
+}
+
+interface AlertsDetailsFields {
+  fields: CspAlertsField;
+}
 
 const AlertsCount = ({
   alertsTotal,
@@ -57,25 +65,25 @@ export const AlertsPreview = ({
   alertsCount,
   isPreviewMode,
 }: {
-  alertsData: ParsedAlertsData;
+  alertsData: AlertSearchResponse<unknown, unknown> | null;
   alertsCount: number;
   isPreviewMode?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const severityMap = new Map<string, number>();
+  const resultX = (alertsData?.hits?.hits as AlertsDetailsFields[])?.map(
+    (item: AlertsDetailsFields) => {
+      return { fields: item.fields };
+    }
+  );
 
-  (['open', 'acknowledged'] as AlertsByStatus[]).forEach((status) => {
-    alertsData?.[status]?.severities.forEach((severity) => {
-      if (severityMap.has(severity.key)) {
-        severityMap.set(severity.key, (severityMap?.get(severity.key) || 0) + severity.value);
-      } else {
-        severityMap.set(severity.key, severity.value);
-      }
-    });
-  });
-
-  const alertStats = Array.from(severityMap, ([key, count]) => ({
+  const severities = resultX?.map((item) => item.fields['signal.rule.severity'][0]) || [];
+  const alertStats = Object.entries(
+    severities.reduce((acc: Record<string, number>, item) => {
+      acc[item] = (acc[item] || 0) + 1;
+      return acc;
+    }, {})
+  ).map(([key, count]) => ({
     key,
     count,
     color: getSeverityColor(key),
