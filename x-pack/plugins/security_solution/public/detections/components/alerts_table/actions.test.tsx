@@ -57,7 +57,7 @@ import {
 } from '@kbn/lists-plugin/common/constants.mock';
 import { of } from 'rxjs';
 import { timelineDefaults } from '../../../timelines/store/defaults';
-import { defaultUdtHeaders } from '../../../timelines/components/timeline/unified_components/default_headers';
+import { defaultUdtHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),

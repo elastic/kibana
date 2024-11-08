@@ -760,7 +760,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         });
 
         it('should handle schedule request where some requests succeed and some requests fail appropriately', async () => {
-          const start = moment().utc().startOf('day').subtract(7, 'days').toISOString();
+          const start = moment().utc().startOf('day').subtract(14, 'days').toISOString();
           const end = moment().utc().startOf('day').subtract(5, 'days').toISOString();
           // create 2 rules
           const rresponse1 = await supertest
