@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,10 +14,12 @@ import {
   EuiSpacer,
   EuiLink,
   EuiCode,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import {
   useForm,
   useFormData,
@@ -90,6 +92,113 @@ function getFieldsMeta(esDocsBase: string) {
         />
       ),
       testSubject: 'dataStreamField',
+    },
+    indexMode: {
+      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.indexModeTitle', {
+        defaultMessage: 'Data stream index mode',
+      }),
+      description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.indexModeDescription', {
+        defaultMessage:
+          'The index.mode setting is used to control settings applied in specific domains like ingestions of time series data or logs.',
+      }),
+      options: [
+        {
+          value: 'standard',
+          inputDisplay: i18n.translate(
+            'xpack.idxMgmt.templateForm.stepLogistics.indexModeStandardOptionLabel',
+            {
+              defaultMessage: 'Standard',
+            }
+          ),
+          dropdownDisplay: (
+            <Fragment>
+              <strong>
+                {i18n.translate(
+                  'xpack.idxMgmt.templateForm.stepLogistics.indexModeStandardOptionTitleDescription',
+                  {
+                    defaultMessage: 'Standard',
+                  }
+                )}
+              </strong>
+              <EuiText size="s" color="subdued">
+                <p>
+                  {i18n.translate(
+                    'xpack.idxMgmt.templateForm.stepLogistics.indexModeStandardOptionDescription',
+                    {
+                      defaultMessage:
+                        'Standard indexing with default settings, for data other than logs or metrics',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            </Fragment>
+          ),
+        },
+        {
+          value: 'time_series',
+          inputDisplay: i18n.translate(
+            'xpack.idxMgmt.templateForm.stepLogistics.indexModeTimeSeriesOptionLabel',
+            {
+              defaultMessage: 'Time series',
+            }
+          ),
+          dropdownDisplay: (
+            <Fragment>
+              <strong>
+                {i18n.translate(
+                  'xpack.idxMgmt.templateForm.stepLogistics.indexModeTimeSeriesOptionTitleDescription',
+                  {
+                    defaultMessage: 'Time series',
+                  }
+                )}
+              </strong>
+              <EuiText size="s" color="subdued">
+                <p>
+                  {i18n.translate(
+                    'xpack.idxMgmt.templateForm.stepLogistics.indexModeTimeSeriesOptionDescription',
+                    {
+                      defaultMessage: 'Optimized for metrics data with reduced storage',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            </Fragment>
+          ),
+        },
+        {
+          value: 'logsdb',
+          inputDisplay: i18n.translate(
+            'xpack.idxMgmt.templateForm.stepLogistics.indexModeLogsdbOptionLabel',
+            {
+              defaultMessage: 'LogsDB',
+            }
+          ),
+          dropdownDisplay: (
+            <Fragment>
+              <strong>
+                {i18n.translate(
+                  'xpack.idxMgmt.templateForm.stepLogistics.indexModeLogsdbOptionTitleDescription',
+                  {
+                    defaultMessage: 'LogsDB',
+                  }
+                )}
+              </strong>
+              <EuiText size="s" color="subdued">
+                <p>
+                  {i18n.translate(
+                    'xpack.idxMgmt.templateForm.stepLogistics.indexModeLogsdbOptionDescription',
+                    {
+                      defaultMessage:
+                        'Optimized for storing logs data, with reduced storage and default settings that help reduce the chance of logs being rejected by Elasticsearch',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            </Fragment>
+          ),
+        },
+      ],
+      testSubject: 'indexModeField',
     },
     order: {
       title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.orderTitle', {
@@ -198,21 +307,33 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       isValid: isFormValid,
       getErrors: getFormErrors,
       getFormData,
+      setFieldValue,
     } = form;
 
-    const [{ addMeta, doCreateDataStream, lifecycle }] = useFormData<{
-      addMeta: boolean;
-      lifecycle: DataRetention;
-      doCreateDataStream: boolean;
-    }>({
-      form,
-      watch: [
-        'addMeta',
-        'lifecycle.enabled',
-        'lifecycle.infiniteDataRetention',
-        'doCreateDataStream',
-      ],
-    });
+    const [{ addMeta, doCreateDataStream, lifecycle, indexPatterns: indexPatternsField }] =
+      useFormData<{
+        addMeta: boolean;
+        lifecycle: DataRetention;
+        doCreateDataStream: boolean;
+        indexPatterns: string[];
+      }>({
+        form,
+        watch: [
+          'addMeta',
+          'lifecycle.enabled',
+          'lifecycle.infiniteDataRetention',
+          'doCreateDataStream',
+          'indexPatterns',
+        ],
+      });
+
+    useEffect(() => {
+      if (indexPatternsField && indexPatternsField.some((pattern) => pattern === 'logs-*-*')) {
+        setFieldValue('indexMode', 'logsdb');
+      } else {
+        setFieldValue('indexMode', 'standard');
+      }
+    }, [indexPatternsField, setFieldValue]);
 
     /**
      * When the consumer call validate() on this step, we submit the form so it enters the "isSubmitted" state
@@ -234,6 +355,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       name,
       indexPatterns,
       createDataStream,
+      indexMode,
       order,
       priority,
       version,
@@ -309,6 +431,36 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                 path="doCreateDataStream"
                 componentProps={{ 'data-test-subj': createDataStream.testSubject }}
               />
+            </FormRow>
+          )}
+
+          {doCreateDataStream && (
+            <FormRow title={indexMode.title} description={indexMode.description}>
+              {/* <UseField*/}
+              {/*  path="indexMode"*/}
+              {/*  component={SuperSelectField}*/}
+              {/*  componentProps={{*/}
+              {/*    euiFieldProps: {*/}
+              {/*      hasDividers: true,*/}
+              {/*      'data-test-subj': indexMode.testSubject,*/}
+              {/*      options: indexMode.options,*/}
+              {/*    },*/}
+              {/*  }}*/}
+              {/* />*/}
+              <UseField path="indexMode">
+                {(field) => {
+                  return (
+                    <SuperSelectField
+                      field={field}
+                      euiFieldProps={{
+                        hasDividers: true,
+                        'data-test-subj': indexMode.testSubject,
+                        options: indexMode.options,
+                      }}
+                    />
+                  );
+                }}
+              </UseField>
             </FormRow>
           )}
 

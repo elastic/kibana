@@ -150,6 +150,13 @@ export const schemas: Record<string, FormSchema> = {
       }),
       defaultValue: false,
     },
+    indexMode: {
+      type: FIELD_TYPES.SUPER_SELECT,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldIndexModeLabel', {
+        defaultMessage: 'Index mode',
+      }),
+      formatters: [toString],
+    },
     order: {
       type: FIELD_TYPES.NUMBER,
       label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldOrderLabel', {
