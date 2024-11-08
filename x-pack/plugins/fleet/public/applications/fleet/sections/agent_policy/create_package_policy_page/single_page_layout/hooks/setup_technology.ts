@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useConfig } from '../../../../../hooks';
 import { ExperimentalFeaturesService } from '../../../../../services';
@@ -28,6 +28,7 @@ import {
 import {
   isAgentlessIntegration as isAgentlessIntegrationFn,
   getAgentlessAgentPolicyNameFromPackagePolicyName,
+  isOnlyAgentlessIntegration,
 } from '../../../../../../../../common/services/agentless_policy_helper';
 
 export const useAgentless = () => {
@@ -97,9 +98,13 @@ export function useSetupTechnology({
 
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
   const newAgentBasedPolicy = useRef<NewAgentPolicy>(newAgentPolicy);
-  const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
-    SetupTechnology.AGENT_BASED
-  );
+  const defaultSetupTechnology = useMemo(() => {
+    return isOnlyAgentlessIntegration(packageInfo)
+      ? SetupTechnology.AGENTLESS
+      : SetupTechnology.AGENT_BASED;
+  }, [packageInfo]);
+  const [selectedSetupTechnology, setSelectedSetupTechnology] =
+    useState<SetupTechnology>(defaultSetupTechnology);
   const [newAgentlessPolicy, setNewAgentlessPolicy] = useState<AgentPolicy | NewAgentPolicy>(() => {
     const agentless = generateNewAgentPolicyWithDefaults({
       inactivity_timeout: 3600,
@@ -154,6 +159,13 @@ export function useSetupTechnology({
     }
   }, [isDefaultAgentlessPolicyEnabled]);
 
+  useEffect(() => {
+    if (isEditPage) {
+      return;
+    }
+    setSelectedSetupTechnology(defaultSetupTechnology);
+  }, [packageInfo, defaultSetupTechnology, isEditPage]);
+
   const handleSetupTechnologyChange = useCallback(
     (setupTechnology: SetupTechnology, policyTemplateName?: string) => {
       if (!isAgentlessEnabled || setupTechnology === selectedSetupTechnology) {
@@ -168,6 +180,7 @@ export function useSetupTechnology({
           } as NewAgentPolicy;
 
           setNewAgentPolicy(agentlessPolicy);
+          setNewAgentlessPolicy(agentlessPolicy);
           setSelectedPolicyTab(SelectedPolicyTab.NEW);
           updateAgentPolicies([agentlessPolicy] as AgentPolicy[]);
         }
