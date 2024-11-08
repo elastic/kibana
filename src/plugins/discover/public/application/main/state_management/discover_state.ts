@@ -434,7 +434,7 @@ export function getDiscoverStateContainer({
     }
     await loadDataViewList();
     addLog('[getDiscoverStateContainer] onDataViewEdited triggers data fetching');
-    internalStateContainer.transitions.setIsLoading(false);
+    setIsLoading(false);
     fetchData();
   };
 
