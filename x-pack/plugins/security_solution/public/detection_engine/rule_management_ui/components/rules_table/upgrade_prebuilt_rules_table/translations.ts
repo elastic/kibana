@@ -41,7 +41,7 @@ export const BULK_UPDATE_ALL_RULES_BUTTON_TOOLTIP_CONFLICTS = i18n.translate(
 export const BULK_UPDATE_SELECTED_RULES_BUTTON_TOOLTIP_CONFLICTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.bulkButtons.selectedRules.conflicts',
   {
-    defaultMessage: 'All selected rules have conflicts. Please update them individually.',
+    defaultMessage: 'All selected rules have conflicts. Update them individually.',
   }
 );
 
