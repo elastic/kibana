@@ -17,7 +17,7 @@ export const createAwsS3accessLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'aws-s3access-logs-data-source',
+    profileId: 'observability-aws-s3access-logs-data-source-profile',
     profile: {
       getDefaultAppState: createGetDefaultAppState({
         defaultColumns: [

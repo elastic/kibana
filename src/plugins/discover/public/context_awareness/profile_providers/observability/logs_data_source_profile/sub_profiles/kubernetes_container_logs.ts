@@ -17,7 +17,7 @@ export const createKubernetesContainerLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'kubernetes-container-logs-data-source',
+    profileId: 'observability-kubernetes-container-logs-data-source-profile',
     profile: {
       getDefaultAppState: createGetDefaultAppState({
         defaultColumns: [
