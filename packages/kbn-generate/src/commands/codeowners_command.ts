@@ -38,6 +38,8 @@ const ULTIMATE_PRIORITY_RULES = `
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
+
+* kibanamachine
 `;
 
 export const CodeownersCommand: GenerateCommand = {
