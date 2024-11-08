@@ -5,13 +5,13 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -29,24 +29,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when(
-    'Dependency metadata when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
+  describe('Dependency metadata', () => {
+    describe('when data is not loaded', () => {
       it('handles empty state', async () => {
         const { status, body } = await callApi();
 
         expect(status).to.be(200);
         expect(body.metadata).to.empty();
       });
-    }
-  );
+    });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177122
-  registry.when(
-    'Dependency metadata when data is generated',
-    { config: 'basic', archives: [] },
-    () => {
+    describe('when data is generated', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+      });
+
       after(() => apmSynthtraceEsClient.clean());
 
       it('returns correct metadata for the dependency', async () => {
@@ -61,6 +60,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         await apmSynthtraceEsClient.clean();
       });
-    }
-  );
+    });
+  });
 }
