@@ -32,7 +32,7 @@ import type {
   UnifiedFieldListSidebarContainerStateService,
   AddFieldFilterHandler,
 } from '../../types';
-import { canProvideStatsForFieldTextBased } from '../../utils/can_provide_stats';
+import { canProvideStatsForEsqlField } from '../../utils/can_provide_stats';
 
 interface GetCommonFieldItemButtonPropsParams {
   stateService: UnifiedFieldListSidebarContainerStateService;
@@ -405,7 +405,7 @@ function UnifiedFieldListItemComponent({
         />
       )}
       renderContent={
-        (searchMode === 'text-based' && canProvideStatsForFieldTextBased(field)) ||
+        (searchMode === 'text-based' && canProvideStatsForEsqlField(field)) ||
         searchMode === 'documents'
           ? renderPopover
           : undefined
