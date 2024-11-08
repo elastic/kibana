@@ -41,7 +41,7 @@ export function getPathsWithOwnersReversed(): PathWithOwners[] {
     .map((line) => line.trim())
     .filter((line) => line && line[0] !== '#')
     // kibanamachine is an assignment override on backport branches to avoid review requests
-    .filter((line) => line.includes('@kibanamachine'));
+    .filter((line) => line && !line.includes('@kibanamachine'));
 
   const pathsWithOwners: PathWithOwners[] = codeowners.map((c) => {
     const [path, ...ghTeams] = c.split(/\s+/);
