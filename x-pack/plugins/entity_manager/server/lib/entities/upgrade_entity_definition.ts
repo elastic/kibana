@@ -46,9 +46,7 @@ export async function upgradeBuiltInEntityDefinitions({
   });
 
   await Promise.all(
-    upgradedDefinitions.map((definition) =>
-      startTransforms(esClient, definition, logger)
-    )
+    upgradedDefinitions.map((definition) => startTransforms(esClient, definition, logger))
   );
 
   return { success: true, definitions: upgradedDefinitions };
