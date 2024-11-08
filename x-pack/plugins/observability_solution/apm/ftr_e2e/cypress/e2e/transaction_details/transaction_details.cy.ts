@@ -34,7 +34,7 @@ describe('Transaction details', () => {
     cy.loginAsViewerUser();
   });
 
-  it('shows transaction name and transaction charts', () => {
+  it('shows transaction name and transaction charts', { defaultCommandTimeout: 60000 }, () => {
     cy.intercept('GET', '/internal/apm/services/opbeans-java/transactions/charts/latency?*').as(
       'transactionLatencyRequest'
     );
@@ -54,14 +54,11 @@ describe('Transaction details', () => {
       })}`
     );
 
-    cy.wait(
-      [
-        '@transactionLatencyRequest',
-        '@transactionThroughputRequest',
-        '@transactionFailureRateRequest',
-      ],
-      { timeout: 30000 }
-    ).spread((latencyInterception, throughputInterception, failureRateInterception) => {
+    cy.wait([
+      '@transactionLatencyRequest',
+      '@transactionThroughputRequest',
+      '@transactionFailureRateRequest',
+    ]).spread((latencyInterception, throughputInterception, failureRateInterception) => {
       expect(latencyInterception.request.query.transactionName).to.be.eql('GET /api/product');
 
       expect(
@@ -106,7 +103,7 @@ describe('Transaction details', () => {
     );
     cy.contains('Create SLO');
   });
-  it('shows top errors table', () => {
+  it('shows top errors table', { defaultCommandTimeout: 60000 }, () => {
     cy.visitKibana(
       `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
         ...timeRange,
@@ -114,10 +111,8 @@ describe('Transaction details', () => {
       })}`
     );
 
-    cy.contains('Top 5 errors', { timeout: 60000 });
-    cy.getByTestSubj('topErrorsForTransactionTable')
-      .contains('a', '[MockError] Foo', { timeout: 60000 })
-      .click();
+    cy.contains('Top 5 errors');
+    cy.getByTestSubj('topErrorsForTransactionTable').contains('a', '[MockError] Foo').click();
     cy.url().should('include', 'opbeans-java/errors');
   });
 

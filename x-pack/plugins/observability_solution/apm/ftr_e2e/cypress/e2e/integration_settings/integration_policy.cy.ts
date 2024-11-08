@@ -28,7 +28,7 @@ const policyFormFields = [
   },
 ];
 
-describe.skip('when navigating to integration page', () => {
+describe('when navigating to integration page', { defaultCommandTimeout: 60000 }, () => {
   beforeEach(() => {
     const integrationsPath = '/app/integrations/browse';
 
@@ -37,7 +37,7 @@ describe.skip('when navigating to integration page', () => {
 
     // open integration policy form
     cy.getByTestSubj('integration-card:ui_link:apm').click();
-    cy.contains('Elastic APM in Fleet', { timeout: 60000 }).click();
+    cy.contains('Elastic APM in Fleet').click();
     cy.contains('a', 'APM integration').click();
     cy.getByTestSubj('addIntegrationPolicyButton').click();
   });
