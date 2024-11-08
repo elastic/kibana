@@ -5,30 +5,13 @@
  * 2.0.
  */
 
-import isEmpty from 'lodash/isEmpty';
 import type { RuleToImport, ValidatedRuleToImport } from './rule_to_import';
 
 /**
  * Additional validation that is implemented outside of the schema itself.
  */
 export const validateRuleToImport = (rule: RuleToImport): string[] => {
-  return [
-    ...validateTimelineId(rule),
-    ...validateTimelineTitle(rule),
-    ...validateThreshold(rule),
-    ...validateSequenceSuppressionXorBuildingBlockRuleType(rule),
-  ];
-};
-
-const validateSequenceSuppressionXorBuildingBlockRuleType = (props: RuleToImport): string[] => {
-  if (
-    props.type === 'eql' &&
-    !isEmpty(props.building_block_type) &&
-    !isEmpty(props.alert_suppression)
-  ) {
-    return ['rule cannot be an eql rule with building block type and have suppression enabled'];
-  }
-  return [];
+  return [...validateTimelineId(rule), ...validateTimelineTitle(rule), ...validateThreshold(rule)];
 };
 
 const validateTimelineId = (rule: RuleToImport): string[] => {

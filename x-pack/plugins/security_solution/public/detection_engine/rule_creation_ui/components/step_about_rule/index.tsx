@@ -55,7 +55,6 @@ interface StepAboutRuleProps extends RuleStepProps {
   timestampOverride: string;
   form: FormHook<AboutStepRule>;
   esqlQuery?: string | undefined;
-  eqlSequenceSuppressionEnabled: boolean;
 }
 
 interface StepAboutRuleReadOnlyProps {
@@ -86,7 +85,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   isLoading,
   form,
   esqlQuery,
-  eqlSequenceSuppressionEnabled,
 }) => {
   const { data } = useKibana().services;
 
@@ -94,16 +92,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const isEsqlRuleValue = useMemo(() => isEsqlRule(ruleType), [ruleType]);
 
   const { ruleIndices } = useRuleIndices(machineLearningJobId, index);
-
-  const [buildingBlockRuleTypeChecked, setBuildingBlockRuleTypeChecked] = useState(false);
-
-  const buildingBlockRuleTypeCheckedOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (eqlSequenceSuppressionEnabled) {
-      setBuildingBlockRuleTypeChecked(false);
-    } else {
-      setBuildingBlockRuleTypeChecked(e.target.checked);
-    }
-  };
 
   /**
    * 1. if not null, fetch data view from id saved on rule form
@@ -332,19 +320,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               />
             </EuiFormRow>
             <EuiFormRow label={I18n.BUILDING_BLOCK} fullWidth>
-              {/* do not display building block rule type option if eql sequence suppression is in use*/}
               <CommonUseField
                 path="isBuildingBlock"
                 componentProps={{
                   idAria: 'detectionEngineStepAboutRuleBuildingBlock',
                   'data-test-subj': 'detectionEngineStepAboutRuleBuildingBlock',
                   euiFieldProps: {
-                    disabled: isLoading || eqlSequenceSuppressionEnabled,
-                    checked: buildingBlockRuleTypeChecked,
-                    // if we are using eql sequence suppression
-                    // make sure to disable checkbox if previously enabled
-                    onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                      buildingBlockRuleTypeCheckedOnChange(e),
+                    disabled: isLoading,
                   },
                 }}
               />

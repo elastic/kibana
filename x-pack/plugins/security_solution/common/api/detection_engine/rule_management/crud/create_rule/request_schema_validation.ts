@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import isEmpty from 'lodash/isEmpty';
 import type { RuleCreateProps } from '../../../model';
 
 /**
@@ -17,19 +16,7 @@ export const validateCreateRuleProps = (props: RuleCreateProps): string[] => {
     ...validateTimelineTitle(props),
     ...validateThreatMapping(props),
     ...validateThreshold(props),
-    ...validateSequenceSuppressionXorBuildingBlockRuleType(props),
   ];
-};
-
-const validateSequenceSuppressionXorBuildingBlockRuleType = (props: RuleCreateProps): string[] => {
-  if (
-    props.type === 'eql' &&
-    !isEmpty(props.building_block_type) &&
-    !isEmpty(props.alert_suppression)
-  ) {
-    return ['rule cannot be an eql rule with building block type and have suppression enabled'];
-  }
-  return [];
 };
 
 const validateTimelineId = (props: RuleCreateProps): string[] => {

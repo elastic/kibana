@@ -22,7 +22,7 @@ import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { isEqlSequenceQuery, isEsqlRule } from '../../../../../common/detection_engine/utils';
+import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { RulePreview } from '../../components/rule_preview';
 import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import type {
@@ -71,7 +71,6 @@ import { useRuleForms, useRuleFormsErrors, useRuleIndexPattern } from '../form';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
 import { SaveWithErrorsModal } from '../../components/save_with_errors_confirmation';
-import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -143,12 +142,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
 
   const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, defineStepData.ruleType);
-
-  const isEqlSeqQuery = isEqlSequenceQuery(defineStepData.queryBar?.query?.query as string);
-  const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(
-    defineStepData.ruleType,
-    isEqlSequenceQuery(defineStepData.queryBar?.query?.query as string)
-  );
 
   const memoizedIndex = useMemo(
     () => (isEsqlRule(defineStepData.ruleType) ? esqlIndex : defineStepData.index),
@@ -286,7 +279,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   form={aboutStepForm}
                   esqlQuery={esqlQueryForAboutStep}
                   key="aboutStep"
-                  eqlSequenceSuppressionEnabled={isAlertSuppressionEnabled && isEqlSeqQuery}
                 />
               )}
               <EuiSpacer />
@@ -375,8 +367,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       actionsStepForm,
       memoizedIndex,
       esqlQueryForAboutStep,
-      isAlertSuppressionEnabled,
-      isEqlSeqQuery,
     ]
   );
 

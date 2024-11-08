@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import isEmpty from 'lodash/isEmpty';
 import type { PatchRuleRequestBody } from './patch_rule_route.gen';
 
 /**
@@ -17,21 +16,7 @@ export const validatePatchRuleRequestBody = (rule: PatchRuleRequestBody): string
     ...validateTimelineId(rule),
     ...validateTimelineTitle(rule),
     ...validateThreshold(rule),
-    ...validateSequenceSuppressionXorBuildingBlockRuleType(rule),
   ];
-};
-
-const validateSequenceSuppressionXorBuildingBlockRuleType = (
-  props: PatchRuleRequestBody
-): string[] => {
-  if (
-    props.type === 'eql' &&
-    !isEmpty(props.building_block_type) &&
-    !isEmpty(props.alert_suppression)
-  ) {
-    return ['rule cannot be an eql rule with building block type and have suppression enabled'];
-  }
-  return [];
 };
 
 const validateId = (rule: PatchRuleRequestBody): string[] => {
