@@ -18,6 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'indexManagement',
     'svlSearchCreateIndexPage',
   ]);
+  const browser = getService('browser');
   const security = getService('security');
   const es = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
@@ -38,11 +39,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esDeleteAllIndices([testIndexName, testAPIIndexName]);
     });
 
+    it('renders the indices tab', async () => {
+      const url = await browser.getCurrentUrl();
+      expect(url).to.contain(`/indices`);
+    });
+
     it('has embedded dev console', async () => {
       await testHasEmbeddedConsole(pageObjects);
     });
 
     describe('create index', function () {
+      beforeEach(async () => {
+        await pageObjects.common.navigateToApp('indexManagement');
+        // Navigate to the indices tab
+        await pageObjects.indexManagement.changeTabs('indicesTab');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
       it('can create an index', async () => {
         await pageObjects.indexManagement.clickCreateIndexButton();
         await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
@@ -56,8 +68,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.indexManagement.expectIndexToExist(testIndexName);
       });
       it('should redirect to index details when index is created via API and on the code view', async () => {
-        await pageObjects.common.navigateToApp('indexManagement');
-        await pageObjects.indexManagement.changeTabs('indicesTab');
         await pageObjects.indexManagement.clickCreateIndexButton();
 
         await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
@@ -68,8 +78,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchCreateIndexPage.expectToBeOnIndexDetailsPage();
       });
       it('should have file upload link', async () => {
-        await pageObjects.common.navigateToApp('indexManagement');
-        await pageObjects.indexManagement.changeTabs('indicesTab');
         await pageObjects.indexManagement.clickCreateIndexButton();
 
         await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
@@ -77,8 +85,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchCreateIndexPage.expectToBeOnMLFileUploadPage();
       });
       it('should support closing create index page', async () => {
-        await pageObjects.common.navigateToApp('indexManagement');
-        await pageObjects.indexManagement.changeTabs('indicesTab');
         await pageObjects.indexManagement.clickCreateIndexButton();
 
         await pageObjects.svlSearchCreateIndexPage.expectCloseCreateIndexButtonExists();
@@ -86,12 +92,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchCreateIndexPage.expectToBeOnIndexListPage();
       });
       it('should have the embedded console', async () => {
-        await pageObjects.common.navigateToApp('indexManagement');
-        await pageObjects.indexManagement.changeTabs('indicesTab');
-        await pageObjects.indexManagement.expectIndexToExist(testIndexName);
         await pageObjects.indexManagement.clickCreateIndexButton();
 
         await testHasEmbeddedConsole(pageObjects);
+      });
+    });
+
+    describe('manage index', function () {
+      beforeEach(async () => {
+        await pageObjects.common.navigateToApp('indexManagement');
+        // Navigate to the indices tab
+        await pageObjects.indexManagement.changeTabs('indicesTab');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.indexManagement.manageIndex(testIndexName);
+        await pageObjects.indexManagement.manageIndexContextMenuExists();
+      });
+      it('can delete index', async () => {
+        await pageObjects.indexManagement.confirmDeleteModalIsVisible();
+        await pageObjects.indexManagement.expectIndexIsDeleted(testIndexName);
       });
     });
   });

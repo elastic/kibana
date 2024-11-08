@@ -17,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
 
   describe('Indices', function () {
+    this.tags(['skipSvlSearch']);
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.svlCommonPage.loginAsAdmin();
@@ -30,14 +31,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/indices`);
     });
-    describe('create index', function () {
-      this.tags(['skipSvlSearch']);
-      it('can create an index', async () => {
-        await pageObjects.indexManagement.clickCreateIndexButton();
-        await pageObjects.indexManagement.setCreateIndexName(testIndexName);
-        await pageObjects.indexManagement.clickCreateIndexSaveButton();
-        await pageObjects.indexManagement.expectIndexToExist(testIndexName);
-      });
+    it('can create an index', async () => {
+      await pageObjects.indexManagement.clickCreateIndexButton();
+      await pageObjects.indexManagement.setCreateIndexName(testIndexName);
+      await pageObjects.indexManagement.clickCreateIndexSaveButton();
+      await pageObjects.indexManagement.expectIndexToExist(testIndexName);
     });
 
     describe('manage index', function () {
@@ -56,7 +54,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         after(async () => {
           await esDeleteAllIndices(testIndexName);
         });
-        this.tags('skipSvlSearch');
         it('navigates to overview', async () => {
           await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
           await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
