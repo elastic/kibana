@@ -25,8 +25,8 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { HostOverview } from '../../../../overview/components/host_overview';
@@ -359,11 +359,13 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
             name={hostName}
             direction="column"
             data-test-subj={HOST_DETAILS_MISCONFIGURATIONS_TEST_ID}
+            telemetrySuffix={'host-details'}
           />
           <VulnerabilitiesInsight
             hostName={hostName}
             direction="column"
             data-test-subj={HOST_DETAILS_VULNERABILITIES_TEST_ID}
+            telemetrySuffix={'host-details'}
           />
         </EuiFlexGrid>
         <EuiSpacer size="l" />
