@@ -34,7 +34,7 @@ export const BULK_UPDATE_BUTTON_TOOLTIP_NO_PERMISSIONS = i18n.translate(
 export const BULK_UPDATE_ALL_RULES_BUTTON_TOOLTIP_CONFLICTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.bulkButtons.allRules.conflicts',
   {
-    defaultMessage: 'All rules have conflicts. Please update them individually.',
+    defaultMessage: 'All rules have conflicts. Update them individually.',
   }
 );
 
