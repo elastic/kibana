@@ -7,10 +7,9 @@
 
 import { EuiButton } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { PhrasesFilter } from '@kbn/es-query';
+import type { PhrasesFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-
 import {
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,

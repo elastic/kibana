@@ -12,8 +12,8 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import deepEqual from 'fast-deep-equal';
 import { i18n } from '@kbn/i18n';
+import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
 import { useAdHocInventoryDataView } from './use_adhoc_inventory_data_view';
-import { useKibanaQuerySettings } from './use_kibana_query_settings';
 import { useUnifiedSearchUrl } from './use_unified_search_url';
 import { useKibana } from './use_kibana';
 
