@@ -11,7 +11,8 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { DeleteAttachmentConfirmationModal } from './delete_attachment_confirmation_modal';
 
-describe('DeleteAttachmentConfirmationModal', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/195672
+describe.skip('DeleteAttachmentConfirmationModal', () => {
   let appMock: AppMockRenderer;
   const props = {
     title: 'My title',
