@@ -22,19 +22,20 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
+// import { generatePath } from 'react-router-dom';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 import { BACK_LABEL } from '../../../../common/i18n_string';
-
+// import { BASE_CONNECTORS_PATH } from '../../constants';
 import { ConnectorIcon } from './connector_icon';
 
 export const ElasticManagedConnectorComingSoon: React.FC = () => {
   const connectorTypes = useConnectorTypes();
 
   const connectorExamples = connectorTypes.filter((connector) =>
-    ['gmail', 'sharepoint_online', 'jira', 'dropbox'].includes(connector.serviceType)
+    ['Gmail', 'Sharepoint Online', 'Jira Cloud', 'Dropbox'].includes(connector.name)
   );
 
   const {
@@ -69,7 +70,7 @@ export const ElasticManagedConnectorComingSoon: React.FC = () => {
               <EuiButtonEmpty
                 data-test-subj="serverlessSearchElasticManagedConnectorEmptyBackButton"
                 iconType="arrowLeft"
-                onClick={() => navigateToUrl(`./`)}
+                onClick={() => navigateToUrl('./')}
               >
                 {BACK_LABEL}
               </EuiButtonEmpty>

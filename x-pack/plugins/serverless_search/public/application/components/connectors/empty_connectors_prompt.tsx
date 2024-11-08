@@ -38,7 +38,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
   const connectorTypes = useConnectorTypes();
 
   const connectorExamples = connectorTypes.filter((connector) =>
-    ['gmail', 'sharepoint_online', 'jira', 'dropbox'].includes(connector.serviceType)
+    ['Gmail', 'Sharepoint Online', 'Jira Cloud', 'Dropbox'].includes(connector.name)
   );
   const { createConnector, isLoading } = useCreateConnector();
   const { data } = useConnectors();
