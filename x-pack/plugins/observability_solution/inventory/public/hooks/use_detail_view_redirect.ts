@@ -43,23 +43,24 @@ export const useDetailViewRedirect = () => {
 
   const getDetailViewRedirectUrl = useCallback(
     (entity: InventoryEntity) => {
-      const entityFields = entityManager.entityClient.getIdentityFieldsValue({
+      const identityFieldsValue = entityManager.entityClient.getIdentityFieldsValue({
         entity: {
           identity_fields: entity.entityIdentityFields,
         },
+        ...entity,
       });
       const identityFields = castArray(entity.entityIdentityFields);
 
       if (isEntityOfType('host', entity) || isEntityOfType('container', entity)) {
         return assetDetailsLocator?.getRedirectUrl({
-          assetId: entityFields[identityFields[0]],
+          assetId: identityFieldsValue[identityFields[0]],
           assetType: entity.entityType,
         });
       }
 
       if (isEntityOfType('service', entity)) {
         return serviceOverviewLocator?.getRedirectUrl({
-          serviceName: entityFields[identityFields[0]],
+          serviceName: identityFieldsValue[identityFields[0]],
           environment: entity.service?.environment,
         });
       }

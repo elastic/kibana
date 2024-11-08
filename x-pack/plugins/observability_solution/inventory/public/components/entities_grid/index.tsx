@@ -135,7 +135,7 @@ export function EntitiesGrid({
             discoverUrl && (
               <EntityActions
                 discoverUrl={discoverUrl}
-                entityIdentifyingValue={entity[ENTITY_DISPLAY_NAME]}
+                entityIdentifyingValue={entity.entityDisplayName}
               />
             )
           );

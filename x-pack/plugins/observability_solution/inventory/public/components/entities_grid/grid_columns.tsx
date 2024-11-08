@@ -65,7 +65,13 @@ const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipCon
   </>
 );
 
-export const getColumns = ({ showAlertsColumn }: { showAlertsColumn: boolean }) => {
+export const getColumns = ({
+  showAlertsColumn,
+  showActions,
+}: {
+  showAlertsColumn: boolean;
+  showActions: boolean;
+}) => {
   return [
     ...(showAlertsColumn
       ? [

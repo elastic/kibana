@@ -13,7 +13,7 @@ import {
 import { useCallback } from 'react';
 import { type PhrasesFilter, buildPhrasesFilter } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
-import type { Entity } from '../../common/entities';
+import type { InventoryEntity } from '../../common/entities';
 import { useKibana } from './use_kibana';
 import { useInventoryParams } from './use_inventory_params';
 import { useInventorySearchBarContext } from '../context/inventory_search_bar_context_provider';
@@ -33,11 +33,11 @@ export const useDiscoverRedirect = () => {
   const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
 
   const getDiscoverEntitiesRedirectUrl = useCallback(
-    (entity?: Entity) => {
+    (entity?: InventoryEntity) => {
       const filters: PhrasesFilter[] = [];
 
       const entityTypeField = (dataView?.getFieldByName(ENTITY_TYPE) ??
-        entity?.[ENTITY_TYPE]) as DataViewField;
+        entity?.entityType) as DataViewField;
 
       if (entityTypes && entityTypeField && dataView) {
         const entityTypeFilter = buildPhrasesFilter(entityTypeField, entityTypes, dataView);
@@ -45,7 +45,12 @@ export const useDiscoverRedirect = () => {
       }
 
       const entityKqlFilter = entity
-        ? entityManager.entityClient.asKqlFilter(unflattenEntity(entity))
+        ? entityManager.entityClient.asKqlFilter({
+            entity: {
+              identity_fields: entity.entityIdentityFields,
+            },
+            ...entity,
+          })
         : '';
 
       const kueryWithEntityDefinitionFilters = [
@@ -76,7 +81,7 @@ export const useDiscoverRedirect = () => {
   );
 
   const getDiscoverRedirectUrl = useCallback(
-    (entity?: Entity) => getDiscoverEntitiesRedirectUrl(entity),
+    (entity?: InventoryEntity) => getDiscoverEntitiesRedirectUrl(entity),
     [getDiscoverEntitiesRedirectUrl]
   );
 
