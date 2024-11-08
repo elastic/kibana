@@ -25852,29 +25852,6 @@ paths:
                               type: number
                             topic:
                               type: string
-                            topics:
-                              items:
-                                additionalProperties: true
-                                type: object
-                                properties:
-                                  topic:
-                                    type: string
-                                  when:
-                                    additionalProperties: true
-                                    type: object
-                                    properties:
-                                      condition:
-                                        type: string
-                                      type:
-                                        enum:
-                                          - equals
-                                          - contains
-                                          - regexp
-                                        type: string
-                                required:
-                                  - topic
-                              minItems: 1
-                              type: array
                             type:
                               enum:
                                 - kafka
@@ -26609,29 +26586,6 @@ paths:
                       type: number
                     topic:
                       type: string
-                    topics:
-                      items:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          topic:
-                            type: string
-                          when:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              condition:
-                                type: string
-                              type:
-                                enum:
-                                  - equals
-                                  - contains
-                                  - regexp
-                                type: string
-                        required:
-                          - topic
-                      minItems: 1
-                      type: array
                     type:
                       enum:
                         - kafka
@@ -27321,29 +27275,6 @@ paths:
                             type: number
                           topic:
                             type: string
-                          topics:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                topic:
-                                  type: string
-                                when:
-                                  additionalProperties: true
-                                  type: object
-                                  properties:
-                                    condition:
-                                      type: string
-                                    type:
-                                      enum:
-                                        - equals
-                                        - contains
-                                        - regexp
-                                      type: string
-                              required:
-                                - topic
-                            minItems: 1
-                            type: array
                           type:
                             enum:
                               - kafka
@@ -28143,29 +28074,6 @@ paths:
                             type: number
                           topic:
                             type: string
-                          topics:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                topic:
-                                  type: string
-                                when:
-                                  additionalProperties: true
-                                  type: object
-                                  properties:
-                                    condition:
-                                      type: string
-                                    type:
-                                      enum:
-                                        - equals
-                                        - contains
-                                        - regexp
-                                      type: string
-                              required:
-                                - topic
-                            minItems: 1
-                            type: array
                           type:
                             enum:
                               - kafka
@@ -28877,29 +28785,6 @@ paths:
                       type: number
                     topic:
                       type: string
-                    topics:
-                      items:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          topic:
-                            type: string
-                          when:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              condition:
-                                type: string
-                              type:
-                                enum:
-                                  - equals
-                                  - contains
-                                  - regexp
-                                type: string
-                        required:
-                          - topic
-                      minItems: 1
-                      type: array
                     type:
                       enum:
                         - kafka
@@ -29586,29 +29471,6 @@ paths:
                             type: number
                           topic:
                             type: string
-                          topics:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                topic:
-                                  type: string
-                                when:
-                                  additionalProperties: true
-                                  type: object
-                                  properties:
-                                    condition:
-                                      type: string
-                                    type:
-                                      enum:
-                                        - equals
-                                        - contains
-                                        - regexp
-                                      type: string
-                              required:
-                                - topic
-                            minItems: 1
-                            type: array
                           type:
                             enum:
                               - kafka
@@ -37229,7 +37091,7 @@ paths:
           description: >
             Indicates a successful call. NOTE: This HTTP response code indicates
             that the bulk operation succeeded.  Errors pertaining to individual
-            objects will be returned in the response body. 
+            objects will be returned in the response body.
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -37263,7 +37125,7 @@ paths:
           description: >
             Indicates a successful call. NOTE: This HTTP response code indicates
             that the bulk operation succeeded. Errors pertaining to individual
-            objects will be returned in the response body. 
+            objects will be returned in the response body.
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -58900,7 +58762,7 @@ tags:
     name: ml
   - name: roles
   - description: >
-      Export sets of saved objects that you want to import into {kib}, resolve
+      Export sets of saved objects that you want to import into Kibana, resolve
       import errors, and rotate an encryption key for encrypted saved objects
       with the saved objects APIs.
 

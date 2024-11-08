@@ -15,7 +15,7 @@ import {
   NetworkTopNFlowStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
-import { BsearchService } from '@kbn/ftr-common-functional-services';
+import { SearchService } from '@kbn/ftr-common-functional-services';
 
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
@@ -25,13 +25,14 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   const utils = getService('securitySolutionUtils');
 
-  describe('Network Top N Flow', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/199363
+  describe.skip('Network Top N Flow', () => {
     let supertest: TestAgent;
-    let bsearch: BsearchService;
+    let search: SearchService;
     describe('With filebeat', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
-        bsearch = await utils.createBsearch();
+        search = await utils.createSearch();
         await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
       });
       after(
@@ -42,7 +43,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       const TO = '2019-02-12T01:57:24.870Z';
 
       it('should get Source NetworkTopNFlow data with bytes_in descending sort', async () => {
-        const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
+        const networkTopNFlow = await search.send<NetworkTopNFlowStrategyResponse>({
           supertest,
           options: {
             defaultIndex: ['filebeat-*'],
@@ -77,7 +78,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       });
 
       it('should get Source NetworkTopNFlow data with bytes_in ascending sort ', async () => {
-        const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
+        const networkTopNFlow = await search.send<NetworkTopNFlowStrategyResponse>({
           supertest,
           options: {
             defaultIndex: ['filebeat-*'],
@@ -114,7 +115,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       });
 
       it('should get Destination NetworkTopNFlow data', async () => {
-        const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
+        const networkTopNFlow = await search.send<NetworkTopNFlowStrategyResponse>({
           supertest,
           options: {
             defaultIndex: ['filebeat-*'],
@@ -146,7 +147,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       });
 
       it('should paginate NetworkTopNFlow query', async () => {
-        const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
+        const networkTopNFlow = await search.send<NetworkTopNFlowStrategyResponse>({
           supertest,
           options: {
             defaultIndex: ['filebeat-*'],
