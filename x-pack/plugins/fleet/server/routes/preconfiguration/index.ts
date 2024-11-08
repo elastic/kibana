@@ -25,7 +25,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: false,
       },
 
@@ -41,7 +41,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostResetOnePreconfiguredAgentPoliciesSchema },
       },
       resetOnePreconfigurationHandler
