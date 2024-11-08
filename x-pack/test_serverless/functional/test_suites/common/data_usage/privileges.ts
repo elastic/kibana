@@ -32,7 +32,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('privileges', function () {
-    // - plugin needs to be enabled in serverless
+    // plugin needs to be enabled in serverless
     this.tags(['skipMKI']);
 
     it('renders for the admin role', async () => {
@@ -46,45 +46,50 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('does not render for default (editor/developer) role', async () => {
+      // unable to target specifically the editor or developer role, so only test in solutions that have the editor role (security, observability)
+      this.tags(['skipSvlEcs']);
       await pageObjects.svlCommonPage.loginWithPrivilegedRole();
-      await navigateAndVerify(false);
-    });
-
-    it('renders with a custom role that has the monitor cluster privilege', async () => {
-      await samlAuth.setCustomRole({
-        elasticsearch: {
-          cluster: ['monitor'],
-          indices: [{ names: ['*'], privileges: ['all'] }],
-        },
-        kibana: [
-          {
-            base: ['all'],
-            feature: {},
-            spaces: ['*'],
-          },
-        ],
-      });
-      await pageObjects.svlCommonPage.loginWithCustomRole();
       await navigateAndVerify(true);
-      await samlAuth.deleteCustomRole();
     });
-
-    it('does not render with a custom role that does not have the monitor cluster privilege', async () => {
-      await samlAuth.setCustomRole({
-        elasticsearch: {
-          indices: [{ names: ['*'], privileges: ['all'] }],
-        },
-        kibana: [
-          {
-            base: ['all'],
-            feature: {},
-            spaces: ['*'],
+    describe('With custom role', function () {
+      // custom roles aren't available in observability yet
+      this.tags(['skipSvlOblt']);
+      it('renders with a custom role that has the monitor cluster privilege', async () => {
+        await samlAuth.setCustomRole({
+          elasticsearch: {
+            cluster: ['monitor'],
+            indices: [{ names: ['*'], privileges: ['all'] }],
           },
-        ],
+          kibana: [
+            {
+              base: ['all'],
+              feature: {},
+              spaces: ['*'],
+            },
+          ],
+        });
+        await pageObjects.svlCommonPage.loginWithCustomRole();
+        await navigateAndVerify(true);
+        await samlAuth.deleteCustomRole();
       });
-      await pageObjects.svlCommonPage.loginWithCustomRole();
-      await navigateAndVerify(false);
-      await samlAuth.deleteCustomRole();
+
+      it('does not render with a custom role that does not have the monitor cluster privilege', async () => {
+        await samlAuth.setCustomRole({
+          elasticsearch: {
+            indices: [{ names: ['*'], privileges: ['all'] }],
+          },
+          kibana: [
+            {
+              base: ['all'],
+              feature: {},
+              spaces: ['*'],
+            },
+          ],
+        });
+        await pageObjects.svlCommonPage.loginWithCustomRole();
+        await navigateAndVerify(false);
+        await samlAuth.deleteCustomRole();
+      });
     });
   });
 };
