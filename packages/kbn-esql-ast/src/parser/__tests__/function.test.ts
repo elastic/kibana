@@ -329,7 +329,9 @@ describe('location', () => {
   const getFunctionTexts = (src: string) => {
     const query = EsqlQuery.fromSrc(src);
     const functions = Walker.matchAll(query.ast, { type: 'function' });
-    const texts: string[] = functions.map((fn) => src.slice(fn.location.min, fn.location.max + 1));
+    const texts: string[] = functions.map((fn) => {
+      return [...src].slice(fn.location.min, fn.location.max + 1).join('');
+    });
 
     return texts;
   };
@@ -356,25 +358,35 @@ describe('location', () => {
   });
 
   it('with the simplest comment after function name identifier', () => {
-    const texts1 = getFunctionTexts('FROM index | STATS agg/* */()');
-    expect(texts1).toEqual(['agg/* */()']);
+    const texts1 = getFunctionTexts('FROM index | STATS agg/* */(1)');
+    expect(texts1).toEqual(['agg/* */(1)']);
 
-    const texts2 = getFunctionTexts('FROM index | STATS agg/* A */()');
-    expect(texts2).toEqual(['agg/* A */()']);
+    const texts2 = getFunctionTexts('FROM index | STATS agg/* A */(a)');
+    expect(texts2).toEqual(['agg/* A */(a)']);
 
-    const texts3 = getFunctionTexts('FROM index | STATS agg /* A */ ()');
-    expect(texts3).toEqual(['agg /* A */ ()']);
+    const texts3 = getFunctionTexts('FROM index | STATS agg /* A */ (*)');
+    expect(texts3).toEqual(['agg /* A */ (*)']);
   });
 
   it('with the simplest emoji comment after function name identifier', () => {
-    const texts = getFunctionTexts('FROM index | STATS agg/* 😎 */()');
-    expect(texts).toEqual(['agg/* 😎 */()']);
+    const texts = getFunctionTexts('FROM index | STATS agg/* 😎 */(*)');
+    expect(texts).toEqual(['agg/* 😎 */(*)']);
+  });
+
+  it('with the simplest emoji comment after function name identifier, followed by another arg', () => {
+    const texts = getFunctionTexts('FROM index | STATS agg/* 😎 */(*), abc');
+    expect(texts).toEqual(['agg/* 😎 */(*)']);
+  });
+
+  it('simple emoji comment twice', () => {
+    const texts = getFunctionTexts('FROM index | STATS agg/* 😎 */(*), max/* 😎 */(*)');
+    expect(texts).toEqual(['agg/* 😎 */(*)', 'max/* 😎 */(*)']);
   });
 
   it('with comment and emoji after function name identifier', () => {
-    const texts = getFunctionTexts('FROM index | STATS agg /* haha 😅 */ ()');
+    const texts = getFunctionTexts('FROM index | STATS agg /* haha 😅 */ (*)');
 
-    expect(texts).toEqual(['agg /* haha 😅 */ ()']);
+    expect(texts).toEqual(['agg /* haha 😅 */ (*)']);
   });
 
   it('with comment inside argument list', () => {
