@@ -80,8 +80,8 @@ export type EnterpriseSearchPublicStart = ReturnType<EnterpriseSearchPlugin['sta
 
 interface PluginsSetup {
   cloud?: CloudSetup;
-  licensing: LicensingPluginStart;
   home?: HomePublicPluginSetup;
+  licensing: LicensingPluginStart;
   security?: SecurityPluginSetup;
   share?: SharePluginSetup;
 }
@@ -98,8 +98,8 @@ export interface PluginsStart {
   ml?: MlPluginStart;
   navigation: NavigationPublicPluginStart;
   searchConnectors?: SearchConnectorsPluginStart;
-  searchPlayground?: SearchPlaygroundPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   share?: SharePluginStart;
 }

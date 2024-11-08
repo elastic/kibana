@@ -2,8 +2,8 @@
   "type": "plugin",
   "id": "@kbn/search-inference-endpoints",
   "owner": "@elastic/search-kibana",
-  "group": "platform",
-  "visibility": "shared",
+  "group": "search",
+  "visibility": "private",
   "plugin": {
     "id": "searchInferenceEndpoints",
     "server": true,

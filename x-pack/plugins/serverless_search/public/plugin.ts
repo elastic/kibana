@@ -148,7 +148,7 @@ export class ServerlessSearchPlugin
     const { serverless, management, indexManagement, security } = services;
     serverless.setProjectHome(services.searchIndices.startRoute);
 
-    const navigationTree$ = of(navigationTree());
+    const navigationTree$ = of(navigationTree(core.application));
     serverless.initNavigation('es', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
     const extendCardNavDefinitions = serverless.getNavigationCards(

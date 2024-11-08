@@ -115,6 +115,14 @@ export interface ApplicationStart {
   navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
 
   /**
+   * Checks whether a given application is registered.
+   *
+   * @param appId - The identifier of the app to check
+   * @returns true if the given appId is registered in the system, false otherwise.
+   */
+  isAppRegistered(appId: string): boolean;
+
+  /**
    * Returns the absolute path (or URL) to a given app, including the global base path.
    *
    * By default, it returns the absolute path of the application (e.g `/basePath/app/my-app`).

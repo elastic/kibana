@@ -2,9 +2,8 @@
   "type": "plugin",
   "id": "@kbn/enterprise-search-plugin",
   "owner": "@elastic/search-kibana",
-  // Could be categorised as Search in the future, but it currently needs to run in Observability too
-  "group": "platform",
-  "visibility": "shared",
+  "group": "search",
+  "visibility": "private",
   "description": "Adds dashboards for discovering and managing Enterprise Search products.",
   "plugin": {
     "id": "enterpriseSearch",

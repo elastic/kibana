@@ -21,7 +21,6 @@
     "optionalPlugins": [
       "home",
       "serverless",
-      "enterpriseSearch"
     ],
     "requiredBundles": [
       "kibanaReact",
