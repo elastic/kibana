@@ -10,7 +10,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiPageTemplate,
   EuiSpacer,
@@ -20,15 +19,16 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 
+import { GithubLink } from '@kbn/search-api-panels';
 import { docLinks } from '../../../common/doc_links';
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
-import { PLUGIN_ID } from '../../../common';
 import { useConnectors } from '../hooks/api/use_connectors';
 import { useCreateConnector } from '../hooks/api/use_create_connector';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { EmptyConnectorsPrompt } from './connectors/empty_connectors_prompt';
 import { ConnectorsTable } from './connectors/connectors_table';
 import { ConnectorPrivilegesCallout } from './connectors/connector_config/connector_privileges_callout';
+import { useAssetBasePath } from '../hooks/use_asset_base_path';
 
 import { BASE_CONNECTORS_PATH, CONNECTORS, ELASTIC_MANAGED_CONNECTOR_PATH } from '../constants';
 
@@ -36,7 +36,7 @@ const CALLOUT_KEY = 'search.connectors.ElasticManaged.ComingSoon.feedbackCallout
 
 export const ConnectorsOverview = () => {
   const { data, isLoading: connectorsLoading } = useConnectors();
-  const { http, console: consolePlugin } = useKibanaServices();
+  const { console: consolePlugin } = useKibanaServices();
   const { createConnector, isLoading } = useCreateConnector();
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -55,6 +55,7 @@ export const ConnectorsOverview = () => {
     setShowCallOut(false);
     sessionStorage.setItem(CALLOUT_KEY, 'hidden');
   };
+  const assetBasePath = useAssetBasePath();
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchConnectorsPage">
@@ -69,32 +70,14 @@ export const ConnectorsOverview = () => {
             ? [
                 <EuiFlexGroup direction="row" alignItems="center" justifyContent="center">
                   <EuiFlexItem>
-                    <EuiFlexGroup
-                      alignItems="center"
-                      gutterSize="xs"
-                      justifyContent="flexEnd"
-                      direction="row"
-                    >
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon
-                          size="s"
-                          type={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/github.svg`)}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="s">
-                          <EuiLink
-                            data-test-subj="serverlessSearchConnectorsOverviewElasticConnectorsLink"
-                            target="_blank"
-                            href={CONNECTORS.github_repo}
-                          >
-                            {i18n.translate('xpack.serverlessSearch.connectorsPythonLink', {
-                              defaultMessage: 'elastic/connectors',
-                            })}
-                          </EuiLink>
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <GithubLink
+                      href={CONNECTORS.github_repo}
+                      label={i18n.translate('xpack.serverlessSearch.connectorsPythonLink', {
+                        defaultMessage: 'elastic/connectors',
+                      })}
+                      assetBasePath={assetBasePath}
+                      data-test-subj="serverlessSearchConnectorsOverviewElasticConnectorsLink"
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiButton
