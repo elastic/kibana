@@ -79,7 +79,7 @@ export async function migratePluginsToPackages(legacyManifests: RepoPath[]) {
       .flatMap((line) => {
         const trim = line.trim();
         // kibanamachine is an assignment override on backport branches to avoid review requests
-        if (!trim || trim.startsWith('#') || trim.includes('kibanamachine')) {
+        if (!trim || trim.startsWith('#') || trim.includes('@kibanamachine')) {
           return [];
         }
 
