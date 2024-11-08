@@ -100,7 +100,7 @@ export function getServiceNodes(
         !allNodes.some((node) => node.id === to[SERVICE_NAME])
       );
     })
-    .map(({ to }) => ({ ...to }));
+    .map(({ to }) => ({ ...to, id: getConnectionNodeId(to) }));
   // List of nodes that are services
   const serviceNodes = [...allNodes, ...connectionFromDiscoveredServices].filter(
     (node) => SERVICE_NAME in node
@@ -229,7 +229,7 @@ export function transformServiceMapResponses({
   const dedupedNodes: typeof nodes = [];
 
   nodes.forEach((node) => {
-    if (!dedupedNodes.find((dedupedNode) => node['service.name'] === dedupedNode['service.name'])) {
+    if (!dedupedNodes.find((dedupedNode) => node.id === dedupedNode.id)) {
       dedupedNodes.push(node);
     }
   });
