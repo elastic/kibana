@@ -13,16 +13,27 @@ import {
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   AppDeepLinkLocations,
+  AppStatus,
+  ApplicationStart,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
-import { BehaviorSubject, combineLatest, from } from 'rxjs';
-import { map } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  from,
+  map,
+  switchMap,
+  of,
+  distinctUntilChanged,
+  firstValueFrom,
+} from 'rxjs';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
+import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability/constants';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -106,79 +117,78 @@ export class Plugin implements InfraClientPluginClass {
       messageFields: this.config.sources?.default?.fields?.message,
     });
 
-    const startDep$AndHostViewFlag$ = combineLatest([
+    const startDep$AndAccessibleFlag$ = combineLatest([
       from(core.getStartServices()),
       core.settings.client.get$<boolean>(enableInfrastructureHostsView),
-    ]);
+    ]).pipe(
+      switchMap(([[{ application }], isInfrastructureHostsViewEnabled]) =>
+        combineLatest([
+          of(application),
+          of(isInfrastructureHostsViewEnabled),
+          getLogsExplorerAccessible$(application),
+        ])
+      )
+    );
 
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
-      startDep$AndHostViewFlag$.pipe(
-        map(
-          ([
-            [
-              {
-                application: { capabilities },
-              },
-            ],
-            isInfrastructureHostsViewEnabled,
-          ]) => {
-            const { infrastructure, logs, discover, fleet } = capabilities;
-            return [
-              ...(logs.show
-                ? [
-                    {
-                      label: 'Logs',
-                      sortKey: 200,
-                      entries: [
-                        ...(discover?.show && fleet?.read
-                          ? [
-                              {
-                                label: 'Explorer',
-                                app: 'observability-logs-explorer',
-                                path: '/',
-                                isBetaFeature: true,
-                              },
-                            ]
-                          : []),
-                        ...(this.config.featureFlags.logsUIEnabled
-                          ? [
-                              { label: 'Stream', app: 'logs', path: '/stream' },
-                              { label: 'Anomalies', app: 'logs', path: '/anomalies' },
-                              { label: 'Categories', app: 'logs', path: '/log-categories' },
-                            ]
-                          : []),
-                      ],
-                    },
-                  ]
-                : []),
-              ...(infrastructure.show
-                ? [
-                    {
-                      label: 'Infrastructure',
-                      sortKey: 300,
-                      entries: [
-                        { label: 'Inventory', app: 'metrics', path: '/inventory' },
-                        ...(this.config.featureFlags.metricsExplorerEnabled
-                          ? [{ label: 'Metrics Explorer', app: 'metrics', path: '/explorer' }]
-                          : []),
-                        ...(isInfrastructureHostsViewEnabled
-                          ? [
-                              {
-                                label: 'Hosts',
-                                isBetaFeature: true,
-                                app: 'metrics',
-                                path: '/hosts',
-                              },
-                            ]
-                          : []),
-                      ],
-                    },
-                  ]
-                : []),
-            ];
-          }
-        )
+      startDep$AndAccessibleFlag$.pipe(
+        map(([application, isInfrastructureHostsViewEnabled, isLogsExplorerAccessible]) => {
+          const { infrastructure, logs } = application.capabilities;
+          return [
+            ...(logs.show
+              ? [
+                  {
+                    label: 'Logs',
+                    sortKey: 200,
+                    entries: [
+                      ...(isLogsExplorerAccessible
+                        ? [
+                            {
+                              label: 'Explorer',
+                              app: 'observability-logs-explorer',
+                              path: '/',
+                              isBetaFeature: true,
+                            },
+                          ]
+                        : []),
+                      ...(this.config.featureFlags.logsUIEnabled
+                        ? [
+                            { label: 'Stream', app: 'logs', path: '/stream' },
+                            { label: 'Anomalies', app: 'logs', path: '/anomalies' },
+                            { label: 'Categories', app: 'logs', path: '/log-categories' },
+                          ]
+                        : []),
+                    ],
+                  },
+                ]
+              : []),
+            ...(infrastructure.show
+              ? [
+                  {
+                    label: 'Infrastructure',
+                    sortKey: 300,
+                    entries: [
+                      { label: 'Inventory', app: 'metrics', path: '/inventory' },
+                      ...(this.config.featureFlags.metricsExplorerEnabled
+                        ? [{ label: 'Metrics Explorer', app: 'metrics', path: '/explorer' }]
+                        : []),
+                      ...(isInfrastructureHostsViewEnabled
+                        ? [
+                            {
+                              label: 'Hosts',
+                              isBetaFeature: true,
+                              app: 'metrics',
+                              path: '/hosts',
+                            },
+                          ]
+                        : []),
+                    ],
+                  },
+                ]
+              : []),
+          ];
+        })
       )
     );
 
@@ -251,8 +261,12 @@ export class Plugin implements InfraClientPluginClass {
           // mount callback should not use setup dependencies, get start dependencies instead
           const [coreStart, plugins, pluginStart] = await core.getStartServices();
 
+          const isLogsExplorerAccessible = await firstValueFrom(
+            getLogsExplorerAccessible$(coreStart.application)
+          );
+
           const { renderApp } = await import('./apps/logs_app');
-          return renderApp(coreStart, plugins, pluginStart, params);
+          return renderApp(coreStart, plugins, pluginStart, isLogsExplorerAccessible, params);
         },
       });
     }
@@ -366,9 +380,10 @@ export class Plugin implements InfraClientPluginClass {
       },
     });
 
-    startDep$AndHostViewFlag$.subscribe(
-      ([_startServices, isInfrastructureHostsViewEnabled]: [
-        [CoreStart, InfraClientStartDeps, InfraClientStartExports],
+    startDep$AndAccessibleFlag$.subscribe(
+      ([_startServices, isInfrastructureHostsViewEnabled, _isLogsExplorerAccessible]: [
+        ApplicationStart,
+        boolean,
         boolean
       ]) => {
         this.appUpdater$.next(() => ({
@@ -450,3 +465,15 @@ export class Plugin implements InfraClientPluginClass {
 
   stop() {}
 }
+
+const getLogsExplorerAccessible$ = (application: CoreStart['application']) => {
+  const { applications$ } = application;
+  return applications$.pipe(
+    map(
+      (apps) =>
+        (apps.get(OBSERVABILITY_LOGS_EXPLORER_APP_ID)?.status ?? AppStatus.inaccessible) ===
+        AppStatus.accessible
+    ),
+    distinctUntilChanged()
+  );
+};

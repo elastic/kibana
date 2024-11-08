@@ -7,8 +7,10 @@ steps:
     depends_on:
       - build
       - quick_checks
+      - checks
       - linting
       - linting_with_types
+      - check_types
     timeout_in_minutes: 120
     retry:
       automatic:

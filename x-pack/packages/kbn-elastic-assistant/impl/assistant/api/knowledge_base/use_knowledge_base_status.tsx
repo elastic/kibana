@@ -20,6 +20,7 @@ export interface UseKnowledgeBaseStatusParams {
   http: HttpSetup;
   resource?: string;
   toasts?: IToasts;
+  enabled: boolean;
 }
 
 /**
@@ -36,6 +37,7 @@ export const useKnowledgeBaseStatus = ({
   http,
   resource,
   toasts,
+  enabled,
 }: UseKnowledgeBaseStatusParams): UseQueryResult<ReadKnowledgeBaseResponse, IHttpFetchError> => {
   return useQuery(
     KNOWLEDGE_BASE_STATUS_QUERY_KEY,
@@ -43,6 +45,7 @@ export const useKnowledgeBaseStatus = ({
       return getKnowledgeBaseStatus({ http, resource, signal });
     },
     {
+      enabled,
       retry: false,
       keepPreviousData: true,
       // Deprecated, hoist to `queryCache` w/in `QueryClient. See: https://stackoverflow.com/a/76961109
