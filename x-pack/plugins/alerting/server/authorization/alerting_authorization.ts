@@ -133,6 +133,12 @@ export class AlertingAuthorization {
     try {
       maybeSpace = await getSpace(request);
     } catch (error) {
+      /**
+       * Failing to fetch the space with 403 or 404 means the user is likely not privileged in the active space at all
+       * which means that `allRegisteredConsumers` and `ruleTypesConsumersMap` should be empty. By initializing the alerting authorization
+       * with empty data structures we ensure that the user will not have access to any rule types in the active space.
+       * All other errors are treated as server errors and they are surfaced to the upper level.
+       */
       if (Boom.isBoom(error) && [403, 404].includes(error.output.statusCode)) {
         return new AlertingAuthorization({
           request,
