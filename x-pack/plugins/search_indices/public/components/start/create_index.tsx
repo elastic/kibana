@@ -71,6 +71,7 @@ export const CreateIndexUIView = ({
       onFileUpload={onFileUpload}
       onIndexNameChange={onIndexNameChange}
       showAPIKeyCreateLabel={userPrivileges?.privileges.canCreateApiKeys ?? false}
+      userPrivileges={userPrivileges}
     />
   );
 };
