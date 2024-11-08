@@ -16,7 +16,7 @@ export const ControlGroupStrings = {
     }),
   getCancelTitle: () =>
     i18n.translate('controls.controlGroup.manageControl.cancelTitle', {
-      defaultMessage: 'Close',
+      defaultMessage: 'Cancel',
     }),
   management: {
     getApplyButtonTitle: (hasUnappliedSelections: boolean) =>

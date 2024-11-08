@@ -282,7 +282,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<
             <EuiButtonEmpty onClick={close} data-test-subj="dashboardPanelSelectionCloseBtn">
               <FormattedMessage
                 id="dashboard.solutionToolbar.addPanelFlyout.cancelButtonText"
-                defaultMessage="Close"
+                defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
