@@ -45,12 +45,16 @@ const entityLastSeenLabel = i18n.translate(
     defaultMessage: 'Last seen',
   }
 );
-const entityLastSeenToolip = i18n.translate(
+const entityLastSeenTooltip = i18n.translate(
   'xpack.inventory.entitiesGrid.euiDataGrid.lastSeenTooltip',
   {
     defaultMessage: 'Timestamp of last received data for entity (entity.lastSeenTimestamp)',
   }
 );
+
+const entityActionsLabel = i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.actionsLabel', {
+  defaultMessage: 'Actions',
+});
 
 const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipContent: string }) => (
   <>
@@ -68,8 +72,10 @@ const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipCon
 
 export const getColumns = ({
   showAlertsColumn,
+  showActions,
 }: {
   showAlertsColumn: boolean;
+  showActions: boolean;
 }): EuiDataGridColumn[] => {
   return [
     ...(showAlertsColumn
@@ -103,11 +109,24 @@ export const getColumns = ({
       // keep it for accessibility purposes
       displayAsText: entityLastSeenLabel,
       display: (
-        <CustomHeaderCell title={entityLastSeenLabel} tooltipContent={entityLastSeenToolip} />
+        <CustomHeaderCell title={entityLastSeenLabel} tooltipContent={entityLastSeenTooltip} />
       ),
       defaultSortDirection: 'desc',
       isSortable: true,
       schema: 'datetime',
     },
+    ...(showActions
+      ? [
+          {
+            id: 'actions',
+            // keep it for accessibility purposes
+            displayAsText: entityActionsLabel,
+            display: (
+              <CustomHeaderCell title={entityActionsLabel} tooltipContent={entityActionsLabel} />
+            ),
+            initialWidth: 100,
+          },
+        ]
+      : []),
   ];
 };
