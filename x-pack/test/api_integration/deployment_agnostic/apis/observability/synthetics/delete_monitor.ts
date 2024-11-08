@@ -12,8 +12,6 @@ import {
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
@@ -24,8 +22,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     this.tags('skipCloud');
 
     const supertest = getService('supertestWithoutAuth');
-    const supertestWithAuth = getService('supertest');
-    const security = getService('security');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
 
@@ -52,7 +48,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     const deleteMonitor = async (monitorId?: string | string[], statusCode = 200) => {
-      return monitorTestService.deleteMonitor(monitorId, statusCode, 'default', editorUser);
+      return monitorTestService.deleteMonitor(editorUser, monitorId, statusCode, 'default');
     };
 
     before(async () => {
@@ -92,10 +88,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const { id: monitorId } = await saveMonitor(httpMonitorJson as MonitorFields);
 
       const deleteResponse = await monitorTestService.deleteMonitorByIdParam(
+        editorUser,
         monitorId,
         200,
-        'default',
-        editorUser
+        'default'
       );
 
       expect(deleteResponse.body).eql([{ id: monitorId, deleted: true }]);
@@ -109,7 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('throws error if both body and param are missing', async () => {
-      const deleteResponse = await supertest
+      await supertest
         .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .send()
         .set(editorUser.apiKeyHeader)

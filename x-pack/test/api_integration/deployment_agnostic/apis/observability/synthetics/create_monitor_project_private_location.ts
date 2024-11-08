@@ -92,7 +92,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await Promise.all([
           testMonitors.map((monitor) => {
             return monitorTestService.deleteMonitorByJourney(
-              projectMonitors,
               monitor.id,
               project,
               'default',

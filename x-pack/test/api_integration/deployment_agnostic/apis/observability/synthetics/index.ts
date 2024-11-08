@@ -23,5 +23,10 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./get_filters'));
     loadTestFile(require.resolve('./get_monitor_project'));
     loadTestFile(require.resolve('./get_monitor'));
+    loadTestFile(require.resolve('./synthetics_enablement'));
+    loadTestFile(require.resolve('./inspect_monitor'));
+    loadTestFile(require.resolve('./suggestions.ts'));
+    loadTestFile(require.resolve('./sync_global_params'));
+    loadTestFile(require.resolve('./test_now_monitor'));
   });
 }

@@ -18,12 +18,6 @@ import {
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
-import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
-import { format as formatUrl } from 'url';
-
-import supertest from 'supertest';
-import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import {
   removeMonitorEmptyValues,
   transformPublicKeys,
@@ -100,7 +94,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       statusCode = 200,
       spaceId?: string
     ) => {
-      return monitorTestService.deleteMonitor(monitorId, statusCode, spaceId, editorRoleAuthc);
+      return monitorTestService.deleteMonitor(editorRoleAuthc, monitorId, statusCode, spaceId);
     };
 
     before(async () => {

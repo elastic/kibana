@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
@@ -32,7 +32,7 @@ export class SyntheticsMonitorTestService {
     this.supertestWithoutAuth = getService('supertestWithoutAuth');
   }
 
-  generateProjectAPIKey = async (accessToPublicLocations = true, user) => {
+  generateProjectAPIKey = async (accessToPublicLocations = true, user: RoleCredentials) => {
     const res = await this.supertest
       .get(
         SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY +
@@ -40,7 +40,7 @@ export class SyntheticsMonitorTestService {
           accessToPublicLocations
       )
       .set(user.apiKeyHeader)
-      .set(samlAuth.getInternalRequestHeader())
+      .set(this.samlAuth.getInternalRequestHeader())
       .expect(200);
     const result = res.body as ProjectAPIKeyResponse;
     expect(result).to.have.property('apiKey');
@@ -61,8 +61,8 @@ export class SyntheticsMonitorTestService {
       statusCode?: number;
       space?: string;
       internal?: boolean;
-      user;
-    } = {}
+      user: RoleCredentials;
+    }
   ) {
     let url = SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId);
     if (space) {
@@ -108,7 +108,7 @@ export class SyntheticsMonitorTestService {
     return apiResponse.body;
   }
 
-  async addMonitor(monitor: any, user) {
+  async addMonitor(monitor: any, user: RoleCredentials) {
     const res = await this.supertest
       .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
       .set(user.apiKeyHeader)
@@ -119,7 +119,7 @@ export class SyntheticsMonitorTestService {
     return res.body as EncryptedSyntheticsSavedMonitor;
   }
 
-  async inspectMonitor(monitor: any, hideParams: boolean = true, user) {
+  async inspectMonitor(user: RoleCredentials, monitor: any, hideParams: boolean = true) {
     const res = await this.supertest
       .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT)
       .set(user.apiKeyHeader)
@@ -139,7 +139,7 @@ export class SyntheticsMonitorTestService {
     return res.body as { result: MonitorInspectResponse; decodedCode: string };
   }
 
-  async addProjectMonitors(project: string, monitors: any, user) {
+  async addProjectMonitors(project: string, monitors: any, user: RoleCredentials) {
     if (this.apiKey) {
       return this.supertestWithoutAuth
         .put(
@@ -160,11 +160,10 @@ export class SyntheticsMonitorTestService {
   }
 
   async deleteMonitorByJourney(
-    projectMonitors: any,
     journeyId: string,
     projectId: string,
     space: string = 'default',
-    user
+    user: RoleCredentials
   ) {
     try {
       const response = await this.supertest
@@ -178,11 +177,11 @@ export class SyntheticsMonitorTestService {
 
       const { monitors } = response.body;
       if (monitors[0]?.id) {
-        const response2 = await this.supertest
+        await this.supertest
           .delete(`/s/${space}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .set(user.apiKeyHeader)
           .set(this.samlAuth.getInternalRequestHeader())
-          .send({ ids: [monitors[0].id] })
+          .send({ ids: monitors.map((monitor: { id: string }) => monitor.id) })
           .expect(200);
       }
     } catch (e) {
@@ -192,36 +191,22 @@ export class SyntheticsMonitorTestService {
   }
 
   async addsNewSpace() {
-    const username = 'admin';
-    const password = `${username}-password`;
-    const roleName = 'uptime-role';
     const SPACE_ID = `test-space-${uuidv4()}`;
     const SPACE_NAME = `test-space-name ${uuidv4()}`;
 
-    const security = this.getService('security');
     const kibanaServer = this.getService('kibanaServer');
 
     await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-    await security.role.create(roleName, {
-      kibana: [
-        {
-          feature: {
-            uptime: ['all'],
-          },
-          spaces: ['*'],
-        },
-      ],
-    });
-    await security.user.create(username, {
-      password,
-      roles: [roleName],
-      full_name: 'a kibana user',
-    });
 
-    return { username, password, SPACE_ID };
+    return { SPACE_ID };
   }
 
-  async deleteMonitor(monitorId?: string | string[], statusCode = 200, spaceId?: string, user) {
+  async deleteMonitor(
+    user: RoleCredentials,
+    monitorId?: string | string[],
+    statusCode = 200,
+    spaceId?: string
+  ) {
     const deleteResponse = await this.supertest
       .delete(
         spaceId
@@ -236,7 +221,12 @@ export class SyntheticsMonitorTestService {
     return deleteResponse;
   }
 
-  async deleteMonitorByIdParam(monitorId?: string, statusCode = 200, spaceId?: string, user) {
+  async deleteMonitorByIdParam(
+    user: RoleCredentials,
+    monitorId?: string,
+    statusCode = 200,
+    spaceId?: string
+  ) {
     const deleteResponse = await this.supertest
       .delete(
         spaceId

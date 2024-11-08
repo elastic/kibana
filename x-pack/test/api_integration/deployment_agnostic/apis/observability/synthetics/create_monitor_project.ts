@@ -10,10 +10,7 @@ import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
-import {
-  ELASTIC_MANAGED_LOCATIONS_DISABLED,
-  REQUEST_TOO_LARGE,
-} from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
+import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   PROFILE_VALUES_ENUM,
@@ -36,7 +33,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const supertest = getService('supertestWithoutAuth');
     const supertestWithAuth = getService('supertest');
-    const security = getService('security');
     const kibanaServer = getService('kibanaServer');
     const monitorTestService = new SyntheticsMonitorTestService(getService);
     const testPrivateLocations = new PrivateLocationTestService(getService);
@@ -76,7 +72,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const { monitors } = response.body;
         if (monitors[0]?.config_id) {
-          await monitorTestService.deleteMonitor(monitors[0].config_id, 200, space, editorUser);
+          await monitorTestService.deleteMonitor(editorUser, monitors[0].config_id, 200, space);
         }
       } catch (e) {
         // eslint-disable-next-line no-console

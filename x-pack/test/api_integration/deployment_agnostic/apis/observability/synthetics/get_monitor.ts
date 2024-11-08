@@ -7,7 +7,8 @@
 
 import { omit } from 'lodash';
 import moment from 'moment';
-import { RouteCredentials } from '@kbn/ftr-common-functional-services';
+import { v4 as uuidv4 } from 'uuid';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
@@ -16,7 +17,6 @@ import {
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
-import { v4 as uuidv4 } from 'uuid';
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
 import { omitMonitorKeys } from './create_monitor';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -35,7 +35,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     let _monitors: MonitorFields[];
     let monitors: MonitorFields[];
-    let editorUser: RouteCredentials;
+    let editorUser: RoleCredentials;
 
     const saveMonitor = async (monitor: MonitorFields, spaceId?: string) => {
       let url = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?internal=true';
@@ -76,10 +76,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('get many monitors', () => {
       it('without params', async () => {
-        const [mon1, mon2] = await Promise.all(monitors.map((mon) => saveMonitor(mon)));
+        const uuid = uuidv4();
+        const [mon1, mon2] = await Promise.all(
+          monitors.map((mon, i) => saveMonitor({ ...mon, name: `${mon.name}-${uuid}-${i}` }))
+        );
 
         const apiResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?perPage=1000&internal=true') // 1000 to sort of load all saved monitors
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         const found: MonitorFields[] = apiResponse.body.monitors.filter(({ id }: MonitorFields) =>
@@ -153,8 +158,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('with multiple monitorQueryId filter', async () => {
+        const uuid = uuidv4();
         const [_, { id: id2 }, { id: id3 }] = await Promise.all(
-          monitors.map((mon) => ({ ...mon, name: mon.name + '3' })).map((monT) => saveMonitor(monT))
+          monitors
+            .map((mon, i) => ({ ...mon, name: `${mon.name}-${uuid}-${i}` }))
+            .map((monT) => saveMonitor(monT))
         );
 
         const resp = await supertest
@@ -251,8 +259,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('get one monitor', () => {
       it('should get by id', async () => {
+        const uuid = uuidv4();
         const [{ id: id1 }] = await Promise.all(
-          monitors.map((mon) => ({ ...mon, name: mon.name + '4' })).map((monT) => saveMonitor(monT))
+          monitors
+            .map((mon, i) => ({ ...mon, name: `${mon.name}-${uuid}-${i}` }))
+            .map((monT) => saveMonitor(monT))
         );
 
         const apiResponse = await monitorTestService.getMonitor(id1, { user: editorUser });
@@ -264,14 +275,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
             revision: 1,
             locations: [LOCAL_LOCATION],
-            name: 'Test HTTP Monitor 044',
+            name: `${monitors[0].name}-${uuid}-0`,
           })
         );
       });
 
       it('should get by id with ui query param', async () => {
+        const uuid = uuidv4();
         const [{ id: id1 }] = await Promise.all(
-          monitors.map((mon) => ({ ...mon, name: mon.name + '5' })).map((monT) => saveMonitor(monT))
+          monitors
+            .map((mon, i) => ({ ...mon, name: `${mon.name}-${uuid}-${i}` }))
+            .map((monT) => saveMonitor(monT))
         );
 
         const apiResponse = await monitorTestService.getMonitor(id1, {
@@ -286,7 +300,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               form_monitor_type: 'icmp',
               revision: 1,
               locations: [LOCAL_LOCATION],
-              name: 'Test HTTP Monitor 045',
+              name: `${monitors[0].name}-${uuid}-0`,
               hosts: '192.33.22.111:3333',
               hash: '',
               journey_id: '',

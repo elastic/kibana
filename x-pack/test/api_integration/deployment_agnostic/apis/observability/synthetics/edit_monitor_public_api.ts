@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { RouteCredentials } from '@kbn/ftr-common-functional-services';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import moment from 'moment';
@@ -24,7 +24,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
     const testPrivateLocations = new PrivateLocationTestService(getService);
-    let editorUser: RouteCredentials;
+    let editorUser: RoleCredentials;
 
     async function addMonitorAPI(monitor: any, statusCode: number = 200) {
       return await addMonitorAPIHelper(supertestAPI, monitor, statusCode, editorUser, samlAuth);

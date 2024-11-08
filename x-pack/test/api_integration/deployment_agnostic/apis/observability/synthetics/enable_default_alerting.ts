@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { RouteCredentials } from '@kbn/ftr-common-functional-services';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { omit } from 'lodash';
 import { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
@@ -26,7 +26,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
-    let editorUser: RouteCredentials;
+    let editorUser: RoleCredentials;
 
     const addMonitorAPI = async (monitor: any, statusCode = 200) => {
       return addMonitorAPIHelper(supertest, monitor, statusCode, editorUser, samlAuth);

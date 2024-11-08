@@ -13,7 +13,7 @@ import {
   HTTPFields,
   MonitorFields,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { RouteCredentials } from '@kbn/ftr-common-functional-services';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -29,7 +29,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const supertestWithAuth = getService('supertest');
     const supertest = getService('supertestWithoutAuth');
-    const security = getService('security');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
 
@@ -39,7 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
     let testPolicyId = '';
-    let editorUser: RouteCredentials;
+    let editorUser: RoleCredentials;
 
     const saveMonitor = async (monitor: MonitorFields, spaceId?: string) => {
       const apiURL = spaceId

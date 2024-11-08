@@ -6,7 +6,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import type SuperTest from 'supertest';
-import { RouteCredentials } from '@kbn/ftr-common-functional-services';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import {
   LegacyProjectMonitorsRequest,
   ProjectMonitor,
@@ -30,7 +30,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let tcpProjectMonitors: LegacyProjectMonitorsRequest;
     let icmpProjectMonitors: LegacyProjectMonitorsRequest;
     let testPolicyId = '';
-    let editorUser: RouteCredentials;
+    let editorUser: RoleCredentials;
 
     const testPrivateLocations = new PrivateLocationTestService(getService);
 

@@ -22,7 +22,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const supertest = getService('supertestWithoutAuth');
     const supertestWithAuth = getService('supertest');
-    const security = getService('security');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
 

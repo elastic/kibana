@@ -307,9 +307,10 @@ export class SyntheticsService {
     return this.server.coreStart?.elasticsearch.client.asInternalUser;
   }
 
-  async getOutput() {
+  async getOutput({ inspect }: { inspect: boolean } = { inspect: false }) {
     const { apiKey, isValid } = await getAPIKeyForSyntheticsService({ server: this.server });
-    if (!isValid) {
+    // do not check for api key validity if inspecting
+    if (!isValid && !inspect) {
       this.server.logger.error(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
@@ -330,7 +331,7 @@ export class SyntheticsService {
     const monitors = this.formatConfigs(config);
     const license = await this.getLicense();
 
-    const output = await this.getOutput();
+    const output = await this.getOutput({ inspect: true });
     if (output) {
       return await this.apiClient.inspect({
         monitors,

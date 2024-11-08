@@ -15,7 +15,6 @@ import {
   ServiceLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { omit } from 'lodash';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
@@ -46,7 +45,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let httpMonitorJson: HTTPFields;
     const monitorTestService = new SyntheticsMonitorTestService(getService);
     const testPrivateLocations = new PrivateLocationTestService(getService);
-    const security = getService('security');
 
     const addMonitorAPI = async (monitor: any, statusCode = 200) => {
       return addMonitorAPIHelper(supertestAPI, monitor, statusCode, editorUser, samlAuth);
@@ -57,7 +55,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       statusCode = 200,
       spaceId?: string
     ) => {
-      return monitorTestService.deleteMonitor(monitorId, statusCode, spaceId, editorUser);
+      return monitorTestService.deleteMonitor(editorUser, monitorId, statusCode, spaceId);
     };
 
     before(async () => {

@@ -6,7 +6,7 @@
  */
 
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { RouteCredentials } from '@kbn/ftr-common-functional-services';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import expect from '@kbn/expect';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -27,7 +27,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const supertest = getService('supertestWithoutAuth');
     const samlAuth = getService('samlAuth');
 
-    let editorUser: RouteCredentials;
+    let editorUser: RoleCredentials;
 
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: [syntheticsMonitorType] });

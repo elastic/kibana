@@ -146,6 +146,10 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
             basic: { 'cloud-basic': { order: 1 } },
           })}`,
           `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
+          '--xpack.uptime.service.password=test',
+          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+          '--xpack.uptime.service.devUrl=mockDevUrl',
+          '--xpack.uptime.service.manifestUrl=mockDevUrl',
         ],
       },
     };

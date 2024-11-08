@@ -14,22 +14,27 @@ import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 export const INSTALLED_VERSION = '1.1.1';
 
 export class PrivateLocationTestService {
-  private supertest: ReturnType<typeof KibanaSupertestProvider>;
+  private supertestWithAuth: ReturnType<typeof KibanaSupertestProvider>;
   private readonly getService: DeploymentAgnosticFtrProviderContext['getService'];
 
-  constructor(getService: FtrProviderContext['getService']) {
-    this.supertest = getService('supertest');
+  constructor(getService: DeploymentAgnosticFtrProviderContext['getService']) {
+    this.supertest = getService('supertestWithoutAuth');
+    this.supertestWithAuth = getService('supertest');
     this.getService = getService;
   }
 
   async installSyntheticsPackage() {
-    await this.supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-    const response = await this.supertest
+    await this.supertestWithAuth
+      .post('/api/fleet/setup')
+      .set('kbn-xsrf', 'true')
+      .send()
+      .expect(200);
+    const response = await this.supertestWithAuth
       .get(`/api/fleet/epm/packages/synthetics/${INSTALLED_VERSION}`)
       .set('kbn-xsrf', 'true')
       .expect(200);
     if (response.body.item.status !== 'installed') {
-      await this.supertest
+      await this.supertestWithAuth
         .post(`/api/fleet/epm/packages/synthetics/${INSTALLED_VERSION}`)
         .set('kbn-xsrf', 'true')
         .send({ force: true })
@@ -44,7 +49,7 @@ export class PrivateLocationTestService {
   }
 
   async addFleetPolicy(name: string) {
-    return this.supertest
+    return this.supertestWithAuth
       .post('/api/fleet/agent_policies?sys_monitoring=true')
       .set('kbn-xsrf', 'true')
       .send({
