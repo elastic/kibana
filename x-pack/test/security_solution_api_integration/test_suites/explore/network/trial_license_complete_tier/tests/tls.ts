@@ -93,7 +93,6 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     let search: SearchService;
     // FLAKY: https://github.com/elastic/kibana/issues/199379
     // FLAKY: https://github.com/elastic/kibana/issues/199433
-    // FLAKY: https://github.com/elastic/kibana/issues/199410
     describe.skip('Tls Test', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
