@@ -12,8 +12,8 @@
     "common/**/*.ts",
     "scripts/**/*.ts",
     "__jest__/**/*",
-    "../../typings/**/*"
-, "server/graphs/cel/validation/wasm_exec_node.js"  ],
+    "../../typings/**/*",
+  ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
