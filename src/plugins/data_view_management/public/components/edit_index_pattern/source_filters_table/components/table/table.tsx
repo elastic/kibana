@@ -129,7 +129,7 @@ class TableClass extends Component<
 
     return [
       {
-        field: 'clientId',
+        field: 'value',
         name: filterHeader,
         description: filterDescription,
         dataType: 'string',
