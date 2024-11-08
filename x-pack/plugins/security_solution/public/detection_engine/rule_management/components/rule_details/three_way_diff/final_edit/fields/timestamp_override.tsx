@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import { Field, UseField, useFormData } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
@@ -40,17 +40,21 @@ export function TimestampOverrideEdit({
   );
   const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern(indexPatternParameters);
 
+  const componentProps = useMemo(
+    () => ({
+      fieldType: 'date',
+      indices: indexPattern,
+      isDisabled: isIndexPatternLoading,
+    }),
+    [indexPattern, isIndexPatternLoading]
+  );
+
   return (
     <>
       <UseField
         path="timestampOverride"
         component={AutocompleteField}
-        componentProps={{
-          fieldType: 'date',
-          indices: indexPattern,
-          isDisabled: isIndexPatternLoading,
-          placeholder: '',
-        }}
+        componentProps={componentProps}
       />
       <TimestampFallbackDisabled />
     </>

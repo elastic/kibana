@@ -6,7 +6,12 @@
  */
 
 import React from 'react';
-import { type FormData, type FieldHook, UseField } from '../../../../../../../shared_imports';
+import {
+  type FormData,
+  type FieldHook,
+  UseField,
+  getFieldValidityAndErrorMessage,
+} from '../../../../../../../shared_imports';
 import type { RiskScore } from '../../../../../../../../common/api/detection_engine';
 import { DefaultRiskScore } from '../../../../../../rule_creation_ui/components/risk_score_mapping/default_risk_score';
 import { defaultRiskScoreValidator } from '../../../../../../rule_creation_ui/validators/default_risk_score_validator';
@@ -31,8 +36,8 @@ interface RiskScoreEditFieldProps {
 }
 
 function RiskScoreEditField({ field }: RiskScoreEditFieldProps) {
-  const { value, setValue, errors } = field;
-  const errorMessage = errors[0]?.message;
+  const { value, setValue } = field;
+  const errorMessage = getFieldValidityAndErrorMessage(field).errorMessage ?? undefined;
 
   return <DefaultRiskScore value={value} onChange={setValue} errorMessage={errorMessage} />;
 }

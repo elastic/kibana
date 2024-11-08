@@ -36,14 +36,14 @@ export function RuleNameOverrideEdit({
   );
   const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern(indexPatternParameters);
 
-  const componentProps = useMemo(() => {
-    return {
+  const componentProps = useMemo(
+    () => ({
       fieldType: 'string',
       indices: indexPattern,
       isDisabled: isIndexPatternLoading,
-      placeholder: '',
-    };
-  }, [indexPattern, isIndexPatternLoading]);
+    }),
+    [indexPattern, isIndexPatternLoading]
+  );
 
   return (
     <UseField

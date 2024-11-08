@@ -382,7 +382,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
                   indices: indexPattern,
                   isDisabled: isLoading || indexPatternLoading,
-                  placeholder: '',
                 }}
               />
             )}
@@ -397,7 +396,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 idAria: 'detectionEngineStepAboutRuleTimestampOverride',
                 indices: indexPattern,
                 isDisabled: isLoading || indexPatternLoading,
-                placeholder: '',
               }}
             />
             {!!timestampOverride && timestampOverride !== '@timestamp' && (

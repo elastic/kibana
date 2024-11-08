@@ -8,7 +8,10 @@
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  getFieldValidityAndErrorMessage,
+  type FieldHook,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { AboutStepRiskScore } from '../../../../detections/pages/detection_engine/rules/types';
 import { DefaultRiskScore } from './default_risk_score';
 import { RiskScoreOverride } from './risk_score_override';
@@ -68,7 +71,7 @@ export const RiskScoreField = ({
     });
   }, [setValue, value, isMappingChecked, mapping]);
 
-  const errorMessage = field.errors[0]?.message;
+  const errorMessage = getFieldValidityAndErrorMessage(field).errorMessage ?? undefined;
 
   return (
     <EuiFlexGroup direction={'column'}>
