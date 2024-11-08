@@ -158,6 +158,13 @@ describe('TelemetryTracer', () => {
     expect(telemetryTracer.totalTools).toBe(9);
   });
 
+  it('should not log and report event on chain end if parent_run_id exists', async () => {
+    await telemetryTracer.onChainEnd({ ...mockRun, parent_run_id: '123' });
+
+    expect(logger.get().debug).not.toHaveBeenCalled();
+    expect(telemetry.reportEvent).not.toHaveBeenCalled();
+  });
+
   it('should log and report event on chain end', async () => {
     await telemetryTracer.onChainEnd(mockRun);
 

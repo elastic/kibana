@@ -48,7 +48,6 @@ export class TelemetryTracer extends BaseTracer implements LangChainTracerFields
   }
 
   async onChainEnd(run: Run): Promise<void> {
-    this.logger.debug(() => `onChainEnd: run:\n${JSON.stringify(run, null, 2)}`);
     if (!run.parent_run_id) {
       const { eventType, ...telemetryParams } = this.telemetryParams;
       const toolsInvoked =
@@ -65,7 +64,7 @@ export class TelemetryTracer extends BaseTracer implements LangChainTracerFields
               return acc;
             }, [])
           : [];
-      this.telemetry.reportEvent(eventType, {
+      const telemetryValue = {
         ...telemetryParams,
         durationMs: (run.end_time ?? 0) - (run.start_time ?? 0),
         elasticTools: this.elasticTools,
@@ -74,7 +73,16 @@ export class TelemetryTracer extends BaseTracer implements LangChainTracerFields
         ...(telemetryParams.actionTypeId === '.gen-ai'
           ? { isOssModel: run.inputs.isOssModel }
           : {}),
-      });
+      };
+      this.logger.debug(
+        () =>
+          `Invoke ${eventType} telemetry onChainEnd: run:\n${JSON.stringify(
+            telemetryValue,
+            null,
+            2
+          )}`
+      );
+      this.telemetry.reportEvent(eventType, telemetryValue);
     }
   }
 
