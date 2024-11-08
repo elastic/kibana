@@ -1,0 +1,85 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { BaseCallbackHandlerInput } from '@langchain/core/callbacks/base';
+import type { Run } from 'langsmith/schemas';
+import { BaseTracer } from '@langchain/core/tracers/base';
+import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+
+export interface TelemetryParams {
+  assistantStreamingEnabled: boolean;
+  actionTypeId: string;
+  isEnabledKnowledgeBase: boolean;
+  eventType: string;
+  model?: string;
+}
+export interface LangChainTracerFields extends BaseCallbackHandlerInput {
+  elasticTools: string[];
+  telemetry: AnalyticsServiceSetup;
+  telemetryParams: TelemetryParams;
+  totalTools: number;
+}
+interface ToolRunStep {
+  action: {
+    tool: string;
+  };
+}
+/**
+ * TelemetryTracer is a tracer that uses event based telemetry to track LangChain events.
+ */
+export class TelemetryTracer extends BaseTracer implements LangChainTracerFields {
+  name = 'telemetry_tracer';
+  logger: Logger;
+  elasticTools: string[];
+  telemetry: AnalyticsServiceSetup;
+  telemetryParams: TelemetryParams;
+  totalTools: number;
+  constructor(fields: LangChainTracerFields, logger: Logger) {
+    super(fields);
+    this.logger = logger.get('telemetryTracer');
+    this.elasticTools = fields.elasticTools;
+    this.telemetry = fields.telemetry;
+    this.telemetryParams = fields.telemetryParams;
+    this.totalTools = fields.totalTools;
+  }
+
+  async onChainEnd(run: Run): Promise<void> {
+    this.logger.debug(() => `onChainEnd: run:\n${JSON.stringify(run, null, 2)}`);
+    if (!run.parent_run_id) {
+      const { eventType, ...telemetryParams } = this.telemetryParams;
+      const toolsInvoked =
+        run?.outputs && run?.outputs.steps.length
+          ? run.outputs.steps.reduce((acc: string[], event: ToolRunStep | never) => {
+              if ('action' in event && event?.action?.tool) {
+                if (this.elasticTools.includes(event.action.tool)) {
+                  return [...acc, event.action.tool];
+                } else {
+                  // Custom tool names are user data, so we strip them out
+                  return [...acc, 'CustomTool'];
+                }
+              }
+              return acc;
+            }, [])
+          : [];
+      this.telemetry.reportEvent(eventType, {
+        ...telemetryParams,
+        durationMs: (run.end_time ?? 0) - (run.start_time ?? 0),
+        toolsAvailable: {
+          elasticTools: this.elasticTools,
+          customTools: this.totalTools - this.elasticTools.length,
+        },
+        toolsInvoked,
+        ...(telemetryParams.actionTypeId === '.gen-ai'
+          ? { isOssModel: run.inputs.isOssModel }
+          : {}),
+      });
+    }
+  }
+
+  // everything below is required for type only
+  protected async persistRun(_run: Run): Promise<void> {}
+}
