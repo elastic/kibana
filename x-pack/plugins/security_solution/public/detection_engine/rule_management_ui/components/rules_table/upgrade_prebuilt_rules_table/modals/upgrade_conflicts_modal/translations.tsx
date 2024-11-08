@@ -24,7 +24,7 @@ export const UPGRADE_CONFLICTS_MODAL_CANCEL = i18n.translate(
 export const UPGRADE_CONFLICTS_MODAL_CONFIRM = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeConflictsModal.confirmTitle',
   {
-    defaultMessage: 'Update rules with no conflicts',
+    defaultMessage: 'Update rules without conflicts',
   }
 );
 
