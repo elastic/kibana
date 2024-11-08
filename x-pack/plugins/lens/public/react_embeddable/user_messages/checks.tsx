@@ -42,11 +42,13 @@ export function getLegacyURLConflictsMessage(
 
 export function isSearchContextIncompatibleWithDataViews(
   api: LensApi,
+  context: { type?: string } | undefined,
   searchContext: MergedSearchContext,
   indexPatternRefs: IndexPatternRef[],
   indexPatterns: IndexPatternMap
 ) {
   return (
+    context?.type !== 'canvas' &&
     !api.isTextBasedLanguage() &&
     searchContext.timeRange == null &&
     indexPatternRefs.some(({ id }) => {

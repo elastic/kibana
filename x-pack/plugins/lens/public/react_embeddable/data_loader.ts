@@ -6,7 +6,7 @@
  */
 
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { fetch$, apiHasExecutionContext, type FetchContext } from '@kbn/presentation-publishing';
+import { fetch$, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import { BehaviorSubject, type Subscription, distinctUntilChanged, skip, pipe } from 'rxjs';
@@ -26,7 +26,7 @@ import { buildUserMessagesHelpers } from './user_messages/api';
 import { getLogError } from './expressions/telemetry';
 import type { SharingSavedObjectProps, UserMessagesDisplayLocationId } from '../types';
 import { apiHasLensComponentCallbacks } from './type_guards';
-import { getRenderMode } from './helper';
+import { getRenderMode, getParentContext } from './helper';
 import { addLog } from './logger';
 import { getUsedDataViews } from './expressions/update_data_views';
 import { getMergedSearchContext } from './expressions/merged_search_context';
@@ -133,9 +133,7 @@ export function loadEmbeddableData(
     const { searchSessionId, ...unifiedSearch } = unifiedSearch$.getValue();
 
     const getExecutionContext = () => {
-      const parentContext = apiHasExecutionContext(parentApi)
-        ? parentApi.executionContext
-        : undefined;
+      const parentContext = getParentContext(parentApi);
       const lastState = getState();
       if (lastState.attributes) {
         const child: KibanaExecutionContext = {

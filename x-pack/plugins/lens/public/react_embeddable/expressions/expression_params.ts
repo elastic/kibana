@@ -167,7 +167,13 @@ export async function getExpressionRendererParams(
   // if at least one indexPattern is time based, then the Lens embeddable requires the timeRange prop
   // this is necessary for the dataview embeddable but not the ES|QL one
   if (
-    isSearchContextIncompatibleWithDataViews(api, searchContext, indexPatternRefs, indexPatterns)
+    isSearchContextIncompatibleWithDataViews(
+      api,
+      getExecutionContext(),
+      searchContext,
+      indexPatternRefs,
+      indexPatterns
+    )
   ) {
     addUserMessages([getSearchContextIncompatibleMessage()]);
   }

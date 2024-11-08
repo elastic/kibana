@@ -11,7 +11,9 @@ import {
   getInheritedViewMode,
   ViewMode,
   type PublishingSubject,
+  apiHasExecutionContext,
 } from '@kbn/presentation-publishing';
+import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -106,6 +108,22 @@ export function getViewMode(api: unknown) {
 export function getRenderMode(api: unknown): RenderMode {
   const mode = getViewMode(api) ?? 'view';
   return mode === 'print' ? 'view' : mode;
+}
+
+function apiHasExecutionContextFunction(
+  api: unknown
+): api is { getAppContext: () => { currentAppId: string } } {
+  return isObject(api) && 'getAppContext' in api && typeof api.getAppContext === 'function';
+}
+
+export function getParentContext(parentApi: unknown) {
+  if (apiHasExecutionContext(parentApi)) {
+    return parentApi.executionContext;
+  }
+  if (apiHasExecutionContextFunction(parentApi)) {
+    return { type: parentApi.getAppContext().currentAppId };
+  }
+  return;
 }
 
 export function extractInheritedViewModeObservable(
