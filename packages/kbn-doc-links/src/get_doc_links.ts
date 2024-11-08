@@ -35,8 +35,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
   const WORKPLACE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/`;
   const SEARCH_UI_DOCS = `${DOCS_WEBSITE_URL}search-ui/`;
   const MACHINE_LEARNING_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`;
-  const SERVERLESS_DOCS = `${DOCS_WEBSITE_URL}serverless/`;
-  const SERVERLESS_ELASTICSEARCH_DOCS = `${SERVERLESS_DOCS}elasticsearch/`;
+  const SERVERLESS_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/serverless/current/`;
   const SEARCH_LABS_REPO = `${ELASTIC_GITHUB}elasticsearch-labs/`;
 
   return deepFreeze({
@@ -70,7 +69,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     console: {
       guide: `${KIBANA_DOCS}console-kibana.html`,
-      serverlessGuide: `${SERVERLESS_ELASTICSEARCH_DOCS}dev-tools-console`,
+      serverlessGuide: `${SERVERLESS_DOCS}devtools-run-api-requests-in-the-console.html`,
     },
     dashboard: {
       guide: `${KIBANA_DOCS}dashboard.html`,
@@ -833,31 +832,35 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       elasticsearch: `${SEARCH_UI_DOCS}tutorials/elasticsearch`,
     },
     serverlessClients: {
-      goApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}go-apis-references`,
-      goGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}go-apis`,
-      httpApis: `${SERVERLESS_ELASTICSEARCH_DOCS}http-apis`,
-      httpApiReferences: `${SERVERLESS_ELASTICSEARCH_DOCS}http-apis-references`,
-      jsApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}nodejs-apis-references`,
-      jsGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}nodejs-apis-getting-started`,
-      phpApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}php-apis-references`,
-      phpGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}php-apis-getting-started`,
-      pythonApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}python-apis-references`,
-      pythonGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}python-apis-getting-started`,
-      pythonReferences: `${SERVERLESS_ELASTICSEARCH_DOCS}python-apis-references`,
-      rubyApiReference: `${SERVERLESS_ELASTICSEARCH_DOCS}ruby-apis-references`,
-      rubyGettingStarted: `${SERVERLESS_ELASTICSEARCH_DOCS}ruby-apis-getting-started`,
+      goApiReference: `${SERVERLESS_DOCS}elasticsearch-go-client-getting-started.html`,
+      goGettingStarted: `${SERVERLESS_DOCS}elasticsearch-go-client-getting-started.html`,
+      httpApis: `${SERVERLESS_DOCS}elasticsearch-http-apis.html`,
+      httpApiReferences: `${SERVERLESS_DOCS}elasticsearch-http-apis.html`,
+      jsApiReference: `${SERVERLESS_DOCS}elasticsearch-nodejs-client-getting-started.html`,
+      jsGettingStarted: `${SERVERLESS_DOCS}elasticsearch-nodejs-client-getting-started.html`,
+      phpApiReference: `${SERVERLESS_DOCS}elasticsearch-php-client-getting-started.html`,
+      phpGettingStarted: `${SERVERLESS_DOCS}elasticsearch-php-client-getting-started.html`,
+      pythonApiReference: `${SERVERLESS_DOCS}elasticsearch-python-client-getting-started.html`,
+      pythonGettingStarted: `${SERVERLESS_DOCS}elasticsearch-python-client-getting-started.html`,
+      pythonReferences: `${SERVERLESS_DOCS}elasticsearch-python-client-getting-started.html`,
+      rubyApiReference: `${SERVERLESS_DOCS}elasticsearch-ruby-client-getting-started.html`,
+      rubyGettingStarted: `${SERVERLESS_DOCS}elasticsearch-ruby-client-getting-started.html`,
     },
     serverlessSearch: {
-      integrations: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations`,
-      integrationsLogstash: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-logstash`,
-      integrationsBeats: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-beats`,
-      integrationsConnectorClient: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-connector-client`,
-      gettingStartedExplore: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started-explore`,
-      gettingStartedIngest: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started-ingest`,
-      gettingStartedSearch: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started-search`,
+      integrations: `${SERVERLESS_DOCS}elasticsearch-ingest-your-data.html`,
+      integrationsLogstash: `${SERVERLESS_DOCS}elasticsearch-ingest-data-through-logstash.html`,
+      integrationsBeats: `${SERVERLESS_DOCS}elasticsearch-ingest-data-through-beats.html`,
+      integrationsConnectorClient: `${SERVERLESS_DOCS}elasticsearch-ingest-data-through-integrations-connector-client.html`,
+      gettingStartedExplore: `${SERVERLESS_DOCS}elasticsearch-get-started.html`,
+      gettingStartedIngest: `${SERVERLESS_DOCS}elasticsearch-get-started.html`,
+      gettingStartedSearch: `${SERVERLESS_DOCS}elasticsearch-get-started.html`,
     },
     synthetics: {
       featureRoles: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-feature-roles.html`,
+      clientLib: `${SERVERLESS_DOCS}elasticsearch-clients.html`,
+    },
+    serverlessSecurity: {
+      apiKeyPrivileges: `${SERVERLESS_DOCS}api-keys.html#api-keys-restrict-privileges`,
     },
     telemetry: {
       settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
