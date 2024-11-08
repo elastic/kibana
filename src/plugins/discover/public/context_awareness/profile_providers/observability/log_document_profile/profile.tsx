@@ -12,10 +12,10 @@ import { DocumentProfileProvider, DocumentType, SolutionType } from '../../../pr
 import { ProfileProviderServices } from '../../profile_provider_services';
 import { getDocViewer } from './accessors';
 
-export const createLogDocumentProfileProvider = (
+export const createObservabilityLogDocumentProfileProvider = (
   services: ProfileProviderServices
 ): DocumentProfileProvider => ({
-  profileId: 'log-document-profile',
+  profileId: 'observability-log-document-profile',
   profile: {
     getDocViewer,
   },

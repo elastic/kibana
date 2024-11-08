@@ -18,12 +18,12 @@ import {
   SolutionType,
 } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
-import { createLogDocumentProfileProvider } from './profile';
+import { createObservabilityLogDocumentProfileProvider } from './profile';
 
 const mockServices = createContextAwarenessMocks().profileProviderServices;
 
 describe('logDocumentProfileProvider', () => {
-  const logDocumentProfileProvider = createLogDocumentProfileProvider(mockServices);
+  const logDocumentProfileProvider = createObservabilityLogDocumentProfileProvider(mockServices);
   const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Observability };
   const DATA_SOURCE_CONTEXT: DataSourceContext = { category: DataSourceCategory.Logs };
   const RESOLUTION_MATCH = {

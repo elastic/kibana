@@ -19,7 +19,7 @@ import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider => ({
-  profileId: 'logs-data-source-profile',
+  profileId: 'observability-logs-data-source-profile',
   profile: {
     getCellRenderers,
     getRowIndicatorProvider,
