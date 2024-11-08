@@ -105,9 +105,9 @@ export const esClient = (
       });
       return null;
     },
-    createIndex: async ({ index, properties }) => {
+    createIndex: async ({ index: indexName, properties }) => {
       const result = await client.indices.create({
-        index,
+        index: indexName,
         body: {
           mappings: {
             properties,
@@ -116,9 +116,9 @@ export const esClient = (
       });
       return result;
     },
-    createDocument: async ({ index, document }) => {
+    createDocument: async ({ index: indexName, document }) => {
       const result = await client.index({
-        index,
+        index: indexName,
         body: document,
         refresh: 'wait_for',
       });

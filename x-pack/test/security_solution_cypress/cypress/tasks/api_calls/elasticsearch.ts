@@ -20,11 +20,11 @@ export const deleteAllDocuments = (target: string) => {
 };
 
 export const createIndex = (indexName: string, properties: Record<string, unknown>) => {
-  cy.task('createIndex', { indexName, properties });
+  cy.task('createIndex', { index: indexName, properties });
 };
 
 export const createDocument = (indexName: string, document: Record<string, unknown>) => {
-  cy.task('createDocument', { indexName, document });
+  cy.task('createDocument', { index: indexName, document });
 };
 
 export const waitForNewDocumentToBeIndexed = (index: string, initialNumberOfDocuments: number) => {
