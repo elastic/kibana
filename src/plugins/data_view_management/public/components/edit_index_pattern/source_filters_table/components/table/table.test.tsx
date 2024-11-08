@@ -10,7 +10,7 @@
 import React, { ReactElement } from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { Table } from './table';
+import { TableWithoutPersist as Table } from './table';
 import { EuiTableFieldDataColumnType, keys } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SourceFiltersTableFilter } from '../../types';
@@ -19,6 +19,14 @@ const indexPattern = {} as DataView;
 const items: SourceFiltersTableFilter[] = [{ value: 'tim*', clientId: '' }];
 
 const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
+
+const baseProps = {
+  euiTablePersist: {
+    pageSize: 10,
+    onTableChange: () => {},
+    sorting: { sort: { direction: 'asc' as const, field: 'clientId' as const } },
+  },
+};
 
 const getTableColumnRender = (component: ShallowWrapper<typeof Table>, index: number = 0) => {
   const columns =
@@ -32,6 +40,7 @@ describe('Table', () => {
   test('should render normally', () => {
     const component = shallow(
       <Table
+        {...baseProps}
         indexPattern={indexPattern}
         items={items}
         deleteFilter={() => {}}
@@ -47,6 +56,7 @@ describe('Table', () => {
   test('should render filter matches', () => {
     const component = shallow<typeof Table>(
       <Table
+        {...baseProps}
         indexPattern={getIndexPatternMock({
           getNonScriptedFields: () => [{ name: 'time' }, { name: 'value' }],
         })}
@@ -72,6 +82,7 @@ describe('Table', () => {
     beforeEach(() => {
       component = shallow<typeof Table>(
         <Table
+          {...baseProps}
           indexPattern={indexPattern}
           items={items}
           deleteFilter={() => {}}
@@ -122,6 +133,7 @@ describe('Table', () => {
     test('should update the matches dynamically as input value is changed', () => {
       const localComponent = shallow(
         <Table
+          {...baseProps}
           indexPattern={getIndexPatternMock({
             getNonScriptedFields: () => [{ name: 'time' }, { name: 'value' }],
           })}
@@ -188,6 +200,7 @@ describe('Table', () => {
 
     const component = shallow(
       <Table
+        {...baseProps}
         indexPattern={indexPattern}
         items={items}
         deleteFilter={deleteFilter}
@@ -211,6 +224,7 @@ describe('Table', () => {
 
     const component = shallow(
       <Table
+        {...baseProps}
         indexPattern={indexPattern}
         items={items}
         deleteFilter={() => {}}
@@ -248,6 +262,7 @@ describe('Table', () => {
 
     const component = shallow(
       <Table
+        {...baseProps}
         indexPattern={indexPattern}
         items={items}
         deleteFilter={() => {}}

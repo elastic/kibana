@@ -261,6 +261,8 @@ class TableClass extends Component<
   }
 }
 
+export const TableWithoutPersist = TableClass; // For testing purposes
+
 export const Table = withEuiTablePersist(TableClass, {
   tableId: 'dataViewsSourceFilters',
   pageSizeOptions: PAGE_SIZE_OPTIONS,
