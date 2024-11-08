@@ -13,7 +13,7 @@ interface EntityMap {
   container: InventoryEntity & { cloud?: { provider?: string[] } };
   service: InventoryEntity & {
     agent?: { name: AgentName[] };
-    service?: { name: string; environment?: string };
+    service?: { environment?: string };
   };
 }
 
