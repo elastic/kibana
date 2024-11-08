@@ -25,6 +25,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     this.tags(['skipMKI']);
     let roleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
+
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('editor');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
@@ -51,8 +52,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           internalReqHeader,
         })
         .expect(200);
-      expect(res.body.deployment_state).to.eql('started');
-      expect(res.body.model_name).to.eql(TINY_ELSER.id);
+
+      expect(res.body.enabled).to.be(true);
+      expect(res.body.ready).to.be(true);
+      expect(res.body.model_id).to.eql(TINY_ELSER.id);
     });
 
     it('returns correct status after elser is stopped', async () => {
@@ -66,11 +69,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(res.body).to.eql({
-        ready: false,
-        model_name: TINY_ELSER.id,
-        enabled: true,
-      });
+      expect(res.body.enabled).to.be(true);
+      expect(res.body.ready).to.be(false);
+      expect(res.body.model_id).to.eql(TINY_ELSER.id);
     });
   });
 }
