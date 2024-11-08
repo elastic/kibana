@@ -350,7 +350,11 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                 { defaultMessage: 'Select roles' }
               )}
               labelAppend={
-                <EuiLink href={getUrlForApp('management', { deepLinkId: 'roles' })}>
+                <EuiLink
+                  href={getUrlForApp('management', { deepLinkId: 'roles' })}
+                  external={false}
+                  target="_blank"
+                >
                   {i18n.translate(
                     'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabelAnchor',
                     { defaultMessage: 'Manage roles' }

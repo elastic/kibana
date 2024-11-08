@@ -142,6 +142,15 @@ describe('PrivilegesRolesForm', () => {
     jest.clearAllMocks();
   });
 
+  it("would open the 'manage roles' link in a new tab", () => {
+    getRolesSpy.mockResolvedValue([]);
+    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+    renderPrivilegeRolesForm();
+
+    expect(screen.getByText('Manage roles')).toHaveAttribute('target', '_blank');
+  });
+
   it('does not display the privilege selection buttons or customization form when no role is selected', async () => {
     getRolesSpy.mockResolvedValue([]);
     getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
