@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { capitalize } from 'lodash';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
@@ -76,7 +77,7 @@ export const AlertsPreview = ({
   });
 
   const alertStats = Array.from(severityMap, ([key, count]) => ({
-    key,
+    key: capitalize(key),
     count,
     color: getSeverityColor(key),
   }));
