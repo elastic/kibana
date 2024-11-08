@@ -30,19 +30,19 @@ export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: (
   const { userInstructions, isLoading: isFetching } = useGetUserInstructions();
   const { mutateAsync: createEntry, isLoading: isSaving } = useCreateKnowledgeBaseUserInstruction();
   const [newEntryText, setNewEntryText] = useState('');
-  const [newEntryDocId, setNewEntryDocId] = useState<string>();
+  const [newEntryId, setNewEntryId] = useState<string>();
   const isSubmitDisabled = newEntryText.trim() === '';
 
   useEffect(() => {
     const userInstruction = userInstructions?.find((entry) => !entry.public);
-    setNewEntryDocId(userInstruction?.doc_id);
     setNewEntryText(userInstruction?.text ?? '');
+    setNewEntryId(userInstruction?.id);
   }, [userInstructions]);
 
   const handleSubmit = async () => {
     await createEntry({
       entry: {
-        doc_id: newEntryDocId ?? uuidv4(),
+        id: newEntryId ?? uuidv4(),
         text: newEntryText,
         public: false, // limit user instructions to private (for now)
       },
