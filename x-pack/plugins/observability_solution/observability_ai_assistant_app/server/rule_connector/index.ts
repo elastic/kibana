@@ -189,6 +189,22 @@ If available, include the link of the conversation at the end of your answer.`
     ),
   };
 
+  const hasSlackConnector = !!connectorsList.filter(
+    (connector) => connector.actionTypeId === '.slack'
+  ).length;
+
+  if (hasSlackConnector) {
+    const slackConnectorInstruction: AdHocInstruction = {
+      instruction_type: 'application_instruction',
+      text: dedent(
+        `The execute_connector function can be used to invoke Kibana connectors.
+        For Slack connectors, the "params" object must include a "message" field. Make sure the
+        "message" field in "params" is defined, when the function is called.`
+      ),
+    };
+    functionClient.registerAdhocInstruction(slackConnectorInstruction);
+  }
+
   const alertsContext = await getAlertsContext(
     execOptions.params.rule,
     execOptions.params.alerts,
