@@ -42,7 +42,7 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import { addLog } from '../../../../utils/add_log';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
-import type { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
+import { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
@@ -177,7 +177,7 @@ export const useDiscoverHistogram = ({
           totalHitsResult &&
           typeof result !== 'number'
         ) {
-          addLog(`[UnifiedHistogram] skip ${status}: total hits > 0 in Discover`, result);
+          // ignore the histogram initial loading state if discover state already has a total hits value
           return;
         }
 
@@ -192,10 +192,6 @@ export const useDiscoverHistogram = ({
         }
 
         if (status !== UnifiedHistogramFetchStatus.complete || typeof result !== 'number') {
-          addLog(
-            '[UnifiedHistogram] ignore the histogram complete/partial state if discover state already has a total hits value',
-            { status, result }
-          );
           return;
         }
 
