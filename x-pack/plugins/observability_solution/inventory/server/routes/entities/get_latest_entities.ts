@@ -22,8 +22,11 @@ import {
 } from '../../../common/entities';
 import { getBuiltinEntityDefinitionIdESQLWhereClause } from './query_helper';
 
-type EntityColumnIdsWithoutAlertsCount = Exclude<EntityColumnIds, 'alertsCount'>;
-const SORT_FIELDS_TO_ES_FIELDS: Record<EntityColumnIdsWithoutAlertsCount, string> = {
+type EntitySortableColumnIds = Extract<
+  EntityColumnIds,
+  'entityLastSeenTimestamp' | 'entityDisplayName' | 'entityType'
+>;
+const SORT_FIELDS_TO_ES_FIELDS: Record<EntitySortableColumnIds, string> = {
   entityLastSeenTimestamp: ENTITY_LAST_SEEN,
   entityDisplayName: ENTITY_DISPLAY_NAME,
   entityType: ENTITY_TYPE,
@@ -44,7 +47,7 @@ export async function getLatestEntities({
 }): Promise<InventoryEntity[]> {
   // alertsCount doesn't exist in entities index. Ignore it and sort by entity.lastSeenTimestamp by default.
   const entitiesSortField =
-    SORT_FIELDS_TO_ES_FIELDS[sortField as EntityColumnIdsWithoutAlertsCount] ?? ENTITY_LAST_SEEN;
+    SORT_FIELDS_TO_ES_FIELDS[sortField as EntitySortableColumnIds] ?? ENTITY_LAST_SEEN;
 
   const from = `FROM ${ENTITIES_LATEST_ALIAS}`;
   const where: string[] = [getBuiltinEntityDefinitionIdESQLWhereClause()];
