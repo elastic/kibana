@@ -272,7 +272,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const resp = await alertingApi.waitForDocumentInIndex<ActionDocument>({
           indexName: ALERT_ACTION_INDEX,
         });
-        const { protocol, hostname, port } = kbnTestConfig.getUrlParts();
+        const { protocol, hostname, port } = kbnTestConfig.getUrlPartsWithStrippedDefaultPort();
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
