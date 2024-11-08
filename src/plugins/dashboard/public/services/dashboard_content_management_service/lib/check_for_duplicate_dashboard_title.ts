@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DashboardSearchIn, DashboardSearchOut } from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
-import { DashboardCrudTypes } from '../../../../common/content_management';
 import { extractTitleAndCount } from '../../../dashboard_container/embeddable/api/lib/extract_title_and_count';
 import { contentManagementService } from '../../kibana_services';
 
@@ -54,8 +54,8 @@ export async function checkForDuplicateDashboardTitle({
   const [baseDashboardName] = extractTitleAndCount(title);
 
   const { hits } = await contentManagementService.client.search<
-    DashboardCrudTypes['SearchIn'],
-    DashboardCrudTypes['SearchOut']
+    DashboardSearchIn,
+    DashboardSearchOut
   >({
     contentTypeId: DASHBOARD_CONTENT_ID,
     query: {
