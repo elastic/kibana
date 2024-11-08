@@ -62,6 +62,7 @@ async function createAgentEnrichment(
     });
   }
 
+  // Create the enrich policy and pipeline, this should probably be part the ES fleet plugin if move forward with that
   await esClient.enrich
     .putPolicy({
       name: 'fleet-agent-policy',
