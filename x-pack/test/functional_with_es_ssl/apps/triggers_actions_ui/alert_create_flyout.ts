@@ -414,7 +414,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           "filter": [{ "term": { "kibana.alert.rule.name": "${alertName}" } }]
         }
       }`;
-      await filterBar.addDslFilter(filter, true);
+      await filterBar.addDslFilter(filter);
 
       await testSubjects.click('rulePageFooterSaveButton');
       const toastTitle = await toasts.getTitleAndDismiss();
@@ -607,7 +607,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         }
       }`;
 
-      await filterBar.addDslFilter(filter, true);
+      await filterBar.addDslFilter(filter);
 
       await filterBar.hasFilter('query', filter, true);
 

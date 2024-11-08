@@ -134,6 +134,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.triggersActionsUI.setAlertName('ml-test-alert');
         await pageObjects.triggersActionsUI.setAlertInterval(10, 's');
         await pageObjects.triggersActionsUI.saveAlert();
+        await ml.navigation.navigateToAlertsAndAction();
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList('ml-test-alert');
       });
     });
