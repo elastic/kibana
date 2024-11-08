@@ -76,7 +76,12 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   assistantStreamingEnabled: boolean;
   actionTypeId: string;
   isEnabledKnowledgeBase: boolean;
+  durationMs: number;
+  elasticTools: string[];
+  customTools: number;
+  toolsInvoked: string[];
   model?: string;
+  isOssModel?: boolean;
 }> = {
   eventType: 'invoke_assistant_success',
   schema: {
@@ -103,6 +108,49 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
       type: 'boolean',
       _meta: {
         description: 'Is knowledge base enabled',
+      },
+    },
+    isOssModel: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is OSS model used on the request',
+        optional: true,
+      },
+    },
+    durationMs: {
+      type: 'float',
+      _meta: {
+        description: 'The duration of the request.',
+      },
+    },
+    elasticTools: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'The tool name',
+        },
+      },
+      _meta: {
+        description: 'The Elastic Security tools provided to the agent.',
+      },
+    },
+    customTools: {
+      type: 'float',
+      _meta: {
+        description: 'Custom tools provided to the agent.',
+      },
+    },
+    toolsInvoked: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'The tool name',
+        },
+      },
+      _meta: {
+        description: 'Tools called by the agent, in order of use.',
       },
     },
   },

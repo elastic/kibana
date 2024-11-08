@@ -68,10 +68,8 @@ export class TelemetryTracer extends BaseTracer implements LangChainTracerFields
       this.telemetry.reportEvent(eventType, {
         ...telemetryParams,
         durationMs: (run.end_time ?? 0) - (run.start_time ?? 0),
-        toolsAvailable: {
-          elasticTools: this.elasticTools,
-          customTools: this.totalTools - this.elasticTools.length,
-        },
+        elasticTools: this.elasticTools,
+        customTools: this.totalTools - this.elasticTools.length,
         toolsInvoked,
         ...(telemetryParams.actionTypeId === '.gen-ai'
           ? { isOssModel: run.inputs.isOssModel }

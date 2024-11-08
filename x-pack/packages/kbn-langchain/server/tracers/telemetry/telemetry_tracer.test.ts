@@ -169,10 +169,8 @@ describe('TelemetryTracer', () => {
       model: 'test_model',
       isOssModel: false,
       durationMs: 8077,
-      toolsAvailable: {
-        elasticTools,
-        customTools: 3,
-      },
+      elasticTools,
+      customTools: 3,
       toolsInvoked: [
         'KnowledgeBaseRetrievalTool',
         'NaturalLanguageESQLTool',
