@@ -41,7 +41,6 @@ describe(
       login();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/187932
     describe.skip('Scan operation:', () => {
       const homeFilePath = Cypress.env('IS_CI') ? '/home/vagrant' : '/home';
 
