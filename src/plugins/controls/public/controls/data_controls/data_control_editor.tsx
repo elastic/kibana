@@ -394,8 +394,6 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
               <div>
                 <EuiButtonGroup
                   buttonSize="compressed"
-                  isFullWidth
-                  color="primary"
                   legend={DataControlEditorStrings.management.controlWidth.getWidthSwitchLegend()}
                   options={CONTROL_WIDTH_OPTIONS}
                   idSelected={editorState.width ?? DEFAULT_CONTROL_WIDTH}
