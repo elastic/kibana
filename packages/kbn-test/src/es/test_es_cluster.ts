@@ -201,12 +201,14 @@ export function createTestEsCluster<
 
   const esArgs = assignArgs(defaultEsArgs, customEsArgs);
 
+  const testLicense: ArtifactLicense = getFips() === 1 ? 'trial' : license ? license : 'basic';
+
   const config = {
     version: esVersion,
     installPath: Path.resolve(basePath, clusterName),
     sourcePath: Path.resolve(REPO_ROOT, '../elasticsearch'),
+    license: testLicense,
     password,
-    ...(getFips() === 1 ? { license: 'trial' } : license ? { license } : { license: 'basic' }),
     basePath,
     esArgs,
     resources: files,
