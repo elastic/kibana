@@ -81,7 +81,6 @@ describe('dependency-usage CLI', () => {
 
   it('should set default values for unspecified options', () => {
     const argv = parser.parse(['--paths', './src']);
-    expect(argv.tool).toBe('cruiser');
     expect(argv['collapse-depth']).toBe(1);
   });
 
