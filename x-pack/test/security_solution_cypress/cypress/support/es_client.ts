@@ -69,6 +69,51 @@ export const esClient = (
         return null;
       }
     },
+    deleteDataStream: async (dataStreamName) => {
+      try {
+        await client.indices.deleteDataStream({
+          name: dataStreamName,
+        });
+
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+    deleteDocuments: async (index: string) => {
+      await client.deleteByQuery({
+        index,
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+        conflicts: 'proceed',
+        scroll_size: 10000,
+        refresh: true,
+      });
+      return null;
+    },
+    createIndex: async ({ index, properties }) => {
+      const result = await client.indices.create({
+        index,
+        body: {
+          mappings: {
+            properties,
+          },
+        },
+      });
+      return result;
+    },
+    createDocument: async ({ index, document }) => {
+      const result = await client.index({
+        index,
+        body: document,
+        refresh: 'wait_for',
+      });
+
+      return result;
+    },
   });
 
   return Promise.resolve();
