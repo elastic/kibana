@@ -92,5 +92,6 @@
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/security-plugin-types-common",
     "@kbn/ai-assistant-common",
+    "@kbn/data-usage-plugin",
   ]
 }

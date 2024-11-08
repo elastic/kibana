@@ -18,7 +18,7 @@ export function IgnoreGlobalFilterRowControl({
 }) {
   return (
     <EuiFormRow
-      display="columnCompressedSwitch"
+      display="columnCompressed"
       label={i18n.translate('xpack.lens.layerSettings.ignoreGlobalFilters', {
         defaultMessage: 'Use global filters',
       })}
