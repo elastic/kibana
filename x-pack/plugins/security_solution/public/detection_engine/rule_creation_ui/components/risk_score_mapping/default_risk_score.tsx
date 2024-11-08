@@ -28,7 +28,7 @@ export function DefaultRiskScore({
 }: DefaultRiskScoreProps) {
   const handleChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
     (event) => {
-      const eventValue = event.currentTarget.value;
+      const eventValue = (event.target as HTMLInputElement).value;
       const intOrNanValue = Number.parseInt(eventValue.trim(), 10);
       const intValue = Number.isNaN(intOrNanValue) ? MIN_RISK_SCORE : intOrNanValue;
 
