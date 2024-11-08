@@ -53,7 +53,7 @@ export interface GetOutputHealthResponse {
 export interface GetListAgentPolicyByOutputsRequest {
   body: {
     ids: string[];
-  }
+  };
 }
 export interface GetListAgentPolicyByOutputsResponse {
   items: string[];

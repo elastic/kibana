@@ -28,7 +28,7 @@ import type {
   GetOutputsResponse,
   Output,
   PostLogstashApiKeyResponse,
-  GetListAgentPolicyByOutputsResponse
+  GetListAgentPolicyByOutputsResponse,
 } from '../../../common/types';
 import { outputService } from '../../services/output';
 import { defaultFleetErrorHandler, FleetUnauthorizedError } from '../../errors';
