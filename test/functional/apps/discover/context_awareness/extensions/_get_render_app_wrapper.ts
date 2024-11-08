@@ -9,6 +9,7 @@
 
 import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -46,8 +47,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.clickFieldListItemAdd('message');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
-        let messageCell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
+        let messageCell: WebElementWrapper;
         await retry.try(async () => {
+          messageCell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
           await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
         });
@@ -102,9 +104,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.clickFieldListItemAdd('message');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
-        let messageCell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
-        await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
+        let messageCell: WebElementWrapper;
         await retry.try(async () => {
+          messageCell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
+          await (await messageCell.findByTestSubject('exampleDataSourceProfileMessage')).click();
           await testSubjects.existOrFail('exampleRootProfileFlyout');
         });
         let message = await testSubjects.find('exampleRootProfileCurrentMessage');
