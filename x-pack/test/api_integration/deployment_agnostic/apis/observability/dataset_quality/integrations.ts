@@ -47,7 +47,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Integrations', () => {
     let adminRoleAuthc: RoleCredentials;
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
-    let preExistingIntegrations: List<string>;
+    let preExistingIntegrations: string[];
 
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
@@ -87,8 +87,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
         });
 
-        expect(body.integrations.map((integration: Integration) => integration.name)).to.eql(
-          preExistingIntegrations.concat(['synthetics', 'system'])
+        expect(body.integrations.map((integration: Integration) => integration.name).sort()).to.eql(
+          preExistingIntegrations.concat(['synthetics', 'system']).sort()
         );
 
         expect(
@@ -125,17 +125,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
         });
 
-        expect(body.integrations.map((integration: Integration) => integration.name)).to.eql(
-          preExistingIntegrations.concat('my.custom.integration')
+        expect(body.integrations.map((integration: Integration) => integration.name).sort()).to.eql(
+          preExistingIntegrations.concat('my.custom.integration').sort()
         );
 
         expect(
-          body.integrations.find(
-            (integration: Integration) => integration.name === 'my.custom.integration'
-          ).datasets
-        ).to.eql({
-          'my.custom.integration': 'My.custom.integration',
-        });
+          Object.entries(
+            body.integrations.find(
+              (integration: Integration) => integration.name === 'my.custom.integration'
+            ).datasets
+          ).sort()
+        ).to.eql(Object.entries({ 'my.custom.integration': 'My.custom.integration' }).sort());
       });
 
       after(
