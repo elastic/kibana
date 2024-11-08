@@ -104,9 +104,9 @@ export function LensRenderer({
       panelProps={{
         hideInspector: !showInspector,
         hideHeader: showPanelChrome,
-        showNotifications: showPanelChrome,
-        showShadow: showPanelChrome,
-        showBadges: showPanelChrome,
+        showNotifications: false,
+        showShadow: false,
+        showBadges: false,
       }}
     />
   );
