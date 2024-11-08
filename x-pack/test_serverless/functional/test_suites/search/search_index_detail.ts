@@ -152,6 +152,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.svlSearchIndexDetailPage.expectQuickStatsToHaveDocumentCount(0);
           });
         });
+        describe('has index actions enabled', async() =>{
+          before(async () => {
+            await es.index({
+              index: indexName,
+              body: {
+                my_field: [1, 0, 1],
+              },
+            });
+            await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+        });
+
+          beforeEach(async () => {
+            await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+          });
+
+          it('delete document button is enabled', async () => {
+            await pageObjects.svlSearchIndexDetailPage.expectDeleteDocumentActionToBeEnabled();
+          });
+          it('add field button is enabled', async () => {
+            await pageObjects.svlSearchIndexDetailPage.changeTab('mappingsTab');
+            await pageObjects.svlSearchIndexDetailPage.expectAddFieldToBeEnabled();
+          });
+          it('edit settings button is enabled', async () => {
+            await pageObjects.svlSearchIndexDetailPage.changeTab('settingsTab');
+            await pageObjects.svlSearchIndexDetailPage.expectEditSettingsToBeEnabled();
+          });
+          it('delete index button is enabled', async () => {
+            await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsActionButtonExists();
+            await pageObjects.svlSearchIndexDetailPage.clickMoreOptionsActionsButton();
+            await pageObjects.svlSearchIndexDetailPage.expectMoreOptionsOverviewMenuIsShown();
+            await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();
+            await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonToBeEnabled();
+          });
+        })
 
         describe('page loading error', () => {
           before(async () => {

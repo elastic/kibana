@@ -107,6 +107,11 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.moveMouseTo('moreOptionsDeleteIndex');
       await testSubjects.existOrFail('moreOptionsDeleteIndexTooltip');
     },
+    async expectDeleteIndexButtonToBeEnabled() {
+      await testSubjects.existOrFail('moreOptionsDeleteIndex');
+      const deleteIndexButton = await testSubjects.isEnabled('moreOptionsDeleteIndex');
+      expect(deleteIndexButton).to.be(true);
+    },
     async expectDeleteIndexButtonExistsInMoreOptions() {
       await testSubjects.existOrFail('moreOptionsDeleteIndex');
     },
@@ -164,6 +169,13 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.moveMouseTo('indexDetailsSettingsEditModeSwitch');
       await testSubjects.existOrFail('indexDetailsSettingsEditModeSwitchToolTip');
     },
+    async expectEditSettingsToBeEnabled() {
+      await testSubjects.existOrFail('indexDetailsSettingsEditModeSwitch', { timeout: 2000 });
+      const isEditSettingsButtonDisabled = await testSubjects.isEnabled(
+        'indexDetailsSettingsEditModeSwitch'
+      );
+      expect(isEditSettingsButtonDisabled).to.be(true);
+    },
     async expectSelectedLanguage(language: string) {
       await testSubjects.existOrFail('codeExampleLanguageSelect');
       expect(
@@ -216,6 +228,13 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.moveMouseTo('deleteDocumentButton');
       await testSubjects.existOrFail('deleteDocumentButtonToolTip');
     },
+    async expectDeleteDocumentActionToBeEnabled() {
+      await testSubjects.existOrFail('documentMetadataButton');
+      await testSubjects.click('documentMetadataButton');
+      await testSubjects.existOrFail('deleteDocumentButton');
+      const isDeleteDocumentEnabled = await testSubjects.isEnabled('deleteDocumentButton');
+      expect(isDeleteDocumentEnabled).to.be(true);
+    },
 
     async openIndicesDetailFromIndexManagementIndicesListTable(indexOfRow: number) {
       const indexList = await testSubjects.findAll('indexTableIndexNameLink');
@@ -251,6 +270,12 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       expect(isMappingsFieldEnabled).to.be(false);
       await testSubjects.moveMouseTo('indexDetailsMappingsAddField');
       await testSubjects.existOrFail('indexDetailsMappingsAddFieldTooltip');
+    },
+
+    async expectAddFieldToBeEnabled() {
+      await testSubjects.existOrFail('indexDetailsMappingsAddField');
+      const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
+      expect(isMappingsFieldEnabled).to.be(true);
     },
   };
 }

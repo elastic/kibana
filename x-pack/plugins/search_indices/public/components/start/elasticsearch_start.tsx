@@ -56,12 +56,13 @@ export interface ElasticsearchStartProps {
 
 export const ElasticsearchStart: React.FC<ElasticsearchStartProps> = () => {
   const { cloud, http } = useKibana().services;
-  const { data: userPrivileges } = useUserPrivilegesQuery(initCreateIndexState().indexName);
+  const [formState, setFormState] = useState<CreateIndexFormState>(initCreateIndexState);
+  const { data: userPrivileges } = useUserPrivilegesQuery(formState.indexName);
 
   const [createIndexView, setCreateIndexView] = useState<CreateIndexView>(
     userPrivileges?.privileges.canManageIndex === false ? CreateIndexView.Code : CreateIndexView.UI
   );
-  const [formState, setFormState] = useState<CreateIndexFormState>(initCreateIndexState);
+
   const usageTracker = useUsageTracker();
 
   useEffect(() => {

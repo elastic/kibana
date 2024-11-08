@@ -12,7 +12,6 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { fetchIndicesStatus, fetchUserStartPrivileges } from './status';
-import { generateRandomIndexName } from '../../public/utils/indices';
 
 const mockLogger = {
   warn: jest.fn(),
@@ -117,7 +116,7 @@ describe('status api lib', function () {
   });
 
   describe('fetchUserStartPrivileges', function () {
-    const testIndexName = generateRandomIndexName();
+    const testIndexName = 'search-zbd1'
     it('should return privileges true', async () => {
       const result: SecurityHasPrivilegesResponse = {
         application: {},
