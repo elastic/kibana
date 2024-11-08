@@ -67,10 +67,21 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
     entityStore: !!entityStore.checked,
   });
   const { data: privileges, isLoading: isLoadingPrivileges } = useEntityEnginePrivileges();
+  const enablementOptions = enablements.riskScore || enablements.entityStore;
 
   if (!visible) {
     return null;
   }
+  const proceedWarning = (
+    <EuiCallOut
+      color="danger"
+      css={css`
+        border-radius: ${euiTheme.border.radius.medium};
+      `}
+    >
+      <p>{ENABLEMENT_WARNING_SELECT_TO_PROCEED}</p>
+    </EuiCallOut>
+  );
   return (
     <EuiModal onClose={() => toggle(false)}>
       <EuiModalHeader>
@@ -137,16 +148,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
 
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem>
-            <EuiCallOut
-              color="danger"
-              css={css`
-                border-radius: ${euiTheme.border.radius.medium};
-              `}
-            >
-              <p>{ENABLEMENT_WARNING_SELECT_TO_PROCEED}</p>
-            </EuiCallOut>
-          </EuiFlexItem>
+          <EuiFlexItem>{!enablementOptions && proceedWarning}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="row">
               <EuiButtonEmpty onClick={() => toggle(false)}>{'Cancel'}</EuiButtonEmpty>
