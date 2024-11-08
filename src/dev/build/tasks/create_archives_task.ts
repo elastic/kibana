@@ -13,7 +13,7 @@ import { promisify } from 'util';
 
 import { CiStatsMetric } from '@kbn/ci-stats-reporter';
 
-import { mkdirp, compressTar, compressZip, Task } from '../lib';
+import { mkdirp, exec, compressTar, compressZip, Task } from '../lib';
 
 const asyncStat = promisify(Fs.stat);
 
@@ -67,6 +67,35 @@ export const CreateArchives: Task = {
               createRootDirectory: true,
               rootDirectoryName: build.getRootDirectory(),
             }),
+          });
+          break;
+        case '.zst':
+          const basename = Path.basename(source);
+          const dirname = Path.dirname(source);
+          await exec(
+            log,
+            'tar',
+            [
+              '-c',
+              '-I',
+              'zstd -19 -T0',
+              '-f',
+              destination,
+              basename,
+              '--transform',
+              `s/${basename}/${build.getRootDirectory()}/`,
+            ],
+            {
+              level: 'info',
+              cwd: dirname,
+            }
+          );
+          archives.push({
+            format: 'tar.zst',
+            path: destination,
+            fileCount: Fs.readdirSync(source, { recursive: true, withFileTypes: true }).filter(
+              (f) => f.isFile()
+            ).length,
           });
           break;
 

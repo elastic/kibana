@@ -41,6 +41,7 @@ interface Options {
   withExamplePlugins: boolean;
   withTestPlugins: boolean;
   downloadFreshNode: boolean;
+  tarZstd: boolean;
 }
 
 export class Config {
@@ -72,7 +73,8 @@ export class Config {
       {
         examples: opts.withExamplePlugins,
         testPlugins: opts.withTestPlugins,
-      }
+      },
+      opts.tarZstd
     );
   }
 
@@ -93,7 +95,8 @@ export class Config {
     private readonly dockerPush: boolean,
     public readonly isRelease: boolean,
     public readonly downloadFreshNode: boolean,
-    public readonly pluginSelector: PluginSelector
+    public readonly pluginSelector: PluginSelector,
+    public readonly tarZstd: boolean
   ) {
     this.pluginFilter = getPluginPackagesFilter(this.pluginSelector);
   }
@@ -274,5 +277,9 @@ export class Config {
 
   getDistPluginsFromRepo() {
     return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
+  }
+
+  getTarZstd() {
+    return this.tarZstd;
   }
 }
