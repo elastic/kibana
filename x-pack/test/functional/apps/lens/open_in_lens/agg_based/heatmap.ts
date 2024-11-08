@@ -18,10 +18,8 @@ export default function ({ getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('Heatmap', function describeIndexTests() {
-    const isNewChartsLibraryEnabled = true;
-
     before(async () => {
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
     });
 
     beforeEach(async () => {
