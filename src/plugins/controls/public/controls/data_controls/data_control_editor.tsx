@@ -452,7 +452,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             <EuiButton
               aria-label={`save-${editorState.title ?? editorState.fieldName}`}
               data-test-subj="control-editor-save"
-              iconType="check"
+              fill
               color="primary"
               disabled={
                 !(
