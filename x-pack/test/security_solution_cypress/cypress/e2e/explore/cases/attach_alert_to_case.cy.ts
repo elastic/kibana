@@ -25,8 +25,7 @@ const loadDetectionsPage = (role: SecurityRoleName) => {
   waitForAlertsToPopulate();
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/191819
-describe.skip('Alerts timeline', { tags: ['@ess'] }, () => {
+describe('Alerts timeline', () => {
   beforeEach(() => {
     // First we login as a privileged user to create alerts.
     deleteAlertsAndRules();
@@ -36,7 +35,7 @@ describe.skip('Alerts timeline', { tags: ['@ess'] }, () => {
     waitForAlertsToPopulate();
   });
 
-  context('Privileges: read only', () => {
+  context('Privileges: read only', { tags: ['@ess'] }, () => {
     beforeEach(() => {
       loadDetectionsPage(ROLES.reader);
     });
@@ -52,7 +51,7 @@ describe.skip('Alerts timeline', { tags: ['@ess'] }, () => {
     });
   });
 
-  context('Privileges: can crud', () => {
+  context('Privileges: can crud', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       loadDetectionsPage(ROLES.platform_engineer);
       cy.get(LOADING_INDICATOR).should('not.exist');
