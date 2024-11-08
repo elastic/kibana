@@ -6,15 +6,13 @@
  */
 
 import { InferenceClient } from '@kbn/inference-plugin/server';
-import { withoutOutputUpdateEvents } from '@kbn/inference-common';
 import { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import { lastValueFrom } from 'rxjs';
 import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
 import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
-import { getInvestigateEntityTaskPrompt } from '../investigate_entity/prompts';
 import { formatEntity } from '../../util/format_entity';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
+import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import { getInvestigateEntityTaskPrompt } from '../investigate_entity/prompts';
 
 export async function describeEntity({
   inferenceClient,
@@ -65,15 +63,12 @@ export async function describeEntity({
     You shouldn't mention the log patterns, they will be analyzed elsewhere.
   `;
 
-  const response = await lastValueFrom(
-    inferenceClient
-      .output('describe_entity', {
-        connectorId,
-        system,
-        input,
-      })
-      .pipe(withoutOutputUpdateEvents())
-  );
+  const response = await inferenceClient.output({
+    id: 'describe_entity',
+    connectorId,
+    system,
+    input,
+  });
 
   return response.content;
 }

@@ -6,16 +6,14 @@
  */
 
 import { InferenceClient } from '@kbn/inference-plugin/server';
-import { withoutOutputUpdateEvents } from '@kbn/inference-common';
 import { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import { lastValueFrom } from 'rxjs';
 import { omit, partition, sumBy } from 'lodash';
 import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
-import { getInvestigateEntityTaskPrompt } from '../investigate_entity/prompts';
 import { formatEntity } from '../../util/format_entity';
-import { AnalyzedLogPattern } from '../analyze_log_patterns';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
+import { AnalyzedLogPattern } from '../analyze_log_patterns';
 import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import { getInvestigateEntityTaskPrompt } from '../investigate_entity/prompts';
 
 export interface LogPatternDescription {
   content: string;
@@ -177,15 +175,12 @@ export async function describeLogPatterns({
    for ${stats.ignoredDocCount} out of the total amount of logs
   `;
 
-  const response = await lastValueFrom(
-    inferenceClient
-      .output('describe_log_patterns', {
-        connectorId,
-        system,
-        input,
-      })
-      .pipe(withoutOutputUpdateEvents())
-  );
+  const response = await inferenceClient.output({
+    id: 'describe_log_patterns',
+    connectorId,
+    system,
+    input,
+  });
 
   return {
     ...stats,

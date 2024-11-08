@@ -98,6 +98,7 @@ export function callTools(
   const chatComplete$ = defer(() =>
     inferenceClient.chatComplete({
       connectorId,
+      stream: true,
       ...nextRequest,
     })
   );

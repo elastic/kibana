@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { withoutOutputUpdateEvents } from '@kbn/inference-common';
 import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
 import { formatValueForKql } from '@kbn/observability-utils-common/es/format_value_for_kql';
 import type { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
@@ -18,7 +17,6 @@ import {
   getLogPatterns,
 } from '@kbn/observability-utils-server/entities/get_log_patterns';
 import { castArray, compact, groupBy, orderBy } from 'lodash';
-import { last, lastValueFrom, map } from 'rxjs';
 import { RCA_PROMPT_CHANGES, RCA_PROMPT_ENTITIES } from '../../prompts';
 import { RootCauseAnalysisContext } from '../../types';
 import { formatEntity } from '../../util/format_entity';
@@ -196,12 +194,12 @@ export async function analyzeLogPatterns({
   };
 
   function categorizeOwnPatterns() {
-    return lastValueFrom(
-      inferenceClient
-        .output('analyze_log_patterns', {
-          connectorId,
-          system: systemPrompt,
-          input: `Based on the following log patterns from
+    return inferenceClient
+      .output({
+        id: 'analyze_log_patterns',
+        connectorId,
+        system: systemPrompt,
+        input: `Based on the following log patterns from
             ${formatEntity(entity)}, group these patterns into
             the following categories:
 
@@ -214,58 +212,53 @@ export async function analyzeLogPatterns({
 
             ${preparePatternsForLlm(logPatternsFromEntity)}
           `,
-          schema: {
-            type: 'object',
-            properties: {
-              categories: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    relevance: {
+        schema: {
+          type: 'object',
+          properties: {
+            categories: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  relevance: {
+                    type: 'string',
+                    enum: ['normal', 'unusual', 'warning', 'critical'],
+                  },
+                  shortIds: {
+                    type: 'array',
+                    description:
+                      'The pattern IDs you want to group here. Use the pattern short ID.',
+                    items: {
                       type: 'string',
-                      enum: ['normal', 'unusual', 'warning', 'critical'],
-                    },
-                    shortIds: {
-                      type: 'array',
-                      description:
-                        'The pattern IDs you want to group here. Use the pattern short ID.',
-                      items: {
-                        type: 'string',
-                      },
                     },
                   },
-                  required: ['relevance', 'shortIds'],
                 },
+                required: ['relevance', 'shortIds'],
               },
             },
-            required: ['categories'],
-          } as const,
-        })
-        .pipe(
-          last(),
-          withoutOutputUpdateEvents(),
-          map((outputEvent) => {
-            return outputEvent.output.categories.flatMap((category) => {
-              return mapIdsBackToPatterns(category.shortIds).map((pattern) => {
-                return {
-                  ...pattern,
-                  relevance: category.relevance,
-                };
-              });
-            });
-          })
-        )
-    );
+          },
+          required: ['categories'],
+        } as const,
+      })
+      .then((outputEvent) => {
+        return outputEvent.output.categories.flatMap((category) => {
+          return mapIdsBackToPatterns(category.shortIds).map((pattern) => {
+            return {
+              ...pattern,
+              relevance: category.relevance,
+            };
+          });
+        });
+      });
   }
 
   function selectRelevantPatternsFromOtherEntities() {
-    return lastValueFrom(
-      inferenceClient
-        .output('select_relevant_patterns_from_other_entities', {
-          connectorId,
-          system: systemPrompt,
-          input: `Based on the following log patterns that
+    return inferenceClient
+      .output({
+        id: 'select_relevant_patterns_from_other_entities',
+        connectorId,
+        system: systemPrompt,
+        input: `Based on the following log patterns that
             are NOT from ${serializedOwnEntity}, group these
             patterns into the following categories:
 
@@ -289,54 +282,49 @@ export async function analyzeLogPatterns({
 
             ${preparePatternsForLlm(logPatternsFromElsewhere)}
           `,
-          schema: {
-            type: 'object',
-            properties: {
-              categories: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    relevance: {
+        schema: {
+          type: 'object',
+          properties: {
+            categories: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  relevance: {
+                    type: 'string',
+                    enum: ['irrelevant', 'normal', 'unusual', 'warning', 'critical'],
+                  },
+                  shortIds: {
+                    type: 'array',
+                    description:
+                      'The pattern IDs you want to group here. Use the pattern short ID.',
+                    items: {
                       type: 'string',
-                      enum: ['irrelevant', 'normal', 'unusual', 'warning', 'critical'],
-                    },
-                    shortIds: {
-                      type: 'array',
-                      description:
-                        'The pattern IDs you want to group here. Use the pattern short ID.',
-                      items: {
-                        type: 'string',
-                      },
                     },
                   },
-                  required: ['relevance', 'shortIds'],
                 },
+                required: ['relevance', 'shortIds'],
               },
             },
-            required: ['categories'],
-          } as const,
-        })
-        .pipe(
-          withoutOutputUpdateEvents(),
-          last(),
-          map((outputEvent) => {
-            return outputEvent.output.categories.flatMap((category) => {
-              return mapIdsBackToPatterns(category.shortIds).flatMap((pattern) => {
-                if (category.relevance === 'irrelevant') {
-                  return [];
-                }
-                return [
-                  {
-                    ...pattern,
-                    relevance: category.relevance,
-                  },
-                ];
-              });
-            });
-          })
-        )
-    );
+          },
+          required: ['categories'],
+        } as const,
+      })
+      .then((outputEvent) => {
+        return outputEvent.output.categories.flatMap((category) => {
+          return mapIdsBackToPatterns(category.shortIds).flatMap((pattern) => {
+            if (category.relevance === 'irrelevant') {
+              return [];
+            }
+            return [
+              {
+                ...pattern,
+                relevance: category.relevance,
+              },
+            ];
+          });
+        });
+      });
   }
 
   function preparePatternsForLlm(patterns: FieldPatternResultWithChanges[]): string {

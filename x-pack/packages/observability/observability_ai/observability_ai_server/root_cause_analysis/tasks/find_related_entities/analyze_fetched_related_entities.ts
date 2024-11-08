@@ -6,33 +6,31 @@
  */
 
 import { InferenceClient } from '@kbn/inference-plugin/server';
-import { withoutOutputUpdateEvents } from '@kbn/inference-common';
-import pLimit from 'p-limit';
-import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
-import { sortAndTruncateAnalyzedFields } from '@kbn/observability-utils-common/llm/log_analysis/sort_and_truncate_analyzed_fields';
-import { lastValueFrom } from 'rxjs';
-import { chunk, isEmpty, isEqual } from 'lodash';
 import { Logger } from '@kbn/logging';
+import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
 import {
   DocumentAnalysis,
   TruncatedDocumentAnalysis,
 } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { rangeQuery } from '@kbn/observability-utils-server/es/queries/range_query';
+import { sortAndTruncateAnalyzedFields } from '@kbn/observability-utils-common/llm/log_analysis/sort_and_truncate_analyzed_fields';
 import { analyzeDocuments } from '@kbn/observability-utils-server/entities/analyze_documents';
-import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';
 import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
+import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';
+import { rangeQuery } from '@kbn/observability-utils-server/es/queries/range_query';
+import { chunk, isEmpty, isEqual } from 'lodash';
+import pLimit from 'p-limit';
 import {
-  RCA_SYSTEM_PROMPT_BASE,
   RCA_PROMPT_DEPENDENCIES,
   RCA_PROMPT_ENTITIES,
+  RCA_SYSTEM_PROMPT_BASE,
 } from '../../prompts';
-import { formatEntity } from '../../util/format_entity';
 import { chunkOutputCalls } from '../../util/chunk_output_calls';
-import { toBlockquote } from '../../util/to_blockquote';
-import { RelatedEntityKeywordSearch } from './write_keyword_searches_for_related_entities';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import { formatEntity } from '../../util/format_entity';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
+import { toBlockquote } from '../../util/to_blockquote';
+import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import { RelatedEntityKeywordSearch } from './write_keyword_searches_for_related_entities';
 
 export interface RelatedEntityFromSearchResults {
   entity: { [x: string]: string };
@@ -282,21 +280,18 @@ export async function analyzeFetchedRelatedEntities({
 
   const allRelevantEntityDescriptions = await Promise.all(
     requests.map(async (request) => {
-      const outputCompleteEvent = await lastValueFrom(
-        inferenceClient
-          .output('describe_relevant_entities', {
-            connectorId,
-            system: request.system,
-            input: `${inputPromptBase}
+      const outputCompleteEvent = await inferenceClient.output({
+        id: 'describe_relevant_entities',
+        connectorId,
+        system: request.system,
+        input: `${inputPromptBase}
           
           # Found entities
 
           ${request.texts.map((text) => text.text).join('\n\n')}
 
           ${inputPromptInstructions}`,
-          })
-          .pipe(withoutOutputUpdateEvents())
-      );
+      });
 
       return outputCompleteEvent.content;
     })

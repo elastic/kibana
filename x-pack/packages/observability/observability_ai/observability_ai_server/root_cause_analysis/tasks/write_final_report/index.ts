@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { withoutOutputUpdateEvents } from '@kbn/inference-common';
-import { lastValueFrom, map } from 'rxjs';
 import { RCA_PROMPT_TIMELINE_GUIDE, RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { RootCauseAnalysisContext } from '../../types';
 import { stringifySummaries } from '../../util/stringify_summaries';
@@ -178,20 +176,16 @@ export async function writeFinalReport({
 }): Promise<string> {
   const { inferenceClient, connectorId } = rcaContext;
 
-  return await lastValueFrom(
-    inferenceClient
-      .output('write_final_report', {
-        connectorId,
-        system: `${RCA_SYSTEM_PROMPT_BASE}
+  return await inferenceClient
+    .output({
+      id: 'write_final_report',
+      connectorId,
+      system: `${RCA_SYSTEM_PROMPT_BASE}
         
         ${SYSTEM_PROMPT_ADDENDUM}`,
-        input: `Write the RCA report, based on the observations.
+      input: `Write the RCA report, based on the observations.
         
         ${stringifySummaries(rcaContext)}`,
-      })
-      .pipe(
-        withoutOutputUpdateEvents(),
-        map((event) => event.content)
-      )
-  );
+    })
+    .then((event) => event.content);
 }

@@ -6,14 +6,11 @@
  */
 
 import { InferenceClient } from '@kbn/inference-plugin/server';
-import { withoutOutputUpdateEvents } from '@kbn/inference-common';
-import { lastValueFrom } from 'rxjs';
-import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
-import { getInvestigateEntityTaskPrompt } from '../investigate_entity/prompts';
-import { toBlockquote } from '../../util/to_blockquote';
+import { RCA_PROMPT_SIGNIFICANT_EVENTS, RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';
-import { RCA_PROMPT_SIGNIFICANT_EVENTS } from '../../prompts';
+import { toBlockquote } from '../../util/to_blockquote';
 import { LogPatternDescription } from '../describe_log_patterns';
+import { getInvestigateEntityTaskPrompt } from '../investigate_entity/prompts';
 
 export async function writeEntityInvestigationReport({
   inferenceClient,
@@ -76,15 +73,12 @@ export async function writeEntityInvestigationReport({
     `;
   }
 
-  const response = await lastValueFrom(
-    inferenceClient
-      .output('generate_entity_report', {
-        connectorId,
-        input,
-        system,
-      })
-      .pipe(withoutOutputUpdateEvents())
-  );
+  const response = await inferenceClient.output({
+    id: 'generate_entity_report',
+    connectorId,
+    input,
+    system,
+  });
 
   return response.content;
 }

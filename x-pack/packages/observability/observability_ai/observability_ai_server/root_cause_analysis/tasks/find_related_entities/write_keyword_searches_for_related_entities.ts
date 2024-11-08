@@ -6,15 +6,13 @@
  */
 
 import { InferenceClient } from '@kbn/inference-plugin/server';
-import { withoutOutputUpdateEvents } from '@kbn/inference-common';
-import { lastValueFrom } from 'rxjs';
 import { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
 import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
-import { RCA_SYSTEM_PROMPT_BASE, RCA_PROMPT_ENTITIES } from '../../prompts';
-import { toBlockquote } from '../../util/to_blockquote';
+import { RCA_PROMPT_ENTITIES, RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
+import { toBlockquote } from '../../util/to_blockquote';
+import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 
 const SYSTEM_PROMPT_ADDENDUM = `# Guide: Constructing Keyword Searches to Find Related Entities
 
@@ -139,14 +137,14 @@ export async function writeKeywordSearchForRelatedEntities({
       )
     : 'No log patterns found';
 
-  const outputCompleteEvent$ = await lastValueFrom(
-    inferenceClient
-      .output('extract_keyword_searches', {
-        connectorId,
-        system: `${RCA_SYSTEM_PROMPT_BASE}
+  return inferenceClient
+    .output({
+      id: 'extract_keyword_searches',
+      connectorId,
+      system: `${RCA_SYSTEM_PROMPT_BASE}
 
         ${RCA_PROMPT_ENTITIES}`,
-        input: `Your current task is to to extract keyword searches
+      input: `Your current task is to to extract keyword searches
         to find related entities to the entity ${formatEntity(entity)},
         based on the following context:
 
@@ -164,41 +162,38 @@ export async function writeKeywordSearchForRelatedEntities({
 
         ## Instructions
         ${SYSTEM_PROMPT_ADDENDUM}`,
-        schema: {
-          type: 'object',
-          properties: {
-            groupingFields: {
-              type: 'array',
-              items: {
-                type: 'string',
-              },
-            },
-            searches: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  fragments: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                    },
-                  },
-                  appearsAs: {
-                    type: 'string',
-                    description:
-                      'Describe in what fields these values appear as in the investigated entity. You can mention multiple fields if applicable',
-                  },
-                },
-                required: ['fragments', 'appearsAs'],
-              },
+      schema: {
+        type: 'object',
+        properties: {
+          groupingFields: {
+            type: 'array',
+            items: {
+              type: 'string',
             },
           },
-          required: ['searches', 'groupingFields'],
-        } as const,
-      })
-      .pipe(withoutOutputUpdateEvents())
-  );
-
-  return outputCompleteEvent$.output;
+          searches: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                fragments: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                  },
+                },
+                appearsAs: {
+                  type: 'string',
+                  description:
+                    'Describe in what fields these values appear as in the investigated entity. You can mention multiple fields if applicable',
+                },
+              },
+              required: ['fragments', 'appearsAs'],
+            },
+          },
+        },
+        required: ['searches', 'groupingFields'],
+      } as const,
+    })
+    .then((event) => event.output);
 }

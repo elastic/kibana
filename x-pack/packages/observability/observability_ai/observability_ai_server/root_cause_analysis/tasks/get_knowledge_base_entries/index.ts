@@ -6,12 +6,10 @@
  */
 
 import { ShortIdTable } from '@kbn/observability-ai-assistant-plugin/common';
-import { lastValueFrom } from 'rxjs';
-import { withoutOutputUpdateEvents } from '@kbn/inference-common';
-import { encode, decode } from 'gpt-tokenizer';
+import { decode, encode } from 'gpt-tokenizer';
 import { orderBy, sumBy } from 'lodash';
-import { RootCauseAnalysisContext } from '../../types';
 import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
+import { RootCauseAnalysisContext } from '../../types';
 import { formatEntity } from '../../util/format_entity';
 import { toBlockquote } from '../../util/to_blockquote';
 
@@ -69,7 +67,7 @@ export async function getKnowledgeBaseEntries({
 
   const maxTokensForScoring = rcaContext.tokenLimit - encode(system + input).length - 1_000;
 
-  const entriesWithTokens = response.entries.map((entry) => {
+  const entriesWithTokens = response.map((entry) => {
     return {
       id: entry.id,
       text: entry.text,
@@ -97,12 +95,11 @@ export async function getKnowledgeBaseEntries({
     };
   });
 
-  const scoredEntries = await lastValueFrom(
-    inferenceClient
-      .output('rescore_kb_entries', {
-        connectorId,
-        system: RCA_SYSTEM_PROMPT_BASE,
-        input: `${input}
+  const scoredEntries = await inferenceClient.output({
+    id: 'score_entries',
+    connectorId,
+    system: RCA_SYSTEM_PROMPT_BASE,
+    input: `${input}
         
         ${truncatedEntriesWithShortIds
           .map((entry) => {
@@ -115,32 +112,31 @@ export async function getKnowledgeBaseEntries({
           })
           .join('\n\n')}
         `,
-        schema: {
-          type: 'object',
-          properties: {
-            docs: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  score: {
-                    type: 'number',
-                    description:
-                      'A score between 1 and 5, with 5 being most relevant, and 1 being least relevant',
-                  },
-                  id: {
-                    type: 'string',
-                  },
-                },
-                required: ['score', 'id'],
+    stream: false,
+    schema: {
+      type: 'object',
+      properties: {
+        docs: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              score: {
+                type: 'number',
+                description:
+                  'A score between 1 and 5, with 5 being most relevant, and 1 being least relevant',
+              },
+              id: {
+                type: 'string',
               },
             },
+            required: ['score', 'id'],
           },
-          required: ['docs'],
         },
-      } as const)
-      .pipe(withoutOutputUpdateEvents())
-  );
+      },
+      required: ['docs'],
+    },
+  } as const);
 
   const scoresById = new Map(scoredEntries.output.docs.map((doc) => [doc.id, doc.score]));
 

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { MessageRole, withoutOutputUpdateEvents } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import { RCA_OBSERVE_TOOL_NAME } from '@kbn/observability-ai-common/root_cause_analysis';
-import { lastValueFrom, map } from 'rxjs';
 import { RCA_PROMPT_CHANGES, RCA_PROMPT_ENTITIES, RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { ObservationToolMessage, RootCauseAnalysisContext } from '../../types';
 import { formatEntity } from '../../util/format_entity';
@@ -224,21 +223,17 @@ export function observeInvestigationResults({
     ? getObserveInvestigationsPrompts({ summaries, investigations, rcaContext })
     : getInitialPrompts(initialContext);
 
-  return lastValueFrom(
-    inferenceClient
-      .output('observe', {
-        system,
-        input,
-        connectorId,
-      })
-      .pipe(
-        withoutOutputUpdateEvents(),
-        map((outputCompleteEvent) => {
-          return {
-            content: outputCompleteEvent.content,
-            investigations,
-          };
-        })
-      )
-  );
+  return inferenceClient
+    .output({
+      id: 'observe',
+      system,
+      input,
+      connectorId,
+    })
+    .then((outputCompleteEvent) => {
+      return {
+        content: outputCompleteEvent.content,
+        investigations,
+      };
+    });
 }

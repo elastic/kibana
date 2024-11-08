@@ -73,6 +73,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
       chatCompleteApi({
         connectorId,
         functionCalling,
+        stream: true,
         system: `${systemMessage}
 
           # Current task

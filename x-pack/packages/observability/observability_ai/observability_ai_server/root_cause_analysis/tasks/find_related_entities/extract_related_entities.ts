@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { withoutOutputUpdateEvents } from '@kbn/inference-common';
-import { lastValueFrom } from 'rxjs';
 import stringify from 'json-stable-stringify';
 import pLimit from 'p-limit';
+import { RelatedEntityFromSearchResults } from '.';
 import {
-  RCA_SYSTEM_PROMPT_BASE,
   RCA_PROMPT_DEPENDENCIES,
   RCA_PROMPT_ENTITIES,
+  RCA_SYSTEM_PROMPT_BASE,
 } from '../../prompts';
-import { formatEntity } from '../../util/format_entity';
-import { RelatedEntityFromSearchResults } from '.';
 import { RootCauseAnalysisContext } from '../../types';
+import { formatEntity } from '../../util/format_entity';
 import { getPreviouslyInvestigatedEntities } from '../../util/get_previously_investigated_entities';
 import { toBlockquote } from '../../util/to_blockquote';
 
@@ -90,53 +88,49 @@ export async function extractRelatedEntities({
   const allEvents = await Promise.all(
     prompts.map(async (input) => {
       const completeEvent = await limiter(() =>
-        lastValueFrom(
-          inferenceClient
-            .output('get_entity_relationships', {
-              connectorId,
-              system,
-              input,
-              schema: {
-                type: 'object',
-                properties: {
-                  related_entities: {
-                    type: 'array',
-                    items: {
+        inferenceClient.output({
+          id: 'get_entity_relationships',
+          connectorId,
+          system,
+          input,
+          schema: {
+            type: 'object',
+            properties: {
+              related_entities: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    entity: {
                       type: 'object',
                       properties: {
-                        entity: {
-                          type: 'object',
-                          properties: {
-                            field: {
-                              type: 'string',
-                            },
-                            value: {
-                              type: 'string',
-                            },
-                          },
-                          required: ['field', 'value'],
-                        },
-                        reason: {
+                        field: {
                           type: 'string',
-                          description:
-                            'Describe why this entity might be relevant. Provide evidence.',
                         },
-                        confidence: {
+                        value: {
                           type: 'string',
-                          description:
-                            'Describe how confident you are in your conclusion about this relationship: low, moderate, high',
                         },
                       },
-
-                      required: ['entity', 'reason', 'confidence'],
+                      required: ['field', 'value'],
+                    },
+                    reason: {
+                      type: 'string',
+                      description: 'Describe why this entity might be relevant. Provide evidence.',
+                    },
+                    confidence: {
+                      type: 'string',
+                      description:
+                        'Describe how confident you are in your conclusion about this relationship: low, moderate, high',
                     },
                   },
+
+                  required: ['entity', 'reason', 'confidence'],
                 },
-                required: ['related_entities'],
-              } as const,
-            })
-            .pipe(withoutOutputUpdateEvents())
-        )
+              },
+            },
+            required: ['related_entities'],
+          } as const,
+        })
       );
       return completeEvent.output;
     })
