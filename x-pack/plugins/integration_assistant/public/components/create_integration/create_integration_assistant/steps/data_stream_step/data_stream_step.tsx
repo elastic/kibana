@@ -53,8 +53,14 @@ interface DataStreamStepProps {
 }
 export const DataStreamStep = React.memo<DataStreamStepProps>(
   ({ integrationSettings, connector, isGenerating }) => {
-    const { setIntegrationSettings, setIsGenerating, setHasCelInput, setStep, setResult } =
-      useActions();
+    const {
+      setIntegrationSettings,
+      setIsGenerating,
+      setHasCelInput,
+      setStep,
+      setResult,
+      completeStep,
+    } = useActions();
     const { isLoading: isLoadingPackageNames, packageNames } = useLoadPackageNames(); // this is used to avoid duplicate names
 
     const [name, setName] = useState<string>(integrationSettings?.name ?? '');
@@ -150,14 +156,21 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="dataStreamStep">
-        <EuiFlexItem>
-          <StepContentWrapper
-            title={i18n.INTEGRATION_NAME_TITLE}
-            subtitle={i18n.INTEGRATION_NAME_DESCRIPTION}
-          >
-            <EuiPanel hasShadow={false} hasBorder>
-              <EuiForm component="form" fullWidth>
+      <EuiForm
+        component="form"
+        fullWidth
+        onSubmit={(e) => {
+          e.preventDefault();
+          completeStep();
+        }}
+      >
+        <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="dataStreamStep">
+          <EuiFlexItem>
+            <StepContentWrapper
+              title={i18n.INTEGRATION_NAME_TITLE}
+              subtitle={i18n.INTEGRATION_NAME_DESCRIPTION}
+            >
+              <EuiPanel hasShadow={false} hasBorder>
                 <EuiFormRow
                   label={i18n.INTEGRATION_NAME_LABEL}
                   helpText={
@@ -176,18 +189,16 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                     disabled={isLoadingPackageNames}
                   />
                 </EuiFormRow>
-              </EuiForm>
-            </EuiPanel>
-          </StepContentWrapper>
-        </EuiFlexItem>
+              </EuiPanel>
+            </StepContentWrapper>
+          </EuiFlexItem>
 
-        <EuiFlexItem>
-          <StepContentWrapper
-            title={i18n.DATA_STREAM_TITLE}
-            subtitle={i18n.DATA_STREAM_DESCRIPTION}
-          >
-            <EuiPanel hasShadow={false} hasBorder>
-              <EuiForm component="form" fullWidth>
+          <EuiFlexItem>
+            <StepContentWrapper
+              title={i18n.DATA_STREAM_TITLE}
+              subtitle={i18n.DATA_STREAM_DESCRIPTION}
+            >
+              <EuiPanel hasShadow={false} hasBorder>
                 <EuiFormRow label={i18n.DATA_STREAM_TITLE_LABEL}>
                   <EuiFieldText
                     name="dataStreamTitle"
@@ -228,19 +239,19 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                   />
                 </EuiFormRow>
                 <SampleLogsInput integrationSettings={integrationSettings} />
-              </EuiForm>
-            </EuiPanel>
-          </StepContentWrapper>
-          {isGenerating && (
-            <GenerationModal
-              integrationSettings={integrationSettings}
-              connector={connector}
-              onComplete={onGenerationCompleted}
-              onClose={onGenerationClosed}
-            />
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              </EuiPanel>
+            </StepContentWrapper>
+            {isGenerating && (
+              <GenerationModal
+                integrationSettings={integrationSettings}
+                connector={connector}
+                onComplete={onGenerationCompleted}
+                onClose={onGenerationClosed}
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiForm>
     );
   }
 );

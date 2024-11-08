@@ -6,12 +6,18 @@
  */
 
 import React from 'react';
-import { useEuiTheme, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiRadio } from '@elastic/eui';
-import { noop } from 'lodash/fp';
+import {
+  useEuiTheme,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiRadio,
+  EuiFormFieldset,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { AIConnector } from '../../types';
-import { useActions } from '../../state';
 
 const useRowCss = () => {
   const { euiTheme } = useEuiTheme();
@@ -36,54 +42,60 @@ const useRowCss = () => {
 interface ConnectorSelectorProps {
   connectors: AIConnector[];
   selectedConnectorId: string | undefined;
+  setConnector: (connector: AIConnector | undefined) => void;
 }
 export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
-  ({ connectors, selectedConnectorId }) => {
+  ({ connectors, setConnector, selectedConnectorId }) => {
     const {
       triggersActionsUi: { actionTypeRegistry },
     } = useKibana().services;
-    const { setConnector } = useActions();
     const rowCss = useRowCss();
     return (
-      <EuiFlexGroup
-        alignItems="stretch"
-        direction="column"
-        gutterSize="s"
-        data-test-subj="connectorSelector"
-      >
-        {connectors.map((connector) => (
-          <EuiFlexItem key={connector.id}>
-            <EuiPanel
-              key={connector.id}
-              onClick={() => setConnector(connector)}
-              hasShadow={false}
-              hasBorder
-              paddingSize="l"
-              css={rowCss}
-              data-test-subj={`connectorSelector-${connector.id}`}
-            >
-              <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiRadio
-                    label={connector.name}
-                    id={connector.id}
-                    checked={selectedConnectorId === connector.id}
-                    onChange={noop}
-                    data-test-subj={`connectorSelectorRadio-${connector.id}${
-                      selectedConnectorId === connector.id ? '-selected' : ''
-                    }`}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">
-                    {actionTypeRegistry.get(connector.actionTypeId).actionTypeTitle}
-                  </EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
+      <EuiFormFieldset>
+        <EuiFlexGroup
+          alignItems="stretch"
+          direction="column"
+          gutterSize="s"
+          data-test-subj="connectorSelector"
+        >
+          {connectors.map((connector) => (
+            <EuiFlexItem key={connector.id}>
+              <EuiPanel
+                element="button"
+                type="button" // So that the enter button will not submit the form.
+                role="radio"
+                key={connector.id}
+                onClick={() => setConnector(connector)}
+                hasShadow={false}
+                hasBorder
+                paddingSize="l"
+                css={rowCss}
+                data-test-subj={`connectorSelector-${connector.id}`}
+              >
+                <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
+                  <EuiFlexItem>
+                    <EuiRadio
+                      label={connector.name}
+                      id={connector.id}
+                      value={connector.id}
+                      checked={selectedConnectorId === connector.id}
+                      onChange={() => setConnector(connector)}
+                      data-test-subj={`connectorSelectorRadio-${connector.id}${
+                        selectedConnectorId === connector.id ? '-selected' : ''
+                      }`}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">
+                      {actionTypeRegistry.get(connector.actionTypeId).actionTypeTitle}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFormFieldset>
     );
   }
 );

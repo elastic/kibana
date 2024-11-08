@@ -51,7 +51,7 @@ interface IntegrationStepProps {
 
 export const IntegrationStep = React.memo<IntegrationStepProps>(({ integrationSettings }) => {
   const styles = useLayoutStyles();
-  const { setIntegrationSettings } = useActions();
+  const { setIntegrationSettings, completeStep } = useActions();
   const [logoError, setLogoError] = React.useState<string>();
 
   const setIntegrationValues = useCallback(
@@ -95,7 +95,14 @@ export const IntegrationStep = React.memo<IntegrationStepProps>(({ integrationSe
       <EuiPanel paddingSize="none" hasShadow={false} hasBorder data-test-subj="integrationStep">
         <EuiFlexGroup direction="row" gutterSize="none">
           <EuiFlexItem css={styles.left}>
-            <EuiForm component="form" fullWidth>
+            <EuiForm
+              component="form"
+              fullWidth
+              onSubmit={(e) => {
+                e.preventDefault();
+                completeStep();
+              }}
+            >
               <EuiFormRow label={i18n.TITLE_LABEL}>
                 <EuiFieldText
                   name="title"
