@@ -22,10 +22,6 @@ const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 
 const REPO_ROOT = Path.resolve(__dirname, '..', '..');
 
-if (process.env.REACT_18 === 'true') {
-  console.warn('Building shared dependencies for and with React 18.');
-}
-
 module.exports = {
   node: {
     child_process: 'empty',

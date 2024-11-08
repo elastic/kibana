@@ -728,6 +728,7 @@
     "@kbn/react-kibana-context-styled": "link:packages/react/kibana_context/styled",
     "@kbn/react-kibana-context-theme": "link:packages/react/kibana_context/theme",
     "@kbn/react-kibana-mount": "link:packages/react/kibana_mount",
+    "@kbn/react-mute-legacy-root-warning": "link:packages/kbn-react-mute-legacy-root-warning",
     "@kbn/recently-accessed": "link:packages/kbn-recently-accessed",
     "@kbn/remote-clusters-plugin": "link:x-pack/plugins/remote_clusters",
     "@kbn/rendering-plugin": "link:test/plugin_functional/plugins/rendering_plugin",

@@ -1404,6 +1404,8 @@
       "@kbn/react-kibana-context-theme/*": ["packages/react/kibana_context/theme/*"],
       "@kbn/react-kibana-mount": ["packages/react/kibana_mount"],
       "@kbn/react-kibana-mount/*": ["packages/react/kibana_mount/*"],
+      "@kbn/react-mute-legacy-root-warning": ["packages/kbn-react-mute-legacy-root-warning"],
+      "@kbn/react-mute-legacy-root-warning/*": ["packages/kbn-react-mute-legacy-root-warning/*"],
       "@kbn/recently-accessed": ["packages/kbn-recently-accessed"],
       "@kbn/recently-accessed/*": ["packages/kbn-recently-accessed/*"],
       "@kbn/remote-clusters-plugin": ["x-pack/plugins/remote_clusters"],

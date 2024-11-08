@@ -144,12 +144,7 @@ export class Home extends Component<HomeProps, State> {
         data-test-subj="homeApp"
         pageHeader={{
           bottomBorder: false,
-          pageTitle: (
-            <FormattedMessage
-              id="home.header.title"
-              defaultMessage={`Welcome home ${React.version}`}
-            />
-          ),
+          pageTitle: <FormattedMessage id="home.header.title" defaultMessage={`Welcome home`} />,
         }}
         panelled={false}
       >

@@ -311,9 +311,9 @@ export function getWebpackConfig(
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
         'react-dom$':
-          process.env.REACT_18 === 'true' ? 'react-dom-18/profiling' : 'react-dom/profiling',
+          worker.reactVersion === '18' ? 'react-dom-18/profiling' : 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',
-        react: process.env.REACT_18 === 'true' ? 'react-18' : 'react',
+        react: worker.reactVersion === '18' ? 'react-18' : 'react',
       },
     },
 
