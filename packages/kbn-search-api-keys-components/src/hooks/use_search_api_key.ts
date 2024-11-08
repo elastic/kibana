@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { ApiKeyContext } from '../providers/search_api_key_provider';
 
 export const useSearchApiKey = () => {
+  const isInitRef = useRef(false);
   const { initialiseKey, ...context } = useContext(ApiKeyContext);
   useEffect(() => {
-    initialiseKey();
+    if (!isInitRef.current) {
+      isInitRef.current = true;
+      initialiseKey();
+    }
   }, [initialiseKey]);
   return context;
 };

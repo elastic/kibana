@@ -66,26 +66,28 @@ export const SearchApiKeyProvider: React.FC<React.PropsWithChildren> = ({ childr
     },
   });
   const initialiseKey = useCallback(async () => {
+    if (status !== Status.uninitialized) {
+      return;
+    }
+
     try {
-      if (status === Status.uninitialized) {
-        setStatus(Status.loading);
-        const storedKey = sessionStorage.getItem(API_KEY_STORAGE_KEY);
+      setStatus(Status.loading);
+      const storedKey = sessionStorage.getItem(API_KEY_STORAGE_KEY);
 
-        if (storedKey) {
-          const { id, encoded } = JSON.parse(storedKey);
+      if (storedKey) {
+        const { id, encoded } = JSON.parse(storedKey);
 
-          if (await validateApiKey(id)) {
-            setApiKey(encoded);
-            setStatus(Status.showHiddenKey);
-          } else {
-            sessionStorage.removeItem(API_KEY_STORAGE_KEY);
-            setApiKey(null);
-            setStatus(Status.showCreateButton);
-            await createApiKey();
-          }
+        if (await validateApiKey(id)) {
+          setApiKey(encoded);
+          setStatus(Status.showHiddenKey);
         } else {
+          sessionStorage.removeItem(API_KEY_STORAGE_KEY);
+          setApiKey(null);
+          setStatus(Status.showCreateButton);
           await createApiKey();
         }
+      } else {
+        await createApiKey();
       }
     } catch (e) {
       setApiKey(null);
