@@ -51,6 +51,7 @@ function setupActionsApi(
     runtimeState,
     () => runtimeState,
     createUnifiedSearchApi(),
+    pick(apiMock, ['timeRange$']),
     pick(apiMock, ['panelTitle']),
     getVisualizationContextHelperMock(stateOverrides?.attributes, contextOverrides),
     {

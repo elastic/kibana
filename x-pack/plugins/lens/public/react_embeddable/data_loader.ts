@@ -29,6 +29,7 @@ import { apiHasLensComponentCallbacks } from './type_guards';
 import { getRenderMode } from './helper';
 import { addLog } from './logger';
 import { getUsedDataViews } from './expressions/update_data_views';
+import { getMergedSearchContext } from './expressions/merged_search_context';
 
 const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
   'visualization',
@@ -185,10 +186,18 @@ export function loadEmbeddableData(
       callbacks
     );
 
+    const searchContext = getMergedSearchContext(
+      currentState,
+      unifiedSearch,
+      api.timeRange$,
+      parentApi,
+      services
+    );
+
     // Go concurrently: build the expression and fetch the dataViews
     const [{ params, abortController, ...rest }, dataViews] = await Promise.all([
       getExpressionRendererParams(currentState, {
-        unifiedSearch,
+        searchContext,
         api,
         settings: {
           syncColors: currentState.syncColors,

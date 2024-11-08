@@ -13,6 +13,7 @@ import {
   type Query,
   type TimeRange,
 } from '@kbn/es-query';
+import { PublishingSubject, apiPublishesTimeslice } from '@kbn/presentation-publishing';
 import type { LensRuntimeState } from '../types';
 import { nonNullable } from '../../utils';
 
@@ -30,28 +31,36 @@ export function getMergedSearchContext(
     filters,
     query,
     timeRange,
-    timeslice,
   }: {
     filters?: Filter[];
     query?: Query | AggregateQuery;
     timeRange?: TimeRange;
-    timeslice?: [number, number];
   },
+  customTimeRange$: PublishingSubject<TimeRange | undefined>,
+  parentApi: unknown,
   {
     data,
     injectFilterReferences,
   }: { data: DataPublicPluginStart; injectFilterReferences: FilterManager['inject'] }
 ): MergedSearchContext {
+  const parentTimeSlice = apiPublishesTimeslice(parentApi)
+    ? parentApi.timeslice$.getValue()
+    : undefined;
+
+  const timesliceTimeRange = parentTimeSlice
+    ? {
+        from: new Date(parentTimeSlice[0]).toISOString(),
+        to: new Date(parentTimeSlice[1]).toISOString(),
+        mode: 'absolute' as 'absolute',
+      }
+    : undefined;
+
+  const customTimeRange = customTimeRange$.getValue();
+
+  const timeRangeToRender = customTimeRange ?? timesliceTimeRange ?? timeRange;
   const context = {
     now: data.nowProvider.get().getTime(),
-    timeRange:
-      timeslice != null
-        ? {
-            from: new Date(timeslice[0]).toISOString(),
-            to: new Date(timeslice[1]).toISOString(),
-            mode: 'absolute' as const,
-          }
-        : timeRange,
+    timeRange: timeRangeToRender,
     query: isOfAggregateQueryType(attributes.state.query)
       ? []
       : [attributes.state.query].filter(nonNullable),

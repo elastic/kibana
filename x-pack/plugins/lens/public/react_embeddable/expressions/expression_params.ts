@@ -33,17 +33,16 @@ import type {
   LensApi,
   LensEmbeddableStartServices,
   LensRuntimeState,
-  LensUnifiedSearchContext,
 } from '../types';
 import { getVariables } from './variables';
-import { getMergedSearchContext } from './merged_search_context';
 import {
   getSearchContextIncompatibleMessage,
   isSearchContextIncompatibleWithDataViews,
 } from '../user_messages/checks';
+import type { MergedSearchContext } from './merged_search_context';
 
 interface GetExpressionRendererPropsParams {
-  unifiedSearch: LensUnifiedSearchContext;
+  searchContext: MergedSearchContext;
   disableTriggers?: boolean;
   renderMode?: RenderMode;
   settings: {
@@ -132,7 +131,6 @@ function buildGetCompatibleCellValueActions(
 export async function getExpressionRendererParams(
   state: LensRuntimeState,
   {
-    unifiedSearch,
     settings: { syncColors = true, syncCursor = true, syncTooltips = false },
     services,
     disableTriggers = false,
@@ -146,6 +144,7 @@ export async function getExpressionRendererParams(
     api,
     addUserMessages,
     updateBlockingErrors,
+    searchContext,
   }: GetExpressionRendererPropsParams
 ): Promise<{
   params: ExpressionWrapperProps | null;
@@ -155,12 +154,7 @@ export async function getExpressionRendererParams(
   activeVisualizationState?: unknown;
   activeDatasourceState?: unknown;
 }> {
-  const { expressionRenderer, documentToExpression, data, injectFilterReferences } = services;
-
-  const searchContext = getMergedSearchContext(state, unifiedSearch, {
-    data,
-    injectFilterReferences,
-  });
+  const { expressionRenderer, documentToExpression } = services;
 
   const {
     expression,

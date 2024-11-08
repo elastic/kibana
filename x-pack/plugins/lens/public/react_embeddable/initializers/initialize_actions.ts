@@ -11,7 +11,6 @@ import { EsQueryConfig, ExecutionContextSearch, Filter, Query, TimeRange } from 
 import {
   PublishingSubject,
   StateComparators,
-  apiPublishesTimeslice,
   apiPublishesUnifiedSearch,
   getUnchangingComparator,
 } from '@kbn/presentation-publishing';
@@ -109,6 +108,7 @@ function getViewUnderlyingDataArgs({
 function loadViewUnderlyingDataArgs(
   state: LensRuntimeState,
   { getVisualizationContext }: VisualizationContextHelper,
+  searchContextApi: { timeRange$: PublishingSubject<TimeRange | undefined> },
   parentApi: unknown,
   {
     capabilities,
@@ -146,16 +146,15 @@ function loadViewUnderlyingDataArgs(
     ? parentApi
     : { filters$: undefined, query$: undefined, timeRange$: undefined };
 
-  const { timeslice$ } = apiPublishesTimeslice(parentApi) ? parentApi : { timeslice$: undefined };
-
   const mergedSearchContext = getMergedSearchContext(
     state,
     {
       filters: filters$?.getValue(),
       query: query$?.getValue(),
       timeRange: timeRange$?.getValue(),
-      timeslice: timeslice$?.getValue(),
     },
+    searchContextApi.timeRange$,
+    parentApi,
     {
       data,
       injectFilterReferences,
@@ -192,6 +191,7 @@ function loadViewUnderlyingDataArgs(
 function createViewUnderlyingDataApis(
   getState: GetStateType,
   visualizationContextHelper: VisualizationContextHelper,
+  searchContextApi: { timeRange$: PublishingSubject<TimeRange | undefined> },
   parentApi: unknown,
   services: LensEmbeddableStartServices
 ): ViewInDiscoverCallbacks {
@@ -205,6 +205,7 @@ function createViewUnderlyingDataApis(
       viewUnderlyingDataArgs = loadViewUnderlyingDataArgs(
         getState(),
         visualizationContextHelper,
+        searchContextApi,
         parentApi,
         services
       );
@@ -225,6 +226,7 @@ export function initializeActionApi(
   initialState: LensRuntimeState,
   getLatestState: GetStateType,
   parentApi: unknown,
+  searchContextApi: { timeRange$: PublishingSubject<TimeRange | undefined> },
   titleApi: { panelTitle: PublishingSubject<string | undefined> },
   visualizationContextHelper: VisualizationContextHelper,
   services: LensEmbeddableStartServices
@@ -247,6 +249,7 @@ export function initializeActionApi(
       ...createViewUnderlyingDataApis(
         getLatestState,
         visualizationContextHelper,
+        searchContextApi,
         parentApi,
         services
       ),
