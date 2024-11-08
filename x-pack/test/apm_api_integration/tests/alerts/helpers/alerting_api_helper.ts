@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import pRetry from 'p-retry';
 import type { Agent as SuperTestAgent } from 'supertest';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
 import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
-
-export const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-*';
-export const APM_ACTION_VARIABLE_INDEX = 'apm-index-connector-test';
+import {
+  APM_ACTION_VARIABLE_INDEX,
+  APM_ALERTS_INDEX,
+} from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
 
 export async function createApmRule<T extends ApmRuleType>({
   supertest,
@@ -76,6 +77,13 @@ export async function runRuleSoon({
   );
 }
 
+export async function deleteAlertsByRuleId({ es, ruleId }: { es: Client; ruleId: string }) {
+  await es.deleteByQuery({
+    index: APM_ALERTS_INDEX,
+    query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+  });
+}
+
 export async function deleteRuleById({
   supertest,
   ruleId,
@@ -113,6 +121,21 @@ export async function deleteAllActionConnectors({
   );
 }
 
+export function deleteApmAlerts(es: Client) {
+  return es.deleteByQuery({
+    index: APM_ALERTS_INDEX,
+    conflicts: 'proceed',
+    query: { match_all: {} },
+  });
+}
+
+export async function clearKibanaApmEventLog(es: Client) {
+  return es.deleteByQuery({
+    index: '.kibana-event-log-*',
+    query: { term: { 'kibana.alert.rule.consumer': 'apm' } },
+  });
+}
+
 export type ApmAlertFields = ParsedTechnicalFields & ObservabilityApmAlert;
 
 async function deleteActionConnector({
@@ -123,4 +146,16 @@ async function deleteActionConnector({
   actionId: string;
 }) {
   return supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
+}
+
+export async function deleteActionConnectorIndex(es: Client) {
+  try {
+    await es.indices.delete({ index: APM_ACTION_VARIABLE_INDEX });
+  } catch (e) {
+    if (e instanceof errors.ResponseError && e.statusCode === 404) {
+      return;
+    }
+
+    throw e;
+  }
 }

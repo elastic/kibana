@@ -12,7 +12,7 @@ import {
   deleteActionConnectorIndex,
   clearKibanaApmEventLog,
   deleteApmAlerts,
-} from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_api_helper';
+} from './alerting_api_helper';
 import { deleteApmRules, deleteAllActionConnectors } from './alerting_api_helper';
 
 export async function cleanupRuleAndAlertState({

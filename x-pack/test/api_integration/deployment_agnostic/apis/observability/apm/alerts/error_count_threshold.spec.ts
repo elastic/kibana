@@ -11,31 +11,28 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import type { SupertestWithRoleScopeType } from '../../../../services';
+import type { RoleCredentials, SupertestWithRoleScopeType } from '../../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  createApmRule,
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
   ApmAlertFields,
-  createIndexConnector,
   getIndexAction,
-} from './helpers/alerting_api_helper';
-import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
-import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
-import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
-import { waitForActiveRule } from './helpers/wait_for_active_rule';
+  APM_ACTION_VARIABLE_INDEX,
+  APM_ALERTS_INDEX,
+} from './helpers/alerting_helper';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const es = getService('es');
-  const logger = getService('log');
   const apmApiClient = getService('apmApi');
   const synthtrace = getService('synthtrace');
+  const alertingApi = getService('alertingApi');
+  const samlAuth = getService('samlAuth');
 
   describe('error count threshold alert', () => {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
-    let supertest: SupertestWithRoleScopeType;
+    let supertestWithRoleScope: SupertestWithRoleScopeType;
+    let roleAuthc: RoleCredentials;
 
     const javaErrorMessage = 'a java error';
     const phpErrorMessage = 'a php error';
@@ -55,9 +52,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     };
 
     before(async () => {
-      supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+      supertestWithRoleScope = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
         withInternalHeaders: true,
+        useCookieHeader: true,
       });
+
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
@@ -113,7 +113,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     after(async () => {
       await apmSynthtraceEsClient.clean();
-      await supertest.destroy();
+      await supertestWithRoleScope.destroy();
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('create rule without kql filter', () => {
@@ -122,31 +123,58 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let actionId: string;
 
       before(async () => {
-        actionId = await createIndexConnector({ supertest, name: 'Transation error count' });
+        actionId = await alertingApi.createIndexConnector({
+          name: 'Transation error count',
+          indexName: APM_ACTION_VARIABLE_INDEX,
+          roleAuthc,
+        });
+
         const indexAction = getIndexAction({
           actionId,
           actionVariables: errorCountActionVariables,
         });
-        const createdRule = await createApmRule({
-          supertest,
+
+        const createdRule = await alertingApi.createRule({
           ruleTypeId: ApmRuleType.ErrorCount,
           name: 'Apm error count without kql query',
+          consumer: 'apm',
+          schedule: {
+            interval: '1m',
+          },
+          tags: ['apm'],
           params: {
             ...ruleParams,
           },
           actions: [indexAction],
+          roleAuthc,
         });
 
         ruleId = createdRule.id;
-        alerts = await waitForAlertsForRule({ es, ruleId, minimumAlertCount: 2 });
+        alerts = (
+          await alertingApi.waitForDocumentInIndex({
+            indexName: APM_ALERTS_INDEX,
+            ruleId,
+            docCountTarget: 2,
+          })
+        ).hits.hits.map((hit) => hit._source) as ApmAlertFields[];
       });
 
-      after(async () => {
-        await cleanupRuleAndAlertState({ es, supertest, logger });
-      });
+      after(() =>
+        alertingApi.cleanUpAlerts({
+          roleAuthc,
+          ruleId,
+          alertIndexName: APM_ALERTS_INDEX,
+          connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+          consumer: 'apm',
+        })
+      );
 
       it('checks if rule is active', async () => {
-        const ruleStatus = await waitForActiveRule({ ruleId, supertest });
+        const ruleStatus = await alertingApi.waitForRuleStatus({
+          ruleId,
+          roleAuthc,
+          expectedStatus: 'active',
+        });
         expect(ruleStatus).to.be('active');
       });
 
@@ -154,8 +182,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         let results: Array<Record<string, string>>;
 
         before(async () => {
-          await waitForActiveRule({ ruleId, supertest });
-          results = await waitForIndexConnectorResults({ es, minCount: 2 });
+          await alertingApi.waitForRuleStatus({
+            ruleId,
+            roleAuthc,
+            expectedStatus: 'active',
+          });
+
+          results = (
+            await alertingApi.waitForDocumentInIndex({
+              indexName: APM_ACTION_VARIABLE_INDEX,
+              docCountTarget: 2,
+            })
+          ).hits.hits.map((hit) => hit._source) as Array<Record<string, string>>;
         });
 
         it('produces a index action document for each service', async () => {
@@ -166,7 +204,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('checks if rule is active', async () => {
-          const ruleStatus = await waitForActiveRule({ ruleId, supertest });
+          const ruleStatus = await alertingApi.waitForRuleStatus({
+            ruleId,
+            roleAuthc,
+            expectedStatus: 'active',
+          });
           expect(ruleStatus).to.be('active');
         });
 
@@ -277,30 +319,48 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let ruleId: string;
 
       before(async () => {
-        const createdRule = await createApmRule({
-          supertest,
+        const createdRule = await alertingApi.createRule({
           ruleTypeId: ApmRuleType.ErrorCount,
           name: 'Apm error count with kql query',
+          consumer: 'apm',
+          schedule: {
+            interval: '1m',
+          },
+          tags: ['apm'],
           params: {
+            ...ruleParams,
             searchConfiguration: {
               query: {
                 query: 'service.name: opbeans-php',
                 language: 'kuery',
               },
             },
-            ...ruleParams,
           },
           actions: [],
+          roleAuthc,
         });
+
         ruleId = createdRule.id;
       });
 
-      after(async () => {
-        await cleanupRuleAndAlertState({ es, supertest, logger });
-      });
+      after(() =>
+        alertingApi.cleanUpAlerts({
+          roleAuthc,
+          ruleId,
+          alertIndexName: APM_ALERTS_INDEX,
+          connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+          consumer: 'apm',
+        })
+      );
 
       it('produces one alert for the opbeans-php service', async () => {
-        const alerts = await waitForAlertsForRule({ es, ruleId });
+        const alerts = (
+          await alertingApi.waitForDocumentInIndex({
+            indexName: APM_ALERTS_INDEX,
+            ruleId,
+          })
+        ).hits.hits.map((hit) => hit._source) as ApmAlertFields[];
+
         expect(alerts[0]['kibana.alert.reason']).to.be(
           'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: 000000000000000000000a php error, error name: a php error. Alert when > 1.'
         );
