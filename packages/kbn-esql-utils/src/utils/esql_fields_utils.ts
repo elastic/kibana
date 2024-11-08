@@ -43,9 +43,11 @@ export const isESQLColumnSortable = (column: DatatableColumn): boolean => {
 
 // Helper function to check if a field is groupable based on its type and esType
 const isGroupable = (type: string | undefined, esType: string | undefined): boolean => {
+  // we don't allow grouping on the unknown field types
   if (type === UNKNOWN_FIELD) {
     return false;
   }
+  // we don't allow grouping on tsdb counter fields
   if (esType && esType.indexOf(TSDB_COUNTER_FIELDS_PREFIX) !== -1) {
     return false;
   }

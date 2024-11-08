@@ -16,7 +16,7 @@ import { Draggable } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
-import { isESQLFieldGroupable } from '@kbn/esql-utils/src/utils/esql_fields_utils';
+import { isESQLFieldGroupable } from '@kbn/esql-utils';
 import type { SearchMode } from '../../types';
 import { FieldItemButton, type FieldItemButtonProps } from '../../components/field_item_button';
 import {
