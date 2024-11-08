@@ -64,7 +64,7 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
                           operationName: name,
                           kibanaRequest: {
                             route: {
-                              path: '/internal/search',
+                              path: '/internal/bsearch',
                               method: 'POST',
                             },
                           } as any,
@@ -95,7 +95,7 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
                         operationName: name,
                         kibanaRequest: {
                           route: {
-                            path: '/internal/search',
+                            path: '/internal/bsearch',
                             method: 'POST',
                           },
                         } as any,

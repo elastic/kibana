@@ -14,13 +14,13 @@ export function SecuritySolutionESSUtils({
   getService,
 }: FtrProviderContextWithSpaces): SecuritySolutionESSUtilsInterface {
   const config = getService('config');
-  const search = getService('search');
+  const bsearch = getService('bsearch');
   const supertestWithoutAuth = getService('supertest');
 
   return {
     getUsername: (_role?: string) =>
       Promise.resolve(config.get('servers.kibana.username') as string),
-    createSearch: (_role?: string) => Promise.resolve(search),
+    createBsearch: (_role?: string) => Promise.resolve(bsearch),
     createSuperTest: async (role?: string, password: string = 'changeme') => {
       if (!role) {
         return supertestWithoutAuth;

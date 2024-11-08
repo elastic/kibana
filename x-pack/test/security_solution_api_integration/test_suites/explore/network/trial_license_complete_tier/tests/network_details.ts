@@ -11,7 +11,7 @@ import {
   NetworkQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
-import { SearchService } from '@kbn/ftr-common-functional-services';
+import { BsearchService } from '@kbn/ftr-common-functional-services';
 
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
@@ -21,11 +21,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
   describe('Network details', () => {
     let supertest: TestAgent;
-    let search: SearchService;
+    let bsearch: BsearchService;
     describe('With filebeat', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
-        search = await utils.createSearch();
+        bsearch = await utils.createBsearch();
         await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
       });
       after(
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       );
 
       it('Make sure that we get Network details data', async () => {
-        const body = await search.send<NetworkDetailsStrategyResponse>({
+        const body = await bsearch.send<NetworkDetailsStrategyResponse>({
           supertest,
           options: {
             ip: '151.205.0.17',
@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('With packetbeat', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
-        search = await utils.createSearch();
+        bsearch = await utils.createBsearch();
         await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/default');
       });
       after(
@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       );
 
       it('Make sure that we get Network details data', async () => {
-        const body = await search.send<NetworkDetailsStrategyResponse>({
+        const body = await bsearch.send<NetworkDetailsStrategyResponse>({
           supertest,
           options: {
             ip: '185.53.91.88',

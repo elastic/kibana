@@ -16,7 +16,7 @@ import {
   FirstLastSeenStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
-import { SearchService } from '@kbn/ftr-common-functional-services';
+import { BsearchService } from '@kbn/ftr-common-functional-services';
 
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
@@ -35,10 +35,10 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
   describe('hosts', () => {
     let supertest: TestAgent;
-    let search: SearchService;
+    let bsearch: BsearchService;
     before(async () => {
       supertest = await utils.createSuperTest();
-      search = await utils.createSearch();
+      bsearch = await utils.createBsearch();
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     );
 
     it('Make sure that we get Hosts Table data', async () => {
-      const hosts = await search.send<HostsStrategyResponse>({
+      const hosts = await bsearch.send<HostsStrategyResponse>({
         supertest,
         options: {
           factoryQueryType: HostsQueries.hosts,
@@ -77,7 +77,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     it('Make sure that pagination is working in Hosts Table query', async () => {
-      const hosts = await search.send<HostsStrategyResponse>({
+      const hosts = await bsearch.send<HostsStrategyResponse>({
         supertest,
         options: {
           factoryQueryType: HostsQueries.hosts,
@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     it('Make sure that we get Host details data', async () => {
-      const { hostDetails } = await search.send<HostDetailsStrategyResponse>({
+      const { hostDetails } = await bsearch.send<HostDetailsStrategyResponse>({
         supertest,
         options: {
           factoryQueryType: HostsQueries.details,
@@ -146,7 +146,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     it('Make sure that we get First Seen for a Host', async () => {
-      const firstLastSeenHost = await search.send<FirstLastSeenStrategyResponse>({
+      const firstLastSeenHost = await bsearch.send<FirstLastSeenStrategyResponse>({
         supertest,
         options: {
           factoryQueryType: FirstLastSeenQuery,
@@ -161,7 +161,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     it('Make sure that we get Last Seen for a Host', async () => {
-      const firstLastSeenHost = await search.send<FirstLastSeenStrategyResponse>({
+      const firstLastSeenHost = await bsearch.send<FirstLastSeenStrategyResponse>({
         supertest,
         options: {
           factoryQueryType: FirstLastSeenQuery,

@@ -12,7 +12,7 @@ import {
   HostsOverviewStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
-import { SearchService } from '@kbn/ftr-common-functional-services';
+import { BsearchService } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
@@ -21,11 +21,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
   describe('Overview Host', () => {
     let supertest: TestAgent;
-    let search: SearchService;
+    let bsearch: BsearchService;
     describe('With auditbeat', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
-        search = await utils.createSearch();
+        bsearch = await utils.createBsearch();
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/overview');
       });
       after(
@@ -54,7 +54,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       };
 
       it('Make sure that we get OverviewHost data', async () => {
-        const { overviewHost } = await search.send<HostsOverviewStrategyResponse>({
+        const { overviewHost } = await bsearch.send<HostsOverviewStrategyResponse>({
           supertest,
           options: {
             defaultIndex: ['auditbeat-*'],

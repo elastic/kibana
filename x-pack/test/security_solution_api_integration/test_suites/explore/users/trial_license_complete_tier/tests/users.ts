@@ -15,7 +15,7 @@ import {
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
 
-import { SearchService } from '@kbn/ftr-common-functional-services';
+import { BsearchService } from '@kbn/ftr-common-functional-services';
 
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
@@ -29,11 +29,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
   describe('Users', () => {
     let supertest: TestAgent;
-    let search: SearchService;
+    let bsearch: BsearchService;
     describe('With auditbeat', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
-        search = await utils.createSearch();
+        bsearch = await utils.createBsearch();
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/users');
       });
       after(
@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       );
 
       it('Ensure data is returned from auditbeat', async () => {
-        const users = await search.send<NetworkUsersStrategyResponse>({
+        const users = await bsearch.send<NetworkUsersStrategyResponse>({
           supertest,
           options: {
             factoryQueryType: NetworkQueries.users,

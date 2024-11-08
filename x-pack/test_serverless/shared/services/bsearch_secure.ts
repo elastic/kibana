@@ -13,6 +13,7 @@ import { GenericFtrService } from '@kbn/test';
 import request from 'superagent';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
@@ -34,7 +35,7 @@ export interface SendOptions {
   internalOrigin: string;
 }
 
-export class SearchSecureService extends GenericFtrService<FtrProviderContext> {
+export class BsearchSecureService extends GenericFtrService<FtrProviderContext> {
   private readonly retry = this.ctx.getService('retry');
 
   async send<T extends IEsSearchResponse>({
@@ -103,12 +104,24 @@ export class SearchSecureService extends GenericFtrService<FtrProviderContext> {
 
     const result = await this.retry.try(async () => {
       const resp = await supertestWithoutAuth
-        .post(`/internal/search/${strategy}/${body.id}`)
+        .post(`/internal/bsearch`)
         .set(apiKeyHeader)
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'Kibana')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send()
+        .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+        .send({
+          batch: [
+            {
+              request: {
+                id: body.id,
+                ...options,
+              },
+              options: {
+                strategy,
+              },
+            },
+          ],
+        })
         .expect(200);
       const [parsedResponse] = parseBfetchResponse(resp);
       expect(parsedResponse.result.isRunning).equal(false);
