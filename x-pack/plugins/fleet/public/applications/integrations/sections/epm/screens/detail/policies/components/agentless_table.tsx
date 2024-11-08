@@ -19,7 +19,11 @@ import type {
 import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../../../../../../../../common/constants';
 import type { usePagination } from '../../../../../../hooks';
 import { useLink, sendGetAgents, useAuthz, useStartServices } from '../../../../../../hooks';
-import { Loading, PackagePolicyActionsMenu } from '../../../../../../components';
+import {
+  Loading,
+  PackagePolicyActionsMenu,
+  AgentlessEnrollmentFlyout,
+} from '../../../../../../components';
 
 import { Persona } from '../persona';
 import { AgentHealth } from '../../../../../../../fleet/sections/agents/components';
@@ -52,11 +56,12 @@ export const AgentlessPackagePoliciesTable = ({
   const canReadAgents = authz.fleet.readAgents;
 
   // Kuery for all agents enrolled into the agent policies associated with the package policies
+  // We use the first agent policy as agentless package policies have a 1:1 relationship with agent policies
   // Maximum # of agent policies is 50, based on the max page size in UI
   const agentsKuery = useMemo(() => {
     return packagePolicies
       .reduce((policyIds, { agentPolicies }) => {
-        return [...policyIds, ...agentPolicies.map(({ id }) => id)];
+        return [...policyIds, ...(agentPolicies[0] ? [agentPolicies[0]?.id] : [])];
       }, [] as string[])
       .map((policyId) => `${AGENTS_PREFIX}.policy_id: "${policyId}"`)
       .join(' or ');
@@ -102,6 +107,10 @@ export const AgentlessPackagePoliciesTable = ({
       return () => clearInterval(interval);
     }
   }, [agentsKuery, canReadAgents, notifications.toasts]);
+
+  // Flyout state
+  const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string>();
+  const [flyoutPackagePolicy, setFlyoutPackagePolicy] = useState<PackagePolicy>();
 
   return (
     <>
@@ -168,6 +177,7 @@ export const AgentlessPackagePoliciesTable = ({
                   align: 'left' as HorizontalAlignment,
                   render({
                     agentPolicies,
+                    packagePolicy,
                   }: {
                     agentPolicies: AgentPolicy[];
                     packagePolicy: InMemoryPackagePolicy;
@@ -181,18 +191,30 @@ export const AgentlessPackagePoliciesTable = ({
                     const agent =
                       (agentPolicies[0]?.id && agentsByPolicyId[agentPolicies[0].id]) || undefined;
 
-                    if (agent) {
-                      return <AgentHealth agent={agent} />;
-                    } else {
-                      return (
-                        <EuiBadge color="subdued">
-                          <FormattedMessage
-                            id="xpack.fleet.packageDetails.integrationList.pendingAgentlessStatus"
-                            defaultMessage="Pending"
-                          />
-                        </EuiBadge>
-                      );
-                    }
+                    // Status badge click handler
+                    const statusBadgeProps = {
+                      onClick: () => {
+                        setFlyoutOpenForPolicyId(packagePolicy.id);
+                        setFlyoutPackagePolicy(packagePolicy);
+                      },
+                      onClickAriaLabel: i18n.translate(
+                        'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusAriaLabel',
+                        {
+                          defaultMessage: 'Open status details',
+                        }
+                      ),
+                    };
+
+                    return agent ? (
+                      <AgentHealth agent={agent} {...statusBadgeProps} />
+                    ) : (
+                      <EuiBadge color="subdued" {...statusBadgeProps}>
+                        <FormattedMessage
+                          id="xpack.fleet.packageDetails.integrationList.pendingAgentlessStatus"
+                          defaultMessage="Pending"
+                        />
+                      </EuiBadge>
+                    );
                   },
                 },
               ]
@@ -258,6 +280,15 @@ export const AgentlessPackagePoliciesTable = ({
           )
         }
       />
+      {flyoutOpenForPolicyId && flyoutPackagePolicy && (
+        <AgentlessEnrollmentFlyout
+          onClose={() => {
+            setFlyoutOpenForPolicyId(undefined);
+            setFlyoutPackagePolicy(undefined);
+          }}
+          packagePolicy={flyoutPackagePolicy}
+        />
+      )}
     </>
   );
 };
