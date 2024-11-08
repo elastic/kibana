@@ -19,6 +19,12 @@ export enum SNAPSHOT_STATE {
   PARTIAL = 'PARTIAL',
 }
 
+export enum SLM_STATE {
+  RUNNING = 'RUNNING',
+  STOPPING = 'STOPPING',
+  STOPPED = 'STOPPED',
+}
+
 const INDEX_SETTING_SUGGESTIONS: string[] = [
   'index.number_of_shards',
   'index.shard.check_on_startup',

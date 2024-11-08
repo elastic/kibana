@@ -25,13 +25,18 @@ import { SlmPolicy } from '../../../../../common/types';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useDecodedParams } from '../../../lib';
-import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
+import {
+  useLoadPolicies,
+  useLoadRetentionSettings,
+  useLoadSlmStatus,
+} from '../../../services/http';
 import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
 import { useAppContext, useServices } from '../../../app_context';
 
 import { PolicyDetails } from './policy_details';
 import { PolicyTable } from './policy_table';
 import { PolicyRetentionSchedule } from './policy_retention_schedule';
+import { SlmStatus } from './slm_status';
 
 interface MatchParams {
   policyName?: SlmPolicy['name'];
@@ -60,6 +65,8 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     data: retentionSettings,
     resendRequest: reloadRetentionSettings,
   } = useLoadRetentionSettings();
+
+  const { data: slmStatus } = useLoadSlmStatus();
 
   const openPolicyDetailsUrl = (newPolicyName: SlmPolicy['name']): string => {
     return linkToPolicy(newPolicyName);
@@ -189,6 +196,8 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
             error={retentionSettingsError}
           />
         ) : null}
+
+        <SlmStatus status={slmStatus?.operation_mode} />
 
         <PolicyTable
           policies={policies || []}
