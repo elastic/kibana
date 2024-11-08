@@ -48,7 +48,7 @@ and <<kibana-concepts-analysts, {kib} concepts>>.
 
 Tell {kib} where to find the data you want to explore, and then specify the time range in which to view that data.
 
-. Open the main menu, and select **Discover**.
+. Go to **Discover**.
 
 . Select the data you want to work with.
 +
