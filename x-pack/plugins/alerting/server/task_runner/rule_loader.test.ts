@@ -96,8 +96,8 @@ describe('rule_loader', () => {
 
   describe('validateRuleAndCreateFakeRequest()', () => {
     describe('succeeds', () => {
-      test('validates and returns the results', async () => {
-        const result = await validateRuleAndCreateFakeRequest({
+      test('validates and returns the results', () => {
+        const result = validateRuleAndCreateFakeRequest({
           ...getDefaultValidateRuleParams(),
           context,
         });
@@ -112,10 +112,10 @@ describe('rule_loader', () => {
       });
     });
 
-    test('throws when rule is not enabled', async () => {
+    test('throws when rule is not enabled', () => {
       let outcome = 'success';
       try {
-        await validateRuleAndCreateFakeRequest({
+        validateRuleAndCreateFakeRequest({
           ...getDefaultValidateRuleParams(false),
           context,
         });
@@ -127,14 +127,14 @@ describe('rule_loader', () => {
       expect(outcome).toBe('failure');
     });
 
-    test('throws when rule type is not enabled', async () => {
+    test('throws when rule type is not enabled', () => {
       ruleTypeRegistry.ensureRuleTypeEnabled.mockImplementation(() => {
         throw new Error('rule-type-not-enabled: 2112');
       });
 
       let outcome = 'success';
       try {
-        await validateRuleAndCreateFakeRequest({
+        validateRuleAndCreateFakeRequest({
           ...getDefaultValidateRuleParams(),
           context,
         });
@@ -147,7 +147,7 @@ describe('rule_loader', () => {
       expect(outcome).toBe('failure');
     });
 
-    test('test throws when rule params fail validation', async () => {
+    test('test throws when rule params fail validation', () => {
       mockGetAlertFromRaw.mockReturnValueOnce({
         name: ruleName,
         alertTypeId: ruleTypeId,
@@ -162,7 +162,7 @@ describe('rule_loader', () => {
       context = contextMock as unknown as TaskRunnerContext;
       let outcome = 'success';
       try {
-        await validateRuleAndCreateFakeRequest({
+        validateRuleAndCreateFakeRequest({
           ...getDefaultValidateRuleParams(),
           context,
         });
