@@ -13,7 +13,6 @@ import chalk from 'chalk';
 import fs from 'fs';
 
 import { identifyDependencyUsageWithCruiser } from './dependency_graph/providers/cruiser.ts';
-import { identifyDependencyUsageWithMadge } from './dependency_graph/providers/madge.ts';
 
 interface CLIArgs {
   dependencyName?: string;
@@ -50,12 +49,6 @@ export const configureYargs = () => {
             alias: 'g',
             describe: chalk.magenta('Group results by either owner or source (package/plugin)'),
             choices: ['owner', 'source'],
-          })
-          .option('tool', {
-            alias: 't',
-            describe: chalk.magenta('Use madge or dependency-cruiser to identify dependencies'),
-            choices: ['madge', 'cruiser'],
-            default: 'cruiser',
           })
           .option('summary', {
             alias: 's',
@@ -108,7 +101,6 @@ export const configureYargs = () => {
           summary,
           collapseDepth,
           outputPath,
-          tool,
           verbose: isVerbose,
         } = argv;
         if (dependencyName) {
@@ -128,25 +120,20 @@ export const configureYargs = () => {
         }
 
         try {
-          console.log(`${chalk.bold.magenta(tool)} is used for building dependency graph`);
+          console.log(`${chalk.bold.magenta('cruiser')} is used for building dependency graph`);
 
-          const result =
-            tool === 'madge'
-              ? await identifyDependencyUsageWithMadge(paths, dependencyName, {
-                  groupBy,
-                  summary,
-                  collapseDepth,
-                })
-              : await identifyDependencyUsageWithCruiser(paths, dependencyName, {
-                  groupBy,
-                  summary,
-                  collapseDepth,
-                  isVerbose,
-                });
+          const result = await identifyDependencyUsageWithCruiser(paths, dependencyName, {
+            groupBy,
+            summary,
+            collapseDepth,
+            isVerbose,
+          });
 
           if (outputPath) {
             const isJsonFile = nodePath.extname(outputPath) === '.json';
-            const outputFile = isJsonFile ? outputPath : nodePath.join(outputPath, 'results.json');
+            const outputFile = isJsonFile
+              ? outputPath
+              : nodePath.join(outputPath, 'dependency-usage.json');
 
             const outputDir = nodePath.dirname(outputFile);
 
