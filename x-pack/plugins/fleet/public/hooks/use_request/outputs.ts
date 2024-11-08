@@ -12,7 +12,8 @@ import type {
   PostOutputRequest,
   PostLogstashApiKeyResponse,
   GetListAgentPolicyByOutputsRequest,
-  GetListAgentPolicyByOutputsResponse, GetOutputHealthResponse
+  GetListAgentPolicyByOutputsResponse,
+  GetOutputHealthResponse,
 } from '../../types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -21,14 +22,6 @@ import { sendRequest, useRequest } from './use_request';
 
 export function useGetOutputs() {
   return useRequest<GetOutputsResponse>({
-    method: 'get',
-    path: outputRoutesService.getListPath(),
-    version: API_VERSIONS.public.v1,
-  });
-}
-
-export function sendGetOutputs() {
-  return sendRequest<GetOutputsResponse>({
     method: 'get',
     path: outputRoutesService.getListPath(),
     version: API_VERSIONS.public.v1,

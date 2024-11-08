@@ -152,7 +152,8 @@ export type {
   GetListAgentPolicyOutputsResponse,
   GetListAgentPolicyByOutputsRequest,
   GetListAgentPolicyByOutputsResponse,
-  GetOutputHealthResponse
+  GetOutputHealthResponse,
+  MinimalOutput,
 } from '../../common/types';
 export {
   entries,

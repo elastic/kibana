@@ -11,10 +11,10 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { Output } from '../../../../../types';
+import type { MinimalOutput } from '../../../../../types';
 
 interface Props {
-  outputs: Output[];
+  outputs: MinimalOutput[];
   selectedOutputs: string[];
   onSelectedOutputsChange: (selectedOutputs: string[]) => void;
 }
@@ -37,8 +37,8 @@ export const OutputsFilter: React.FunctionComponent<Props> = ({
 
   const getOptions = useCallback((): EuiSelectableOption[] => {
     return outputs.map((output) => ({
-      label: output.name,
-      checked: selectedOutputs.includes(output.id) ? 'on' : undefined,
+      label: output?.name ?? '',
+      checked: selectedOutputs.includes(output?.id ?? '') ? 'on' : undefined,
       key: output.id,
       'data-test-subj': 'agentList.outputFilterOption',
     }));

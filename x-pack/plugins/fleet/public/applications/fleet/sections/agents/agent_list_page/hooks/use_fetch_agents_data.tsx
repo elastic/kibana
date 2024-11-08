@@ -6,7 +6,7 @@
  */
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
+import { isEqual, uniqBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
 
 import { agentStatusesToSummary } from '../../../../../../../common/services';
@@ -25,14 +25,17 @@ import {
   sendGetActionStatus,
   sendBulkGetAgentPolicies,
   sendGetListOutputsForPolicies,
-  sendGetOutputs,
   useListPoliciesByOutputs,
 } from '../../../../hooks';
 import { AgentStatusKueryHelper, ExperimentalFeaturesService } from '../../../../services';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
 
 import { getKuery } from '../utils/get_kuery';
-import type { Output, OutputsForAgentPolicy } from '../../../../../../../common/types';
+import type {
+  IntegrationsOutput,
+  MinimalOutput,
+  OutputsForAgentPolicy,
+} from '../../../../../../../common/types';
 
 const REFRESH_INTERVAL_MS = 30000;
 const MAX_AGENT_ACTIONS = 100;
@@ -127,7 +130,7 @@ export function useFetchAgentsData() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedOutputs, setSelectedOutputs] = useState<string[]>([]);
   const [selectedPoliciesByOutputs, setSelectedPoliciesByOutputs] = useState<string[]>([]);
-  const [allOutputs, setOutputs] = useState<Output[]>([]);
+  const [allOutputs, setOutputs] = useState<MinimalOutput[]>([]);
 
   const showInactive = useMemo(() => {
     return selectedStatus.some((status) => status === 'inactive') || selectedStatus.length === 0;
@@ -217,7 +220,6 @@ export function useFetchAgentsData() {
             managedAgentPoliciesResponse,
             agentTagsResponse,
             actionStatusResponse,
-            outputsResponse,
           ] = await Promise.all([
             sendGetAgents({
               page: pagination.currentPage,
@@ -246,7 +248,6 @@ export function useFetchAgentsData() {
               latest: REFRESH_INTERVAL_MS + 5000, // avoid losing errors
               perPage: MAX_AGENT_ACTIONS,
             }),
-            sendGetOutputs(),
           ]);
 
           // Return if a newer request has been triggered
@@ -270,9 +271,6 @@ export function useFetchAgentsData() {
           }
           if (!agentTagsResponse.data) {
             throw new Error('Invalid GET /agent/tags response');
-          }
-          if (!outputsResponse.data) {
-            throw new Error('Invalid GET /outputs response');
           }
           if (actionStatusResponse.error) {
             throw new Error('Invalid GET /agents/action_status response');
@@ -302,8 +300,7 @@ export function useFetchAgentsData() {
 
           setAgentsStatus(agentStatusesToSummary(statusSummary));
 
-          setOutputs(outputsResponse.data.items);
-
+          // get the list of outputs by agent policies and index them by policies
           const outputsForPolicies = await sendGetListOutputsForPolicies({
             ids: policyIds,
           });
@@ -320,6 +317,21 @@ export function useFetchAgentsData() {
           if (!outputsByPolicyIds || !isEqual(indexedOutputs, outputsByPolicyIds)) {
             setOutputsByPolicyIds(indexedOutputs ?? {});
           }
+
+          // Retrieve the unique outputs on page to populate the dropdown filter
+          const flattenedOutputs = outputsForPolicies?.data?.items.flatMap((item) => {
+            let result: MinimalOutput[] | IntegrationsOutput[] = [];
+            result.push(item.monitoring.output);
+            if (item.data.output.id !== item.monitoring.output.id) {
+              result.push(item.data.output);
+            }
+            if (item.data?.integrations && item.data?.integrations?.length > 0) {
+              result = result.concat(item.data.integrations);
+            }
+            return result;
+          });
+          const outputsOnTable = uniqBy(flattenedOutputs, 'id');
+          setOutputs(outputsOnTable);
 
           const newAllTags = agentTagsResponse.data.items;
           // We only want to update the list of available tags if

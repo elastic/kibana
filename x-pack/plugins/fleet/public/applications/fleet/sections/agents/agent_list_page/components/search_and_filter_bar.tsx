@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useIsFirstTimeAgentUserQuery } from '../../../../../integrations/sections/epm/screens/detail/hooks';
 
-import type { Agent, AgentPolicy, Output } from '../../../../types';
+import type { Agent, AgentPolicy, MinimalOutput } from '../../../../types';
 import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX, AGENTS_PREFIX } from '../../../../constants';
 
@@ -61,7 +61,7 @@ export interface SearchAndFilterBarProps {
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
   latestAgentActionErrors: number;
-  outputs: Output[];
+  outputs: MinimalOutput[];
   selectedOutputs: string[];
   onSelectedOutputsChange: (selectedOutputs: string[]) => void;
 }
