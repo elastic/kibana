@@ -135,7 +135,7 @@ describe('commands.stats', () => {
             field: '`agg( /* haha 😅 */ max(foo), bar, baz)`',
             column: {
               type: 'column',
-              name: 'agg( /* haha 😅 */ max(foo), bar, baz)',
+              name: '`agg( /* haha 😅 */ max(foo), bar, baz)`',
             },
             definition: {
               type: 'function',
@@ -195,7 +195,7 @@ describe('commands.stats', () => {
 
     describe('params', () => {
       it('can use params as source field names', () => {
-        const src = 'FROM index | STATS foo = agg(f1.?aha) + agg(?nested.?param), a.b = agg(f1)';
+        const src = 'FROM index | STATS foo = agg(f1.?aha) + ?aha(?nested.?param), a.b = agg(f1)';
         const query = EsqlQuery.fromSrc(src);
 
         const command = commands.stats.byIndex(query.ast, 0)!;
@@ -211,7 +211,24 @@ describe('commands.stats', () => {
             },
           },
         });
-        expect(summary.fields).toEqual(new Set(['f1.?aha', '?nested.?param', 'f2']));
+        expect(summary.fields).toEqual(new Set(['f1.?aha', '?nested.?param', 'f1']));
+      });
+
+      it('can use params as destination field names', () => {
+        const src = 'FROM index | STATS ?dest = agg(asdf)';
+        const query = EsqlQuery.fromSrc(src);
+
+        const command = commands.stats.byIndex(query.ast, 0)!;
+        const summary = commands.stats.summarizeCommand(query, command);
+
+        expect(summary).toMatchObject({
+          aggregates: {
+            '?dest': {
+              fields: ['asdf'],
+            },
+          },
+        });
+        expect(summary.fields).toEqual(new Set(['asdf']));
       });
     });
 

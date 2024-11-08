@@ -120,8 +120,9 @@ const summarizeArgParts = (
     return [column as ESQLColumn, definition as ESQLProperNode];
   }
 
-  const text = [...query.src].slice(arg.location.min, arg.location.max + 1).join('');
-  const column = Builder.expression.column({ parts: [text] });
+  const name = [...query.src].slice(arg.location.min, arg.location.max + 1).join('');
+  const args = [Builder.identifier({ name })];
+  const column = Builder.expression.column({ args });
 
   return [column, arg];
 };
