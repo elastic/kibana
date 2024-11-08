@@ -289,7 +289,8 @@ To personalize your dashboards, add your own logos and graphics with the *Image*
 [role="screenshot"]
 image::images/dashboard_addImageEditor_8.7.0.png[Add image editor]
 
-To manage your uploaded image files, open the main menu, then click *Stack Management > Kibana > Files*. 
+To manage your uploaded image files, go to the *Files* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 
 [WARNING]
