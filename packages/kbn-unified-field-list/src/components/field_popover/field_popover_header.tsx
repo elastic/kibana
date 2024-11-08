@@ -110,7 +110,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
                 data-test-subj={`fieldPopoverHeader_addBreakdownField-${field.name}`}
                 aria-label={addBreakdownFieldTooltip}
                 {...(buttonAddBreakdownFieldProps || {})}
-                iconType="visBarVertical"
+                iconType="visBarVerticalStacked"
                 onClick={() => {
                   closePopover();
                   onAddBreakdownField(field);
