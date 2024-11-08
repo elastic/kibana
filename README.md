@@ -13,6 +13,7 @@ Kibana is your window into the [Elastic Stack](https://www.elastic.co/products).
 
 // test change 1
 // test change 2
+// test change 3
 
 If you just want to try Kibana out, check out the [Elastic Stack Getting Started Page](https://www.elastic.co/start) to give it a whirl.
 
