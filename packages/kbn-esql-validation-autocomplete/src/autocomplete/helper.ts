@@ -7,21 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLSource } from '@kbn/esql-ast';
+import type {
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLFunction,
+  ESQLLiteral,
+  ESQLSource,
+} from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
-import type { FunctionDefinition } from '../definitions/types';
+import type {
+  FunctionDefinition,
+  FunctionReturnType,
+  SupportedDataType,
+} from '../definitions/types';
 import {
+  findFinalWord,
+  getColumnForASTNode,
   getFunctionDefinition,
   isAssignment,
+  isColumnItem,
   isFunctionItem,
+  isIdentifier,
   isLiteralItem,
+  isTimeIntervalItem,
 } from '../shared/helpers';
-import type { SuggestionRawDefinition } from './types';
+import type { GetColumnsByTypeFn, SuggestionRawDefinition } from './types';
 import { compareTypesWithLiterals } from '../shared/esql_types';
-import { TIME_SYSTEM_PARAMS } from './factories';
+import {
+  TIME_SYSTEM_PARAMS,
+  buildVariablesDefinitions,
+  getFunctionSuggestions,
+  getCompatibleLiterals,
+  getDateLiterals,
+} from './factories';
 import { EDITOR_MARKER } from '../shared/constants';
-import { extractTypeFromASTArg } from './autocomplete';
-import { ESQLRealField, ESQLVariable } from '../validation/types';
+import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
@@ -271,4 +291,191 @@ export function getValidSignaturesAndTypesToSuggestNext(
     argIndex,
     currentArg,
   };
+}
+
+/**
+ * This function handles the logic to suggest completions
+ * for a given fragment of text in a generic way. A good example is
+ * a field name.
+ *
+ * When typing a field name, there are 2 scenarios
+ *
+ * 1. field name is incomplete (includes the empty string)
+ * KEEP /
+ * KEEP fie/
+ *
+ * 2. field name is complete
+ * KEEP field/
+ *
+ * This function provides a framework for detecting and handling both scenarios in a clean way.
+ *
+ * @param innerText - the query text before the current cursor position
+ * @param isFragmentComplete — return true if the fragment is complete
+ * @param getSuggestionsForIncomplete — gets suggestions for an incomplete fragment
+ * @param getSuggestionsForComplete - gets suggestions for a complete fragment
+ * @returns
+ */
+export function handleFragment(
+  innerText: string,
+  isFragmentComplete: (fragment: string) => boolean,
+  getSuggestionsForIncomplete: (
+    fragment: string,
+    rangeToReplace?: { start: number; end: number }
+  ) => SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]>,
+  getSuggestionsForComplete: (
+    fragment: string,
+    rangeToReplace: { start: number; end: number }
+  ) => SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]>
+): SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]> {
+  /**
+   * @TODO — this string manipulation is crude and can't support all cases
+   * Checking for a partial word and computing the replacement range should
+   * really be done using the AST node, but we'll have to refactor further upstream
+   * to make that available. This is a quick fix to support the most common case.
+   */
+  const fragment = findFinalWord(innerText);
+  if (!fragment) {
+    return getSuggestionsForIncomplete('');
+  } else {
+    const rangeToReplace = {
+      start: innerText.length - fragment.length + 1,
+      end: innerText.length + 1,
+    };
+    if (isFragmentComplete(fragment)) {
+      return getSuggestionsForComplete(fragment, rangeToReplace);
+    } else {
+      return getSuggestionsForIncomplete(fragment, rangeToReplace);
+    }
+  }
+}
+/**
+ * TODO — split this into distinct functions, one for fields, one for functions, one for literals
+ */
+export async function getFieldsOrFunctionsSuggestions(
+  types: string[],
+  commandName: string,
+  optionName: string | undefined,
+  getFieldsByType: GetColumnsByTypeFn,
+  {
+    functions,
+    fields,
+    variables,
+    literals = false,
+  }: {
+    functions: boolean;
+    fields: boolean;
+    variables?: Map<string, ESQLVariable[]>;
+    literals?: boolean;
+  },
+  {
+    ignoreFn = [],
+    ignoreColumns = [],
+  }: {
+    ignoreFn?: string[];
+    ignoreColumns?: string[];
+  } = {}
+): Promise<SuggestionRawDefinition[]> {
+  const filteredFieldsByType = pushItUpInTheList(
+    (await (fields
+      ? getFieldsByType(types, ignoreColumns, {
+          advanceCursor: commandName === 'sort',
+          openSuggestions: commandName === 'sort',
+        })
+      : [])) as SuggestionRawDefinition[],
+    functions
+  );
+
+  const filteredVariablesByType: string[] = [];
+  if (variables) {
+    for (const variable of variables.values()) {
+      if (
+        (types.includes('any') || types.includes(variable[0].type)) &&
+        !ignoreColumns.includes(variable[0].name)
+      ) {
+        filteredVariablesByType.push(variable[0].name);
+      }
+    }
+    // due to a bug on the ES|QL table side, filter out fields list with underscored variable names (??)
+    // avg( numberField ) => avg_numberField_
+    const ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
+    if (
+      filteredVariablesByType.length &&
+      filteredVariablesByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
+    ) {
+      for (const variable of filteredVariablesByType) {
+        const underscoredName = variable.replace(ALPHANUMERIC_REGEXP, '_');
+        const index = filteredFieldsByType.findIndex(
+          ({ label }) => underscoredName === label || `_${underscoredName}_` === label
+        );
+        if (index >= 0) {
+          filteredFieldsByType.splice(index);
+        }
+      }
+    }
+  }
+  // could also be in stats (bucket) but our autocomplete is not great yet
+  const displayDateSuggestions = types.includes('date') && ['where', 'eval'].includes(commandName);
+
+  const suggestions = filteredFieldsByType.concat(
+    displayDateSuggestions ? getDateLiterals() : [],
+    functions
+      ? getFunctionSuggestions({
+          command: commandName,
+          option: optionName,
+          returnTypes: types,
+          ignored: ignoreFn,
+        })
+      : [],
+    variables
+      ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
+      : [],
+    literals ? getCompatibleLiterals(commandName, types) : []
+  );
+
+  return suggestions;
+}
+
+export function pushItUpInTheList(suggestions: SuggestionRawDefinition[], shouldPromote: boolean) {
+  if (!shouldPromote) {
+    return suggestions;
+  }
+  return suggestions.map(({ sortText, ...rest }) => ({
+    ...rest,
+    sortText: `1${sortText}`,
+  }));
+}
+
+export function extractTypeFromASTArg(
+  arg: ESQLAstItem,
+  references: Pick<ReferenceMaps, 'fields' | 'variables'>
+):
+  | ESQLLiteral['literalType']
+  | SupportedDataType
+  | FunctionReturnType
+  | 'timeInterval'
+  | string // @TODO remove this
+  | undefined {
+  if (Array.isArray(arg)) {
+    return extractTypeFromASTArg(arg[0], references);
+  }
+  if (isLiteralItem(arg)) {
+    return arg.literalType;
+  }
+  if (isColumnItem(arg) || isIdentifier(arg)) {
+    const hit = getColumnForASTNode(arg, references);
+    if (hit) {
+      return hit.type;
+    }
+  }
+  if (isTimeIntervalItem(arg)) {
+    return arg.type;
+  }
+  if (isFunctionItem(arg)) {
+    const fnDef = getFunctionDefinition(arg.name);
+    if (fnDef) {
+      // @TODO: improve this to better filter down the correct return type based on existing arguments
+      // just mind that this can be highly recursive...
+      return fnDef.signatures[0].returnType;
+    }
+  }
 }

@@ -6,6 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { AssistantScope } from '@kbn/ai-assistant-common';
 import type { Message } from '../../common';
 import { chatFeedbackEventSchema, ChatFeedback } from './schemas/chat_feedback';
 import { insightFeedbackEventSchema, InsightFeedback } from './schemas/insight_feedback';
@@ -17,7 +18,10 @@ const schemas = [chatFeedbackEventSchema, insightFeedbackEventSchema, userSentPr
 export type TelemetryEventTypeWithPayload =
   | { type: ObservabilityAIAssistantTelemetryEventType.ChatFeedback; payload: ChatFeedback }
   | { type: ObservabilityAIAssistantTelemetryEventType.InsightFeedback; payload: InsightFeedback }
-  | { type: ObservabilityAIAssistantTelemetryEventType.UserSentPromptInChat; payload: Message };
+  | {
+      type: ObservabilityAIAssistantTelemetryEventType.UserSentPromptInChat;
+      payload: Message & { scopes: AssistantScope[] };
+    };
 
 export const registerTelemetryEventTypes = (analytics: AnalyticsServiceSetup) => {
   schemas.forEach((schema) => {

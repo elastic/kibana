@@ -5,11 +5,17 @@ The Elasticsearch Query Language, {esql}, makes it easier to explore your data w
 
 In this tutorial we'll use the {kib} sample web logs in Discover and Lens to explore the data and create visualizations. 
 
+[TIP]
+====
+For the complete {esql} documentation, including tutorials, examples and the full syntax reference, refer to the {ref}/esql.html[{es} documentation].
+For a more detailed overview of {esql} in {kib}, refer to {ref}/esql-kibana.html[Use {esql} in Kibana].
+====
+
 [float]
 [[prerequisite]]
 === Prerequisite 
 
-To be able to select **Language {esql}** from the Data views menu the `enableESQL` setting must be enabled from **Stack Management > Advanced Settings**. It is enabled by default. 
+To view the {esql} option in **Discover**, the `enableESQL` setting must be enabled from Kibana's **Advanced Settings**. It is enabled by default. 
 
 [float]
 [[tutorial-try-esql]]
@@ -17,24 +23,24 @@ To be able to select **Language {esql}** from the Data views menu the `enableESQ
 
 To load the sample data:
 
-. On the home page, click **Try sample data**.
-. Click **Other sample data sets**.
-. On the Sample web logs card, click **Add data**.
-. Open the main menu and select *Discover*.
-. From the Data views menu, select *Language {esql}*.
+. <<gs-get-data-into-kibana,Install the web logs sample data>>.
+. Go to *Discover*.
+. Select *Try {esql}* from the application menu bar.
 
 Let's say we want to find out what operating system users have and how much RAM is on their machine.  
 
 . Set the time range to **Last 7 days**.
-. Expand image:images/expand-icon-2.png[An image of the expand icon] the query bar.
-. Put each processing command on a new line for better readability.
 . Copy the query below:
 +
 [source,esql]
 ----
-FROM kibana_sample_data_logs 
-| KEEP machine.os, machine.ram
+FROM kibana_sample_data_logs <1>
+| KEEP machine.os, machine.ram <2>
 ----
+<1> We're specifically looking for data from the sample web logs we just installed.
+<2> We're only keeping the `machine.os` and `machine.ram` fields in the results table.
++
+TIP: Put each processing command on a new line for better readability.
 +
 . Click **▶Run**.
 +
@@ -57,12 +63,14 @@ FROM kibana_sample_data_logs
 | LIMIT 10
 ----
 +
-. Click **▶Run**.
+. Click **▶Run** again. You can notice that the table is now limited to 10 results. The visualization also updated automatically based on the query, and broke down the data for you.
++
+NOTE: When you don't specify any specific fields to retain using `KEEP`, the visualization isn't broken down automatically. Instead, an additional option appears above the visualization and lets you select a field manually.
 +
 [role="screenshot"]
 image:images/esql-limit.png[An image of the extended query result]
 
-Let's sort the data by machine ram and filter out the destination GB. 
+We will now take it a step further to sort the data by machine ram and filter out the `GB` destination. 
 
 . Copy the query below:
 +
@@ -75,18 +83,51 @@ FROM kibana_sample_data_logs
 | LIMIT 10
 ----
 +
-. Click **▶Run**.
+. Click **▶Run** again. The table and visualization no longer show results for which the `geo.dest` field value is "GB", and the results are now sorted in descending order in the table based on the `machine.ram` field. 
 +
 [role="screenshot"]
 image:images/esql-full-query.png[An image of the full query result]
 +
 . Click **Save** to save the query and visualization to a dashboard. 
 
-To make changes to the visualization you can use the visualization drop-down. To make changes to the colors used or the axes, or click the pencil icon. This opens an in-line editor where you can change the colors and axes of the visualization. 
+[float]
+==== Edit the ES|QL visualization
 
-[TIP]
-====
-For the complete {esql} documentation, including tutorials, examples and the full syntax reference, refer to the {ref}/esql.html[{es} documentation].
-For a more detailed overview of {esql} in {kib}, refer to {ref}/esql-kibana.html[Use {esql} in Kibana].
-====
+You can make changes to the visualization by clicking the pencil icon. This opens additional settings that let you adjust the chart type, axes, breakdown, colors, and information displayed to your liking. If you're not sure which route to go, check one of the suggestions available in the visualization editor.
+
+If you'd like to keep the visualization and add it to a dashboard, you can save it using the floppy disk icon.
+
+[float]
+==== ES|QL and time series data
+
+By default, ES|QL identifies time series data when an index contains a `@timestamp` field. This enables the time range selector and visualization options for your query.
+
+If your index doesn't have an explicit `@timestamp` field, but has a different time field, you can still enable the time range selector and visualization options by calling the `?_start` and `?_tend` parameters in your query.
+
+For example, the eCommerce sample data set doesn't have a `@timestamp` field, but has an `order_date` field.
+
+By default, when querying this data set, time series capabilities aren't active. No visualization is generated and the time picker is disabled.
+
+[source,esql]
+----
+FROM kibana_sample_data_ecommerce 
+| KEEP customer_first_name, email, products._id.keyword
+----
+
+image::images/esql-no-time-series.png[ESQL query without time series capabilities enabled]
+
+While still querying the same data set, by adding the `?_start` and `?_tend` parameters based on the `order_date` field, **Discover** enables times series capabilities.
+
+[source,esql]
+----
+FROM kibana_sample_data_ecommerce 
+| WHERE order_date >= ?_tstart and order_date <= ?_tend
+----
+
+image::images/esql-custom-time-series.png[ESQL query with a custom time field enabled]
+
+
+
+
+
 
