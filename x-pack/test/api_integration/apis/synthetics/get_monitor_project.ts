@@ -22,13 +22,13 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
+    const kibanaServer = getService('kibanaServer');
 
     let projectMonitors: LegacyProjectMonitorsRequest;
     let httpProjectMonitors: LegacyProjectMonitorsRequest;
     let tcpProjectMonitors: LegacyProjectMonitorsRequest;
     let icmpProjectMonitors: LegacyProjectMonitorsRequest;
 
-    let testPolicyId = '';
     const testPrivateLocations = new PrivateLocationTestService(getService);
 
     const setUniqueIds = (request: LegacyProjectMonitorsRequest) => {
@@ -39,12 +39,10 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await testPrivateLocations.installSyntheticsPackage();
 
-      const testPolicyName = 'Fleet test server policy' + Date.now();
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
-      testPolicyId = apiResponse.body.item.id;
-      await testPrivateLocations.setTestLocations([testPolicyId]);
+      await testPrivateLocations.addPrivateLocation();
     });
 
     beforeEach(() => {
