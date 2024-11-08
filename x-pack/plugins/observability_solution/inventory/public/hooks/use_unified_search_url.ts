@@ -63,12 +63,12 @@ const INITIAL_VALUE: SearchState = {
   filters: [],
 };
 
-export type HostsStateAction =
+export type StateAction =
   | { type: 'SET_FILTERS'; filters: SearchState['filters'] }
   | { type: 'SET_QUERY'; query: SearchState['query'] }
   | { type: 'SET_PANEL_FILTERS'; panelFilters: SearchState['panelFilters'] };
 
-const reducer = (state: SearchState, action: HostsStateAction): SearchState => {
+const reducer = (state: SearchState, action: StateAction): SearchState => {
   switch (action.type) {
     case 'SET_FILTERS':
       return { ...state, filters: action.filters };
