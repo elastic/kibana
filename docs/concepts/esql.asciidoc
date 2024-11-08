@@ -8,15 +8,12 @@ Based on the query, Lens suggestions in Discover create a visualization of the q
 
 {esql} comes with its own dedicated {esql} Compute Engine for greater efficiency. With one query you can search, aggregate, calculate and perform data transformations without leaving **Discover**. Write your query directly in **Discover** or use the **Dev Tools** with the {ref}/esql-rest.html[{esql} API].
 
-Here's how to use {esql} in the data view selector in **Discover**:
+You can switch to the ES|QL mode of Discover from the application menu bar.
+
+{esql} also features in-app help and suggestions, so you can get started faster and don't have to leave the application to check syntax. 
 
 [role="screenshot"]
-image:images/esql-data-view-menu.png[An image of the Discover UI where users can access the {esql} feature, width=30%, align="center"]
-
-{esql} also features in-app help, so you can get started faster and don't have to leave the application to check syntax. 
-
-[role="screenshot"]
-image:images/esql-in-app-help.png[An image of the Discover UI where users can browse the in-app help]
+image:images/esql-in-app-help.png[The ES|QL syntax reference and the autocomplete menu]
 
 You can also use ES|QL queries to create panels on your dashboards, create enrich policies, and create alerting rules.
 
