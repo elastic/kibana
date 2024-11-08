@@ -10,11 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
-<<<<<<< HEAD
-=======
-* <<release-notes-8.16.0>>
 * <<release-notes-8.15.4>>
->>>>>>> bab2c2a497e ([Docs] 8.15.4 release notes (#198565))
 * <<release-notes-8.15.3>>
 * <<release-notes-8.15.2>>
 * <<release-notes-8.15.1>>
