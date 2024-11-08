@@ -10,6 +10,7 @@
 import type { ConnectionRequestParams } from '@elastic/transport';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { IncomingHttpHeaders } from 'http';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 /**
@@ -17,17 +18,20 @@ import { sanitizeRequestParams } from '../../sanitize_request_params';
  */
 export function toAsyncKibanaSearchResponse(
   response: SqlGetAsyncResponse,
-  warning?: string,
+  headers: IncomingHttpHeaders,
   requestParams?: ConnectionRequestParams
 ): IKibanaSearchResponse<SqlGetAsyncResponse> {
+  const responseIsStream = response.id === undefined;
   return {
-    id: response.id,
-    rawResponse: {
-      ...response,
-    },
-    isPartial: response.is_partial,
-    isRunning: response.is_running,
-    ...(warning ? { warning } : {}),
+    id: responseIsStream ? (headers['x-elasticsearch-async-id'] as string) : response.id,
+    rawResponse: response,
+    isRunning: responseIsStream
+      ? headers['x-elasticsearch-async-is-running'] === '?1'
+      : response.is_running,
+    isPartial: responseIsStream
+      ? headers['x-elasticsearch-async-is-partial'] === '?1'
+      : response.is_partial,
+    ...(headers?.warning ? { warning: headers?.warning } : {}),
     ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
   };
 }

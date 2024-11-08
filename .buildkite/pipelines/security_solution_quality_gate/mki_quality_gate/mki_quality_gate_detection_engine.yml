@@ -61,7 +61,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-       - label: Running exception_lists:common:lists:qa:serverless:release
+      - label: Running exception_lists:common:lists:qa:serverless:release
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:common:lists:qa:serverless:release
         key: exception_lists:common:lists:qa:serverless:release
         agents:
@@ -75,7 +75,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-       - label: Running exception_lists:items:lists:qa:serverless:release
+      - label: Running exception_lists:items:lists:qa:serverless:release
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:items:lists:qa:serverless:release
         key: exception_lists:items:lists:qa:serverless:release
         agents:
