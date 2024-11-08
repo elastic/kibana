@@ -24,7 +24,7 @@ import {
   getOperatorSuggestions,
   getSuggestionsAfterNot,
 } from '../../factories';
-import { getSuggestionsToRightOfOperatorExpression } from '../../helper';
+import { getOverlapRange, getSuggestionsToRightOfOperatorExpression } from '../../helper';
 import { getPosition } from './util';
 import { pipeCompleteItem } from '../../complete_items';
 
@@ -95,15 +95,17 @@ export async function suggest(
      * <COMMAND> <field> NOT <here>
      * is an incomplete statement and it results in a missing AST node, so we need to detect
      * from the query string itself
+     *
+     * (this comment was copied but seems to still apply)
      */
     case 'after_not':
-      if (!command.args.some((arg) => isFunctionItem(arg) && arg.name === 'not')) {
-        suggestions.push(...getSuggestionsAfterNot());
-      } else {
+      if (expressionRoot && isFunctionItem(expressionRoot) && expressionRoot.name === 'not') {
         suggestions.push(
           ...getFunctionSuggestions({ command: 'where', returnTypes: ['boolean'] }),
           ...(await getColumnsByType('boolean', [], { advanceCursor: true, openSuggestions: true }))
         );
+      } else {
+        suggestions.push(...getSuggestionsAfterNot());
       }
 
       break;
@@ -131,7 +133,9 @@ export async function suggest(
       });
       walker.walkFunction(expressionRoot);
 
-      if (rightmostOperator.name.endsWith('null')) {
+      // See https://github.com/elastic/kibana/issues/199401 for an explanation of
+      // why this check has to be so convoluted
+      if (rightmostOperator.text.toLowerCase().trim().endsWith('null')) {
         suggestions.push(...logicalOperators.map(getOperatorSuggestion));
         break;
       }
@@ -165,5 +169,15 @@ export async function suggest(
     suggestions.push(pipeCompleteItem);
   }
 
-  return suggestions;
+  return suggestions.map<SuggestionRawDefinition>((s) => {
+    const overlap = getOverlapRange(innerText, s.text);
+    const offset = overlap.start === overlap.end ? 1 : 0;
+    return {
+      ...s,
+      rangeToReplace: {
+        start: overlap.start + offset,
+        end: overlap.end + offset,
+      },
+    };
+  });
 }

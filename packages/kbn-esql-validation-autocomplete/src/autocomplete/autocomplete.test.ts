@@ -1161,27 +1161,35 @@ describe('autocomplete', () => {
 
   describe('Replacement ranges are attached when needed', () => {
     testSuggestions('FROM a | WHERE doubleField IS NOT N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 35 } },
-      { text: 'IS NULL', rangeToReplace: { start: 36, end: 36 } },
+      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 36 } },
+      { text: 'IS NULL', rangeToReplace: { start: 37, end: 37 } },
       '!= $0',
       '== $0',
       'IN $0',
       'AND $0',
       'NOT',
       'OR $0',
+      // pipe doesn't make sense here, but Monaco will filter it out.
+      // see https://github.com/elastic/kibana/issues/199401 for an explanation
+      // of why this happens
+      '| ',
     ]);
     testSuggestions('FROM a | WHERE doubleField IS N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 31 } },
-      { text: 'IS NULL', rangeToReplace: { start: 28, end: 31 } },
-      { text: '!= $0', rangeToReplace: { start: 32, end: 32 } },
+      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 32 } },
+      { text: 'IS NULL', rangeToReplace: { start: 28, end: 32 } },
+      { text: '!= $0', rangeToReplace: { start: 33, end: 33 } },
       '== $0',
       'IN $0',
       'AND $0',
       'NOT',
       'OR $0',
+      // pipe doesn't make sense here, but Monaco will filter it out.
+      // see https://github.com/elastic/kibana/issues/199401 for an explanation
+      // of why this happens
+      '| ',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
+      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 35 } },
       'IS NULL',
       '!= $0',
       '== $0',
@@ -1190,6 +1198,7 @@ describe('autocomplete', () => {
       'NOT',
       'OR $0',
     ]);
+
     describe('dot-separated field names', () => {
       testSuggestions(
         'FROM a | KEEP field.nam/',

@@ -213,9 +213,10 @@ export function getOverlapRange(
     }
   }
 
+  // add one since Monaco columns are 1-based
   return {
-    start: Math.min(query.length - overlapLength + 1, query.length),
-    end: query.length,
+    start: query.length - overlapLength + 1,
+    end: query.length + 1,
   };
 }
 

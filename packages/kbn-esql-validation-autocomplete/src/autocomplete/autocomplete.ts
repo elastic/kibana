@@ -406,7 +406,7 @@ async function getSuggestionsWithinCommandExpression(
       getColumnsByType,
       (col: string) => Boolean(getColumnByName(col, references)),
       () => findNewVariable(anyVariables),
-      (expression: ESQLAstItem) =>
+      (expression: ESQLAstItem | undefined) =>
         getExpressionType(expression, references.fields, references.variables),
       getPreferences
     );

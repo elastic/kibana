@@ -218,6 +218,29 @@ describe('WHERE <expression>', () => {
         ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['boolean']),
         pipeCompleteItem,
       ]);
+      await assertSuggestions('from index | WHERE keywordField IS NOT/', [
+        '!= $0',
+        '== $0',
+        'AND $0',
+        'IN $0',
+        'IS NOT NULL',
+        'IS NULL',
+        'NOT',
+        'OR $0',
+        '| ',
+      ]);
+
+      await assertSuggestions('from index | WHERE keywordField IS NOT /', [
+        '!= $0',
+        '== $0',
+        'AND $0',
+        'IN $0',
+        'IS NOT NULL',
+        'IS NULL',
+        'NOT',
+        'OR $0',
+        '| ',
+      ]);
     });
 
     test('suggestions after IN', async () => {
@@ -278,6 +301,32 @@ describe('WHERE <expression>', () => {
       expect(await suggest('from index | WHERE doubleField != doubleField /')).toContainEqual(
         expect.objectContaining({
           label: '|',
+        })
+      );
+    });
+
+    test('attaches ranges', async () => {
+      const { suggest } = await setup();
+
+      const suggestions = await suggest('FROM index | WHERE doubleField IS N/');
+
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          text: 'IS NOT NULL',
+          rangeToReplace: {
+            start: 32,
+            end: 36,
+          },
+        })
+      );
+
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          text: 'IS NULL',
+          rangeToReplace: {
+            start: 32,
+            end: 36,
+          },
         })
       );
     });

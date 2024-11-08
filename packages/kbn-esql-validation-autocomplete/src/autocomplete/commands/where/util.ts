@@ -18,11 +18,21 @@ export type CaretPosition =
   | 'empty_expression';
 
 export const getPosition = (innerText: string, command: ESQLCommand): CaretPosition => {
-  if (/ not$/i.test(innerText.trimEnd())) {
+  const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
+
+  const endsWithNot = / not$/i.test(innerText.trimEnd());
+  if (
+    endsWithNot &&
+    !(
+      expressionRoot &&
+      isFunctionItem(expressionRoot) &&
+      // See https://github.com/elastic/kibana/issues/199401
+      // for more information on this check...
+      ['is null', 'is not null'].includes(expressionRoot.name)
+    )
+  ) {
     return 'after_not';
   }
-
-  const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
 
   if (expressionRoot) {
     if (isColumnItem(expressionRoot)) {
