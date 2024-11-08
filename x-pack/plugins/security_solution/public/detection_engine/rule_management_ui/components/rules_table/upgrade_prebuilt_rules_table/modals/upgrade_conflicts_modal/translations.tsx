@@ -32,6 +32,6 @@ export const UPGRADE_CONFLICTS_MODAL_BODY = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeConflictsModal.affectedJobsTitle',
   {
     defaultMessage:
-      'Some of the selected rules have conflicts in one or more of their fields and will not be updated. Please resolve the conflicts on a case-by-case basis.',
+      'Some of the selected rules have conflicts and, for that reason, won't be updated. Resolve the conflicts to properly update the rules. ',
   }
 );
