@@ -12,6 +12,7 @@ import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import {
   DataSourceCategory,
   DataSourceContext,
+  DocumentProfileProviderParams,
   DocumentType,
   RootContext,
   SolutionType,
@@ -23,7 +24,7 @@ const mockServices = createContextAwarenessMocks().profileProviderServices;
 
 describe('logDocumentProfileProvider', () => {
   const logDocumentProfileProvider = createLogDocumentProfileProvider(mockServices);
-  const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Default };
+  const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Observability };
   const DATA_SOURCE_CONTEXT: DataSourceContext = { category: DataSourceCategory.Logs };
   const RESOLUTION_MATCH = {
     isMatch: true,
@@ -95,6 +96,39 @@ describe('logDocumentProfileProvider', () => {
         rootContext: ROOT_CONTEXT,
         dataSourceContext: DATA_SOURCE_CONTEXT,
         record: buildMockRecord('another-index'),
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('does not match records when solution type is not Observability', () => {
+    const params: Omit<DocumentProfileProviderParams, 'rootContext'> = {
+      dataSourceContext: DATA_SOURCE_CONTEXT,
+      record: buildMockRecord('another-index', {
+        'data_stream.type': ['logs'],
+      }),
+    };
+    expect(
+      logDocumentProfileProvider.resolve({
+        ...params,
+        rootContext: ROOT_CONTEXT,
+      })
+    ).toEqual(RESOLUTION_MATCH);
+    expect(
+      logDocumentProfileProvider.resolve({
+        ...params,
+        rootContext: { solutionType: SolutionType.Default },
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+    expect(
+      logDocumentProfileProvider.resolve({
+        ...params,
+        rootContext: { solutionType: SolutionType.Search },
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+    expect(
+      logDocumentProfileProvider.resolve({
+        ...params,
+        rootContext: { solutionType: SolutionType.Security },
       })
     ).toEqual(RESOLUTION_MISMATCH);
   });

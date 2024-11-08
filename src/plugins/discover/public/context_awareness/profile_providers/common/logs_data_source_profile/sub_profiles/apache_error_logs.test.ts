@@ -14,7 +14,7 @@ import { createContextAwarenessMocks } from '../../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from '../profile';
 import { createApacheErrorLogsDataSourceProfileProvider } from './apache_error_logs';
 
-const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Default };
+const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Observability };
 const { profileProviderServices } = createContextAwarenessMocks();
 const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(profileProviderServices);
 const dataSourceProfileProvider = createApacheErrorLogsDataSourceProfileProvider(

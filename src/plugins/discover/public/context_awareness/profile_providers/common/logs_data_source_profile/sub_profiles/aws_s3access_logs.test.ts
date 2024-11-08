@@ -14,7 +14,7 @@ import { createContextAwarenessMocks } from '../../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from '../profile';
 import { createAwsS3accessLogsDataSourceProfileProvider } from './aws_s3access_logs';
 
-const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Default };
+const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Observability };
 const { profileProviderServices } = createContextAwarenessMocks();
 const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(profileProviderServices);
 const dataSourceProfileProvider = createAwsS3accessLogsDataSourceProfileProvider(

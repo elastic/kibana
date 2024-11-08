@@ -11,7 +11,12 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
-import { DataSourceCategory, RootContext, SolutionType } from '../../../profiles';
+import {
+  DataSourceCategory,
+  DataSourceProfileProviderParams,
+  RootContext,
+  SolutionType,
+} from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from './profile';
 import { DataGridDensity } from '@kbn/unified-data-table';
@@ -24,7 +29,7 @@ describe('logsDataSourceProfileProvider', () => {
   const VALID_INDEX_PATTERN = 'logs-nginx.access-*';
   const MIXED_INDEX_PATTERN = 'logs-nginx.access-*,metrics-*';
   const INVALID_INDEX_PATTERN = 'my_source-access-*';
-  const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Default };
+  const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Observability };
   const RESOLUTION_MATCH = {
     isMatch: true,
     context: { category: DataSourceCategory.Logs },
@@ -83,6 +88,34 @@ describe('logsDataSourceProfileProvider', () => {
         rootContext: ROOT_CONTEXT,
         dataSource: createDataViewDataSource({ dataViewId: MIXED_INDEX_PATTERN }),
         dataView: createStubIndexPattern({ spec: { title: MIXED_INDEX_PATTERN } }),
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('does NOT match data view sources when solution type is not Observability', () => {
+    const params: Omit<DataSourceProfileProviderParams, 'rootContext'> = {
+      dataSource: createEsqlDataSource(),
+      query: { esql: `from ${VALID_INDEX_PATTERN}` },
+    };
+    expect(logsDataSourceProfileProvider.resolve({ ...params, rootContext: ROOT_CONTEXT })).toEqual(
+      RESOLUTION_MATCH
+    );
+    expect(
+      logsDataSourceProfileProvider.resolve({
+        ...params,
+        rootContext: { solutionType: SolutionType.Default },
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+    expect(
+      logsDataSourceProfileProvider.resolve({
+        ...params,
+        rootContext: { solutionType: SolutionType.Search },
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+    expect(
+      logsDataSourceProfileProvider.resolve({
+        ...params,
+        rootContext: { solutionType: SolutionType.Security },
       })
     ).toEqual(RESOLUTION_MISMATCH);
   });
