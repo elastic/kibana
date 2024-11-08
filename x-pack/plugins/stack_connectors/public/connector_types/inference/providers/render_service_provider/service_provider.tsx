@@ -107,9 +107,7 @@ export const ServiceProviderIcon: React.FC<ServiceProviderProps> = ({ providerKe
 
   return provider ? (
     <EuiIcon data-test-subj={`icon-service-provider-${providerKey}`} type={provider.icon} />
-  ) : (
-    <span>{providerKey}</span>
-  );
+  ) : null;
 };
 
 export const ServiceProviderName: React.FC<ServiceProviderProps> = ({

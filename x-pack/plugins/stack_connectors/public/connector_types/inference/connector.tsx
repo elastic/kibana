@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   EuiFormRow,
   EuiSpacer,
@@ -309,6 +309,22 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     setFieldValue('config.provider', '');
   }, [onProviderChange, setFieldValue]);
 
+  const providerIcon = useMemo(
+    () =>
+      Object.keys(SERVICE_PROVIDERS).includes(config?.provider)
+        ? SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].icon
+        : undefined,
+    [config?.provider]
+  );
+
+  const providerName = useMemo(
+    () =>
+      Object.keys(SERVICE_PROVIDERS).includes(config?.provider)
+        ? SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].name
+        : config?.provider,
+    [config?.provider]
+  );
+
   const providerSuperSelect = useCallback(
     (isInvalid: boolean) => (
       <EuiFormControlLayout
@@ -317,11 +333,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
         isDisabled={isEdit || readOnly}
         isInvalid={isInvalid}
         fullWidth
-        icon={
-          !config?.provider
-            ? { type: 'sparkles', side: 'left' }
-            : SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].icon
-        }
+        icon={!config?.provider ? { type: 'sparkles', side: 'left' } : providerIcon}
       >
         <EuiFieldText
           onClick={handleProviderPopover}
@@ -329,9 +341,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
           isInvalid={isInvalid}
           disabled={isEdit || readOnly}
           onKeyDown={handleProviderKeyboardOpen}
-          value={
-            config?.provider ? SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].name : ''
-          }
+          value={config?.provider ? providerName : ''}
           fullWidth
           placeholder={i18n.SELECT_PROVIDER}
           icon={{ type: 'arrowDown', side: 'right' }}
@@ -345,8 +355,10 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       readOnly,
       onClearProvider,
       config?.provider,
+      providerIcon,
       handleProviderPopover,
       handleProviderKeyboardOpen,
+      providerName,
       isProviderPopoverOpen,
     ]
   );
