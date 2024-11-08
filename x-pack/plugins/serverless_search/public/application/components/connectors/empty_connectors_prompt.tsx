@@ -14,7 +14,6 @@ import {
   EuiText,
   EuiLink,
   EuiButton,
-  EuiToolTip,
   EuiBadge,
   EuiStepsHorizontal,
   EuiStepsHorizontalProps,
@@ -31,36 +30,21 @@ import { useCreateConnector } from '../../hooks/api/use_create_connector';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useConnectors } from '../../hooks/api/use_connectors';
 
+import { ConnectorIcon } from './connector_icon';
+
 import { ELASTIC_MANAGED_CONNECTOR_PATH, BASE_CONNECTORS_PATH } from '../../constants';
 
 export const EmptyConnectorsPrompt: React.FC = () => {
   const connectorTypes = useConnectorTypes();
+
+  const connectorExamples = connectorTypes.filter((connector) =>
+    ['gmail', 'sharepoint_online', 'jira', 'dropbox'].includes(connector.serviceType)
+  );
   const { createConnector, isLoading } = useCreateConnector();
   const { data } = useConnectors();
 
   const assetBasePath = useAssetBasePath();
   const connectorsPath = assetBasePath + '/connectors.svg';
-  const getConnectorByName = (connectors: typeof connectorTypes, serviceType: string) => {
-    return connectors.find((connector) => connector.serviceType === serviceType);
-  };
-
-  const connectorIcon = (connector: { name: string; serviceType: string; iconPath?: string }) => {
-    return (
-      <EuiToolTip content={connector.name}>
-        <EuiIcon
-          size="l"
-          title={connector?.name}
-          id={connector?.serviceType}
-          type={connector?.iconPath || 'defaultIcon'}
-        />
-      </EuiToolTip>
-    );
-  };
-
-  const connectorExample1 = getConnectorByName(connectorTypes, 'gmail');
-  const connectorExample2 = getConnectorByName(connectorTypes, 'sharepoint_online');
-  const connectorExample3 = getConnectorByName(connectorTypes, 'jira');
-  const connectorExample4 = getConnectorByName(connectorTypes, 'dropbox');
 
   const {
     application: { navigateToUrl },
@@ -149,21 +133,22 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                             direction="row"
                             gutterSize="s"
                           >
-                            <EuiFlexItem grow={false}>
-                              {connectorExample1 && connectorIcon(connectorExample1)}
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              {connectorExample2 && connectorIcon(connectorExample2)}
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiIcon color="primary" size="l" type="documents" />
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              {connectorExample3 && connectorIcon(connectorExample3)}
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              {connectorExample4 && connectorIcon(connectorExample4)}
-                            </EuiFlexItem>
+                            {connectorExamples.map((connector, index) => (
+                              <React.Fragment key={connector.serviceType}>
+                                {index === Math.floor(connectorExamples.length / 2) && (
+                                  <EuiFlexItem grow={false}>
+                                    <EuiIcon color="primary" size="l" type="documents" />
+                                  </EuiFlexItem>
+                                )}
+                                <EuiFlexItem grow={false}>
+                                  <ConnectorIcon
+                                    name={connector.name}
+                                    serviceType={connector.serviceType}
+                                    iconPath={connector.iconPath}
+                                  />
+                                </EuiFlexItem>
+                              </React.Fragment>
+                            ))}
                           </EuiFlexGroup>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>

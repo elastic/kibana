@@ -13,7 +13,6 @@ import {
   EuiIcon,
   EuiTitle,
   EuiText,
-  EuiToolTip,
   EuiBadge,
   EuiStepsHorizontal,
   EuiStepsHorizontalProps,
@@ -29,15 +28,7 @@ import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 import { BACK_LABEL } from '../../../../common/i18n_string';
 
-const ConnectorIcon: React.FC<{ name: string; serviceType: string; iconPath?: string }> = ({
-  name,
-  serviceType,
-  iconPath,
-}) => (
-  <EuiToolTip content={name}>
-    <EuiIcon size="l" title={name} id={serviceType} type={iconPath || 'defaultIcon'} />
-  </EuiToolTip>
-);
+import { ConnectorIcon } from './connector_icon';
 
 export const ElasticManagedConnectorComingSoon: React.FC = () => {
   const connectorTypes = useConnectorTypes();
