@@ -65,7 +65,8 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       });
     });
 
-    describe('With packetbeat', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/199364
+    describe.skip('With packetbeat', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
         search = await utils.createSearch();
