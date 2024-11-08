@@ -29,8 +29,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { MetaDataProps } from './result_types';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { MetaDataProps } from './result_types';
 
 interface Props {
   metaData: MetaDataProps;
