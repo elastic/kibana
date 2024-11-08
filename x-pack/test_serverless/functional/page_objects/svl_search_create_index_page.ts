@@ -83,20 +83,6 @@ export function SvlSearchCreateIndexPageProvider({ getService }: FtrProviderCont
       await testSubjects.existOrFail('uploadFileLink');
       await testSubjects.click('uploadFileLink');
     },
-    async expectAnalyzeLogsLink() {
-      await testSubjects.existOrFail('analyzeLogsBtn');
-      expect(await testSubjects.getAttribute('analyzeLogsBtn', 'href')).equal(
-        'https://docs.elastic.co/serverless/elasticsearch/ingest-your-data'
-      );
-      expect(await testSubjects.getAttribute('analyzeLogsBtn', 'target')).equal('_blank');
-    },
-    async expectO11yTrialLink() {
-      await testSubjects.existOrFail('startO11yTrialBtn');
-      expect(await testSubjects.getAttribute('startO11yTrialBtn', 'href')).match(
-        /^https?\:\/\/.*\/projects\/create\/observability\/start/
-      );
-      expect(await testSubjects.getAttribute('startO11yTrialBtn', 'target')).equal('_blank');
-    },
     async expectAPIKeyVisibleInCodeBlock(apiKey: string) {
       await testSubjects.existOrFail('createIndex-code-block');
       await retry.try(async () => {

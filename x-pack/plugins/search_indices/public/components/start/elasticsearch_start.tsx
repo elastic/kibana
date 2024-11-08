@@ -98,6 +98,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
       onChangeView={onChangeView}
       onClose={onClose}
       showSkip
+      showCallouts
     >
       {createIndexView === CreateIndexViewMode.UI && (
         <CreateIndexUIView
