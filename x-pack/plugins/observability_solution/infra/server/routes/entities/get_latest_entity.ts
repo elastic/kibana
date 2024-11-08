@@ -15,7 +15,7 @@ const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   dataset: ENTITY_LATEST,
 });
 
-interface LatestEntityResponse {
+interface EntitySourceResponse {
   sourceDataStreamType?: string | string[];
 }
 
@@ -29,7 +29,7 @@ export async function getLatestEntity({
   entityType: 'host' | 'container';
   entityId: string;
   entityManagerClient: EntityClient;
-}): Promise<LatestEntityResponse | undefined> {
+}): Promise<EntitySourceResponse | undefined> {
   const { definitions } = await entityManagerClient.getEntityDefinitions({
     builtIn: true,
     type: entityType,
