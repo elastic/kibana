@@ -21,10 +21,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('Pie', function describeIndexTests() {
-    const isNewChartsLibraryEnabled = true;
-
     before(async () => {
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
     });
 
     beforeEach(async () => {
@@ -60,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectAggregation('Terms');
       await visEditor.selectField('machine.os.raw');
       await header.waitUntilLoadingHasFinished();
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
 
       expect(await visualize.hasNavigateToLensButton()).to.eql(true);
     });
@@ -94,7 +92,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickBucket('Split slices');
       await visEditor.selectAggregation('Terms');
       await visEditor.selectField('machine.os.raw');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisualization();
@@ -108,7 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(sliceByText).to.be('machine.os.raw: Descending');
       expect(sizeByText).to.be('Count');
 
-      await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
+      await pieChart.expectPieChartLabels(expectedTableData);
     });
 
     it('should convert types correctly', async () => {
@@ -116,7 +114,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectAggregation('Terms');
       await visEditor.selectField('machine.os.raw');
 
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisualization();
@@ -133,7 +131,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickOptionsTab();
       const isDonutButton = await testSubjects.find('visTypePieIsDonut');
       await isDonutButton.click();
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisualization();

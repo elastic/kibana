@@ -5,26 +5,58 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
-  privateLocationsSavedObjectId,
-  privateLocationsSavedObjectName,
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
+import { uniqBy } from 'lodash';
+import {
+  legacyPrivateLocationsSavedObjectId,
+  legacyPrivateLocationsSavedObjectName,
+  privateLocationSavedObjectName,
 } from '../../common/saved_objects/private_locations';
-import type { SyntheticsPrivateLocationsAttributes } from '../runtime_types/private_locations';
+import {
+  PrivateLocationAttributes,
+  SyntheticsPrivateLocationsAttributes,
+} from '../runtime_types/private_locations';
 
 export const getPrivateLocations = async (
   client: SavedObjectsClientContract
 ): Promise<SyntheticsPrivateLocationsAttributes['locations']> => {
   try {
-    const obj = await client.get<SyntheticsPrivateLocationsAttributes>(
-      privateLocationsSavedObjectName,
-      privateLocationsSavedObjectId
-    );
-    return obj?.attributes.locations ?? [];
+    const finder = client.createPointInTimeFinder<PrivateLocationAttributes>({
+      type: privateLocationSavedObjectName,
+      perPage: 1000,
+    });
+
+    const results: Array<SavedObject<PrivateLocationAttributes>> = [];
+
+    for await (const response of finder.find()) {
+      results.push(...response.saved_objects);
+    }
+
+    finder.close().catch((e) => {});
+
+    const legacyLocations = await getLegacyPrivateLocations(client);
+
+    return uniqBy([...results.map((r) => r.attributes), ...legacyLocations], 'id');
   } catch (getErr) {
     if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
       return [];
     }
     throw getErr;
+  }
+};
+
+const getLegacyPrivateLocations = async (client: SavedObjectsClientContract) => {
+  try {
+    const obj = await client.get<SyntheticsPrivateLocationsAttributes>(
+      legacyPrivateLocationsSavedObjectName,
+      legacyPrivateLocationsSavedObjectId
+    );
+    return obj?.attributes.locations ?? [];
+  } catch (getErr) {
+    return [];
   }
 };
