@@ -598,7 +598,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${OBSERVABILITY_DOCS}custom-threshold-alert.html`,
       monitorStatus: `${OBSERVABILITY_DOCS}monitor-status-alert.html`,
       monitorUptime: isServerless
-        ? `${SERVERLESS_DOCS}observability-monitor-synthetics.htmls`
+        ? `${SERVERLESS_DOCS}observability-monitor-synthetics.html`
         : `${OBSERVABILITY_DOCS}monitor-uptime.html`,
       tlsCertificate: `${OBSERVABILITY_DOCS}tls-certificate-alert.html`,
       uptimeDurationAnomaly: `${OBSERVABILITY_DOCS}duration-anomaly-alert.html`,
