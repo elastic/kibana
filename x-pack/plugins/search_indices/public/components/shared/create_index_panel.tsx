@@ -108,7 +108,7 @@ export const CreateIndexPanel = ({
           <EuiTitle size="l">
             <h2>
               {i18n.translate('xpack.searchIndices.shared.createIndex.pageDescription', {
-                defaultMessage: 'Vectorize, search, and visualize your data',
+                defaultMessage: 'Get started with Elasticsearch',
               })}
             </h2>
           </EuiTitle>
