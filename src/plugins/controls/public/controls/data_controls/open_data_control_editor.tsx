@@ -102,7 +102,7 @@ export const openDataControlEditor = <
       paddingSize: 'm',
       onClose: () => closeOverlay(overlay),
     }
- );
+  );
 
   if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
     controlGroupApi.parentApi.openOverlay(overlay);
