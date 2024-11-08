@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
+import type { SavedDashboardPanel } from '../schema';
+import type { DashboardPanelState } from '../../../common';
+
 import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
-} from './dashboard_panel_converters';
-import { SavedDashboardPanel } from '../content_management';
-import { DashboardPanelState } from '../dashboard_container/types';
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
+} from './utils';
 
 test('convertSavedDashboardPanelToPanelState', () => {
   const savedDashboardPanel: SavedDashboardPanel = {
@@ -148,7 +149,7 @@ test('convertPanelStateToSavedDashboardPanel will not leave title as part of emb
   expect(converted.title).toBe('title');
 });
 
-test('convertPanelStateToSavedDashboardPanel retains legacy version info when not passed removeLegacyVersion', () => {
+test('convertPanelStateToSavedDashboardPanel retains legacy version info', () => {
   const dashboardPanel: DashboardPanelState = {
     gridData: {
       x: 0,
@@ -167,25 +168,4 @@ test('convertPanelStateToSavedDashboardPanel retains legacy version info when no
 
   const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
   expect(converted.version).toBe('8.10.0');
-});
-
-test('convertPanelStateToSavedDashboardPanel removes legacy version info when passed removeLegacyVersion', () => {
-  const dashboardPanel: DashboardPanelState = {
-    gridData: {
-      x: 0,
-      y: 0,
-      h: 15,
-      w: 15,
-      i: '123',
-    },
-    explicitInput: {
-      id: '123',
-      title: 'title',
-    } as EmbeddableInput,
-    type: 'search',
-    version: '8.10.0',
-  };
-
-  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel, true);
-  expect(converted.version).not.toBeDefined();
 });
