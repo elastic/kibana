@@ -14,14 +14,14 @@ import {
 } from '@kbn/licensing-plugin/server';
 
 import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
-import { AlertConsumers, ApmRuleType } from '@kbn/rule-data-utils';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
 
 const alertingFeatures = Object.values(ApmRuleType).map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [APM_SERVER_FEATURE_ID, ALERTING_FEATURE_ID, AlertConsumers.OBSERVABILITY],
+  consumers: [APM_SERVER_FEATURE_ID, ALERTING_FEATURE_ID],
 }));
 
 export const APM_FEATURE: KibanaFeatureConfig = {

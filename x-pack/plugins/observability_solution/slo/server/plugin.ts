@@ -31,7 +31,7 @@ import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { AlertsLocatorDefinition } from '@kbn/observability-plugin/common';
-import { AlertConsumers, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
@@ -85,7 +85,7 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
 
     const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
       ruleTypeId,
-      consumers: [sloFeatureId, ALERTING_FEATURE_ID, AlertConsumers.OBSERVABILITY],
+      consumers: [sloFeatureId, ALERTING_FEATURE_ID],
     }));
 
     plugins.features.registerKibanaFeature({
