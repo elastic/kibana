@@ -45,6 +45,22 @@ const DEFAULTS_SETTINGS = {
     root: {
       level: 'off',
     },
+    loggers: [
+      {
+        name: 'root',
+        level: 'error',
+        appenders: ['console'],
+      },
+      {
+        name: 'elasticsearch.deprecation',
+        level: 'all',
+        appenders: ['deprecation'],
+      },
+    ],
+    appenders: {
+      deprecation: { type: 'console', layout: { type: 'json' } },
+      console: { type: 'console', layout: { type: 'pattern' } },
+    },
   },
   plugins: {},
   migrations: { skip: false },
