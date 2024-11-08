@@ -6,17 +6,35 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiIcon,
+  EuiFormRow,
+  EuiComboBox,
+  EuiBadge,
+  EuiComboBoxOptionOption,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Connector } from '@kbn/search-connectors';
+import { Connector as BaseConnector } from '@kbn/search-connectors';
+
+interface Connector extends BaseConnector {
+  iconPath?: string;
+}
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useConnector } from '../../hooks/api/use_connector';
+import connectorLogo from '../../../assets/connectors.svg';
 
 interface EditServiceTypeProps {
   connector: Connector;
   isDisabled?: boolean;
+}
+interface OptionData {
+  secondaryContent?: string;
 }
 
 export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isDisabled }) => {
@@ -25,26 +43,10 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
 
-  const options =
-    connectorTypes.map((connectorType) => ({
-      inputDisplay: (
-        <EuiFlexGroup direction="row" alignItems="center">
-          <EuiFlexItem
-            grow={false}
-            data-test-subj={`serverlessSearchConnectorServiceType-${connectorType.serviceType}`}
-          >
-            <EuiIcon
-              size="l"
-              title={connectorType.name}
-              id={connectorType.serviceType}
-              type={connectorType.iconPath}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>{connectorType.name}</EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      value: connectorType.serviceType,
-    })) || [];
+  const allConnectors = useMemo(
+    () => connectorTypes.sort((a, b) => a.name.localeCompare(b.name)),
+    [connectorTypes]
+  );
 
   const { isLoading, mutate } = useMutation({
     mutationFn: async (inputServiceType: string) => {
@@ -62,24 +64,125 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
     },
   });
 
+  const getInitialOptions = () => {
+    return allConnectors.map((conn, key) => {
+      const _append: JSX.Element[] = [];
+      if (conn.isTechPreview) {
+        _append.push(
+          <EuiBadge key={key + '-preview'} iconType="beaker" color="hollow">
+            {i18n.translate(
+              'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.thechPreviewBadgeLabel',
+              { defaultMessage: 'Tech preview' }
+            )}
+          </EuiBadge>
+        );
+      }
+      if (conn.isBeta) {
+        _append.push(
+          <EuiBadge key={key + '-beta'} iconType={'beta'} color="hollow">
+            {i18n.translate(
+              'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.BetaBadgeLabel',
+              {
+                defaultMessage: 'Beta',
+              }
+            )}
+          </EuiBadge>
+        );
+      }
+      return {
+        _append,
+        _prepend: <EuiIcon size="l" type={conn.iconPath} />,
+        key: key.toString(),
+        label: conn.name,
+        serviceType: conn.serviceType,
+      };
+    });
+  };
+
+  const initialOptions = getInitialOptions();
+  const { euiTheme } = useEuiTheme();
+  const [selectedOption, setSelectedOption] = useState<Array<EuiComboBoxOptionOption<OptionData>>>(
+    []
+  );
+  const [selectedConnector, setSelectedConnector] = useState<Connector | null>(null);
+  const renderOption = (
+    option: EuiComboBoxOptionOption<OptionData>,
+    searchValue: string,
+    contentClassName: string
+  ) => {
+    const { _append, key, label, _prepend, serviceType } =
+      option as EuiComboBoxOptionOption<OptionData> & {
+        _append: JSX.Element[];
+        _prepend: JSX.Element;
+        serviceType: string;
+      };
+    return (
+      <EuiFlexGroup
+        gutterSize="m"
+        key={key + '-span'}
+        justifyContent="spaceBetween"
+        className={contentClassName}
+      >
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false}>{_prepend}</EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+            data-test-subj={`serverlessSearchConnectorServiceType-${serviceType}`}
+          >
+            <EuiText size="s" textAlign="left">
+              {label}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexItem grow={false}>{_append}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
   return (
-    <EuiFormRow
-      label={i18n.translate('xpack.serverlessSearch.connectors.serviceTypeLabel', {
-        defaultMessage: 'Connector type',
-      })}
-      data-test-subj="serverlessSearchEditConnectorType"
-      fullWidth
-    >
-      <EuiSuperSelect
-        // We only want to allow people to set the service type once to avoid weird conflicts
-        disabled={Boolean(connector.service_type) || isDisabled}
-        data-test-subj="serverlessSearchEditConnectorTypeChoices"
-        isLoading={isLoading}
-        onChange={(event) => mutate(event)}
-        options={options}
-        valueOfSelected={connector.service_type || undefined}
+    <>
+      <EuiFormRow
+        label={i18n.translate('xpack.serverlessSearch.connectors.serviceTypeLabel', {
+          defaultMessage: 'Connector type',
+        })}
+        data-test-subj="serverlessSearchEditConnectorType"
         fullWidth
-      />
-    </EuiFormRow>
+      >
+        <EuiComboBox
+          aria-label={i18n.translate(
+            'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
+            { defaultMessage: 'Select a data source for your connector to use.' }
+          )}
+          // We only want to allow people to set the service type once to avoid weird conflicts
+          isDisabled={Boolean(connector.service_type) || isDisabled}
+          isLoading={isLoading}
+          data-test-subj="serverlessSearchEditConnectorTypeChoices"
+          prepend={<EuiIcon type={selectedConnector?.iconPath ?? connectorLogo} size="l" />}
+          singleSelection
+          fullWidth
+          placeholder={i18n.translate(
+            'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.placeholder.text',
+            { defaultMessage: 'Choose a data source' }
+          )}
+          options={initialOptions}
+          selectedOptions={selectedOption}
+          onChange={(selectedItem) => {
+            setSelectedOption(selectedItem);
+            if (selectedItem.length === 0) {
+              setSelectedConnector(null);
+              return;
+            }
+            const keySelected = Number(selectedItem[0].key);
+            setSelectedConnector({
+              ...connector,
+              ...allConnectors[keySelected],
+            });
+            mutate(allConnectors[keySelected].serviceType);
+          }}
+          renderOption={renderOption}
+          rowHeight={(euiTheme.base / 2) * 5}
+        />
+      </EuiFormRow>
+    </>
   );
 };
