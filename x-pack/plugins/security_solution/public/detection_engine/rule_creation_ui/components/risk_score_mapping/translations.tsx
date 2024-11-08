@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MIN_RISK_SCORE, MAX_RISK_SCORE } from './constants';
 
 export const RISK_SCORE = i18n.translate(
   'xpack.securitySolution.alerts.riskScoreMapping.riskScoreTitle',
@@ -62,13 +61,5 @@ export const RISK_SCORE_MAPPING_DETAILS = i18n.translate(
   {
     defaultMessage:
       'If value is out of bounds, or field is not present, the default risk score will be used.',
-  }
-);
-
-export const RISK_SCORE_VALIDATION_ERROR = i18n.translate(
-  'xpack.securitySolution.alerts.defaultRiskScore.validationError',
-  {
-    values: { min: MIN_RISK_SCORE, max: MAX_RISK_SCORE },
-    defaultMessage: 'Risk score must be between {min} and {max}.',
   }
 );

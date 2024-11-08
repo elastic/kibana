@@ -7,13 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { FormSchema, ValidationFunc, ERROR_CODE } from '../../../../shared_imports';
+import type {
+  FormSchema,
+  ValidationFunc,
+  ERROR_CODE,
+  ValidationError,
+} from '../../../../shared_imports';
 import { FIELD_TYPES, fieldValidators, VALIDATION_TYPES } from '../../../../shared_imports';
-import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type {
+  AboutStepRiskScore,
+  AboutStepRule,
+} from '../../../../detections/pages/detection_engine/rules/types';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import * as I18n from './translations';
-import { validateDefaultRiskScore } from '../risk_score_mapping/default_risk_score';
+import { defaultRiskScoreValidator } from '../../validators/default_risk_score_validator';
 
 const { emptyField } = fieldValidators;
 
@@ -133,20 +141,12 @@ export const schema: FormSchema<AboutStepRule> = {
     validations: [
       {
         validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ value, path }] = args;
-          const fieldValue = value as { value: unknown };
-          const defaultRiskScore = fieldValue?.value ?? null;
+          ...args: Parameters<ValidationFunc<{}, ERROR_CODE, AboutStepRiskScore>>
+        ): ValidationError | undefined => {
+          const [{ value: fieldValue, path }] = args;
+          const defaultRiskScore = fieldValue.value;
 
-          const errorMessage = validateDefaultRiskScore(defaultRiskScore);
-
-          if (errorMessage) {
-            return {
-              path,
-              message: errorMessage,
-            };
-          }
+          return defaultRiskScoreValidator(defaultRiskScore, path);
         },
       },
     ],

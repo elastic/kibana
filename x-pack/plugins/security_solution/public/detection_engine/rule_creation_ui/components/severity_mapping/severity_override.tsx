@@ -15,9 +15,7 @@ import {
   EuiIcon,
   EuiSpacer,
 } from '@elastic/eui';
-import { noop } from 'lodash/fp';
-import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import React, { useCallback, useMemo } from 'react';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import {
   FieldComponent,
@@ -26,23 +24,8 @@ import {
 import type { Severity, SeverityMappingItem } from '@kbn/securitysolution-io-ts-alerting-types';
 import { severityOptions } from '../step_about_rule/data';
 import { useKibana } from '../../../../common/lib/kibana';
+import * as styles from './styles';
 import * as i18n from './translations';
-
-const NestedContent = styled.div`
-  margin-left: 24px;
-`;
-
-const EuiFlexItemComboBoxColumn = styled(EuiFlexItem)`
-  max-width: 376px;
-`;
-
-const EuiFlexItemIconColumn = styled(EuiFlexItem)`
-  width: 20px;
-`;
-
-const EuiFlexItemSeverityColumn = styled(EuiFlexItem)`
-  width: 80px;
-`;
 
 interface SeverityOverrideProps {
   isDisabled: boolean;
@@ -67,19 +50,17 @@ export function SeverityOverride({
   mapping,
   indices,
 }: SeverityOverrideProps) {
-  const { services } = useKibana();
-
   const severityMappingLabel = useMemo(() => {
     return (
       <div>
         <EuiFlexGroup
           alignItems="center"
           gutterSize="s"
-          onClick={!isDisabled ? onSeverityMappingChecked : noop}
+          onClick={isDisabled ? undefined : onSeverityMappingChecked}
         >
           <EuiFlexItem grow={false}>
             <EuiCheckbox
-              id={`severity-mapping-override`}
+              id="severity-mapping-override"
               checked={isMappingChecked}
               disabled={isDisabled}
               onChange={onSeverityMappingChecked}
@@ -89,11 +70,13 @@ export function SeverityOverride({
         </EuiFlexGroup>
         <EuiSpacer size="xs" />
         <NestedContent>
-          <EuiText size={'xs'}>{i18n.SEVERITY_MAPPING_DESCRIPTION}</EuiText>
+          <EuiText size="xs">{i18n.SEVERITY_MAPPING_DESCRIPTION}</EuiText>
         </NestedContent>
       </div>
     );
   }, [onSeverityMappingChecked, isDisabled, isMappingChecked]);
+
+  const describedByIds = useMemo(() => (idAria ? [idAria] : undefined), [idAria]);
 
   return (
     <EuiFormRow
@@ -103,12 +86,12 @@ export function SeverityOverride({
       }
       fullWidth
       data-test-subj={`${dataTestSubj}-severityOverride`}
-      describedByIds={idAria ? [idAria] : undefined}
+      describedByIds={describedByIds}
     >
       <NestedContent>
         <EuiSpacer size="s" />
         {isMappingChecked && (
-          <EuiFlexGroup direction={'column'} gutterSize="s">
+          <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItemComboBoxColumn>
@@ -117,64 +100,23 @@ export function SeverityOverride({
                 <EuiFlexItemComboBoxColumn>
                   <EuiFormLabel>{i18n.SOURCE_VALUE}</EuiFormLabel>
                 </EuiFlexItemComboBoxColumn>
-                <EuiFlexItemIconColumn grow={false} />
-                <EuiFlexItemSeverityColumn grow={false}>
+                <EuiFlexItemIconColumn />
+                <EuiFlexItemSeverityColumn>
                   <EuiFormLabel>{i18n.DEFAULT_SEVERITY}</EuiFormLabel>
                 </EuiFlexItemSeverityColumn>
               </EuiFlexGroup>
             </EuiFlexItem>
 
-            {mapping.map((severityMappingItem: SeverityMappingItem, index) => (
-              <EuiFlexItem key={`${severityMappingItem.severity}-${index}`}>
-                <EuiFlexGroup
-                  data-test-subj="severityOverrideRow"
-                  alignItems="center"
-                  gutterSize="s"
-                >
-                  <EuiFlexItemComboBoxColumn>
-                    <FieldComponent
-                      placeholder={''}
-                      selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
-                      isLoading={false}
-                      isDisabled={isDisabled}
-                      isClearable={false}
-                      indexPattern={indices}
-                      onChange={onFieldChange.bind(null, index, severityMappingItem.severity)}
-                      data-test-subj={`detectionEngineStepAboutRuleSeverityMappingField-${severityMappingItem.severity}-${index}`}
-                      aria-label={`detectionEngineStepAboutRuleSeverityMappingField-${severityMappingItem.severity}-${index}`}
-                    />
-                  </EuiFlexItemComboBoxColumn>
-
-                  <EuiFlexItemComboBoxColumn>
-                    <AutocompleteFieldMatchComponent
-                      autocompleteService={services.unifiedSearch.autocomplete}
-                      placeholder={''}
-                      selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
-                      selectedValue={severityMappingItem.value}
-                      isClearable={true}
-                      isDisabled={isDisabled}
-                      isLoading={false}
-                      indexPattern={indices}
-                      onChange={onFieldMatchValueChange.bind(
-                        null,
-                        index,
-                        severityMappingItem.severity
-                      )}
-                      data-test-subj={`detectionEngineStepAboutRuleSeverityMappingValue-${severityMappingItem.severity}-${index}`}
-                      aria-label={`detectionEngineStepAboutRuleSeverityMappingValue-${severityMappingItem.severity}-${index}`}
-                    />
-                  </EuiFlexItemComboBoxColumn>
-                  <EuiFlexItemIconColumn grow={false}>
-                    <EuiIcon type={'sortRight'} />
-                  </EuiFlexItemIconColumn>
-                  <EuiFlexItemSeverityColumn grow={false}>
-                    {
-                      severityOptions.find((o) => o.value === severityMappingItem.severity)
-                        ?.inputDisplay
-                    }
-                  </EuiFlexItemSeverityColumn>
-                </EuiFlexGroup>
-              </EuiFlexItem>
+            {mapping.map((severityMappingItem, index) => (
+              <SeverityMappingRow
+                key={index}
+                severityMappingItem={severityMappingItem}
+                index={index}
+                indices={indices}
+                isDisabled={isDisabled}
+                onFieldChange={onFieldChange}
+                onFieldMatchValueChange={onFieldMatchValueChange}
+              />
             ))}
           </EuiFlexGroup>
         )}
@@ -182,6 +124,97 @@ export function SeverityOverride({
     </EuiFormRow>
   );
 }
+
+interface SeverityMappingRowProps {
+  severityMappingItem: SeverityMappingItem;
+  index: number;
+  indices: DataViewBase;
+  isDisabled: boolean;
+  onFieldChange: (index: number, severity: Severity, [newField]: DataViewFieldBase[]) => void;
+  onFieldMatchValueChange: (index: number, severity: Severity, newMatchValue: string) => void;
+}
+
+function SeverityMappingRow({
+  severityMappingItem,
+  index,
+  indices,
+  isDisabled,
+  onFieldChange,
+  onFieldMatchValueChange,
+}: SeverityMappingRowProps) {
+  const { services } = useKibana();
+
+  const handleFieldChange = useCallback(
+    (newField: DataViewFieldBase[]) => {
+      onFieldChange(index, severityMappingItem.severity, newField);
+    },
+    [index, severityMappingItem.severity, onFieldChange]
+  );
+
+  const handleFieldMatchValueChange = useCallback(
+    (newMatchValue: string) => {
+      onFieldMatchValueChange(index, severityMappingItem.severity, newMatchValue);
+    },
+    [index, severityMappingItem.severity, onFieldMatchValueChange]
+  );
+
+  return (
+    <EuiFlexItem key={`${severityMappingItem.severity}-${index}`}>
+      <EuiFlexGroup data-test-subj="severityOverrideRow" alignItems="center" gutterSize="s">
+        <EuiFlexItemComboBoxColumn>
+          <FieldComponent
+            placeholder=""
+            selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
+            isDisabled={isDisabled}
+            indexPattern={indices}
+            onChange={handleFieldChange}
+            aria-label={i18n.SOURCE_FIELD}
+          />
+        </EuiFlexItemComboBoxColumn>
+
+        <EuiFlexItemComboBoxColumn>
+          <AutocompleteFieldMatchComponent
+            autocompleteService={services.unifiedSearch.autocomplete}
+            placeholder=""
+            selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
+            selectedValue={severityMappingItem.value}
+            isClearable={true}
+            isDisabled={isDisabled}
+            indexPattern={indices}
+            onChange={handleFieldMatchValueChange}
+            aria-label={i18n.SOURCE_VALUE}
+          />
+        </EuiFlexItemComboBoxColumn>
+        <EuiFlexItemIconColumn>
+          <EuiIcon type="sortRight" />
+        </EuiFlexItemIconColumn>
+        <EuiFlexItemSeverityColumn>
+          {severityOptions.find((o) => o.value === severityMappingItem.severity)?.inputDisplay}
+        </EuiFlexItemSeverityColumn>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+}
+
+const NestedContent: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <div className={styles.nestedContent}>{children}</div>
+);
+
+const EuiFlexItemComboBoxColumn: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <EuiFlexItem className={styles.comboBoxColumn}>{children}</EuiFlexItem>
+);
+
+const EuiFlexItemIconColumn: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <EuiFlexItem className={styles.iconColumn} grow={false}>
+    {children}
+  </EuiFlexItem>
+);
+
+const EuiFlexItemSeverityColumn: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <EuiFlexItem className={styles.severityColumn} grow={false}>
+    {children}
+  </EuiFlexItem>
+);
 
 /**
  * Looks for field metadata (DataViewFieldBase) in existing index pattern.

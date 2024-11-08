@@ -8,25 +8,15 @@
 import React from 'react';
 import { type FormData, type FieldHook, UseField } from '../../../../../../../shared_imports';
 import type { RiskScore } from '../../../../../../../../common/api/detection_engine';
-import {
-  DefaultRiskScore,
-  validateDefaultRiskScore,
-} from '../../../../../../rule_creation_ui/components/risk_score_mapping/default_risk_score';
+import { DefaultRiskScore } from '../../../../../../rule_creation_ui/components/risk_score_mapping/default_risk_score';
+import { defaultRiskScoreValidator } from '../../../../../../rule_creation_ui/validators/default_risk_score_validator';
 
 export const riskScoreSchema = {
   riskScore: {
     validations: [
       {
-        validator: ({ path, value }: { path: string; value: unknown }) => {
-          const errorMessage = validateDefaultRiskScore(value);
-
-          if (errorMessage) {
-            return {
-              path,
-              message: errorMessage,
-            };
-          }
-        },
+        validator: ({ path, value }: { path: string; value: unknown }) =>
+          defaultRiskScoreValidator(value, path),
       },
     ],
   },

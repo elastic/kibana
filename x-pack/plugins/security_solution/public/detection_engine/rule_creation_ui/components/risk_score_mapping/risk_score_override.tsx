@@ -39,6 +39,8 @@ const EuiFlexItemRiskScoreColumn = styled(EuiFlexItem)`
   width: 160px;
 `;
 
+const fieldTypeFilter = ['number'];
+
 interface RiskScoreOverrideProps {
   isMappingChecked: boolean;
   onToggleMappingChecked: () => void;
@@ -70,7 +72,7 @@ export function RiskScoreOverride({
         >
           <EuiFlexItem grow={false}>
             <EuiCheckbox
-              id={`risk_score-mapping-override`}
+              id="risk_score-mapping-override"
               checked={isMappingChecked}
               onChange={onToggleMappingChecked}
             />
@@ -79,13 +81,13 @@ export function RiskScoreOverride({
         </EuiFlexGroup>
         <EuiSpacer size="xs" />
         <NestedContent>
-          <EuiText size={'xs'}>{i18n.RISK_SCORE_MAPPING_DESCRIPTION}</EuiText>
+          <EuiText size="xs">{i18n.RISK_SCORE_MAPPING_DESCRIPTION}</EuiText>
         </NestedContent>
       </div>
     );
   }, [isDisabled, isMappingChecked, onToggleMappingChecked]);
 
-  const fieldTypeFilter = useMemo(() => ['number'], []);
+  const describedByIds = useMemo(() => (idAria ? [idAria] : undefined), [idAria]);
   const selectedField = useMemo(() => getFieldTypeByMapping(mapping, indices), [mapping, indices]);
 
   return (
@@ -96,12 +98,12 @@ export function RiskScoreOverride({
       }
       fullWidth
       data-test-subj={`${dataTestSubj}-riskOverride`}
-      describedByIds={idAria ? [idAria] : undefined}
+      describedByIds={describedByIds}
     >
       <NestedContent>
         <EuiSpacer size="s" />
         {isMappingChecked && (
-          <EuiFlexGroup direction={'column'} gutterSize="s">
+          <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItemComboBoxColumn>
@@ -118,12 +120,10 @@ export function RiskScoreOverride({
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItemComboBoxColumn>
                   <FieldComponent
-                    placeholder={''}
+                    placeholder=""
                     indexPattern={indices}
                     selectedField={selectedField}
                     fieldTypeFilter={fieldTypeFilter}
-                    isLoading={false}
-                    isClearable={false}
                     isDisabled={isDisabled}
                     onChange={onMappingChange}
                     data-test-subj={dataTestSubj}
@@ -131,10 +131,10 @@ export function RiskScoreOverride({
                   />
                 </EuiFlexItemComboBoxColumn>
                 <EuiFlexItemIconColumn grow={false}>
-                  <EuiIcon type={'sortRight'} />
+                  <EuiIcon type="sortRight" />
                 </EuiFlexItemIconColumn>
                 <EuiFlexItemRiskScoreColumn grow={false}>
-                  <EuiText size={'s'}>{i18n.RISK_SCORE_FIELD}</EuiText>
+                  <EuiText size="s">{i18n.RISK_SCORE_FIELD}</EuiText>
                 </EuiFlexItemRiskScoreColumn>
               </EuiFlexGroup>
             </EuiFlexItem>

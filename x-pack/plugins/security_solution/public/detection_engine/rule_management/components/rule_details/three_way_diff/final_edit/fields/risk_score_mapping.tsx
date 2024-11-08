@@ -50,11 +50,11 @@ function RiskScoreMappingField({ field, finalDiffableRule }: RiskScoreMappingFie
   const { value, setValue } = field;
 
   const handleToggleMappingChecked = useCallback(() => {
-    setValue({
-      ...value,
-      isMappingChecked: !value.isMappingChecked,
-    });
-  }, [value, setValue]);
+    setValue((prevValue) => ({
+      ...prevValue,
+      isMappingChecked: !prevValue.isMappingChecked,
+    }));
+  }, [setValue]);
 
   const handleMappingChange = useCallback(
     ([newField]: DataViewFieldBase[]): void => {
@@ -66,12 +66,12 @@ function RiskScoreMappingField({ field, finalDiffableRule }: RiskScoreMappingFie
         },
       ];
 
-      setValue({
-        ...value,
+      setValue((prevValue) => ({
+        ...prevValue,
         mapping,
-      });
+      }));
     },
-    [value, setValue]
+    [setValue]
   );
 
   return (

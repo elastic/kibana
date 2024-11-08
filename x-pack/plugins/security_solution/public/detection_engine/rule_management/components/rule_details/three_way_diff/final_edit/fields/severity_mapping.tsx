@@ -56,61 +56,65 @@ function SeverityMappingField({ field, finalDiffableRule }: SeverityMappingField
 
   const handleFieldChange = useCallback(
     (index: number, severity: Severity, [newField]: DataViewFieldBase[]): void => {
-      const newMappingItem: SeverityMapping = [
-        {
-          ...value.mapping[index],
-          field: newField?.name ?? '',
-          value: newField != null ? value.mapping[index].value : '',
-          operator: 'equals',
-          severity,
-        },
-      ];
+      setValue((prevValue) => {
+        const newMappingItem: SeverityMapping = [
+          {
+            ...prevValue.mapping[index],
+            field: newField?.name ?? '',
+            value: newField != null ? prevValue.mapping[index].value : '',
+            operator: 'equals',
+            severity,
+          },
+        ];
 
-      setValue({
-        ...value,
-        mapping: [
-          ...value.mapping.slice(0, index),
-          ...newMappingItem,
-          ...value.mapping.slice(index + 1),
-        ],
+        return {
+          ...prevValue,
+          mapping: [
+            ...prevValue.mapping.slice(0, index),
+            ...newMappingItem,
+            ...prevValue.mapping.slice(index + 1),
+          ],
+        };
       });
     },
-    [value, setValue]
+    [setValue]
   );
 
   const handleFieldMatchValueChange = useCallback(
     (index: number, severity: Severity, newMatchValue: string): void => {
-      const newMappingItem: SeverityMapping = [
-        {
-          ...value.mapping[index],
-          field: value.mapping[index].field,
-          value:
-            value.mapping[index].field != null && value.mapping[index].field !== ''
-              ? newMatchValue
-              : '',
-          operator: 'equals',
-          severity,
-        },
-      ];
+      setValue((prevValue) => {
+        const newMappingItem: SeverityMapping = [
+          {
+            ...prevValue.mapping[index],
+            field: prevValue.mapping[index].field,
+            value:
+              prevValue.mapping[index].field != null && prevValue.mapping[index].field !== ''
+                ? newMatchValue
+                : '',
+            operator: 'equals',
+            severity,
+          },
+        ];
 
-      setValue({
-        ...value,
-        mapping: [
-          ...value.mapping.slice(0, index),
-          ...newMappingItem,
-          ...value.mapping.slice(index + 1),
-        ],
+        return {
+          ...prevValue,
+          mapping: [
+            ...prevValue.mapping.slice(0, index),
+            ...newMappingItem,
+            ...prevValue.mapping.slice(index + 1),
+          ],
+        };
       });
     },
-    [value, setValue]
+    [setValue]
   );
 
   const handleSeverityMappingChecked = useCallback(() => {
-    setValue({
-      ...value,
-      isMappingChecked: !value.isMappingChecked,
-    });
-  }, [value, setValue]);
+    setValue((prevValue) => ({
+      ...prevValue,
+      isMappingChecked: !prevValue.isMappingChecked,
+    }));
+  }, [setValue]);
 
   return (
     <SeverityOverride

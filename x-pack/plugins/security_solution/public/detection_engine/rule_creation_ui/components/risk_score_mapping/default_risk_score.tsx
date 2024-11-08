@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiFormRow, EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiRange } from '@elastic/eui';
 import type { EuiRangeProps } from '@elastic/eui';
-import { MIN_RISK_SCORE, MAX_RISK_SCORE } from './constants';
+import { MAX_RISK_SCORE, MIN_RISK_SCORE } from '../../validators/default_risk_score_validator';
 import * as i18n from './translations';
 
 interface DefaultRiskScoreProps {
@@ -28,8 +28,11 @@ export function DefaultRiskScore({
 }: DefaultRiskScoreProps) {
   const handleChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
     (event) => {
-      const newValue = (event.target as HTMLInputElement).value;
-      onChange(Number(newValue.trim()));
+      const eventValue = event.currentTarget.value;
+      const intOrNanValue = Number.parseInt(eventValue.trim(), 10);
+      const intValue = Number.isNaN(intOrNanValue) ? MIN_RISK_SCORE : intOrNanValue;
+
+      onChange(intValue);
     },
     [onChange]
   );
@@ -71,16 +74,4 @@ function DefaultRiskScoreLabel() {
       <EuiText size={'xs'}>{i18n.RISK_SCORE_DESCRIPTION}</EuiText>
     </div>
   );
-}
-
-function isValidDefaultRiskScore(value: unknown) {
-  return typeof value === 'number' && value >= MIN_RISK_SCORE && value <= MAX_RISK_SCORE;
-}
-
-export function validateDefaultRiskScore(value: unknown) {
-  const isValid = isValidDefaultRiskScore(value);
-
-  if (!isValid) {
-    return i18n.RISK_SCORE_VALIDATION_ERROR;
-  }
 }

@@ -18,6 +18,8 @@ import type { Severity } from '../../../../../common/api/detection_engine/model/
 import { severityOptions } from '../step_about_rule/data';
 import * as i18n from './translations';
 
+const describedByIds = ['detectionEngineStepAboutRuleSeverity'];
+
 interface DefaultSeverityProps {
   value: Severity;
   onChange: (newValue: Severity) => void;
@@ -30,7 +32,7 @@ export function DefaultSeverity({ value, onChange }: DefaultSeverityProps) {
         label={<DefaultSeverityLabel />}
         fullWidth
         data-test-subj="detectionEngineStepAboutRuleSeverity"
-        describedByIds={['detectionEngineStepAboutRuleSeverity']}
+        describedByIds={describedByIds}
       >
         <EuiSuperSelect
           fullWidth={false}
