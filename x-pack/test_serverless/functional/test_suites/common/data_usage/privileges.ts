@@ -44,16 +44,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.svlCommonPage.loginAsViewer();
       await navigateAndVerify(false);
     });
-
-    it('does not render for default (editor/developer) role', async () => {
-      // unable to target specifically the editor or developer role, so only test in solutions that have the editor role (security, observability)
-      this.tags(['skipSvlEcs']);
-      await pageObjects.svlCommonPage.loginWithPrivilegedRole();
-      await navigateAndVerify(true);
+    describe('with editor role', function () {
+      // editor role does not exist in search solution
+      this.tags(['skipSvlSearch']);
+      it('does not render for default (editor) role', async () => {
+        await pageObjects.svlCommonPage.loginAsEditor();
+        await navigateAndVerify(false);
+      });
     });
-    describe('With custom role', function () {
+    describe('with developer role', function () {
+      // developer role only exists in ecs solution
+      this.tags(['skipSvlOblt', 'skipSvlSec']);
+      it('renders for developer role', async () => {
+        await pageObjects.svlCommonPage.loginAsDeveloper();
+        await navigateAndVerify(true);
+      });
+    });
+    describe('with custom role', function () {
       // custom roles aren't available in observability yet
       this.tags(['skipSvlOblt']);
+      afterEach(async () => {
+        await samlAuth.deleteCustomRole();
+      });
       it('renders with a custom role that has the monitor cluster privilege', async () => {
         await samlAuth.setCustomRole({
           elasticsearch: {
@@ -70,7 +82,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
         await pageObjects.svlCommonPage.loginWithCustomRole();
         await navigateAndVerify(true);
-        await samlAuth.deleteCustomRole();
       });
 
       it('does not render with a custom role that does not have the monitor cluster privilege', async () => {
@@ -88,7 +99,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
         await pageObjects.svlCommonPage.loginWithCustomRole();
         await navigateAndVerify(false);
-        await samlAuth.deleteCustomRole();
       });
     });
   });
