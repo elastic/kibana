@@ -71,7 +71,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         _append.push(
           <EuiBadge key={key + '-preview'} iconType="beaker" color="hollow">
             {i18n.translate(
-              'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.thechPreviewBadgeLabel',
+              'xpack.serverlessSearch.connectors.chooseConnectorSelectable.thechPreviewBadgeLabel',
               { defaultMessage: 'Tech preview' }
             )}
           </EuiBadge>
@@ -81,7 +81,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         _append.push(
           <EuiBadge key={key + '-beta'} iconType={'beta'} color="hollow">
             {i18n.translate(
-              'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.BetaBadgeLabel',
+              'xpack.serverlessSearch.connectors.chooseConnectorSelectable.BetaBadgeLabel',
               {
                 defaultMessage: 'Beta',
               }
@@ -150,7 +150,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
       >
         <EuiComboBox
           aria-label={i18n.translate(
-            'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
+            'xpack.serverlessSearch.connectors.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
             { defaultMessage: 'Select a data source for your connector to use.' }
           )}
           // We only want to allow people to set the service type once to avoid weird conflicts
@@ -161,7 +161,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
           singleSelection
           fullWidth
           placeholder={i18n.translate(
-            'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.placeholder.text',
+            'xpack.serverlessSearch.connectors.chooseConnectorSelectable.placeholder.text',
             { defaultMessage: 'Choose a data source' }
           )}
           options={initialOptions}
