@@ -120,17 +120,7 @@ const summarizeArgParts = (
     return [column as ESQLColumn, definition as ESQLProperNode];
   }
 
-  let text = query.src.slice(arg.location.min, arg.location.max + 2);
-
-  /**
-   * @see https://github.com/elastic/kibana/issues/199319
-   * @todo Remove this eventually. This works around a parser bug, where it
-   *     sometimes grabs extra character
-   */
-  if (text[text.length - 2] === ')') {
-    text = text.slice(0, -1);
-  }
-
+  const text = [...query.src].slice(arg.location.min, arg.location.max + 1).join('');
   const column = Builder.expression.column({ parts: [text] });
 
   return [column, arg];
