@@ -46,12 +46,12 @@ import {
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
-  ALERT_SUPPRESSION_DURATION,
-  ALERT_SUPPRESSION_DURATION_TYPE,
-  ALERT_SUPPRESSION_DURATION_UNIT,
-  ALERT_SUPPRESSION_DURATION_VALUE,
-  ALERT_SUPPRESSION_FIELDS,
-} from '../../../rule_creation/components/alert_suppression_edit/fields';
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+} from '../../../rule_creation/components/alert_suppression_edit';
 
 describe('helpers', () => {
   describe('getTimeTypeValue', () => {
@@ -465,8 +465,9 @@ describe('helpers', () => {
               query: 'process where process_name == "explorer.exe"',
             },
           },
-          [ALERT_SUPPRESSION_FIELDS]: ['event.type'],
-          [ALERT_SUPPRESSION_DURATION_TYPE]: AlertSuppressionDurationType.PerRuleExecution,
+          [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: ['event.type'],
+          [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]:
+            AlertSuppressionDurationType.PerRuleExecution,
         };
         const result = formatDefineStepData(mockStepData);
 
@@ -498,9 +499,9 @@ describe('helpers', () => {
               query: 'process where process_name == "explorer.exe"',
             },
           },
-          [ALERT_SUPPRESSION_FIELDS]: ['event.type'],
-          [ALERT_SUPPRESSION_DURATION_TYPE]: AlertSuppressionDurationType.PerTimePeriod,
-          [ALERT_SUPPRESSION_DURATION]: { value: 10, unit: 'm' },
+          [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: ['event.type'],
+          [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: AlertSuppressionDurationType.PerTimePeriod,
+          [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: { value: 10, unit: 'm' },
         };
         const result = formatDefineStepData(mockStepData);
 
@@ -604,11 +605,11 @@ describe('helpers', () => {
         ruleType: 'machine_learning',
         machineLearningJobId: ['some_jobert_id'],
         anomalyThreshold: 44,
-        [ALERT_SUPPRESSION_FIELDS]: ['event.type'],
-        [ALERT_SUPPRESSION_DURATION_TYPE]: AlertSuppressionDurationType.PerTimePeriod,
-        [ALERT_SUPPRESSION_DURATION]: {
-          [ALERT_SUPPRESSION_DURATION_VALUE]: 10,
-          [ALERT_SUPPRESSION_DURATION_UNIT]: 'm',
+        [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: ['event.type'],
+        [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: AlertSuppressionDurationType.PerTimePeriod,
+        [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: {
+          [ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME]: 10,
+          [ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME]: 'm',
         },
       };
       const result = formatDefineStepData(mockStepData);

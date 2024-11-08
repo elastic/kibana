@@ -7,16 +7,16 @@
 
 import React, { useEffect } from 'react';
 import { EuiFormRow, EuiRadioGroup, EuiToolTip } from '@elastic/eui';
-import type { FieldHook } from '../../../../shared_imports';
-import { UseMultiFields } from '../../../../shared_imports';
-import { AlertSuppressionDurationType } from '../../../../detections/pages/detection_engine/rules/types';
-import { DurationInput } from '../duration_input';
+import type { FieldHook } from '../../../../../shared_imports';
+import { UseMultiFields } from '../../../../../shared_imports';
+import { AlertSuppressionDurationType } from '../../../../../detections/pages/detection_engine/rules/types';
+import { DurationInput } from '../../duration_input';
 import {
-  ALERT_SUPPRESSION_DURATION,
-  ALERT_SUPPRESSION_DURATION_TYPE,
-  ALERT_SUPPRESSION_DURATION_UNIT,
-  ALERT_SUPPRESSION_DURATION_VALUE,
-} from './fields';
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
+} from '../constants/fields';
 import * as i18n from './translations';
 
 interface AlertSuppressionDurationProps {
@@ -39,13 +39,13 @@ export function SuppressionDurationSelector({
       }>
         fields={{
           suppressionDurationSelector: {
-            path: ALERT_SUPPRESSION_DURATION_TYPE,
+            path: ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
           },
           suppressionDurationValue: {
-            path: `${ALERT_SUPPRESSION_DURATION}.${ALERT_SUPPRESSION_DURATION_VALUE}`,
+            path: `${ALERT_SUPPRESSION_DURATION_FIELD_NAME}.${ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME}`,
           },
           suppressionDurationUnit: {
-            path: `${ALERT_SUPPRESSION_DURATION}.${ALERT_SUPPRESSION_DURATION_UNIT}`,
+            path: `${ALERT_SUPPRESSION_DURATION_FIELD_NAME}.${ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME}`,
           },
         }}
       >

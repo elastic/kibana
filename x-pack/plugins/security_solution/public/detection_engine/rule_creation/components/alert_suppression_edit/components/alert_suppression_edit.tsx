@@ -8,11 +8,11 @@
 import React, { memo } from 'react';
 import { EuiPanel, EuiText, EuiToolTip } from '@elastic/eui';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import { useFormData } from '../../../../shared_imports';
+import { useFormData } from '../../../../../shared_imports';
 import { MissingFieldsStrategySelector } from './missing_fields_strategy_selector';
 import { SuppressionDurationSelector } from './suppression_duration_selector';
 import { SuppressionFieldsSelector } from './suppression_fields_selector';
-import { ALERT_SUPPRESSION_FIELDS } from './fields';
+import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../constants/fields';
 
 interface AlertSuppressionEditProps {
   suppressibleFields: DataViewFieldBase[];
@@ -29,10 +29,10 @@ export const AlertSuppressionEdit = memo(function AlertSuppressionEdit({
   disabledText,
   warningText,
 }: AlertSuppressionEditProps): JSX.Element {
-  const [{ [ALERT_SUPPRESSION_FIELDS]: suppressionFields }] = useFormData<{
-    [ALERT_SUPPRESSION_FIELDS]: string[];
+  const [{ [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: suppressionFields }] = useFormData<{
+    [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: string[];
   }>({
-    watch: ALERT_SUPPRESSION_FIELDS,
+    watch: ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   });
   const hasSelectedFields = suppressionFields?.length > 0;
   const content = (

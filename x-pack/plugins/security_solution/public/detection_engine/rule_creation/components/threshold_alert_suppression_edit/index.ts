@@ -6,3 +6,4 @@
  */
 
 export * from './threshold_alert_suppression_edit';
+export * from './fields';

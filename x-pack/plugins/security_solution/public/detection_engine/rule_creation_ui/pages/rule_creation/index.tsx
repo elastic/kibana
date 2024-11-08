@@ -81,7 +81,7 @@ import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleFormsErrors, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 import { SaveWithErrorsModal } from '../../components/save_with_errors_confirmation';
-import { ALERT_SUPPRESSION_FIELDS } from '../../../rule_creation/components/alert_suppression_edit/fields';
+import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -566,7 +566,7 @@ const CreateRulePageComponent: React.FC = () => {
             ruleType={defineStepData.ruleType}
             index={memoizedIndex}
             threatIndex={defineStepData.threatIndex}
-            alertSuppressionFields={defineStepData[ALERT_SUPPRESSION_FIELDS]}
+            alertSuppressionFields={defineStepData[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]}
             dataSourceType={defineStepData.dataSourceType}
             shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
             queryBarTitle={defineStepData.queryBar.title}

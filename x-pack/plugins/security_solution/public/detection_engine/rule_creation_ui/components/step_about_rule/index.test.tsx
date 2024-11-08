@@ -37,14 +37,14 @@ import type { FormHook } from '../../../../shared_imports';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
-  ALERT_SUPPRESSION_DURATION,
-  ALERT_SUPPRESSION_DURATION_TYPE,
-  ALERT_SUPPRESSION_DURATION_UNIT,
-  ALERT_SUPPRESSION_DURATION_VALUE,
-  ALERT_SUPPRESSION_FIELDS,
-  ALERT_SUPPRESSION_MISSING_FIELDS,
-} from '../../../rule_creation/components/alert_suppression_edit/fields';
-import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit/fields';
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine';
 
 jest.mock('../../../../common/lib/kibana');
@@ -79,13 +79,13 @@ export const stepDefineStepMLRule: DefineStepRule = {
   timeline: { id: null, title: null },
   eqlOptions: {},
   dataSourceType: DataSourceType.IndexPatterns,
-  [ALERT_SUPPRESSION_FIELDS]: ['host.name'],
-  [ALERT_SUPPRESSION_DURATION_TYPE]: AlertSuppressionDurationType.PerRuleExecution,
-  [ALERT_SUPPRESSION_DURATION]: {
-    [ALERT_SUPPRESSION_DURATION_VALUE]: 5,
-    [ALERT_SUPPRESSION_DURATION_UNIT]: 'm',
+  [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: ['host.name'],
+  [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: AlertSuppressionDurationType.PerRuleExecution,
+  [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: {
+    [ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME]: 5,
+    [ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME]: 'm',
   },
-  [ALERT_SUPPRESSION_MISSING_FIELDS]: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+  [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: AlertSuppressionMissingFieldsStrategyEnum.suppress,
   [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: false,
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',

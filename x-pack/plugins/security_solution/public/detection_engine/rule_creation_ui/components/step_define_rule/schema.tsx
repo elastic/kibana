@@ -48,11 +48,11 @@ import {
 } from './translations';
 import { getQueryRequiredMessage } from './utils';
 import {
-  ALERT_SUPPRESSION_DURATION,
-  ALERT_SUPPRESSION_FIELDS,
-  ALERT_SUPPRESSION_MISSING_FIELDS,
-} from '../../../rule_creation/components/alert_suppression_edit/fields';
-import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/translations';
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../rule_creation/components/alert_suppression_edit';
+import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -119,7 +119,7 @@ export const schema: FormSchema<DefineStepRule> = {
     fieldsToValidateOnChange: ['eqlOptions', 'queryBar'],
   },
   queryBar: {
-    fieldsToValidateOnChange: ['queryBar', ALERT_SUPPRESSION_FIELDS],
+    fieldsToValidateOnChange: ['queryBar', ALERT_SUPPRESSION_FIELDS_FIELD_NAME],
     validations: [
       {
         validator: (
@@ -655,7 +655,7 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  [ALERT_SUPPRESSION_FIELDS]: {
+  [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: {
     validations: [
       {
         validator: (...args: Parameters<ValidationFunc>) => {
@@ -690,7 +690,7 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  [ALERT_SUPPRESSION_DURATION]: {
+  [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel',
       {
@@ -698,7 +698,7 @@ export const schema: FormSchema<DefineStepRule> = {
       }
     ),
   },
-  [ALERT_SUPPRESSION_MISSING_FIELDS]: {
+  [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: {
     label: alertSuppressionEditI81n.ALERT_SUPPRESSION_MISSING_FIELDS_LABEL,
   },
   shouldLoadQueryDynamically: {

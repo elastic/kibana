@@ -6,13 +6,13 @@
  */
 
 import type {
-  ALERT_SUPPRESSION_DURATION_UNIT,
-  ALERT_SUPPRESSION_DURATION_VALUE,
-  ALERT_SUPPRESSION_DURATION,
-  ALERT_SUPPRESSION_DURATION_TYPE,
-  ALERT_SUPPRESSION_FIELDS,
-} from '../../../../../../../rule_creation/components/alert_suppression_edit/fields';
-import { ALERT_SUPPRESSION_MISSING_FIELDS } from '../../../../../../../rule_creation/components/alert_suppression_edit/fields';
+  ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+} from '../../../../../../../rule_creation/components/alert_suppression_edit';
+import { ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME } from '../../../../../../../rule_creation/components/alert_suppression_edit';
 import type {
   AlertSuppressionDurationUnit,
   AlertSuppressionMissingFieldsStrategy,
@@ -21,17 +21,17 @@ import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../.
 import { type FormSchema } from '../../../../../../../../shared_imports';
 
 export interface AlertSuppressionFormData {
-  [ALERT_SUPPRESSION_FIELDS]: string[];
-  [ALERT_SUPPRESSION_DURATION_TYPE]: string;
-  [ALERT_SUPPRESSION_DURATION]: {
-    [ALERT_SUPPRESSION_DURATION_VALUE]: number;
-    [ALERT_SUPPRESSION_DURATION_UNIT]: AlertSuppressionDurationUnit;
+  [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: string[];
+  [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: string;
+  [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: {
+    [ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME]: number;
+    [ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME]: AlertSuppressionDurationUnit;
   };
-  [ALERT_SUPPRESSION_MISSING_FIELDS]: AlertSuppressionMissingFieldsStrategy;
+  [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: AlertSuppressionMissingFieldsStrategy;
 }
 
 export const alertSuppressionFormSchema = {
-  [ALERT_SUPPRESSION_MISSING_FIELDS]: {
+  [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: {
     defaultValue: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
   },
 } as FormSchema<AlertSuppressionFormData>;

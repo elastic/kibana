@@ -6,8 +6,11 @@
  */
 
 import React from 'react';
-import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../../../../rule_creation/components/threshold_alert_suppression_edit/fields';
-import { ALERT_SUPPRESSION_DURATION } from '../../../../../../../rule_creation/components/alert_suppression_edit/fields';
+import {
+  THRESHOLD_ALERT_SUPPRESSION_ENABLED,
+  ThresholdAlertSuppressionEdit,
+} from '../../../../../../../rule_creation/components/threshold_alert_suppression_edit';
+import { ALERT_SUPPRESSION_DURATION_FIELD_NAME } from '../../../../../../../rule_creation/components/alert_suppression_edit';
 import { type FormData } from '../../../../../../../../shared_imports';
 import type { ThresholdAlertSuppression } from '../../../../../../../../../common/api/detection_engine';
 import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
@@ -16,7 +19,6 @@ import {
   type ThresholdAlertSuppressionFormData,
 } from './form_schema';
 import type { RuleFieldEditComponentProps } from '../rule_field_edit_component_props';
-import { ThresholdAlertSuppressionEdit } from '../../../../../../../rule_creation/components/threshold_alert_suppression_edit';
 
 export function ThresholdAlertSuppressionEditForm(): JSX.Element {
   return (
@@ -46,7 +48,7 @@ function deserializer(defaultValue: FormData): ThresholdAlertSuppressionFormData
 
   return {
     [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: Boolean(alertSuppression?.duration),
-    [ALERT_SUPPRESSION_DURATION]: alertSuppression?.duration ?? {
+    [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: alertSuppression?.duration ?? {
       value: 5,
       unit: 'm',
     },
@@ -62,7 +64,7 @@ function serializer(formData: FormData): { alert_suppression?: ThresholdAlertSup
 
   return {
     alert_suppression: {
-      duration: alertSuppressionFormData[ALERT_SUPPRESSION_DURATION],
+      duration: alertSuppressionFormData[ALERT_SUPPRESSION_DURATION_FIELD_NAME],
     },
   };
 }

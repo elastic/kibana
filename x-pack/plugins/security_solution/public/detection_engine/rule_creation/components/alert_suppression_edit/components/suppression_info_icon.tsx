@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiLink, EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 const POPOVER_WIDTH = 320;
 

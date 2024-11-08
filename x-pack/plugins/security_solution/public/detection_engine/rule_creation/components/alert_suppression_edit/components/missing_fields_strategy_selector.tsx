@@ -8,10 +8,10 @@
 import React, { useMemo } from 'react';
 import type { EuiFormRowProps, EuiRadioGroupOption, EuiRadioGroupProps } from '@elastic/eui';
 import { RadioGroupField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine';
-import { UseField } from '../../../../shared_imports';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../../common/api/detection_engine';
+import { UseField } from '../../../../../shared_imports';
 import { SuppressionInfoIcon } from './suppression_info_icon';
-import { ALERT_SUPPRESSION_MISSING_FIELDS } from './fields';
+import { ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME } from '../constants/fields';
 import * as i18n from './translations';
 
 interface MissingFieldsStrategySelectorProps {
@@ -32,7 +32,7 @@ export function MissingFieldsStrategySelector({
 
   return (
     <UseField
-      path={ALERT_SUPPRESSION_MISSING_FIELDS}
+      path={ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME}
       component={RadioGroupField}
       componentProps={EUI_FORM_ROW_PROPS}
       euiFieldProps={radioFieldProps}

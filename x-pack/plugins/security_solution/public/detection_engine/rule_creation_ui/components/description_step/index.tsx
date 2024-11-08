@@ -66,12 +66,12 @@ import {
   isSuppressionRuleConfiguredWithDuration,
 } from '../../../../../common/detection_engine/utils';
 import {
-  ALERT_SUPPRESSION_DURATION,
-  ALERT_SUPPRESSION_DURATION_TYPE,
-  ALERT_SUPPRESSION_FIELDS,
-  ALERT_SUPPRESSION_MISSING_FIELDS,
-} from '../../../rule_creation/components/alert_suppression_edit/fields';
-import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit/fields';
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
@@ -224,7 +224,7 @@ export const getDescriptionItem = (
     });
   } else if (field === 'responseActions') {
     return [];
-  } else if (field === ALERT_SUPPRESSION_FIELDS) {
+  } else if (field === ALERT_SUPPRESSION_FIELDS_FIELD_NAME) {
     const ruleType: Type = get('ruleType', data);
 
     const ruleCanHaveGroupByFields = isSuppressionRuleConfiguredWithGroupBy(ruleType);
@@ -233,9 +233,9 @@ export const getDescriptionItem = (
     }
     const values: string[] = get(field, data);
     return buildAlertSuppressionDescription(label, values, ruleType);
-  } else if (field === ALERT_SUPPRESSION_DURATION_TYPE) {
+  } else if (field === ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME) {
     return [];
-  } else if (field === ALERT_SUPPRESSION_DURATION) {
+  } else if (field === ALERT_SUPPRESSION_DURATION_FIELD_NAME) {
     const ruleType: Type = get('ruleType', data);
 
     const ruleCanHaveDuration = isSuppressionRuleConfiguredWithDuration(ruleType);
@@ -247,20 +247,20 @@ export const getDescriptionItem = (
     // query rule have suppression duration only if group by fields selected
     const showDuration = isThresholdRule(ruleType)
       ? get(THRESHOLD_ALERT_SUPPRESSION_ENABLED, data) === true
-      : get(ALERT_SUPPRESSION_FIELDS, data).length > 0;
+      : get(ALERT_SUPPRESSION_FIELDS_FIELD_NAME, data).length > 0;
 
     if (showDuration) {
       const value: Duration = get(field, data);
       return buildAlertSuppressionWindowDescription(
         label,
         value,
-        get(ALERT_SUPPRESSION_DURATION_TYPE, data),
+        get(ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME, data),
         ruleType
       );
     } else {
       return [];
     }
-  } else if (field === ALERT_SUPPRESSION_MISSING_FIELDS) {
+  } else if (field === ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME) {
     const ruleType: Type = get('ruleType', data);
     const ruleCanHaveSuppressionMissingFields =
       isSuppressionRuleConfiguredWithMissingFields(ruleType);
@@ -268,7 +268,7 @@ export const getDescriptionItem = (
     if (!ruleCanHaveSuppressionMissingFields) {
       return [];
     }
-    if (get(ALERT_SUPPRESSION_FIELDS, data).length > 0) {
+    if (get(ALERT_SUPPRESSION_FIELDS_FIELD_NAME, data).length > 0) {
       const value = get(field, data);
       return buildAlertSuppressionMissingFieldsDescription(label, value, ruleType);
     } else {

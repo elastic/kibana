@@ -25,7 +25,7 @@ import {
   createIndexPatternField,
   getSelectToggleButtonForName,
 } from '../../../rule_creation/components/required_fields/required_fields.test';
-import { ALERT_SUPPRESSION_FIELDS } from '../../../rule_creation/components/alert_suppression_edit/fields';
+import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 
 // Mocks integrations
 jest.mock('../../../fleet_integrations/api');
@@ -583,7 +583,7 @@ function TestForm({
         ruleType={ruleType}
         index={stepDefineDefaultValue.index}
         threatIndex={stepDefineDefaultValue.threatIndex}
-        alertSuppressionFields={stepDefineDefaultValue[ALERT_SUPPRESSION_FIELDS]}
+        alertSuppressionFields={stepDefineDefaultValue[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]}
         dataSourceType={stepDefineDefaultValue.dataSourceType}
         shouldLoadQueryDynamically={stepDefineDefaultValue.shouldLoadQueryDynamically}
         queryBarTitle=""

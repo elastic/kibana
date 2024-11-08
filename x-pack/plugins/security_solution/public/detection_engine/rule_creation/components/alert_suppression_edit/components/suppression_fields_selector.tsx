@@ -8,9 +8,9 @@
 import React from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import { UseField } from '../../../../shared_imports';
-import { MultiSelectFieldsAutocomplete } from '../../../rule_creation_ui/components/multi_select_fields';
-import { ALERT_SUPPRESSION_FIELDS } from './fields';
+import { UseField } from '../../../../../shared_imports';
+import { MultiSelectFieldsAutocomplete } from '../../../../rule_creation_ui/components/multi_select_fields';
+import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../constants/fields';
 import * as i18n from './translations';
 
 interface SuppressionFieldsSelectorProps {
@@ -33,7 +33,7 @@ export function SuppressionFieldsSelector({
     >
       <>
         <UseField
-          path={ALERT_SUPPRESSION_FIELDS}
+          path={ALERT_SUPPRESSION_FIELDS_FIELD_NAME}
           component={MultiSelectFieldsAutocomplete}
           componentProps={{
             browserFields: suppressibleFields,

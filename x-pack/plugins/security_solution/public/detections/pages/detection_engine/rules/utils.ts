@@ -7,13 +7,13 @@
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
-  ALERT_SUPPRESSION_DURATION,
-  ALERT_SUPPRESSION_DURATION_TYPE,
-  ALERT_SUPPRESSION_FIELDS,
-  ALERT_SUPPRESSION_MISSING_FIELDS,
-} from '../../../../detection_engine/rule_creation/components/alert_suppression_edit/fields';
-import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit/fields';
-import { ALERT_SUPPRESSION_DEFAULT_DURATION } from '../../../../detection_engine/rule_creation/components/alert_suppression_edit/default_duration';
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_DEFAULT_DURATION,
+} from '../../../../detection_engine/rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { DEFAULT_THREAT_MATCH_QUERY } from '../../../../../common/constants';
@@ -74,10 +74,10 @@ export const stepDefineDefaultValue: DefineStepRule = {
   newTermsFields: [],
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
-  [ALERT_SUPPRESSION_FIELDS]: [],
-  [ALERT_SUPPRESSION_DURATION_TYPE]: AlertSuppressionDurationType.PerRuleExecution,
-  [ALERT_SUPPRESSION_DURATION]: ALERT_SUPPRESSION_DEFAULT_DURATION,
-  [ALERT_SUPPRESSION_MISSING_FIELDS]: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: [],
+  [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: AlertSuppressionDurationType.PerRuleExecution,
+  [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: ALERT_SUPPRESSION_DEFAULT_DURATION,
+  [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
   [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: false,
 };
 

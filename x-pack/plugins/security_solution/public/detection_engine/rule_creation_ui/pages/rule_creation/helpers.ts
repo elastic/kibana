@@ -61,12 +61,12 @@ import type {
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import {
-  ALERT_SUPPRESSION_DURATION,
-  ALERT_SUPPRESSION_DURATION_TYPE,
-  ALERT_SUPPRESSION_FIELDS,
-  ALERT_SUPPRESSION_MISSING_FIELDS,
-} from '../../../rule_creation/components/alert_suppression_edit/fields';
-import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit/fields';
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
   const timeObj: { unit: Unit; value: number } = {
@@ -435,16 +435,16 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
 
   // Threshold rule won't contain alert suppression fields
   const alertSuppressionFields =
-    ruleFields[ALERT_SUPPRESSION_FIELDS]?.length > 0
+    ruleFields[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]?.length > 0
       ? {
           alert_suppression: {
-            group_by: ruleFields[ALERT_SUPPRESSION_FIELDS],
+            group_by: ruleFields[ALERT_SUPPRESSION_FIELDS_FIELD_NAME],
             duration:
-              ruleFields[ALERT_SUPPRESSION_DURATION_TYPE] ===
+              ruleFields[ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME] ===
               AlertSuppressionDurationType.PerTimePeriod
-                ? ruleFields[ALERT_SUPPRESSION_DURATION]
+                ? ruleFields[ALERT_SUPPRESSION_DURATION_FIELD_NAME]
                 : undefined,
-            missing_fields_strategy: (ruleFields[ALERT_SUPPRESSION_MISSING_FIELDS] ||
+            missing_fields_strategy: (ruleFields[ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME] ||
               DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) as AlertSuppression['missing_fields_strategy'],
           },
         }
@@ -482,7 +482,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
                 : [],
           },
           ...(ruleFields[THRESHOLD_ALERT_SUPPRESSION_ENABLED] && {
-            alert_suppression: { duration: ruleFields[ALERT_SUPPRESSION_DURATION] },
+            alert_suppression: { duration: ruleFields[ALERT_SUPPRESSION_DURATION_FIELD_NAME] },
           }),
         }),
       }

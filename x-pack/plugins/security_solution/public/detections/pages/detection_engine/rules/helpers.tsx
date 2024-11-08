@@ -23,12 +23,12 @@ import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { requiredOptional } from '@kbn/zod-helpers';
 import {
-  ALERT_SUPPRESSION_FIELDS,
-  ALERT_SUPPRESSION_DURATION_TYPE,
-  ALERT_SUPPRESSION_DURATION,
-  ALERT_SUPPRESSION_MISSING_FIELDS,
-} from '../../../../detection_engine/rule_creation/components/alert_suppression_edit/fields';
-import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit/fields';
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../../detection_engine/rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
 import type { ResponseAction } from '../../../../../common/api/detection_engine/model/rule_response_actions';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../../common/utility_types';
@@ -163,22 +163,22 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
       ? convertHistoryStartToSize(rule.history_window_start)
       : '7d',
   shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
-  [ALERT_SUPPRESSION_FIELDS]:
+  [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]:
     ('alert_suppression' in rule &&
       rule.alert_suppression &&
       'group_by' in rule.alert_suppression &&
       rule.alert_suppression.group_by) ||
     [],
-  [ALERT_SUPPRESSION_DURATION_TYPE]:
+  [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]:
     'alert_suppression' in rule && rule.alert_suppression?.duration
       ? AlertSuppressionDurationType.PerTimePeriod
       : AlertSuppressionDurationType.PerRuleExecution,
-  [ALERT_SUPPRESSION_DURATION]: ('alert_suppression' in rule &&
+  [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: ('alert_suppression' in rule &&
     rule.alert_suppression?.duration) || {
     value: 5,
     unit: 'm',
   },
-  [ALERT_SUPPRESSION_MISSING_FIELDS]:
+  [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]:
     ('alert_suppression' in rule &&
       rule.alert_suppression &&
       'missing_fields_strategy' in rule.alert_suppression &&
