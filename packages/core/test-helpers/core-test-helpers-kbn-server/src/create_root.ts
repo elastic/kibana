@@ -65,6 +65,7 @@ export function createRootWithSettings(
   if (getFips() === 1) {
     set(settings, 'xpack.security.experimental.fipsMode.enabled', true);
     oss = false;
+    delete cliArgs.oss;
   }
 
   const env = Env.createDefault(
@@ -79,8 +80,8 @@ export function createRootWithSettings(
         disableOptimizer: true,
         cache: true,
         dist: false,
-        ...cliArgs,
         oss,
+        ...cliArgs,
       },
       repoPackages: getPackages(REPO_ROOT),
     },
