@@ -152,7 +152,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.svlSearchIndexDetailPage.expectQuickStatsToHaveDocumentCount(0);
           });
         });
-        describe('has index actions enabled', async() =>{
+        describe('has index actions enabled', () => {
           before(async () => {
             await es.index({
               index: indexName,
@@ -161,7 +161,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               },
             });
             await svlSearchNavigation.navigateToIndexDetailPage(indexName);
-        });
+          });
 
           beforeEach(async () => {
             await svlSearchNavigation.navigateToIndexDetailPage(indexName);
@@ -185,7 +185,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();
             await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonToBeEnabled();
           });
-        })
+        });
 
         describe('page loading error', () => {
           before(async () => {
