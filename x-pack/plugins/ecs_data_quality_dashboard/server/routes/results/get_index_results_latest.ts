@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { IRouter, Logger } from '@kbn/core/server';
 
 import { INTERNAL_API_VERSION, GET_INDEX_RESULTS_LATEST } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
-import { GetIndexResultsLatestParams } from '../../schemas/result';
+import { GetIndexResultsLatestParams, GetIndexResultsLatestQuery } from '../../schemas/result';
 import type { ResultDocument } from '../../schemas/result';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
 import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
 import { getAuthorizedIndexNames } from '../../helpers/get_authorized_index_names';
+import { getRangeFilteredIndices } from '../../helpers/get_range_filtered_indices';
 
 export const getQuery = (indexName: string[]) => ({
   size: 0,
@@ -53,6 +53,7 @@ export const getIndexResultsLatestRoute = (
         validate: {
           request: {
             params: buildRouteValidation(GetIndexResultsLatestParams),
+            query: buildRouteValidation(GetIndexResultsLatestQuery),
           },
         },
       },
@@ -81,8 +82,27 @@ export const getIndexResultsLatestRoute = (
             return response.ok({ body: [] });
           }
 
+          const { startDate, endDate } = request.query;
+
+          let resultingIndices: string[] = [];
+
+          if (startDate && endDate) {
+            resultingIndices = resultingIndices.concat(
+              await getRangeFilteredIndices({
+                client,
+                authorizedIndexNames,
+                startDate,
+                endDate,
+                logger,
+                pattern,
+              })
+            );
+          } else {
+            resultingIndices = authorizedIndexNames;
+          }
+
           // Get the latest result for each indexName
-          const query = { index, ...getQuery(authorizedIndexNames) };
+          const query = { index, ...getQuery(resultingIndices) };
           const { aggregations } = await client.asInternalUser.search<
             ResultDocument,
             Record<string, { buckets: LatestAggResponseBucket[] }>
