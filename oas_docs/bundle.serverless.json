@@ -23782,39 +23782,6 @@
                               "topic": {
                                 "type": "string"
                               },
-                              "topics": {
-                                "items": {
-                                  "additionalProperties": true,
-                                  "properties": {
-                                    "topic": {
-                                      "type": "string"
-                                    },
-                                    "when": {
-                                      "additionalProperties": true,
-                                      "properties": {
-                                        "condition": {
-                                          "type": "string"
-                                        },
-                                        "type": {
-                                          "enum": [
-                                            "equals",
-                                            "contains",
-                                            "regexp"
-                                          ],
-                                          "type": "string"
-                                        }
-                                      },
-                                      "type": "object"
-                                    }
-                                  },
-                                  "required": [
-                                    "topic"
-                                  ],
-                                  "type": "object"
-                                },
-                                "minItems": 1,
-                                "type": "array"
-                              },
                               "type": {
                                 "enum": [
                                   "kafka"
@@ -24917,39 +24884,6 @@
                       "topic": {
                         "type": "string"
                       },
-                      "topics": {
-                        "items": {
-                          "additionalProperties": false,
-                          "properties": {
-                            "topic": {
-                              "type": "string"
-                            },
-                            "when": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "condition": {
-                                  "type": "string"
-                                },
-                                "type": {
-                                  "enum": [
-                                    "equals",
-                                    "contains",
-                                    "regexp"
-                                  ],
-                                  "type": "string"
-                                }
-                              },
-                              "type": "object"
-                            }
-                          },
-                          "required": [
-                            "topic"
-                          ],
-                          "type": "object"
-                        },
-                        "minItems": 1,
-                        "type": "array"
-                      },
                       "type": {
                         "enum": [
                           "kafka"
@@ -25977,39 +25911,6 @@
                             },
                             "topic": {
                               "type": "string"
-                            },
-                            "topics": {
-                              "items": {
-                                "additionalProperties": true,
-                                "properties": {
-                                  "topic": {
-                                    "type": "string"
-                                  },
-                                  "when": {
-                                    "additionalProperties": true,
-                                    "properties": {
-                                      "condition": {
-                                        "type": "string"
-                                      },
-                                      "type": {
-                                        "enum": [
-                                          "equals",
-                                          "contains",
-                                          "regexp"
-                                        ],
-                                        "type": "string"
-                                      }
-                                    },
-                                    "type": "object"
-                                  }
-                                },
-                                "required": [
-                                  "topic"
-                                ],
-                                "type": "object"
-                              },
-                              "minItems": 1,
-                              "type": "array"
                             },
                             "type": {
                               "enum": [
@@ -27213,39 +27114,6 @@
                             "topic": {
                               "type": "string"
                             },
-                            "topics": {
-                              "items": {
-                                "additionalProperties": true,
-                                "properties": {
-                                  "topic": {
-                                    "type": "string"
-                                  },
-                                  "when": {
-                                    "additionalProperties": true,
-                                    "properties": {
-                                      "condition": {
-                                        "type": "string"
-                                      },
-                                      "type": {
-                                        "enum": [
-                                          "equals",
-                                          "contains",
-                                          "regexp"
-                                        ],
-                                        "type": "string"
-                                      }
-                                    },
-                                    "type": "object"
-                                  }
-                                },
-                                "required": [
-                                  "topic"
-                                ],
-                                "type": "object"
-                              },
-                              "minItems": 1,
-                              "type": "array"
-                            },
                             "type": {
                               "enum": [
                                 "kafka"
@@ -28321,39 +28189,6 @@
                       "topic": {
                         "type": "string"
                       },
-                      "topics": {
-                        "items": {
-                          "additionalProperties": false,
-                          "properties": {
-                            "topic": {
-                              "type": "string"
-                            },
-                            "when": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "condition": {
-                                  "type": "string"
-                                },
-                                "type": {
-                                  "enum": [
-                                    "equals",
-                                    "contains",
-                                    "regexp"
-                                  ],
-                                  "type": "string"
-                                }
-                              },
-                              "type": "object"
-                            }
-                          },
-                          "required": [
-                            "topic"
-                          ],
-                          "type": "object"
-                        },
-                        "minItems": 1,
-                        "type": "array"
-                      },
                       "type": {
                         "enum": [
                           "kafka"
@@ -29378,39 +29213,6 @@
                             },
                             "topic": {
                               "type": "string"
-                            },
-                            "topics": {
-                              "items": {
-                                "additionalProperties": true,
-                                "properties": {
-                                  "topic": {
-                                    "type": "string"
-                                  },
-                                  "when": {
-                                    "additionalProperties": true,
-                                    "properties": {
-                                      "condition": {
-                                        "type": "string"
-                                      },
-                                      "type": {
-                                        "enum": [
-                                          "equals",
-                                          "contains",
-                                          "regexp"
-                                        ],
-                                        "type": "string"
-                                      }
-                                    },
-                                    "type": "object"
-                                  }
-                                },
-                                "required": [
-                                  "topic"
-                                ],
-                                "type": "object"
-                              },
-                              "minItems": 1,
-                              "type": "array"
                             },
                             "type": {
                               "enum": [
