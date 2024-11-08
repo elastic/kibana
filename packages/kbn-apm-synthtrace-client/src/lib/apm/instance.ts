@@ -70,7 +70,7 @@ export class Instance extends Entity<ApmFields> {
       ...this.fields,
       'error.type': 'crash',
       'error.exception': [{ message, ...(type ? { type } : {}) }],
-      'error.grouping_name': getErrorGroupingKey(message),
+      // 'error.grouping_name': getErrorGroupingKey(message),
     });
   }
   error({
