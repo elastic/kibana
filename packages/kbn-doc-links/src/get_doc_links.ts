@@ -355,6 +355,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       autocompleteSuggestions: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
       secureSavedObject: `${KIBANA_DOCS}xpack-security-secure-saved-objects.html`,
       xpackSecurity: `${KIBANA_DOCS}xpack-security.html`,
+      restApis: `${KIBANA_DOCS}api.html`,
+      dashboardImportExport: `${KIBANA_DOCS}dashboard-api.html`,
     },
     upgradeAssistant: {
       overview: `${KIBANA_DOCS}upgrade-assistant.html`,
