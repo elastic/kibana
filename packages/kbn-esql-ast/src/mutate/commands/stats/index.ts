@@ -8,6 +8,7 @@
  */
 
 import { Walker } from '../../../walker';
+import { Visitor } from '../../../visitor';
 import { LeafPrinter } from '../../../pretty_print';
 import { Builder } from '../../../builder';
 import { singleItems } from '../../../visitor/utils';
@@ -169,18 +170,45 @@ const summarizeArg = (query: EsqlQuery, arg: ESQLProperNode): StatsAggregatesSum
  */
 export const summarizeCommand = (query: EsqlQuery, command: ESQLCommand): StatsCommandSummary => {
   const aggregates: StatsCommandSummary['aggregates'] = {};
+  const grouping: StatsCommandSummary['grouping'] = {};
   const fields: StatsCommandSummary['fields'] = new Set();
 
-  for (const arg of singleItems(command.args)) {
-    const summary = summarizeArg(query, arg);
-    aggregates[summary.field] = summary;
-    for (const field of summary.fields) fields.add(field);
-  }
+  // Process main arguments, the "aggregates" part of the command.
+  new Visitor()
+    .on('visitExpression', (ctx) => {
+      const summary = summarizeArg(query, ctx.node);
+      aggregates[summary.field] = summary;
+      for (const field of summary.fields) fields.add(field);
+    })
+    .on('visitCommand', () => {})
+    .on('visitStatsCommand', (ctx) => {
+      for (const _ of ctx.visitArguments());
+    })
+    .visitCommand(command);
+
+  // Process the "BY" arguments, the "grouping" part of the command.
+  new Visitor()
+    .on('visitExpression', () => {})
+    .on('visitColumnExpression', (ctx) => {
+      const column = ctx.node;
+      const formatted = LeafPrinter.column(column);
+      grouping[formatted] = column;
+      fields.add(formatted);
+    })
+    .on('visitCommandOption', (ctx) => {
+      if (ctx.node.name !== 'by') return;
+      for (const _ of ctx.visitArguments());
+    })
+    .on('visitCommand', () => {})
+    .on('visitStatsCommand', (ctx) => {
+      for (const _ of ctx.visitOptions());
+    })
+    .visitCommand(command);
 
   const summary: StatsCommandSummary = {
     command,
     aggregates,
-    grouping: {},
+    grouping,
     fields,
   };
 

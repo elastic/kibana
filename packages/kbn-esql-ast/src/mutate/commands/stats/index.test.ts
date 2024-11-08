@@ -215,7 +215,7 @@ describe('commands.stats', () => {
       });
 
       it('can use params as destination field names', () => {
-        const src = 'FROM index | STATS ?dest = agg(asdf)';
+        const src = 'FROM index | STATS ?dest = agg(asdf) BY asdf';
         const query = EsqlQuery.fromSrc(src);
 
         const command = commands.stats.byIndex(query.ast, 0)!;
@@ -232,7 +232,54 @@ describe('commands.stats', () => {
       });
     });
 
-    it.todo('BY fields');
+    describe('BY option', () => {
+      it('can collect fields from the BY option', () => {
+        const src = 'FROM index | STATS max(1) BY abc';
+        const query = EsqlQuery.fromSrc(src);
+
+        const command = commands.stats.byIndex(query.ast, 0)!;
+        const summary = commands.stats.summarizeCommand(query, command);
+
+        expect(summary.aggregates).toEqual({
+          '`max(1)`': expect.any(Object),
+        });
+        expect(summary.fields).toEqual(new Set(['abc']));
+      });
+
+      it('returns all "grouping" fields', () => {
+        const src = 'FROM index | STATS max(1) BY a, b, c';
+        const query = EsqlQuery.fromSrc(src);
+
+        const command = commands.stats.byIndex(query.ast, 0)!;
+        const summary = commands.stats.summarizeCommand(query, command);
+
+        expect(summary.aggregates).toEqual({
+          '`max(1)`': expect.any(Object),
+        });
+        expect(summary.grouping).toMatchObject({
+          a: { type: 'column' },
+          b: { type: 'column' },
+          c: { type: 'column' },
+        });
+      });
+
+      it('can have params and quoted fields in grouping', () => {
+        const src = 'FROM index | STATS max(1) BY `a😎`, ?123, a.?b.?0.`😎`';
+        const query = EsqlQuery.fromSrc(src);
+
+        const command = commands.stats.byIndex(query.ast, 0)!;
+        const summary = commands.stats.summarizeCommand(query, command);
+
+        expect(summary.aggregates).toEqual({
+          '`max(1)`': expect.any(Object),
+        });
+        expect(summary.grouping).toMatchObject({
+          '`a😎`': { type: 'column' },
+          // '?123': { type: 'column' },
+          'a.?b.?0.`😎`': { type: 'column' },
+        });
+      });
+    });
   });
 
   describe('.summarize()', () => {
