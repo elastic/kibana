@@ -20,7 +20,7 @@ export const getFleetManagedIndexTemplatesRoute = (router: IRouter) => {
         security: {
           authz: {
             enabled: false,
-            reason: 'Route delegates authorization to the scoped ES Client',
+            reason: 'This route delegates authorization of the current user to the Elasticsearch index template API.',
           },
         },
         validate: {},
