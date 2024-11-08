@@ -35,8 +35,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   let supertest: TestAgent;
   let search: SearchService;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/199432
-  describe.skip('@skipInServerless Timeline Details', () => {
+  describe('@skipInServerless Timeline Details', () => {
     before(async () => {
       supertest = await utils.createSuperTest();
       search = await utils.createSearch();
