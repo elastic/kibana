@@ -10,40 +10,22 @@ import { render } from '@testing-library/react';
 import { AlertsPreview } from './alerts_preview';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
+import type { ParsedAlertsData } from '../../../overview/components/detection_response/alerts_by_status/types';
 
-const mockAlertsData: AlertSearchResponse<unknown, unknown> = {
-  took: 0,
-  timeout: false,
-  _shards: {
-    total: 1,
-    successful: 1,
-    skipped: 0,
-    failed: 0,
+const mockAlertsData: ParsedAlertsData = {
+  closed: { total: 2, severities: [{ key: 'low', value: 1, label: 'Low' }] },
+  open: {
+    total: 3,
+    severities: [
+      { key: 'low', value: 2, label: 'Low' },
+      { key: 'medium', value: 1, label: 'Medium' },
+    ],
   },
-  hits: {
-    total: {
-      value: 2,
-      relation: 'eq',
-    },
-    max_score: 0,
-    hits: [
-      {
-        fields: {
-          'signal.rule.name': ['Low Alert'],
-          'kibana.alert.reason': ['Low Alert Reason'],
-          'kibana.alert.rule.uuid': ['Low Alert UUID'],
-          'signal.rule.severity': ['low'],
-        },
-      },
-      {
-        fields: {
-          'signal.rule.name': ['Medium Alert'],
-          'kibana.alert.reason': ['Medium Alert Reason'],
-          'kibana.alert.rule.uuid': ['Medium Alert UUID'],
-          'signal.rule.severity': ['medium'],
-        },
-      },
+  acknowledged: {
+    total: 2,
+    severities: [
+      { key: 'low', value: 1, label: 'Low' },
+      { key: 'high', value: 1, label: 'High' },
     ],
   },
 };
@@ -66,10 +48,30 @@ describe('AlertsPreview', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsPreview alertsData={mockAlertsData} alertsCount={1} />
+        <AlertsPreview alertsData={mockAlertsData} alertsCount={5} />
       </TestProviders>
     );
 
     expect(getByTestId('securitySolutionFlyoutInsightsAlertsTitleText')).toBeInTheDocument();
+  });
+
+  it('renders correct alerts number', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AlertsPreview alertsData={mockAlertsData} alertsCount={5} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('securitySolutionFlyoutInsightsAlertsCount').textContent).toEqual('5');
+  });
+
+  it('renders correct number distribution bar based on severity', () => {
+    const { queryAllByTestId } = render(
+      <TestProviders>
+        <AlertsPreview alertsData={mockAlertsData} alertsCount={5} />
+      </TestProviders>
+    );
+
+    expect(queryAllByTestId('undefined__part').length).toEqual(3);
   });
 });
