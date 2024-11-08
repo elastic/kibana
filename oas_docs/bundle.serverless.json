@@ -26105,6 +26105,110 @@
         ]
       }
     },
+    "/api/fleet/outputs/agent_policies": {
+      "post": {
+        "description": "Get agent policies associated with outputs by output ids",
+        "operationId": "post-fleet-outputs-agent-policies",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "ids": {
+                    "description": "list of output ids",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "ids"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Fleet outputs"
+        ]
+      }
+    },
     "/api/fleet/outputs/{outputId}": {
       "delete": {
         "description": "Delete output by ID",
