@@ -29,6 +29,7 @@ import {
 import { SnapshotListParams, SortDirection, SortField } from '../../../../lib';
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
 import { SnapshotSearchBar } from './snapshot_search_bar';
+import { SnapshotState } from '../snapshot_details/tabs/snapshot_state';
 
 const getLastSuccessfulManagedSnapshot = (
   snapshots: SnapshotDetails[]
@@ -92,6 +93,18 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
           {snapshotId}
         </EuiLink>
       ),
+    },
+    {
+      field: 'state',
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.stateColumnTitle', {
+        defaultMessage: 'State',
+      }),
+      truncateText: false,
+      sortable: false,
+      description: i18n.translate('xpack.snapshotRestore.snapshotList.table.statePartialTooltip', {
+        defaultMessage: 'This is partial.',
+      }),
+      render: (state: string) => <SnapshotState state={state} tooltipIcon={false} />,
     },
     {
       field: 'repository',

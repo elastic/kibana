@@ -7,53 +7,45 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiToolTip } from '@elastic/eui';
 
 import { SNAPSHOT_STATE } from '../../../../../constants';
 import { useServices } from '../../../../../app_context';
 
 interface Props {
   state: any;
+  tooltipIcon: boolean;
 }
 
-export const SnapshotState: React.FC<Props> = ({ state }) => {
+export const SnapshotState: React.FC<Props> = ({ state, tooltipIcon }) => {
   const { i18n } = useServices();
 
   const stateMap: any = {
     [SNAPSHOT_STATE.IN_PROGRESS]: {
-      icon: <EuiLoadingSpinner size="m" />,
+      icon: <EuiIcon color="primary" type="dot" />,
       label: i18n.translate('xpack.snapshotRestore.snapshotState.inProgressLabel', {
-        defaultMessage: 'Taking snapshot…',
+        defaultMessage: 'In Progress',
       }),
     },
     [SNAPSHOT_STATE.SUCCESS]: {
-      icon: <EuiIcon color="success" type="check" />,
+      icon: <EuiIcon color="success" type="dot" />,
       label: i18n.translate('xpack.snapshotRestore.snapshotState.completeLabel', {
-        defaultMessage: 'Snapshot complete',
+        defaultMessage: 'Complete',
       }),
     },
     [SNAPSHOT_STATE.FAILED]: {
-      icon: <EuiIcon color="danger" type="cross" />,
+      icon: <EuiIcon color="danger" type="dot" />,
       label: i18n.translate('xpack.snapshotRestore.snapshotState.failedLabel', {
-        defaultMessage: 'Snapshot failed',
+        defaultMessage: 'Failed',
       }),
     },
     [SNAPSHOT_STATE.PARTIAL]: {
-      icon: <EuiIcon color="warning" type="warning" />,
+      icon: <EuiIcon color="warning" type="dot" />,
       label: i18n.translate('xpack.snapshotRestore.snapshotState.partialLabel', {
-        defaultMessage: 'Partial failure',
+        defaultMessage: 'Partial',
       }),
       tip: i18n.translate('xpack.snapshotRestore.snapshotState.partialTipDescription', {
         defaultMessage: `Global cluster state was stored, but at least one shard wasn't stored successfully. See the 'Failed indices' tab.`,
-      }),
-    },
-    [SNAPSHOT_STATE.INCOMPATIBLE]: {
-      icon: <EuiIcon color="warning" type="warning" />,
-      label: i18n.translate('xpack.snapshotRestore.snapshotState.incompatibleLabel', {
-        defaultMessage: 'Incompatible version',
-      }),
-      tip: i18n.translate('xpack.snapshotRestore.snapshotState.incompatibleTipDescription', {
-        defaultMessage: `Snapshot was created with a version of Elasticsearch incompatible with the cluster's version.`,
       }),
     },
   };
@@ -65,14 +57,14 @@ export const SnapshotState: React.FC<Props> = ({ state }) => {
 
   const { icon, label, tip } = stateMap[state];
 
-  const iconTip = tip && (
+  const iconTip = tip && tooltipIcon && (
     <Fragment>
       {' '}
       <EuiIconTip content={tip} />
     </Fragment>
   );
 
-  return (
+  const snapshotInfo = (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
 
@@ -84,5 +76,13 @@ export const SnapshotState: React.FC<Props> = ({ state }) => {
         </div>
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+
+  return tip && tooltipIcon ? (
+    snapshotInfo
+  ) : (
+    <EuiToolTip position="top" content={tip}>
+      {snapshotInfo}
+    </EuiToolTip>
   );
 };

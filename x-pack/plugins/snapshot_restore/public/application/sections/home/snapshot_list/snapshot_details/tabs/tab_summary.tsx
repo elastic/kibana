@@ -94,7 +94,7 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            <SnapshotState state={state} />
+            <SnapshotState state={state} tooltipIcon={true} />
           </EuiDescriptionListDescription>
         </EuiFlexItem>
 
