@@ -85,8 +85,9 @@ export function WelcomeMessage({
             connectors={connectors}
             onSetupConnectorClick={handleConnectorClick}
           />
-
-          <WelcomeMessageKnowledgeBase connectors={connectors} knowledgeBase={knowledgeBase} />
+          {knowledgeBase.status.value?.enabled ? (
+            <WelcomeMessageKnowledgeBase connectors={connectors} knowledgeBase={knowledgeBase} />
+          ) : null}
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

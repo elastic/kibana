@@ -17,18 +17,37 @@ import type { IntegrationCardMetadata } from './types';
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
   IntegrationCardMetadata
 > = async (services: StartServices) => {
-  const packageData = await services.http.get<GetPackagesResponse>(
-    EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
-    {
+  const packageData = await services.http
+    .get<GetPackagesResponse>(EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN, {
       version: '2023-10-31',
-    }
-  );
+    })
+    .catch((err: Error) => {
+      services.notifications.toasts.addError(err, {
+        title: i18n.translate(
+          'xpack.securitySolution.onboarding.integrationsCard.checkComplete.fetchIntegrations.errorTitle',
+          {
+            defaultMessage: 'Error fetching integrations data',
+          }
+        ),
+      });
+      return { items: [] };
+    });
 
   const agentsData = await lastValueFrom(
     services.data.search.search({
       params: { index: AGENT_INDEX, body: { size: 1 } },
     })
-  );
+  ).catch((err: Error) => {
+    services.notifications.toasts.addError(err, {
+      title: i18n.translate(
+        'xpack.securitySolution.onboarding.integrationsCard.checkComplete.fetchAgents.errorTitle',
+        {
+          defaultMessage: 'Error fetching agents data',
+        }
+      ),
+    });
+    return { rawResponse: { hits: { total: 0 } } };
+  });
 
   const installed = packageData?.items?.filter(
     (pkg) =>

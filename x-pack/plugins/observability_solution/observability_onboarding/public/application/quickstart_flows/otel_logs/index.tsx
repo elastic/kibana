@@ -20,7 +20,6 @@ import {
   EuiLink,
   EuiImage,
   EuiCallOut,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import {
   AllDatasetsLocatorParams,
@@ -31,11 +30,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ObservabilityOnboardingAppServices } from '../../..';
-import { ApiKeyBanner } from '../custom_logs/api_key_banner';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
-
-const feedbackUrl = 'https://ela.st/otelcollector';
+import { EmptyPrompt } from '../shared/empty_prompt';
+import { FeedbackButtons } from '../shared/feedback_buttons';
 
 const HOST_COMMAND = i18n.translate(
   'xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel',
@@ -48,11 +46,15 @@ const HOST_COMMAND = i18n.translate(
 export const OtelLogsPanel: React.FC = () => {
   const {
     data: apiKeyData,
-    status: apiKeyStatus,
     error,
-  } = useFetcher((callApi) => {
-    return callApi('POST /internal/observability_onboarding/otel/api_key', {});
-  }, []);
+    refetch,
+  } = useFetcher(
+    (callApi) => {
+      return callApi('POST /internal/observability_onboarding/otel/api_key', {});
+    },
+    [],
+    { showToastOnError: false }
+  );
 
   const { data: setup } = useFetcher((callApi) => {
     return callApi('GET /internal/observability_onboarding/logs/setup/environment');
@@ -118,15 +120,14 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
 
   const selectedContent = installTabContents.find((tab) => tab.id === selectedTab)!;
 
+  if (error) {
+    return <EmptyPrompt onboardingFlowType="otel_logs" error={error} onRetryClick={refetch} />;
+  }
+
   return (
     <EuiPanel hasBorder paddingSize="xl">
       <EuiFlexGroup direction="column" gutterSize="none">
         <MultiIntegrationInstallBanner />
-        {error && (
-          <EuiFlexItem>
-            <ApiKeyBanner status={apiKeyStatus} payload={apiKeyData} error={error} />
-          </EuiFlexItem>
-        )}
         <EuiSteps
           steps={[
             {
@@ -340,37 +341,8 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
             },
           ]}
         />
-        <EuiHorizontalRule />
 
-        <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="s" wrap>
-          <EuiFlexItem grow={false}>
-            <EuiText color="subdued" size="s">
-              {i18n.translate(
-                'xpack.observability_onboarding.otelLogsPanel.feedbackButtons.label',
-                {
-                  defaultMessage: 'Was this helpful or were there any problems?',
-                }
-              )}
-            </EuiText>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="editorComment"
-              data-test-subj="observabilityOnboardingOtelLogsPanelGiveFeedbackButton"
-              href={feedbackUrl}
-              color="warning"
-              target="_blank"
-            >
-              {i18n.translate(
-                'xpack.observability_onboarding.otelLogsPanel.feedbackButtons.title',
-                {
-                  defaultMessage: 'Give feedback',
-                }
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <FeedbackButtons flow="otel_logs" />
       </EuiFlexGroup>
     </EuiPanel>
   );

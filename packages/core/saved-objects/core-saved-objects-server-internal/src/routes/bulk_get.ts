@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { RouteAccess } from '@kbn/core-http-server';
+import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -24,11 +24,12 @@ interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
   access: RouteAccess;
+  deprecationInfo: RouteDeprecationInfo;
 }
 
 export const registerBulkGetRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger, access }: RouteDependencies
+  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.post(
@@ -38,7 +39,7 @@ export const registerBulkGetRoute = (
         summary: `Get saved objects`,
         tags: ['oas-tag:saved objects'],
         access,
-        deprecated: true,
+        deprecated: deprecationInfo,
       },
       validate: {
         body: schema.arrayOf(

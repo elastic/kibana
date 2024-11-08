@@ -39,7 +39,7 @@ const mockChatService: MockedChatService = {
       role: MessageRole.System,
     },
   }),
-  getScope: jest.fn(),
+  getScopes: jest.fn(),
 };
 
 const addErrorMock = jest.fn();
@@ -83,7 +83,7 @@ describe('useChat', () => {
           service: {
             getScreenContexts: () => [],
           } as unknown as ObservabilityAIAssistantService,
-          scope: 'observability',
+          scopes: ['observability'],
         } as UseChatProps,
       });
     });
@@ -113,7 +113,7 @@ describe('useChat', () => {
           service: {
             getScreenContexts: () => [],
           } as unknown as ObservabilityAIAssistantService,
-          scope: 'observability',
+          scopes: ['observability'],
         } as UseChatProps,
       });
 

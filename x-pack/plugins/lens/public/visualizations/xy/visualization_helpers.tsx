@@ -270,7 +270,6 @@ export function getDescription(state?: State, layerId?: string) {
 }
 
 export const defaultIcon = IconChartBarStacked;
-export const defaultSeriesType = 'bar_stacked';
 
 export const supportedDataLayer = {
   type: layerTypes.DATA,

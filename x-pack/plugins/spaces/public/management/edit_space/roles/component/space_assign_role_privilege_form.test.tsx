@@ -95,6 +95,7 @@ const renderPrivilegeRolesForm = ({
           getUrlForApp: jest.fn((_) => _),
           navigateToUrl: jest.fn(),
           license: licenseMock,
+          isRoleManagementEnabled: true,
           capabilities: {
             navLinks: {},
             management: {},

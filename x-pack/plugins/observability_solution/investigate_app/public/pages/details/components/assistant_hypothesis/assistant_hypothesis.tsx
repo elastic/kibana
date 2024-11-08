@@ -114,7 +114,7 @@ const formatEntityMetrics = (entity: EntityWithSource): string => {
     .join(', ');
   const entitySources = entity.sources.map((source) => source.dataStream).join(', ');
   return dedent(`
-    Entity name: ${entity.displayName}; 
+    Entity name: ${entity.display_name}; 
     Entity type: ${entity.type}; 
     Entity metrics: ${entityMetrics}; 
     Entity data streams: ${entitySources}

@@ -8,7 +8,7 @@
  */
 
 import { Capabilities } from '@kbn/core/public';
-import { convertPanelMapToSavedPanels, DashboardContainerInput } from '../../../../common';
+import { convertPanelMapToPanelsArray, DashboardContainerInput } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
 
 import { shareService } from '../../../services/kibana_services';
@@ -143,7 +143,7 @@ describe('ShowShareModal', () => {
     ).locatorParams.params;
     const rawDashboardState = {
       ...unsavedDashboardState,
-      panels: convertPanelMapToSavedPanels(unsavedDashboardState.panels),
+      panels: convertPanelMapToPanelsArray(unsavedDashboardState.panels),
     };
     unsavedStateKeys.forEach((key) => {
       expect(shareLocatorParams[key]).toStrictEqual(
@@ -208,8 +208,8 @@ describe('ShowShareModal', () => {
     ).locatorParams.params;
 
     expect(shareLocatorParams.panels).toBeDefined();
-    expect(shareLocatorParams.panels![0].embeddableConfig.changedKey1).toBe('changed');
-    expect(shareLocatorParams.panels![1].embeddableConfig.changedKey2).toBe('definitely changed');
-    expect(shareLocatorParams.panels![2].embeddableConfig.changedKey3).toBe('should still exist');
+    expect(shareLocatorParams.panels![0].panelConfig.changedKey1).toBe('changed');
+    expect(shareLocatorParams.panels![1].panelConfig.changedKey2).toBe('definitely changed');
+    expect(shareLocatorParams.panels![2].panelConfig.changedKey3).toBe('should still exist');
   });
 });

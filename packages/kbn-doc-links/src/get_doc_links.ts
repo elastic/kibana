@@ -283,9 +283,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       base: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}`,
       inputElasticAgent: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}/plugins-inputs-elastic_agent.html`,
     },
-    functionbeat: {
-      base: `${ELASTIC_WEBSITE_URL}guide/en/beats/functionbeat/${DOC_LINK_VERSION}`,
-    },
     winlogbeat: {
       base: `${ELASTIC_WEBSITE_URL}guide/en/beats/winlogbeat/${DOC_LINK_VERSION}`,
     },
@@ -358,6 +355,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       autocompleteSuggestions: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
       secureSavedObject: `${KIBANA_DOCS}xpack-security-secure-saved-objects.html`,
       xpackSecurity: `${KIBANA_DOCS}xpack-security.html`,
+      restApis: `${KIBANA_DOCS}api.html`,
+      dashboardImportExport: `${KIBANA_DOCS}dashboard-api.html`,
     },
     upgradeAssistant: {
       overview: `${KIBANA_DOCS}upgrade-assistant.html`,
@@ -578,7 +577,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       alertingRules: `${ELASTICSEARCH_DOCS}transform-alerts.html`,
     },
     visualize: {
-      guide: `${KIBANA_DOCS}dashboard.html`,
+      guide: `${KIBANA_DOCS}_panels_and_visualizations.html`,
       lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
       lensPanels: `${KIBANA_DOCS}lens.html`,
       maps: `${ELASTIC_WEBSITE_URL}maps`,

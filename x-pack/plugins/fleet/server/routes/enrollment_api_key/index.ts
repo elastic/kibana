@@ -109,10 +109,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetEnrollmentAPIKeysRequestSchema,
           response: {
             200: {
-              body: () =>
-                ListResponseSchema(EnrollmentAPIKeySchema).extends({
-                  list: schema.arrayOf(EnrollmentAPIKeySchema, { meta: { deprecated: true } }),
-                }),
+              body: () => ListResponseSchema(EnrollmentAPIKeySchema),
             },
             400: {
               body: genericErrorResponse,
@@ -151,70 +148,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             },
           },
         },
-      },
-      postEnrollmentApiKeyHandler
-    );
-
-  router.versioned
-    .get({
-      path: ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN_DEPRECATED,
-      fleetAuthz: {
-        fleet: { readEnrollmentTokens: true },
-      },
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: GetOneEnrollmentAPIKeyRequestSchema },
-      },
-      getOneEnrollmentApiKeyHandler
-    );
-
-  router.versioned
-    .delete({
-      path: ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN_DEPRECATED,
-      fleetAuthz: {
-        fleet: { allAgents: true },
-      },
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: DeleteEnrollmentAPIKeyRequestSchema },
-      },
-      deleteEnrollmentApiKeyHandler
-    );
-
-  router.versioned
-    .get({
-      path: ENROLLMENT_API_KEY_ROUTES.LIST_PATTERN_DEPRECATED,
-      fleetAuthz: {
-        fleet: { readEnrollmentTokens: true },
-      },
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: GetEnrollmentAPIKeysRequestSchema },
-      },
-      getEnrollmentApiKeysHandler
-    );
-
-  router.versioned
-    .post({
-      path: ENROLLMENT_API_KEY_ROUTES.CREATE_PATTERN_DEPRECATED,
-      fleetAuthz: {
-        fleet: { allAgents: true },
-      },
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: PostEnrollmentAPIKeyRequestSchema },
       },
       postEnrollmentApiKeyHandler
     );

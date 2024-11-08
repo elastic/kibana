@@ -18,11 +18,6 @@ api-docs: ## Generate Serverless and ESS Kibana OpenAPI bundles with kbn-openapi
 	@node scripts/merge_serverless_oas.js
 	@node scripts/merge_ess_oas.js
 
-.PHONY: api-docs-staging
-api-docs-staging: ## Generate Serverless and ESS Kibana OpenAPI bundles with kbn-openapi-bundler
-	@node scripts/merge_serverless_oas_staging.js
-	@node scripts/merge_ess_oas_staging.js
-
 .PHONY: api-docs-stateful
 api-docs-stateful: ## Generate only kibana.yaml
 	@node scripts/merge_ess_oas.js
@@ -30,9 +25,9 @@ api-docs-stateful: ## Generate only kibana.yaml
 .PHONY: api-docs-serverless
 api-docs-serverless: ## Generate only kibana.serverless.yaml
 	@node scripts/merge_serverless_oas.js
-	
+
 .PHONY: api-docs-lint
-api-docs-lint: ## Run spectral API docs linter 
+api-docs-lint: ## Run spectral API docs linter
 	@npx @stoplight/spectral-cli lint "output/*.yaml" --ruleset ".spectral.yaml"
 
 .PHONY: api-docs-lint-errs
@@ -52,11 +47,13 @@ api-docs-overlay: ## Run spectral API docs linter on kibana.serverless.yaml
 	@npx bump overlay "output/kibana.serverless.yaml" "overlays/kibana.overlays.serverless.yaml" > "output/kibana.serverless.tmp1.yaml"
 	@npx bump overlay "output/kibana.serverless.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.serverless.tmp2.yaml"
 	@npx bump overlay "output/kibana.serverless.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.serverless.tmp3.yaml"
+	@npx bump overlay "output/kibana.serverless.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.serverless.tmp4.yaml"
 	@npx bump overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
 	@npx bump overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
 	@npx bump overlay "output/kibana.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.tmp3.yaml"
-	@npx @redocly/cli bundle output/kibana.serverless.tmp3.yaml --ext yaml -o output/kibana.serverless.new.yaml
-	@npx @redocly/cli bundle output/kibana.tmp3.yaml --ext yaml -o output/kibana.new.yaml
+	@npx bump overlay "output/kibana.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.tmp4.yaml"
+	@npx @redocly/cli bundle output/kibana.serverless.tmp4.yaml --ext yaml -o output/kibana.serverless.new.yaml
+	@npx @redocly/cli bundle output/kibana.tmp4.yaml --ext yaml -o output/kibana.new.yaml
 	rm output/kibana.tmp*.yaml
 	rm output/kibana.serverless.tmp*.yaml
 

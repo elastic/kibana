@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { omitBy, isNil } from 'lodash';
+import classNames from 'classnames';
 import { css } from '@emotion/react';
 
 import { ExpressionRenderer } from '@kbn/expressions-plugin/common';
@@ -29,6 +30,8 @@ export interface Props {
   backgroundColor: string;
   selectElement: () => void;
   state: string;
+  selectedElementId: string | null;
+  id: string;
 }
 
 export const ElementContent = (props: Props) => {
@@ -59,7 +62,9 @@ export const ElementContent = (props: Props) => {
     <div
       css={css(renderable.css)}
       // TODO: 'canvas__element' was added for BWC, It can be removed after a while
-      className={'canvas__element canvasElement'}
+      className={classNames('canvas__element', 'canvasElement', {
+        'canvas__element--selected': props?.selectedElementId === props.id,
+      })}
       style={{ ...containerStyle, width, height }}
       data-test-subj="canvasWorkpadPageElementContent"
     >

@@ -26,10 +26,8 @@ describe(
   () => {
     let ruleId: string;
     let ruleName: string;
-    before(() => {
-      initializeDataViews();
-    });
     beforeEach(() => {
+      initializeDataViews();
       loadRule().then((data) => {
         ruleId = data.id;
         ruleName = data.name;
