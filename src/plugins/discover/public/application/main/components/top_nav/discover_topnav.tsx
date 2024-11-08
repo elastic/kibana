@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { TextBasedLanguages } from '@kbn/esql-utils';
@@ -20,7 +20,6 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { onSaveSearch } from './on_save_search';
 import { useDiscoverCustomization } from '../../../../customizations';
-import { addLog } from '../../../../utils/add_log';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
@@ -47,15 +46,8 @@ export const DiscoverTopNav = ({
   onCancelClick,
 }: DiscoverTopNavProps) => {
   const services = useDiscoverServices();
-  const {
-    dataViewEditor,
-    navigation,
-    dataViewFieldEditor,
-    data,
-    uiSettings,
-    dataViews,
-    setHeaderActionMenu,
-  } = services;
+  const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, setHeaderActionMenu } =
+    services;
   const query = useAppStateSelector((state) => state.query);
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const dataView = useInternalStateSelector((state) => state.dataView!);
@@ -122,23 +114,6 @@ export const DiscoverTopNav = ({
       allowAdHocDataView: true,
     });
   }, [dataViewEditor, stateContainer]);
-
-  const onEditDataView = useCallback(
-    async (editedDataView: DataView) => {
-      if (editedDataView.isPersisted()) {
-        // Clear the current data view from the cache and create a new instance
-        // of it, ensuring we have a new object reference to trigger a re-render
-        dataViews.clearInstanceCache(editedDataView.id);
-        stateContainer.actions.setDataView(await dataViews.create(editedDataView.toSpec(), true));
-      } else {
-        await stateContainer.actions.updateAdHocDataViewId();
-      }
-      stateContainer.actions.loadDataViewList();
-      addLog('[DiscoverTopNav] onEditDataView triggers data fetching');
-      stateContainer.dataState.fetch();
-    },
-    [dataViews, stateContainer.actions, stateContainer.dataState]
-  );
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     const { appState } = stateContainer;
@@ -223,14 +198,13 @@ export const DiscoverTopNav = ({
       textBasedLanguages: supportedTextBasedLanguages,
       adHocDataViews,
       savedDataViews,
-      onEditDataView,
+      onEditDataView: stateContainer.actions.onDataViewEdited,
     };
   }, [
     adHocDataViews,
     addField,
     createNewDataView,
     dataView,
-    onEditDataView,
     savedDataViews,
     stateContainer,
     uiSettings,

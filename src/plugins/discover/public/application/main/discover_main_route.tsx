@@ -22,6 +22,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
+import { useInternalStateSelector } from './state_management/discover_internal_state_container';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverStateContainer } from './hooks/use_discover_state_container';
 import { MainHistoryLocationState } from '../../../common';
@@ -85,7 +86,6 @@ export function DiscoverMainRoute({
       stateContainer,
     });
   const [error, setError] = useState<Error>();
-  const [loading, setLoading] = useState(true);
   const [noDataState, setNoDataState] = useState({
     hasESData: false,
     hasUserDataView: false,
@@ -157,10 +157,10 @@ export function DiscoverMainRoute({
       initialAppState,
     }: { nextDataView?: DataView; initialAppState?: LoadParams['initialAppState'] } = {}) => {
       const loadSavedSearchStartTime = window.performance.now();
-      setLoading(true);
+      stateContainer.actions.setIsLoading(true);
       const skipNoData = await skipNoDataPage(nextDataView);
       if (!skipNoData) {
-        setLoading(false);
+        stateContainer.actions.setIsLoading(false);
         return;
       }
       try {
@@ -181,7 +181,7 @@ export function DiscoverMainRoute({
 
           setBreadcrumbs({ services, titleBreadcrumbText: currentSavedSearch?.title ?? undefined });
         }
-        setLoading(false);
+        stateContainer.actions.setIsLoading(false);
         if (services.analytics) {
           const loadSavedSearchDuration = window.performance.now() - loadSavedSearchStartTime;
           reportPerformanceMetricEvent(services.analytics, {
@@ -231,7 +231,7 @@ export function DiscoverMainRoute({
 
   useEffect(() => {
     if (!isCustomizationServiceInitialized) return;
-    setLoading(true);
+    stateContainer.actions.setIsLoading(true);
     setNoDataState({
       hasESData: false,
       hasUserDataView: false,
@@ -259,13 +259,13 @@ export function DiscoverMainRoute({
   const onDataViewCreated = useCallback(
     async (nextDataView: unknown) => {
       if (nextDataView) {
-        setLoading(true);
+        stateContainer.actions.setIsLoading(true);
         setNoDataState((state) => ({ ...state, showNoDataPage: false }));
         setError(undefined);
         await loadSavedSearch({ nextDataView: nextDataView as DataView });
       }
     },
-    [loadSavedSearch]
+    [loadSavedSearch, stateContainer]
   );
 
   const onESQLNavigationComplete = useCallback(async () => {
@@ -326,14 +326,8 @@ export function DiscoverMainRoute({
       );
     }
 
-    if (loading) {
-      return loadingIndicator;
-    }
-
     return <DiscoverMainAppMemoized stateContainer={stateContainer} />;
   }, [
-    loading,
-    loadingIndicator,
     noDataDependencies,
     onDataViewCreated,
     onESQLNavigationComplete,
@@ -355,11 +349,11 @@ export function DiscoverMainRoute({
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
         <rootProfileState.AppWrapper>
-          <DiscoverTopNavInline
+          <DiscoverMainLoading
+            mainContent={mainContent}
+            showNoDataPage={noDataState.showNoDataPage}
             stateContainer={stateContainer}
-            hideNavMenuItems={loading || noDataState.showNoDataPage}
           />
-          {mainContent}
         </rootProfileState.AppWrapper>
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>
@@ -367,6 +361,28 @@ export function DiscoverMainRoute({
 }
 // eslint-disable-next-line import/no-default-export
 export default DiscoverMainRoute;
+
+export function DiscoverMainLoading({
+  stateContainer,
+  showNoDataPage,
+  mainContent,
+}: {
+  stateContainer: DiscoverStateContainer;
+  showNoDataPage: boolean;
+  mainContent: JSX.Element;
+}) {
+  const loading = useInternalStateSelector((state) => state.isLoading);
+
+  return (
+    <>
+      <DiscoverTopNavInline
+        stateContainer={stateContainer}
+        hideNavMenuItems={showNoDataPage || loading}
+      />
+      {loading && !showNoDataPage ? <LoadingIndicator /> : mainContent}
+    </>
+  );
+}
 
 function getLoadParamsForNewSearch(stateContainer: DiscoverStateContainer): {
   nextDataView: LoadParams['dataView'];
