@@ -638,7 +638,13 @@
           "[], [], unknown>; registerOnPostValidation: jest.MockInstance<void, [cb: (req: ",
           "CoreKibanaRequest",
           "<unknown, unknown, unknown, any>, metadata: { deprecated: ",
-          "RouteDeprecationInfo",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteDeprecationInfo",
+            "text": "RouteDeprecationInfo"
+          },
           "; }) => void], unknown>; registerRouterAfterListening: jest.MockInstance<void, [router: ",
           {
             "pluginId": "@kbn/core-http-server",
