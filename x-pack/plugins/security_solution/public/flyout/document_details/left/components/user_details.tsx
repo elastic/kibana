@@ -25,8 +25,8 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { UserOverview } from '../../../../overview/components/user_overview';
@@ -359,6 +359,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
             name={userName}
             direction="column"
             data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
+            telemetrySuffix={'user-details'}
           />
         </EuiFlexGrid>
         <EuiSpacer size="l" />

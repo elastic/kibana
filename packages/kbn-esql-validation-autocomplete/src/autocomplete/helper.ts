@@ -27,6 +27,7 @@ import {
   isAssignment,
   isColumnItem,
   isFunctionItem,
+  isIdentifier,
   isLiteralItem,
   isTimeIntervalItem,
 } from '../shared/helpers';
@@ -35,7 +36,7 @@ import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   TIME_SYSTEM_PARAMS,
   buildVariablesDefinitions,
-  getCompatibleFunctionDefinition,
+  getFunctionSuggestions,
   getCompatibleLiterals,
   getDateLiterals,
 } from './factories';
@@ -417,7 +418,14 @@ export async function getFieldsOrFunctionsSuggestions(
 
   const suggestions = filteredFieldsByType.concat(
     displayDateSuggestions ? getDateLiterals() : [],
-    functions ? getCompatibleFunctionDefinition(commandName, optionName, types, ignoreFn) : [],
+    functions
+      ? getFunctionSuggestions({
+          command: commandName,
+          option: optionName,
+          returnTypes: types,
+          ignored: ignoreFn,
+        })
+      : [],
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
       : [],
@@ -450,15 +458,13 @@ export function extractTypeFromASTArg(
   if (Array.isArray(arg)) {
     return extractTypeFromASTArg(arg[0], references);
   }
-  if (isColumnItem(arg) || isLiteralItem(arg)) {
-    if (isLiteralItem(arg)) {
-      return arg.literalType;
-    }
-    if (isColumnItem(arg)) {
-      const hit = getColumnForASTNode(arg, references);
-      if (hit) {
-        return hit.type;
-      }
+  if (isLiteralItem(arg)) {
+    return arg.literalType;
+  }
+  if (isColumnItem(arg) || isIdentifier(arg)) {
+    const hit = getColumnForASTNode(arg, references);
+    if (hit) {
+      return hit.type;
     }
   }
   if (isTimeIntervalItem(arg)) {
