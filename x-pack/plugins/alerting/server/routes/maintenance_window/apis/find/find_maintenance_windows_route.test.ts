@@ -108,6 +108,7 @@ describe('findMaintenanceWindowsRoute', () => {
     expect(maintenanceWindowClient.find).toHaveBeenCalledWith({ page: 1, perPage: 3 });
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
+        // @ts-expect-error upgrade typescript v5.1.6
         data: mockMaintenanceWindows.data.map((data) => rewriteMaintenanceWindowRes(data)),
         total: 2,
         page: 1,
