@@ -77,7 +77,7 @@ export const AgentlessStepConfirmData = ({
           <p>
             <FormattedMessage
               id="xpack.fleet.agentlessEnrollmentFlyout.confirmData.failureHelperText"
-              defaultMessage="No data receieved in the past {num} minutes. Check out the {troubleshootingGuideLink} for help."
+              defaultMessage="No integration data receieved in the past {num} minutes. Check out the {troubleshootingGuideLink} for help."
               values={{
                 num: POLLING_TIMEOUT_MS / 1000 / 60,
                 troubleshootingGuideLink: (
