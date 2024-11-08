@@ -96,7 +96,6 @@ describe('findMaintenanceWindowsRoute', () => {
     expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/_find');
     expect(config.options).toMatchInlineSnapshot(`
       Object {
-        "access": "internal",
         "tags": Array [
           "access:read-maintenance-window",
         ],
