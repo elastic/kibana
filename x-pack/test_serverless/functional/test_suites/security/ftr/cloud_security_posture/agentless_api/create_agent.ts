@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
 import expect from '@kbn/expect';
 import { setupMockServer } from './mock_agentless_api';
