@@ -56,6 +56,8 @@ const UserNameComponent: React.FC<Props> = ({
 
   const currentAppId = useObservable(application.currentAppId$);
 
+  const isAppSecurity = useMemo(() => currentAppId === APP_UI_ID, [currentAppId]);
+
   const openUserDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent) => {
       e.preventDefault();
@@ -91,9 +93,7 @@ const UserNameComponent: React.FC<Props> = ({
         Component={Component}
         userName={userName}
         isButton={isButton}
-        onClick={
-          isInTimelineContext || currentAppId !== APP_UI_ID ? openUserDetailsSidePanel : undefined
-        }
+        onClick={isInTimelineContext || !isAppSecurity ? openUserDetailsSidePanel : undefined}
         title={title}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{userName}</TruncatableText>
@@ -106,7 +106,7 @@ const UserNameComponent: React.FC<Props> = ({
       openUserDetailsSidePanel,
       Component,
       title,
-      currentAppId,
+      isAppSecurity,
     ]
   );
 
