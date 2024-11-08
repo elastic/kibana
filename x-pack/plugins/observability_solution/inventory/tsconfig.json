@@ -54,6 +54,7 @@
     "@kbn/cloud-plugin",
     "@kbn/storybook",
     "@kbn/dashboard-plugin",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/react-hooks"
   ]
 }
