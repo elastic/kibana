@@ -19,7 +19,7 @@ export function NewChatButton(
       {...nextProps}
     >
       {i18n.translate('xpack.aiAssistant.newChatButton', {
-        defaultMessage: 'New chat',
+        defaultMessage: 'New conversation',
       })}
     </EuiButton>
   ) : (
