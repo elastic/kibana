@@ -63,7 +63,7 @@ import { SingleMetricViewerTitle } from './timeseriesexplorer_title';
 
 export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   static propTypes = {
-    api: PropTypes.object.isRequired,
+    api: PropTypes.object,
     appStateHandler: PropTypes.func.isRequired,
     autoZoomDuration: PropTypes.number.isRequired,
     bounds: PropTypes.object.isRequired,

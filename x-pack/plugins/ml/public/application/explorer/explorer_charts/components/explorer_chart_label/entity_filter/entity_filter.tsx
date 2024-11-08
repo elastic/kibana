@@ -62,10 +62,17 @@ export const EntityFilter: FC<EntityFilterProps> = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={
-            <FormattedMessage
-              id="xpack.ml.entityFilter.removeFilterTooltip"
-              defaultMessage={mode ? 'Filter out' : 'Remove filter'}
-            />
+            mode ? (
+              <FormattedMessage
+                id="xpack.ml.entityFilter.filterOutTooltip"
+                defaultMessage={'Filter out'}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ml.entityFilter.removeFilterTooltip"
+                defaultMessage={'Remove filter'}
+              />
+            )
           }
         >
           <EuiButtonIcon

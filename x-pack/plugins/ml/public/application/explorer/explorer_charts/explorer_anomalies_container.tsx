@@ -23,7 +23,7 @@ import type { AnomaliesTableData } from '../explorer_utils';
 
 interface ExplorerAnomaliesContainerProps {
   id: string;
-  mode?: string;
+  mode: 'embeddable';
   chartsData: ExplorerChartsData;
   showCharts: boolean;
   severity: TableSeverity;

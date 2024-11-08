@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -33,6 +33,22 @@ const FilterButton: FC<{
     services: { uiActions },
   } = useMlKibana();
   const isAddFilter = operation === ML_ENTITY_FIELD_OPERATIONS.ADD;
+
+  const onClick = useCallback(() => {
+    const trigger = uiActions.getTrigger(SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER);
+    trigger.exec({
+      embeddable: api,
+      data: [
+        {
+          ...entity,
+          operation: isAddFilter
+            ? ML_ENTITY_FIELD_OPERATIONS.ADD
+            : ML_ENTITY_FIELD_OPERATIONS.REMOVE,
+        },
+      ],
+    });
+  }, [api, entity, isAddFilter, uiActions]);
+
   return (
     <EuiToolTip
       content={
@@ -51,20 +67,7 @@ const FilterButton: FC<{
     >
       <EuiButtonIcon
         size="xs"
-        onClick={() => {
-          const trigger = uiActions.getTrigger(SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER);
-          trigger.exec({
-            embeddable: api,
-            data: [
-              {
-                ...entity,
-                operation: isAddFilter
-                  ? ML_ENTITY_FIELD_OPERATIONS.ADD
-                  : ML_ENTITY_FIELD_OPERATIONS.REMOVE,
-              },
-            ],
-          });
-        }}
+        onClick={onClick}
         iconType={isAddFilter ? 'plusInCircle' : 'minusInCircle'}
         aria-label={
           isAddFilter
@@ -81,7 +84,7 @@ const FilterButton: FC<{
 };
 
 interface SingleMetricViewerTitleProps {
-  api: any;
+  api?: SingleMetricViewerEmbeddableApi;
   entityData: { entities: MlEntity[]; count: number };
   functionLabel: string;
 }
@@ -116,7 +119,7 @@ export const SingleMetricViewerTitle: FC<SingleMetricViewerTitleProps> = ({
         <EuiFlexGroup alignItems="center">
           {entityData.entities.map((entity, i) => {
             return (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} key={`${entity.fieldName}.${entity.fieldValue}`}>
                 <EuiFlexGroup gutterSize="none" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiTextColor color={'success'} component={'span'}>
