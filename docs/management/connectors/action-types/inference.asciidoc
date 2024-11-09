@@ -8,7 +8,7 @@
 :frontmatter-tags-content-type: [how-to] 
 :frontmatter-tags-user-goals: [configure]
 
-preview::[]
+coming::[]
 
 The {infer} connector uses the {es} client to send requests to an {infer} service.
 The connector uses the <<execute-connector-api,run connector API>> to send the request.
