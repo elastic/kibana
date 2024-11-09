@@ -498,6 +498,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
   }, [esqlSuppressionFields, mlSuppressionFields, ruleType, termsAggregationFields]);
 
+  const alertSuppressionFieldsAppendText = useMemo(
+    () => (
+      <EuiText color="subdued" size="xs">
+        {isSuppressionRuleInGA(ruleType)
+          ? i18n.ALERT_SUPPRESSION_FIELDS_GA_LABEL_APPEND
+          : i18n.ALERT_SUPPRESSION_FIELDS_TECH_PREVIEW_LABEL_APPEND}
+      </EuiText>
+    ),
+    [ruleType]
+  );
+
   const dataViewIndexPatternToggleButtonOptions: EuiButtonGroupOptionProps[] = useMemo(
     () => [
       {
@@ -938,13 +949,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             ) : (
               <AlertSuppressionEdit
                 suppressibleFields={suppressionGroupByFields}
-                labelAppend={
-                  <EuiText color="subdued" size="xs">
-                    {isSuppressionRuleInGA(ruleType)
-                      ? i18n.ALERT_SUPPRESSION_FIELDS_GA_LABEL_APPEND
-                      : i18n.ALERT_SUPPRESSION_FIELDS_TECH_PREVIEW_LABEL_APPEND}
-                  </EuiText>
-                }
+                labelAppend={alertSuppressionFieldsAppendText}
                 warningText={
                   isMlSuppressionIncomplete
                     ? i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL
