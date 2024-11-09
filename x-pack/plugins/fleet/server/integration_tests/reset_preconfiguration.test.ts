@@ -258,7 +258,7 @@ describe('Fleet preconfiguration reset', () => {
       );
       await resetAPI
         .set('kbn-sxrf', 'xx')
-        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .set('Elastic-Api-Version', `${API_VERSIONS.public.v1}`)
         .expect(200)
         .send();
 
@@ -303,7 +303,7 @@ describe('Fleet preconfiguration reset', () => {
       );
       await resetAPI
         .set('kbn-sxrf', 'xx')
-        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .set('Elastic-Api-Version', `${API_VERSIONS.public.v1}`)
         .expect(200)
         .send();
 
@@ -341,7 +341,7 @@ describe('Fleet preconfiguration reset', () => {
       );
       await resetAPI
         .set('kbn-sxrf', 'xx')
-        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .set('Elastic-Api-Version', `${API_VERSIONS.public.v1}`)
         .expect(200)
         .send();
 
@@ -378,7 +378,7 @@ describe('Fleet preconfiguration reset', () => {
       );
       await resetAPI
         .set('kbn-sxrf', 'xx')
-        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .set('Elastic-Api-Version', `${API_VERSIONS.public.v1}`)
         .expect(200)
         .send();
 
