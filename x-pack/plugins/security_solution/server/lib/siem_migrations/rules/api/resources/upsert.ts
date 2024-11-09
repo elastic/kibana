@@ -48,7 +48,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             ...resource,
           }));
 
-          await ruleMigrationsClient.data.resources.createOrUpdate(ruleMigrations);
+          await ruleMigrationsClient.data.resources.createOrUpdate(migrationId, ruleMigrations);
 
           return res.ok({ body: { acknowledged: true } });
         } catch (err) {

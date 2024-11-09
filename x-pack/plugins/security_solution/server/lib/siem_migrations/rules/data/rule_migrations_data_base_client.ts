@@ -9,10 +9,11 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import assert from 'assert';
 import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Stored } from '../types';
+import type { IndexNameProvider } from './rule_migrations_data_client';
 
 export class RuleMigrationsDataBaseClient {
   constructor(
-    protected indexNamePromise: Promise<string>,
+    protected getIndexName: IndexNameProvider,
     protected username: string,
     protected esClient: ElasticsearchClient,
     protected logger: Logger

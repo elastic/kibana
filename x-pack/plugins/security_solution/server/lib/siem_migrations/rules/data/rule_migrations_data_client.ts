@@ -12,29 +12,33 @@ import type {
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
 import { RuleMigrationsDataResourcesClient } from './rule_migrations_data_resources_client';
+import type { AdapterId } from './rule_migrations_data_service';
 
 export type CreateRuleMigrationInput = Omit<RuleMigration, '@timestamp' | 'status' | 'created_by'>;
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
 export type RuleMigrationAllDataStats = Array<RuleMigrationDataStats & { migration_id: string }>;
+
+export type IndexNameProvider = (migrationId: string) => Promise<string>;
+export type IndexNameProviders = Record<AdapterId, IndexNameProvider>;
 
 export class RuleMigrationsDataClient {
   public readonly rules: RuleMigrationsDataRulesClient;
   public readonly resources: RuleMigrationsDataResourcesClient;
 
   constructor(
-    indexNamePromises: Record<'rules' | 'resources', Promise<string>>,
+    indexNameProviders: IndexNameProviders,
     username: string,
     esClient: ElasticsearchClient,
     logger: Logger
   ) {
     this.rules = new RuleMigrationsDataRulesClient(
-      indexNamePromises.rules,
+      indexNameProviders.rules,
       username,
       esClient,
       logger
     );
     this.resources = new RuleMigrationsDataResourcesClient(
-      indexNamePromises.resources,
+      indexNameProviders.resources,
       username,
       esClient,
       logger

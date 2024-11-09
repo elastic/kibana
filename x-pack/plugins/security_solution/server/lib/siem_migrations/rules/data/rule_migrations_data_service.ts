@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { FieldMap } from '@kbn/data-stream-adapter';
-import { DataStreamSpacesAdapter, type InstallParams } from '@kbn/data-stream-adapter';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import { IndexPatternAdapter, type FieldMap, type InstallParams } from '@kbn/index-adapter';
 import {
   ruleMigrationsFieldMap,
   ruleMigrationResourcesFieldMap,
@@ -15,7 +13,9 @@ import {
 import { RuleMigrationsDataClient } from './rule_migrations_data_client';
 
 const TOTAL_FIELDS_LIMIT = 2500;
-const DATA_STREAM_PREFIX = '.kibana-siem-rule-migrations';
+const INDEX_PATTERN = '.kibana-siem-rule-migrations';
+
+export type AdapterId = 'rules' | 'resources';
 
 interface CreateClientParams {
   spaceId: string;
@@ -24,51 +24,56 @@ interface CreateClientParams {
 }
 
 export class RuleMigrationsDataService {
-  private readonly rulesDataStream: DataStreamSpacesAdapter;
-  private readonly resourcesDataStream: DataStreamSpacesAdapter;
+  private readonly adapters: Record<AdapterId, IndexPatternAdapter>;
 
   constructor(private logger: Logger, private kibanaVersion: string) {
-    this.rulesDataStream = this.createDataStream({
-      name: `${DATA_STREAM_PREFIX}.rules`,
-      fieldMap: ruleMigrationsFieldMap,
-    });
-    this.resourcesDataStream = this.createDataStream({
-      name: `${DATA_STREAM_PREFIX}.resources`,
-      fieldMap: ruleMigrationResourcesFieldMap,
-    });
+    this.adapters = {
+      rules: this.createAdapter({ id: 'rules', fieldMap: ruleMigrationsFieldMap }),
+      resources: this.createAdapter({ id: 'resources', fieldMap: ruleMigrationResourcesFieldMap }),
+    };
   }
 
-  private createDataStream({ name, fieldMap }: { name: string; fieldMap: FieldMap }) {
-    const dataStream = new DataStreamSpacesAdapter(name, {
+  private createAdapter({ id, fieldMap }: { id: AdapterId; fieldMap: FieldMap }) {
+    const name = `${INDEX_PATTERN}-${id}`;
+    const adapter = new IndexPatternAdapter(name, {
       kibanaVersion: this.kibanaVersion,
       totalFieldsLimit: TOTAL_FIELDS_LIMIT,
     });
-    dataStream.setComponentTemplate({ name, fieldMap });
-    dataStream.setIndexTemplate({ name, componentTemplateRefs: [name] });
-    return dataStream;
+    adapter.setComponentTemplate({ name, fieldMap });
+    adapter.setIndexTemplate({ name, componentTemplateRefs: [name] });
+    return adapter;
   }
 
   public install(params: Omit<InstallParams, 'logger'>) {
     Promise.all([
-      this.rulesDataStream.install({ ...params, logger: this.logger }),
-      this.resourcesDataStream.install({ ...params, logger: this.logger }),
+      this.adapters.rules.install({ ...params, logger: this.logger }),
+      this.adapters.resources.install({ ...params, logger: this.logger }),
     ]).catch((err) => {
-      this.logger.error(`Error installing siem rule migrations data streams. ${err.message}`, err);
+      this.logger.error(`Error installing siem rule migrations index. ${err.message}`, err);
     });
   }
 
   public createClient({ spaceId, currentUser, esClient }: CreateClientParams) {
-    // installSpace: creates the data stream for the specific space. it will only install if it hasn't been installed yet.
-    // The adapter stores the data stream name promise, it will return it directly when the data stream is known to be installed.
-    const indexNamePromises = {
-      rules: this.rulesDataStream.installSpace(spaceId),
-      resources: this.resourcesDataStream.installSpace(spaceId),
+    const indexNameProviders = {
+      rules: this.createIndexNameProvider('rules', spaceId),
+      resources: this.createIndexNameProvider('resources', spaceId),
     };
+
     return new RuleMigrationsDataClient(
-      indexNamePromises,
+      indexNameProviders,
       currentUser.username,
       esClient,
       this.logger
     );
+  }
+
+  private createIndexNameProvider(adapter: AdapterId, spaceId: string) {
+    return async (migrationId: string) => {
+      const suffix = `${migrationId}-${spaceId}`;
+      if (suffix.includes('*')) {
+        return this.adapters[adapter].getIndexName(suffix);
+      }
+      return this.adapters[adapter].createIndex(suffix);
+    };
   }
 }

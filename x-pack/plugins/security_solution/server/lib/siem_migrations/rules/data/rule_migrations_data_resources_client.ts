@@ -18,8 +18,11 @@ const BULK_MAX_SIZE = 500 as const;
 
 export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseClient {
   /** Creates or updates an array of resources granularly */
-  public async createOrUpdate(resources: RuleMigrationResource[]): Promise<void> {
-    const index = await this.indexNamePromise;
+  public async createOrUpdate(
+    migrationId: string,
+    resources: RuleMigrationResource[]
+  ): Promise<void> {
+    const index = await this.getIndexName(migrationId);
 
     let resourcesSlice: RuleMigrationResource[];
     while ((resourcesSlice = resources.splice(0, BULK_MAX_SIZE)).length > 0) {
@@ -74,7 +77,7 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
     type?: RuleMigrationResourceType,
     names?: string[]
   ): Promise<StoredRuleMigrationResource[]> {
-    const index = await this.indexNamePromise;
+    const index = await this.getIndexName(migrationId);
 
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
     if (type) {
