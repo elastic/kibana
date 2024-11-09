@@ -49,7 +49,7 @@ exports[`Table should render normally 1`] = `
       Object {
         "dataType": "string",
         "description": "Filter name",
-        "field": "clientId",
+        "field": "value",
         "name": "Filter",
         "render": [Function],
         "sortable": true,
