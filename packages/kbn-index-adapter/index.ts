@@ -8,7 +8,7 @@
  */
 
 export { IndexAdapter } from './src/index_adapter';
-export { IndexPatternAdapter } from './src/index_pattern_adapter';
+export { IndexPatternAdapter, type InstallIndex } from './src/index_pattern_adapter';
 export { retryTransientEsErrors } from './src/retry_transient_es_errors';
 export { ecsFieldMap, type EcsFieldMap } from './src/field_maps/ecs_field_map';
 export { createOrUpdateIndexTemplate } from './src/create_or_update_index_template';

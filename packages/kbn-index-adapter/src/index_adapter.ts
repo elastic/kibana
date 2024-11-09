@@ -9,37 +9,27 @@
 
 import type {
   ClusterPutComponentTemplateRequest,
-  IndicesIndexSettings,
-  IndicesPutIndexTemplateIndexTemplateMapping,
   IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { Subject } from 'rxjs';
-import type { FieldMap } from './field_maps/types';
 import { createOrUpdateComponentTemplate } from './create_or_update_component_template';
 import { createOrUpdateIndex } from './create_or_update_index';
 import { createOrUpdateIndexTemplate } from './create_or_update_index_template';
 import { InstallShutdownError, installWithTimeout } from './install_with_timeout';
-import { getComponentTemplate, getIndexTemplate } from './resource_installer_utils';
+import {
+  getComponentTemplate,
+  getIndexTemplate,
+  type GetComponentTemplateOpts,
+  type GetIndexTemplateOpts,
+} from './resource_installer_utils';
 
 export interface IndexAdapterParams {
   kibanaVersion: string;
   totalFieldsLimit?: number;
 }
-export interface SetComponentTemplateParams {
-  name: string;
-  fieldMap: FieldMap;
-  settings?: IndicesIndexSettings;
-  dynamic?: 'strict' | boolean;
-}
-export interface SetIndexTemplateParams {
-  name: string;
-  componentTemplateRefs?: string[];
-  namespace?: string;
-  template?: IndicesPutIndexTemplateIndexTemplateMapping;
-  hidden?: boolean;
-}
-
+export type SetComponentTemplateParams = GetComponentTemplateOpts;
+export type SetIndexTemplateParams = GetIndexTemplateOpts;
 export interface GetInstallFnParams {
   logger: Logger;
   pluginStop$: Subject<void>;

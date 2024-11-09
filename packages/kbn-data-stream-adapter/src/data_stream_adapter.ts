@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IndexAdapter, type InstallParams } from '@kbn/index-adapter';
+import { IndexAdapter, SetIndexTemplateParams, type InstallParams } from '@kbn/index-adapter';
 import { createOrUpdateDataStream } from './create_or_update_data_stream';
 
 export class DataStreamAdapter extends IndexAdapter {
+  public setIndexTemplate(params: SetIndexTemplateParams) {
+    super.setIndexTemplate({ ...params, isDataStream: true });
+  }
+
   public async install(params: InstallParams) {
     this.installed = true;
     const { logger, pluginStop$, tasksTimeoutMs } = params;

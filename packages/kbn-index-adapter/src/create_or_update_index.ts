@@ -175,10 +175,9 @@ export async function createIndex({ logger, esClient, name }: CreateIndexParams)
   // check if index exists
   let indexExists = false;
   try {
-    indexExists = await retryTransientEsErrors(
-      () => esClient.indices.exists({ index: name, expand_wildcards: 'all' }),
-      { logger }
-    );
+    indexExists = await retryTransientEsErrors(() => esClient.indices.exists({ index: name }), {
+      logger,
+    });
   } catch (error) {
     if (error?.statusCode !== 404) {
       logger.error(`Error fetching index for ${name} - ${error.message}`);
@@ -215,19 +214,19 @@ export async function updateIndices({
   name,
   totalFieldsLimit,
 }: CreateOrUpdateSpacesIndexParams): Promise<void> {
-  logger.info(`Updating data streams - ${name}`);
+  logger.info(`Updating indices - ${name}`);
 
   // check if data stream exists
   let indices: IndexName[] = [];
   try {
     const response = await retryTransientEsErrors(
-      () => esClient.indices.get({ index: `${name}*`, expand_wildcards: 'all' }),
+      () => esClient.indices.get({ index: name, expand_wildcards: 'all' }),
       { logger }
     );
     indices = Object.keys(response);
   } catch (error) {
     if (error?.statusCode !== 404) {
-      logger.error(`Error fetching data stream for ${name} - ${error.message}`);
+      logger.error(`Error fetching indices for ${name} - ${error.message}`);
       throw error;
     }
   }
