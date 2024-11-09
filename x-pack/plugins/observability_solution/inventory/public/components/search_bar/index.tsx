@@ -11,7 +11,6 @@ import React, { useCallback, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Query } from '@kbn/es-query';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
-import { useAdHocInventoryDataView } from '../../hooks/use_adhoc_inventory_data_view';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntityTypesControls } from './entity_types_controls';
@@ -19,7 +18,7 @@ import { DiscoverButton } from './discover_button';
 import { getKqlFieldsWithFallback } from '../../utils/get_kql_field_names_with_fallback';
 
 export function SearchBar() {
-  const { searchBarContentSubject$, refreshSubject$ } = useInventorySearchBarContext();
+  const { refreshSubject$, searchBarContentSubject$, dataView } = useInventorySearchBarContext();
   const {
     services: {
       unifiedSearch,
@@ -35,8 +34,6 @@ export function SearchBar() {
   } = useInventoryParams('/*');
 
   const { SearchBar: UnifiedSearchBar } = unifiedSearch.ui;
-
-  const { dataView } = useAdHocInventoryDataView();
 
   const syncSearchBarWithUrl = useCallback(() => {
     const query = kuery ? { query: kuery, language: 'kuery' } : undefined;
@@ -107,7 +104,7 @@ export function SearchBar() {
         refreshSubject$.next();
       }
     },
-    [entityTypes, registerSearchSubmittedEvent, searchBarContentSubject$, refreshSubject$]
+    [searchBarContentSubject$, entityTypes, registerSearchSubmittedEvent, refreshSubject$]
   );
 
   return (
