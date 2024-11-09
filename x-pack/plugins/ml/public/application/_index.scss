@@ -5,7 +5,6 @@
 // SASSTODO: Prefix ml selectors instead
 .ml-app {
   // Sub applications
-  @import 'data_frame_analytics/index';
   @import 'explorer/index'; // SASSTODO: This file needs to be rewritten
 
   // Components

@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 
 import { type EuiBasicTableColumn, useEuiTheme } from '@elastic/eui';
 import { EuiSpacer, EuiInMemoryTable, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,6 +22,12 @@ import { blurButtonOnClick } from '../../util/component_utils';
 
 import { JobIcon } from '../job_message_icon';
 import { useEnabledFeatures } from '../../contexts/ml';
+
+const cssOverride = css({
+  '.euiTable': {
+    backgroundColor: 'transparent',
+  },
+});
 
 interface JobMessagesProps {
   messages: JobMessage[];
@@ -144,6 +151,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
     <>
       <EuiSpacer size="s" />
       <EuiInMemoryTable
+        css={cssOverride}
         items={messages}
         columns={columns}
         sorting={defaultSorting}

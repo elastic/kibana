@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import './expanded_row_messages_pane.scss';
-
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMlApi } from '../../../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../../../common';
@@ -23,6 +22,10 @@ interface Props {
 
 export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId, dataTestSubj }) => {
   const mlApi = useMlApi();
+  const {
+    euiTheme: { size },
+  } = useEuiTheme();
+
   const [messages, setMessages] = useState<JobMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -63,7 +66,7 @@ export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId, dataTestSubj }
   useRefreshAnalyticsList({ onRefresh: getMessages });
 
   return (
-    <div className="mlExpandedRowJobMessages" data-test-subj={dataTestSubj}>
+    <div data-test-subj={dataTestSubj} css={{ padding: `0 ${size.s} ${size.s} ${size.s}` }}>
       <JobMessages
         messages={messages}
         loading={isLoading}
