@@ -57,10 +57,10 @@ export function KnowledgeBaseTab() {
             data-test-subj="pluginsColumnsButton"
             onClick={() => setSelectedCategory(category)}
             aria-label={
-              category.categoryName === selectedCategory?.categoryName ? 'Collapse' : 'Expand'
+              category.categoryKey === selectedCategory?.categoryKey ? 'Collapse' : 'Expand'
             }
             iconType={
-              category.categoryName === selectedCategory?.categoryName ? 'minimize' : 'expand'
+              category.categoryKey === selectedCategory?.categoryKey ? 'minimize' : 'expand'
             }
           />
         );
@@ -85,7 +85,8 @@ export function KnowledgeBaseTab() {
       width: '40px',
     },
     {
-      field: 'categoryName',
+      'data-test-subj': 'knowledgeBaseTableTitleCell',
+      field: 'title',
       name: i18n.translate('xpack.observabilityAiAssistantManagement.kbTab.columns.name', {
         defaultMessage: 'Name',
       }),
@@ -107,6 +108,7 @@ export function KnowledgeBaseTab() {
       },
     },
     {
+      'data-test-subj': 'knowledgeBaseTableAuthorCell',
       name: i18n.translate('xpack.observabilityAiAssistantManagement.kbTab.columns.author', {
         defaultMessage: 'Author',
       }),
@@ -183,7 +185,7 @@ export function KnowledgeBaseTab() {
   const [isNewEntryPopoverOpen, setIsNewEntryPopoverOpen] = useState(false);
   const [isEditUserInstructionFlyoutOpen, setIsEditUserInstructionFlyoutOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'doc_id' | '@timestamp'>('doc_id');
+  const [sortBy, setSortBy] = useState<keyof KnowledgeBaseEntryCategory>('title');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const {
@@ -193,17 +195,10 @@ export function KnowledgeBaseTab() {
   } = useGetKnowledgeBaseEntries({ query, sortBy, sortDirection });
   const categorizedEntries = categorizeEntries({ entries });
 
-  const handleChangeSort = ({
-    sort,
-  }: Criteria<KnowledgeBaseEntryCategory & KnowledgeBaseEntry>) => {
+  const handleChangeSort = ({ sort }: Criteria<KnowledgeBaseEntryCategory>) => {
     if (sort) {
       const { field, direction } = sort;
-      if (field === '@timestamp') {
-        setSortBy(field);
-      }
-      if (field === 'categoryName') {
-        setSortBy('doc_id');
-      }
+      setSortBy(field);
       setSortDirection(direction);
     }
   };
@@ -329,7 +324,7 @@ export function KnowledgeBaseTab() {
             loading={isLoading}
             sorting={{
               sort: {
-                field: sortBy === 'doc_id' ? 'categoryName' : sortBy,
+                field: sortBy,
                 direction: sortDirection,
               },
             }}

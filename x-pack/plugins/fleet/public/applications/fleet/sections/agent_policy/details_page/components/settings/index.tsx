@@ -150,8 +150,8 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
       if (isFleetEnabled) {
         setIsLoading(true);
         const { data } = await sendGetAgentStatus({ policyId: agentPolicy.id });
-        if (data?.results.total) {
-          setAgentCount(data.results.total);
+        if (data?.results.active) {
+          setAgentCount(data.results.active);
         } else {
           await submitUpdateAgentPolicy();
         }

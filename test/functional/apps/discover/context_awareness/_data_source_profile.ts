@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
+  const retry = getService('retry');
 
   describe('data source profile', () => {
     describe('ES|QL mode', () => {
@@ -98,6 +99,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Record #0');
         });
       });
+
+      describe('custom context', () => {
+        it('should render formatted record in doc viewer using formatter from custom context', async () => {
+          const state = kbnRison.encode({
+            dataSource: { type: 'esql' },
+            query: { esql: 'from my-example-logs | sort @timestamp desc' },
+          });
+          await common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
+          });
+          await discover.waitUntilSearchingHasFinished();
+          await dataGrid.clickRowToggle({ rowIndex: 0, defaultTabId: 'doc_view_example' });
+          await retry.try(async () => {
+            const formattedRecord = await testSubjects.find(
+              'exampleDataSourceProfileDocViewRecord'
+            );
+            expect(await formattedRecord.getVisibleText()).to.be(
+              JSON.stringify(
+                {
+                  '@timestamp': '2024-06-10T16:00:00.000Z',
+                  'agent.name': 'java',
+                  'agent.name.text': 'java',
+                  'data_stream.type': 'logs',
+                  'log.level': 'debug',
+                  message: 'This is a debug log',
+                  'service.name': 'product',
+                  'service.name.text': 'product',
+                },
+                null,
+                2
+              )
+            );
+          });
+        });
+      });
     });
 
     describe('data view mode', () => {
@@ -164,6 +200,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be(
             'Record #my-example-logs::XdQFDpABfGznVC1bCHLo::'
           );
+        });
+      });
+
+      describe('custom context', () => {
+        it('should render formatted record in doc viewer using formatter from custom context', async () => {
+          await common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
+          await dataViews.switchTo('my-example-logs');
+          await discover.waitUntilSearchingHasFinished();
+          await dataGrid.clickRowToggle({ rowIndex: 0, defaultTabId: 'doc_view_example' });
+          await retry.try(async () => {
+            const formattedRecord = await testSubjects.find(
+              'exampleDataSourceProfileDocViewRecord'
+            );
+            expect(await formattedRecord.getVisibleText()).to.be(
+              JSON.stringify(
+                {
+                  '@timestamp': ['2024-06-10T16:00:00.000Z'],
+                  'agent.name': ['java'],
+                  'agent.name.text': ['java'],
+                  'data_stream.type': ['logs'],
+                  'log.level': ['debug'],
+                  message: ['This is a debug log'],
+                  'service.name': ['product'],
+                  'service.name.text': ['product'],
+                  _id: 'XdQFDpABfGznVC1bCHLo',
+                  _index: 'my-example-logs',
+                  _score: null,
+                },
+                null,
+                2
+              )
+            );
+          });
         });
       });
     });

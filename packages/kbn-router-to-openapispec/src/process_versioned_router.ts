@@ -90,12 +90,13 @@ export const processVersionedRouter = (
           ...queryObjects,
         ];
       }
-
-      let description = '';
+      let description = `${route.options.description ?? ''}`;
       if (route.options.security) {
         const authzDescription = extractAuthzDescription(route.options.security);
 
-        description = `${route.options.description ?? ''}${authzDescription ?? ''}`;
+        description += `${route.options.description && authzDescription ? '<br/><br/>' : ''}${
+          authzDescription ?? ''
+        }`;
       }
 
       const hasBody = Boolean(extractValidationSchemaFromVersionedHandler(handler)?.request?.body);
@@ -107,7 +108,6 @@ export const processVersionedRouter = (
         summary: route.options.summary ?? '',
         tags: route.options.options?.tags ? extractTags(route.options.options.tags) : [],
         ...(description ? { description } : {}),
-        ...(route.options.description ? { description: route.options.description } : {}),
         ...(hasDeprecations ? { deprecated: true } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
         requestBody: hasBody

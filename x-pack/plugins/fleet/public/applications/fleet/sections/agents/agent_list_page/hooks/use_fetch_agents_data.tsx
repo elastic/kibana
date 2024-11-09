@@ -52,6 +52,7 @@ function useFullAgentPolicyFetcher() {
       if (policiesToFetchIds.length) {
         const bulkGetAgentPoliciesResponse = await sendBulkGetAgentPolicies(policiesToFetchIds, {
           full: authz.fleet.readAgentPolicies,
+          ignoreMissing: true,
         });
 
         if (bulkGetAgentPoliciesResponse.error) {

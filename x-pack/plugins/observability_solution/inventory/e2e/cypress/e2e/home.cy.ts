@@ -121,6 +121,35 @@ describe('Home page', () => {
         cy.url().should('include', '/app/metrics/detail/host/server1');
       });
 
+      it('Navigates to discover with default filter', () => {
+        cy.intercept('GET', '/internal/entities/managed/enablement', {
+          fixture: 'eem_enabled.json',
+        }).as('getEEMStatus');
+        cy.visitKibana('/app/inventory');
+        cy.wait('@getEEMStatus');
+        cy.contains('Open in discover').click();
+        cy.url().should(
+          'include',
+          "query:(language:kuery,query:'entity.definition_id%20:%20builtin*"
+        );
+      });
+
+      it('Navigates to discover with kuery filter', () => {
+        cy.intercept('GET', '/internal/entities/managed/enablement', {
+          fixture: 'eem_enabled.json',
+        }).as('getEEMStatus');
+        cy.visitKibana('/app/inventory');
+        cy.wait('@getEEMStatus');
+        cy.getByTestSubj('queryInput').type('service.name : foo');
+
+        cy.contains('Update').click();
+        cy.contains('Open in discover').click();
+        cy.url().should(
+          'include',
+          "query:'service.name%20:%20foo%20AND%20entity.definition_id%20:%20builtin*'"
+        );
+      });
+
       it('Navigates to infra when clicking on a container type entity', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
@@ -199,6 +228,22 @@ describe('Home page', () => {
         cy.contains('foo');
         cy.getByTestSubj('inventoryGroup_entity.type_host').should('not.exist');
         cy.getByTestSubj('inventoryGroup_entity.type_service').should('not.exist');
+      });
+
+      it('Navigates to discover with actions button in the entities list', () => {
+        cy.intercept('GET', '/internal/entities/managed/enablement', {
+          fixture: 'eem_enabled.json',
+        }).as('getEEMStatus');
+        cy.visitKibana('/app/inventory');
+        cy.wait('@getEEMStatus');
+        cy.contains('container');
+        cy.getByTestSubj('inventoryGroupTitle_entity.type_container').click();
+        cy.getByTestSubj('inventoryEntityActionsButton-foo').click();
+        cy.getByTestSubj('inventoryEntityActionOpenInDiscover').click();
+        cy.url().should(
+          'include',
+          "query:'container.id:%20foo%20AND%20entity.definition_id%20:%20builtin*"
+        );
       });
     });
   });

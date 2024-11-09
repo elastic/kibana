@@ -20,10 +20,13 @@ import useAsync from 'react-use/lib/useAsync';
 import React, { useCallback, useMemo } from 'react';
 import { IndexEntry } from '@kbn/elastic-assistant-common';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { HttpSetup } from '@kbn/core-http-browser';
 import * as i18n from './translations';
 import { isGlobalEntry } from './helpers';
+import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
 
 interface Props {
+  http: HttpSetup;
   dataViews: DataViewsContract;
   entry?: IndexEntry;
   originalEntry?: IndexEntry;
@@ -32,7 +35,7 @@ interface Props {
 }
 
 export const IndexEntryEditor: React.FC<Props> = React.memo(
-  ({ dataViews, entry, setEntry, hasManageGlobalKnowledgeBase, originalEntry }) => {
+  ({ http, dataViews, entry, setEntry, hasManageGlobalKnowledgeBase, originalEntry }) => {
     const privateUsers = useMemo(() => {
       const originalUsers = originalEntry?.users;
       if (originalEntry && !isGlobalEntry(originalEntry)) {
@@ -93,18 +96,16 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
       entry?.users?.length === 0 ? sharingOptions[1].value : sharingOptions[0].value;
 
     // Index
-    const indexOptions = useAsync(async () => {
-      const indices = await dataViews.getIndices({
-        pattern: '*',
-        isRollupIndex: () => false,
-      });
-
-      return indices.map((index) => ({
-        'data-test-subj': index.name,
-        label: index.name,
-        value: index.name,
+    const { data: kbIndices } = useKnowledgeBaseIndices({
+      http,
+    });
+    const indexOptions = useMemo(() => {
+      return kbIndices?.indices.map((index) => ({
+        'data-test-subj': index,
+        label: index,
+        value: index,
       }));
-    }, [dataViews]);
+    }, [kbIndices?.indices]);
 
     const { value: isMissingIndex } = useAsync(async () => {
       if (!entry?.index?.length) return false;
@@ -272,6 +273,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
           fullWidth
           isInvalid={isMissingIndex}
           error={isMissingIndex && <>{i18n.MISSING_INDEX_ERROR}</>}
+          helpText={i18n.ENTRY_INDEX_NAME_INPUT_DESCRIPTION}
         >
           <EuiComboBox
             data-test-subj="index-combobox"
@@ -281,7 +283,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
             singleSelection={{ asPlainText: true }}
             onCreateOption={onCreateIndexOption}
             fullWidth
-            options={indexOptions.value ?? []}
+            options={indexOptions ?? []}
             selectedOptions={
               entry?.index
                 ? [

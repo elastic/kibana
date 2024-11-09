@@ -625,9 +625,6 @@
           "id": "kibTelemetryCollectionManagerPluginApi"
         },
         {
-          "id": "kibTelemetryCollectionXpackPluginApi"
-        },
-        {
           "id": "kibTelemetryManagementSectionPluginApi"
         },
         {
