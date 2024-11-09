@@ -14,4 +14,7 @@
     "@kbn/safer-lodash-set",
     "@kbn/logging-mocks",
   ],
+  "exclude": [
+    "target/**/*"
+  ],
 }
