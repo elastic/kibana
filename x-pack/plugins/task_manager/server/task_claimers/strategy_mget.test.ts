@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { filter, take } from 'rxjs';
 
 import { CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from '../config';
+import { NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL } from './strategy_mget';
 
 import {
   TaskStatus,
@@ -2259,6 +2260,129 @@ describe('TaskClaiming', () => {
           },
         }
       `);
+    });
+
+    test(`it should log warning on interval when the node has no assigned partitions`, async () => {
+      // Reset the warning timer by advancing more
+      fakeTimer.tick(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL);
+
+      jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
+      const taskManagerId = uuidv4();
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          createTaskRunner: jest.fn(),
+        },
+        bar: {
+          title: 'bar',
+          createTaskRunner: jest.fn(),
+        },
+      });
+      await testClaimAvailableTasks({
+        storeOpts: {
+          taskManagerId,
+          definitions,
+        },
+        taskClaimingOpts: {},
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+        },
+      });
+
+      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+        'Background task node "test" has no assigned partitions, claiming against all partitions',
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
+
+      taskManagerLogger.warn.mockReset();
+      fakeTimer.tick(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL - 500);
+
+      await testClaimAvailableTasks({
+        storeOpts: {
+          taskManagerId,
+          definitions,
+        },
+        taskClaimingOpts: {},
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+        },
+      });
+
+      expect(taskManagerLogger.warn).not.toHaveBeenCalled();
+
+      fakeTimer.tick(500);
+
+      await testClaimAvailableTasks({
+        storeOpts: {
+          taskManagerId,
+          definitions,
+        },
+        taskClaimingOpts: {},
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+        },
+      });
+
+      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+        'Background task node "test" has no assigned partitions, claiming against all partitions',
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
+    });
+
+    test(`it should log a message after the node no longer has no assigned partitions`, async () => {
+      // Reset the warning timer by advancing more
+      fakeTimer.tick(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL);
+
+      jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
+      const taskManagerId = uuidv4();
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          createTaskRunner: jest.fn(),
+        },
+        bar: {
+          title: 'bar',
+          createTaskRunner: jest.fn(),
+        },
+      });
+      await testClaimAvailableTasks({
+        storeOpts: {
+          taskManagerId,
+          definitions,
+        },
+        taskClaimingOpts: {},
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+        },
+      });
+
+      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+        'Background task node "test" has no assigned partitions, claiming against all partitions',
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
+
+      taskManagerLogger.warn.mockReset();
+      jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([1, 2, 3]);
+      fakeTimer.tick(500);
+
+      await testClaimAvailableTasks({
+        storeOpts: {
+          taskManagerId,
+          definitions,
+        },
+        taskClaimingOpts: {},
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+        },
+      });
+
+      expect(taskManagerLogger.warn).not.toHaveBeenCalled();
+      expect(taskManagerLogger.info).toHaveBeenCalledWith(
+        `Background task node "${taskPartitioner.getPodName()}" now claiming with assigned partitions`,
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
     });
   });
 
