@@ -8,9 +8,9 @@ Manage single index. Example:
 
 ```
 // Setup
-const index = new IndexAdapter('my-awesome-index', { kibanaVersion: '8.12.1' });
+const indexAdapter = new IndexAdapter('my-awesome-index', { kibanaVersion: '8.12.1' });
 
-index.setComponentTemplate({
+indexAdapter.setComponentTemplate({
     name: 'awesome-component-template',
     fieldMap: {
         'awesome.field1: { type: 'keyword', required: true },
@@ -19,30 +19,25 @@ index.setComponentTemplate({
     },
 });
 
-index.setIndexTemplate({
+indexAdapter.setIndexTemplate({
     name: 'awesome-index-template',
     componentTemplateRefs: ['awesome-component-template', 'ecs-component-template'],
-    template: {
-        lifecycle: {
-            data_retention: '5d',
-        },
-    },
 });
 
 // Start
-await index.install({ logger, esClient, pluginStop$ }); // Installs templates and the index, or updates existing.
+await indexAdapter.install({ logger, esClient, pluginStop$ }); // Installs templates and the 'my-awesome-index' index, or updates existing.
 ```
 
 
-## IndexSpacesAdapter
+## IndexPatternAdapter
 
-Manage index per space. Example:
+Manage index patterns. Example:
 
 ```
 // Setup
-const spacesIndex = new IndexSpacesAdapter('my-awesome-index', { kibanaVersion: '8.12.1' });
+const indexPatternAdapter = new IndexPatternAdapter('my-awesome-index', { kibanaVersion: '8.12.1' });
 
-spacesIndex.setComponentTemplate({
+indexPatternAdapter.setComponentTemplate({
     name: 'awesome-component-template',
     fieldMap: {
         'awesome.field1: { type: 'keyword', required: true },
@@ -51,19 +46,14 @@ spacesIndex.setComponentTemplate({
     },
 });
 
-spacesIndex.setIndexTemplate({
+indexPatternAdapter.setIndexTemplate({
     name: 'awesome-index-template',
     componentTemplateRefs: ['awesome-component-template', 'ecs-component-template'],
-    template: {
-        lifecycle: {
-            data_retention: '5d',
-        },
-    },
 });
 
 // Start
-await spacesIndex.install({ logger, esClient, pluginStop$ }); // Installs templates and updates existing index.
+indexPatternAdapter.install({ logger, esClient, pluginStop$ }); // Installs/updates templates for the index pattern 'my-awesome-index-*', and updates mappings of all specific indices
 
-// Create a space index on the fly
-await spacesIndex.installSpace('space2'); // creates 'my-awesome-index-space2' index if it does not exist.
+// Create a specific index on the fly
+await indexPatternAdapter.installIndex('12345'); // creates 'my-awesome-index-12345' index if it does not exist.
 ```

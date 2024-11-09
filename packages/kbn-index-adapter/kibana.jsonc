@@ -1,5 +1,6 @@
 {
-  "type": "shared-common",
+  "type": "shared-server",
   "id": "@kbn/index-adapter",
-  "owner": "@elastic/security-threat-hunting"
+  "owner": "@elastic/security-threat-hunting",
+  "visibility": "shared"
 }
