@@ -168,6 +168,8 @@ export async function createDataStream({
   esClient,
   name,
 }: CreateDataStreamParams): Promise<void> {
+  logger.info(`Creating data stream - ${name}`);
+
   // check if data stream exists
   let dataStreamExists = false;
   try {
@@ -188,7 +190,6 @@ export async function createDataStream({
     return;
   }
 
-  logger.info(`Creating data stream - ${name}`);
   try {
     await retryTransientEsErrors(() => esClient.indices.createDataStream({ name }), { logger });
   } catch (error) {

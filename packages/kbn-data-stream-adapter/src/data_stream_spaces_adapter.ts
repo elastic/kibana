@@ -16,25 +16,24 @@ import {
   type InstallParams,
 } from './data_stream_adapter';
 
-type InstallSpace = (spaceId: string) => Promise<string>;
-
 export class DataStreamSpacesAdapter extends DataStreamAdapter {
   private installedSpaceDataStreamName: Map<string, Promise<string>>;
-  private installSpacePromise?: Promise<InstallSpace>;
+  private _installSpace?: (spaceId: string) => Promise<string>;
 
   constructor(private readonly prefix: string, options: DataStreamAdapterParams) {
     super(`${prefix}-*`, options); // make indexTemplate `indexPatterns` match all data stream space names
     this.installedSpaceDataStreamName = new Map();
   }
 
-  public async install(params: InstallParams): Promise<void> {
-    this.installSpacePromise = this._install(params);
-    await this.installSpacePromise;
-  }
+  public async install({
+    logger,
+    esClient: esClientToResolve,
+    pluginStop$,
+    tasksTimeoutMs,
+  }: InstallParams) {
+    this.installed = true;
 
-  private async _install(params: InstallParams): Promise<InstallSpace> {
-    const { logger, pluginStop$, tasksTimeoutMs } = params;
-    const esClient = await params.esClient;
+    const esClient = await esClientToResolve;
     const installFn = this.getInstallFn({ logger, pluginStop$, tasksTimeoutMs });
 
     // Install component templates in parallel
@@ -56,11 +55,7 @@ export class DataStreamSpacesAdapter extends DataStreamAdapter {
     await Promise.all(
       this.indexTemplates.map((indexTemplate) =>
         installFn(
-          createOrUpdateIndexTemplate({
-            template: indexTemplate,
-            esClient,
-            logger,
-          }),
+          createOrUpdateIndexTemplate({ template: indexTemplate, esClient, logger }),
           `create or update ${indexTemplate.name} index template`
         )
       )
@@ -78,29 +73,27 @@ export class DataStreamSpacesAdapter extends DataStreamAdapter {
     );
 
     // define function to install data stream for spaces on demand
-    const installSpace = async (spaceId: string) => {
+    this._installSpace = async (spaceId: string) => {
       const existingInstallPromise = this.installedSpaceDataStreamName.get(spaceId);
       if (existingInstallPromise) {
         return existingInstallPromise;
       }
       const name = `${this.prefix}-${spaceId}`;
-      const namePromise = installFn(
+      const installPromise = installFn(
         createDataStream({ name, esClient, logger }),
         `create ${name} data stream`
       ).then(() => name);
-      this.installedSpaceDataStreamName.set(spaceId, namePromise);
-      return namePromise;
+
+      this.installedSpaceDataStreamName.set(spaceId, installPromise);
+      return installPromise;
     };
-    return installSpace;
   }
 
   public async installSpace(spaceId: string): Promise<string> {
-    if (!this.installSpacePromise) {
+    if (!this._installSpace) {
       throw new Error('Cannot installSpace before install');
     }
-    // Await for installSpacePromise to ensure installation is complete, since install call may not be awaited from the plugin
-    const installSpace = await this.installSpacePromise;
-    return installSpace(spaceId);
+    return this._installSpace(spaceId);
   }
 
   public async getInstalledSpaceName(spaceId: string): Promise<string | undefined> {
