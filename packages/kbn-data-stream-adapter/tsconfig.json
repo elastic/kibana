@@ -10,5 +10,9 @@
   "include": ["**/*.ts"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/index-adapter",
+  ],
+  "exclude": [
+    "target/**/*"
   ],
 }
