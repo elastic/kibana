@@ -11,4 +11,4 @@ export const ALL_HOSTS_TAB = '[data-test-subj="navigation-allHosts"]';
 
 export const HOSTS_NAMES = '[data-test-subj="cellActions-renderContent-host.name"] a.euiLink';
 
-export const UNIQUE_IPS_VISUALIZATIONS = '[data-test-subj="stat-uniqueIps"]';
+export const UNIQUE_IPS_VISUALIZATIONS = '[data-test-subj="uniqueIps"]';
