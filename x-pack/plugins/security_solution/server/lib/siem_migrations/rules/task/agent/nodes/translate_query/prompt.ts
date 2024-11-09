@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import type { RuleMigrationResources } from '../../../util/rule_resource_retriever';
 import type { MigrateRuleState } from '../../types';
 
 export const getEsqlTranslationPrompt = (
-  state: MigrateRuleState
-): string => `You are a helpful cybersecurity (SIEM) expert agent. Your task is to migrate "detection rules" from Splunk to Elastic Security.
-Below you will find Splunk rule information: the title, description and the SPL (Search Processing Language) query.
+  state: MigrateRuleState,
+  resources: RuleMigrationResources
+): string => {
+  const resourcesPrompt = getResourcesPrompt(resources);
+  return `You are a helpful cybersecurity (SIEM) expert agent. Your task is to migrate "detection rules" from Splunk to Elastic Security.
+Below you will find Splunk rule information: the title, description and the SPL (Search Processing Language) query. Along with related resources, such as lookup lists and macros.
 Your goal is to translate the SPL query into an equivalent Elastic Security Query Language (ES|QL) query.
 
 Guidelines:
@@ -36,4 +40,22 @@ ${state.original_rule.description}
 <<SPLUNK_RULE_QUERY_SLP>>
 ${state.original_rule.query}
 <</SPLUNK_RULE_QUERY_SLP>>
+
+${resourcesPrompt}
 `;
+};
+
+const getResourcesPrompt = (resources: RuleMigrationResources): string => {
+  const resourcesList = Object.entries(resources).map(([type, values]) => {
+    const summaries = values.map((value) => `* ${value.name}: ${value.content}`).join('\n');
+    return `${type}s:\n${summaries}`;
+  });
+
+  if (resourcesList.length === 0) {
+    return '';
+  }
+
+  return `<<RESOURCES>>
+${resourcesList.join('\n')}
+<</RESOURCES>>`;
+};

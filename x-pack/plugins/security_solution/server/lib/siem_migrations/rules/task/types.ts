@@ -31,6 +31,7 @@ export interface RuleMigrationTaskStartParams {
 }
 
 export interface RuleMigrationTaskPrepareParams {
+  migrationId: string;
   connectorId: string;
   inferenceClient: InferenceClient;
   actionsClient: ActionsClient;

@@ -8,6 +8,7 @@
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { AbortError, abortSignalToPromise } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
+import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import type {
   RuleMigrationAllTaskStats,
   RuleMigrationTaskStats,
@@ -28,6 +29,7 @@ import { getRuleMigrationAgent } from './agent';
 import type { MigrateRuleState } from './agent/types';
 import { retrievePrebuiltRulesMap } from './util/prebuilt_rules';
 import { ActionsClientChat } from './util/actions_client_chat';
+import { RuleResourceRetriever } from './util/rule_resource_retriever';
 
 const ITERATION_BATCH_SIZE = 50 as const;
 const ITERATION_SLEEP_SECONDS = 10 as const;
@@ -48,8 +50,13 @@ export class RuleMigrationsTaskClient {
     if (this.migrationsRunning.has(migrationId)) {
       return { exists: true, started: false };
     }
-    // Just in case some previous execution was interrupted without releasing
-    await this.data.rules.releaseProcessable(migrationId);
+    // Just in case some previous execution was interrupted without cleaning up
+    await this.data.rules.updateStatus(
+      migrationId,
+      SiemMigrationStatus.PROCESSING,
+      SiemMigrationStatus.PENDING,
+      { refresh: true }
+    );
 
     const { rules } = await this.data.rules.getStats(migrationId);
     if (rules.total === 0) {
@@ -74,6 +81,7 @@ export class RuleMigrationsTaskClient {
   }
 
   private async prepare({
+    migrationId,
     connectorId,
     inferenceClient,
     actionsClient,
@@ -82,6 +90,7 @@ export class RuleMigrationsTaskClient {
     abortController,
   }: RuleMigrationTaskPrepareParams): Promise<MigrationAgent> {
     const prebuiltRulesMap = await retrievePrebuiltRulesMap({ soClient, rulesClient });
+    const resourceRetriever = new RuleResourceRetriever(migrationId, this.data);
 
     const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
     const model = await actionsClientChat.createModel({
@@ -94,6 +103,7 @@ export class RuleMigrationsTaskClient {
       model,
       inferenceClient,
       prebuiltRulesMap,
+      resourceRetriever,
       logger: this.logger,
     });
     return agent;
@@ -141,7 +151,7 @@ export class RuleMigrationsTaskClient {
             try {
               const start = Date.now();
 
-              const ruleMigrationResult: MigrateRuleState = await Promise.race([
+              const migrationResult: MigrateRuleState = await Promise.race([
                 agent.invoke({ original_rule: ruleMigration.original_rule }, config),
                 abortPromise.promise, // workaround for the issue with the langGraph signal
               ]);
@@ -153,9 +163,9 @@ export class RuleMigrationsTaskClient {
 
               await this.data.rules.saveCompleted({
                 ...ruleMigration,
-                elastic_rule: ruleMigrationResult.elastic_rule,
-                translation_result: ruleMigrationResult.translation_result,
-                comments: ruleMigrationResult.comments,
+                elastic_rule: migrationResult.elastic_rule,
+                translation_result: migrationResult.translation_result,
+                comments: migrationResult.comments,
               });
             } catch (error) {
               if (error instanceof AbortError) {
@@ -196,6 +206,18 @@ export class RuleMigrationsTaskClient {
       this.migrationsRunning.delete(migrationId);
       abortPromise.cleanup();
     }
+  }
+
+  /** Updates all the rules in a migration to be re-executed */
+  public async updateToRetry(migrationId: string): Promise<{ updated: boolean }> {
+    if (this.migrationsRunning.has(migrationId)) {
+      return { updated: false };
+    }
+    // Update all the rules in the migration to pending
+    await this.data.rules.updateStatus(migrationId, undefined, SiemMigrationStatus.PENDING, {
+      refresh: true,
+    });
+    return { updated: true };
   }
 
   /** Returns the stats of a migration */

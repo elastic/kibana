@@ -17,6 +17,12 @@
 import { z } from '@kbn/zod';
 
 /**
+ * The original rule vendor identifier.
+ */
+export type OriginalRuleVendor = z.infer<typeof OriginalRuleVendor>;
+export const OriginalRuleVendor = z.literal('splunk');
+
+/**
  * The original rule to migrate.
  */
 export type OriginalRule = z.infer<typeof OriginalRule>;
@@ -25,10 +31,7 @@ export const OriginalRule = z.object({
    * The original rule id.
    */
   id: z.string(),
-  /**
-   * The original rule vendor identifier.
-   */
-  vendor: z.literal('splunk'),
+  vendor: OriginalRuleVendor,
   /**
    * The original rule name.
    */
@@ -180,14 +183,19 @@ export const RuleMigrationAllTaskStats = z.array(
 );
 
 /**
+ * The type of the rule migration resource.
+ */
+export type RuleMigrationResourceType = z.infer<typeof RuleMigrationResourceType>;
+export const RuleMigrationResourceType = z.enum(['macro', 'list']);
+export type RuleMigrationResourceTypeEnum = typeof RuleMigrationResourceType.enum;
+export const RuleMigrationResourceTypeEnum = RuleMigrationResourceType.enum;
+
+/**
  * The rule migration resource data provided by the vendor.
  */
 export type RuleMigrationResourceData = z.infer<typeof RuleMigrationResourceData>;
 export const RuleMigrationResourceData = z.object({
-  /**
-   * The type of the resource.
-   */
-  type: z.enum(['macro', 'list']),
+  type: RuleMigrationResourceType,
   /**
    * The resource name identifier.
    */

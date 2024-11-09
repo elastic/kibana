@@ -64,6 +64,11 @@ export class RuleMigrationsDataService {
       rules: this.rulesDataStream.installSpace(spaceId),
       resources: this.resourcesDataStream.installSpace(spaceId),
     };
-    return new RuleMigrationsDataClient(indexNamePromises, currentUser, esClient, this.logger);
+    return new RuleMigrationsDataClient(
+      indexNamePromises,
+      currentUser.username,
+      esClient,
+      this.logger
+    );
   }
 }

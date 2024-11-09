@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import assert from 'assert';
 import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Stored } from '../types';
@@ -13,13 +13,16 @@ import type { Stored } from '../types';
 export class RuleMigrationsDataBaseClient {
   constructor(
     protected indexNamePromise: Promise<string>,
-    protected currentUser: AuthenticatedUser,
+    protected username: string,
     protected esClient: ElasticsearchClient,
     protected logger: Logger
   ) {}
 
-  protected processResponse<T extends object>(response: SearchResponse<T>): Array<Stored<T>> {
-    return this.processHits(response.hits.hits);
+  protected processResponseHits<T extends object>(
+    response: SearchResponse<T>,
+    override?: Partial<T>
+  ): Array<Stored<T>> {
+    return this.processHits(response.hits.hits, override);
   }
 
   protected processHits<T extends object>(

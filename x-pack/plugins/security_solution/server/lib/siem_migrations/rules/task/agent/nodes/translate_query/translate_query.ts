@@ -11,22 +11,27 @@ import type { GraphNode } from '../../types';
 import { getEsqlKnowledgeBase } from './esql_knowledge_base_caller';
 import { getEsqlTranslationPrompt } from './prompt';
 import { SiemMigrationRuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import type { RuleResourceRetriever } from '../../../util/rule_resource_retriever';
 
 interface GetTranslateQueryNodeParams {
   inferenceClient: InferenceClient;
+  resourceRetriever: RuleResourceRetriever;
   connectorId: string;
   logger: Logger;
 }
 
 export const getTranslateQueryNode = ({
+  resourceRetriever,
   inferenceClient,
   connectorId,
   logger,
 }: GetTranslateQueryNodeParams): GraphNode => {
   const esqlKnowledgeBaseCaller = getEsqlKnowledgeBase({ inferenceClient, connectorId, logger });
   return async (state) => {
-    const input = getEsqlTranslationPrompt(state);
-    const response = await esqlKnowledgeBaseCaller(input);
+    const resources = await resourceRetriever.getResources(state.original_rule);
+    const prompt = getEsqlTranslationPrompt(state, resources);
+    logger.info(prompt);
+    const response = await esqlKnowledgeBaseCaller(prompt);
 
     const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
     const summary = response.match(/## Migration Summary[\s\S]*$/)?.[0] ?? '';

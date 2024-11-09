@@ -6,6 +6,13 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
+
+    OriginalRuleVendor:
+      type: string
+      description: The original rule vendor identifier.
+      enum:
+        - splunk
+
     OriginalRule:
       type: object
       description: The original rule to migrate.
@@ -21,10 +28,7 @@ components:
           type: string
           description: The original rule id.
         vendor:
-          type: string
-          description: The original rule vendor identifier.
-          enum:
-            - splunk
+          $ref: '#/components/schemas/OriginalRuleVendor'
         title:
           type: string
           description: The original rule name.
@@ -182,6 +186,13 @@ components:
                 description: The migration id
 
 ## Rule migration resources
+    
+    RuleMigrationResourceType:
+      type: string
+      description: The type of the rule migration resource.
+      enum:
+        - macro
+        - list
 
     RuleMigrationResourceData:
       type: object
@@ -192,11 +203,7 @@ components:
         - content
       properties:
         type:
-          type: string
-          description: The type of the resource.
-          enum:
-            - macro
-            - list
+          $ref: '#/components/schemas/RuleMigrationResourceType'
         name:
           type: string
           description: The resource name identifier.

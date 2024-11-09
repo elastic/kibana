@@ -24,13 +24,15 @@ export type CreateRuleMigrationInput = Omit<RuleMigration, '@timestamp' | 'statu
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
 export type RuleMigrationAllDataStats = Array<RuleMigrationDataStats & { migration_id: string }>;
 
+const BULK_MAX_SIZE = 500 as const;
+
 export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient {
   /** Indexes an array of rule migrations to be processed */
   async create(ruleMigrations: CreateRuleMigrationInput[]): Promise<void> {
     const index = await this.indexNamePromise;
 
     let ruleMigrationsSlice: CreateRuleMigrationInput[];
-    while ((ruleMigrationsSlice = ruleMigrations.splice(0, 500)).length) {
+    while ((ruleMigrationsSlice = ruleMigrations.splice(0, BULK_MAX_SIZE)).length) {
       await this.esClient
         .bulk({
           refresh: 'wait_for',
@@ -40,7 +42,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
               ...ruleMigration,
               '@timestamp': new Date().toISOString(),
               status: SiemMigrationStatus.PENDING,
-              created_by: this.currentUser.username,
+              created_by: this.username,
             },
           ]),
         })
@@ -58,9 +60,9 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
 
     const storedRuleMigrations = await this.esClient
       .search<RuleMigration>({ index, query, sort: '_doc' })
-      .then((response) => this.processResponse(response))
+      .then(this.processResponseHits.bind(this))
       .catch((error) => {
-        this.logger.error(`Error searching getting rule migrations: ${error.message}`);
+        this.logger.error(`Error searching rule migrations: ${error.message}`);
         throw error;
       });
     return storedRuleMigrations;
@@ -79,10 +81,10 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const storedRuleMigrations = await this.esClient
       .search<RuleMigration>({ index, query, sort: '_doc', size })
       .then((response) =>
-        this.processHits(response.hits.hits, { status: SiemMigrationStatus.PROCESSING })
+        this.processResponseHits(response, { status: SiemMigrationStatus.PROCESSING })
       )
       .catch((error) => {
-        this.logger.error(`Error searching for rule migrations: ${error.message}`);
+        this.logger.error(`Error searching rule migrations: ${error.message}`);
         throw error;
       });
 
@@ -92,11 +94,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
         operations: storedRuleMigrations.flatMap(({ _id, _index, status }) => [
           { update: { _id, _index } },
           {
-            doc: {
-              status,
-              updated_by: this.currentUser.username,
-              updated_at: new Date().toISOString(),
-            },
+            doc: { status, updated_by: this.username, updated_at: new Date().toISOString() },
           },
         ]),
       })
@@ -115,7 +113,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const doc = {
       ...ruleMigration,
       status: SiemMigrationStatus.COMPLETED,
-      updated_by: this.currentUser.username,
+      updated_by: this.username,
       updated_at: new Date().toISOString(),
     };
     await this.esClient
@@ -131,38 +129,52 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const doc = {
       ...ruleMigration,
       status: SiemMigrationStatus.FAILED,
-      updated_by: this.currentUser.username,
+      updated_by: this.username,
       updated_at: new Date().toISOString(),
     };
     await this.esClient
       .update({ index: _index, id: _id, doc, refresh: 'wait_for' })
       .catch((error) => {
-        this.logger.error(`Error updating rule migration status to completed: ${error.message}`);
+        this.logger.error(`Error updating rule migration status to failed: ${error.message}`);
         throw error;
       });
   }
 
   /** Updates all the rule migration with the provided id with status `processing` back to `pending` */
   async releaseProcessing(migrationId: string): Promise<void> {
-    const index = await this.indexNamePromise;
-    const query = this.getFilterQuery(migrationId, SiemMigrationStatus.PROCESSING);
-    const script = { source: `ctx._source['status'] = '${SiemMigrationStatus.PENDING}'` };
-    await this.esClient.updateByQuery({ index, query, script, refresh: false }).catch((error) => {
-      this.logger.error(`Error releasing rule migrations status to pending: ${error.message}`);
-      throw error;
-    });
+    return this.updateStatus(
+      migrationId,
+      SiemMigrationStatus.PROCESSING,
+      SiemMigrationStatus.PENDING
+    );
   }
 
-  /** Updates all the rule migration with the provided id with status `processing` or `failed` back to `pending` */
-  async releaseProcessable(migrationId: string): Promise<void> {
+  // /** Updates all the rule migration with the provided id with status `processing` or `failed` back to `pending` */
+  // async releaseProcessable(migrationId: string): Promise<void> {
+  //   const index = await this.indexNamePromise;
+  //   const query = this.getFilterQuery(migrationId, [
+  //     SiemMigrationStatus.PROCESSING,
+  //     SiemMigrationStatus.FAILED,
+  //   ]);
+  //   const script = { source: `ctx._source['status'] = '${SiemMigrationStatus.PENDING}'` };
+  //   await this.esClient.updateByQuery({ index, query, script, refresh: true }).catch((error) => {
+  //     this.logger.error(`Error releasing rule migrations status to pending: ${error.message}`);
+  //     throw error;
+  //   });
+  // }
+
+  /** Updates all the rule migration with the provided id and with status `statusToQuery` to `statusToUpdate` */
+  async updateStatus(
+    migrationId: string,
+    statusToQuery: SiemMigrationStatus | SiemMigrationStatus[] | undefined,
+    statusToUpdate: SiemMigrationStatus,
+    { refresh = false }: { refresh?: boolean } = {}
+  ): Promise<void> {
     const index = await this.indexNamePromise;
-    const query = this.getFilterQuery(migrationId, [
-      SiemMigrationStatus.PROCESSING,
-      SiemMigrationStatus.FAILED,
-    ]);
-    const script = { source: `ctx._source['status'] = '${SiemMigrationStatus.PENDING}'` };
-    await this.esClient.updateByQuery({ index, query, script, refresh: true }).catch((error) => {
-      this.logger.error(`Error releasing rule migrations status to pending: ${error.message}`);
+    const query = this.getFilterQuery(migrationId, statusToQuery);
+    const script = { source: `ctx._source['status'] = '${statusToUpdate}'` };
+    await this.esClient.updateByQuery({ index, query, script, refresh }).catch((error) => {
+      this.logger.error(`Error updating rule migrations status: ${error.message}`);
       throw error;
     });
   }

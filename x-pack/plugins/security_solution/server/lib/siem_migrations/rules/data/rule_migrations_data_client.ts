@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   RuleMigration,
   RuleMigrationTaskStats,
@@ -23,19 +23,19 @@ export class RuleMigrationsDataClient {
 
   constructor(
     indexNamePromises: Record<'rules' | 'resources', Promise<string>>,
-    currentUser: AuthenticatedUser,
+    username: string,
     esClient: ElasticsearchClient,
     logger: Logger
   ) {
     this.rules = new RuleMigrationsDataRulesClient(
       indexNamePromises.rules,
-      currentUser,
+      username,
       esClient,
       logger
     );
     this.resources = new RuleMigrationsDataResourcesClient(
       indexNamePromises.resources,
-      currentUser,
+      username,
       esClient,
       logger
     );

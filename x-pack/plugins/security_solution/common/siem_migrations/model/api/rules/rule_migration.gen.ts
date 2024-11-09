@@ -15,6 +15,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { ArrayFromString } from '@kbn/zod-helpers';
 
 import {
   OriginalRule,
@@ -22,6 +23,8 @@ import {
   RuleMigration,
   RuleMigrationTaskStats,
   RuleMigrationResourceData,
+  RuleMigrationResourceType,
+  RuleMigrationResource,
 } from '../../rule_migration.gen';
 import { ConnectorId, LangSmithOptions } from '../common.gen';
 
@@ -48,6 +51,29 @@ export type GetRuleMigrationRequestParamsInput = z.input<typeof GetRuleMigration
 
 export type GetRuleMigrationResponse = z.infer<typeof GetRuleMigrationResponse>;
 export const GetRuleMigrationResponse = z.array(RuleMigration);
+export type GetRuleMigrationResourcesRequestQuery = z.infer<
+  typeof GetRuleMigrationResourcesRequestQuery
+>;
+export const GetRuleMigrationResourcesRequestQuery = z.object({
+  type: RuleMigrationResourceType.optional(),
+  names: ArrayFromString(z.string()).optional(),
+});
+export type GetRuleMigrationResourcesRequestQueryInput = z.input<
+  typeof GetRuleMigrationResourcesRequestQuery
+>;
+
+export type GetRuleMigrationResourcesRequestParams = z.infer<
+  typeof GetRuleMigrationResourcesRequestParams
+>;
+export const GetRuleMigrationResourcesRequestParams = z.object({
+  migration_id: z.string(),
+});
+export type GetRuleMigrationResourcesRequestParamsInput = z.input<
+  typeof GetRuleMigrationResourcesRequestParams
+>;
+
+export type GetRuleMigrationResourcesResponse = z.infer<typeof GetRuleMigrationResourcesResponse>;
+export const GetRuleMigrationResourcesResponse = z.array(RuleMigrationResource);
 
 export type GetRuleMigrationStatsRequestParams = z.infer<typeof GetRuleMigrationStatsRequestParams>;
 export const GetRuleMigrationStatsRequestParams = z.object({

@@ -220,3 +220,41 @@ paths:
                   acknowledged:
                     type: boolean
                     description: The request has been processed correctly.
+
+    get:
+      summary: Gets rule migration resources for a migration
+      operationId: GetRuleMigrationResources
+      x-codegen-enabled: true
+      description: Retrieves resources for an existing SIEM rules migration
+      tags:
+        - SIEM Rule Migrations
+        - Resources
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            type: string
+            description: The migration id to attach the resources
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceType'
+        - name: names
+          in: query
+          required: false
+          schema:
+            type: array
+            description: The names of the resource to retrieve
+            items:
+              type: string
+      responses:
+        200:
+          description: Indicates migration have been created correctly.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResource'
