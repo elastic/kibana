@@ -42,8 +42,11 @@ export const ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS = `${ALERT_SUPPRESSION_MI
 
 export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS = `${ALERT_SUPPRESSION_MISSING_FIELDS_OPTIONS} #doNotSuppress`;
 
-export const ALERT_SUPPRESSION_DURATION_INPUT =
-  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="alertSuppressionDurationInput"]';
+export const ALERT_SUPPRESSION_DURATION_VALUE_INPUT =
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="interval"]';
+
+export const ALERT_SUPPRESSION_DURATION_UNIT_INPUT =
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="timeType"]';
 
 export const THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX =
   '[data-test-subj="thresholdAlertSuppressionEnabled"] input';

@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { screen, fireEvent, render, within, act, waitFor } from '@testing-library/react';
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase } from '@kbn/es-query';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import { StepDefineRule } from '.';
 import type { StepDefineRuleProps } from '.';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
@@ -26,6 +27,21 @@ import {
   getSelectToggleButtonForName,
 } from '../../../rule_creation/components/required_fields/required_fields.test';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
+import {
+  expectDuration,
+  expectSuppressionFields,
+  setDuration,
+  setDurationType,
+  setSuppressionFields,
+} from '../../../rule_creation/components/alert_suppression_edit/test_helpers';
+import {
+  selectEuiComboBoxOption,
+  selectFirstEuiComboBoxOption,
+} from '../../../../common/test/eui/combobox';
+import {
+  addRelatedIntegrationRow,
+  setVersion,
+} from '../../../rule_creation/components/related_integrations/test_helpers';
 
 // Mocks integrations
 jest.mock('../../../fleet_integrations/api');
@@ -50,6 +66,12 @@ jest.mock('../ai_assistant', () => {
 });
 
 jest.mock('../data_view_selector_field/use_data_view_list_items');
+
+jest.mock('../../../../common/hooks/use_license', () => ({
+  useLicense: jest.fn().mockReturnValue({
+    isAtLeast: jest.fn().mockReturnValue(true),
+  }),
+}));
 
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
@@ -168,6 +190,62 @@ describe('StepDefineRule', () => {
     });
 
     expect(screen.getByTestId('stepDefineRule')).toBeDefined();
+  });
+
+  describe('alert suppression', () => {
+    it('persists state when switching between custom query and threshold rule types', async () => {
+      const mockFields: FieldSpec[] = [
+        {
+          name: 'test-field',
+          type: 'string',
+          searchable: false,
+          aggregatable: true,
+        },
+      ];
+
+      const { rerender } = render(
+        <TestForm
+          indexPattern={{
+            title: '',
+            fields: mockFields,
+          }}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      await setSuppressionFields(['test-field']);
+      setDurationType('Per time period');
+      setDuration(10, 'h');
+
+      // switch to threshold rule type
+      rerender(
+        <TestForm
+          ruleType="threshold"
+          indexPattern={{
+            title: '',
+            fields: mockFields,
+          }}
+        />
+      );
+
+      expectDuration(10, 'h');
+
+      // switch back to custom query rule type
+      rerender(
+        <TestForm
+          ruleType="query"
+          indexPattern={{
+            title: '',
+            fields: mockFields,
+          }}
+        />
+      );
+
+      expectSuppressionFields(['test-field']);
+      expectDuration(10, 'h');
+    });
   });
 
   describe('related integrations', () => {
@@ -602,79 +680,4 @@ function submitForm(): Promise<void> {
   return act(async () => {
     fireEvent.click(screen.getByText('Submit'));
   });
-}
-
-function addRelatedIntegrationRow(): Promise<void> {
-  return act(async () => {
-    fireEvent.click(screen.getByText('Add integration'));
-  });
-}
-
-function setVersion({ input, value }: { input: HTMLInputElement; value: string }): Promise<void> {
-  return act(async () => {
-    fireEvent.input(input, {
-      target: { value },
-    });
-  });
-}
-
-function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
-  fireEvent.click(comboBoxToggleButton);
-
-  return waitFor(() => {
-    const listWithOptionsElement = document.querySelector('[role="listbox"]');
-    const emptyListElement = document.querySelector('.euiComboBoxOptionsList__empty');
-
-    expect(listWithOptionsElement || emptyListElement).toBeInTheDocument();
-  });
-}
-
-type SelectEuiComboBoxOptionParameters =
-  | {
-      comboBoxToggleButton: HTMLElement;
-      optionIndex: number;
-      optionText?: undefined;
-    }
-  | {
-      comboBoxToggleButton: HTMLElement;
-      optionText: string;
-      optionIndex?: undefined;
-    };
-
-function selectEuiComboBoxOption({
-  comboBoxToggleButton,
-  optionIndex,
-  optionText,
-}: SelectEuiComboBoxOptionParameters): Promise<void> {
-  return act(async () => {
-    await showEuiComboBoxOptions(comboBoxToggleButton);
-
-    const options = Array.from(
-      document.querySelectorAll('[data-test-subj*="comboBoxOptionsList"] [role="option"]')
-    );
-
-    if (typeof optionText === 'string') {
-      const optionToSelect = options.find((option) => option.textContent === optionText);
-
-      if (optionToSelect) {
-        fireEvent.click(optionToSelect);
-      } else {
-        throw new Error(
-          `Could not find option with text "${optionText}". Available options: ${options
-            .map((option) => option.textContent)
-            .join(', ')}`
-        );
-      }
-    } else {
-      fireEvent.click(options[optionIndex]);
-    }
-  });
-}
-
-function selectFirstEuiComboBoxOption({
-  comboBoxToggleButton,
-}: {
-  comboBoxToggleButton: HTMLElement;
-}): Promise<void> {
-  return selectEuiComboBoxOption({ comboBoxToggleButton, optionIndex: 0 });
 }

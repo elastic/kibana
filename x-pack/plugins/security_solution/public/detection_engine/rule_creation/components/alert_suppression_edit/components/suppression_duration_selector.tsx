@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { EuiFormRow, EuiRadioGroup, EuiToolTip } from '@elastic/eui';
+import React, { memo, useEffect } from 'react';
+import { EuiFormRow, EuiRadioGroup, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import type { FieldHook } from '../../../../../shared_imports';
 import { UseMultiFields } from '../../../../../shared_imports';
 import { AlertSuppressionDurationType } from '../../../../../detections/pages/detection_engine/rules/types';
@@ -73,7 +74,7 @@ interface SuppressionDurationSelectorFieldsProps {
   disabled?: boolean;
 }
 
-function SuppressionDurationSelectorFields({
+const SuppressionDurationSelectorFields = memo(function SuppressionDurationSelectorFields({
   suppressionDurationSelectorField,
   suppressionDurationValueField,
   suppressionDurationUnitField,
@@ -81,6 +82,7 @@ function SuppressionDurationSelectorFields({
   onlyPerTimePeriodReasonMessage,
   disabled,
 }: SuppressionDurationSelectorFieldsProps): JSX.Element {
+  const { euiTheme } = useEuiTheme();
   const { value: durationType, setValue: setDurationType } = suppressionDurationSelectorField;
 
   useEffect(() => {
@@ -90,47 +92,49 @@ function SuppressionDurationSelectorFields({
   }, [onlyPerTimePeriod, durationType, setDurationType]);
 
   return (
-    <EuiRadioGroup
-      disabled={disabled}
-      idSelected={suppressionDurationSelectorField.value}
-      options={[
-        {
-          id: AlertSuppressionDurationType.PerRuleExecution,
-          label: onlyPerTimePeriod ? (
-            <EuiToolTip content={onlyPerTimePeriodReasonMessage}>
-              <> {i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION}</>
-            </EuiToolTip>
-          ) : (
-            i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION
-          ),
-          disabled: onlyPerTimePeriod ? true : disabled,
-        },
-        {
-          id: AlertSuppressionDurationType.PerTimePeriod,
-          disabled,
-          label: (
-            <>
-              {i18n.ALERT_SUPPRESSION_DURATION_PER_TIME_PERIOD_OPTION}
-              <DurationInput
-                data-test-subj="alertSuppressionDurationInput"
-                durationValueField={suppressionDurationValueField}
-                durationUnitField={suppressionDurationUnitField}
-                // Suppression duration is also disabled suppression by rule execution is selected in radio button
-                isDisabled={
-                  disabled ||
-                  suppressionDurationSelectorField.value !==
-                    AlertSuppressionDurationType.PerTimePeriod
-                }
-                minimumValue={1}
-              />
-            </>
-          ),
-        },
-      ]}
-      onChange={(id) => {
-        suppressionDurationSelectorField.setValue(id);
-      }}
-      data-test-subj="alertSuppressionDurationOptions"
-    />
+    <>
+      <EuiRadioGroup
+        disabled={disabled}
+        idSelected={suppressionDurationSelectorField.value}
+        options={[
+          {
+            id: AlertSuppressionDurationType.PerRuleExecution,
+            label: onlyPerTimePeriod ? (
+              <EuiToolTip content={onlyPerTimePeriodReasonMessage}>
+                <> {i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION}</>
+              </EuiToolTip>
+            ) : (
+              i18n.ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION_OPTION
+            ),
+            disabled: onlyPerTimePeriod ? true : disabled,
+          },
+          {
+            id: AlertSuppressionDurationType.PerTimePeriod,
+            disabled,
+            label: i18n.ALERT_SUPPRESSION_DURATION_PER_TIME_PERIOD_OPTION,
+          },
+        ]}
+        onChange={(id) => {
+          suppressionDurationSelectorField.setValue(id);
+        }}
+        data-test-subj="alertSuppressionDurationOptions"
+      />
+      <div
+        className={css`
+          padding-left: ${euiTheme.size.l};
+        `}
+      >
+        <DurationInput
+          durationValueField={suppressionDurationValueField}
+          durationUnitField={suppressionDurationUnitField}
+          // Suppression duration is also disabled suppression by rule execution is selected in radio button
+          isDisabled={
+            disabled ||
+            suppressionDurationSelectorField.value !== AlertSuppressionDurationType.PerTimePeriod
+          }
+          minimumValue={1}
+        />
+      </div>
+    </>
   );
-}
+});

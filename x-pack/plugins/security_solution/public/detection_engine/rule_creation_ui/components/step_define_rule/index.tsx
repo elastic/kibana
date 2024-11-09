@@ -252,10 +252,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [form]
   );
 
-  const [aggFields, setAggregatableFields] = useState<FieldSpec[]>([]);
-
-  useEffect(() => {
-    const { fields } = indexPattern;
+  const termsAggregationFields: FieldSpec[] = useMemo(
     /**
      * Typecasting to FieldSpec because fields is
      * typed as DataViewFieldBase[] which does not have
@@ -265,12 +262,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
      * We will need to determine where these types are defined and
      * figure out where the discrepency is.
      */
-    setAggregatableFields(aggregatableFields(fields as FieldSpec[]));
-  }, [indexPattern]);
-
-  const termsAggregationFields: FieldSpec[] = useMemo(
-    () => getTermsAggregationFields(aggFields),
-    [aggFields]
+    () => getTermsAggregationFields(indexPattern.fields as FieldSpec[]),
+    [indexPattern.fields]
   );
 
   const [threatIndexPatternsLoading, { indexPatterns: threatIndexPatterns }] =
@@ -413,14 +406,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       thresholdCardinalityValue,
     }: Record<string, FieldHook>) => (
       <ThresholdInput
-        browserFields={aggFields}
+        browserFields={termsAggregationFields}
         thresholdField={thresholdField}
         thresholdValue={thresholdValue}
         thresholdCardinalityField={thresholdCardinalityField}
         thresholdCardinalityValue={thresholdCardinalityValue}
       />
     ),
-    [aggFields]
+    [termsAggregationFields]
   );
 
   const ThreatMatchInputChildren = useCallback(
@@ -962,7 +955,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             )}
           </RuleTypeEuiFormRow>
-
           {!isMlRule(ruleType) && (
             <>
               <RequiredFields
@@ -1011,7 +1003,3 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
   );
 };
 export const StepDefineRuleReadOnly = memo(StepDefineRuleReadOnlyComponent);
-
-function aggregatableFields<T extends { aggregatable: boolean }>(browserFields: T[]): T[] {
-  return browserFields.filter((field) => field.aggregatable === true);
-}
