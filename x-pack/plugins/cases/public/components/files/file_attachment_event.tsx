@@ -20,7 +20,7 @@ export const FileAttachmentEvent = ({ file }: { file: DownloadableFile }) => {
     <>
       {i18n.ADDED}
       <FileNameLink file={file} showPreview={showPreview} />
-      {isPreviewVisible && <FilePreview closePreview={closePreview} selectedFile={file} />}
+      {isPreviewVisible ? <FilePreview closePreview={closePreview} selectedFile={file} /> : null}
     </>
   );
 };

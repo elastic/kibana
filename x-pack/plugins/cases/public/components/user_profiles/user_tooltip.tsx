@@ -66,7 +66,7 @@ const UserFullRepresentationComponent: React.FC<UserFullRepresentationProps> = (
           <EuiFlexItem>
             <UserFullInformation userInfo={userInfo} />
           </EuiFlexItem>
-          {userInfo?.user && displayEmail(userInfo) && (
+          {userInfo?.user && displayEmail(userInfo) ? (
             <EuiFlexItem grow={false}>
               <EuiText
                 size="s"
@@ -76,7 +76,7 @@ const UserFullRepresentationComponent: React.FC<UserFullRepresentationProps> = (
                 {userInfo.user.email}
               </EuiText>
             </EuiFlexItem>
-          )}
+          ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

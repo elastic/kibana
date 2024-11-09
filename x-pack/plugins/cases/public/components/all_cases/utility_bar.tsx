@@ -168,7 +168,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
               </EuiFlexItem>
               <EuiFlexItem data-test-subj="case-table-utility-bar-actions" grow={false}>
                 <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
-                  {!isSelectorView && showBulkActions && (
+                  {!isSelectorView && showBulkActions ? (
                     <>
                       <EuiFlexItem data-test-subj="case-table-selected-case-count" grow={false}>
                         <EuiText size="xs" color="subdued">
@@ -202,7 +202,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
                         </EuiPopover>
                       </EuiFlexItem>
                     </>
-                  )}
+                  ) : null}
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       onClick={onRefresh}
@@ -244,7 +244,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
         </EuiFlexGroup>
         {modals}
         {flyouts}
-        {hasReachedMaxCases && !isMessageDismissed && !doNotShowAgain && (
+        {hasReachedMaxCases && !isMessageDismissed && !doNotShowAgain ? (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup>
@@ -259,7 +259,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
             </EuiFlexGroup>
             <EuiSpacer size="m" />
           </>
-        )}
+        ) : null}
       </>
     );
   }

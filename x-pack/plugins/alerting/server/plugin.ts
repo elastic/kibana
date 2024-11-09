@@ -11,7 +11,10 @@ import { BehaviorSubject, ReplaySubject, map, distinctUntilChanged } from 'rxjs'
 import { pick } from 'lodash';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import type {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '@kbn/data-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
@@ -49,7 +52,6 @@ import type {
 } from '@kbn/event-log-plugin/server';
 import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
-import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
@@ -65,7 +67,6 @@ import {
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import type { ILicenseState } from './lib/license_state';
 import { LicenseState } from './lib/license_state';
-import type { AlertingRequestHandlerContext, RuleAlertData } from './types';
 import { ALERTING_FEATURE_ID } from './types';
 import { defineRoutes } from './routes';
 import type {
@@ -76,6 +77,8 @@ import type {
   RuleTypeParams,
   RuleTypeState,
   RulesClientApi,
+  AlertingRequestHandlerContext,
+  RuleAlertData,
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
@@ -454,7 +457,7 @@ export class AlertingPlugin {
         ruleTypeRegistry.register(ruleType);
       },
       getSecurityHealth: async () => {
-        return await getSecurityHealth(
+        return getSecurityHealth(
           async () => (this.licenseState ? this.licenseState.getIsSecurityEnabled() : null),
           async () => plugins.encryptedSavedObjects.canEncrypt,
           async () => {
@@ -630,7 +633,7 @@ export class AlertingPlugin {
       const client = getRulesClientWithRequest(request);
       return (objects?: SavedObjectsBulkGetObject[]) =>
         objects
-          ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
+          ? Promise.all(objects.map(async (objectItem) => client.get({ id: objectItem.id })))
           : Promise.resolve([]);
     });
 
@@ -653,7 +656,7 @@ export class AlertingPlugin {
       getAlertingAuthorizationWithRequest,
       getRulesClientWithRequest,
       getFrameworkHealth: async () =>
-        await getHealth(core.savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
+        getHealth(core.savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
     };
   }
 
@@ -683,7 +686,7 @@ export class AlertingPlugin {
         },
         listTypes: ruleTypeRegistry!.list.bind(ruleTypeRegistry!),
         getFrameworkHealth: async () =>
-          await getHealth(savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
+          getHealth(savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
         areApiKeysEnabled: async () => {
           const [, { security }] = await core.getStartServices();
           return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;

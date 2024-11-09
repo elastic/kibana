@@ -52,7 +52,6 @@ interface FormTestComponentProps {
   children: React.ReactNode;
 }
 
-// eslint-disable-next-line react/display-name
 export const FormTestComponent: FC<PropsWithChildren<FormTestComponentProps>> = ({
   children,
   onSubmit,

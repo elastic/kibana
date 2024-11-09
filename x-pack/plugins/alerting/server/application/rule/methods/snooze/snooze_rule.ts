@@ -38,10 +38,10 @@ export async function snoozeRule(
     throw new RuleMutedError(snoozeDateValidationMsg);
   }
 
-  return await retryIfConflicts(
+  return retryIfConflicts(
     context.logger,
     `rulesClient.snooze('${id}', ${JSON.stringify(snoozeSchedule, null, 4)})`,
-    async () => await snoozeWithOCC(context, { id, snoozeSchedule })
+    async () => snoozeWithOCC(context, { id, snoozeSchedule })
   );
 }
 

@@ -13,9 +13,9 @@ import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
+  Logger,
 } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
@@ -161,14 +161,12 @@ const bulkEnableRulesWithOCC = async (
       type: 'rules',
     },
     async () =>
-      await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
-        {
-          filter,
-          type: RULE_SAVED_OBJECT_TYPE,
-          perPage: 100,
-          ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
-        }
-      )
+      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
+        filter,
+        type: RULE_SAVED_OBJECT_TYPE,
+        perPage: 100,
+        ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
+      })
   );
 
   const rulesFinderRules: Array<SavedObjectsFindResult<RawRule>> = [];

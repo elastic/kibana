@@ -27,10 +27,8 @@ export async function unsnoozeRule(
   context: RulesClientContext,
   { id, scheduleIds }: UnsnoozeParams
 ): Promise<void> {
-  return await retryIfConflicts(
-    context.logger,
-    `rulesClient.unsnooze('${id}')`,
-    async () => await unsnoozeWithOCC(context, { id, scheduleIds })
+  return retryIfConflicts(context.logger, `rulesClient.unsnooze('${id}')`, async () =>
+    unsnoozeWithOCC(context, { id, scheduleIds })
   );
 }
 

@@ -23,6 +23,7 @@ import {
   extractReferences,
   validateActions,
   addGeneratedActionValues,
+  createRuleSavedObject,
 } from '../../../../rules_client/lib';
 import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -37,7 +38,6 @@ import {
 import { ruleDomainSchema } from '../../schemas';
 import type { CreateRuleData } from './types';
 import { createRuleDataSchema } from './schemas';
-import { createRuleSavedObject } from '../../../../rules_client/lib';
 import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 

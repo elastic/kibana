@@ -151,13 +151,13 @@ const ServiceNowITSMFieldsPreviewComponent: React.FunctionComponent<
 
   return (
     <>
-      {showConnectorWarning && (
+      {showConnectorWarning ? (
         <EuiFlexGroup>
           <EuiFlexItem>
             <DeprecatedCallout />
           </EuiFlexItem>
         </EuiFlexGroup>
-      )}
+      ) : null}
       <EuiFlexGroup>
         <EuiFlexItem>
           <ConnectorCard

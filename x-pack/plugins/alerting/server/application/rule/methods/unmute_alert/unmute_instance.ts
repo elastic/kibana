@@ -28,10 +28,8 @@ export async function unmuteInstance(
     throw Boom.badRequest(`Failed to validate params: ${error.message}`);
   }
 
-  return await retryIfConflicts(
-    context.logger,
-    `rulesClient.unmuteInstance('${ruleId}')`,
-    async () => await unmuteInstanceWithOCC(context, params)
+  return retryIfConflicts(context.logger, `rulesClient.unmuteInstance('${ruleId}')`, async () =>
+    unmuteInstanceWithOCC(context, params)
   );
 }
 

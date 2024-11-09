@@ -61,10 +61,11 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
       <EuiFlexItem
         grow={true}
         css={
-          releasePhase &&
-          css`
-            overflow: hidden;
-          `
+          releasePhase
+            ? css`
+                overflow: hidden;
+              `
+            : null
         }
       >
         <EuiInlineEditTitle

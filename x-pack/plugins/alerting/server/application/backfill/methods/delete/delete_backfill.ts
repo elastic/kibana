@@ -17,10 +17,8 @@ import {
 } from '../../../../rules_client/common/audit_events';
 
 export async function deleteBackfill(context: RulesClientContext, id: string): Promise<{}> {
-  return await retryIfConflicts(
-    context.logger,
-    `rulesClient.deleteBackfill('${id}')`,
-    async () => await deleteWithOCC(context, { id })
+  return retryIfConflicts(context.logger, `rulesClient.deleteBackfill('${id}')`, async () =>
+    deleteWithOCC(context, { id })
   );
 }
 

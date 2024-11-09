@@ -28,11 +28,11 @@ import type {
   WithoutReservedActionGroups,
   DataStreamAdapter,
 } from '../types';
+
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import type { IIndexPatternString } from '../alerts_service/resource_installer_utils';
 import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
 import type { CreateAlertsClientParams } from '../alerts_service/alerts_service';
-import type { AlertRule, LogAlertsOpts, ProcessAlertsOpts, SearchResult } from './types';
 import type {
   IAlertsClient,
   InitializeExecutionOpts,
@@ -43,6 +43,10 @@ import type {
   GetSummarizedAlertsParams,
   GetMaintenanceWindowScopedQueryAlertsParams,
   ScopedQueryAggregationResult,
+  AlertRule,
+  LogAlertsOpts,
+  ProcessAlertsOpts,
+  SearchResult,
 } from './types';
 import {
   buildNewAlert,
@@ -326,7 +330,7 @@ export class AlertsClient<
     // Persist alerts first
     await this.persistAlertsHelper();
 
-    return await this.updatePersistedAlertsWithMaintenanceWindowIds();
+    return this.updatePersistedAlertsWithMaintenanceWindowIds();
   }
 
   public getAlertsToSerialize() {

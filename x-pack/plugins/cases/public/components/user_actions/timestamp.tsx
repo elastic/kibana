@@ -25,7 +25,7 @@ const UserActionTimestampComponent = ({ createdAt, updatedAt }: UserActionAvatar
         value={createdAt}
       />
     </LocalizedDateTooltip>
-    {updatedAt && (
+    {updatedAt ? (
       <EuiTextColor color="subdued">
         {/* be careful of the extra space at the beginning of the parenthesis */}
         {' ('}
@@ -38,7 +38,7 @@ const UserActionTimestampComponent = ({ createdAt, updatedAt }: UserActionAvatar
         </LocalizedDateTooltip>
         {')'}
       </EuiTextColor>
-    )}
+    ) : null}
   </>
 );
 UserActionTimestampComponent.displayName = 'UserActionTimestamp';

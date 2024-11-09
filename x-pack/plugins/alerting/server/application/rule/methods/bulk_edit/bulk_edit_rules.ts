@@ -20,7 +20,6 @@ import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_auth
 import type { Rule, RuleAction, RuleSystemAction } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { BulkActionSkipResult } from '../../../../../common/bulk_edit';
-import type { RuleTypeRegistry } from '../../../../types';
 import {
   validateRuleTypeParams,
   getRuleNotifyWhenType,
@@ -53,6 +52,7 @@ import {
   updateMeta,
   addGeneratedActionValues,
   createNewAPIKeySet,
+  migrateLegacyActions,
 } from '../../../../rules_client/lib';
 import type {
   BulkOperationError,
@@ -61,7 +61,6 @@ import type {
   NormalizedAlertActionWithGeneratedValues,
   NormalizedAlertAction,
 } from '../../../../rules_client/types';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
 import type {
   BulkEditFields,
   BulkEditOperation,
@@ -70,7 +69,7 @@ import type {
   ParamsModifier,
   ShouldIncrementRevision,
 } from './types';
-import type { RawRuleAction, RawRule, SanitizedRule } from '../../../../types';
+import type { RawRuleAction, RawRule, SanitizedRule, RuleTypeRegistry } from '../../../../types';
 import { ruleNotifyWhen } from '../../constants';
 import { actionRequestSchema, ruleDomainSchema, systemActionRequestSchema } from '../../schemas';
 import type { RuleParams, RuleDomain, RuleSnoozeSchedule } from '../../types';

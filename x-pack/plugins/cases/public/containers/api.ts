@@ -97,7 +97,7 @@ import { decodeCasesFindResponse } from '../api/decoders';
 
 export const getCase = async (
   caseId: string,
-  includeComments: boolean = true,
+  includeComments = true,
   signal: AbortSignal
 ): Promise<CaseUI> => {
   const response = await KibanaServices.get().http.fetch<Case>(getCaseDetailsUrl(caseId), {

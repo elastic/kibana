@@ -29,10 +29,8 @@ export async function enableRule(
   context: RulesClientContext,
   { id }: EnableRuleParams
 ): Promise<void> {
-  return await retryIfConflicts(
-    context.logger,
-    `rulesClient.enableRule('${id}')`,
-    async () => await enableWithOCC(context, { id })
+  return retryIfConflicts(context.logger, `rulesClient.enableRule('${id}')`, async () =>
+    enableWithOCC(context, { id })
   );
 }
 
@@ -160,37 +158,33 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
       },
     });
 
-    try {
-      // to mitigate AAD issues(actions property is not used for encrypting API key in partial SO update)
-      // we call create with overwrite=true
-      if (migratedActions.hasLegacyActions) {
-        await context.unsecuredSavedObjectsClient.create<RawRule>(
-          RULE_SAVED_OBJECT_TYPE,
-          {
-            ...updateAttributes,
-            actions: migratedActions.resultedActions,
-            throttle: undefined,
-            notifyWhen: undefined,
-          },
-          {
-            id,
-            overwrite: true,
-            version,
-            references: migratedActions.resultedReferences,
-          }
-        );
-      } else {
-        await context.unsecuredSavedObjectsClient.update(
-          RULE_SAVED_OBJECT_TYPE,
+    // to mitigate AAD issues(actions property is not used for encrypting API key in partial SO update)
+    // we call create with overwrite=true
+    if (migratedActions.hasLegacyActions) {
+      await context.unsecuredSavedObjectsClient.create<RawRule>(
+        RULE_SAVED_OBJECT_TYPE,
+        {
+          ...updateAttributes,
+          actions: migratedActions.resultedActions,
+          throttle: undefined,
+          notifyWhen: undefined,
+        },
+        {
           id,
-          updateAttributes,
-          {
-            version,
-          }
-        );
-      }
-    } catch (e) {
-      throw e;
+          overwrite: true,
+          version,
+          references: migratedActions.resultedReferences,
+        }
+      );
+    } else {
+      await context.unsecuredSavedObjectsClient.update(
+        RULE_SAVED_OBJECT_TYPE,
+        id,
+        updateAttributes,
+        {
+          version,
+        }
+      );
     }
   }
 

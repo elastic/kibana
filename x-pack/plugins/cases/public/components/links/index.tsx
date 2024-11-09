@@ -31,7 +31,7 @@ export const LinkButton: LinkButtonProps = ({ children, isEmpty, ...props }) =>
 LinkButton.displayName = 'LinkButton';
 
 // TODO: Fix this manually. Issue #123375
-// eslint-disable-next-line react/display-name
+
 export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
   <EuiLink {...props}>{children}</EuiLink>
 );
@@ -43,7 +43,7 @@ export interface CaseDetailsLinkProps {
 }
 
 // TODO: Fix this manually. Issue #123375
-// eslint-disable-next-line react/display-name
+
 const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkProps> = ({
   children,
   detailName,
@@ -81,7 +81,7 @@ export interface ConfigureCaseButtonProps {
 }
 
 // TODO: Fix this manually. Issue #123375
-// eslint-disable-next-line react/display-name
+
 const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
   label,
   msgTooltip,

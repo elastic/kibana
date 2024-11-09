@@ -45,7 +45,7 @@ const FilesBadge = ({
   euiTheme: EuiThemeComputed<{}>;
 }) => (
   <>
-    {!isLoading && fileStatsData && (
+    {!isLoading && fileStatsData ? (
       <EuiNotificationBadge
         css={css`
           margin-left: ${euiTheme.size.xs};
@@ -55,7 +55,7 @@ const FilesBadge = ({
       >
         {fileStatsData.total > 0 ? fileStatsData.total : 0}
       </EuiNotificationBadge>
-    )}
+    ) : null}
   </>
 );
 
@@ -82,7 +82,7 @@ const AlertsBadge = ({
     >
       {totalAlerts || 0}
     </EuiNotificationBadge>
-    {isExperimental && (
+    {isExperimental ? (
       <EuiBetaBadge
         label={EXPERIMENTAL_LABEL}
         size="s"
@@ -94,7 +94,7 @@ const AlertsBadge = ({
         `}
         data-test-subj="case-view-alerts-table-experimental-badge"
       />
-    )}
+    ) : null}
   </>
 );
 

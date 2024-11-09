@@ -294,8 +294,8 @@ describe('updateRuleApiKey()', () => {
     rulesClientParams.createAPIKey.mockImplementation(() => {
       throw new Error('no');
     });
-    await expect(
-      async () => await rulesClient.updateRuleApiKey({ id: '1' })
+    await expect(async () =>
+      rulesClient.updateRuleApiKey({ id: '1' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error updating API key for rule: could not create API key - no"`
     );
@@ -304,7 +304,7 @@ describe('updateRuleApiKey()', () => {
   test('throws an error if API params do not match the schema', async () => {
     await expect(
       // @ts-ignore: this is what we are testing
-      async () => await rulesClient.updateRuleApiKey({ id: 1 })
+      async () => rulesClient.updateRuleApiKey({ id: 1 })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error validating update api key parameters - [id]: expected value of type [string] but got [number]"`
     );

@@ -123,7 +123,7 @@ export class AlertingAuthorization {
                   // ignore features which are disabled in the user's space
                   !disabledFeatures.has(id) &&
                   // ignore features which don't grant privileges to alerting
-                  (alerting?.length ?? 0 > 0)
+                  Boolean(alerting?.length)
               )
               .map((feature) => feature.id)
           )

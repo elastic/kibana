@@ -21,10 +21,8 @@ export async function unmuteAll(
   context: RulesClientContext,
   { id }: UnmuteAllRuleParams
 ): Promise<void> {
-  return await retryIfConflicts(
-    context.logger,
-    `rulesClient.unmuteAll('${id}')`,
-    async () => await unmuteAllWithOCC(context, { id })
+  return retryIfConflicts(context.logger, `rulesClient.unmuteAll('${id}')`, async () =>
+    unmuteAllWithOCC(context, { id })
   );
 }
 

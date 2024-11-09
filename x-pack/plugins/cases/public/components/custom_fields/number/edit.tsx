@@ -93,7 +93,7 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
         path="value"
         config={formFieldConfig}
         component={NumericField}
-        helpText={populatedWithDefault && POPULATED_WITH_DEFAULT}
+        helpText={populatedWithDefault ? POPULATED_WITH_DEFAULT : null}
         componentProps={{
           euiFieldProps: {
             fullWidth: true,
@@ -167,12 +167,12 @@ const EditComponent: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
             <h4>{title}</h4>
           </EuiText>
         </EuiFlexItem>
-        {isLoading && (
+        {isLoading ? (
           <EuiLoadingSpinner
             data-test-subj={`case-number-custom-field-loading-${customFieldConfiguration.key}`}
           />
-        )}
-        {!isLoading && canUpdate && (
+        ) : null}
+        {!isLoading && canUpdate ? (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               data-test-subj={`case-number-custom-field-edit-button-${customFieldConfiguration.key}`}
@@ -181,7 +181,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
               onClick={onEdit}
             />
           </EuiFlexItem>
-        )}
+        ) : null}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
       <EuiFlexGroup
@@ -192,12 +192,12 @@ const EditComponent: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
         {!isCustomFieldValueDefined && !isEdit && (
           <p data-test-subj="no-number-custom-field-value">{NO_CUSTOM_FIELD_SET}</p>
         )}
-        {!isEdit && isCustomFieldValueDefined && (
+        {!isEdit && isCustomFieldValueDefined ? (
           <EuiFlexItem>
             <View customField={customField} />
           </EuiFlexItem>
-        )}
-        {isEdit && canUpdate && (
+        ) : null}
+        {isEdit && canUpdate ? (
           <EuiFlexGroup gutterSize="m" direction="column">
             <EuiFlexItem>
               <FormWrapperComponent
@@ -235,7 +235,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
+        ) : null}
       </EuiFlexGroup>
     </>
   );

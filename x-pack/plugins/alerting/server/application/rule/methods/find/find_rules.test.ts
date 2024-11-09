@@ -1038,7 +1038,7 @@ describe('find()', () => {
         }),
       });
 
-      await expect(async () => await rulesClient.find()).rejects.toThrow();
+      await expect(async () => rulesClient.find()).rejects.toThrow();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({

@@ -28,10 +28,8 @@ export async function muteInstance(
     throw Boom.badRequest(`Failed to validate params: ${error.message}`);
   }
 
-  return await retryIfConflicts(
-    context.logger,
-    `rulesClient.muteInstance('${ruleId}')`,
-    async () => await muteInstanceWithOCC(context, params)
+  return retryIfConflicts(context.logger, `rulesClient.muteInstance('${ruleId}')`, async () =>
+    muteInstanceWithOCC(context, params)
   );
 }
 

@@ -49,7 +49,7 @@ export async function retryIfConflicts<T>(
     // delay a bit before retrying
     logger.debug(`${name} conflict, retrying ...`);
     await waitBeforeNextRetry();
-    return await retryIfConflicts(logger, name, operation, retries - 1);
+    return retryIfConflicts(logger, name, operation, retries - 1);
   }
 }
 

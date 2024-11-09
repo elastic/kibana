@@ -36,6 +36,7 @@ import {
   siemRule2,
 } from '../../../../rules_client/tests/test_helpers';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
+
 import { migrateLegacyActionsMock } from '../../../../rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { ConnectorAdapter } from '../../../../connector_adapters/types';
@@ -1878,6 +1879,7 @@ describe('bulkEdit()', () => {
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
       expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(0);
 
+      // eslint-disable-next-line require-atomic-updates
       bulkEditOperationsSchema.validate = originalValidate;
     });
   });

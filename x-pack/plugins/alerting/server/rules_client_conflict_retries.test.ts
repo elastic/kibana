@@ -252,7 +252,7 @@ function expectConflict(success: boolean, err: Error, method: 'update' | 'create
 
 // wrapper to call the test function with a it's own name
 function testFn(fn: (success: boolean) => unknown, success: boolean) {
-  test(`${fn.name}`, async () => await fn(success));
+  test(`${fn.name}`, async () => fn(success));
 }
 
 // set up mocks for update or create (the update() method uses create!)

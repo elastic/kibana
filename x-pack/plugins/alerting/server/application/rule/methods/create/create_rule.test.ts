@@ -3066,8 +3066,8 @@ describe('create()', () => {
     rulesClientParams.createAPIKey.mockImplementation(() => {
       throw new Error('no');
     });
-    await expect(
-      async () => await rulesClient.create({ data })
+    await expect(async () =>
+      rulesClient.create({ data })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error creating rule: could not create API key - no"`
     );

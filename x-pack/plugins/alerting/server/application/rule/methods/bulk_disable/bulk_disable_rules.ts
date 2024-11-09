@@ -6,11 +6,14 @@
  */
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
-import type { SavedObjectsBulkUpdateObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import type {
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkCreateObject,
+  Logger,
+} from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
 import pMap from 'p-map';
-import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawRule, SanitizedRule, RawRuleAction } from '../../../../types';
@@ -306,7 +309,7 @@ const tryToDisableTasks = async ({
   logger: Logger;
   taskManager: TaskManagerStartContract;
 }) => {
-  return await withSpan({ name: 'taskManager.bulkDisable', type: 'rules' }, async () => {
+  return withSpan({ name: 'taskManager.bulkDisable', type: 'rules' }, async () => {
     if (taskIdsToDisable.length > 0) {
       try {
         const resultFromDisablingTasks = await taskManager.bulkDisable(

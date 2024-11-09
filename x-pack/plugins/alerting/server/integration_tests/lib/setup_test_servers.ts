@@ -31,7 +31,7 @@ export async function setupTestServers(settings = {}) {
       root,
       coreSetup,
       coreStart,
-      stop: async () => await root.shutdown(),
+      stop: async () => root.shutdown(),
     },
   };
 }

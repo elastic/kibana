@@ -108,13 +108,13 @@ export const UserList: React.FC<UserListProps> = React.memo(
           <h3>{headline}</h3>
         </EuiTitle>
         <EuiHorizontalRule margin="xs" />
-        {loading && (
+        {loading ? (
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiLoadingSpinner data-test-subj="users-list-loading-spinner" />
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
+        ) : null}
         {renderUsers(orderedUsers, handleSendEmail, euiTheme)}
       </EuiFlexItem>
     );

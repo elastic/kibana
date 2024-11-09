@@ -85,13 +85,13 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
 
   return (
     <>
-      {showConnectorWarning && (
+      {showConnectorWarning ? (
         <EuiFlexGroup>
           <EuiFlexItem>
             <DeprecatedCallout />
           </EuiFlexItem>
         </EuiFlexGroup>
-      )}
+      ) : null}
       <EuiFlexGroup data-test-subj="connector-fields-sn-sir" direction="column" gutterSize="s">
         <EuiFlexGroup>
           <EuiFlexItem>

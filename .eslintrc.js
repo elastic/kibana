@@ -1566,13 +1566,6 @@ module.exports = {
       plugins: ['react', '@typescript-eslint'],
       rules: {
         'import/no-nodejs-modules': 'error',
-        'no-restricted-imports': [
-          'error',
-          {
-            // prevents UI code from importing server side code and then webpack including it when doing builds
-            patterns: ['**/server/*'],
-          },
-        ],
         'react/boolean-prop-naming': 'error',
         'react/button-has-type': 'error',
         'react/display-name': 'error',
@@ -1636,10 +1629,6 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            // prevents code from importing files that contain the name "legacy" within their name. This is a mechanism
-            // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
-            // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it is has valid uses.
-            patterns: ['*legacy*'],
             paths: [
               {
                 name: 'react-router-dom',

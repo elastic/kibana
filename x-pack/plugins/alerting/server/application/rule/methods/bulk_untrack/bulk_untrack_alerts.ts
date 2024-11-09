@@ -29,10 +29,10 @@ export async function bulkUntrackAlerts(
     throw Boom.badRequest(`Failed to validate params: ${error.message}`);
   }
 
-  return await retryIfConflicts(
+  return retryIfConflicts(
     context.logger,
     `rulesClient.bulkUntrack('${params.alertUuids}')`,
-    async () => await bulkUntrackAlertsWithOCC(context, params)
+    async () => bulkUntrackAlertsWithOCC(context, params)
   );
 }
 
@@ -54,7 +54,7 @@ async function bulkUntrackAlertsWithOCC(context: RulesClientContext, params: Bul
         ruleTypeId: string;
         consumer: string;
       }) =>
-        await withSpan({ name: 'authorization.ensureAuthorized', type: 'alerts' }, () =>
+        withSpan({ name: 'authorization.ensureAuthorized', type: 'alerts' }, () =>
           context.authorization.ensureAuthorized({
             ruleTypeId,
             consumer,

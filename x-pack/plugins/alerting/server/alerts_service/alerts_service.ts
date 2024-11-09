@@ -369,7 +369,7 @@ export class AlertsService implements IAlertsService {
       await Promise.all(
         initFns.map((fn) =>
           installWithTimeout({
-            installFn: async () => await fn(),
+            installFn: async () => fn(),
             pluginStop$: this.options.pluginStop$,
             logger: this.options.logger,
             timeoutMs,
@@ -430,14 +430,13 @@ export class AlertsService implements IAlertsService {
         dynamic: mappings.dynamic,
         context,
       });
-      initFns.push(
-        async () =>
-          await createOrUpdateComponentTemplate({
-            logger: this.options.logger,
-            esClient,
-            template: componentTemplate,
-            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
-          })
+      initFns.push(async () =>
+        createOrUpdateComponentTemplate({
+          logger: this.options.logger,
+          esClient,
+          template: componentTemplate,
+          totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+        })
       );
       componentTemplateRefs.push(componentTemplate.name);
     }
@@ -453,7 +452,7 @@ export class AlertsService implements IAlertsService {
     // Context specific initialization installs index template and write index
     initFns = initFns.concat([
       async () =>
-        await createOrUpdateIndexTemplate({
+        createOrUpdateIndexTemplate({
           logger: this.options.logger,
           esClient,
           template: getIndexTemplate({
@@ -467,7 +466,7 @@ export class AlertsService implements IAlertsService {
           }),
         }),
       async () =>
-        await createConcreteWriteIndex({
+        createConcreteWriteIndex({
           logger: this.options.logger,
           esClient,
           totalFieldsLimit: TOTAL_FIELDS_LIMIT,
@@ -481,7 +480,7 @@ export class AlertsService implements IAlertsService {
     // the component template.
     for (const fn of initFns) {
       await installWithTimeout({
-        installFn: async () => await fn(),
+        installFn: async () => fn(),
         pluginStop$: this.options.pluginStop$,
         logger: this.options.logger,
         timeoutMs,

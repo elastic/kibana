@@ -28,10 +28,8 @@ export async function deleteRule(context: RulesClientContext, params: DeleteRule
 
   const { id } = params;
 
-  return await retryIfConflicts(
-    context.logger,
-    `rulesClient.delete('${id}')`,
-    async () => await deleteRuleWithOCC(context, { id })
+  return retryIfConflicts(context.logger, `rulesClient.delete('${id}')`, async () =>
+    deleteRuleWithOCC(context, { id })
   );
 }
 

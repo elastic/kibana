@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+
 import { trackLegacyRouteUsage } from './track_legacy_route_usage';
 
 describe('trackLegacyRouteUsage', () => {

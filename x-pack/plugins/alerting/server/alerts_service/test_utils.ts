@@ -15,9 +15,10 @@ export const retryUntil = async (
   count: number = RETRY_UNTIL_DEFAULT_COUNT,
   wait: number = RETRY_UNTIL_DEFAULT_WAIT
 ): Promise<boolean> => {
+  let _count = count;
   await delay(wait);
-  while (count > 0) {
-    count--;
+  while (_count > 0) {
+    _count--;
 
     if (await fn()) return true;
 
@@ -31,4 +32,4 @@ export const retryUntil = async (
   return false;
 };
 
-const delay = async (millis: number) => await new Promise((resolve) => setTimeout(resolve, millis));
+const delay = async (millis: number) => new Promise((resolve) => setTimeout(resolve, millis));

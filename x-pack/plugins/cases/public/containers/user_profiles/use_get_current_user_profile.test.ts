@@ -93,7 +93,7 @@ class MockServerError extends Error {
     statusCode: number;
   };
 
-  constructor(message?: string, statusCode: number = 200) {
+  constructor(message?: string, statusCode = 200) {
     super(message);
     this.name = this.constructor.name;
     this.body = { statusCode };

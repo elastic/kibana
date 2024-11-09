@@ -9,10 +9,6 @@ import type { KibanaResponseFactory } from '@kbn/core/server';
 import type { ErrorThatHandlesItsOwnResponse } from './types';
 
 export class RuleMutedError extends Error implements ErrorThatHandlesItsOwnResponse {
-  constructor(message: string) {
-    super(message);
-  }
-
   public sendResponse(res: KibanaResponseFactory) {
     return res.badRequest({ body: { message: this.message } });
   }

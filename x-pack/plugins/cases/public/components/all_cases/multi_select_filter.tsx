@@ -159,7 +159,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
         }}
         data-test-subj={`options-filter-popover-${id}`}
       >
-        {isInvalid && (
+        {isInvalid ? (
           <>
             <EuiHorizontalRule margin="none" />
             <EuiCallOut
@@ -170,7 +170,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
             />
             <EuiHorizontalRule margin="none" />
           </>
-        )}
+        ) : null}
         <EuiSelectable<FilterOption<T, K>>
           options={options}
           searchable

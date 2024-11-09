@@ -14,16 +14,17 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { tryToRemoveTasks } from '../../../../rules_client/common';
 import { API_KEY_GENERATE_CONCURRENCY } from '../../../../rules_client/common/constants';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
   migrateLegacyActions,
+  untrackRuleAlerts,
 } from '../../../../rules_client/lib';
 import {
   retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
+  tryToRemoveTasks,
 } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type {
@@ -37,7 +38,6 @@ import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '
 import { ruleDomainSchema } from '../../schemas';
 import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
-import { untrackRuleAlerts } from '../../../../rules_client/lib';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,

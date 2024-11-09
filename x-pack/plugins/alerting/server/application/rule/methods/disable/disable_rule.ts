@@ -21,10 +21,8 @@ export async function disableRule(
   context: RulesClientContext,
   { id, untrack = false }: DisableRuleParams
 ): Promise<void> {
-  return await retryIfConflicts(
-    context.logger,
-    `rulesClient.disableRule('${id}')`,
-    async () => await disableWithOCC(context, { id, untrack })
+  return retryIfConflicts(context.logger, `rulesClient.disableRule('${id}')`, async () =>
+    disableWithOCC(context, { id, untrack })
   );
 }
 

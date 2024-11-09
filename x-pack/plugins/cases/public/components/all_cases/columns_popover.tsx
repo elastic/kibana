@@ -182,7 +182,7 @@ export const ColumnsPopover: React.FC<Props> = ({
                           }}
                         />
                       </EuiFlexItem>
-                      {isDragEnabled && (
+                      {isDragEnabled ? (
                         <EuiFlexItem
                           grow={false}
                           data-test-subj="column-selection-popover-draggable-icon"
@@ -196,7 +196,7 @@ export const ColumnsPopover: React.FC<Props> = ({
                             <EuiIcon type="grab" color="subdued" />
                           </EuiPanel>
                         </EuiFlexItem>
-                      )}
+                      ) : null}
                     </EuiFlexGroup>
                   )}
                 </EuiDraggable>

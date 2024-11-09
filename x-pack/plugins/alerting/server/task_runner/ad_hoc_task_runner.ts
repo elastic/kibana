@@ -265,7 +265,7 @@ export class AdHocTaskRunner implements CancellableTask {
    */
   private async prepareToRun(): Promise<RunParams> {
     this.runDate = new Date();
-    return await this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareRule, async () => {
+    return this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareRule, async () => {
       const {
         params: { adHocRunParamsId, spaceId },
         startedAt,

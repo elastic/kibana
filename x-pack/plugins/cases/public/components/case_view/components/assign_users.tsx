@@ -52,22 +52,22 @@ const AssigneesList: React.FC<AssigneesListProps> = ({
             <EuiText size="s" color="subdued">
               <p>
                 {i18n.NO_ASSIGNEES}
-                {permissions.update && (
+                {permissions.update ? (
                   <>
                     <br />
                     <EuiLink data-test-subj="case-view-assign-users-link" onClick={togglePopOver}>
                       {i18n.ASSIGN_A_USER}
                     </EuiLink>
                   </>
-                )}
-                {currentUserProfile && permissions.update && (
+                ) : null}
+                {currentUserProfile && permissions.update ? (
                   <>
                     <span>{i18n.SPACED_OR}</span>
                     <EuiLink data-test-subj="case-view-assign-yourself-link" onClick={assignSelf}>
                       {i18n.ASSIGN_YOURSELF}
                     </EuiLink>
                   </>
-                )}
+                ) : null}
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -179,8 +179,10 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
         <EuiFlexItem grow={false}>
           <SidebarTitle title={i18n.ASSIGNEES} />
         </EuiFlexItem>
-        {isLoading && <EuiLoadingSpinner data-test-subj="case-view-assignees-button-loading" />}
-        {!isLoading && permissions.update && (
+        {isLoading ? (
+          <EuiLoadingSpinner data-test-subj="case-view-assignees-button-loading" />
+        ) : null}
+        {!isLoading && permissions.update ? (
           <EuiFlexItem data-test-subj="case-view-assignees-edit" grow={false}>
             <SuggestUsersPopover
               assignedUsersWithProfiles={assigneesWithProfiles}
@@ -192,7 +194,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
               togglePopover={togglePopover}
             />
           </EuiFlexItem>
-        )}
+        ) : null}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
       <AssigneesList

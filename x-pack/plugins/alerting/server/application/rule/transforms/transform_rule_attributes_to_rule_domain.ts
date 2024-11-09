@@ -5,8 +5,7 @@
  * 2.0.
  */
 import { isEmpty } from 'lodash';
-import type { Logger } from '@kbn/core/server';
-import type { SavedObjectReference } from '@kbn/core/server';
+import type { Logger, SavedObjectReference } from '@kbn/core/server';
 import { ruleExecutionStatusValues } from '../constants';
 import { getRuleSnoozeEndTime } from '../../../lib';
 import type { RuleDomain, Monitoring, RuleParams } from '../types';

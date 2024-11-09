@@ -34,11 +34,11 @@ export async function updateMaintenanceWindow(
   context: MaintenanceWindowClientContext,
   params: UpdateMaintenanceWindowParams
 ): Promise<MaintenanceWindow> {
-  return await retryIfConflicts(
+  return retryIfConflicts(
     context.logger,
     `maintenanceWindowClient.update('${params.id})`,
     async () => {
-      return await updateWithOCC(context, params);
+      return updateWithOCC(context, params);
     }
   );
 }

@@ -25,6 +25,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
+
 import { migrateLegacyActionsMock } from '../../../../rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import {
@@ -427,8 +428,8 @@ describe('enable()', () => {
     rulesClientParams.createAPIKey.mockImplementation(() => {
       throw new Error('no');
     });
-    await expect(
-      async () => await rulesClient.enableRule({ id: '1' })
+    await expect(async () =>
+      rulesClient.enableRule({ id: '1' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Error creating API key for rule - no"`);
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
   });
@@ -436,7 +437,7 @@ describe('enable()', () => {
   test('throws an error if API params do not match the schema', async () => {
     await expect(
       // @ts-ignore: this is what we are testing
-      async () => await rulesClient.enableRule({ id: 1 })
+      async () => rulesClient.enableRule({ id: 1 })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error validating enable rule parameters - [id]: expected value of type [string] but got [number]"`
     );

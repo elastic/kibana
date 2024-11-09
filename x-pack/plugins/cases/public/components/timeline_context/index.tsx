@@ -55,7 +55,7 @@ export const CasesTimelineIntegrationProvider: FC<
   }>
 > =
   // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line react/display-name
+
   ({ children, timelineIntegration }) => {
     const [activeTimelineIntegration] = useState(timelineIntegration ?? null);
 

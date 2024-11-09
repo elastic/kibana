@@ -8,17 +8,15 @@ import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { resolveRuleSavedObject } from '../../../../rules_client/lib';
+import { resolveRuleSavedObject, formatLegacyActions } from '../../../../rules_client/lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import type { RuleTypeParams } from '../../../../types';
+import type { RuleTypeParams, ResolvedSanitizedRule } from '../../../../types';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import { formatLegacyActions } from '../../../../rules_client/lib';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import type { Rule } from '../../types';
 import { ruleSchema } from '../../schemas';
 import { resolveRuleParamsSchema } from './schemas';
-import type { ResolvedSanitizedRule } from '../../../../types';
 
 export interface ResolveParams {
   id: string;

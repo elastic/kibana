@@ -18,12 +18,11 @@ import { alertingAuthorizationMock } from '../../../../authorization/alerting_au
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server/task_scheduling';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import {
   disabledRule1,
   disabledRule2,

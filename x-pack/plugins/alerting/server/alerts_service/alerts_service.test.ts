@@ -1974,7 +1974,7 @@ describe('Alerts Service', () => {
               await new Promise((r) => setTimeout(r, delayMs));
             }
 
-            return await alertsService.createAlertsClient({
+            return alertsService.createAlertsClient({
               alertingEventLogger,
               logger,
               request: fakeRequest,
@@ -2081,7 +2081,7 @@ describe('Alerts Service', () => {
               await new Promise((r) => setTimeout(r, delayMs));
             }
 
-            return await alertsService.createAlertsClient({
+            return alertsService.createAlertsClient({
               alertingEventLogger,
               logger,
               request: fakeRequest,

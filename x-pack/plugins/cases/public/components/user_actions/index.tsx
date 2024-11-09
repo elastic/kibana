@@ -187,9 +187,9 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
           bottomActions={lastPage <= 1 ? bottomActions : []}
           isExpandable
         />
-        {hasNextPage && (
+        {hasNextPage ? (
           <ShowMoreButton onShowMoreClick={handleShowMore} isLoading={isFetchingNextPage} />
-        )}
+        ) : null}
         {lastPageUserActions?.length ? (
           <EuiFlexItem
             {...(!hasNextPage

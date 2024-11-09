@@ -82,9 +82,9 @@ export const FilesTable = ({ caseId, items, pagination, onChange, isLoading }: F
         noItemsMessage={<EmptyFilesTable caseId={caseId} />}
         rowProps={filesTableRowProps}
       />
-      {isPreviewVisible && selectedFile !== undefined && (
+      {isPreviewVisible && selectedFile !== undefined ? (
         <FilePreview closePreview={closePreview} selectedFile={selectedFile} />
-      )}
+      ) : null}
     </>
   );
 };

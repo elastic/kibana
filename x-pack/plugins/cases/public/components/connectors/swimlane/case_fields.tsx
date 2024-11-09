@@ -17,7 +17,7 @@ const SwimlaneFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = (
 
   return (
     <>
-      {showMappingWarning && (
+      {showMappingWarning ? (
         <EuiCallOut
           title={i18n.EMPTY_MAPPING_WARNING_TITLE}
           color="danger"
@@ -26,7 +26,7 @@ const SwimlaneFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = (
         >
           {i18n.EMPTY_MAPPING_WARNING_DESC}
         </EuiCallOut>
-      )}
+      ) : null}
     </>
   );
 };

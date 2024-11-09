@@ -74,7 +74,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
             display: block;
           `}
         >
-          {showBackButton && (
+          {showBackButton ? (
             <div
               className="casesHeaderPage__linkBack"
               css={css`
@@ -90,14 +90,14 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
                 {i18n.BACK_TO_ALL}
               </LinkIcon>
             </div>
-          )}
+          ) : null}
 
           {titleNode || <Title title={title} releasePhase={releasePhase} />}
 
-          {border && isLoading && <EuiProgress size="xs" color="accent" />}
+          {border && isLoading ? <EuiProgress size="xs" color="accent" /> : null}
         </EuiFlexItem>
 
-        {children && (
+        {children ? (
           <EuiFlexItem
             data-test-subj="header-page-supplements"
             css={css`
@@ -107,7 +107,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
           >
             {children}
           </EuiFlexItem>
-        )}
+        ) : null}
       </EuiFlexGroup>
     </header>
   );

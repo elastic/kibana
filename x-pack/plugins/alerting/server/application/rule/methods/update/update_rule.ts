@@ -85,10 +85,8 @@ export async function updateRule<Params extends RuleParams = never>(
   context: RulesClientContext,
   updateParams: UpdateRuleParams<Params>
 ): Promise<SanitizedRule<Params>> {
-  return await retryIfConflicts(
-    context.logger,
-    `rulesClient.update('${updateParams.id}')`,
-    async () => await updateWithOCC<Params>(context, updateParams)
+  return retryIfConflicts(context.logger, `rulesClient.update('${updateParams.id}')`, async () =>
+    updateWithOCC<Params>(context, updateParams)
   );
 }
 

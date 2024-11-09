@@ -21,10 +21,8 @@ export async function updateRuleApiKey(
   context: RulesClientContext,
   { id }: UpdateApiKeyParams
 ): Promise<void> {
-  return await retryIfConflicts(
-    context.logger,
-    `rulesClient.updateRuleApiKey('${id}')`,
-    async () => await updateApiKeyWithOCC(context, { id })
+  return retryIfConflicts(context.logger, `rulesClient.updateRuleApiKey('${id}')`, async () =>
+    updateApiKeyWithOCC(context, { id })
   );
 }
 

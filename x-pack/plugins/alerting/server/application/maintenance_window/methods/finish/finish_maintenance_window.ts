@@ -31,11 +31,11 @@ export async function finishMaintenanceWindow(
   context: MaintenanceWindowClientContext,
   params: FinishMaintenanceWindowParams
 ): Promise<MaintenanceWindow> {
-  return await retryIfConflicts(
+  return retryIfConflicts(
     context.logger,
     `maintenanceWindowClient.finish('${params.id})`,
     async () => {
-      return await finishWithOCC(context, params);
+      return finishWithOCC(context, params);
     }
   );
 }
