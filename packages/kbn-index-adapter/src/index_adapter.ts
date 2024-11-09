@@ -29,7 +29,10 @@ export interface IndexAdapterParams {
   totalFieldsLimit?: number;
 }
 export type SetComponentTemplateParams = GetComponentTemplateOpts;
-export type SetIndexTemplateParams = GetIndexTemplateOpts;
+export type SetIndexTemplateParams = Omit<
+  GetIndexTemplateOpts,
+  'indexPatterns' | 'kibanaVersion' | 'totalFieldsLimit'
+>;
 export interface GetInstallFnParams {
   logger: Logger;
   pluginStop$: Subject<void>;
