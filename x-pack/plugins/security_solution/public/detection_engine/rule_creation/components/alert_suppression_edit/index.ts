@@ -6,5 +6,6 @@
  */
 
 export * from './components/alert_suppression_edit';
+export * from './components/suppression_duration_selector';
 export * from './constants/fields';
 export * from './constants/default_duration';

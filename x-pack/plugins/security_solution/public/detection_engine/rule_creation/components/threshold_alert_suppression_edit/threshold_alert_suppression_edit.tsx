@@ -10,7 +10,7 @@ import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { CheckBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField, useFormData } from '../../../../shared_imports';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from './fields';
-import { SuppressionDurationSelector } from '../alert_suppression_edit/components/suppression_duration_selector';
+import { SuppressionDurationSelector } from '../alert_suppression_edit';
 import * as i18n from './translations';
 
 interface ThresholdAlertSuppressionEditProps {
