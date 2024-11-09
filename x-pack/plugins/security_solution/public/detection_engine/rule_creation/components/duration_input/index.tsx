@@ -88,6 +88,7 @@ export const DurationInput = memo(function DurationInputComponent({
             options={durationUnitOptions}
             onChange={onChangeTimeType}
             value={durationUnit}
+            aria-label={I18n.DURATION_UNIT_SELECTOR}
             data-test-subj="timeType"
             {...rest}
           />
