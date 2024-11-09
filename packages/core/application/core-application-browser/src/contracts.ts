@@ -68,9 +68,12 @@ export interface ApplicationStart {
   applications$: Observable<ReadonlyMap<string, PublicAppInfo>>;
 
   /**
-   * Navigate to a given app
+   * Navigate to a given app.
+   * If a plugin is disabled any applications it registers won't be available either.
+   * Before rendering a UI element that a user could use to navigate to another application,
+   * first check if the destination application is actually available using the isAppRegistered API.
    *
-   * @param appId
+   * @param appId - The identifier of the app to navigate to
    * @param options - navigation options
    */
   navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
