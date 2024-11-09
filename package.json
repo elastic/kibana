@@ -567,6 +567,7 @@
     "@kbn/i18n-react": "link:packages/kbn-i18n-react",
     "@kbn/iframe-embedded-plugin": "link:x-pack/test/functional_embedded/plugins/iframe_embedded",
     "@kbn/image-embeddable-plugin": "link:src/plugins/image_embeddable",
+    "@kbn/index-adapter": "link:packages/kbn-index-adapter",
     "@kbn/index-lifecycle-management-plugin": "link:x-pack/plugins/index_lifecycle_management",
     "@kbn/index-management-plugin": "link:x-pack/plugins/index_management",
     "@kbn/index-management-shared-types": "link:x-pack/packages/index-management/index_management_shared_types",
