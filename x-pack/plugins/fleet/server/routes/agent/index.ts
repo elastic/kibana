@@ -276,6 +276,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       summary: `Unenroll an agent`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
+      },
     })
     .addVersion(
       {
