@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DataStreamAdapter } from './src/data_stream_adapter';
-export { DataStreamSpacesAdapter } from './src/data_stream_spaces_adapter';
-export { retryTransientEsErrors } from '@kbn/index-adapter/src/retry_transient_es_errors';
-export { ecsFieldMap, type EcsFieldMap } from '@kbn/index-adapter/src/field_maps/ecs_field_map';
+export { IndexAdapter } from './src/index_adapter';
+export { IndexPatternAdapter } from './src/index_pattern_adapter';
+export { retryTransientEsErrors } from './src/retry_transient_es_errors';
+export { ecsFieldMap, type EcsFieldMap } from './src/field_maps/ecs_field_map';
+export { createOrUpdateIndexTemplate } from './src/create_or_update_index_template';
+export { createOrUpdateComponentTemplate } from './src/create_or_update_component_template';
 
 export type {
   SetComponentTemplateParams,
   SetIndexTemplateParams,
+  IndexAdapterParams,
   InstallParams,
-} from '@kbn/index-adapter';
-
-export * from '@kbn/index-adapter/src/field_maps/types';
+} from './src/index_adapter';
+export * from './src/field_maps/types';

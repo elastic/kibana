@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  updateDataStreams,
-  createDataStream,
-  createOrUpdateDataStream,
-} from './create_or_update_data_stream';
+import { updateIndices, createIndex, createOrUpdateIndex } from './create_or_update_index';
 
 const logger = loggingSystemMock.createLogger();
 const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -25,50 +20,49 @@ const simulateIndexTemplateResponse = { template: { mappings: { is_managed: true
 // @ts-expect-error test data type mismatch
 esClient.indices.simulateIndexTemplate.mockResolvedValue(simulateIndexTemplateResponse);
 
-const name = 'test_data_stream';
+const name = 'test_index_name';
 const totalFieldsLimit = 1000;
 
-describe('updateDataStreams', () => {
+describe('updateIndices', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it(`should update data streams`, async () => {
-    const dataStreamName = 'test_data_stream-default';
-    esClient.indices.getDataStream.mockResolvedValueOnce({
-      data_streams: [{ name: dataStreamName } as IndicesDataStream],
-    });
+  it(`should update indices`, async () => {
+    const indexName = 'test_index_name-default';
+    esClient.indices.get.mockResolvedValueOnce({ [indexName]: {} });
 
-    await updateDataStreams({
+    await updateIndices({
       esClient,
       logger,
       name,
       totalFieldsLimit,
     });
 
-    expect(esClient.indices.getDataStream).toHaveBeenCalledWith({ name, expand_wildcards: 'all' });
+    expect(esClient.indices.get).toHaveBeenCalledWith({
+      index: `${name}*`,
+      expand_wildcards: 'all',
+    });
 
     expect(esClient.indices.putSettings).toHaveBeenCalledWith({
-      index: dataStreamName,
+      index: indexName,
       body: { 'index.mapping.total_fields.limit': totalFieldsLimit },
     });
     expect(esClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
-      name: dataStreamName,
+      name: indexName,
     });
     expect(esClient.indices.putMapping).toHaveBeenCalledWith({
-      index: dataStreamName,
+      index: indexName,
       body: simulateIndexTemplateResponse.template.mappings,
     });
   });
 
-  it(`should update multiple data streams`, async () => {
-    const dataStreamName1 = 'test_data_stream-1';
-    const dataStreamName2 = 'test_data_stream-2';
-    esClient.indices.getDataStream.mockResolvedValueOnce({
-      data_streams: [{ name: dataStreamName1 }, { name: dataStreamName2 }] as IndicesDataStream[],
-    });
+  it(`should update multiple indices`, async () => {
+    const indexName1 = 'test_index_name-1';
+    const indexName2 = 'test_index_name-2';
+    esClient.indices.get.mockResolvedValueOnce({ [indexName1]: {}, [indexName2]: {} });
 
-    await updateDataStreams({
+    await updateIndices({
       esClient,
       logger,
       name,
@@ -80,10 +74,10 @@ describe('updateDataStreams', () => {
     expect(esClient.indices.putMapping).toHaveBeenCalledTimes(2);
   });
 
-  it(`should not update data streams when not exist`, async () => {
-    esClient.indices.getDataStream.mockResolvedValueOnce({ data_streams: [] });
+  it(`should not update indices when not exist`, async () => {
+    esClient.indices.get.mockResolvedValueOnce({});
 
-    await updateDataStreams({
+    await updateIndices({
       esClient,
       logger,
       name,
@@ -96,69 +90,67 @@ describe('updateDataStreams', () => {
   });
 });
 
-describe('createDataStream', () => {
+describe('createIndex', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it(`should create data stream`, async () => {
-    esClient.indices.getDataStream.mockResolvedValueOnce({ data_streams: [] });
+  it(`should create index`, async () => {
+    esClient.indices.exists.mockResolvedValueOnce(false);
 
-    await createDataStream({
+    await createIndex({
       esClient,
       logger,
       name,
     });
 
-    expect(esClient.indices.createDataStream).toHaveBeenCalledWith({ name });
+    expect(esClient.indices.exists).toHaveBeenCalledWith({ index: name, expand_wildcards: 'all' });
+    expect(esClient.indices.create).toHaveBeenCalledWith({ index: name });
   });
 
-  it(`should not create data stream if already exists`, async () => {
-    esClient.indices.getDataStream.mockResolvedValueOnce({
-      data_streams: [{ name: 'test_data_stream-default' } as IndicesDataStream],
-    });
+  it(`should not create index if already exists`, async () => {
+    esClient.indices.exists.mockResolvedValueOnce(true);
 
-    await createDataStream({
+    await createIndex({
       esClient,
       logger,
       name,
     });
 
-    expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
+    expect(esClient.indices.exists).toHaveBeenCalledWith({ index: name, expand_wildcards: 'all' });
+    expect(esClient.indices.create).not.toHaveBeenCalled();
   });
 });
 
-describe('createOrUpdateDataStream', () => {
+describe('createOrUpdateIndex', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it(`should create data stream if not exists`, async () => {
-    esClient.indices.getDataStream.mockResolvedValueOnce({ data_streams: [] });
+  it(`should create index if not exists`, async () => {
+    esClient.indices.exists.mockResolvedValueOnce(false);
 
-    await createOrUpdateDataStream({
+    await createOrUpdateIndex({
       esClient,
       logger,
       name,
       totalFieldsLimit,
     });
 
-    expect(esClient.indices.createDataStream).toHaveBeenCalledWith({ name });
+    expect(esClient.indices.create).toHaveBeenCalledWith({ index: name });
   });
 
-  it(`should update data stream if already exists`, async () => {
-    esClient.indices.getDataStream.mockResolvedValueOnce({
-      data_streams: [{ name: 'test_data_stream-default' } as IndicesDataStream],
-    });
+  it(`should update index if already exists`, async () => {
+    esClient.indices.exists.mockResolvedValueOnce(true);
 
-    await createOrUpdateDataStream({
+    await createOrUpdateIndex({
       esClient,
       logger,
       name,
       totalFieldsLimit,
     });
 
-    expect(esClient.indices.getDataStream).toHaveBeenCalledWith({ name, expand_wildcards: 'all' });
+    expect(esClient.indices.exists).toHaveBeenCalledWith({ index: name, expand_wildcards: 'all' });
 
     expect(esClient.indices.putSettings).toHaveBeenCalledWith({
       index: name,
