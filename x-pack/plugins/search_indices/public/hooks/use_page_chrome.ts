@@ -25,5 +25,13 @@ export const usePageChrome = (docTitle: string, breadcrumbs: ChromeBreadcrumb[])
     } else {
       chrome.setBreadcrumbs(newBreadcrumbs);
     }
+    return () => {
+      // clear manually set breadcrumbs
+      if (serverless) {
+        serverless.setBreadcrumbs([]);
+      } else {
+        chrome.setBreadcrumbs([]);
+      }
+    };
   }, [breadcrumbs, chrome, docTitle, http.basePath, serverless]);
 };
