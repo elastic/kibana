@@ -17,7 +17,8 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('find backfill', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/196226
+  describe.skip('find backfill', () => {
     let backfillIds: Array<{ id: string; spaceId: string }> = [];
     const objectRemover = new ObjectRemover(supertest);
     const start1 = moment().utc().startOf('day').subtract(14, 'days').toISOString();
