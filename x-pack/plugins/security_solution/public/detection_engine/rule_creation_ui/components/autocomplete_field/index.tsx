@@ -13,7 +13,7 @@ import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_
 
 interface AutocompleteFieldProps {
   dataTestSubj: string;
-  field: FieldHook;
+  field: FieldHook<string>;
   idAria: string;
   indices: DataViewBase;
   isDisabled: boolean;
@@ -30,6 +30,8 @@ export const AutocompleteField = ({
   fieldType,
   placeholder,
 }: AutocompleteFieldProps) => {
+  const fieldTypeFilter = useMemo(() => [fieldType], [fieldType]);
+
   const handleFieldChange = useCallback(
     ([newField]: DataViewFieldBase[]): void => {
       // TODO: Update onChange type in FieldComponent as newField can be undefined
@@ -38,15 +40,19 @@ export const AutocompleteField = ({
     [field]
   );
 
-  const selectedField = useMemo(() => {
-    const existingField = (field.value as string) ?? '';
-    const [newSelectedField] = indices.fields.filter(
-      ({ name }) => existingField != null && existingField === name
-    );
-    return newSelectedField;
-  }, [field.value, indices]);
+  const foundField = field.value && indices.fields.find(({ name }) => name === field.value);
 
-  const fieldTypeFilter = useMemo(() => [fieldType], [fieldType]);
+  const { selectedField, indexPattern } = useMemo(() => {
+    /* eslint-disable @typescript-eslint/no-shadow */
+    /* If the field is not found in the indices, we still want to show it in the dropdown */
+    const selectedField = foundField || { name: field.value, type: fieldType };
+    const indexPattern = foundField
+      ? indices
+      : { ...indices, fields: [...indices.fields, selectedField] };
+
+    return { selectedField, indexPattern };
+    /* eslint-enable @typescript-eslint/no-shadow */
+  }, [field.value, indices, foundField, fieldType]);
 
   return (
     <EuiFormRow
@@ -59,7 +65,7 @@ export const AutocompleteField = ({
     >
       <FieldComponent
         placeholder={placeholder ?? ''}
-        indexPattern={indices}
+        indexPattern={indexPattern}
         selectedField={selectedField}
         fieldTypeFilter={fieldTypeFilter}
         isLoading={false}
