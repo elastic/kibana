@@ -91,6 +91,8 @@ export const EntityInsight = <T,>({
         <AlertsPreview
           alertsData={alertsData}
           alertsCount={alertsCount}
+          fieldName={fieldName}
+          name={name}
           isPreviewMode={isPreviewMode}
         />
         <EuiSpacer size="s" />
@@ -101,14 +103,23 @@ export const EntityInsight = <T,>({
   if (hasMisconfigurationFindings)
     insightContent.push(
       <>
-        <MisconfigurationsPreview name={name} fieldName={fieldName} isPreviewMode={isPreviewMode} />
+        <MisconfigurationsPreview
+          name={name}
+          fieldName={fieldName}
+          hasNonClosedAlerts={alertsCount > 0}
+          isPreviewMode={isPreviewMode}
+        />
         <EuiSpacer size="s" />
       </>
     );
   if (isVulnerabilitiesFindingForHost && hasVulnerabilitiesFindings)
     insightContent.push(
       <>
-        <VulnerabilitiesPreview name={name} isPreviewMode={isPreviewMode} />
+        <VulnerabilitiesPreview
+          name={name}
+          isPreviewMode={isPreviewMode}
+          hasNonClosedAlerts={alertsCount > 0}
+        />
         <EuiSpacer size="s" />
       </>
     );

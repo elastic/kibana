@@ -63,7 +63,13 @@ export const buildEntityFlyoutPreviewQuery = (field: string, queryValue?: string
   };
 };
 
-export const buildEntityAlertsQuery = (field: string, queryValue?: string, size?: number) => {
+export const buildEntityAlertsQuery = (
+  field: string,
+  to: string,
+  from: string,
+  queryValue?: string,
+  size?: number
+) => {
   return {
     size: size || 0,
     _source: false,
@@ -90,6 +96,14 @@ export const buildEntityAlertsQuery = (field: string, queryValue?: string, size?
               ],
               should: [],
               must_not: [],
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: from,
+                lte: to,
+              },
             },
           },
           {

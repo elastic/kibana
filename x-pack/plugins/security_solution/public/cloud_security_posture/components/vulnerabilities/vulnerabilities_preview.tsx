@@ -72,9 +72,11 @@ const VulnerabilitiesCount = ({
 export const VulnerabilitiesPreview = ({
   name,
   isPreviewMode,
+  hasNonClosedAlerts = false,
 }: {
   name: string;
   isPreviewMode?: boolean;
+  hasNonClosedAlerts?: boolean;
 }) => {
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW);
@@ -132,11 +134,13 @@ export const VulnerabilitiesPreview = ({
         isRiskScoreExist,
         hasMisconfigurationFindings,
         hasVulnerabilitiesFindings,
+        hasNonClosedAlerts,
         path: { tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS, subTab: 'vulnerabilitiesTabId' },
       },
     });
   }, [
     hasMisconfigurationFindings,
+    hasNonClosedAlerts,
     hasVulnerabilitiesFindings,
     isRiskScoreExist,
     name,

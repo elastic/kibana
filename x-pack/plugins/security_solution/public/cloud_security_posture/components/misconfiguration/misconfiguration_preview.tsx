@@ -103,10 +103,12 @@ const MisconfigurationPreviewScore = ({
 export const MisconfigurationsPreview = ({
   name,
   fieldName,
+  hasNonClosedAlerts = false,
   isPreviewMode,
 }: {
   name: string;
   fieldName: 'host.name' | 'user.name';
+  hasNonClosedAlerts?: boolean;
   isPreviewMode?: boolean;
 }) => {
   const { data } = useMisconfigurationPreview({
@@ -180,6 +182,7 @@ export const MisconfigurationsPreview = ({
             isRiskScoreExist,
             hasMisconfigurationFindings,
             hasVulnerabilitiesFindings,
+            hasNonClosedAlerts,
             path: {
               tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
               subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
@@ -189,11 +192,16 @@ export const MisconfigurationsPreview = ({
             user: { name },
             isRiskScoreExist,
             hasMisconfigurationFindings,
-            path: { tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS },
+            hasNonClosedAlerts,
+            path: {
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
+            },
           },
     });
   }, [
     hasMisconfigurationFindings,
+    hasNonClosedAlerts,
     hasVulnerabilitiesFindings,
     isRiskScoreExist,
     isUsingHostName,
