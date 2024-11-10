@@ -19,11 +19,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
-  onCancel: () => void;
-  disableCancelLoading?: boolean;
+  onCancel?: () => void;
 }
 
-export const LoadingCategorization: FC<Props> = ({ onCancel, disableCancelLoading }) => (
+export const LoadingCategorization: FC<Props> = ({ onCancel }) => (
   <>
     <EuiSpacer size="l" />
     <EuiFlexGroup justifyContent="spaceAround">
@@ -47,8 +46,8 @@ export const LoadingCategorization: FC<Props> = ({ onCancel, disableCancelLoadin
               <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
                 <EuiButton
                   data-test-subj="aiopsLoadingCategorizationCancelButton"
-                  onClick={() => onCancel()}
-                  disabled={disableCancelLoading}
+                  onClick={onCancel}
+                  disabled={!onCancel}
                 >
                   Cancel
                 </EuiButton>

@@ -205,41 +205,39 @@ export const AttachmentsMenu = ({
   ]);
 
   return (
-    <>
-      <EuiFlexItem>
-        <EuiPopover
-          button={
-            <EuiButtonIcon
-              data-test-subj="aiopsLogPatternAnalysisAttachmentsMenuButton"
-              aria-label={i18n.translate('xpack.aiops.logCategorization.attachmentsMenuAriaLabel', {
-                defaultMessage: 'Attachments',
-              })}
-              iconType="boxesHorizontal"
-              color="text"
-              onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-            />
-          }
-          isOpen={isActionMenuOpen}
-          closePopover={() => setIsActionMenuOpen(false)}
-          panelPaddingSize="none"
-          anchorPosition="downRight"
-        >
-          <EuiContextMenu panels={panels} initialPanelId="attachMainPanel" />
-        </EuiPopover>
-        {dashboardAttachmentReady ? (
-          <SavedObjectSaveModalDashboard
-            canSaveByReference={false}
-            objectType={i18n.translate('xpack.aiops.logCategorization.objectTypeLabel', {
-              defaultMessage: 'Log pattern analysis',
+    <EuiFlexItem>
+      <EuiPopover
+        button={
+          <EuiButtonIcon
+            data-test-subj="aiopsLogPatternAnalysisAttachmentsMenuButton"
+            aria-label={i18n.translate('xpack.aiops.logCategorization.attachmentsMenuAriaLabel', {
+              defaultMessage: 'Attachments',
             })}
-            documentInfo={{
-              title: 'Log pattern analysis',
-            }}
-            onClose={() => setDashboardAttachmentReady(false)}
-            onSave={onSave}
+            iconType="boxesHorizontal"
+            color="text"
+            onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
           />
-        ) : null}
-      </EuiFlexItem>
-    </>
+        }
+        isOpen={isActionMenuOpen}
+        closePopover={() => setIsActionMenuOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="downRight"
+      >
+        <EuiContextMenu panels={panels} initialPanelId="attachMainPanel" />
+      </EuiPopover>
+      {dashboardAttachmentReady ? (
+        <SavedObjectSaveModalDashboard
+          canSaveByReference={false}
+          objectType={i18n.translate('xpack.aiops.logCategorization.objectTypeLabel', {
+            defaultMessage: 'Log pattern analysis',
+          })}
+          documentInfo={{
+            title: 'Log pattern analysis',
+          }}
+          onClose={() => setDashboardAttachmentReady(false)}
+          onSave={onSave}
+        />
+      ) : null}
+    </EuiFlexItem>
   );
 };

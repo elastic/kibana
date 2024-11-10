@@ -356,15 +356,15 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
 
   const isCasesEmbeddable = embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.CASES;
 
-  // Disable filtering for cases embeddable, as it's not possible to delete filters
-  const actions = [...(isCasesEmbeddable ? [] : getActions(false)), ...getActions(true)];
+  // When in cases, we can only show the "Filter for pattern in Discover" actions as Cases does not have full filter management.
+  const actions = isCasesEmbeddable
+    ? getActions(true)
+    : [...getActions(false), ...getActions(true)];
 
   return (
     <>
       <FieldValidationCallout validationResults={fieldValidationResult} />
-      {(loading ?? true) === true ? (
-        <LoadingCategorization onCancel={cancelRequest} disableCancelLoading={isCasesEmbeddable} />
-      ) : null}
+      {(loading ?? true) === true ? <LoadingCategorization /> : null}
 
       <InformationText
         loading={loading ?? true}
