@@ -4,13 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiPageHeader } from '@elastic/eui';
+import { EuiFlexGroup, EuiPageHeader, EuiPanel } from '@elastic/eui';
 import React from 'react';
 
-export function StreamsAppPageHeader({ children }: { children: React.ReactNode }) {
+export function StreamsAppPageHeader({
+  title,
+  children,
+}: {
+  title: React.ReactNode;
+  children?: React.ReactNode;
+}) {
   return (
-    <EuiPageHeader>
-      <EuiFlexGroup direction="row">{children}</EuiFlexGroup>
-    </EuiPageHeader>
+    <EuiPanel paddingSize="none" color="transparent">
+      <EuiPageHeader>
+        <EuiFlexGroup direction="row">
+          <EuiPanel hasBorder={false} hasShadow={false} color="transparent">
+            {title}
+          </EuiPanel>
+        </EuiFlexGroup>
+      </EuiPageHeader>
+      {children}
+    </EuiPanel>
   );
 }

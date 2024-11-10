@@ -4,22 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/css';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiIcon, EuiLink, EuiPanel } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { EntityDetailViewHeaderSection } from '../entity_detail_view_header_section';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
 import { LoadingPanel } from '../loading_panel';
+import { StreamsAppPageBody } from '../streams_app_page_body';
 import { StreamsAppPageHeader } from '../streams_app_page_header';
 import { StreamsAppPageHeaderTitle } from '../streams_app_page_header/streams_app_page_header_title';
 
@@ -32,15 +24,10 @@ export interface EntityViewTab {
 export function EntityDetailViewWithoutParams({
   selectedTab,
   tabs,
-  type,
   entity,
 }: {
   selectedTab: string;
   tabs: EntityViewTab[];
-  type: {
-    displayName?: string;
-    id: string;
-  };
   entity: {
     displayName?: string;
     id: string;
@@ -48,27 +35,21 @@ export function EntityDetailViewWithoutParams({
 }) {
   const router = useStreamsAppRouter();
 
-  const theme = useEuiTheme().euiTheme;
-
   useStreamsAppBreadcrumbs(() => {
-    if (!type.displayName || !entity.displayName) {
+    if (!entity.displayName) {
       return [];
     }
 
     return [
-      {
-        title: type.displayName,
-        path: `/`,
-      } as const,
       {
         title: entity.displayName,
         path: `/{key}`,
         params: { path: { key: entity.id } },
       } as const,
     ];
-  }, [type.displayName, type.id, entity.displayName, entity.id]);
+  }, [entity.displayName, entity.id]);
 
-  if (!type.displayName || !entity.displayName) {
+  if (!entity.displayName) {
     return <LoadingPanel />;
   }
 
@@ -78,7 +59,7 @@ export function EntityDetailViewWithoutParams({
         tab.name,
         {
           href: router.link('/{key}/{tab}', {
-            path: { key: entity.id, tab: 'overview' },
+            path: { key: entity.id, tab: tab.name },
           }),
           label: tab.label,
           content: tab.content,
@@ -90,62 +71,30 @@ export function EntityDetailViewWithoutParams({
   const selectedTabObject = tabMap[selectedTab];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <StreamsAppPageHeader>
-        <StreamsAppPageHeaderTitle title={entity.displayName}>
-          <EuiHorizontalRule margin="s" />
-          <EuiPanel
-            hasBorder={false}
-            hasShadow={false}
-            className={css`
-              padding-top: 0;
-              padding-bottom: 0;
-            `}
-          >
-            <EuiFlexGroup
-              direction="row"
-              alignItems="flexStart"
-              className={css`
-                > div {
-                  border: 0px solid ${theme.colors.lightShade};
-                  border-right-width: 1px;
-                  width: 25%;
-                }
-                > div:last-child {
-                  border-right-width: 0;
-                }
-              `}
-            >
-              <EuiFlexItem grow={false}>
-                <EntityDetailViewHeaderSection
-                  title={i18n.translate('xpack.streams.entityDetailView.typeSection', {
-                    defaultMessage: 'Type',
-                  })}
-                >
-                  <EuiFlexItem
-                    className={css`
-                      align-self: flex-start;
-                    `}
-                  >
-                    <EuiBadge>{type.displayName}</EuiBadge>
-                  </EuiFlexItem>
-                </EntityDetailViewHeaderSection>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </StreamsAppPageHeaderTitle>
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiPanel color="transparent">
+        <EuiLink data-test-subj="streamsEntityDetailViewGoBackHref" href={router.link('/')}>
+          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+            <EuiIcon type="arrowLeft" />
+            {i18n.translate('xpack.streams.entityDetailView.goBackLinkLabel', {
+              defaultMessage: 'Back',
+            })}
+          </EuiFlexGroup>
+        </EuiLink>
+      </EuiPanel>
+      <StreamsAppPageHeader title={<StreamsAppPageHeaderTitle title={entity.displayName} />}>
+        <EntityOverviewTabList
+          tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
+            return {
+              name: tabKey,
+              label,
+              href,
+              selected: selectedTab === tabKey,
+            };
+          })}
+        />
       </StreamsAppPageHeader>
-      <EntityOverviewTabList
-        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
-          return {
-            name: tabKey,
-            label,
-            href,
-            selected: selectedTab === tabKey,
-          };
-        })}
-      />
-      {selectedTabObject.content}
+      <StreamsAppPageBody>{selectedTabObject.content}</StreamsAppPageBody>
     </EuiFlexGroup>
   );
 }

@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
 import React from 'react';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 
 export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
@@ -35,14 +35,8 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
         },
       }}
     >
-      <EuiPanel
-        hasBorder={false}
-        hasShadow={false}
-        paddingSize="l"
-        className={css`
-          min-width: 0;
-        `}
-      >
+      <EuiPanel paddingSize="none" color="subdued" hasShadow={false} hasBorder={false}>
+        <EuiSpacer size="m" />
         {children}
       </EuiPanel>
     </PageTemplate>

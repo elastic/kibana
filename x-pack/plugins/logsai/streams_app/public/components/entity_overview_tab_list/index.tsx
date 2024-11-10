@@ -5,13 +5,21 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 
 export function EntityOverviewTabList<
   T extends { name: string; label: string; href: string; selected: boolean }
 >({ tabs }: { tabs: T[] }) {
+  const theme = useEuiTheme().euiTheme;
+
   return (
-    <EuiTabs size="m">
+    <EuiTabs
+      size="m"
+      className={css`
+        padding: 0 ${theme.size.l};
+      `}
+    >
       {tabs.map((tab) => {
         return (
           <EuiTab key={tab.name} href={tab.href} isSelected={tab.selected}>

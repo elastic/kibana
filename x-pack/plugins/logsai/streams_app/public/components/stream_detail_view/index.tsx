@@ -39,13 +39,6 @@ export function StreamDetailView() {
     [streamsRepositoryClient, key]
   );
 
-  const type = {
-    id: 'stream',
-    displayName: i18n.translate('xpack.streams.streamDetailView.streamsTypeDisplayName', {
-      defaultMessage: 'Streams',
-    }),
-  };
-
   const entity = {
     id: key,
     displayName: key,
@@ -55,13 +48,25 @@ export function StreamDetailView() {
     {
       name: 'overview',
       content: <StreamDetailOverview definition={streamEntity?.definition} />,
-      label: i18n.translate('xpack.streams.streamDetailView.parsingTab', {
-        defaultMessage: 'Parsing',
+      label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
+        defaultMessage: 'Overview',
+      }),
+    },
+    {
+      name: 'routing',
+      content: <></>,
+      label: i18n.translate('xpack.streams.streamDetailView.routingTab', {
+        defaultMessage: 'Routing',
+      }),
+    },
+    {
+      name: 'processing',
+      content: <></>,
+      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+        defaultMessage: 'Processing',
       }),
     },
   ];
 
-  return (
-    <EntityDetailViewWithoutParams tabs={tabs} entity={entity} type={type} selectedTab={tab} />
-  );
+  return <EntityDetailViewWithoutParams tabs={tabs} entity={entity} selectedTab={tab} />;
 }

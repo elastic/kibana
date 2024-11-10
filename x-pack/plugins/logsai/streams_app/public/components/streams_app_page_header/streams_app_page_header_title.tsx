@@ -4,25 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 
-export function StreamsAppPageHeaderTitle({
-  title,
-  children,
-}: {
-  title: string;
-  children?: React.ReactNode;
-}) {
+export function StreamsAppPageHeaderTitle({ title }: { title: string }) {
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiTitle>
-          <h1>{title}</h1>
-        </EuiTitle>
-        {children}
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="none" />
-    </EuiFlexGroup>
+    <EuiTitle size="l">
+      <h1>{title}</h1>
+    </EuiTitle>
   );
 }
