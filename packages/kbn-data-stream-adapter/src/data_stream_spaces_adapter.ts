@@ -44,8 +44,13 @@ export class DataStreamSpacesAdapter extends IndexPatternAdapter {
       installFn(createDataStream({ name, esClient, logger }), `create ${name} data stream`);
   }
 
+  /**
+   * Method to create the data stream for a given space ID.
+   * It resolves with the full data stream name.
+   */
   public async installSpace(spaceId: string): Promise<string> {
-    return this.createIndex(spaceId);
+    await this.createIndex(spaceId);
+    return this.getIndexName(spaceId);
   }
 
   public async getInstalledSpaceName(spaceId: string): Promise<string | undefined> {

@@ -115,7 +115,7 @@ export class IndexAdapter {
             logger,
             totalFieldsLimit: this.totalFieldsLimit,
           }),
-          `${componentTemplate.name} component template`
+          `create or update ${componentTemplate.name} component template`
         )
       )
     );
@@ -129,7 +129,7 @@ export class IndexAdapter {
             esClient,
             logger,
           }),
-          `${indexTemplate.name} index template`
+          `create or update ${indexTemplate.name} index template`
         )
       )
     );

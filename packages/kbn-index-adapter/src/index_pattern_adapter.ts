@@ -13,12 +13,12 @@ import { IndexAdapter, type IndexAdapterParams, type InstallParams } from './ind
 export type InstallIndex = (indexSuffix: string) => Promise<void>;
 
 export class IndexPatternAdapter extends IndexAdapter {
-  protected installedIndexName: Map<string, Promise<string>>;
+  protected installationPromises: Map<string, Promise<void>>;
   protected installIndexPromise?: Promise<InstallIndex>;
 
   constructor(protected readonly prefix: string, options: IndexAdapterParams) {
     super(`${prefix}-*`, options); // make indexTemplate `indexPatterns` match all index names
-    this.installedIndexName = new Map();
+    this.installationPromises = new Map();
   }
 
   /** Method to create/update the templates, update existing indices and setup internal state for the adapter. */
@@ -52,44 +52,46 @@ export class IndexPatternAdapter extends IndexAdapter {
   }
 
   /**
-   * Method to create the index for a given index suffix. It will be created only if it does not exist.
-   * @param indexSuffix The suffix of the index name
-   * @returns A promise that resolves with the full index name.
+   * Method to create the index for a given index suffix.
+   * Stores the installations promises to avoid concurrent installations for the same index.
+   * Index creation will only be attempted once per index suffix and existence will be checked before creating.
    */
-  public async createIndex(indexSuffix: string): Promise<string> {
+  public async createIndex(indexSuffix: string): Promise<void> {
     if (!this.installIndexPromise) {
       throw new Error('Cannot installIndex before install');
     }
 
-    const existingInstallPromise = this.installedIndexName.get(indexSuffix);
-    if (existingInstallPromise) {
-      // return the existing promise so we don't try to install the same index multiple times for concurrent requests
-      return existingInstallPromise;
+    const existingInstallation = this.installationPromises.get(indexSuffix);
+    if (existingInstallation) {
+      return existingInstallation;
     }
     const indexName = this.getIndexName(indexSuffix);
 
     // Awaits for installIndexPromise to resolve to ensure templates are installed before the specific index is created.
     // This is a safety measure since the initial `install` call may not be awaited from the plugin lifecycle caller.
     // However, the promise will most likely be already fulfilled by the time `createIndex` is called, so this is a no-op.
-    const installPromise = this.installIndexPromise
+    const installation = this.installIndexPromise
       .then((installIndex) => installIndex(indexName))
-      .then(() => indexName)
       .catch((err) => {
-        this.installedIndexName.delete(indexSuffix);
+        this.installationPromises.delete(indexSuffix);
         throw err;
       });
 
-    this.installedIndexName.set(indexSuffix, installPromise);
-    await installPromise;
-    return indexName;
+    this.installationPromises.set(indexSuffix, installation);
+    return installation;
   }
 
+  /** Method to get the full index name for a given index suffix. */
   public getIndexName(indexSuffix: string): string {
     return `${this.prefix}-${indexSuffix}`;
   }
 
-  /** Method to get the full index name for a given index suffix. Ii won't create the index if it does not exist. */
+  /** Method to get the full index name for a given index suffix. It returns undefined if the index does not exist. */
   public async getInstalledIndexName(indexSuffix: string): Promise<string | undefined> {
-    return this.installedIndexName.get(indexSuffix);
+    const existingInstallation = this.installationPromises.get(indexSuffix);
+    if (!existingInstallation) {
+      return undefined;
+    }
+    return existingInstallation.then(() => this.getIndexName(indexSuffix)).catch(() => undefined);
   }
 }
