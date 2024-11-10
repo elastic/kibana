@@ -35,7 +35,7 @@ export const getApiDeprecationMessage = (
   details: RouterDeprecatedApiDetails,
   apiUsageStats: CoreDeprecatedApiUsageStats
 ): string[] => {
-  const { routePath, routeMethod } = details;
+  const { routePath, routeMethod, routeDeprecationOptions } = details;
   const { apiLastCalledAt, apiTotalCalls, markedAsResolvedLastCalledAt, totalMarkedAsResolved } =
     apiUsageStats;
 
@@ -69,6 +69,11 @@ export const getApiDeprecationMessage = (
         }
       )
     );
+  }
+
+  if (routeDeprecationOptions.message) {
+    // Surfaces additional deprecation messages passed into the route in UA
+    messages.push(routeDeprecationOptions.message);
   }
 
   return messages;
@@ -106,6 +111,15 @@ export const getApiDeprecationsManualSteps = (details: RouterDeprecatedApiDetail
       );
       break;
     }
+    case 'deprecate': {
+      manualSteps.push(
+        i18n.translate('core.deprecations.deprecations.manualSteps.removeTypeExplainationStep', {
+          defaultMessage:
+            'For now, the API will still work, but will be moved or removed in a future version. Check the Learn more link for more information. If you are no longer using the API, you can mark this issue as resolved. It will no longer appear in the Upgrade Assistant unless another call using this API is detected.',
+        })
+      );
+      break;
+    }
     case 'migrate': {
       const { newApiPath, newApiMethod } = routeDeprecationOptions.reason;
       const newRouteWithMethod = `${newApiMethod.toUpperCase()} ${newApiPath}`;
@@ -121,12 +135,14 @@ export const getApiDeprecationsManualSteps = (details: RouterDeprecatedApiDetail
     }
   }
 
-  manualSteps.push(
-    i18n.translate('core.deprecations.deprecations.manualSteps.markAsResolvedStep', {
-      defaultMessage:
-        'Check that you are no longer using the old API in any requests, and mark this issue as resolved. It will no longer appear in the Upgrade Assistant unless another call using this API is detected.',
-    })
-  );
+  if (deprecationType !== 'deprecate') {
+    manualSteps.push(
+      i18n.translate('core.deprecations.deprecations.manualSteps.markAsResolvedStep', {
+        defaultMessage:
+          'Check that you are no longer using the old API in any requests, and mark this issue as resolved. It will no longer appear in the Upgrade Assistant unless another call using this API is detected.',
+      })
+    );
+  }
 
   return manualSteps;
 };

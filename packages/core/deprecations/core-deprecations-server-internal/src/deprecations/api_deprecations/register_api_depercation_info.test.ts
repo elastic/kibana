@@ -228,6 +228,51 @@ describe('#registerApiDeprecationsInfo', () => {
       `);
     });
 
+    it('returns deprecated type deprecated route', async () => {
+      const getDeprecations = createGetApiDeprecations({ coreUsageData, http });
+      const deprecatedRoute = createDeprecatedRouteDetails({
+        routePath: '/api/test_deprecated/',
+        routeDeprecationOptions: { reason: { type: 'deprecate' }, message: 'additional message' },
+      });
+      http.getRegisteredDeprecatedApis.mockReturnValue([deprecatedRoute]);
+      usageClientMock.getDeprecatedApiUsageStats.mockResolvedValue([
+        createApiUsageStat(buildApiDeprecationId(deprecatedRoute)),
+      ]);
+
+      const deprecations = await getDeprecations();
+      expect(deprecations).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "apiId": "123|get|/api/test_deprecated",
+            "correctiveActions": Object {
+              "manualSteps": Array [
+                "Identify the origin of these API calls.",
+                "For now, the API will still work, but will be moved or removed in a future version. Check the Learn more link for more information. If you are no longer using the API, you can mark this issue as resolved. It will no longer appear in the Upgrade Assistant unless another call using this API is detected.",
+              ],
+              "mark_as_resolved_api": Object {
+                "apiTotalCalls": 13,
+                "routeMethod": "get",
+                "routePath": "/api/test_deprecated/",
+                "routeVersion": "123",
+                "timestamp": 2024-10-17T12:06:41.224Z,
+                "totalMarkedAsResolved": 1,
+              },
+            },
+            "deprecationType": "api",
+            "documentationUrl": "https://fake-url",
+            "domainId": "core.routes-deprecations",
+            "level": "critical",
+            "message": Array [
+              "The API \\"GET /api/test_deprecated/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",
+              "This issue has been marked as resolved on Thursday, October 17, 2024 8:06 AM -04:00 but the API has been called 12 times since.",
+              "additional message",
+            ],
+            "title": "The \\"GET /api/test_deprecated/\\" route is deprecated",
+          },
+        ]
+      `);
+    });
+
     it('does not return resolved deprecated route', async () => {
       const getDeprecations = createGetApiDeprecations({ coreUsageData, http });
       const deprecatedRoute = createDeprecatedRouteDetails({ routePath: '/api/test_resolved/' });

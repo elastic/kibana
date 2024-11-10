@@ -15,6 +15,13 @@ export function defineStatusRoute({ router, elasticsearch, preboot }: RouteDefin
   router.get(
     {
       path: '/internal/interactive_setup/status',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'Interactive setup is strictly a "pre-boot" feature which cannot leverage conventional authorization.',
+        },
+      },
       validate: false,
       options: { authRequired: false },
     },
