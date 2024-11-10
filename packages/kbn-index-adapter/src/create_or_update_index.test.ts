@@ -40,7 +40,7 @@ describe('updateIndices', () => {
     });
 
     expect(esClient.indices.get).toHaveBeenCalledWith({
-      index: `${name}*`,
+      index: name,
       expand_wildcards: 'all',
     });
 
