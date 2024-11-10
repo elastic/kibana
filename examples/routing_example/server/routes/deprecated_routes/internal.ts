@@ -16,6 +16,7 @@ export const registerInternalDeprecatedRoute = (router: IRouter) => {
       path: DEPRECATED_ROUTES.INTERNAL_DEPRECATED_ROUTE,
       validate: false,
       options: {
+        // Explicitly set access is to internal
         access: 'internal',
         deprecated: {
           documentationUrl: 'https://elastic.co/',
@@ -39,9 +40,7 @@ export const registerInternalDeprecatedRoute = (router: IRouter) => {
     {
       path: DEPRECATED_ROUTES.INTERNAL_ONLY_ROUTE,
       validate: false,
-      options: {
-        access: 'internal',
-      },
+      // If no access is specified then it defaults to internal
     },
     async (ctx, req, res) => {
       return res.ok({

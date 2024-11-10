@@ -287,8 +287,7 @@ Run them in the console to trigger the deprecation condition so they show up in 
 
 ```
 # Route deprecations for Versioned routes: Version 1 is deprecated
-GET kbn:/api/routing_example/d/versioned?apiVersion=1
-GET kbn:/api/routing_example/d/versioned?apiVersion=2
+GET kbn:/api/routing_example/d/versioned_route?apiVersion=2023-10-31
 
 # Route deprecations for Non-versioned routes
 GET kbn:/api/routing_example/d/removed_route
@@ -299,12 +298,12 @@ POST kbn:/api/routing_example/d/migrated_route
 # Access deprecations
 GET kbn:/api/routing_example/d/internal_deprecated_route
 GET kbn:/internal/routing_example/d/internal_only_route
+GET kbn:/internal/routing_example/d/internal_versioned_route?apiVersion=1
 ```
 
 1. You can also mark as deprecated in the UA to remove the deprecation from the list.
 2. Check the telemetry response to see the reported data about the deprecated route.
-3. Calling version 2 of the API  does not do anything since it is not deprecated unlike version `1` (`GET kbn:/api/routing_example/d/versioned?apiVersion=2`)
-4. Internally you can see the deprecations counters from the dev console by running the following:
+3. Internally you can see the deprecations counters from the dev console by running the following:
 ```
 GET .kibana_usage_counters/_search
 {

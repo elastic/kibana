@@ -11,12 +11,20 @@ import type {
   ApiDeprecationDetails,
   DomainDeprecationDetails,
 } from '@kbn/core-deprecations-common';
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type { BuildApiDeprecationDetailsParams } from '../types';
 import {
   getApiDeprecationMessage,
   getApiDeprecationsManualSteps,
   getApiDeprecationTitle,
 } from './i18n_texts';
+
+export const getIsAccessApiDeprecation = (req: CoreKibanaRequest): boolean => {
+  const isNotPublicAccess = req.route.options.access !== 'public';
+  const isNotInternalRequest = !req.isInternalApiRequest;
+
+  return !!(isNotPublicAccess && isNotInternalRequest);
+};
 
 export const buildApiAccessDeprecationDetails = ({
   apiUsageStats,

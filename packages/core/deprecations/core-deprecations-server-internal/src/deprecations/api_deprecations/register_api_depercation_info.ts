@@ -38,17 +38,17 @@ export const createGetApiDeprecations =
         }
 
         const { routeAccess } = deprecatedApiDetails;
-
         switch (routeAccess) {
-          case 'internal': {
-            return buildApiAccessDeprecationDetails({
+          case 'public': {
+            return buildApiRouteDeprecationDetails({
               apiUsageStats,
               deprecatedApiDetails,
             });
           }
-          case 'public':
+          // if no access is specified then internal is the default
+          case 'internal':
           default: {
-            return buildApiRouteDeprecationDetails({
+            return buildApiAccessDeprecationDetails({
               apiUsageStats,
               deprecatedApiDetails,
             });

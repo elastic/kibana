@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { buildApiAccessDeprecationDetails } from './access_deprecations';
+export { buildApiAccessDeprecationDetails, getIsAccessApiDeprecation } from './access_deprecations';
