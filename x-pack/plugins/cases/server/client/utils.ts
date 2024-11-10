@@ -16,6 +16,7 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
+import { escapeQuotes } from '@kbn/es-query/src/kuery/utils/escape_kuery';
 import type {
   CaseCustomField,
   CaseSeverity,
@@ -665,7 +666,9 @@ export const buildObservablesFieldsFilter = (observables: Record<string, string[
   const filterExpressions = Object.keys(observables).flatMap((typeKey) => {
     return Object.values(observables[typeKey]).map((observableValue) => {
       return fromKueryExpression(
-        `cases.attributes.observables:{value: "${observableValue}" AND typeKey: "${typeKey}"}`
+        `cases.attributes.observables:{value: "${escapeQuotes(
+          observableValue
+        )}" AND typeKey: "${typeKey}"}`
       );
     });
   });

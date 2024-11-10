@@ -15,6 +15,7 @@ import { createSavedObjectsSerializerMock } from './mocks';
 import {
   arraysDifference,
   buildFilter,
+  buildObservablesFieldsFilter,
   buildRangeFilter,
   constructQueryOptions,
   constructSearch,
@@ -1574,6 +1575,12 @@ describe('utils', () => {
       });
 
       expect(res).toEqual([]);
+    });
+  });
+
+  describe('buildObservablesFieldsFilter', () => {
+    it('builds the filter escaping quotes in the value', () => {
+      expect(buildObservablesFieldsFilter({ type: ['{"json":"value"}'] })).toMatchInlineSnapshot();
     });
   });
 });

@@ -64,7 +64,54 @@ export default ({ getService }: FtrProviderContext): void => {
         const newObservableData = {
           isIoc: false,
           hasBeenSighted: false,
-          value: 'test',
+          value: 'value',
+          typeKey: '0ad4bf8e-575f-49ad-87ea-8bcafd5173e4',
+          description: '',
+        };
+
+        const { cases } = await similarCases({
+          supertest,
+          body: { perPage: 10, page: 1 },
+          caseId: caseA.id,
+        });
+        expect(cases.length).to.be(0);
+
+        await addObservable({
+          supertest,
+          caseId: caseA.id,
+          params: {
+            observable: newObservableData,
+          },
+        });
+
+        await addObservable({
+          supertest,
+          caseId: caseB.id,
+          params: {
+            observable: newObservableData,
+          },
+        });
+
+        const { cases: casesAfterObservablesAreAdded } = await similarCases({
+          supertest,
+          body: { perPage: 10, page: 1 },
+          caseId: caseA.id,
+        });
+
+        expect(casesAfterObservablesAreAdded.length).to.be(1);
+      });
+
+      it('returns cases similar to given case with json in the value', async () => {
+        const [caseA, caseB] = await Promise.all([
+          createCase(supertest, getPostCaseRequest()),
+          createCase(supertest, getPostCaseRequest()),
+          createCase(supertest, getPostCaseRequest()),
+        ]);
+
+        const newObservableData = {
+          isIoc: false,
+          hasBeenSighted: false,
+          value: '{"foo": "bar"}',
           typeKey: '0ad4bf8e-575f-49ad-87ea-8bcafd5173e4',
           description: '',
         };
