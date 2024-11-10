@@ -4,26 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiPageHeader, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiPageHeader, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import React from 'react';
 
 export function StreamsAppPageHeader({
   title,
   children,
+  verticalPaddingSize = 'l',
 }: {
   title: React.ReactNode;
   children?: React.ReactNode;
+  verticalPaddingSize?: 'none' | 'l';
 }) {
+  const theme = useEuiTheme().euiTheme;
+
   return (
-    <EuiPanel paddingSize="none" color="transparent">
-      <EuiPageHeader>
-        <EuiFlexGroup direction="row">
-          <EuiPanel hasBorder={false} hasShadow={false} color="transparent">
-            {title}
-          </EuiPanel>
-        </EuiFlexGroup>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiPageHeader
+        className={css`
+          padding: ${verticalPaddingSize === 'none' ? 0 : theme.size[verticalPaddingSize]}
+            ${theme.size.l};
+        `}
+      >
+        {title}
       </EuiPageHeader>
       {children}
-    </EuiPanel>
+    </EuiFlexGroup>
   );
 }

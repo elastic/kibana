@@ -8,7 +8,7 @@
 export function entitySourceQuery({ entity }: { entity: Record<string, string> }) {
   return {
     bool: {
-      filter: Object.entries(entity).map(([key, value]) => ({ [key]: value })),
+      filter: Object.entries(entity).map(([key, value]) => ({ term: { [key]: value } })),
     },
   };
 }

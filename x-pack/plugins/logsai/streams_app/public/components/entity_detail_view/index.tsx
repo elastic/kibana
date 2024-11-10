@@ -82,7 +82,10 @@ export function EntityDetailViewWithoutParams({
           </EuiFlexGroup>
         </EuiLink>
       </EuiPanel>
-      <StreamsAppPageHeader title={<StreamsAppPageHeaderTitle title={entity.displayName} />}>
+      <StreamsAppPageHeader
+        verticalPaddingSize="none"
+        title={<StreamsAppPageHeaderTitle title={entity.displayName} />}
+      >
         <EntityOverviewTabList
           tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
             return {

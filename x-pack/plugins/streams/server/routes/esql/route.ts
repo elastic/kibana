@@ -39,7 +39,6 @@ export const executeEsqlRoute = createServerRoute({
     } = params;
 
     const response = await observabilityEsClient.esql(operationName, {
-      dropNullColumns: true,
       query,
       filter: {
         bool: {

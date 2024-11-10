@@ -16,6 +16,7 @@ import { entitySourceQuery } from '../../../common/entity_source_query';
 import { useKibana } from '../../hooks/use_kibana';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
+import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 
 export function StreamDetailOverview({ definition }: { definition?: StreamDefinition }) {
   const {
@@ -53,9 +54,11 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
 
     const baseQuery = `FROM ${indexPatterns.join(', ')}`;
 
-    const bucketSize = calculateAuto.atLeast(50, moment.duration(1, 'minute'))!.asMinutes();
+    const bucketSize = Math.round(
+      calculateAuto.atLeast(50, moment.duration(1, 'minute'))!.asSeconds()
+    );
 
-    const histogramQuery = `${baseQuery} | STATS metric = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${bucketSize} minutes)`;
+    const histogramQuery = `${baseQuery} | STATS metric = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${bucketSize} seconds)`;
 
     return {
       histogramQuery,
@@ -63,9 +66,15 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
     };
   }, [dataStream]);
 
-  const histogramQueryFetch = useAbortableAsync(
+  const histogramQueryFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      if (!queries?.histogramQuery) {
+      if (!queries?.histogramQuery || !dataStream) {
+        return undefined;
+      }
+
+      const existingIndices = await dataViews.getExistingIndices([dataStream]);
+
+      if (existingIndices.length === 0) {
         return undefined;
       }
 
@@ -84,6 +93,8 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
       });
     },
     [
+      dataStream,
+      dataViews,
       streamsRepositoryClient,
       queries?.histogramQuery,
       persistedKqlFilter,
