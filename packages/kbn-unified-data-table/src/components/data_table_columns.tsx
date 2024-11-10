@@ -21,7 +21,11 @@ import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ExpandButton } from './data_table_expand_button';
 import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
-import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
+import type {
+  ValueToStringConverter,
+  DataTableColumnsMeta,
+  RenderCustomGridColumnInfoPopover,
+} from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
 import { SelectButton, getSelectAllButton } from './data_table_document_selection';
@@ -32,7 +36,11 @@ import {
 } from '../constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
-import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
+import {
+  DataTableColumnHeader,
+  DataTableColumnHeaderProps,
+  DataTableTimeColumnHeader,
+} from './data_table_column_header';
 import { UnifiedDataTableProps } from './data_table';
 
 export const getColumnDisplayName = (
@@ -115,6 +123,7 @@ function buildEuiGridColumn({
   showColumnTokens,
   headerRowHeight,
   customGridColumnsConfiguration,
+  renderCustomGridColumnInfoPopover,
   columnDisplay,
   onResize,
 }: {
@@ -138,6 +147,7 @@ function buildEuiGridColumn({
   showColumnTokens?: boolean;
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+  renderCustomGridColumnInfoPopover?: RenderCustomGridColumnInfoPopover;
   columnDisplay?: string;
   onResize: UnifiedDataTableProps['onResize'];
 }) {
@@ -205,6 +215,16 @@ function buildEuiGridColumn({
 
   const columnType = columnsMeta?.[columnName]?.type ?? dataViewField?.type;
 
+  const columnHeaderCommonProps: DataTableColumnHeaderProps = {
+    dataView,
+    columnName,
+    columnDisplayName,
+    columnsMeta,
+    showColumnTokens,
+    headerRowHeight,
+    renderCustomGridColumnInfoPopover,
+  };
+
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(columnType),
@@ -214,14 +234,7 @@ function buildEuiGridColumn({
       ((isPlainRecord && columnName !== '_source') || dataViewField?.sortable === true),
     display:
       showColumnTokens || headerRowHeight !== 1 ? (
-        <DataTableColumnHeaderMemoized
-          dataView={dataView}
-          columnName={columnName}
-          columnDisplayName={columnDisplayName}
-          columnsMeta={columnsMeta}
-          showColumnTokens={showColumnTokens}
-          headerRowHeight={headerRowHeight}
-        />
+        <DataTableColumnHeaderMemoized {...columnHeaderCommonProps} />
       ) : undefined,
     displayAsText: columnDisplayName,
     actions: {
@@ -262,14 +275,7 @@ function buildEuiGridColumn({
   };
 
   if (column.id === dataView.timeFieldName) {
-    column.display = (
-      <DataTableTimeColumnHeaderMemoized
-        dataView={dataView}
-        dataViewField={dataViewField}
-        headerRowHeight={headerRowHeight}
-        columnLabel={columnDisplay}
-      />
-    );
+    column.display = <DataTableTimeColumnHeaderMemoized {...columnHeaderCommonProps} />;
     if (numberOfColumns > 1) {
       column.initialWidth = defaultTimeColumnWidth;
     }
@@ -315,6 +321,7 @@ export function getEuiGridColumns({
   showColumnTokens,
   headerRowHeightLines,
   customGridColumnsConfiguration,
+  renderCustomGridColumnInfoPopover,
   onResize,
 }: {
   columns: string[];
@@ -339,6 +346,7 @@ export function getEuiGridColumns({
   showColumnTokens?: boolean;
   headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+  renderCustomGridColumnInfoPopover?: RenderCustomGridColumnInfoPopover;
   onResize: UnifiedDataTableProps['onResize'];
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
@@ -367,6 +375,7 @@ export function getEuiGridColumns({
       showColumnTokens,
       headerRowHeight,
       customGridColumnsConfiguration,
+      renderCustomGridColumnInfoPopover,
       columnDisplay: settings?.columns?.[column]?.display,
       onResize,
     })

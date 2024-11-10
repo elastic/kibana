@@ -186,6 +186,15 @@
   }
 }
 
+.unifiedDataTable__columnHeaderInfoButton {
+  display: none;
+
+  .unifiedDataTable__headerCell:hover &,
+  .unifiedDataTable__headerCell:focus-within & {
+    display: block;
+  }
+}
+
 @include euiBreakpoint('xs', 's', 'm') {
   // EUI issue to hide 'of' text https://github.com/elastic/eui/issues/4654
   .unifiedDataTable__flyoutDocumentNavigation .euiPagination__compressedText {

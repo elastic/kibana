@@ -29,7 +29,7 @@ import { FIELDS_LIMIT_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-u
 import { FieldList } from '../../components/field_list';
 import { FieldListFilters } from '../../components/field_list_filters';
 import { FieldListGrouped, type FieldListGroupedProps } from '../../components/field_list_grouped';
-import { FieldsGroupNames } from '../../types';
+import { FieldsGroupNames, type UnifiedFieldListSidebarContainerStateService } from '../../types';
 import type { ButtonAddFieldVariant, AdditionalFieldGroups } from '../../types';
 import { GroupedFieldsParams, useGroupedFields } from '../../hooks/use_grouped_fields';
 import { UnifiedFieldListItem, type UnifiedFieldListItemProps } from '../unified_field_list_item';
@@ -92,7 +92,7 @@ interface UnifiedFieldListSidebarInternalProps {
   /**
    * Service for managing the state
    */
-  stateService: UnifiedFieldListItemProps['stateService'];
+  stateService: UnifiedFieldListSidebarContainerStateService;
 
   /**
    * Show loading instead of the field list if processing
@@ -264,7 +264,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     ({ field, groupName, groupIndex, itemIndex, fieldSearchHighlight }) => (
       <li key={`field${field.name}`} data-attr-field={field.name}>
         <UnifiedFieldListItem
-          stateService={stateService}
+          options={stateService.creationOptions}
           searchMode={searchMode}
           services={services}
           alwaysShowActionButton={alwaysShowActionButton}

@@ -7,5 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DiscoverGrid } from './discover_grid';
-export { getDiscoverGridColumnInfoPopover } from './discover_grid_column_info_popover';
+import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import type { UnifiedFieldListItemPopoverProps } from './field_list_item_popover';
+
+const LazyUnifiedFieldListItemPopover = React.lazy(() => import('./field_list_item_popover'));
+
+export const UnifiedFieldListItemPopover = withSuspense<UnifiedFieldListItemPopoverProps>(
+  LazyUnifiedFieldListItemPopover,
+  <></>
+);
+
+export type { UnifiedFieldListItemPopoverProps };

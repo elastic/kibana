@@ -93,5 +93,10 @@ export {
   type UnifiedFieldListSidebarContainerProps,
 } from './src/containers/unified_field_list_sidebar';
 
+export {
+  UnifiedFieldListItemPopover,
+  type UnifiedFieldListItemPopoverProps,
+} from './src/containers/unified_field_list_item/field_list_item_popover_lazy';
+
 export * from './src/utils/fallback_fields';
 export { SmartFieldFallbackTooltip } from './src/components/fallback_fields';

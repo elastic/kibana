@@ -50,7 +50,10 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import { map } from 'rxjs';
-import { DiscoverGrid } from '../../../../components/discover_grid';
+import {
+  DiscoverGrid,
+  getDiscoverGridColumnInfoPopover,
+} from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
@@ -404,6 +407,15 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator]
   );
 
+  const renderCustomGridColumnInfoPopover = useMemo(
+    () =>
+      getDiscoverGridColumnInfoPopover({
+        isEsqlMode,
+        services,
+      }),
+    [isEsqlMode, services]
+  );
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       <div className="dscDocuments__loading">
@@ -511,6 +523,7 @@ function DiscoverDocumentsComponent({
                 onFetchMoreRecords={onFetchMoreRecords}
                 externalCustomRenderers={cellRenderers}
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
+                renderCustomGridColumnInfoPopover={renderCustomGridColumnInfoPopover}
                 rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                 additionalFieldGroups={additionalFieldGroups}
                 dataGridDensityState={density}

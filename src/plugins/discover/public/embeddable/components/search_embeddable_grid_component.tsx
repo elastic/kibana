@@ -267,6 +267,7 @@ export function SearchEmbeddableGridComponent({
       maxAllowedSampleSize={getMaxAllowedSampleSize(discoverServices.uiSettings)}
       query={savedSearchQuery}
       filters={savedSearchFilters}
+      timeRange={timeRange}
       savedSearchId={savedSearchId}
       searchTitle={panelTitle || savedSearchTitle}
       services={discoverServices}
