@@ -49,7 +49,7 @@ import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './typ
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
 import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
-import { validateDuplicatedKeysInRequest } from '../validators';
+import { validateDuplicatedKeysInRequest, validateDuplicatedLabelsInRequest } from '../validators';
 import {
   validateCustomFieldTypesInRequest,
   validateTemplatesCustomFieldsInRequest,
@@ -306,6 +306,11 @@ export async function update(
     validateDuplicatedKeysInRequest({
       requestFields: request.customFields,
       fieldName: 'customFields',
+    });
+
+    validateDuplicatedLabelsInRequest({
+      requestFields: request.observableTypes,
+      fieldName: 'observableTypes',
     });
 
     const { version, templates, ...queryWithoutVersion } = request;

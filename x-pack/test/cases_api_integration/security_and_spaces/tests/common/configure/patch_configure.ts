@@ -98,6 +98,52 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(data).to.eql({ ...getConfigurationOutput(true), customFields });
     });
 
+    it('should patch a configuration with observableTypes', async () => {
+      const observableTypes = [
+        {
+          key: '50d4d08c-12b4-4055-a343-b303e0ab3724',
+          label: 'type 1',
+        },
+        {
+          key: 'fc3ff698-589a-44fd-bbc4-ffaa0b7211f7',
+          label: 'type 2',
+        },
+      ] as ConfigurationPatchRequest['observableTypes'];
+      const configuration = await createConfiguration(supertest);
+
+      await updateConfiguration(supertest, configuration.id, {
+        version: configuration.version,
+        observableTypes,
+      });
+    });
+
+    it('should not patch a configuration with duplicated observableTypes', async () => {
+      const observableTypes = [
+        {
+          key: '50d4d08c-12b4-4055-a343-b303e0ab3724',
+          label: 'duplicate',
+        },
+        {
+          key: 'fc3ff698-589a-44fd-bbc4-ffaa0b7211f7',
+          label: 'duplicate',
+        },
+      ] as ConfigurationPatchRequest['observableTypes'];
+      const configuration = await createConfiguration(supertest);
+
+      let exception;
+
+      try {
+        await updateConfiguration(supertest, configuration.id, {
+          version: configuration.version,
+          observableTypes,
+        });
+      } catch (e) {
+        exception = e;
+      }
+
+      expect(exception).not.to.be(undefined);
+    });
+
     it('should update mapping when changing connector', async () => {
       const configuration = await createConfiguration(supertest);
       await updateConfiguration(supertest, configuration.id, {

@@ -507,13 +507,7 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "${expectedStatus}",
-            },
-          ],
-          "function": "is",
-          "type": "function",
-        }
-      `);
+              "value": "`);
     });
 
     it('should create a filter for multiple status values', () => {
@@ -577,13 +571,7 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "${expectedSeverity}",
-            },
-          ],
-          "function": "is",
-          "type": "function",
-        }
-        `);
+              "value": "`);
     });
 
     it('should create a filter for multiple severity values', () => {
@@ -1113,9 +1101,7 @@ describe('utils', () => {
           "rootSearchFields": Array [
             "_id",
           ],
-          "search": "\\"${uuid}\\" \\"cases:${uuid}\\"",
-        }
-      `);
+          "search": "\\"`);
     });
 
     it('search value not changed and no rootSearchFields when search is non-uuid', () => {
@@ -1580,7 +1566,57 @@ describe('utils', () => {
 
   describe('buildObservablesFieldsFilter', () => {
     it('builds the filter escaping quotes in the value', () => {
-      expect(buildObservablesFieldsFilter({ type: ['{"json":"value"}'] })).toMatchInlineSnapshot();
+      expect(buildObservablesFieldsFilter({ type: ['{"json":"value"}'] })).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "cases.attributes.observables",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "value",
+                    },
+                    Object {
+                      "isQuoted": true,
+                      "type": "literal",
+                      "value": "{\\"json\\":\\"value\\"}",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
+                },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "typeKey",
+                    },
+                    Object {
+                      "isQuoted": true,
+                      "type": "literal",
+                      "value": "type",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
+                },
+              ],
+              "function": "and",
+              "type": "function",
+            },
+          ],
+          "function": "nested",
+          "type": "function",
+        }
+      `);
     });
   });
 });
