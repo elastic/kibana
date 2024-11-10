@@ -123,6 +123,7 @@ export type {
   RouteSecurityGetter,
   InternalRouteSecurity,
   RouteDeprecationInfo,
+  PostValidationMetadata,
 } from './src/router';
 export {
   validBodyOutput,

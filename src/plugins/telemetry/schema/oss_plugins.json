@@ -10905,12 +10905,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "observability:newLogsOverview": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Enable the new logs overview component."
-          }
-        },
         "observability:searchExcludedDataTiers": {
           "type": "array",
           "items": {
@@ -10918,6 +10912,12 @@
             "_meta": {
               "description": "Non-default value of setting."
             }
+          }
+        },
+        "observability:newLogsOverview": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Enable the new logs overview component."
           }
         }
       }

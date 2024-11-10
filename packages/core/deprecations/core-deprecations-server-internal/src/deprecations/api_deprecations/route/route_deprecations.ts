@@ -11,10 +11,8 @@ import type {
   ApiDeprecationDetails,
   DomainDeprecationDetails,
 } from '@kbn/core-deprecations-common';
-
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import _ from 'lodash';
-import { RouteDeprecationInfo } from '@kbn/core-http-server';
+import { PostValidationMetadata } from '@kbn/core-http-server';
 import {
   getApiDeprecationMessage,
   getApiDeprecationsManualSteps,
@@ -22,12 +20,12 @@ import {
 } from './i18n_texts';
 import type { BuildApiDeprecationDetailsParams } from '../types';
 
-export const getIsRouteApiDeprecation = (
-  req: CoreKibanaRequest,
-  deprecated?: RouteDeprecationInfo
-): boolean => {
+export const getIsRouteApiDeprecation = ({
+  isInternalApiRequest,
+  deprecated,
+}: PostValidationMetadata): boolean => {
   const hasDeprecatedObject = deprecated && _.isObject(deprecated);
-  const isNotInternalRequest = !req.isInternalApiRequest;
+  const isNotInternalRequest = !isInternalApiRequest;
 
   return !!(hasDeprecatedObject && isNotInternalRequest);
 };

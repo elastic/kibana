@@ -65,6 +65,7 @@ export type {
   Privilege,
   PrivilegeSet,
   RouteDeprecationInfo,
+  PostValidationMetadata,
 } from './route';
 
 export { validBodyOutput, ReservedPrivilegesSet } from './route';

@@ -11,7 +11,8 @@ import type {
   ApiDeprecationDetails,
   DomainDeprecationDetails,
 } from '@kbn/core-deprecations-common';
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+
+import type { PostValidationMetadata } from '@kbn/core-http-server';
 import type { BuildApiDeprecationDetailsParams } from '../types';
 import {
   getApiDeprecationMessage,
@@ -19,9 +20,12 @@ import {
   getApiDeprecationTitle,
 } from './i18n_texts';
 
-export const getIsAccessApiDeprecation = (req: CoreKibanaRequest): boolean => {
-  const isNotPublicAccess = req.route.options.access !== 'public';
-  const isNotInternalRequest = !req.isInternalApiRequest;
+export const getIsAccessApiDeprecation = ({
+  isInternalApiRequest,
+  isPublicAccess,
+}: PostValidationMetadata): boolean => {
+  const isNotPublicAccess = !isPublicAccess;
+  const isNotInternalRequest = !isInternalApiRequest;
 
   return !!(isNotPublicAccess && isNotInternalRequest);
 };
