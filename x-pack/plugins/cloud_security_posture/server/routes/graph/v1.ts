@@ -25,9 +25,9 @@ type EsQuery = GraphRequest['query']['esQuery'];
 
 interface GraphEdge {
   badge: number;
-  ips: string[];
-  hosts: string[];
-  users: string[];
+  ips?: string[] | string;
+  hosts?: string[] | string;
+  users?: string[] | string;
   actorIds: string[] | string;
   action: string;
   targetIds: string[] | string;
@@ -246,7 +246,12 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
           id,
           label: unknownTargets.includes(id) ? 'Unknown' : undefined,
           color: isAlert ? 'danger' : 'primary',
-          ...determineEntityNodeShape(id, ips ?? [], hosts ?? [], users ?? []),
+          ...determineEntityNodeShape(
+            id,
+            castArray(ips ?? []),
+            castArray(hosts ?? []),
+            castArray(users ?? [])
+          ),
         };
       }
     });
