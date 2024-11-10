@@ -159,6 +159,7 @@ export const getFormattedTable = (
   accessors: Array<string | ExpressionValueVisDimension>,
   xScaleType: XScaleType
 ): { table: Datatable; formattedColumns: Record<string, true> } => {
+  console.time('getFormattedTable');
   const columnsFormatters = table.columns.reduce<Record<string, IFieldFormat>>(
     (formatters, { id, meta }) => {
       const accessor: string | ExpressionValueVisDimension | undefined = accessors.find(
@@ -196,6 +197,7 @@ export const getFormattedTable = (
       ...formattedRowInfo.formattedColumns,
     };
   }
+  console.timeEnd('getFormattedTable');
 
   return {
     table: { ...table, rows: formattedTableInfo.rows },
