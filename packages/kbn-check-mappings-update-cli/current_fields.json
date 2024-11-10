@@ -1076,6 +1076,7 @@
     "urls"
   ],
   "synthetics-param": [],
+  "synthetics-private-location": [],
   "synthetics-privates-locations": [],
   "tag": [
     "color",

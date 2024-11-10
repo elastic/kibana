@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
-import { defaultUdtHeaders } from '../../unified_components/default_headers';
+import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { memoizedGetTimelineColumnHeaders } from './utils';
 
