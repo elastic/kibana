@@ -10,6 +10,7 @@ import { SecurityException } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
 import { syncStream } from '../../lib/streams/stream_crud';
 import { rootStreamDefinition } from '../../lib/streams/root_stream_definition';
+import { createStreamsIndex } from '../../lib/streams/internal_stream_mapping';
 
 export const enableStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/_enable 2023-10-31',
@@ -25,6 +26,7 @@ export const enableStreamsRoute = createServerRoute({
   handler: async ({ request, response, logger, getScopedClients }) => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
+      await createStreamsIndex(scopedClusterClient);
       await syncStream({
         scopedClusterClient,
         definition: rootStreamDefinition,

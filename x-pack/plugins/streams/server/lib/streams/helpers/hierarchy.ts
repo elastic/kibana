@@ -28,3 +28,8 @@ export function getParentId(id: string) {
 export function isRoot(id: string) {
   return id.split('.').length === 1;
 }
+
+export function getAncestors(id: string) {
+  const parts = id.split('.');
+  return parts.slice(0, parts.length - 1).map((_, index) => parts.slice(0, index + 1).join('.'));
+}

@@ -8,7 +8,7 @@
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { get } from 'lodash';
 import { Logger } from '@kbn/logging';
-import { StreamDefinition } from '../../../common/types';
+import { FieldDefinition, StreamDefinition } from '../../../common/types';
 import { STREAMS_INDEX } from '../../../common/constants';
 import { DefinitionNotFound, IndexTemplateNotFound } from './errors';
 import { deleteTemplate, upsertTemplate } from './index_templates/manage_index_templates';
@@ -24,6 +24,8 @@ import {
   deleteIngestPipeline,
   upsertIngestPipeline,
 } from './ingest_pipelines/manage_ingest_pipelines';
+import { getAncestors } from './helpers/hierarchy';
+import { MalformedFields } from './errors/malformed_fields';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
@@ -66,7 +68,7 @@ export async function deleteStreamObjects({ id, scopedClusterClient, logger }: D
   });
 }
 
-async function upsertStream({ definition, scopedClusterClient }: BaseParamsWithDefinition) {
+async function upsertInternalStream({ definition, scopedClusterClient }: BaseParamsWithDefinition) {
   return scopedClusterClient.asCurrentUser.index({
     id: definition.id,
     index: STREAMS_INDEX,
@@ -108,6 +110,95 @@ export async function readStream({ id, scopedClusterClient }: ReadStreamParams) 
       throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
     }
     throw e;
+  }
+}
+
+interface ReadAncestorsParams extends BaseParams {
+  id: string;
+}
+
+export async function readAncestors({ id, scopedClusterClient }: ReadAncestorsParams) {
+  const ancestorIds = getAncestors(id);
+
+  return await Promise.all(
+    ancestorIds.map((ancestorId) => readStream({ scopedClusterClient, id: ancestorId }))
+  );
+}
+
+interface ReadDescendantsParams extends BaseParams {
+  id: string;
+}
+
+export async function readDescendants({ id, scopedClusterClient }: ReadDescendantsParams) {
+  const response = await scopedClusterClient.asCurrentUser.search<StreamDefinition>({
+    index: STREAMS_INDEX,
+    size: 10000,
+    body: {
+      query: {
+        bool: {
+          filter: {
+            prefix: {
+              id,
+            },
+          },
+          must_not: {
+            term: {
+              id,
+            },
+          },
+        },
+      },
+    },
+  });
+  return response.hits.hits.map((hit) => hit._source as StreamDefinition);
+}
+
+export async function validateAncestorFields(
+  scopedClusterClient: IScopedClusterClient,
+  id: string,
+  fields: FieldDefinition[]
+) {
+  const ancestors = await readAncestors({
+    id,
+    scopedClusterClient,
+  });
+  for (const ancestor of ancestors) {
+    for (const field of fields) {
+      if (
+        ancestor.definition.fields.some(
+          (ancestorField) => ancestorField.type !== field.type && ancestorField.name === field.name
+        )
+      ) {
+        throw new MalformedFields(
+          `Field ${field.name} is already defined with incompatible type in the parent stream ${ancestor.definition.id}`
+        );
+      }
+    }
+  }
+}
+
+export async function validateDescendantFields(
+  scopedClusterClient: IScopedClusterClient,
+  id: string,
+  fields: FieldDefinition[]
+) {
+  const descendants = await readDescendants({
+    id,
+    scopedClusterClient,
+  });
+  for (const descendant of descendants) {
+    for (const field of fields) {
+      if (
+        descendant.fields.some(
+          (descendantField) =>
+            descendantField.type !== field.type && descendantField.name === field.name
+        )
+      ) {
+        throw new MalformedFields(
+          `Field ${field.name} is already defined with incompatible type in the child stream ${descendant.id}`
+        );
+      }
+    }
   }
 }
 
@@ -167,7 +258,7 @@ export async function syncStream({
   rootDefinition,
   logger,
 }: SyncStreamParams) {
-  await upsertStream({
+  await upsertInternalStream({
     scopedClusterClient,
     definition,
   });
@@ -189,11 +280,12 @@ export async function syncStream({
     logger,
     pipeline: reroutePipeline,
   });
+  await upsertTemplate({
+    esClient: scopedClusterClient.asSecondaryAuthUser,
+    logger,
+    template: generateIndexTemplate(definition.id),
+  });
   if (rootDefinition) {
-    const { composedOf, ignoreMissing } = await getIndexTemplateComponents({
-      scopedClusterClient,
-      definition: rootDefinition,
-    });
     const parentReroutePipeline = await generateReroutePipeline({
       definition: rootDefinition,
     });
@@ -201,17 +293,6 @@ export async function syncStream({
       esClient: scopedClusterClient.asSecondaryAuthUser,
       logger,
       pipeline: parentReroutePipeline,
-    });
-    await upsertTemplate({
-      esClient: scopedClusterClient.asSecondaryAuthUser,
-      logger,
-      template: generateIndexTemplate(definition.id, composedOf, ignoreMissing),
-    });
-  } else {
-    await upsertTemplate({
-      esClient: scopedClusterClient.asSecondaryAuthUser,
-      logger,
-      template: generateIndexTemplate(definition.id),
     });
   }
 }

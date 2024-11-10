@@ -15,10 +15,17 @@ import {
   SecurityException,
 } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
-import { StreamDefinition, streamDefinitonSchema } from '../../../common/types';
-import { syncStream, readStream, checkStreamExists } from '../../lib/streams/stream_crud';
+import { StreamDefinition, streamWithoutIdDefinitonSchema } from '../../../common/types';
+import {
+  syncStream,
+  readStream,
+  checkStreamExists,
+  validateAncestorFields,
+  validateDescendantFields,
+} from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
 import { getParentId } from '../../lib/streams/helpers/hierarchy';
+import { MalformedChildren } from '../../lib/streams/errors/malformed_children';
 
 export const editStreamRoute = createServerRoute({
   endpoint: 'PUT /api/streams/{id} 2023-10-31',
@@ -34,17 +41,15 @@ export const editStreamRoute = createServerRoute({
     path: z.object({
       id: z.string(),
     }),
-    body: z.object({ definition: streamDefinitonSchema }),
+    body: streamWithoutIdDefinitonSchema,
   }),
   handler: async ({ response, params, logger, request, getScopedClients }) => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
 
-      await validateStreamChildren(
-        scopedClusterClient,
-        params.path.id,
-        params.body.definition.children
-      );
+      await validateStreamChildren(scopedClusterClient, params.path.id, params.body.children);
+      await validateAncestorFields(scopedClusterClient, params.path.id, params.body.fields);
+      await validateDescendantFields(scopedClusterClient, params.path.id, params.body.fields);
 
       const parentId = getParentId(params.path.id);
       let parentDefinition: StreamDefinition | undefined;
@@ -57,11 +62,11 @@ export const editStreamRoute = createServerRoute({
           logger
         );
       }
-      const streamDefinition = { ...params.body.definition };
+      const streamDefinition = { ...params.body };
 
       await syncStream({
         scopedClusterClient,
-        definition: streamDefinition,
+        definition: { ...streamDefinition, id: params.path.id },
         rootDefinition: parentDefinition,
         logger,
       });
@@ -80,7 +85,6 @@ export const editStreamRoute = createServerRoute({
           children: [],
           fields: [],
           processing: [],
-          root: false,
         };
 
         await syncStream({
@@ -149,7 +153,7 @@ async function validateStreamChildren(
     const oldChildren = oldDefinition.children.map((child) => child.id);
     const newChildren = new Set(children.map((child) => child.id));
     if (oldChildren.some((child) => !newChildren.has(child))) {
-      throw new MalformedStreamId(
+      throw new MalformedChildren(
         'Cannot remove children from a stream, please delete the stream instead'
       );
     }

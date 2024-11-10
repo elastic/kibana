@@ -14,7 +14,7 @@ import {
 } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
 import { conditionSchema, streamDefinitonSchema } from '../../../common/types';
-import { syncStream, readStream } from '../../lib/streams/stream_crud';
+import { syncStream, readStream, validateAncestorFields } from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
 import { isChildOf } from '../../lib/streams/helpers/hierarchy';
 
@@ -47,7 +47,7 @@ export const forkStreamsRoute = createServerRoute({
         id: params.path.id,
       });
 
-      const childDefinition = { ...params.body.stream, root: false };
+      const childDefinition = { ...params.body.stream };
 
       // check whether root stream has a child of the given name already
       if (rootDefinition.children.some((child) => child.id === childDefinition.id)) {
@@ -61,6 +61,12 @@ export const forkStreamsRoute = createServerRoute({
           `The ID (${params.body.stream.id}) from the new stream must start with the parent's id (${rootDefinition.id}), followed by a dot and a name`
         );
       }
+
+      await validateAncestorFields(
+        scopedClusterClient,
+        params.body.stream.id,
+        params.body.stream.fields
+      );
 
       rootDefinition.children.push({
         id: params.body.stream.id,

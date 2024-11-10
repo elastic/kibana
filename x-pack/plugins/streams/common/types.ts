@@ -65,22 +65,7 @@ export const fieldDefinitionSchema = z.object({
 
 export type FieldDefinition = z.infer<typeof fieldDefinitionSchema>;
 
-/**
- * Example of a "root" stream
- * {
- *   "id": "logs",
- * }
- *
- * Example of a forked stream
- * {
- *    "id": "logs.nginx",
- *    "condition": { field: 'log.logger, operator: 'eq', value": "nginx_proxy" }
- *    "forked_from": "logs"
- * }
- */
-
-export const streamDefinitonSchema = z.object({
-  id: z.string(),
+export const streamWithoutIdDefinitonSchema = z.object({
   processing: z.array(processingDefinitionSchema).default([]),
   fields: z.array(fieldDefinitionSchema).default([]),
   children: z
@@ -91,6 +76,12 @@ export const streamDefinitonSchema = z.object({
       })
     )
     .default([]),
+});
+
+export type StreamWithoutIdDefinition = z.infer<typeof streamDefinitonSchema>;
+
+export const streamDefinitonSchema = streamWithoutIdDefinitonSchema.extend({
+  id: z.string(),
 });
 
 export type StreamDefinition = z.infer<typeof streamDefinitonSchema>;

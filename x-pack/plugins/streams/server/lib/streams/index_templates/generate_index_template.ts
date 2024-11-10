@@ -9,15 +9,19 @@ import { ASSET_VERSION } from '../../../../common/constants';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 import { getIndexTemplateName } from './name';
 
-export function generateIndexTemplate(
-  id: string,
-  composedOf: string[] = [],
-  ignoreMissing: string[] = []
-) {
+export function generateIndexTemplate(id: string) {
+  const composedOf = id.split('.').reduce((acc, _, index, array) => {
+    if (index === array.length - 1) {
+      return acc;
+    }
+    const parent = array.slice(0, index + 1).join('.');
+    return [...acc, `${parent}@stream.layer`];
+  }, [] as string[]);
+
   return {
     name: getIndexTemplateName(id),
     index_patterns: [id],
-    composed_of: [...composedOf, `${id}@stream.layer`],
+    composed_of: composedOf,
     priority: 200,
     version: ASSET_VERSION,
     _meta: {
@@ -35,6 +39,7 @@ export function generateIndexTemplate(
       },
     },
     allow_auto_create: true,
-    ignore_missing_component_templates: [...ignoreMissing, `${id}@stream.layer`],
+    // ignore missing component templates to be more robust against out-of-order syncs
+    ignore_missing_component_templates: composedOf,
   };
 }
