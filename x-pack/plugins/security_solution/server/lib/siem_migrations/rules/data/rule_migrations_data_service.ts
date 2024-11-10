@@ -70,10 +70,10 @@ export class RuleMigrationsDataService {
   private createIndexNameProvider(adapter: AdapterId, spaceId: string) {
     return async (migrationId: string) => {
       const suffix = `${migrationId}-${spaceId}`;
-      if (suffix.includes('*')) {
-        return this.adapters[adapter].getIndexName(suffix);
+      if (!suffix.includes('*')) {
+        await this.adapters[adapter].createIndex(suffix);
       }
-      return this.adapters[adapter].createIndex(suffix);
+      return this.adapters[adapter].getIndexName(suffix);
     };
   }
 }
