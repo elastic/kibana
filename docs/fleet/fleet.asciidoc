@@ -31,7 +31,7 @@ You can make a complete clone of a whole managed dashboard. If you clone a panel
 
 To clone a dashboard:
 
-. Open the main menu (&#8801;) and click *Dashboards*.
+. Go to *Dashboards*.
 . Click on the name of the managed dashboard to view the dashboard.
 . Click *Clone* in the toolbar.
 . Click *Save and return* after editing the dashboard.
