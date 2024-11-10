@@ -144,33 +144,28 @@ async function getIngestPipelineState({
     .filter(({ type }) => type === 'ingest_pipeline')
     .map(({ id }) => id);
 
-  const [ingestPipelines, ingestStatsByPipeline] = await Promise.all([
+  const [ingestPipelines, ingestPipelinesStats] = await Promise.all([
     esClient.ingest.getPipeline({ id: ingestPipelineIds.join(',') }, { ignore: [404] }),
-    esClient.nodes
-      .stats({
-        metric: 'ingest',
-        filter_path: ingestPipelineIds.map((id) => `nodes.*.ingest.pipelines.${id}`),
-      })
-      .then((stats) => {
-        return reduce(
-          stats.nodes,
-          (pipelines, { ingest }) => {
-            forEach(ingest?.pipelines, (value: NodesIngestTotal, key: string) => {
-              if (!pipelines[key]) {
-                pipelines[key] = { count: 0, failed: 0 };
-              }
-              pipelines[key].count += value.count ?? 0;
-              pipelines[key].failed += value.failed ?? 0;
-            });
-            return pipelines;
-          },
-          {} as Record<string, { count: number; failed: number }>
-        );
-      })
-      .catch(() => {
-        return {} as Record<string, { count: number; failed: number }>;
-      }),
+    esClient.nodes.stats({
+      metric: 'ingest',
+      filter_path: ingestPipelineIds.map((id) => `nodes.*.ingest.pipelines.${id}`),
+    }),
   ]);
+
+  const ingestStatsByPipeline = reduce(
+    ingestPipelinesStats.nodes,
+    (pipelines, { ingest }) => {
+      forEach(ingest?.pipelines, (value: NodesIngestTotal, key: string) => {
+        if (!pipelines[key]) {
+          pipelines[key] = { count: 0, failed: 0 };
+        }
+        pipelines[key].count += value.count ?? 0;
+        pipelines[key].failed += value.failed ?? 0;
+      });
+      return pipelines;
+    },
+    {} as Record<string, { count: number; failed: number }>
+  );
 
   return ingestPipelineIds.map((id) => ({
     id,
