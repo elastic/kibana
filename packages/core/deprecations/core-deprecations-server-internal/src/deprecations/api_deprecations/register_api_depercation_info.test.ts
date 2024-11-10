@@ -62,6 +62,7 @@ describe('#registerApiDeprecationsInfo', () => {
     ): RouterDeprecatedApiDetails =>
       _.merge(
         {
+          routeAccess: 'public',
           routeDeprecationOptions: {
             documentationUrl: 'https://fake-url',
             severity: 'critical',
