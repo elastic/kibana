@@ -7,7 +7,12 @@
 
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { Plugin } from './plugin';
+import { StreamsPluginSetup, StreamsPluginStart } from './types';
 
-export const plugin: PluginInitializer<{}, {}> = (context: PluginInitializerContext) => {
+export type { StreamsPluginSetup, StreamsPluginStart };
+
+export const plugin: PluginInitializer<StreamsPluginSetup, StreamsPluginStart> = (
+  context: PluginInitializerContext
+) => {
   return new Plugin(context);
 };

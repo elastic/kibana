@@ -40,14 +40,14 @@ export function useStreamsAppRouter(): StatefulStreamsAppRouter {
       ...streamsAppRouter,
       push: (...args) => {
         const next = link(...args);
-        navigateToApp('entities', { path: next, replace: false });
+        navigateToApp('streams', { path: next, replace: false });
       },
       replace: (path, ...args) => {
         const next = link(path, ...args);
-        navigateToApp('entities', { path: next, replace: true });
+        navigateToApp('streams', { path: next, replace: true });
       },
       link: (path, ...args) => {
-        return http.basePath.prepend('/app/entities' + link(path, ...args));
+        return http.basePath.prepend('/app/streams' + link(path, ...args));
       },
     }),
     [navigateToApp, http.basePath]

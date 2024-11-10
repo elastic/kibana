@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
-import { kqlQuery } from '@kbn/observability-utils/es/queries/kql_query';
-import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { kqlQuery } from '@kbn/observability-utils-common/es/queries/kql_query';
+import { esqlResultToPlainObjects } from '@kbn/observability-utils-server/es/esql_result_to_plain_objects';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { ScalarValue } from '@elastic/elasticsearch/lib/api/types';
 import {

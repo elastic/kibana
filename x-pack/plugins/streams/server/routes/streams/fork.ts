@@ -45,6 +45,7 @@ export const forkStreamsRoute = createServerRoute({
       const { definition: rootDefinition } = await readStream({
         scopedClusterClient,
         id: params.path.id,
+        logger,
       });
 
       if (!params.body.id.startsWith(rootDefinition.id)) {
@@ -56,6 +57,7 @@ export const forkStreamsRoute = createServerRoute({
       await createStream({
         scopedClusterClient,
         definition: { ...params.body, forked_from: rootDefinition.id, root: false },
+        logger,
       });
 
       await bootstrapStream({

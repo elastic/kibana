@@ -34,6 +34,7 @@ export async function bootstrapStream({
   const { composedOf, ignoreMissing } = await getIndexTemplateComponents({
     scopedClusterClient,
     definition: rootDefinition,
+    logger,
   });
   const reroutePipeline = await generateReroutePipeline({
     esClient: scopedClusterClient.asCurrentUser,

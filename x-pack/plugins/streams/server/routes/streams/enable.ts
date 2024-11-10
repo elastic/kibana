@@ -13,10 +13,9 @@ import { createStream } from '../../lib/streams/stream_crud';
 import { rootStreamDefinition } from '../../lib/streams/root_stream_definition';
 
 export const enableStreamsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/_enable 2023-10-31',
+  endpoint: 'POST /internal/streams/_enable',
   params: z.object({}),
   options: {
-    access: 'public',
     security: {
       authz: {
         requiredPrivileges: ['streams_enable'],
@@ -33,6 +32,7 @@ export const enableStreamsRoute = createServerRoute({
       await createStream({
         scopedClusterClient,
         definition: rootStreamDefinition,
+        logger,
       });
       return response.ok({ body: { acknowledged: true } });
     } catch (e) {

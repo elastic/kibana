@@ -6,9 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
+import { notFound, internal } from '@hapi/boom';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
 import { readStream } from '../../lib/streams/stream_crud';
+import { StreamDefinition } from '../../../common';
 
 export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{id} 2023-10-31',
@@ -23,21 +25,28 @@ export const readStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ id: z.string() }),
   }),
-  handler: async ({ response, params, request, getScopedClients }) => {
+  handler: async ({
+    response,
+    params,
+    request,
+    logger,
+    getScopedClients,
+  }): Promise<{ definition: StreamDefinition }> => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
       const streamEntity = await readStream({
+        logger,
         scopedClusterClient,
         id: params.path.id,
       });
 
-      return response.ok({ body: streamEntity });
+      return streamEntity;
     } catch (e) {
       if (e instanceof DefinitionNotFound) {
-        return response.notFound({ body: e });
+        throw notFound(e);
       }
 
-      return response.customError({ body: e, statusCode: 500 });
+      throw internal(e);
     }
   },
 });

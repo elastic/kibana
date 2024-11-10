@@ -8,17 +8,8 @@
     "browser": true,
     "configPath": ["xpack", "streamsAPI"],
     "requiredPlugins": [
-      "observabilityShared",
-      "inference",
-      "dataViews",
-      "data",
-      "unifiedSearch",
-      "datasetQuality",
-      "share",
       "alerting",
       "ruleRegistry",
-      "slo",
-      "spaces"
     ],
     "requiredBundles": [
     ],

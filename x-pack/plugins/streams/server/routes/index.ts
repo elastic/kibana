@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import { esqlRoutes } from './esql/route';
 import { enableStreamsRoute } from './streams/enable';
 import { forkStreamsRoute } from './streams/fork';
+import { listStreamsRoute } from './streams/list';
 import { readStreamRoute } from './streams/read';
 
 export const StreamsRouteRepository = {
   ...enableStreamsRoute,
   ...forkStreamsRoute,
   ...readStreamRoute,
+  ...listStreamsRoute,
+  ...esqlRoutes,
 };
 
 export type StreamsRouteRepository = typeof StreamsRouteRepository;

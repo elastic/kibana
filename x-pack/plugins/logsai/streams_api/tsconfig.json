@@ -14,5 +14,16 @@
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
+    "@kbn/core",
+    "@kbn/server-route-repository",
+    "@kbn/server-route-repository-client",
+    "@kbn/logging",
+    "@kbn/rule-registry-plugin",
+    "@kbn/config-schema",
+    "@kbn/apm-utils",
+    "@kbn/dashboard-plugin",
+    "@kbn/alerting-plugin",
+    "@kbn/observability-utils-server",
+    "@kbn/licensing-plugin",
   ]
 }

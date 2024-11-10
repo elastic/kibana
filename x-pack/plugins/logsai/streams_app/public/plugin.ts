@@ -16,7 +16,7 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { ENTITY_APP_ID } from '@kbn/deeplinks-observability/constants';
+import { STREAMS_APP_ID } from '@kbn/deeplinks-observability/constants';
 import type {
   ConfigSchema,
   StreamsAppPublicSetup,
@@ -53,10 +53,10 @@ export class StreamsAppPlugin
               sortKey: 101,
               entries: [
                 {
-                  label: i18n.translate('xpack.entities.streamsAppLinkTitle', {
-                    defaultMessage: 'Entities',
+                  label: i18n.translate('xpack.streams.streamsAppLinkTitle', {
+                    defaultMessage: 'Streams',
                   }),
-                  app: ENTITY_APP_ID,
+                  app: STREAMS_APP_ID,
                   path: '/',
                   matchPath(currentPath: string) {
                     return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
@@ -70,20 +70,20 @@ export class StreamsAppPlugin
     );
 
     coreSetup.application.register({
-      id: ENTITY_APP_ID,
-      title: i18n.translate('xpack.entities.appTitle', {
-        defaultMessage: 'Entities',
+      id: STREAMS_APP_ID,
+      title: i18n.translate('xpack.streams.appTitle', {
+        defaultMessage: 'Streams',
       }),
       euiIconType: 'logoObservability',
-      appRoute: '/app/entities',
+      appRoute: '/app/streams',
       category: DEFAULT_APP_CATEGORIES.observability,
       visibleIn: ['sideNav'],
       order: 8001,
       deepLinks: [
         {
-          id: 'entities',
-          title: i18n.translate('xpack.entities.streamsAppDeepLinkTitle', {
-            defaultMessage: 'Entities',
+          id: 'streams',
+          title: i18n.translate('xpack.streams.streamsAppDeepLinkTitle', {
+            defaultMessage: 'Streams',
           }),
           path: '/',
         },

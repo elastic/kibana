@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { SearchHit } from '@kbn/es-types';
+import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { get } from 'lodash';
-import { StreamDefinition } from '../../../common/types';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { STREAMS_INDEX } from '../../../common/constants';
+import { StreamDefinition } from '../../../common/types';
 import { ComponentTemplateNotFound, DefinitionNotFound, IndexTemplateNotFound } from './errors';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
+  logger: Logger;
 }
 
 interface BaseParamsWithDefinition extends BaseParams {
@@ -32,16 +35,17 @@ interface ReadStreamParams extends BaseParams {
   id: string;
 }
 
-export async function readStream({ id, scopedClusterClient }: ReadStreamParams) {
+export async function readStream({ id, ...baseParams }: ReadStreamParams) {
+  const { scopedClusterClient } = baseParams;
   try {
     const response = await scopedClusterClient.asCurrentUser.get<StreamDefinition>({
       id,
       index: STREAMS_INDEX,
     });
     const definition = response._source as StreamDefinition;
-    const indexTemplate = await readIndexTemplate({ scopedClusterClient, definition });
-    const componentTemplate = await readComponentTemplate({ scopedClusterClient, definition });
-    const ingestPipelines = await readIngestPipelines({ scopedClusterClient, definition });
+    const indexTemplate = await readIndexTemplate({ ...baseParams, definition });
+    const componentTemplate = await readComponentTemplate({ ...baseParams, definition });
+    const ingestPipelines = await readIngestPipelines({ ...baseParams, definition });
     return {
       definition,
       index_template: indexTemplate,
@@ -54,6 +58,38 @@ export async function readStream({ id, scopedClusterClient }: ReadStreamParams) 
     }
     throw e;
   }
+}
+
+type ListStreamsParams = BaseParams;
+
+export interface ListStreamResponse {
+  hits: Array<SearchHit<StreamDefinition>>;
+  total: {
+    value: number;
+  };
+}
+
+export async function listStreams({
+  scopedClusterClient,
+  logger,
+}: ListStreamsParams): Promise<ListStreamResponse> {
+  const esClient = createObservabilityEsClient({
+    client: scopedClusterClient.asCurrentUser,
+    logger,
+    plugin: 'streams',
+  });
+
+  const response = await esClient.search<StreamDefinition>('list_streams', {
+    index: STREAMS_INDEX,
+    allow_no_indices: true,
+    track_total_hits: true,
+    size: 10_000,
+  });
+
+  return {
+    hits: response.hits.hits,
+    total: response.hits.total,
+  };
 }
 
 export async function readIndexTemplate({
@@ -99,11 +135,8 @@ export async function readIngestPipelines({
   return response;
 }
 
-export async function getIndexTemplateComponents({
-  scopedClusterClient,
-  definition,
-}: BaseParamsWithDefinition) {
-  const indexTemplate = await readIndexTemplate({ scopedClusterClient, definition });
+export async function getIndexTemplateComponents(params: BaseParamsWithDefinition) {
+  const indexTemplate = await readIndexTemplate(params);
   return {
     composedOf: indexTemplate.index_template.composed_of,
     ignoreMissing: get(

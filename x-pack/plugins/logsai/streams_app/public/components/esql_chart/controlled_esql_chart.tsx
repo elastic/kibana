@@ -28,7 +28,7 @@ import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { useKibana } from '../../hooks/use_kibana';
 import { LoadingPanel } from '../loading_panel';
 
-const END_ZONE_LABEL = i18n.translate('xpack.entities.esqlChart.endzone', {
+const END_ZONE_LABEL = i18n.translate('xpack.streams.esqlChart.endzone', {
   defaultMessage:
     'The selected time range does not include this entire bucket. It might contain partial data.',
 });

@@ -4,10 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Entity } from '@kbn/streams-api-plugin/common';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -17,161 +13,81 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
-import { useKibana } from '../../hooks/use_kibana';
-import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import { LoadingPanel } from '../loading_panel';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
-import { StreamsAppPageHeader } from '../streams_app_page_header';
-import { StreamsAppPageHeaderTitle } from '../streams_app_page_header/streams_app_page_header_title';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { EntityDetailViewHeaderSection } from '../entity_detail_view_header_section';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
-import { EntityDetailOverview } from '../entity_detail_overview';
+import { LoadingPanel } from '../loading_panel';
+import { StreamsAppPageHeader } from '../streams_app_page_header';
+import { StreamsAppPageHeaderTitle } from '../streams_app_page_header/streams_app_page_header_title';
 
-interface TabDependencies {
-  entity: Entity;
-  dataStreams: Array<{ name: string }>;
-}
-
-interface Tab {
+export interface EntityViewTab {
   name: string;
   label: string;
   content: React.ReactElement;
 }
 
 export function EntityDetailViewWithoutParams({
-  tab,
-  entityKey: key,
+  selectedTab,
+  tabs,
   type,
-  getAdditionalTabs,
+  entity,
 }: {
-  tab: string;
-  entityKey: string;
-  type: string;
-  getAdditionalTabs?: (dependencies: TabDependencies) => Tab[];
+  selectedTab: string;
+  tabs: EntityViewTab[];
+  type: {
+    displayName?: string;
+    id: string;
+  };
+  entity: {
+    displayName?: string;
+    id: string;
+  };
 }) {
-  const {
-    dependencies: {
-      start: {
-        data,
-        streamsAPI: { streamsAPIClient },
-      },
-    },
-    services: {},
-  } = useKibana();
-
-  const {
-    absoluteTimeRange: { start, end },
-  } = useDateRange({ data });
-
   const router = useStreamsAppRouter();
 
   const theme = useEuiTheme().euiTheme;
 
-  const entityFetch = useStreamsAppFetch(
-    ({ signal }) => {
-      return streamsAPIClient.fetch('GET /internal/streams_api/entity/{type}/{key}', {
-        signal,
-        params: {
-          path: {
-            type,
-            key: encodeURIComponent(key),
-          },
-        },
-      });
-    },
-    [type, key, streamsAPIClient]
-  );
-
-  const typeDefinition = entityFetch.value?.typeDefinition;
-
-  const entity = entityFetch.value?.entity;
-
   useStreamsAppBreadcrumbs(() => {
-    if (!typeDefinition || !entity) {
+    if (!type.displayName || !entity.displayName) {
       return [];
     }
 
     return [
       {
-        title: typeDefinition.displayName,
-        path: `/{type}`,
-        params: { path: { type } },
+        title: type.displayName,
+        path: `/`,
       } as const,
       {
         title: entity.displayName,
-        path: `/{type}/{key}`,
-        params: { path: { type, key } },
+        path: `/{key}`,
+        params: { path: { key: entity.id } },
       } as const,
     ];
-  }, [type, key, entity?.displayName, typeDefinition]);
+  }, [type.displayName, type.id, entity.displayName, entity.id]);
 
-  const entityDataStreamsFetch = useStreamsAppFetch(
-    async ({ signal }) => {
-      return streamsAPIClient.fetch(
-        'GET /internal/streams_api/entity/{type}/{key}/data_streams',
-        {
-          signal,
-          params: {
-            path: {
-              type,
-              key: encodeURIComponent(key),
-            },
-            query: {
-              start: String(start),
-              end: String(end),
-            },
-          },
-        }
-      );
-    },
-    [key, type, streamsAPIClient, start, end]
-  );
-
-  const dataStreams = entityDataStreamsFetch.value?.dataStreams;
-
-  if (!entity || !typeDefinition || !dataStreams) {
+  if (!type.displayName || !entity.displayName) {
     return <LoadingPanel />;
   }
 
-  const tabs = {
-    overview: {
-      href: router.link('/{type}/{key}/{tab}', {
-        path: { type, key, tab: 'overview' },
-      }),
-      label: i18n.translate('xpack.entities.entityDetailView.overviewTabLabel', {
-        defaultMessage: 'Overview',
-      }),
-      content: (
-        <EntityDetailOverview
-          dataStreams={dataStreams}
-          entity={entity}
-          typeDefinition={typeDefinition}
-        />
-      ),
-    },
-    ...Object.fromEntries(
-      getAdditionalTabs?.({
-        entity,
-        dataStreams,
-      }).map(({ name, ...rest }) => [
-        name,
+  const tabMap = Object.fromEntries(
+    tabs.map((tab) => {
+      return [
+        tab.name,
         {
-          ...rest,
-          href: router.link(`/{type}/{key}/{tab}`, {
-            path: {
-              type,
-              key,
-              tab: name,
-            },
+          href: router.link('/{key}/{tab}', {
+            path: { key: entity.id, tab: 'overview' },
           }),
+          label: tab.label,
+          content: tab.content,
         },
-      ]) ?? []
-    ),
-  };
+      ];
+    })
+  );
 
-  const selectedTab = tabs[tab as keyof typeof tabs];
+  const selectedTabObject = tabMap[selectedTab];
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -202,7 +118,7 @@ export function EntityDetailViewWithoutParams({
             >
               <EuiFlexItem grow={false}>
                 <EntityDetailViewHeaderSection
-                  title={i18n.translate('xpack.entities.entityDetailView.typeSection', {
+                  title={i18n.translate('xpack.streams.entityDetailView.typeSection', {
                     defaultMessage: 'Type',
                   })}
                 >
@@ -211,7 +127,7 @@ export function EntityDetailViewWithoutParams({
                       align-self: flex-start;
                     `}
                   >
-                    <EuiBadge>{type}</EuiBadge>
+                    <EuiBadge>{type.displayName}</EuiBadge>
                   </EuiFlexItem>
                 </EntityDetailViewHeaderSection>
               </EuiFlexItem>
@@ -220,24 +136,16 @@ export function EntityDetailViewWithoutParams({
         </StreamsAppPageHeaderTitle>
       </StreamsAppPageHeader>
       <EntityOverviewTabList
-        tabs={Object.entries(tabs).map(([tabKey, { label, href }]) => {
+        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
           return {
             name: tabKey,
             label,
             href,
-            selected: tab === tabKey,
+            selected: selectedTab === tabKey,
           };
         })}
       />
-      {selectedTab.content}
+      {selectedTabObject.content}
     </EuiFlexGroup>
   );
-}
-
-export function EntityDetailView() {
-  const {
-    path: { type, key, tab },
-  } = useStreamsAppParams('/{type}/{key}/{tab}');
-
-  return <EntityDetailViewWithoutParams type={type} entityKey={key} tab={tab} />;
 }

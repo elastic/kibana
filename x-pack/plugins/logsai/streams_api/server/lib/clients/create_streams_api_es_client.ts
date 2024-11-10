@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { StreamsAPIRouteHandlerResources } from '../../routes/types';
 
 export async function createStreamsAPIEsClient({

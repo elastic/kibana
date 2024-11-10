@@ -47,7 +47,7 @@ export const useStreamsAppFetch: UseAbortableAsync<{}, { disableToastOnError?: b
       }
 
       notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.entities.failedToFetchError', {
+        title: i18n.translate('xpack.streams.failedToFetchError', {
           defaultMessage: 'Failed to fetch data{requestUrlSuffix}',
           values: {
             requestUrlSuffix: requestUrl ? ` (${requestUrl})` : '',

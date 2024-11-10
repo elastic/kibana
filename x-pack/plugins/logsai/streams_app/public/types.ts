@@ -4,41 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  StreamsAPIPublicSetup,
-  StreamsAPIPublicStart,
-} from '@kbn/streams-api-plugin/public';
-import type {
-  ObservabilitySharedPluginSetup,
-  ObservabilitySharedPluginStart,
-} from '@kbn/observability-shared-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
 import type {
-  UnifiedSearchPluginSetup,
-  UnifiedSearchPublicPluginStart,
-} from '@kbn/unified-search-plugin/public';
-
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
+import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
 
 export interface StreamsAppSetupDependencies {
-  observabilityShared: ObservabilitySharedPluginSetup;
-  streamsAPI: StreamsAPIPublicSetup;
+  streams: StreamsPluginSetup;
   data: DataPublicPluginSetup;
   dataViews: DataViewsPublicPluginSetup;
-  unifiedSearch: UnifiedSearchPluginSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
+  unifiedSearch: {};
 }
 
 export interface StreamsAppStartDependencies {
-  observabilityShared: ObservabilitySharedPluginStart;
-  streamsAPI: StreamsAPIPublicStart;
+  streams: StreamsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
