@@ -39,7 +39,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: (authz) => {
         return authz.fleet.addAgents || authz.fleet.addFleetServers || authz.fleet.readSettings;
       },
-      description: `List Fleet Server hosts`,
+      summary: `Get Fleet Server hosts`,
       options: {
         tags: ['oas-tag:Fleet Server hosts'],
       },
@@ -67,7 +67,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
-      description: `Create Fleet Server host`,
+      summary: `Create a Fleet Server host`,
       options: {
         tags: ['oas-tag:Fleet Server hosts'],
       },
@@ -95,7 +95,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readSettings: true },
       },
-      description: `Get Fleet Server host by ID`,
+      summary: `Get a Fleet Server host`,
+      description: `Get a Fleet Server host by ID.`,
       options: {
         tags: ['oas-tag:Fleet Server hosts'],
       },
@@ -123,7 +124,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
-      description: `Delete Fleet Server host by ID`,
+      summary: `Delete a Fleet Server host`,
+      description: `Delete a Fleet Server host by ID.`,
       options: {
         tags: ['oas-tag:Fleet Server hosts'],
       },
@@ -154,7 +156,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
-      description: `Update Fleet Server host by ID`,
+      summary: `Update a Fleet Server host`,
+      description: `Update a Fleet Server host by ID.`,
       options: {
         tags: ['oas-tag:Fleet Server hosts'],
       },
