@@ -9,12 +9,10 @@
 
 import { DeprecationsDetails } from '@kbn/core-deprecations-common';
 
-import _ from 'lodash';
-import { buildApiRouteDeprecationDetails } from './route_deprecations';
-import { buildApiAccessDeprecationDetails } from './access_deprecations';
-
-import { ApiDeprecationsServiceDeps } from './types';
+import { buildApiRouteDeprecationDetails } from './route/route_deprecations';
+import { buildApiAccessDeprecationDetails } from './access/access_deprecations';
 import { buildApiDeprecationId } from './api_deprecation_id';
+import type { ApiDeprecationsServiceDeps } from './types';
 
 export const createGetApiDeprecations =
   ({ http, coreUsageData }: Pick<ApiDeprecationsServiceDeps, 'coreUsageData' | 'http'>) =>
@@ -31,23 +29,32 @@ export const createGetApiDeprecations =
         deprecatedApis.some((routeDetails) => buildApiDeprecationId(routeDetails) === apiId)
       )
       .map((apiUsageStats) => {
-        const { internal: internalApiDeprecationedRoutes, ...deprecatedRoutes } = _.groupBy(
-          deprecatedApis,
-          'routeAccess'
+        const { apiId } = apiUsageStats;
+        const deprecatedApiDetails = deprecatedApis.find(
+          (routeDetails) => buildApiDeprecationId(routeDetails) === apiId
         );
+        if (!deprecatedApiDetails) {
+          throw new Error(`Unable to find deprecation details for "${apiId}"`);
+        }
 
-        return [
-          buildApiRouteDeprecationDetails({
-            apiUsageStats,
-            deprecatedApis: Object.values(deprecatedRoutes).flat(),
-          }),
-          buildApiAccessDeprecationDetails({
-            apiUsageStats,
-            deprecatedApis: Object.values(internalApiDeprecationedRoutes),
-          }),
-        ];
-      })
-      .flat();
+        const { routeAccess } = deprecatedApiDetails;
+
+        switch (routeAccess) {
+          case 'internal': {
+            return buildApiAccessDeprecationDetails({
+              apiUsageStats,
+              deprecatedApiDetails,
+            });
+          }
+          case 'public':
+          default: {
+            return buildApiRouteDeprecationDetails({
+              apiUsageStats,
+              deprecatedApiDetails,
+            });
+          }
+        }
+      });
   };
 
 export const registerApiDeprecationsInfo = ({

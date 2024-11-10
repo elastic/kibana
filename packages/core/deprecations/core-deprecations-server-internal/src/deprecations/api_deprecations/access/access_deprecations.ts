@@ -11,34 +11,30 @@ import type {
   ApiDeprecationDetails,
   DomainDeprecationDetails,
 } from '@kbn/core-deprecations-common';
-import type { BuildApiDeprecationDetailsParams } from './types';
+import type { BuildApiDeprecationDetailsParams } from '../types';
 import {
   getApiDeprecationMessage,
   getApiDeprecationsManualSteps,
   getApiDeprecationTitle,
 } from './i18n_texts';
-import { buildApiDeprecationId } from './api_deprecation_id';
 
 export const buildApiAccessDeprecationDetails = ({
   apiUsageStats,
-  deprecatedApis,
+  deprecatedApiDetails,
 }: BuildApiDeprecationDetailsParams): DomainDeprecationDetails<ApiDeprecationDetails> => {
   const { apiId, apiTotalCalls, totalMarkedAsResolved } = apiUsageStats;
-  const routeDeprecationDetails = deprecatedApis.find(
-    (routeDetails) => buildApiDeprecationId(routeDetails) === apiId
-  )!;
-  const { routeVersion, routePath, routeDeprecationOptions, routeMethod } = routeDeprecationDetails;
+  const { routeVersion, routePath, routeDeprecationOptions, routeMethod } = deprecatedApiDetails;
 
-  const deprecationLevel = routeDeprecationOptions.severity || 'warning';
+  const deprecationLevel = routeDeprecationOptions?.severity || 'warning';
 
   return {
     apiId,
-    title: getApiDeprecationTitle(routeDeprecationDetails),
+    title: getApiDeprecationTitle(deprecatedApiDetails),
     level: deprecationLevel,
-    message: getApiDeprecationMessage(routeDeprecationDetails, apiUsageStats),
-    documentationUrl: routeDeprecationOptions.documentationUrl,
+    message: getApiDeprecationMessage(deprecatedApiDetails, apiUsageStats),
+    documentationUrl: routeDeprecationOptions?.documentationUrl,
     correctiveActions: {
-      manualSteps: getApiDeprecationsManualSteps(routeDeprecationDetails),
+      manualSteps: getApiDeprecationsManualSteps(),
       mark_as_resolved_api: {
         routePath,
         routeMethod,

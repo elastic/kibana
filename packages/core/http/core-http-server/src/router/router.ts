@@ -144,9 +144,21 @@ export interface RouterRoute {
 
 /** @public */
 export interface RouterDeprecatedApiDetails {
-  routeDeprecationOptions: RouteDeprecationInfo;
+  routeDeprecationOptions?: RouteDeprecationInfo;
   routeMethod: RouteMethod;
   routePath: string;
   routeVersion?: string;
   routeAccess?: RouteAccess;
+}
+
+/** @public */
+export interface RouterRouteDeprecatedApiDetails extends RouterDeprecatedApiDetails {
+  routeAccess: 'public';
+  routeDeprecationOptions: RouteDeprecationInfo;
+}
+
+/** @public */
+export interface RouterAccessDeprecatedApiDetails extends RouterDeprecatedApiDetails {
+  routeAccess: 'internal';
+  routeDeprecationOptions?: RouteDeprecationInfo;
 }

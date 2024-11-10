@@ -260,7 +260,7 @@ describe('#registerApiDeprecationsInfo', () => {
             },
             "deprecationType": "api",
             "documentationUrl": "https://fake-url",
-            "domainId": "core.routes-deprecations",
+            "domainId": "core.http.routes-deprecations",
             "level": "critical",
             "message": Array [
               "The API \\"GET /api/test_deprecated/\\" has been called 13 times. The last call was on Sunday, September 1, 2024 6:06 AM -04:00.",

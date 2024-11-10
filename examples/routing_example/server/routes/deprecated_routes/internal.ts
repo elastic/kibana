@@ -20,7 +20,8 @@ export const registerInternalDeprecatedRoute = (router: IRouter) => {
         deprecated: {
           documentationUrl: 'https://elastic.co/',
           severity: 'critical',
-          reason: { type: 'remove' },
+          message: 'Additonal message for internal deprecated api',
+          reason: { type: 'deprecate' },
         },
       },
     },

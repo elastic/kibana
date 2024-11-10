@@ -21,5 +21,5 @@ export interface ApiDeprecationsServiceDeps {
 
 export interface BuildApiDeprecationDetailsParams {
   apiUsageStats: CoreDeprecatedApiUsageStats;
-  deprecatedApis: RouterDeprecatedApiDetails[];
+  deprecatedApiDetails: RouterDeprecatedApiDetails;
 }
