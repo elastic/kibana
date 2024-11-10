@@ -12,7 +12,7 @@ import type {
   DomainDeprecationDetails,
 } from '@kbn/core-deprecations-common';
 import _ from 'lodash';
-import { PostValidationMetadata } from '@kbn/core-http-server';
+import type { PostValidationMetadata } from '@kbn/core-http-server';
 import {
   getApiDeprecationMessage,
   getApiDeprecationsManualSteps,

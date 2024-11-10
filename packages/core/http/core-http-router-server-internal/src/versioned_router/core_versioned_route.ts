@@ -26,9 +26,9 @@ import type {
   RouteSecurity,
   RouteMethod,
   VersionedRouterRoute,
+  PostValidationMetadata,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
-import { PostValidationMetadata } from '@kbn/core-http-server-internal';
 import type { HandlerResolutionStrategy, Method, Options } from './types';
 
 import { validate } from './validate';

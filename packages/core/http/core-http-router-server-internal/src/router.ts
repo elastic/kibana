@@ -28,12 +28,12 @@ import type {
   VersionedRouter,
   RouteRegistrar,
   RouteSecurity,
+  PostValidationMetadata,
 } from '@kbn/core-http-server';
 import { isZod } from '@kbn/zod';
 import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import type { DeepPartial } from '@kbn/utility-types';
-import type { PostValidationMetadata } from '@kbn/core-http-server-internal';
 import { RouteValidator } from './validator';
 import { ALLOWED_PUBLIC_VERSION, CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
