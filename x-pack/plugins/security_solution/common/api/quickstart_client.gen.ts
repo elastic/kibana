@@ -153,10 +153,6 @@ import type {
   EndpointGetFileActionResponse,
 } from './endpoint/actions/response_actions/get_file/get_file.gen';
 import type {
-  EndpointIsolateRedirectRequestBodyInput,
-  EndpointIsolateRedirectResponse,
-} from './endpoint/actions/response_actions/isolate/deprecated_isolate.gen';
-import type {
   EndpointIsolateActionRequestBodyInput,
   EndpointIsolateActionResponse,
 } from './endpoint/actions/response_actions/isolate/isolate.gen';
@@ -177,10 +173,6 @@ import type {
   EndpointSuspendProcessActionResponse,
 } from './endpoint/actions/response_actions/suspend_process/suspend_process.gen';
 import type {
-  EndpointUnisolateRedirectRequestBodyInput,
-  EndpointUnisolateRedirectResponse,
-} from './endpoint/actions/response_actions/unisolate/deprecated_unisolate.gen';
-import type {
   EndpointUnisolateActionRequestBodyInput,
   EndpointUnisolateActionResponse,
 } from './endpoint/actions/response_actions/unisolate/unisolate.gen';
@@ -197,10 +189,6 @@ import type {
   GetEndpointMetadataListRequestQueryInput,
   GetEndpointMetadataListResponse,
 } from './endpoint/metadata/get_metadata.gen';
-import type {
-  GetAgentPolicySummaryRequestQueryInput,
-  GetAgentPolicySummaryResponse,
-} from './endpoint/policy/deprecated_agent_policy_summary.gen';
 import type {
   GetPolicyResponseRequestQueryInput,
   GetPolicyResponseResponse,
@@ -981,25 +969,6 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Isolate an endpoint from the network.
-> info
-> This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/isolate`.
-
-    */
-  async endpointIsolateRedirect(props: EndpointIsolateRedirectProps) {
-    this.log.info(`${new Date().toISOString()} Calling API EndpointIsolateRedirect`);
-    return this.kbnClient
-      .request<EndpointIsolateRedirectResponse>({
-        path: '/api/endpoint/isolate',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
    * Terminate a running process on an endpoint.
    */
   async endpointKillProcessAction(props: EndpointKillProcessActionProps) {
@@ -1055,25 +1024,6 @@ If a record already exists for the specified entity, that record is overwritten 
     return this.kbnClient
       .request<EndpointUnisolateActionResponse>({
         path: '/api/endpoint/action/unisolate',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-    * Release an isolated endpoint, allowing it to rejoin a network.
-> info
-> This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/unisolate`.
-
-    */
-  async endpointUnisolateRedirect(props: EndpointUnisolateRedirectProps) {
-    this.log.info(`${new Date().toISOString()} Calling API EndpointUnisolateRedirect`);
-    return this.kbnClient
-      .request<EndpointUnisolateRedirectResponse>({
-        path: '/api/endpoint/unisolate',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -1190,20 +1140,6 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getAgentPolicySummary(props: GetAgentPolicySummaryProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetAgentPolicySummary`);
-    return this.kbnClient
-      .request<GetAgentPolicySummaryResponse>({
-        path: '/api/endpoint/policy/summaries',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   /**
    * Get the asset criticality record for a specific entity.
    */
@@ -1268,7 +1204,7 @@ finalize it.
     this.log.info(`${new Date().toISOString()} Calling API GetEndpointSuggestions`);
     return this.kbnClient
       .request<GetEndpointSuggestionsResponse>({
-        path: replaceParams('/api/endpoint/suggestions/{suggestion_type}', props.params),
+        path: replaceParams('/internal/api/endpoint/suggestions/{suggestion_type}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -2092,9 +2028,6 @@ export interface EndpointGetProcessesActionProps {
 export interface EndpointIsolateActionProps {
   body: EndpointIsolateActionRequestBodyInput;
 }
-export interface EndpointIsolateRedirectProps {
-  body: EndpointIsolateRedirectRequestBodyInput;
-}
 export interface EndpointKillProcessActionProps {
   body: EndpointKillProcessActionRequestBodyInput;
 }
@@ -2106,9 +2039,6 @@ export interface EndpointSuspendProcessActionProps {
 }
 export interface EndpointUnisolateActionProps {
   body: EndpointUnisolateActionRequestBodyInput;
-}
-export interface EndpointUnisolateRedirectProps {
-  body: EndpointUnisolateRedirectRequestBodyInput;
 }
 export interface EndpointUploadActionProps {
   body: EndpointUploadActionRequestBodyInput;
@@ -2129,9 +2059,6 @@ export interface FindAssetCriticalityRecordsProps {
 }
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
-}
-export interface GetAgentPolicySummaryProps {
-  query: GetAgentPolicySummaryRequestQueryInput;
 }
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
