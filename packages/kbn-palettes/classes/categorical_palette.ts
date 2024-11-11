@@ -8,19 +8,19 @@
  */
 
 import { Optional } from 'utility-types';
-import { BaseKbnPalette, BaseKbnPaletteConfig } from './palette';
+import { KbnBasePalette, KbnBasePaletteConfig } from './palette';
 import { IKbnPalette } from './types';
 
-export interface CategoricalPaletteConfig extends Optional<BaseKbnPaletteConfig, 'colorCount'> {
+export interface KbnCategoricalPaletteConfig extends Optional<KbnBasePaletteConfig, 'colorCount'> {
   colors: string[];
 }
 
-export class CategoricalPalette extends BaseKbnPalette implements IKbnPalette {
+export class KbnCategoricalPalette extends KbnBasePalette implements IKbnPalette {
   public readonly type = 'categorical' as const;
 
   #colors: string[];
 
-  constructor({ colors, colorCount = colors.length, ...rest }: CategoricalPaletteConfig) {
+  constructor({ colors, colorCount = colors.length, ...rest }: KbnCategoricalPaletteConfig) {
     super({ ...rest, colorCount });
 
     this.#colors = colors;
@@ -28,9 +28,5 @@ export class CategoricalPalette extends BaseKbnPalette implements IKbnPalette {
 
   public colors = (n?: number) => {
     return this.#colors.slice(0, n);
-  };
-
-  public scale = (n: number) => {
-    return this.#colors[n];
   };
 }

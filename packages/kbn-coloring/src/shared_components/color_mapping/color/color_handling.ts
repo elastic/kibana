@@ -9,10 +9,9 @@
 
 import chroma from 'chroma-js';
 import { findLast } from 'lodash';
-import { KbnPalettes } from '@kbn/palettes';
+import { KbnPalette, KbnPalettes } from '@kbn/palettes';
 import { ColorMapping } from '../config';
 import { changeAlpha, combineColors, getValidColor } from './color_math';
-import { NeutralPalette } from '../palettes';
 import { ColorMappingInputData } from '../categorical_color_mapping';
 import { ruleMatch } from './rule_matching';
 import { GradientColorMode } from '../config/types';
@@ -153,7 +152,7 @@ export function getColorFactory(
     return getColor(
       {
         type: 'categorical',
-        paletteId: NeutralPalette.id,
+        paletteId: KbnPalette.Neutral,
         colorIndex: DEFAULT_NEUTRAL_PALETTE_INDEX,
       },
       palettes

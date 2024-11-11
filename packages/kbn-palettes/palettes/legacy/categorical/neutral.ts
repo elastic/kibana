@@ -8,18 +8,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CategoricalPalette } from '../../../classes/categorical_palette';
+import { KbnCategoricalPalette } from '../../../classes/categorical_palette';
 import { ThemeMode } from '../../../types';
+import { KbnPalette } from '../../../constants';
 
 const schemeGreys = ['#f2f4fb', '#d4d9e5', '#98a2b3', '#696f7d', '#353642'];
-export const NEUTRAL_COLOR_LIGHT = schemeGreys.slice();
-export const NEUTRAL_COLOR_DARK = schemeGreys.slice().reverse();
+const NEUTRAL_COLOR_LIGHT = schemeGreys.slice();
+const NEUTRAL_COLOR_DARK = schemeGreys.slice().reverse();
 
 export const getNeutralPalette = (mode: ThemeMode) =>
-  new CategoricalPalette({
-    id: 'neutral',
+  new KbnCategoricalPalette({
+    id: KbnPalette.Neutral,
     name: i18n.translate('palettes.elastic.name', {
       defaultMessage: 'Neutral',
     }),
+    standalone: true,
     colors: mode === 'LIGHT' ? NEUTRAL_COLOR_LIGHT : NEUTRAL_COLOR_DARK,
   });

@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// export const AVAILABLE_PALETTES = new Map<string, ColorMapping.CategoricalPalette>([
-//   [EUIAmsterdamColorBlindPalette.id, EUIAmsterdamColorBlindPalette],
-//   [ElasticBrandPalette.id, ElasticBrandPalette],
-//   [KibanaV7LegacyPalette.id, KibanaV7LegacyPalette],
-//   [NeutralPalette.id, NeutralPalette],
-// ]);
+import { ThemeMode } from '../../types';
+import { changeAlpha, combineColors } from '../../utils/color_math';
 
-export * from './eui_amsterdam';
-export * from './elastic_brand';
-export * from './kibana_legacy';
-export * from './neutral';
+export const getBackgroundColor2 = (mode: ThemeMode, fgColor: string) => {
+  return combineColors(changeAlpha(fgColor, 0.3), mode !== 'LIGHT' ? 'black' : 'white');
+};
+
+export const getBackgroundColor = (mode: ThemeMode) =>
+  mode === 'LIGHT' ? '#F6F9FC' : mode === 'DARK' ? '#0E0F12' : '#07101F';

@@ -10,12 +10,12 @@
 import { Optional } from 'utility-types';
 import { IKbnPalette, KbnPaletteType } from './types';
 
-export type BaseKbnPaletteConfig = Optional<
+export type KbnBasePaletteConfig = Optional<
   Pick<IKbnPalette, 'id' | 'name' | 'colorCount' | 'legacy' | 'aliases' | 'standalone'>,
   'legacy' | 'aliases'
 >;
 
-export abstract class BaseKbnPalette implements IKbnPalette {
+export abstract class KbnBasePalette implements IKbnPalette {
   public abstract type: KbnPaletteType;
 
   public readonly id: string;
@@ -32,7 +32,7 @@ export abstract class BaseKbnPalette implements IKbnPalette {
     aliases = [],
     legacy = false,
     standalone = false,
-  }: BaseKbnPaletteConfig) {
+  }: KbnBasePaletteConfig) {
     this.id = id;
     this.name = name;
     this.colorCount = colorCount;
@@ -41,7 +41,6 @@ export abstract class BaseKbnPalette implements IKbnPalette {
     this.aliases = aliases;
   }
 
-  public abstract scale: (n: number) => string;
   public abstract colors: (n?: number | undefined) => string[];
 
   public getColor = (colorIndex: number, numberOfColors?: number) => {

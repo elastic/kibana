@@ -8,15 +8,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CategoricalPalette } from '../../classes/categorical_palette';
+import { KbnCategoricalPalette } from '../../classes/categorical_palette';
 import { ThemeMode } from '../../types';
+import { KbnPalette } from '../../constants';
 
 const lightColors = ['#F6F9FC', '#D0D4DA', '#989FAA', '#666D78', '#373D45'];
 const darkColors = ['#F6F9FC', '#C9D4E6', '#89A0C4', '#546D95', '#283C5C'];
 
 export const getNeutralPalette = (mode: ThemeMode) =>
-  new CategoricalPalette({
-    id: 'neutral',
+  new KbnCategoricalPalette({
+    id: KbnPalette.Neutral,
     standalone: true,
     name: i18n.translate('palettes.elastic.name', {
       defaultMessage: 'Neutral',

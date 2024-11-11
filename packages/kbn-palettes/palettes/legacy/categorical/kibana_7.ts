@@ -8,27 +8,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CategoricalPalette } from '../../../classes/categorical_palette';
+import { KbnCategoricalPalette } from '../../../classes/categorical_palette';
+import { KbnPalette } from '../../../constants';
 
-// export const KIBANA_7_PALETTE_COLORS = [
-//   '#54b399',
-//   '#6092c0',
-//   '#d36086',
-//   '#9170b8',
-//   '#ca8eae',
-//   '#d6bf57',
-//   '#b9a888',
-//   '#da8b45',
-//   '#aa6556',
-//   '#e7664c',
-// ];
-
-export const kibana7Palette = new CategoricalPalette({
-  id: 'eui_amsterdam',
-  aliases: ['eui_amsterdam_color_blind'],
+export const kibana7Palette = new KbnCategoricalPalette({
+  id: KbnPalette.Kibana7,
+  aliases: [
+    KbnPalette.Amsterdam, // to assign to existing default palettes
+  ],
   name: i18n.translate('palettes.kibana7.name', {
     defaultMessage: 'Kibana 7',
   }),
+  colorCount: 10,
   colors: [
     '#54b399',
     '#6092c0',
@@ -40,5 +31,25 @@ export const kibana7Palette = new CategoricalPalette({
     '#da8b45',
     '#aa6556',
     '#e7664c',
+    '#7fc6b3',
+    '#88aed0',
+    '#de88a5',
+    '#ad94ca',
+    '#d8abc3',
+    '#e1cf81',
+    '#cbbea6',
+    '#e4a874',
+    '#c08c81',
+    '#ed8d79',
+    '#aad9cc',
+    '#b0c9e0',
+    '#e9b0c3',
+    '#c8b8dc',
+    '#e5c7d7',
+    '#ebdfab',
+    '#dcd4c4',
+    '#edc5a2',
+    '#d5b2ab',
+    '#f3b3a6',
   ],
 });

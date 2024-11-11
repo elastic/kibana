@@ -8,14 +8,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { euiPaletteForTemperature } from '@elastic/eui';
-import { KbnColorFnPalette } from '../../classes/color_fn_palette';
+import { KbnGradientPalette } from '../../classes/gradient_palette';
+import { ThemeMode } from '../../types';
+import { getBackgroundColor } from './getBackgroundColor';
 import { KbnPalette } from '../../constants';
 
-export const temperaturePalette = new KbnColorFnPalette({
-  id: KbnPalette.Temperature,
-  name: i18n.translate('palettes.temperature.name', {
-    defaultMessage: 'Temperature',
-  }),
-  colorFn: euiPaletteForTemperature,
-});
+export const getRedPalette = (mode: ThemeMode) =>
+  new KbnGradientPalette({
+    id: KbnPalette.Red,
+    name: i18n.translate('palettes.red.name', {
+      defaultMessage: 'Negative',
+    }),
+    colors: [getBackgroundColor(mode), '#F66D64'],
+  });

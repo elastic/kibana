@@ -9,12 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiPaletteCool } from '@elastic/eui';
-import { LegacyGradientPalette } from '../../../classes/legacy_gradient_palette';
+import { KbnColorFnPalette } from '../../../classes/color_fn_palette';
+import { KbnPalette } from '../../../constants';
 
-export const coolPalette = new LegacyGradientPalette({
-  id: 'cool',
+export const coolPalette = new KbnColorFnPalette({
+  id: KbnPalette.Cool,
   name: i18n.translate('palettes.cool.name', {
     defaultMessage: 'Cool',
   }),
-  colorFactory: euiPaletteCool,
+  colorFn: euiPaletteCool,
 });

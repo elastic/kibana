@@ -10,18 +10,18 @@
 import chroma, { Scale } from 'chroma-js';
 import { Optional } from 'utility-types';
 import { IKbnPalette } from './types';
-import { BaseKbnPalette, BaseKbnPaletteConfig } from './palette';
+import { KbnBasePalette, KbnBasePaletteConfig } from './palette';
 
-export interface GradientPaletteConfig extends Optional<BaseKbnPaletteConfig, 'colorCount'> {
+export interface KbnGradientPaletteConfig extends Optional<KbnBasePaletteConfig, 'colorCount'> {
   colors: string[];
 }
 
-export class GradientPalette extends BaseKbnPalette implements IKbnPalette {
+export class KbnGradientPalette extends KbnBasePalette implements IKbnPalette {
   public readonly type = 'gradient' as const;
 
   #scale: Scale;
 
-  constructor({ colors, colorCount = 10, ...rest }: GradientPaletteConfig) {
+  constructor({ colors, colorCount = 10, ...rest }: KbnGradientPaletteConfig) {
     super({ ...rest, colorCount });
 
     this.#scale = chroma.scale(colors).mode('lab');
@@ -29,9 +29,5 @@ export class GradientPalette extends BaseKbnPalette implements IKbnPalette {
 
   public colors = (n?: number) => {
     return this.#scale.colors(n, 'hex');
-  };
-
-  public scale = (n: number) => {
-    return this.#scale(n).hex();
   };
 }

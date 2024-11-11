@@ -23,7 +23,7 @@ export function useKbnPalettes() {
     }
 
     // Temporary as theme name is the same for gray/blue
-    if (colors.plainDark.toUpperCase() === '#07101F') {
+    if (colors.backgroundBaseSubdued.toUpperCase() === '#07101F') {
       return getPalettes('DARKBLUE');
     }
 

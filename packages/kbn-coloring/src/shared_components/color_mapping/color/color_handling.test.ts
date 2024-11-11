@@ -12,21 +12,21 @@ import {
   DEFAULT_NEUTRAL_PALETTE_INDEX,
 } from '../config/default_color_mapping';
 import { getColorFactory } from './color_handling';
-import { getPalette, AVAILABLE_PALETTES } from '../palettes';
-import {
-  EUIAmsterdamColorBlindPalette,
-  EUI_AMSTERDAM_PALETTE_COLORS,
-} from '../palettes/eui_amsterdam';
-import { NeutralPalette, NEUTRAL_COLOR_DARK, NEUTRAL_COLOR_LIGHT } from '../palettes/neutral';
 import { toHex } from './color_math';
 
 import { ColorMapping } from '../config';
+import { KbnPalette, getKbnPalettes } from '@kbn/palettes';
+
+// TODO: fix this - using placeholder for now
+const EUI_AMSTERDAM_PALETTE_COLORS: string[] = [];
+const NEUTRAL_COLOR_LIGHT: string[] = [];
+const NEUTRAL_COLOR_DARK: string[] = [];
 
 describe('Color mapping - color generation', () => {
-  const getPaletteFn = getPalette(AVAILABLE_PALETTES, NeutralPalette);
+  const palettes = getKbnPalettes({ version: 'v8', darkMode: false });
 
   it('returns EUI light colors from default config', () => {
-    const colorFactory = getColorFactory(DEFAULT_COLOR_MAPPING_CONFIG, getPaletteFn, false, {
+    const colorFactory = getColorFactory(DEFAULT_COLOR_MAPPING_CONFIG, palettes, false, {
       type: 'categories',
       categories: ['catA', 'catB', 'catC'],
     });
@@ -43,7 +43,7 @@ describe('Color mapping - color generation', () => {
   // currently there is no difference in the two colors, but this could change in the future
   // this test will catch the change
   it('returns EUI dark colors from default config', () => {
-    const colorFactory = getColorFactory(DEFAULT_COLOR_MAPPING_CONFIG, getPaletteFn, true, {
+    const colorFactory = getColorFactory(DEFAULT_COLOR_MAPPING_CONFIG, palettes, true, {
       type: 'categories',
       categories: ['catA', 'catB', 'catC'],
     });
@@ -66,7 +66,7 @@ describe('Color mapping - color generation', () => {
       },
     };
 
-    const simplifiedGetPaletteGn = getPalette(
+    const simplifiedGetPaletteGn = getKbnPalettes(
       new Map([[twoColorPalette.id, twoColorPalette]]),
       NeutralPalette
     );
@@ -111,7 +111,7 @@ describe('Color mapping - color generation', () => {
       },
     };
 
-    const simplifiedGetPaletteGn = getPalette(
+    const simplifiedGetPaletteGn = getKbnPalettes(
       new Map([[twoColorPalette.id, twoColorPalette]]),
       NeutralPalette
     );
@@ -122,7 +122,7 @@ describe('Color mapping - color generation', () => {
           {
             color: {
               type: 'categorical',
-              paletteId: NeutralPalette.id,
+              paletteId: KbnPalette.Neutral,
               colorIndex: DEFAULT_NEUTRAL_PALETTE_INDEX,
             },
             rule: {
@@ -150,7 +150,7 @@ describe('Color mapping - color generation', () => {
   });
 
   it('handles special tokens, multi-field categories and non-trimmed whitespaces', () => {
-    const colorFactory = getColorFactory(DEFAULT_COLOR_MAPPING_CONFIG, getPaletteFn, false, {
+    const colorFactory = getColorFactory(DEFAULT_COLOR_MAPPING_CONFIG, palettes, false, {
       type: 'categories',
       categories: ['__other__', ['fieldA', 'fieldB'], '__empty__', '   with-whitespaces   '],
     });
@@ -172,7 +172,7 @@ describe('Color mapping - color generation', () => {
           },
         ],
       },
-      getPaletteFn,
+      palettes,
       false,
       {
         type: 'categories',
@@ -207,7 +207,7 @@ describe('Color mapping - color generation', () => {
           },
         ],
       },
-      getPaletteFn,
+      palettes,
       false,
       {
         type: 'categories',
@@ -234,7 +234,7 @@ describe('Color mapping - color generation', () => {
           steps: [
             {
               type: 'categorical',
-              paletteId: EUIAmsterdamColorBlindPalette.id,
+              paletteId: KbnPalette.Default,
               colorIndex: 0,
               touched: false,
             },
@@ -242,7 +242,7 @@ describe('Color mapping - color generation', () => {
           sort: 'desc',
         },
       },
-      getPaletteFn,
+      palettes,
       false,
       {
         type: 'categories',
@@ -264,7 +264,7 @@ describe('Color mapping - color generation', () => {
           steps: [
             {
               type: 'categorical',
-              paletteId: EUIAmsterdamColorBlindPalette.id,
+              paletteId: KbnPalette.Default,
               colorIndex: 0,
               touched: false,
             },
@@ -272,7 +272,7 @@ describe('Color mapping - color generation', () => {
           sort: 'asc',
         },
       },
-      getPaletteFn,
+      palettes,
       false,
       {
         type: 'categories',
@@ -300,7 +300,7 @@ describe('Color mapping - color generation', () => {
           steps: [
             {
               type: 'categorical',
-              paletteId: EUIAmsterdamColorBlindPalette.id,
+              paletteId: KbnPalette.Default,
               colorIndex: 0,
               touched: false,
             },
@@ -312,7 +312,7 @@ describe('Color mapping - color generation', () => {
             color: {
               type: 'categorical',
               colorIndex: DEFAULT_NEUTRAL_PALETTE_INDEX,
-              paletteId: NeutralPalette.id,
+              paletteId: KbnPalette.Neutral,
             },
             rule: {
               type: 'other',
@@ -321,7 +321,7 @@ describe('Color mapping - color generation', () => {
           },
         ],
       },
-      getPaletteFn,
+      palettes,
       false,
       {
         type: 'categories',
@@ -343,13 +343,13 @@ describe('Color mapping - color generation', () => {
           steps: [
             {
               type: 'categorical',
-              paletteId: EUIAmsterdamColorBlindPalette.id,
+              paletteId: KbnPalette.Default,
               colorIndex: 0,
               touched: false,
             },
             {
               type: 'categorical',
-              paletteId: EUIAmsterdamColorBlindPalette.id,
+              paletteId: KbnPalette.Default,
               colorIndex: 2,
               touched: false,
             },
@@ -357,7 +357,7 @@ describe('Color mapping - color generation', () => {
           sort: 'desc',
         },
       },
-      getPaletteFn,
+      palettes,
       false,
       {
         type: 'categories',
@@ -378,14 +378,14 @@ describe('Color mapping - color generation', () => {
           steps: [
             {
               type: 'categorical',
-              paletteId: EUIAmsterdamColorBlindPalette.id,
+              paletteId: KbnPalette.Default,
               colorIndex: 0,
               touched: false,
             },
-            { type: 'categorical', paletteId: NeutralPalette.id, colorIndex: 0, touched: false },
+            { type: 'categorical', paletteId: KbnPalette.Neutral, colorIndex: 0, touched: false },
             {
               type: 'categorical',
-              paletteId: EUIAmsterdamColorBlindPalette.id,
+              paletteId: KbnPalette.Default,
               colorIndex: 2,
               touched: false,
             },
@@ -393,7 +393,7 @@ describe('Color mapping - color generation', () => {
           sort: 'asc', // testing in ascending order
         },
       },
-      getPaletteFn,
+      palettes,
       true, // testing in dark mode
       {
         type: 'categories',

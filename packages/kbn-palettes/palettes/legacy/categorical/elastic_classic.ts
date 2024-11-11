@@ -8,19 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CategoricalPalette } from '../../../classes/categorical_palette';
+import { KbnCategoricalPalette } from '../../../classes/categorical_palette';
+import { KbnPalette } from '../../../constants';
 
-// export const ELASTIC_CLASSIC_PALETTE_COLORS = [
-//   '#20377d',
-//   '#7de2d1',
-//   '#ff957d',
-//   '#f04e98',
-//   '#0077cc',
-//   '#fec514',
-// ];
-
-export const elasticClassicPalette = new CategoricalPalette({
-  id: 'elastic_brand_2023',
+export const elasticClassicPalette = new KbnCategoricalPalette({
+  id: KbnPalette.ElasticClassic,
   name: i18n.translate('palettes.classic.name', {
     defaultMessage: 'Elastic classic',
   }),

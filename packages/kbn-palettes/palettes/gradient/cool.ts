@@ -8,17 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GradientPalette } from '../../classes/gradient_palette';
-import { ThemeMode } from '../../types';
-import { getBackgroundColor } from './getBackgroundColor';
+import { euiPaletteCool } from '@elastic/eui';
+import { KbnColorFnPalette } from '../../classes/color_fn_palette';
+import { KbnPalette } from '../../constants';
 
-export const getCoolPalette = (mode: ThemeMode) =>
-  new GradientPalette({
-    id: 'cool',
-    name: i18n.translate('palettes.cool.name', {
-      defaultMessage: 'Cool',
-    }),
-    colors: [getBackgroundColor(mode), '#599DFF'],
-  });
-
-export const euiPaletteCool = getCoolPalette('LIGHT').colors;
+export const coolPalette = new KbnColorFnPalette({
+  id: KbnPalette.Cool,
+  name: i18n.translate('palettes.cool.name', {
+    defaultMessage: 'Cool',
+  }),
+  colorFn: euiPaletteCool,
+});

@@ -9,12 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiPaletteForStatus } from '@elastic/eui';
-import { LegacyGradientPalette } from '../../../classes/legacy_gradient_palette';
+import { KbnColorFnPalette } from '../../../classes/color_fn_palette';
+import { KbnPalette } from '../../../constants';
 
-export const statusPalette = new LegacyGradientPalette({
-  id: 'status',
+export const statusPalette = new KbnColorFnPalette({
+  id: KbnPalette.Status,
   name: i18n.translate('palettes.status.name', {
     defaultMessage: 'Status',
   }),
-  colorFactory: euiPaletteForStatus,
+  colorFn: euiPaletteForStatus,
 });

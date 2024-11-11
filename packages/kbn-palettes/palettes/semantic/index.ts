@@ -7,15 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-import { euiPaletteForTemperature } from '@elastic/eui';
-import { KbnColorFnPalette } from '../../classes/color_fn_palette';
-import { KbnPalette } from '../../constants';
-
-export const temperaturePalette = new KbnColorFnPalette({
-  id: KbnPalette.Temperature,
-  name: i18n.translate('palettes.temperature.name', {
-    defaultMessage: 'Temperature',
-  }),
-  colorFn: euiPaletteForTemperature,
-});
+export * from './log_level';

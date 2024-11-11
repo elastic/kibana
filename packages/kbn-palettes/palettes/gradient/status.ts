@@ -8,14 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GradientPalette } from '../../classes/gradient_palette';
+import { euiPaletteForStatus } from '@elastic/eui';
+import { KbnColorFnPalette } from '../../classes/color_fn_palette';
+import { KbnPalette } from '../../constants';
 
-export const statusPalette = new GradientPalette({
-  id: 'status',
+export const statusPalette = new KbnColorFnPalette({
+  id: KbnPalette.Status,
   name: i18n.translate('palettes.status.name', {
     defaultMessage: 'Status',
   }),
-  colors: ['#00BD79', '#FFD569', '#F66D64'],
+  colorFn: euiPaletteForStatus,
 });
-
-export const euiPaletteForStatus = statusPalette.colors;

@@ -8,20 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GradientPalette } from '../../classes/gradient_palette';
-import { ThemeMode } from '../../types';
-import { getBackgroundColor } from './getBackgroundColor';
+import { euiPaletteComplementary } from '@elastic/eui';
+import { KbnColorFnPalette } from '../../classes/color_fn_palette';
+import { KbnPalette } from '../../constants';
 
-export const getComplementaryPalette = (mode: ThemeMode) => {
-  return new GradientPalette({
-    id: 'complementary',
-    name: i18n.translate('palettes.complementary.name', {
-      defaultMessage: 'Complementary',
-    }),
-    colors: ['#599DFF', getBackgroundColor(mode), '#ED9E00'],
-  });
-};
-
-export const complementaryPalette = getComplementaryPalette('LIGHT');
-
-export const euiPaletteComplementary = complementaryPalette.colors;
+export const complementaryPalette = new KbnColorFnPalette({
+  id: KbnPalette.Complementary,
+  name: i18n.translate('palettes.complementary.name', {
+    defaultMessage: 'Complementary',
+  }),
+  colorFn: euiPaletteComplementary,
+});

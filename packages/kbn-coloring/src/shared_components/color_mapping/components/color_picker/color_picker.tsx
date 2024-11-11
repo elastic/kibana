@@ -10,11 +10,10 @@
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiPopoverTitle, EuiTab, EuiTabs, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IKbnPalette, KbnPalettes } from '@kbn/palettes';
+import { IKbnPalette, KbnPalette, KbnPalettes } from '@kbn/palettes';
 import { ColorMapping } from '../../config';
 import { PaletteColors } from './palette_colors';
 import { RGBPicker } from './rgb_picker';
-import { NeutralPalette } from '../../palettes/neutral';
 
 export function ColorPicker({
   color,
@@ -33,7 +32,7 @@ export function ColorPicker({
 }) {
   const [tab, setTab] = useState(
     color.type === 'categorical' &&
-      (color.paletteId === palette.id || color.paletteId === NeutralPalette.id)
+      (color.paletteId === palette.id || color.paletteId === KbnPalette.Neutral)
       ? 'palette'
       : 'custom'
   );

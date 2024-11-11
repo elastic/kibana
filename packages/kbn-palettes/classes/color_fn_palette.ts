@@ -8,29 +8,25 @@
  */
 
 import { Optional } from 'utility-types';
-import { BaseKbnPaletteConfig, BaseKbnPalette } from './palette';
+import { KbnBasePaletteConfig, KbnBasePalette } from './palette';
 import { IKbnPalette } from './types';
 
-export interface LegacyGradientPaletteConfig extends Optional<BaseKbnPaletteConfig, 'colorCount'> {
-  colorFactory: (n: number) => string[];
+export interface KbnColorFnPaletteConfig extends Optional<KbnBasePaletteConfig, 'colorCount'> {
+  colorFn: (n: number) => string[];
 }
 
-export class LegacyGradientPalette extends BaseKbnPalette implements IKbnPalette {
+export class KbnColorFnPalette extends KbnBasePalette implements IKbnPalette {
   public readonly type = 'gradient' as const;
 
-  #colorFactory: (n: number) => string[];
+  #colorFn: (n: number) => string[];
 
-  constructor({ colorFactory, colorCount = 10, ...rest }: LegacyGradientPaletteConfig) {
+  constructor({ colorFn, colorCount = 10, ...rest }: KbnColorFnPaletteConfig) {
     super({ ...rest, colorCount });
 
-    this.#colorFactory = colorFactory;
+    this.#colorFn = colorFn;
   }
 
   public colors = (n: number = 10) => {
-    return this.#colorFactory(n);
-  };
-
-  public scale = (n: number) => {
-    return 'red';
+    return this.#colorFn(n);
   };
 }

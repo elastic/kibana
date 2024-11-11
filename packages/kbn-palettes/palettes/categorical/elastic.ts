@@ -8,14 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CategoricalPalette } from '../../classes/categorical_palette';
+import { KbnCategoricalPalette } from '../../classes/categorical_palette';
+import { KbnPalette } from '../../constants';
 
-export const elasticPalette = new CategoricalPalette({
-  // id: 'eui_amsterdam_color_blind', // temporary hot-swap
-  id: 'default',
+export const elasticPalette = new KbnCategoricalPalette({
+  id: KbnPalette.Default,
   aliases: [
-    'elastic_borealis',
-    'eui_amsterdam_color_blind', // to assign to existing default palettes
+    'elastic_borealis', // placeholder - not yet used
+    KbnPalette.Amsterdam, // to assign to existing default palettes
   ],
   colorCount: 10,
   name: i18n.translate('palettes.elastic.name', {

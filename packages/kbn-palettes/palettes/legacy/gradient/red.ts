@@ -9,12 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiPaletteRed } from '@elastic/eui';
-import { LegacyGradientPalette } from '../../../classes/legacy_gradient_palette';
+import { KbnColorFnPalette } from '../../../classes/color_fn_palette';
+import { KbnPalette } from '../../../constants';
 
-export const redPalette = new LegacyGradientPalette({
-  id: 'red',
+export const redPalette = new KbnColorFnPalette({
+  id: KbnPalette.Red,
   name: i18n.translate('palettes.red.name', {
     defaultMessage: 'Negative',
   }),
-  colorFactory: euiPaletteRed,
+  colorFn: euiPaletteRed,
 });

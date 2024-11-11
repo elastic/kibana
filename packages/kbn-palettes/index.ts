@@ -9,6 +9,7 @@
 
 export * from './palettes';
 export * from './classes';
+export { DEFAULT_FALLBACK_PALETTE, KbnPalette } from './constants';
 
 // eslint-disable-next-line @kbn/imports/uniform_imports
 export * from './hooks/index';

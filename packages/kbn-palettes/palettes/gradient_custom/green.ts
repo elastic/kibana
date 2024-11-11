@@ -7,7 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
+import { KbnGradientPalette } from '../../classes/gradient_palette';
 import { ThemeMode } from '../../types';
+import { getBackgroundColor } from './getBackgroundColor';
+import { KbnPalette } from '../../constants';
 
-export const getBackgroundColor = (mode: ThemeMode) =>
-  mode === 'LIGHT' ? '#F6F9FC' : mode === 'DARK' ? '#0E0F12' : '#07101F';
+export const getGreenPalette = (mode: ThemeMode) =>
+  new KbnGradientPalette({
+    id: KbnPalette.Green,
+    name: i18n.translate('palettes.green.name', {
+      defaultMessage: 'Positive',
+    }),
+    colors: [getBackgroundColor(mode), '#00BD79'],
+  });

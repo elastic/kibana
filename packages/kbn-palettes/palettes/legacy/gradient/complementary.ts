@@ -9,12 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiPaletteComplementary } from '@elastic/eui';
-import { LegacyGradientPalette } from '../../../classes/legacy_gradient_palette';
+import { KbnColorFnPalette } from '../../../classes/color_fn_palette';
+import { KbnPalette } from '../../../constants';
 
-export const complementaryPalette = new LegacyGradientPalette({
-  id: 'complementary',
+export const complementaryPalette = new KbnColorFnPalette({
+  id: KbnPalette.Complementary,
   name: i18n.translate('palettes.complementary.name', {
     defaultMessage: 'Complementary',
   }),
-  colorFactory: euiPaletteComplementary,
+  colorFn: euiPaletteComplementary,
 });

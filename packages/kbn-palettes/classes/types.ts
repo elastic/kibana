@@ -9,6 +9,9 @@
 
 export type KbnPaletteType = 'categorical' | 'gradient';
 
+/**
+ * Common palette definition used throughout kibana
+ */
 export interface IKbnPalette {
   /**
    * Unique identifier for the palette
@@ -43,13 +46,7 @@ export interface IKbnPalette {
    */
   colors: (n?: number) => string[];
   /**
-   * Scale of colors ranging from 0 to 1
-   */
-  scale: (n: number) => string;
-  /**
    * Returns color provided index and optional total number of colors
    */
   getColor: (colorIndex: number, numberOfColors?: number) => string;
-
-  // getColor: (valueInRange: number, isDarkMode: boolean, loop: boolean) => string;
 }
