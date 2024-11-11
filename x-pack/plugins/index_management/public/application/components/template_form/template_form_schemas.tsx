@@ -23,6 +23,7 @@ import {
   allowAutoCreateRadioIds,
   INVALID_INDEX_PATTERN_CHARS,
   INVALID_TEMPLATE_NAME_CHARS,
+  STANDARD_INDEX_MODE,
 } from '../../../../common/constants';
 
 const {
@@ -152,10 +153,10 @@ export const schemas: Record<string, FormSchema> = {
     },
     indexMode: {
       type: FIELD_TYPES.SUPER_SELECT,
+      defaultValue: STANDARD_INDEX_MODE,
       label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldIndexModeLabel', {
         defaultMessage: 'Index mode',
       }),
-      formatters: [toString],
     },
     order: {
       type: FIELD_TYPES.NUMBER,

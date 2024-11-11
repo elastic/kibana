@@ -6,24 +6,43 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  STANDARD_INDEX_MODE,
+  LOGSDB_INDEX_MODE,
+  TIME_SERIES_MODE,
+} from '../../../common/constants';
 
-export const getIndexModeLabel = (mode?: string | null) => {
-  switch (mode) {
-    case 'standard':
-    case null:
-    case undefined:
-      return i18n.translate('xpack.idxMgmt.indexModeLabels.standardModeLabel', {
-        defaultMessage: 'Standard',
-      });
-    case 'logsdb':
-      return i18n.translate('xpack.idxMgmt.indexModeLabels.logsdbModeLabel', {
-        defaultMessage: 'LogsDB',
-      });
-    case 'time_series':
-      return i18n.translate('xpack.idxMgmt.indexModeLabels.tsdbModeLabel', {
-        defaultMessage: 'Time series',
-      });
-    default:
-      return mode;
-  }
+export const indexModeLabels = {
+  [STANDARD_INDEX_MODE]: i18n.translate('xpack.idxMgmt.indexModeLabels.standardIndexModeLabel', {
+    defaultMessage: 'Standard',
+  }),
+  [LOGSDB_INDEX_MODE]: i18n.translate('xpack.idxMgmt.indexModeLabels.logsdbIndexModeLabel', {
+    defaultMessage: 'LogsDB',
+  }),
+  [TIME_SERIES_MODE]: i18n.translate('xpack.idxMgmt.indexModeLabels.timeSeriesIndexModeLabel', {
+    defaultMessage: 'Time series',
+  }),
+};
+
+export const indexModeDescriptions = {
+  [STANDARD_INDEX_MODE]: i18n.translate(
+    'xpack.idxMgmt.indexModeDescriptions.standardIndexModeDescription',
+    {
+      defaultMessage:
+        'Standard indexing with default settings, for data other than logs or metrics',
+    }
+  ),
+  [LOGSDB_INDEX_MODE]: i18n.translate(
+    'xpack.idxMgmt.indexModeDescriptions.logsdbIndexModeDescription',
+    {
+      defaultMessage:
+        'Optimized for storing logs data, with reduced storage and default settings that help reduce the chance of logs being rejected by Elasticsearch',
+    }
+  ),
+  [TIME_SERIES_MODE]: i18n.translate(
+    'xpack.idxMgmt.indexModeDescriptions.timeSeriesIndexModeDescription',
+    {
+      defaultMessage: 'Optimized for metrics data with reduced storage',
+    }
+  ),
 };

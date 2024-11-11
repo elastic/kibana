@@ -19,7 +19,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import {
   useForm,
   useFormData,
@@ -36,7 +35,13 @@ import { UnitField, timeUnits } from '../../shared';
 import { DataRetention } from '../../../../../common';
 import { documentationService } from '../../../services/documentation';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
-import { allowAutoCreateRadios } from '../../../../../common/constants';
+import {
+  allowAutoCreateRadios,
+  STANDARD_INDEX_MODE,
+  TIME_SERIES_MODE,
+  LOGSDB_INDEX_MODE,
+} from '../../../../../common/constants';
+import { indexModeLabels, indexModeDescriptions } from '../../../lib/index_mode_labels';
 
 // Create or Form components with partial props that are common to all instances
 const UseField = getUseField({ component: Field });
@@ -103,96 +108,37 @@ function getFieldsMeta(esDocsBase: string) {
       }),
       options: [
         {
-          value: 'standard',
-          inputDisplay: i18n.translate(
-            'xpack.idxMgmt.templateForm.stepLogistics.indexModeStandardOptionLabel',
-            {
-              defaultMessage: 'Standard',
-            }
-          ),
+          value: STANDARD_INDEX_MODE,
+          inputDisplay: indexModeLabels[STANDARD_INDEX_MODE],
           dropdownDisplay: (
             <Fragment>
-              <strong>
-                {i18n.translate(
-                  'xpack.idxMgmt.templateForm.stepLogistics.indexModeStandardOptionTitleDescription',
-                  {
-                    defaultMessage: 'Standard',
-                  }
-                )}
-              </strong>
+              <strong>{indexModeLabels[STANDARD_INDEX_MODE]}</strong>
               <EuiText size="s" color="subdued">
-                <p>
-                  {i18n.translate(
-                    'xpack.idxMgmt.templateForm.stepLogistics.indexModeStandardOptionDescription',
-                    {
-                      defaultMessage:
-                        'Standard indexing with default settings, for data other than logs or metrics',
-                    }
-                  )}
-                </p>
+                <p>{indexModeDescriptions[STANDARD_INDEX_MODE]}</p>
               </EuiText>
             </Fragment>
           ),
         },
         {
-          value: 'time_series',
-          inputDisplay: i18n.translate(
-            'xpack.idxMgmt.templateForm.stepLogistics.indexModeTimeSeriesOptionLabel',
-            {
-              defaultMessage: 'Time series',
-            }
-          ),
+          value: TIME_SERIES_MODE,
+          inputDisplay: indexModeLabels[TIME_SERIES_MODE],
           dropdownDisplay: (
             <Fragment>
-              <strong>
-                {i18n.translate(
-                  'xpack.idxMgmt.templateForm.stepLogistics.indexModeTimeSeriesOptionTitleDescription',
-                  {
-                    defaultMessage: 'Time series',
-                  }
-                )}
-              </strong>
+              <strong>{indexModeLabels[TIME_SERIES_MODE]}</strong>
               <EuiText size="s" color="subdued">
-                <p>
-                  {i18n.translate(
-                    'xpack.idxMgmt.templateForm.stepLogistics.indexModeTimeSeriesOptionDescription',
-                    {
-                      defaultMessage: 'Optimized for metrics data with reduced storage',
-                    }
-                  )}
-                </p>
+                <p>{indexModeDescriptions[TIME_SERIES_MODE]}</p>
               </EuiText>
             </Fragment>
           ),
         },
         {
-          value: 'logsdb',
-          inputDisplay: i18n.translate(
-            'xpack.idxMgmt.templateForm.stepLogistics.indexModeLogsdbOptionLabel',
-            {
-              defaultMessage: 'LogsDB',
-            }
-          ),
+          value: LOGSDB_INDEX_MODE,
+          inputDisplay: indexModeLabels[LOGSDB_INDEX_MODE],
           dropdownDisplay: (
             <Fragment>
-              <strong>
-                {i18n.translate(
-                  'xpack.idxMgmt.templateForm.stepLogistics.indexModeLogsdbOptionTitleDescription',
-                  {
-                    defaultMessage: 'LogsDB',
-                  }
-                )}
-              </strong>
+              <strong>{indexModeLabels[LOGSDB_INDEX_MODE]}</strong>
               <EuiText size="s" color="subdued">
-                <p>
-                  {i18n.translate(
-                    'xpack.idxMgmt.templateForm.stepLogistics.indexModeLogsdbOptionDescription',
-                    {
-                      defaultMessage:
-                        'Optimized for storing logs data, with reduced storage and default settings that help reduce the chance of logs being rejected by Elasticsearch',
-                    }
-                  )}
-                </p>
+                <p>{indexModeDescriptions[LOGSDB_INDEX_MODE]}</p>
               </EuiText>
             </Fragment>
           ),
@@ -329,11 +275,9 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
 
     useEffect(() => {
       if (indexPatternsField && indexPatternsField.some((pattern) => pattern === 'logs-*-*')) {
-        setFieldValue('indexMode', 'logsdb');
-      } else {
-        setFieldValue('indexMode', 'standard');
+        setFieldValue('indexMode', LOGSDB_INDEX_MODE);
       }
-    }, [indexPatternsField, setFieldValue]);
+    }, [getFormData, indexPatternsField, setFieldValue]);
 
     /**
      * When the consumer call validate() on this step, we submit the form so it enters the "isSubmitted" state
@@ -436,31 +380,16 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
 
           {doCreateDataStream && (
             <FormRow title={indexMode.title} description={indexMode.description}>
-              {/* <UseField*/}
-              {/*  path="indexMode"*/}
-              {/*  component={SuperSelectField}*/}
-              {/*  componentProps={{*/}
-              {/*    euiFieldProps: {*/}
-              {/*      hasDividers: true,*/}
-              {/*      'data-test-subj': indexMode.testSubject,*/}
-              {/*      options: indexMode.options,*/}
-              {/*    },*/}
-              {/*  }}*/}
-              {/* />*/}
-              <UseField path="indexMode">
-                {(field) => {
-                  return (
-                    <SuperSelectField
-                      field={field}
-                      euiFieldProps={{
-                        hasDividers: true,
-                        'data-test-subj': indexMode.testSubject,
-                        options: indexMode.options,
-                      }}
-                    />
-                  );
+              <UseField
+                path="indexMode"
+                componentProps={{
+                  euiFieldProps: {
+                    hasDividers: true,
+                    'data-test-subj': indexMode.testSubject,
+                    options: indexMode.options,
+                  },
                 }}
-              </UseField>
+              />
             </FormRow>
           )}
 
