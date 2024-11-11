@@ -316,18 +316,30 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('> Expired data deleted.');
     },
 
-    async cleanMlIndices() {
+    async cleanAnomalyDetection() {
       await this.deleteAllCalendars();
       await this.deleteAllFilters();
       await this.deleteAllAnomalyDetectionJobs();
       await this.deleteExpiredAnomalyDetectionData();
+      await this.deleteAllAnnotations();
+      await this.syncSavedObjects();
+    },
 
+    async cleanDataFrameAnalytics() {
       await this.deleteAllDataFrameAnalyticsJobs();
+      await this.syncSavedObjects();
+    },
 
+    async cleanTrainedModels() {
       await this.deleteAllTrainedModelsIngestPipelines();
       await this.deleteAllTrainedModelsES();
-
       await this.syncSavedObjects();
+    },
+
+    async cleanMlIndices() {
+      await this.cleanAnomalyDetection();
+      await this.cleanDataFrameAnalytics();
+      await this.cleanTrainedModels();
     },
 
     async getJobState(jobId: string): Promise<JOB_STATE> {
@@ -1270,6 +1282,18 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return body.hits.hits;
     },
 
+    async getAllAnnotations() {
+      log.debug('Fetching all annotations ...');
+
+      const body = await es.search<Annotation>({
+        index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+      });
+      expect(body).to.not.be(undefined);
+      expect(body).to.have.property('hits');
+      log.debug('> All annotations fetched.');
+      return body.hits.hits;
+    },
+
     async getAnnotationById(annotationId: string): Promise<Annotation | undefined> {
       log.debug(`Fetching annotation '${annotationId}'...`);
 
@@ -1334,6 +1358,24 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         expectedCount,
         `expected annotation count of ${expectedCount}, got ${annotations.length}`
       );
+    },
+
+    async deleteAnnotation(annotationId: string) {
+      log.debug(`Deleting annotation with id "${annotationId}"`);
+      const { body, status } = await kbnSupertest
+        .delete(`/internal/ml/annotations/delete/${annotationId}`)
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug('> Annotation deleted');
+    },
+
+    async deleteAllAnnotations() {
+      log.debug('Deleting all annotations.');
+      const allAnnotations = await this.getAllAnnotations();
+      for (const annotation of allAnnotations) {
+        await this.deleteAnnotation(annotation._id!);
+      }
     },
 
     async runDFAJob(dfaId: string) {
