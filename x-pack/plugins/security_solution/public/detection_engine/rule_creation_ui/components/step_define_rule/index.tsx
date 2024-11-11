@@ -252,7 +252,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [form]
   );
 
-  const termsAggregationFields: FieldSpec[] = useMemo(
+  const aggFields = useMemo(
+    () => (indexPattern.fields as FieldSpec[]).filter((field) => field.aggregatable === true),
+    [indexPattern.fields]
+  );
+  const termsAggregationFields = useMemo(
     /**
      * Typecasting to FieldSpec because fields is
      * typed as DataViewFieldBase[] which does not have
@@ -406,14 +410,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       thresholdCardinalityValue,
     }: Record<string, FieldHook>) => (
       <ThresholdInput
-        browserFields={termsAggregationFields}
+        browserFields={aggFields}
         thresholdField={thresholdField}
         thresholdValue={thresholdValue}
         thresholdCardinalityField={thresholdCardinalityField}
         thresholdCardinalityValue={thresholdCardinalityValue}
       />
     ),
-    [termsAggregationFields]
+    [aggFields]
   );
 
   const ThreatMatchInputChildren = useCallback(
