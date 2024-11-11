@@ -26,6 +26,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiRadioGroupOption,
+  EuiRange,
 } from '@elastic/eui';
 
 import {
@@ -59,6 +60,7 @@ export const LinkEditor = ({
   const [linkDescription, setLinkDescription] = useState<string | undefined>();
   const [linkOptions, setLinkOptions] = useState<LinkOptions | undefined>();
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
+  const [linkSize, setLinkSize] = useState<'xs' | 's' | 'm' | 'l'>('xs');
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
     return ([DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE] as LinkType[]).map((type) => {
@@ -141,7 +143,23 @@ export const LinkEditor = ({
             />
           </EuiFormRow>
           <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkSizeLabel()}>
-            <EuiFlexItem grow={false}>change size</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiRange
+                ticks={[
+                  { label: 'xs', value: 0 },
+                  { label: 's', value: 5 },
+                  { label: 'm', value: 10 },
+                  { label: 'l', value: 15 },
+                ]}
+                min={0}
+                max={15}
+                tickInterval={5}
+                value={linkSize}
+                showTicks
+                onChange={(e) => setLinkSize(e.currentTarget.value as 'xs' | 's' | 'm' | 'l')}
+                aria-label="Link size"
+              />
+            </EuiFlexItem>
           </EuiFormRow>
           <LinkOptionsComponent
             link={link}
@@ -175,6 +193,7 @@ export const LinkEditor = ({
                     options: linkOptions,
                     title: defaultLinkLabel ?? '',
                     description: linkDescription,
+                    size: linkSize,
                   });
 
                   onClose();

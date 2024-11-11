@@ -148,10 +148,11 @@ export const DashboardLinkComponent = ({
   ]);
 
   const id = `dashboardLink--${link.id}`;
+  const linkSize = link.size ?? 's';
 
   return (
     <EuiListGroupItem
-      size={link.size || 's'}
+      size={linkSize}
       color="text"
       {...onClickProps}
       id={id}
