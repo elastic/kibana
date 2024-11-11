@@ -37,5 +37,6 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/mock-idp-utils",
     "@kbn/code-owners",
+    "@kbn/react-mute-legacy-root-warning"
   ]
 }
