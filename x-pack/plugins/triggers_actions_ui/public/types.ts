@@ -64,7 +64,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { KueryNode } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { ValidationResult } from '@kbn/response-ops-rule-form';
+import type { ValidationResult } from '@kbn/response-ops-rule-form';
 import type { RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
   EcsFieldsResponse,
