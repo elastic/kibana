@@ -15,5 +15,6 @@ export default function apmApiIntegrationTests({
     loadTestFile(require.resolve('./mobile'));
     loadTestFile(require.resolve('./custom_dashboards'));
     loadTestFile(require.resolve('./dependencies'));
+    loadTestFile(require.resolve('./cold_start'));
   });
 }
