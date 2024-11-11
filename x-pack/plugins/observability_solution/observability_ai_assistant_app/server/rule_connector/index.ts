@@ -23,7 +23,6 @@ import {
   JiraParamsSchema,
   PagerdutyParamsSchema,
   SlackApiParamsSchema,
-  SlackParamsSchema,
   WebhookParamsSchema,
 } from '@kbn/stack-connectors-plugin/server';
 import { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
@@ -42,9 +41,16 @@ import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_conne
 
 const CONNECTOR_PRIVILEGES = ['api:observabilityAIAssistant', 'app:observabilityAIAssistant'];
 
+export const SlackConnectorParamsSchema = schema.object({
+  id: schema.string({ minLength: 1 }),
+  params: schema.object({
+    message: schema.string({ minLength: 1 }),
+  }),
+});
+
 const connectorParamsSchemas: Record<string, CompatibleJSONSchema> = {
   '.slack_api': convertSchemaToOpenApi(SlackApiParamsSchema),
-  '.slack': convertSchemaToOpenApi(SlackParamsSchema),
+  '.slack': convertSchemaToOpenApi(SlackConnectorParamsSchema),
   '.email': convertSchemaToOpenApi(EmailParamsSchema),
   '.webhook': convertSchemaToOpenApi(WebhookParamsSchema),
   '.jira': convertSchemaToOpenApi(JiraParamsSchema),
@@ -201,7 +207,7 @@ If available, include the link of the conversation at the end of your answer.`
         To send to the Slack connector, you need the following arguments:
           - the "id" of the connector
           - the "params" parameter that you will fill with the message
-        Both these arguments are required.`
+        Please include both "id" and "params.message" in the function arguments when executing the Slack connector..`
       ),
     };
     functionClient.registerAdhocInstruction(slackConnectorInstruction);
