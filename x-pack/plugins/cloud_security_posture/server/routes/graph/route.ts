@@ -44,7 +44,7 @@ export const defineGraphRoute = (router: CspRouter) =>
         const spaceId = (await cspContext.spaces?.spacesService?.getActiveSpace(request))?.id;
 
         try {
-          const { nodes, edges } = await getGraphV1({
+          const resp = await getGraphV1({
             services: {
               logger: cspContext.logger,
               esClient: cspContext.esClient,
@@ -60,7 +60,7 @@ export const defineGraphRoute = (router: CspRouter) =>
             nodesLimit,
           });
 
-          return response.ok({ body: { nodes, edges } });
+          return response.ok({ body: resp });
         } catch (err) {
           const error = transformError(err);
           cspContext.logger.error(`Failed to fetch graph ${err}`);

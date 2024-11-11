@@ -8,18 +8,19 @@
 import { castArray } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
+import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type {
   Color,
   EdgeDataModel,
   EntityNodeDataModel,
   GraphRequest,
+  GraphResponse,
   GroupNodeDataModel,
   LabelNodeDataModel,
   NodeDataModel,
-} from '@kbn/cloud-security-posture-common/types/graph/latest';
+} from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import type { Writable } from '@kbn/utility-types';
-import type { GraphContextServices, GraphContext } from './types';
 
 type EsQuery = GraphRequest['query']['esQuery'];
 
@@ -40,6 +41,11 @@ interface LabelEdges {
   target: string;
 }
 
+interface GraphContextServices {
+  logger: Logger;
+  esClient: IScopedClusterClient;
+}
+
 interface GetGraphParams {
   services: GraphContextServices;
   query: {
@@ -58,10 +64,7 @@ export const getGraph = async ({
   query: { eventIds, spaceId = 'default', start, end, esQuery },
   showUnknownTarget,
   nodesLimit,
-}: GetGraphParams): Promise<{
-  nodes: NodeDataModel[];
-  edges: EdgeDataModel[];
-}> => {
+}: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
   logger.trace(`Fetching graph for [eventIds: ${eventIds.join(', ')}] in [spaceId: ${spaceId}]`);
 
   const results = await fetchGraph({
@@ -75,9 +78,7 @@ export const getGraph = async ({
   });
 
   // Convert results into set of nodes and edges
-  const graphContext = parseRecords(logger, results.records, nodesLimit);
-
-  return { nodes: graphContext.nodes, edges: graphContext.edges };
+  return parseRecords(logger, results.records, nodesLimit);
 };
 
 interface ParseContext {
@@ -86,10 +87,15 @@ interface ParseContext {
   readonly edgesMap: Record<string, EdgeDataModel>;
   readonly edgeLabelsNodes: Record<string, string[]>;
   readonly labelEdges: Record<string, LabelEdges>;
+  readonly messages: ApiMessageCode[];
   readonly logger: Logger;
 }
 
-const parseRecords = (logger: Logger, records: GraphEdge[], nodesLimit?: number): GraphContext => {
+const parseRecords = (
+  logger: Logger,
+  records: GraphEdge[],
+  nodesLimit?: number
+): Pick<GraphResponse, 'nodes' | 'edges' | 'messages'> => {
   const ctx: ParseContext = {
     nodesLimit,
     logger,
@@ -97,6 +103,7 @@ const parseRecords = (logger: Logger, records: GraphEdge[], nodesLimit?: number)
     edgeLabelsNodes: {},
     edgesMap: {},
     labelEdges: {},
+    messages: [],
   };
 
   logger.trace(`Parsing records [length: ${records.length}] [nodesLimit: ${nodesLimit ?? 'none'}]`);
@@ -113,7 +120,11 @@ const parseRecords = (logger: Logger, records: GraphEdge[], nodesLimit?: number)
   // Sort groups to be first (fixes minor layout issue)
   const nodes = sortNodes(ctx.nodesMap);
 
-  return { nodes, edges: Object.values(ctx.edgesMap) };
+  return {
+    nodes,
+    edges: Object.values(ctx.edgesMap),
+    messages: ctx.messages.length > 0 ? ctx.messages : undefined,
+  };
 };
 
 const fetchGraph = async ({
@@ -223,6 +234,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
           Object.keys(nodesMap).length
         }]`
       );
+      context.messages.push(ApiMessageCode.ReachedNodesLimit);
       break;
     }
 

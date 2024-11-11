@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { schema } from '@kbn/config-schema';
 
 export const graphRequestSchema = schema.object({
@@ -34,6 +35,9 @@ export const graphResponseSchema = () =>
       schema.oneOf([entityNodeDataSchema, groupNodeDataSchema, labelNodeDataSchema])
     ),
     edges: schema.arrayOf(edgeDataSchema),
+    messages: schema.maybe(
+      schema.arrayOf(schema.oneOf([schema.literal(ApiMessageCode.ReachedNodesLimit)]))
+    ),
   });
 
 export const colorSchema = schema.oneOf([

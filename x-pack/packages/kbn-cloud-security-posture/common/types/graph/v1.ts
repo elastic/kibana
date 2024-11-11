@@ -21,11 +21,17 @@ import {
 export type GraphRequest = Omit<TypeOf<typeof graphRequestSchema>, 'query.esQuery'> & {
   query: { esQuery?: { bool: Partial<BoolQuery> } };
 };
-export type GraphResponse = TypeOf<typeof graphResponseSchema>;
+export type GraphResponse = Omit<TypeOf<typeof graphResponseSchema>, 'messages'> & {
+  messages?: ApiMessageCode[];
+};
 
 export type Color = typeof colorSchema.type;
 
 export type NodeShape = TypeOf<typeof nodeShapeSchema>;
+
+export enum ApiMessageCode {
+  ReachedNodesLimit = 'REACHED_NODES_LIMIT',
+}
 
 export type EntityNodeDataModel = TypeOf<typeof entityNodeDataSchema>;
 

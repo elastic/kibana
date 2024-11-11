@@ -57,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(response.body).to.have.property('nodes').length(0);
         expect(response.body).to.have.property('edges').length(0);
+        expect(response.body).not.to.have.property('messages');
       });
 
       it('should return a graph with nodes and edges by actor', async () => {
@@ -75,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(response.body).to.have.property('nodes').length(3);
         expect(response.body).to.have.property('edges').length(2);
+        expect(response.body).not.to.have.property('messages');
 
         response.body.nodes.forEach((node: any) => {
           expect(node).to.have.property('color');

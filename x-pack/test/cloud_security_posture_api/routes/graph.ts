@@ -11,6 +11,7 @@ import {
 } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import type { Agent } from 'supertest';
+import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
@@ -129,6 +130,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.have.property('nodes').length(0);
         expect(response.body).to.have.property('edges').length(0);
+        expect(response.body).not.to.have.property('messages');
       });
 
       it('should return a graph with nodes and edges by actor', async () => {
@@ -153,6 +155,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.have.property('nodes').length(3);
         expect(response.body).to.have.property('edges').length(2);
+        expect(response.body).not.to.have.property('messages');
 
         response.body.nodes.forEach((node: any) => {
           expect(node).to.have.property('color');
@@ -182,6 +185,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.have.property('nodes').length(3);
         expect(response.body).to.have.property('edges').length(2);
+        expect(response.body).not.to.have.property('messages');
 
         response.body.nodes.forEach((node: any) => {
           expect(node).to.have.property('color');
@@ -211,6 +215,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.have.property('nodes').length(3);
         expect(response.body).to.have.property('edges').length(2);
+        expect(response.body).not.to.have.property('messages');
 
         response.body.nodes.forEach((node: any) => {
           expect(node).to.have.property('color');
@@ -251,6 +256,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.have.property('nodes').length(3);
         expect(response.body).to.have.property('edges').length(2);
+        expect(response.body).not.to.have.property('messages');
 
         response.body.nodes.forEach((node: any) => {
           expect(node).to.have.property('color');
@@ -292,6 +298,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.have.property('nodes').length(5);
         expect(response.body).to.have.property('edges').length(6);
+        expect(response.body).not.to.have.property('messages');
 
         expect(response.body.nodes[0].shape).equal('group', 'Groups should be the first nodes');
 
@@ -328,6 +335,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.have.property('nodes').length(5);
         expect(response.body).to.have.property('edges').length(4);
+        expect(response.body).not.to.have.property('messages');
 
         response.body.nodes.forEach((node: any) => {
           expect(node).to.have.property('color');
@@ -368,6 +376,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.have.property('nodes').length(5);
         expect(response.body).to.have.property('edges').length(4);
+        expect(response.body).not.to.have.property('messages');
 
         response.body.nodes.forEach((node: any, idx: number) => {
           expect(node).to.have.property('color');
@@ -412,6 +421,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.have.property('nodes').length(0);
         expect(response.body).to.have.property('edges').length(0);
+        expect(response.body).not.to.have.property('messages');
       });
 
       it('Should return unknown targets', async () => {
@@ -437,6 +447,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.have.property('nodes').length(3);
         expect(response.body).to.have.property('edges').length(2);
+        expect(response.body).not.to.have.property('messages');
       });
 
       it('Should limit number of nodes', async () => {
@@ -462,6 +473,8 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.have.property('nodes').length(3); // Minimal number of nodes in a single relationship
         expect(response.body).to.have.property('edges').length(2);
+        expect(response.body).to.have.property('messages').length(1);
+        expect(response.body.messages[0]).equal(ApiMessageCode.ReachedNodesLimit);
       });
     });
   });
