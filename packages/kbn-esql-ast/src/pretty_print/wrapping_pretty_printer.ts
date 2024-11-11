@@ -20,7 +20,7 @@ import {
 } from '../visitor';
 import { children, singleItems } from '../visitor/utils';
 import { BasicPrettyPrinter, BasicPrettyPrinterOptions } from './basic_pretty_printer';
-import { commandsWithNoCommaArgSeparator } from './constants';
+import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
 import { getPrettyPrintStats } from './helpers';
 import { LeafPrinter } from './leaf_printer';
 
@@ -561,8 +561,9 @@ export class WrappingPrettyPrinter {
         indent: inp.indent,
         remaining: inp.remaining - option.length - 1,
       });
-      const argsFormatted = args.txt ? ` ${args.txt}` : '';
-      const txt = `${option}${argsFormatted}`;
+      const argsFormatted = args.txt ? `${args.txt[0] === '\n' ? '' : ' '}${args.txt}` : '';
+      const separator = commandOptionsWithEqualsSeparator.has(ctx.node.name) ? ' =' : '';
+      const txt = `${option}${separator}${argsFormatted}`;
 
       return { txt, lines: args.lines };
     })

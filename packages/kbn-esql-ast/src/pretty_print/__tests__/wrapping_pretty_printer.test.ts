@@ -64,10 +64,23 @@ FROM index
         'FROM index | DISSECT input "pattern" APPEND_SEPARATOR="<separator>"'
       );
 
-      expect(text).toBe('FROM index | DISSECT input "pattern" APPEND_SEPARATOR="<separator>"');
+      expect(text).toBe('FROM index | DISSECT input "pattern" APPEND_SEPARATOR = "<separator>"');
     });
 
-    test('two long arguments with APPEND_SEPARATOR option', () => {
+    test('two long arguments with short APPEND_SEPARATOR option', () => {
+      const { text } = reprint(
+        'FROM index | DISSECT InputInputInputInputInputInputInputInputInputInputInputInputInputInput "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern" APPEND_SEPARATOR="sep"'
+      );
+
+      expect('\n' + text).toBe(`
+FROM index
+  | DISSECT
+      InputInputInputInputInputInputInputInputInputInputInputInputInputInput
+      "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern"
+        APPEND_SEPARATOR = "sep"`);
+    });
+
+    test('two long arguments with long APPEND_SEPARATOR option', () => {
       const { text } = reprint(
         'FROM index | DISSECT InputInputInputInputInputInputInputInputInputInputInputInputInputInput "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern" APPEND_SEPARATOR="<SeparatorSeparatorSeparatorSeparatorSeparatorSeparatorSeparatorSeparator>"'
       );
@@ -76,7 +89,9 @@ FROM index
 FROM index
   | DISSECT
       InputInputInputInputInputInputInputInputInputInputInputInputInputInput
-      "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern"`);
+      "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern"
+        APPEND_SEPARATOR =
+          "<SeparatorSeparatorSeparatorSeparatorSeparatorSeparatorSeparatorSeparator>"`);
     });
   });
 });
