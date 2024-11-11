@@ -478,8 +478,8 @@ export const PresentationPanelHoverActions = ({
         .embPanel {
           ${showBorder
             ? `
-            outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
-          `
+              outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
+            `
             : ''}
         }
 
