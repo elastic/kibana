@@ -7,20 +7,18 @@
 
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
   const es = getService('es');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
-  const synthtraceKibanaClient = getService('synthtraceKibanaClient');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177245
-  registry.when('Diagnostics: Data streams', { config: 'basic', archives: [] }, () => {
+  describe('Diagnostics: Data streams', () => {
     describe('When there is no data', () => {
       before(async () => {
         // delete APM data streams
@@ -45,9 +43,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('When data is ingested', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       before(async () => {
-        const latestVersion = await synthtraceKibanaClient.fetchLatestApmPackageVersion();
-        await synthtraceKibanaClient.installApmPackage(latestVersion);
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        const apmSynthtraceKibanaClient = synthtrace.apmSynthtraceKibanaClient;
+        const latestVersion = await apmSynthtraceKibanaClient.fetchLatestApmPackageVersion();
+        await apmSynthtraceKibanaClient.installApmPackage(latestVersion);
 
         const instance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })

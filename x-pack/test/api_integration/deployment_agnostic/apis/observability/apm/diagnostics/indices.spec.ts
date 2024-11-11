@@ -8,20 +8,20 @@
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
   const es = getService('es');
-  const synthtraceKibanaClient = getService('synthtraceKibanaClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  // FLAKY: https://github.com/elastic/kibana/pull/177039
-  registry.when.skip('Diagnostics: Indices', { config: 'basic', archives: [] }, () => {
+  let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+  describe('Diagnostics: Indices', () => {
     describe.skip('When there is no data', () => {
       it('returns empty response`', async () => {
         const { status, body } = await apmApiClient.adminUser({
@@ -39,6 +39,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const instance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
           .instance('instance-a');
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
         await apmSynthtraceEsClient.index(
           timerange(start, end)
@@ -92,8 +93,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await es.indices.delete({ index: 'traces-apm-default' });
-        const latestVersion = await synthtraceKibanaClient.fetchLatestApmPackageVersion();
-        await synthtraceKibanaClient.installApmPackage(latestVersion);
+        const apmSynthtraceKibanaClient = synthtrace.apmSynthtraceKibanaClient;
+        const latestVersion = await apmSynthtraceKibanaClient.fetchLatestApmPackageVersion();
+        await apmSynthtraceKibanaClient.installApmPackage(latestVersion);
         await apmSynthtraceEsClient.clean();
       });
 
@@ -136,8 +138,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        const latestVersion = await synthtraceKibanaClient.fetchLatestApmPackageVersion();
-        await synthtraceKibanaClient.installApmPackage(latestVersion);
+        const apmSynthtraceKibanaClient = synthtrace.apmSynthtraceKibanaClient;
+        const latestVersion = await apmSynthtraceKibanaClient.fetchLatestApmPackageVersion();
+        await apmSynthtraceKibanaClient.installApmPackage(latestVersion);
         await apmSynthtraceEsClient.clean();
       });
 

@@ -7,13 +7,12 @@
 
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
 
-  registry.when('Diagnostics: Privileges', { config: 'basic', archives: [] }, () => {
+  describe('Diagnostics: Privileges', () => {
     describe('superuser', () => {
       let body: APIReturnType<'GET /internal/apm/diagnostics'>;
 

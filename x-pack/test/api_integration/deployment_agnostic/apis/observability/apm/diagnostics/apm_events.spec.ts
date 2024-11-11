@@ -9,19 +9,18 @@ import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { sumBy } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
   const es = getService('es');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177144
-  registry.when('Diagnostics: APM Events', { config: 'basic', archives: [] }, () => {
+  describe('Diagnostics: APM Events', () => {
     describe('When there is no data', () => {
       before(async () => {
         // delete APM data streams
@@ -38,10 +37,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('When data is ingested', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       before(async () => {
         const instance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
           .instance('instance-a');
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
         await apmSynthtraceEsClient.index(
           timerange(start, end)
