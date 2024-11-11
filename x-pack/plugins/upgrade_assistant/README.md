@@ -287,10 +287,10 @@ Run them in the console to trigger the deprecation condition so they show up in 
 We need to explicitly set the query param `elasticInternalOrigin` to `false` to track the request as non-internal origin.
 
 ```
-# Route deprecations for Versioned routes: Version 1 is deprecated
+# Route deprecations for Versioned routes
 GET kbn:/api/routing_example/d/versioned_route?apiVersion=2023-10-31&elasticInternalOrigin=false
 
-# Route deprecations for Non-versioned routes?elasticInternalOrigin=false
+# Route deprecations for Non-versioned routes
 GET kbn:/api/routing_example/d/removed_route?elasticInternalOrigin=false
 GET kbn:/api/routing_example/d/deprecated_route?elasticInternalOrigin=false
 POST kbn:/api/routing_example/d/migrated_route?elasticInternalOrigin=false
