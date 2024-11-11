@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 27596
   aiAssistantManagementSelection: 19146
-  aiops: 10000
+  aiops: 16000
   alerting: 106936
   apm: 64385
   banners: 17946
@@ -33,7 +33,7 @@ pageLoadAssetSize:
   dataViewFieldEditor: 42021
   dataViewManagement: 5300
   dataViews: 65000
-  dataVisualizer: 27530
+  dataVisualizer: 30000
   devTools: 38637
   discover: 99999
   discoverEnhanced: 42730
@@ -165,7 +165,7 @@ pageLoadAssetSize:
   threatIntelligence: 44299
   timelines: 327300
   transform: 41007
-  triggersActionsUi: 970000
+  triggersActionsUi: 135613
   uiActions: 35121
   uiActionsEnhanced: 38494
   unifiedDocViewer: 25099
