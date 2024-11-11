@@ -4,7 +4,7 @@
     "id": "589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1",
     "index": ".internal.alerts-security.alerts-default-000001",
     "source": {
-      "@timestamp": "2024-09-01T20:44:02.109Z",
+      "@timestamp": "2024-09-01T12:44:02.109Z",
       "actor": {
         "entity": {
           "id": "admin@example.com"
@@ -34,7 +34,7 @@
         ],
         "dataset": "gcp.audit",
         "id": "kabcd1234efgh5678",
-        "ingested": "2024-09-01T20:40:17Z",
+        "ingested": "2024-09-01T12:40:17Z",
         "module": "gcp",
         "outcome": "success",
         "provider": "activity",
@@ -95,8 +95,8 @@
         }
       ],
       "kibana.alert.depth": 1,
-      "kibana.alert.intended_timestamp": "2024-09-01T20:44:02.117Z",
-      "kibana.alert.last_detected": "2024-09-01T20:44:02.117Z",
+      "kibana.alert.intended_timestamp": "2024-09-01T12:44:02.117Z",
+      "kibana.alert.last_detected": "2024-09-01T12:44:02.117Z",
       "kibana.alert.original_event.action": "google.iam.admin.v1.CreateRole",
       "kibana.alert.original_event.agent_id_status": "missing",
       "kibana.alert.original_event.category": [
@@ -106,7 +106,7 @@
       ],
       "kibana.alert.original_event.dataset": "gcp.audit",
       "kibana.alert.original_event.id": "kabcd1234efgh5678",
-      "kibana.alert.original_event.ingested": "2024-09-01T20:40:17Z",
+      "kibana.alert.original_event.ingested": "2024-09-01T12:40:17Z",
       "kibana.alert.original_event.kind": "event",
       "kibana.alert.original_event.module": "gcp",
       "kibana.alert.original_event.outcome": "success",
@@ -126,13 +126,13 @@
       ],
       "kibana.alert.rule.category": "Custom Query Rule",
       "kibana.alert.rule.consumer": "siem",
-      "kibana.alert.rule.created_at": "2024-09-01T20:38:49.650Z",
+      "kibana.alert.rule.created_at": "2024-09-01T12:38:49.650Z",
       "kibana.alert.rule.created_by": "elastic",
       "kibana.alert.rule.description": "Identifies an Identity and Access Management (IAM) custom role creation in Google Cloud Platform (GCP). Custom roles are user-defined, and allow for the bundling of one or more supported permissions to meet specific needs. Custom roles will not be updated automatically and could lead to privilege creep if not carefully scrutinized.",
       "kibana.alert.rule.enabled": true,
       "kibana.alert.rule.exceptions_list": [
       ],
-      "kibana.alert.rule.execution.timestamp": "2024-09-01T20:44:02.117Z",
+      "kibana.alert.rule.execution.timestamp": "2024-09-01T12:44:02.117Z",
       "kibana.alert.rule.execution.uuid": "a440f349-1900-4087-b507-f2b98c6cfa79",
       "kibana.alert.rule.false_positives": [
         "Custom role creations may be done by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Role creations by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
@@ -300,12 +300,12 @@
       "kibana.alert.rule.timestamp_override": "event.ingested",
       "kibana.alert.rule.to": "now",
       "kibana.alert.rule.type": "query",
-      "kibana.alert.rule.updated_at": "2024-09-01T20:39:00.099Z",
+      "kibana.alert.rule.updated_at": "2024-09-01T12:39:00.099Z",
       "kibana.alert.rule.updated_by": "elastic",
       "kibana.alert.rule.uuid": "c6f64115-5941-46ef-bfa3-61a4ecb4f3ba",
       "kibana.alert.rule.version": 104,
       "kibana.alert.severity": "medium",
-      "kibana.alert.start": "2024-09-01T20:44:02.117Z",
+      "kibana.alert.start": "2024-09-01T12:44:02.117Z",
       "kibana.alert.status": "active",
       "kibana.alert.uuid": "589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1",
       "kibana.alert.workflow_assignee_ids": [
@@ -361,7 +361,7 @@
     "id": "838ea37ab43ab7d2754d007fbe8191be53d7d637bea62f6189f8db1503c0e250",
     "index": ".internal.alerts-security.alerts-default-000001",
     "source": {
-      "@timestamp": "2024-09-01T20:39:03.646Z",
+      "@timestamp": "2024-09-01T12:39:03.646Z",
       "actor": {
         "entity": {
           "id": "admin@example.com"
@@ -391,7 +391,7 @@
         ],
         "dataset": "gcp.audit",
         "id": "kabcd1234efgh5678",
-        "ingested": "2024-09-01T20:38:13Z",
+        "ingested": "2024-09-01T12:38:13Z",
         "module": "gcp",
         "outcome": "success",
         "provider": "activity",
@@ -452,8 +452,8 @@
         }
       ],
       "kibana.alert.depth": 1,
-      "kibana.alert.intended_timestamp": "2024-09-01T20:39:03.657Z",
-      "kibana.alert.last_detected": "2024-09-01T20:39:03.657Z",
+      "kibana.alert.intended_timestamp": "2024-09-01T12:39:03.657Z",
+      "kibana.alert.last_detected": "2024-09-01T12:39:03.657Z",
       "kibana.alert.original_event.action": "google.iam.admin.v1.CreateRole",
       "kibana.alert.original_event.agent_id_status": "missing",
       "kibana.alert.original_event.category": [
@@ -463,7 +463,7 @@
       ],
       "kibana.alert.original_event.dataset": "gcp.audit",
       "kibana.alert.original_event.id": "kabcd1234efgh5678",
-      "kibana.alert.original_event.ingested": "2024-09-01T20:38:13Z",
+      "kibana.alert.original_event.ingested": "2024-09-01T12:38:13Z",
       "kibana.alert.original_event.kind": "event",
       "kibana.alert.original_event.module": "gcp",
       "kibana.alert.original_event.outcome": "success",
@@ -483,13 +483,13 @@
       ],
       "kibana.alert.rule.category": "Custom Query Rule",
       "kibana.alert.rule.consumer": "siem",
-      "kibana.alert.rule.created_at": "2024-09-01T20:38:49.650Z",
+      "kibana.alert.rule.created_at": "2024-09-01T12:38:49.650Z",
       "kibana.alert.rule.created_by": "elastic",
       "kibana.alert.rule.description": "Identifies an Identity and Access Management (IAM) custom role creation in Google Cloud Platform (GCP). Custom roles are user-defined, and allow for the bundling of one or more supported permissions to meet specific needs. Custom roles will not be updated automatically and could lead to privilege creep if not carefully scrutinized.",
       "kibana.alert.rule.enabled": true,
       "kibana.alert.rule.exceptions_list": [
       ],
-      "kibana.alert.rule.execution.timestamp": "2024-09-01T20:39:03.657Z",
+      "kibana.alert.rule.execution.timestamp": "2024-09-01T12:39:03.657Z",
       "kibana.alert.rule.execution.uuid": "939d34e1-1e74-480d-90ae-24079d9b40d3",
       "kibana.alert.rule.false_positives": [
         "Custom role creations may be done by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Role creations by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
@@ -657,12 +657,12 @@
       "kibana.alert.rule.timestamp_override": "event.ingested",
       "kibana.alert.rule.to": "now",
       "kibana.alert.rule.type": "query",
-      "kibana.alert.rule.updated_at": "2024-09-01T20:39:00.099Z",
+      "kibana.alert.rule.updated_at": "2024-09-01T12:39:00.099Z",
       "kibana.alert.rule.updated_by": "elastic",
       "kibana.alert.rule.uuid": "c6f64115-5941-46ef-bfa3-61a4ecb4f3ba",
       "kibana.alert.rule.version": 104,
       "kibana.alert.severity": "medium",
-      "kibana.alert.start": "2024-09-01T20:39:03.657Z",
+      "kibana.alert.start": "2024-09-01T12:39:03.657Z",
       "kibana.alert.status": "active",
       "kibana.alert.uuid": "838ea37ab43ab7d2754d007fbe8191be53d7d637bea62f6189f8db1503c0e250",
       "kibana.alert.workflow_assignee_ids": [
