@@ -7,9 +7,9 @@
 
 import './_explorer_chart_label.scss';
 import PropTypes from 'prop-types';
-import React, { useCallback } from 'react';
+import React, { Fragment, useCallback } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiIconTip, EuiText, EuiTextColor } from '@elastic/eui';
 
 import { ExplorerChartLabelBadge } from './explorer_chart_label_badge';
 import { ExplorerChartInfoTooltip } from '../../explorer_chart_info_tooltip';
@@ -35,9 +35,9 @@ export function ExplorerChartLabel({
   // Using &nbsp;s here to make sure those spaces get rendered.
   const labelSeparator =
     wrapLabel === true || entityFields.length === 0 || detectorLabel.length === 0 ? (
-      <React.Fragment>&nbsp;</React.Fragment>
+      <>&nbsp;</>
     ) : (
-      <React.Fragment>&nbsp;&ndash;&nbsp;</React.Fragment>
+      <>&nbsp;&ndash;&nbsp;</>
     );
 
   const applyFilter = useCallback(
@@ -49,30 +49,26 @@ export function ExplorerChartLabel({
   const entityFieldBadges = entityFields.map((entity) => {
     const key = `${infoTooltip.chartFunction}-${entity.fieldName}-${entity.fieldType}-${entity.fieldValue}`;
     return (
-      <EuiFlexGroup gutterSize="none" alignItems="center" key={`badge-wrapper-${key}`}>
-        <EuiFlexItem grow={false}>
-          {mode === 'embeddable' ? (
+      <Fragment key={`badge-wrapper-${key}`}>
+        {mode === 'embeddable' ? (
+          <span className="ml-explorer-chart-label-badge">
             <EuiText size="xs">
               <EuiTextColor color={'success'} component={'span'}>
                 {`${entity.fieldName}: ${entity.fieldValue}`}
               </EuiTextColor>
             </EuiText>
-          ) : (
-            <ExplorerChartLabelBadge entity={entity} />
-          )}
-        </EuiFlexItem>
-
-        {onSelectEntity !== undefined && (
-          <EuiFlexItem grow={false}>
-            <EntityFilter
-              mode={mode}
-              onFilter={applyFilter}
-              influencerFieldName={entity.fieldName}
-              influencerFieldValue={entity.fieldValue}
-            />
-          </EuiFlexItem>
+          </span>
+        ) : (
+          <ExplorerChartLabelBadge entity={entity} />
         )}
-      </EuiFlexGroup>
+        {onSelectEntity !== undefined && (
+          <EntityFilter
+            onFilter={applyFilter}
+            influencerFieldName={entity.fieldName}
+            influencerFieldValue={entity.fieldValue}
+          />
+        )}
+      </Fragment>
     );
   });
 
@@ -88,7 +84,7 @@ export function ExplorerChartLabel({
   );
 
   return (
-    <React.Fragment>
+    <>
       <span className="ml-explorer-chart-label">
         <span className="ml-explorer-chart-label-detector">
           {detectorLabel}
@@ -96,13 +92,13 @@ export function ExplorerChartLabel({
         </span>
         {wrapLabel && infoIcon}
         {!wrapLabel && (
-          <React.Fragment>
+          <>
             {entityFieldBadges} {infoIcon}
-          </React.Fragment>
+          </>
         )}
       </span>
       {wrapLabel && <span className="ml-explorer-chart-label-badges">{entityFieldBadges}</span>}
-    </React.Fragment>
+    </>
   );
 }
 ExplorerChartLabel.propTypes = {
