@@ -22,18 +22,18 @@
 /src/plugins/management/ @elastic/kibana-management
 /src/plugins/kibana_legacy/ @elastic/kibana-core
 /src/plugins/timelion/ @elastic/kibana-visualizations
-/src/plugins/vis_default_editor/@elastic/kibana-visualizations
-/src/plugins/vis_type_metric/@elastic/kibana-visualizations
-/src/plugins/vis_type_table/@elastic/kibana-visualizations
-/src/plugins/vis_type_tagcloud/@elastic/kibana-visualizations
-/src/plugins/vis_type_timelion/@elastic/kibana-visualizations
-/src/plugins/vis_type_timeseries/@elastic/kibana-visualizations
-/src/plugins/vis_type_vega/@elastic/kibana-visualizations
-/src/plugins/vis_type_vislib/@elastic/kibana-visualizations
-/src/plugins/vis_type_xy/@elastic/kibana-visualizations
-/src/plugins/vis_type_pie/@elastic/kibana-visualizations
-/src/plugins/visualize/@elastic/kibana-visualizations
-/src/plugins/visualizations/@elastic/kibana-visualizations
+/src/plugins/vis_default_editor/ @elastic/kibana-visualizations
+/src/plugins/vis_type_metric/ @elastic/kibana-visualizations
+/src/plugins/vis_type_table/ @elastic/kibana-visualizations
+/src/plugins/vis_type_tagcloud/ @elastic/kibana-visualizations
+/src/plugins/vis_type_timelion/ @elastic/kibana-visualizations
+/src/plugins/vis_type_timeseries/ @elastic/kibana-visualizations
+/src/plugins/vis_type_vega/ @elastic/kibana-visualizations
+/src/plugins/vis_type_vislib/ @elastic/kibana-visualizations
+/src/plugins/vis_type_xy/ @elastic/kibana-visualizations
+/src/plugins/vis_type_pie/ @elastic/kibana-visualizations
+/src/plugins/visualize/ @elastic/kibana-visualizations
+/src/plugins/visualizations/ @elastic/kibana-visualizations
 /src/plugins/url_forwarding/ @elastic/kibana-visualizations
 /packages/kbn-tinymath/ @elastic/kibana-visualizations
 
