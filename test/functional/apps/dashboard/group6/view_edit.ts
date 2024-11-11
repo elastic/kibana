@@ -216,7 +216,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('and preserves edits on cancel', function () {
       it('when time changed is stored with dashboard', async function () {
         await dashboard.gotoDashboardEditMode(dashboardName);
-        await timePicker.setDefaultAbsoluteRange();
+        await timePicker.setDefaultDataRange();
         await dashboard.saveDashboard(dashboardName, { saveAsNew: false });
         await timePicker.setAbsoluteRange(
           'Sep 19, 2013 @ 06:31:44.000',
