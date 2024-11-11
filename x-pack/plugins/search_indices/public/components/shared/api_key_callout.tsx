@@ -17,19 +17,19 @@ interface APIKeyCalloutProps {
 
 export const APIKeyCallout = ({ apiKey }: APIKeyCalloutProps) => {
   const title = apiKey
-    ? i18n.translate('xpack.searchIndices.startPage.codeView.apiKeyTitle', {
+    ? i18n.translate('xpack.searchIndices.shared.codeView.apiKeyTitle', {
         defaultMessage: 'Copy your API key',
       })
-    : i18n.translate('xpack.searchIndices.startPage.codeView.explicitGenerate.apiKeyTitle', {
+    : i18n.translate('xpack.searchIndices.shared.codeView.explicitGenerate.apiKeyTitle', {
         defaultMessage: 'Create an API key',
       });
 
   const description = apiKey
-    ? i18n.translate('xpack.searchIndices.startPage.codeView.apiKeyDescription', {
+    ? i18n.translate('xpack.searchIndices.shared.codeView.apiKeyDescription', {
         defaultMessage:
           'Make sure you keep it somewhere safe. You won’t be able to retrieve it later.',
       })
-    : i18n.translate('xpack.searchIndices.startPage.codeView.explicitGenerate.apiKeyDescription', {
+    : i18n.translate('xpack.searchIndices.shared.codeView.explicitGenerate.apiKeyDescription', {
         defaultMessage: 'Create an API key to connect to Elasticsearch.',
       });
 
