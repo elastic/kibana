@@ -20,6 +20,7 @@ import {
   CommandDefinition,
   CommandOptionsDefinition,
   CommandModeDefinition,
+  FunctionParameterType,
 } from '../definitions/types';
 import { shouldBeQuotedSource, getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
@@ -27,6 +28,7 @@ import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
 import { getTestFunctions } from '../shared/test_functions';
+import { builtinFunctions } from '../definitions/builtin';
 
 const allFunctions = memoize(
   () =>
@@ -75,7 +77,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): SuggestionRawDefi
   };
 }
 
-export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
+export function getOperatorSuggestion(fn: FunctionDefinition): SuggestionRawDefinition {
   const hasArgs = fn.signatures.some(({ params }) => params.length > 1);
   return {
     label: fn.name.toUpperCase(),
@@ -91,21 +93,22 @@ export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): Suggesti
   };
 }
 
-/**
- * Builds suggestions for functions based on the provided predicates.
- *
- * @param predicates a set of conditions that must be met for a function to be included in the suggestions
- * @returns
- */
-export const getFunctionSuggestions = (predicates?: {
+interface FunctionFilterPredicates {
   command?: string;
   option?: string | undefined;
   returnTypes?: string[];
   ignored?: string[];
-}): SuggestionRawDefinition[] => {
-  const functions = allFunctions();
-  const { command, option, returnTypes, ignored = [] } = predicates ?? {};
-  const filteredFunctions: FunctionDefinition[] = functions.filter(
+}
+
+export const filterFunctionDefinitions = (
+  functions: FunctionDefinition[],
+  predicates: FunctionFilterPredicates | undefined
+): FunctionDefinition[] => {
+  if (!predicates) {
+    return functions;
+  }
+  const { command, option, returnTypes, ignored = [] } = predicates;
+  return functions.filter(
     ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion, signatures }) => {
       if (ignoreAsSuggestion) {
         return false;
@@ -130,8 +133,53 @@ export const getFunctionSuggestions = (predicates?: {
       return true;
     }
   );
+};
 
-  return filteredFunctions.map(getFunctionSuggestion);
+/**
+ * Builds suggestions for functions based on the provided predicates.
+ *
+ * @param predicates a set of conditions that must be met for a function to be included in the suggestions
+ * @returns
+ */
+export const getFunctionSuggestions = (
+  predicates?: FunctionFilterPredicates
+): SuggestionRawDefinition[] => {
+  return filterFunctionDefinitions(allFunctions(), predicates).map(getFunctionSuggestion);
+};
+
+/**
+ * Builds suggestions for operators based on the provided predicates.
+ *
+ * @param predicates a set of conditions that must be met for an operator to be included in the suggestions
+ * @returns
+ */
+export const getOperatorSuggestions = (
+  predicates?: FunctionFilterPredicates & { leftParamType?: FunctionParameterType }
+): SuggestionRawDefinition[] => {
+  const filteredDefinitions = filterFunctionDefinitions(
+    getTestFunctions().length ? [...builtinFunctions, ...getTestFunctions()] : builtinFunctions,
+    predicates
+  );
+
+  // make sure the operator has at least one signature that matches
+  // the type of the existing left argument if provided (e.g. "doubleField <suggest>")
+  return (
+    predicates?.leftParamType
+      ? filteredDefinitions.filter(({ signatures }) =>
+          signatures.some(
+            ({ params }) =>
+              !params.length ||
+              params.some((pArg) => pArg.type === predicates?.leftParamType || pArg.type === 'any')
+          )
+        )
+      : filteredDefinitions
+  ).map(getOperatorSuggestion);
+};
+
+export const getSuggestionsAfterNot = (): SuggestionRawDefinition[] => {
+  return builtinFunctions
+    .filter(({ name }) => name === 'like' || name === 'rlike' || name === 'in')
+    .map(getOperatorSuggestion);
 };
 
 export function getSuggestionCommandDefinition(

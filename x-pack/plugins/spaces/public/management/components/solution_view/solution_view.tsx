@@ -79,7 +79,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
       value: 'classic',
       inputDisplay: (
         <>
-          <EuiIcon type="logoKibana" css={iconCss} />
+          <EuiIcon type="logoElasticStack" css={iconCss} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.classicOptionLabel',
             { defaultMessage: 'Classic' }
@@ -151,6 +151,16 @@ export const SolutionView: FunctionComponent<Props> = ({
               defaultMessage: 'Solution view',
             })}
             fullWidth
+            helpText={
+              <React.Fragment>
+                {showClassicDefaultViewCallout ? (
+                  <FormattedMessage
+                    id="xpack.spaces.management.manageSpacePage.solutionViewSelect.classicDefaultViewCallout"
+                    defaultMessage="Affects all users of the space"
+                  />
+                ) : null}
+              </React.Fragment>
+            }
             {...validator.validateSolutionView(space, isEditing)}
           >
             <EuiSuperSelect
@@ -174,13 +184,6 @@ export const SolutionView: FunctionComponent<Props> = ({
 
           {showClassicDefaultViewCallout && (
             <>
-              <EuiText size="s" color="subdued">
-                <FormattedMessage
-                  id="xpack.spaces.management.manageSpacePage.solutionViewSelect.classicDefaultViewCallout"
-                  defaultMessage="Affects all users of the space"
-                />
-              </EuiText>
-
               <EuiSpacer size="m" />
               <EuiCallOut
                 color="primary"
