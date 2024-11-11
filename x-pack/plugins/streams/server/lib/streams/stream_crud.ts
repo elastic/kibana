@@ -45,6 +45,11 @@ interface DeleteStreamParams extends BaseParams {
 }
 
 export async function deleteStreamObjects({ id, scopedClusterClient, logger }: DeleteStreamParams) {
+  await deleteDataStream({
+    esClient: scopedClusterClient.asCurrentUser,
+    name: id,
+    logger,
+  });
   await deleteTemplate({
     esClient: scopedClusterClient.asCurrentUser,
     name: getIndexTemplateName(id),
@@ -63,11 +68,6 @@ export async function deleteStreamObjects({ id, scopedClusterClient, logger }: D
   await deleteIngestPipeline({
     esClient: scopedClusterClient.asCurrentUser,
     id: getReroutePipelineName(id),
-    logger,
-  });
-  await deleteDataStream({
-    esClient: scopedClusterClient.asCurrentUser,
-    name: id,
     logger,
   });
   await scopedClusterClient.asInternalUser.delete({

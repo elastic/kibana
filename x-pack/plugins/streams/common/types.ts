@@ -60,7 +60,7 @@ export type ProcessingDefinition = z.infer<typeof processingDefinitionSchema>;
 
 export const fieldDefinitionSchema = z.object({
   name: z.string(),
-  type: z.enum(['keyword', 'text', 'long', 'double', 'date', 'boolean', 'ip']),
+  type: z.enum(['keyword', 'match_only_text', 'long', 'double', 'date', 'boolean', 'ip']),
 });
 
 export type FieldDefinition = z.infer<typeof fieldDefinitionSchema>;
@@ -85,3 +85,7 @@ export const streamDefinitonSchema = streamWithoutIdDefinitonSchema.extend({
 });
 
 export type StreamDefinition = z.infer<typeof streamDefinitonSchema>;
+
+export const streamDefinitonWithoutChildrenSchema = streamDefinitonSchema.omit({ children: true });
+
+export type StreamWithoutChildrenDefinition = z.infer<typeof streamDefinitonWithoutChildrenSchema>;

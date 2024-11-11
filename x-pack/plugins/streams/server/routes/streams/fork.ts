@@ -13,7 +13,7 @@ import {
   SecurityException,
 } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
-import { conditionSchema, streamDefinitonSchema } from '../../../common/types';
+import { conditionSchema, streamDefinitonWithoutChildrenSchema } from '../../../common/types';
 import { syncStream, readStream, validateAncestorFields } from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
 import { isChildOf } from '../../lib/streams/helpers/hierarchy';
@@ -32,7 +32,7 @@ export const forkStreamsRoute = createServerRoute({
     path: z.object({
       id: z.string(),
     }),
-    body: z.object({ stream: streamDefinitonSchema, condition: conditionSchema }),
+    body: z.object({ stream: streamDefinitonWithoutChildrenSchema, condition: conditionSchema }),
   }),
   handler: async ({ response, params, logger, request, getScopedClients }) => {
     try {
@@ -47,7 +47,7 @@ export const forkStreamsRoute = createServerRoute({
         id: params.path.id,
       });
 
-      const childDefinition = { ...params.body.stream };
+      const childDefinition = { ...params.body.stream, children: [] };
 
       // check whether root stream has a child of the given name already
       if (rootDefinition.children.some((child) => child.id === childDefinition.id)) {
@@ -82,7 +82,7 @@ export const forkStreamsRoute = createServerRoute({
 
       await syncStream({
         scopedClusterClient,
-        definition: params.body.stream,
+        definition: childDefinition,
         rootDefinition,
         logger,
       });

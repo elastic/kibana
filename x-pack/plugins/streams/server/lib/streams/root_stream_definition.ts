@@ -18,7 +18,7 @@ export const rootStreamDefinition: StreamDefinition = {
     },
     {
       name: 'message',
-      type: 'text',
+      type: 'match_only_text',
     },
     {
       name: 'host.name',
