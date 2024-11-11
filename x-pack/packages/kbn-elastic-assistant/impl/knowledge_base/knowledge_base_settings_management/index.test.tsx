@@ -413,6 +413,63 @@ describe('KnowledgeBaseSettingsManagement', () => {
     expect(mockCreateEntry).toHaveBeenCalledWith({ ...mockData[3], users: undefined });
   });
 
+  it('does not show duplicate entry modal on new document entry creation', async () => {
+    // Covers the BUG: https://github.com/elastic/kibana/issues/198892
+    const closeFlyoutMock = jest.fn();
+    (useFlyoutModalVisibility as jest.Mock).mockReturnValue({
+      isFlyoutOpen: true,
+      openFlyout: jest.fn(),
+      closeFlyout: closeFlyoutMock,
+    });
+    render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
+      wrapper,
+    });
+
+    await waitFor(() => {
+      fireEvent.click(screen.getAllByTestId('edit-button')[3]);
+    });
+    expect(screen.getByTestId('flyout')).toBeVisible();
+
+    await waitFor(() => {
+      expect(screen.getByText('Edit document entry')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('sharing-select'));
+      fireEvent.click(screen.getByTestId('sharing-private-option'));
+      fireEvent.click(screen.getByTestId('save-button'));
+    });
+
+    expect(screen.getByTestId('create-duplicate-entry-modal')).toBeInTheDocument();
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+    });
+    expect(screen.queryByTestId('create-duplicate-entry-modal')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(mockCreateEntry).toHaveBeenCalledTimes(1);
+    });
+
+    // Create a new document entry
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('addEntry'));
+    });
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('addDocument'));
+    });
+
+    expect(screen.getByTestId('flyout')).toBeVisible();
+
+    await userEvent.type(screen.getByTestId('entryNameInput'), 'hi');
+    await userEvent.type(screen.getByTestId('entryMarkdownInput'), 'hi');
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('save-button'));
+    });
+
+    expect(screen.queryByTestId('create-duplicate-entry-modal')).not.toBeInTheDocument();
+    expect(closeFlyoutMock).toHaveBeenCalled();
+  });
+
   it('shows warning icon for index entries with missing indices', async () => {
     render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
       wrapper,
