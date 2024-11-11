@@ -94,7 +94,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     );
   } catch (error) {
     // return an empty set for closed indices
-    if (error.message.startsWith('cluster_block_exception')) {
+    if (error.message.startsWith('index_closed_exception')) {
       return { body: { indices: [], fields: {} } };
     }
     throw convertEsError(indices, error);

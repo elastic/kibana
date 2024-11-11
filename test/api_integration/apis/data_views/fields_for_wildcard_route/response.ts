@@ -21,6 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const esClient = getService('es');
+  const log = getService('log');
+  const retry = getService('retry');
 
   const ensureFieldsAreSorted = (resp: { body: { fields: { name: string } } }) => {
     expect(resp.body.fields).to.eql(sortBy(resp.body.fields, 'name'));
@@ -244,15 +246,36 @@ export default function ({ getService }: FtrProviderContext) {
 
       await es.indices.close({ index: 'basic_index' });
 
-      await supertest
-        .get(FIELDS_FOR_WILDCARD_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query({ pattern: 'basic_index' })
-        .expect(200, {
-          fields: [],
-          indices: [],
-        });
+      await retry.try(async () => {
+        await supertest
+          .get(FIELDS_FOR_WILDCARD_PATH)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .query({ pattern: 'basic_index', allow_no_index: true })
+          .expect((response) => {
+            if (response.statusCode !== 200) {
+              log.debug(response.body);
+            }
+          })
+          .expect(200, {
+            fields: [],
+            indices: [],
+          });
+      });
+
+      await retry.try(async () => {
+        await supertest
+          .get(FIELDS_FOR_WILDCARD_PATH)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .query({ pattern: 'basic_index', allow_no_index: false })
+          .expect((response) => {
+            if (response.statusCode !== 404) {
+              log.debug(response.body);
+            }
+          })
+          .expect(404);
+      });
     });
 
     it('returns empty set when no fields even if meta fields are supplied', async () => {
