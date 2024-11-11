@@ -128,8 +128,6 @@ describe('getUseCellActionsHook', () => {
 
     const cellAction = result.current.getCellActions('host.name', 0);
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(cellAction).toHaveLength(0);
+    await waitFor(() => expect(cellAction).toHaveLength(0));
   });
 });

@@ -91,9 +91,7 @@ describe('useUpdateUserProfile() hook', () => {
     expect(result.current.isLoading).toBeTruthy();
 
     updateDone.next(true); // Resolve the http.post promise
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current.isLoading).toBeFalsy();
+    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
   });
 
   test('should show a success notification by default', async () => {

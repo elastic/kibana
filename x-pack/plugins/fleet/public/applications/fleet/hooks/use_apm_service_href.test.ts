@@ -33,10 +33,10 @@ describe('useApmServiceHref hook', () => {
 
     const { result } = renderHook(() => useAPMServiceDetailHref(datastream));
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current).toMatchObject({ isSuccessful: true, href: undefined });
-    expect(apmLocatorMock).not.toBeCalled();
+    await waitFor(() => {
+      expect(result.current).toMatchObject({ isSuccessful: true, href: undefined });
+      expect(apmLocatorMock).not.toBeCalled();
+    });
   });
 
   const testCases = [
@@ -87,10 +87,10 @@ describe('useApmServiceHref hook', () => {
     async (datastream, locatorParams) => {
       const { result } = renderHook(() => useAPMServiceDetailHref(datastream));
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      expect(result.current).toMatchObject({ isSuccessful: true, href: '' });
-      expect(apmLocatorMock).toBeCalledWith(expect.objectContaining(locatorParams));
+      await waitFor(() => {
+        expect(result.current).toMatchObject({ isSuccessful: true, href: '' });
+        expect(apmLocatorMock).toBeCalledWith(expect.objectContaining(locatorParams));
+      });
     }
   );
 });

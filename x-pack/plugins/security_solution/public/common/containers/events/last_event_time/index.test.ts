@@ -81,13 +81,14 @@ describe('useTimelineLastEventTime', () => {
         indexNames: [],
       })
     );
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(mockSearchStrategy.mock.calls[0][0]).toEqual({
-      defaultIndex: [],
-      details: {},
-      factoryQueryType: 'eventsLastEventTime',
-      indexKey: 'hostDetails',
-    });
+    await waitFor(() =>
+      expect(mockSearchStrategy.mock.calls[0][0]).toEqual({
+        defaultIndex: [],
+        details: {},
+        factoryQueryType: 'eventsLastEventTime',
+        indexKey: 'hostDetails',
+      })
+    );
   });
 
   it('should set response', async () => {
@@ -102,7 +103,6 @@ describe('useTimelineLastEventTime', () => {
         indexNames: [],
       })
     );
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current[1].lastSeen).toEqual('1 minute ago');
+    await waitFor(() => expect(result.current[1].lastSeen).toEqual('1 minute ago'));
   });
 });

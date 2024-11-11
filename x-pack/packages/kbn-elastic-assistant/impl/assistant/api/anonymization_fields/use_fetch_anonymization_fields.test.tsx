@@ -44,21 +44,22 @@ describe('useFetchAnonymizationFields', () => {
 
     await act(async () => {
       renderHook(() => useFetchAnonymizationFields());
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-      expect(http.fetch).toHaveBeenCalledWith(
-        '/api/security_ai_assistant/anonymization_fields/_find',
-        {
-          method: 'GET',
-          query: {
-            page: 1,
-            per_page: 1000,
-          },
-          version: API_VERSIONS.public.v1,
-          signal: undefined,
-        }
-      );
+      await waitFor(() => {
+        expect(http.fetch).toHaveBeenCalledWith(
+          '/api/security_ai_assistant/anonymization_fields/_find',
+          {
+            method: 'GET',
+            query: {
+              page: 1,
+              per_page: 1000,
+            },
+            version: API_VERSIONS.public.v1,
+            signal: undefined,
+          }
+        );
 
-      expect(http.fetch).toHaveBeenCalled();
+        expect(http.fetch).toHaveBeenCalled();
+      });
     });
   });
 });

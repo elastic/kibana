@@ -31,9 +31,9 @@ describe('useGetCaseUsers', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(spy).toHaveBeenCalledWith({ caseId: 'case-1', signal: expect.any(AbortSignal) });
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith({ caseId: 'case-1', signal: expect.any(AbortSignal) })
+    );
   });
 
   it('shows a toast error when the api return an error', async () => {

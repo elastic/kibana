@@ -44,19 +44,20 @@ describe('useFetchPrompts', () => {
 
     await act(async () => {
       renderHook(() => useFetchPrompts());
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-      expect(http.fetch).toHaveBeenCalledWith('/api/security_ai_assistant/prompts/_find', {
-        method: 'GET',
-        query: {
-          page: 1,
-          per_page: 1000,
-          filter: 'consumer:*',
-        },
-        version: API_VERSIONS.public.v1,
-        signal: undefined,
-      });
+      await waitFor(() => {
+        expect(http.fetch).toHaveBeenCalledWith('/api/security_ai_assistant/prompts/_find', {
+          method: 'GET',
+          query: {
+            page: 1,
+            per_page: 1000,
+            filter: 'consumer:*',
+          },
+          version: API_VERSIONS.public.v1,
+          signal: undefined,
+        });
 
-      expect(http.fetch).toHaveBeenCalled();
+        expect(http.fetch).toHaveBeenCalled();
+      });
     });
   });
 });

@@ -88,12 +88,12 @@ describe('UseInfiniteFindCaseUserActions', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(spy).toHaveBeenCalledWith(
-      basicCase.id,
-      { type: 'user', sortOrder: 'desc', page: 1, perPage: 5 },
-      expect.any(AbortSignal)
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith(
+        basicCase.id,
+        { type: 'user', sortOrder: 'desc', page: 1, perPage: 5 },
+        expect.any(AbortSignal)
+      )
     );
   });
 

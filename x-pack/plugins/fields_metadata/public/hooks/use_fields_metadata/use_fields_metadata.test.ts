@@ -71,9 +71,7 @@ describe('useFieldsMetadata', () => {
 
     renderHook(() => useFieldsMetadata(params));
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(fieldsMetadataClient.find).toHaveBeenCalledWith(params);
+    await waitFor(() => expect(fieldsMetadataClient.find).toHaveBeenCalledWith(params));
   });
 
   it('should return an error if the API call fails', async () => {
@@ -82,8 +80,6 @@ describe('useFieldsMetadata', () => {
 
     const { result } = renderHook(() => useFieldsMetadata());
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current.error?.message).toMatch(error.message);
+    await waitFor(() => expect(result.current.error?.message).toMatch(error.message));
   });
 });

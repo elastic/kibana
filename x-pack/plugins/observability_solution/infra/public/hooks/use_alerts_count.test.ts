@@ -96,8 +96,6 @@ describe('useAlertsCount', () => {
       })
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
     const body = JSON.stringify({
       aggs: {
         count: {
@@ -109,9 +107,11 @@ describe('useAlertsCount', () => {
       size: 0,
     });
 
-    expect(mockedPostAPI).toHaveBeenCalledWith(
-      '/internal/rac/alerts/find',
-      expect.objectContaining({ body })
+    await waitFor(() =>
+      expect(mockedPostAPI).toHaveBeenCalledWith(
+        '/internal/rac/alerts/find',
+        expect.objectContaining({ body })
+      )
     );
   });
 
@@ -121,8 +121,6 @@ describe('useAlertsCount', () => {
 
     const { result } = renderHook(() => useAlertsCount({ featureIds }));
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current.error?.message).toMatch(error.message);
+    await waitFor(() => expect(result.current.error?.message).toMatch(error.message));
   });
 });

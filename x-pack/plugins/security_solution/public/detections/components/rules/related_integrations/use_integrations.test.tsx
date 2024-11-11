@@ -42,9 +42,7 @@ describe('useIntegrations', () => {
 
     render();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(fetchAllIntegrations).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(fetchAllIntegrations).toHaveBeenCalledTimes(1));
   });
 
   it('does not call the API when skip is true', async () => {

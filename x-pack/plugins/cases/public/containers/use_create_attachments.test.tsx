@@ -67,9 +67,12 @@ describe('useCreateAttachments', () => {
       result.current.mutate(request);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(spy).toHaveBeenCalledWith({ attachments: attachmentsWithOwner, caseId: request.caseId });
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith({
+        attachments: attachmentsWithOwner,
+        caseId: request.caseId,
+      })
+    );
   });
 
   it('does not show a success toaster', async () => {
@@ -81,9 +84,7 @@ describe('useCreateAttachments', () => {
       result.current.mutate(request);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(addSuccess).not.toHaveBeenCalled();
+    await waitFor(() => expect(addSuccess).not.toHaveBeenCalled());
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -99,8 +100,6 @@ describe('useCreateAttachments', () => {
       result.current.mutate(request);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 });

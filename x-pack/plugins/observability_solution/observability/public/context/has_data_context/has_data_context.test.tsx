@@ -67,23 +67,23 @@ describe('HasDataContextProvider', () => {
         onRefreshTimeRange: expect.any(Function),
       });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      expect(result.current).toEqual({
-        hasDataMap: {
-          apm: { hasData: undefined, status: 'success' },
-          uptime: { hasData: undefined, status: 'success' },
-          infra_logs: { hasData: undefined, status: 'success' },
-          infra_metrics: { hasData: undefined, status: 'success' },
-          ux: { hasData: undefined, status: 'success' },
-          alert: { hasData: false, status: 'success' },
-          universal_profiling: { hasData: false, status: 'success' },
-        },
-        hasAnyData: false,
-        isAllRequestsComplete: true,
-        forceUpdate: expect.any(String),
-        onRefreshTimeRange: expect.any(Function),
-      });
+      await waitFor(() =>
+        expect(result.current).toEqual({
+          hasDataMap: {
+            apm: { hasData: undefined, status: 'success' },
+            uptime: { hasData: undefined, status: 'success' },
+            infra_logs: { hasData: undefined, status: 'success' },
+            infra_metrics: { hasData: undefined, status: 'success' },
+            ux: { hasData: undefined, status: 'success' },
+            alert: { hasData: false, status: 'success' },
+            universal_profiling: { hasData: false, status: 'success' },
+          },
+          hasAnyData: false,
+          isAllRequestsComplete: true,
+          forceUpdate: expect.any(String),
+          onRefreshTimeRange: expect.any(Function),
+        })
+      );
     });
   });
 
@@ -123,29 +123,29 @@ describe('HasDataContextProvider', () => {
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await waitFor(() => new Promise((resolve) => resolve(null)));
-
-        expect(result.current).toEqual({
-          hasDataMap: {
-            apm: { hasData: false, status: 'success' },
-            uptime: {
-              hasData: false,
-              status: 'success',
+        await waitFor(() =>
+          expect(result.current).toEqual({
+            hasDataMap: {
+              apm: { hasData: false, status: 'success' },
+              uptime: {
+                hasData: false,
+                status: 'success',
+              },
+              infra_logs: { hasData: false, indices: 'test-index', status: 'success' },
+              infra_metrics: { hasData: false, status: 'success' },
+              ux: {
+                hasData: false,
+                status: 'success',
+              },
+              alert: { hasData: false, status: 'success' },
+              universal_profiling: { hasData: false, status: 'success' },
             },
-            infra_logs: { hasData: false, indices: 'test-index', status: 'success' },
-            infra_metrics: { hasData: false, status: 'success' },
-            ux: {
-              hasData: false,
-              status: 'success',
-            },
-            alert: { hasData: false, status: 'success' },
-            universal_profiling: { hasData: false, status: 'success' },
-          },
-          hasAnyData: false,
-          isAllRequestsComplete: true,
-          forceUpdate: expect.any(String),
-          onRefreshTimeRange: expect.any(Function),
-        });
+            hasAnyData: false,
+            isAllRequestsComplete: true,
+            forceUpdate: expect.any(String),
+            onRefreshTimeRange: expect.any(Function),
+          })
+        );
       });
     });
 
@@ -184,31 +184,31 @@ describe('HasDataContextProvider', () => {
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await waitFor(() => new Promise((resolve) => resolve(null)));
-
-        expect(result.current).toEqual({
-          hasDataMap: {
-            apm: { hasData: true, status: 'success' },
-            uptime: {
-              hasData: false,
-              indices: 'heartbeat-*, synthetics-*',
-              status: 'success',
+        await waitFor(() =>
+          expect(result.current).toEqual({
+            hasDataMap: {
+              apm: { hasData: true, status: 'success' },
+              uptime: {
+                hasData: false,
+                indices: 'heartbeat-*, synthetics-*',
+                status: 'success',
+              },
+              infra_logs: { hasData: false, indices: 'test-index', status: 'success' },
+              infra_metrics: { hasData: false, indices: 'metric-*', status: 'success' },
+              ux: {
+                hasData: false,
+                indices: 'apm-*',
+                status: 'success',
+              },
+              alert: { hasData: false, status: 'success' },
+              universal_profiling: { hasData: false, status: 'success' },
             },
-            infra_logs: { hasData: false, indices: 'test-index', status: 'success' },
-            infra_metrics: { hasData: false, indices: 'metric-*', status: 'success' },
-            ux: {
-              hasData: false,
-              indices: 'apm-*',
-              status: 'success',
-            },
-            alert: { hasData: false, status: 'success' },
-            universal_profiling: { hasData: false, status: 'success' },
-          },
-          hasAnyData: true,
-          isAllRequestsComplete: true,
-          forceUpdate: expect.any(String),
-          onRefreshTimeRange: expect.any(Function),
-        });
+            hasAnyData: true,
+            isAllRequestsComplete: true,
+            forceUpdate: expect.any(String),
+            onRefreshTimeRange: expect.any(Function),
+          })
+        );
       });
     });
 
@@ -247,35 +247,35 @@ describe('HasDataContextProvider', () => {
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await waitFor(() => new Promise((resolve) => resolve(null)));
-
-        expect(result.current).toEqual({
-          hasDataMap: {
-            apm: {
-              hasData: true,
-              status: 'success',
+        await waitFor(() =>
+          expect(result.current).toEqual({
+            hasDataMap: {
+              apm: {
+                hasData: true,
+                status: 'success',
+              },
+              uptime: {
+                hasData: true,
+                indices: 'heartbeat-*, synthetics-*',
+                status: 'success',
+              },
+              infra_logs: { hasData: true, indices: 'test-index', status: 'success' },
+              infra_metrics: { hasData: true, indices: 'metric-*', status: 'success' },
+              ux: {
+                hasData: true,
+                serviceName: 'ux',
+                indices: 'apm-*',
+                status: 'success',
+              },
+              alert: { hasData: false, status: 'success' },
+              universal_profiling: { hasData: false, status: 'success' },
             },
-            uptime: {
-              hasData: true,
-              indices: 'heartbeat-*, synthetics-*',
-              status: 'success',
-            },
-            infra_logs: { hasData: true, indices: 'test-index', status: 'success' },
-            infra_metrics: { hasData: true, indices: 'metric-*', status: 'success' },
-            ux: {
-              hasData: true,
-              serviceName: 'ux',
-              indices: 'apm-*',
-              status: 'success',
-            },
-            alert: { hasData: false, status: 'success' },
-            universal_profiling: { hasData: false, status: 'success' },
-          },
-          hasAnyData: true,
-          isAllRequestsComplete: true,
-          forceUpdate: expect.any(String),
-          onRefreshTimeRange: expect.any(Function),
-        });
+            hasAnyData: true,
+            isAllRequestsComplete: true,
+            forceUpdate: expect.any(String),
+            onRefreshTimeRange: expect.any(Function),
+          })
+        );
       });
     });
 
@@ -301,23 +301,23 @@ describe('HasDataContextProvider', () => {
             onRefreshTimeRange: expect.any(Function),
           });
 
-          await waitFor(() => new Promise((resolve) => resolve(null)));
-
-          expect(result.current).toEqual({
-            hasDataMap: {
-              apm: { hasData: true, indices: sampleAPMIndices, status: 'success' },
-              uptime: { hasData: undefined, status: 'success' },
-              infra_logs: { hasData: undefined, status: 'success' },
-              infra_metrics: { hasData: undefined, status: 'success' },
-              ux: { hasData: undefined, status: 'success' },
-              alert: { hasData: false, status: 'success' },
-              universal_profiling: { hasData: false, status: 'success' },
-            },
-            hasAnyData: true,
-            isAllRequestsComplete: true,
-            forceUpdate: expect.any(String),
-            onRefreshTimeRange: expect.any(Function),
-          });
+          await waitFor(() =>
+            expect(result.current).toEqual({
+              hasDataMap: {
+                apm: { hasData: true, indices: sampleAPMIndices, status: 'success' },
+                uptime: { hasData: undefined, status: 'success' },
+                infra_logs: { hasData: undefined, status: 'success' },
+                infra_metrics: { hasData: undefined, status: 'success' },
+                ux: { hasData: undefined, status: 'success' },
+                alert: { hasData: false, status: 'success' },
+                universal_profiling: { hasData: false, status: 'success' },
+              },
+              hasAnyData: true,
+              isAllRequestsComplete: true,
+              forceUpdate: expect.any(String),
+              onRefreshTimeRange: expect.any(Function),
+            })
+          );
         });
       });
 
@@ -345,27 +345,27 @@ describe('HasDataContextProvider', () => {
             onRefreshTimeRange: expect.any(Function),
           });
 
-          await waitFor(() => new Promise((resolve) => resolve(null)));
-
-          expect(result.current).toEqual({
-            hasDataMap: {
-              apm: {
-                hasData: false,
-                indices: sampleAPMIndices,
-                status: 'success',
+          await waitFor(() =>
+            expect(result.current).toEqual({
+              hasDataMap: {
+                apm: {
+                  hasData: false,
+                  indices: sampleAPMIndices,
+                  status: 'success',
+                },
+                uptime: { hasData: undefined, status: 'success' },
+                infra_logs: { hasData: undefined, status: 'success' },
+                infra_metrics: { hasData: undefined, status: 'success' },
+                ux: { hasData: undefined, status: 'success' },
+                alert: { hasData: false, status: 'success' },
+                universal_profiling: { hasData: false, status: 'success' },
               },
-              uptime: { hasData: undefined, status: 'success' },
-              infra_logs: { hasData: undefined, status: 'success' },
-              infra_metrics: { hasData: undefined, status: 'success' },
-              ux: { hasData: undefined, status: 'success' },
-              alert: { hasData: false, status: 'success' },
-              universal_profiling: { hasData: false, status: 'success' },
-            },
-            hasAnyData: false,
-            isAllRequestsComplete: true,
-            forceUpdate: expect.any(String),
-            onRefreshTimeRange: expect.any(Function),
-          });
+              hasAnyData: false,
+              isAllRequestsComplete: true,
+              forceUpdate: expect.any(String),
+              onRefreshTimeRange: expect.any(Function),
+            })
+          );
         });
       });
     });
@@ -410,32 +410,32 @@ describe('HasDataContextProvider', () => {
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await waitFor(() => new Promise((resolve) => resolve(null)));
-
-        expect(result.current).toEqual({
-          hasDataMap: {
-            apm: { hasData: undefined, status: 'failure' },
-            uptime: {
-              hasData: true,
-              indices: 'heartbeat-*, synthetics-*',
-              status: 'success',
+        await waitFor(() =>
+          expect(result.current).toEqual({
+            hasDataMap: {
+              apm: { hasData: undefined, status: 'failure' },
+              uptime: {
+                hasData: true,
+                indices: 'heartbeat-*, synthetics-*',
+                status: 'success',
+              },
+              infra_logs: { hasData: true, indices: 'test-index', status: 'success' },
+              infra_metrics: { hasData: true, indices: 'metric-*', status: 'success' },
+              ux: {
+                hasData: true,
+                serviceName: 'ux',
+                indices: 'apm-*',
+                status: 'success',
+              },
+              alert: { hasData: false, status: 'success' },
+              universal_profiling: { hasData: false, status: 'success' },
             },
-            infra_logs: { hasData: true, indices: 'test-index', status: 'success' },
-            infra_metrics: { hasData: true, indices: 'metric-*', status: 'success' },
-            ux: {
-              hasData: true,
-              serviceName: 'ux',
-              indices: 'apm-*',
-              status: 'success',
-            },
-            alert: { hasData: false, status: 'success' },
-            universal_profiling: { hasData: false, status: 'success' },
-          },
-          hasAnyData: true,
-          isAllRequestsComplete: true,
-          forceUpdate: expect.any(String),
-          onRefreshTimeRange: expect.any(Function),
-        });
+            hasAnyData: true,
+            isAllRequestsComplete: true,
+            forceUpdate: expect.any(String),
+            onRefreshTimeRange: expect.any(Function),
+          })
+        );
       });
     });
 
@@ -487,23 +487,23 @@ describe('HasDataContextProvider', () => {
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await waitFor(() => new Promise((resolve) => resolve(null)));
-
-        expect(result.current).toEqual({
-          hasDataMap: {
-            apm: { hasData: undefined, status: 'failure' },
-            uptime: { hasData: undefined, status: 'failure' },
-            infra_logs: { hasData: undefined, status: 'failure' },
-            infra_metrics: { hasData: undefined, status: 'failure' },
-            ux: { hasData: undefined, status: 'failure' },
-            alert: { hasData: false, status: 'success' },
-            universal_profiling: { hasData: false, status: 'success' },
-          },
-          hasAnyData: false,
-          isAllRequestsComplete: true,
-          forceUpdate: expect.any(String),
-          onRefreshTimeRange: expect.any(Function),
-        });
+        await waitFor(() =>
+          expect(result.current).toEqual({
+            hasDataMap: {
+              apm: { hasData: undefined, status: 'failure' },
+              uptime: { hasData: undefined, status: 'failure' },
+              infra_logs: { hasData: undefined, status: 'failure' },
+              infra_metrics: { hasData: undefined, status: 'failure' },
+              ux: { hasData: undefined, status: 'failure' },
+              alert: { hasData: false, status: 'success' },
+              universal_profiling: { hasData: false, status: 'success' },
+            },
+            hasAnyData: false,
+            isAllRequestsComplete: true,
+            forceUpdate: expect.any(String),
+            onRefreshTimeRange: expect.any(Function),
+          })
+        );
       });
     });
   });
@@ -532,23 +532,23 @@ describe('HasDataContextProvider', () => {
         onRefreshTimeRange: expect.any(Function),
       });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      expect(result.current).toEqual({
-        hasDataMap: {
-          apm: { hasData: undefined, status: 'success' },
-          uptime: { hasData: undefined, status: 'success' },
-          infra_logs: { hasData: undefined, status: 'success' },
-          infra_metrics: { hasData: undefined, status: 'success' },
-          ux: { hasData: undefined, status: 'success' },
-          alert: { hasData: true, status: 'success' },
-          universal_profiling: { hasData: false, status: 'success' },
-        },
-        hasAnyData: true,
-        isAllRequestsComplete: true,
-        forceUpdate: expect.any(String),
-        onRefreshTimeRange: expect.any(Function),
-      });
+      await waitFor(() =>
+        expect(result.current).toEqual({
+          hasDataMap: {
+            apm: { hasData: undefined, status: 'success' },
+            uptime: { hasData: undefined, status: 'success' },
+            infra_logs: { hasData: undefined, status: 'success' },
+            infra_metrics: { hasData: undefined, status: 'success' },
+            ux: { hasData: undefined, status: 'success' },
+            alert: { hasData: true, status: 'success' },
+            universal_profiling: { hasData: false, status: 'success' },
+          },
+          hasAnyData: true,
+          isAllRequestsComplete: true,
+          forceUpdate: expect.any(String),
+          onRefreshTimeRange: expect.any(Function),
+        })
+      );
     });
   });
 });

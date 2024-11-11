@@ -43,14 +43,14 @@ describe('useImportList', () => {
         type: 'keyword',
       });
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(Api.importList).toHaveBeenCalledWith(
-      expect.objectContaining({
-        file: fileMock,
-        listId: 'my_list_id',
-        type: 'keyword',
-      })
+    await waitFor(() =>
+      expect(Api.importList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          file: fileMock,
+          listId: 'my_list_id',
+          type: 'keyword',
+        })
+      )
     );
   });
 
@@ -67,9 +67,7 @@ describe('useImportList', () => {
         type: 'keyword',
       });
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current.result).toEqual(getListResponseMock());
+    await waitFor(() => expect(result.current.result).toEqual(getListResponseMock()));
   });
 
   it('error is populated if importList rejects', async () => {
@@ -86,9 +84,9 @@ describe('useImportList', () => {
       });
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current.result).toBeUndefined();
-    expect(result.current.error).toEqual(new Error('whoops'));
+    await waitFor(() => {
+      expect(result.current.result).toBeUndefined();
+      expect(result.current.error).toEqual(new Error('whoops'));
+    });
   });
 });

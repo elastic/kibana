@@ -80,7 +80,10 @@ describe('dispatchUpdateTimeline', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    clock = sinon.useFakeTimers(unix);
+    clock = sinon.useFakeTimers({
+      now: unix,
+      toFake: ['Date'],
+    });
   });
 
   afterEach(function () {
@@ -88,128 +91,134 @@ describe('dispatchUpdateTimeline', () => {
   });
 
   it('it invokes date range picker dispatch', async () => {
-    await act(async () => {
-      const { result } = renderHook(() => useUpdateTimeline(), {
-        wrapper: TestProviders,
-      });
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-      result.current(defaultArgs);
+    const { result } = renderHook(() => useUpdateTimeline(), {
+      wrapper: TestProviders,
+    });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
-      expect(dispatchSetTimelineRangeDatePicker).toHaveBeenCalledWith({
-        from: '2020-03-26T14:35:56.356Z',
-        to: '2020-03-26T14:41:56.356Z',
-      });
+    act(() => {
+      result.current(defaultArgs);
+    });
+
+    expect(dispatchSetTimelineRangeDatePicker).toHaveBeenCalledWith({
+      from: '2020-03-26T14:35:56.356Z',
+      to: '2020-03-26T14:41:56.356Z',
     });
   });
 
   it('it invokes add timeline dispatch', async () => {
-    await act(async () => {
-      const { result } = renderHook(() => useUpdateTimeline(), {
-        wrapper: TestProviders,
-      });
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-      result.current(defaultArgs);
+    const { result } = renderHook(() => useUpdateTimeline(), {
+      wrapper: TestProviders,
+    });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
-      expect(dispatchAddTimeline).toHaveBeenCalledWith({
-        id: TimelineId.active,
-        savedTimeline: true,
-        timeline: {
-          ...mockTimelineModel,
-          version: null,
-          updated: undefined,
-          changed: true,
-        },
-      });
+    act(() => {
+      result.current(defaultArgs);
+    });
+
+    expect(dispatchAddTimeline).toHaveBeenCalledWith({
+      id: TimelineId.active,
+      savedTimeline: true,
+      timeline: {
+        ...mockTimelineModel,
+        version: null,
+        updated: undefined,
+        changed: true,
+      },
     });
   });
 
   it('it does not invoke kql filter query dispatches if timeline.kqlQuery.filterQuery is null', async () => {
-    await act(async () => {
-      const { result } = renderHook(() => useUpdateTimeline(), {
-        wrapper: TestProviders,
-      });
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-      result.current(defaultArgs);
-
-      expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
+    const { result } = renderHook(() => useUpdateTimeline(), {
+      wrapper: TestProviders,
     });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+
+    act(() => {
+      result.current(defaultArgs);
+    });
+
+    expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
   });
 
   it('it does not invoke notes dispatch if duplicate is true', async () => {
-    await act(async () => {
-      const { result } = renderHook(() => useUpdateTimeline(), {
-        wrapper: TestProviders,
-      });
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-      result.current(defaultArgs);
-
-      expect(dispatchAddNotes).not.toHaveBeenCalled();
+    const { result } = renderHook(() => useUpdateTimeline(), {
+      wrapper: TestProviders,
     });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    act(() => {
+      result.current(defaultArgs);
+    });
+
+    expect(dispatchAddNotes).not.toHaveBeenCalled();
   });
 
   it('it does not invoke kql filter query dispatches if timeline.kqlQuery.kuery is null', async () => {
-    await act(async () => {
-      const { result } = renderHook(() => useUpdateTimeline(), {
-        wrapper: TestProviders,
-      });
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-      const mockTimeline = {
-        ...mockTimelineModel,
-        kqlQuery: {
-          filterQuery: {
-            kuery: null,
-            serializedQuery: 'some-serialized-query',
-          },
+    const { result } = renderHook(() => useUpdateTimeline(), {
+      wrapper: TestProviders,
+    });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    const mockTimeline = {
+      ...mockTimelineModel,
+      kqlQuery: {
+        filterQuery: {
+          kuery: null,
+          serializedQuery: 'some-serialized-query',
         },
-      };
+      },
+    };
+
+    act(() => {
       result.current({
         ...defaultArgs,
         timeline: mockTimeline,
       });
-
-      expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
     });
+
+    expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
   });
 
   it('it invokes kql filter query dispatches if timeline.kqlQuery.filterQuery.kuery is not null', async () => {
-    await act(async () => {
-      const { result } = renderHook(() => useUpdateTimeline(), {
-        wrapper: TestProviders,
-      });
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-      const mockTimeline = {
-        ...mockTimelineModel,
-        kqlQuery: {
-          filterQuery: {
-            kuery: { expression: 'expression', kind: 'kuery' as KueryFilterQueryKind },
-            serializedQuery: 'some-serialized-query',
-          },
+    const { result } = renderHook(() => useUpdateTimeline(), {
+      wrapper: TestProviders,
+    });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    const mockTimeline = {
+      ...mockTimelineModel,
+      kqlQuery: {
+        filterQuery: {
+          kuery: { expression: 'expression', kind: 'kuery' as KueryFilterQueryKind },
+          serializedQuery: 'some-serialized-query',
         },
-      };
+      },
+    };
+
+    act(() => {
       result.current({
         ...defaultArgs,
         timeline: mockTimeline,
       });
+    });
 
-      expect(dispatchApplyKqlFilterQuery).toHaveBeenCalledWith({
-        id: TimelineId.active,
-        filterQuery: {
-          kuery: {
-            kind: 'kuery',
-            expression: 'expression',
-          },
-          serializedQuery: 'some-serialized-query',
+    expect(dispatchApplyKqlFilterQuery).toHaveBeenCalledWith({
+      id: TimelineId.active,
+      filterQuery: {
+        kuery: {
+          kind: 'kuery',
+          expression: 'expression',
         },
-      });
+        serializedQuery: 'some-serialized-query',
+      },
     });
   });
 
   it('it invokes dispatchAddNotes if duplicate is false', async () => {
-    await act(async () => {
-      const { result } = renderHook(() => useUpdateTimeline(), {
-        wrapper: TestProviders,
-      });
-      await waitFor(() => new Promise((resolve) => resolve(null)));
+    const { result } = renderHook(() => useUpdateTimeline(), {
+      wrapper: TestProviders,
+    });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+
+    act(() => {
       result.current({
         ...defaultArgs,
         duplicate: false,
@@ -224,53 +233,55 @@ describe('dispatchUpdateTimeline', () => {
           },
         ],
       });
+    });
 
-      expect(dispatchAddGlobalTimelineNote).not.toHaveBeenCalled();
-      expect(dispatchUpdateNote).not.toHaveBeenCalled();
-      expect(dispatchAddNotes).toHaveBeenCalledWith({
-        notes: [
-          {
-            created: new Date('2020-03-26T14:35:56.356Z'),
-            eventId: null,
-            id: 'note-id',
-            lastEdit: new Date('2020-03-26T14:35:56.356Z'),
-            note: 'I am a note',
-            user: 'unknown',
-            saveObjectId: 'note-id',
-            timelineId: 'abc',
-            version: 'testVersion',
-          },
-        ],
-      });
+    expect(dispatchAddGlobalTimelineNote).not.toHaveBeenCalled();
+    expect(dispatchUpdateNote).not.toHaveBeenCalled();
+    expect(dispatchAddNotes).toHaveBeenCalledWith({
+      notes: [
+        {
+          created: new Date('2020-03-26T14:35:56.356Z'),
+          eventId: null,
+          id: 'note-id',
+          lastEdit: new Date('2020-03-26T14:35:56.356Z'),
+          note: 'I am a note',
+          user: 'unknown',
+          saveObjectId: 'note-id',
+          timelineId: 'abc',
+          version: 'testVersion',
+        },
+      ],
     });
   });
 
   it('it invokes dispatch to create a timeline note if duplicate is true and ruleNote exists', async () => {
+    const { result } = renderHook(() => useUpdateTimeline(), {
+      wrapper: TestProviders,
+    });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+
     await act(async () => {
-      const { result } = renderHook(() => useUpdateTimeline(), {
-        wrapper: TestProviders,
-      });
-      await waitFor(() => new Promise((resolve) => resolve(null)));
       result.current({
         ...defaultArgs,
         ruleNote: '# this would be some markdown',
       });
-      const expectedNote: Note = {
-        created: new Date(anchor),
-        id: 'uuidv4()',
-        lastEdit: null,
-        note: '# this would be some markdown',
-        saveObjectId: null,
-        user: 'elastic',
-        version: null,
-      };
+    });
 
-      expect(dispatchAddNotes).not.toHaveBeenCalled();
-      expect(dispatchUpdateNote).toHaveBeenCalledWith({ note: expectedNote });
-      expect(dispatchAddGlobalTimelineNote).toHaveBeenLastCalledWith({
-        id: TimelineId.active,
-        noteId: 'uuidv4()',
-      });
+    const expectedNote: Note = {
+      created: new Date(anchor),
+      id: 'uuidv4()',
+      lastEdit: null,
+      note: '# this would be some markdown',
+      saveObjectId: null,
+      user: 'elastic',
+      version: null,
+    };
+
+    expect(dispatchAddNotes).not.toHaveBeenCalled();
+    expect(dispatchUpdateNote).toHaveBeenCalledWith({ note: expectedNote });
+    expect(dispatchAddGlobalTimelineNote).toHaveBeenLastCalledWith({
+      id: TimelineId.active,
+      noteId: 'uuidv4()',
     });
   });
 });

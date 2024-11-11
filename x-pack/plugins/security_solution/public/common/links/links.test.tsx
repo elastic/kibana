@@ -185,9 +185,7 @@ describe('Security links', () => {
         );
       });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      expect(result.current).toStrictEqual([networkLinkItem]);
+      await waitFor(() => expect(result.current).toStrictEqual([networkLinkItem]));
     });
 
     it('should return unauthorized page when page has upselling (serverless)', async () => {
@@ -253,9 +251,9 @@ describe('Security links', () => {
         );
       });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      expect(result.current).toStrictEqual([{ ...networkLinkItem, unauthorized: true }]);
+      await waitFor(() =>
+        expect(result.current).toStrictEqual([{ ...networkLinkItem, unauthorized: true }])
+      );
     });
 
     it('should return unauthorized page when page has upselling (ESS)', async () => {
@@ -283,9 +281,9 @@ describe('Security links', () => {
         });
       });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      expect(result.current).toStrictEqual([{ ...hostLinkItem, unauthorized: true }]);
+      await waitFor(() =>
+        expect(result.current).toStrictEqual([{ ...hostLinkItem, unauthorized: true }])
+      );
 
       // cleanup
       mockUpselling.setPages({});
@@ -317,8 +315,7 @@ describe('Security links', () => {
         });
       });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-      expect(result.current).toStrictEqual([]);
+      await waitFor(() => expect(result.current).toStrictEqual([]));
 
       // cleanup
       mockUpselling.setPages({});
@@ -358,8 +355,7 @@ describe('Security links', () => {
         );
       });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-      expect(result.current).toBe(false);
+      await waitFor(() => expect(result.current).toBe(false));
     });
 
     it('should update if the links are added', async () => {
@@ -391,8 +387,7 @@ describe('Security links', () => {
         );
       });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-      expect(result.current).toBe(true);
+      await waitFor(() => expect(result.current).toBe(true));
     });
   });
 

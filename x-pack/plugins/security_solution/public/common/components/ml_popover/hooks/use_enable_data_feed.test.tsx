@@ -90,8 +90,7 @@ describe('useSecurityJobsHelpers', () => {
         await enableDataFeedPromise;
       });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-      expect(result.current.isLoading).toBe(false);
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
     });
 
     it('does not call setupMlJob if job is already installed', async () => {

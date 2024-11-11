@@ -50,7 +50,9 @@ describe('usePersistExceptionList', () => {
       usePersistExceptionList({ http: mockKibanaHttpService, onError })
     );
     await waitFor(() => new Promise((resolve) => resolve(null)));
-    result.current[1](getCreateExceptionListSchemaMock());
+    act(() => {
+      result.current[1](getCreateExceptionListSchemaMock());
+    });
     rerender();
 
     expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);

@@ -50,10 +50,10 @@ describe('useUpdateCase', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    await waitFor(() => {
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    });
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
@@ -66,13 +66,13 @@ describe('useUpdateCase', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(patchCaseSpy).toHaveBeenCalledWith({
-      caseId: basicCase.id,
-      updatedCase: { description: 'updated description' },
-      version: basicCase.version,
-    });
+    await waitFor(() =>
+      expect(patchCaseSpy).toHaveBeenCalledWith({
+        caseId: basicCase.id,
+        updatedCase: { description: 'updated description' },
+        version: basicCase.version,
+      })
+    );
   });
 
   it('shows a success toaster', async () => {
@@ -84,12 +84,12 @@ describe('useUpdateCase', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(addSuccess).toHaveBeenCalledWith({
-      title: 'Updated "Another horrible breach!!"',
-      className: 'eui-textBreakWord',
-    });
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith({
+        title: 'Updated "Another horrible breach!!"',
+        className: 'eui-textBreakWord',
+      })
+    );
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -103,8 +103,6 @@ describe('useUpdateCase', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 });

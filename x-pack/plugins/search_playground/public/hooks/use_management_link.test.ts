@@ -43,12 +43,12 @@ describe('useManagementLink Hook', () => {
     mockGetUrl.mockResolvedValue(expectedUrl);
     const connectorId = 'test-connector-id';
     const { result } = renderHook(() => useManagementLink(connectorId));
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current).toBe(expectedUrl);
-    expect(mockGetUrl).toHaveBeenCalledWith({
-      sectionId: 'insightsAndAlerting',
-      appId: 'triggersActionsConnectors/connectors/test-connector-id',
+    await waitFor(() => {
+      expect(result.current).toBe(expectedUrl);
+      expect(mockGetUrl).toHaveBeenCalledWith({
+        sectionId: 'insightsAndAlerting',
+        appId: 'triggersActionsConnectors/connectors/test-connector-id',
+      });
     });
   });
 

@@ -74,9 +74,9 @@ describe('useLensAttributes hook', () => {
 
   it('should return the basic lens attributes', async () => {
     renderHook(() => useLensAttributes(params));
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(LensConfigBuilderMock.mock.instances[0].build).toHaveBeenCalledWith(params);
+    await waitFor(() =>
+      expect(LensConfigBuilderMock.mock.instances[0].build).toHaveBeenCalledWith(params)
+    );
   });
 
   it('should return extra actions', async () => {

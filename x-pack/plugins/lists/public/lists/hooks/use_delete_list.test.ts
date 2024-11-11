@@ -30,10 +30,10 @@ describe('useDeleteList', () => {
     act(() => {
       result.current.start({ http: httpMock, id: 'list' });
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(Api.deleteList).toHaveBeenCalledWith(
-      expect.objectContaining({ http: httpMock, id: 'list' })
+    await waitFor(() =>
+      expect(Api.deleteList).toHaveBeenCalledWith(
+        expect.objectContaining({ http: httpMock, id: 'list' })
+      )
     );
   });
 });

@@ -108,22 +108,22 @@ describe('use_change_csp_rule_state', () => {
       result.current.mutate(mockRuleStateUpdateRequest);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(httpPostSpy).toHaveBeenCalledWith(CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH, {
-      version: '1',
-      body: JSON.stringify({
-        action: 'mute',
-        rules: [
-          {
-            benchmark_id: 'benchmark_id',
-            benchmark_version: 'benchmark_version',
-            rule_number: '1',
-            rule_id: 'rule_1',
-          },
-        ],
-      }),
-    });
+    await waitFor(() =>
+      expect(httpPostSpy).toHaveBeenCalledWith(CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH, {
+        version: '1',
+        body: JSON.stringify({
+          action: 'mute',
+          rules: [
+            {
+              benchmark_id: 'benchmark_id',
+              benchmark_version: 'benchmark_version',
+              rule_number: '1',
+              rule_id: 'rule_1',
+            },
+          ],
+        }),
+      })
+    );
   });
 
   it('should cancel queries and update query data onMutate', async () => {
@@ -152,17 +152,17 @@ describe('use_change_csp_rule_state', () => {
       result.current.mutate(mockRuleStateUpdateRequest);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => {
+      const expectedMutatedRules = {
+        ...initialRules,
+        rule_1: { ...initialRules.rule_1, muted: true },
+      };
 
-    const expectedMutatedRules = {
-      ...initialRules,
-      rule_1: { ...initialRules.rule_1, muted: true },
-    };
-
-    expect(queryClientSpy).toHaveBeenCalled();
-    expect(queryClientGetSpy).toHaveBeenCalled();
-    expect(mockSetQueryDataSpy).toHaveBeenCalled();
-    expect(mockSetQueryDataSpy).toHaveReturnedWith(expectedMutatedRules);
+      expect(queryClientSpy).toHaveBeenCalled();
+      expect(queryClientGetSpy).toHaveBeenCalled();
+      expect(mockSetQueryDataSpy).toHaveBeenCalled();
+      expect(mockSetQueryDataSpy).toHaveReturnedWith(expectedMutatedRules);
+    });
   });
 
   it('should invalidate queries onSettled', async () => {
@@ -189,12 +189,12 @@ describe('use_change_csp_rule_state', () => {
       result.current.mutate(mockRuleStateUpdateRequest);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(BENCHMARK_INTEGRATION_QUERY_KEY_V2);
-    expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(CSPM_STATS_QUERY_KEY);
-    expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(KSPM_STATS_QUERY_KEY);
-    expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(CSP_RULES_STATES_QUERY_KEY);
+    await waitFor(() => {
+      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(BENCHMARK_INTEGRATION_QUERY_KEY_V2);
+      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(CSPM_STATS_QUERY_KEY);
+      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(KSPM_STATS_QUERY_KEY);
+      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(CSP_RULES_STATES_QUERY_KEY);
+    });
   });
 
   it('should restore previous query data onError', async () => {
@@ -222,13 +222,13 @@ describe('use_change_csp_rule_state', () => {
       result.current.mutate(mockRuleStateUpdateRequest);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(mockSetQueryDataSpy).toHaveBeenCalled();
-    expect(mockSetQueryDataSpy).toHaveReturnedWith(initialRules);
+    await waitFor(() => {
+      expect(mockSetQueryDataSpy).toHaveBeenCalled();
+      expect(mockSetQueryDataSpy).toHaveReturnedWith(initialRules);
+    });
   });
 
-  it('creates the new set of cache rules in a muted state when calling createRulesWithUpdatedState', async () => {
+  it('creates the new set of cache rules in a muted state when calling createRulesWithUpdatedState', () => {
     const request: RuleStateUpdateRequest = {
       newState: 'mute',
       ruleIds: [
@@ -268,7 +268,7 @@ describe('use_change_csp_rule_state', () => {
     expect(newRulesState).toEqual({ ...initialRules, ...updateRules });
   });
 
-  it('creates the new cache with rules in a unmute state', async () => {
+  it('creates the new cache with rules in a unmute state', () => {
     const initialMutedRules: Record<string, RuleStateAttributes> = {
       rule_1: {
         benchmark_id: 'benchmark_id',

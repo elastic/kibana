@@ -447,32 +447,32 @@ describe('UnifiedFieldList useExistingFields', () => {
       query: { query: 'test', language: 'kuery' },
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        fromDate: '2021-01-01',
-        toDate: '2022-01-01',
-        dslQuery: {
-          bool: {
-            filter: [
-              {
-                multi_match: {
-                  lenient: true,
-                  query: 'test',
-                  type: 'best_fields',
+    await waitFor(() =>
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          fromDate: '2021-01-01',
+          toDate: '2022-01-01',
+          dslQuery: {
+            bool: {
+              filter: [
+                {
+                  multi_match: {
+                    lenient: true,
+                    query: 'test',
+                    type: 'best_fields',
+                  },
                 },
-              },
-            ],
-            must: [],
-            must_not: [],
-            should: [],
+              ],
+              must: [],
+              must_not: [],
+              should: [],
+            },
           },
-        },
-        dataView,
-        timeFieldName: dataView.timeFieldName,
-      })
+          dataView,
+          timeFieldName: dataView.timeFieldName,
+        })
+      )
     );
   });
 

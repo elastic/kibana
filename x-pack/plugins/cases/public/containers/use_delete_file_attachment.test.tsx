@@ -46,12 +46,12 @@ describe('useDeleteFileAttachment', () => {
       });
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(spyOnDeleteFileAttachments).toHaveBeenCalledWith({
-      caseId: basicCaseId,
-      fileIds: [basicFileMock.id],
-    });
+    await waitFor(() =>
+      expect(spyOnDeleteFileAttachments).toHaveBeenCalledWith({
+        caseId: basicCaseId,
+        fileIds: [basicFileMock.id],
+      })
+    );
   });
 
   it('refreshes the case page view', async () => {

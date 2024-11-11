@@ -73,13 +73,14 @@ describe('useGetApplication', () => {
       });
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(getApplicationMock).toBeCalledWith({
-      signal: abortCtrl.signal,
-      appId: action.config.appId,
-      apiToken: action.secrets.apiToken,
-      url: action.config.apiUrl,
-    });
+    await waitFor(() =>
+      expect(getApplicationMock).toBeCalledWith({
+        signal: abortCtrl.signal,
+        appId: action.config.appId,
+        apiToken: action.secrets.apiToken,
+        url: action.config.apiUrl,
+      })
+    );
   });
 
   it('get application', async () => {
@@ -97,12 +98,12 @@ describe('useGetApplication', () => {
         apiUrl: action.config.apiUrl,
       });
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current).toEqual({
-      isLoading: false,
-      getApplication: result.current.getApplication,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        isLoading: false,
+        getApplication: result.current.getApplication,
+      })
+    );
   });
 
   it('set isLoading to true when getting the application', async () => {
@@ -171,11 +172,11 @@ describe('useGetApplication', () => {
         apiUrl: action.config.apiUrl,
       });
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-      title: 'Unable to get application with id bcq16kdTbz5jlwM6h',
-      text: 'Unable to get application fields',
-    });
+    await waitFor(() =>
+      expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        title: 'Unable to get application with id bcq16kdTbz5jlwM6h',
+        text: 'Unable to get application fields',
+      })
+    );
   });
 });

@@ -36,10 +36,10 @@ describe('useEmbeddableFactory', () => {
 
     expect(loading).toBe(true);
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    const [embeddable] = result.current;
-    expect(embeddable).toBeDefined();
+    await waitFor(() => {
+      const [embeddable] = result.current;
+      expect(embeddable).toBeDefined();
+    });
   });
 });
 

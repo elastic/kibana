@@ -93,8 +93,7 @@ describe('useEmailConfig', () => {
       result.current.getEmailServiceConfig('foo');
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(toasts.addDanger).toHaveBeenCalled();
+    await waitFor(() => expect(toasts.addDanger).toHaveBeenCalled());
   });
 
   it('should not make an API call if the service is empty', async () => {

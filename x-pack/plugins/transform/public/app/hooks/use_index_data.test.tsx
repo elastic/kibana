@@ -108,11 +108,11 @@ describe('Transform: useIndexData()', () => {
 
     const IndexObj: UseIndexDataReturnType = result.current;
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(IndexObj.errorMessage).toBe('');
-    expect(IndexObj.status).toBe(INDEX_STATUS.LOADING);
-    expect(IndexObj.tableItems).toEqual([]);
+    await waitFor(() => {
+      expect(IndexObj.errorMessage).toBe('');
+      expect(IndexObj.status).toBe(INDEX_STATUS.LOADING);
+      expect(IndexObj.tableItems).toEqual([]);
+    });
   });
 });
 

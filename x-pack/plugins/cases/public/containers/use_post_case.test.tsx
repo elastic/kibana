@@ -58,9 +58,7 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(spy).toHaveBeenCalledWith({ newCase: samplePost });
+    await waitFor(() => expect(spy).toHaveBeenCalledWith({ newCase: samplePost }));
   });
 
   it('invalidates the queries correctly', async () => {
@@ -73,11 +71,11 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.userProfiles());
+    await waitFor(() => {
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.userProfiles());
+    });
   });
 
   it('does not show a success toaster', async () => {
@@ -89,9 +87,7 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(addSuccess).not.toHaveBeenCalled();
+    await waitFor(() => expect(addSuccess).not.toHaveBeenCalled());
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -105,8 +101,6 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 });

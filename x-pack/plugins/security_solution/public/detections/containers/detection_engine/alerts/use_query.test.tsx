@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, act } from '@testing-library/react';
 import type { ReturnQueryAlerts } from './use_query';
 import { useQueryAlerts } from './use_query';
 import { ALERTS_QUERY_NAMES } from './constants';
@@ -46,15 +46,16 @@ describe('useQueryAlerts', () => {
     const { result } = renderHook<[object, string], ReturnQueryAlerts<unknown, unknown>>(() =>
       useQueryAlerts<unknown, unknown>(defaultProps)
     );
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toEqual({
-      loading: false,
-      data: alertsMock,
-      response: JSON.stringify(alertsMock, null, 2),
-      request: JSON.stringify({ index: [indexName] ?? [''], body: mockAlertsQuery }, null, 2),
-      setQuery: result.current.setQuery,
-      refetch: result.current.refetch,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        loading: false,
+        data: alertsMock,
+        response: JSON.stringify(alertsMock, null, 2),
+        request: JSON.stringify({ index: [indexName] ?? [''], body: mockAlertsQuery }, null, 2),
+        setQuery: result.current.setQuery,
+        refetch: result.current.refetch,
+      })
+    );
   });
 
   test('re-fetch alerts data', async () => {
@@ -64,7 +65,9 @@ describe('useQueryAlerts', () => {
     );
     await waitFor(() => expect(result.current.refetch).toBeDefined());
 
-    result.current.refetch!();
+    act(() => {
+      result.current.refetch!();
+    });
 
     await waitFor(() => expect(spyOnfetchQueryAlerts).toHaveBeenCalledTimes(2));
   });

@@ -33,12 +33,13 @@ describe.skip('Use get case hook', () => {
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'resolveCase');
     renderHook(() => useGetCase('case-1'), { wrapper });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(spy).toHaveBeenCalledWith({
-      caseId: 'case-1',
-      includeComments: true,
-      signal: expect.any(AbortSignal),
-    });
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith({
+        caseId: 'case-1',
+        includeComments: true,
+        signal: expect.any(AbortSignal),
+      })
+    );
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -46,7 +47,6 @@ describe.skip('Use get case hook', () => {
     (useToasts as jest.Mock).mockReturnValue({ addError });
     const spy = jest.spyOn(api, 'resolveCase').mockRejectedValue(new Error("C'est la vie"));
     renderHook(() => useGetCase('case-1'), { wrapper });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({
         caseId: 'case-1',

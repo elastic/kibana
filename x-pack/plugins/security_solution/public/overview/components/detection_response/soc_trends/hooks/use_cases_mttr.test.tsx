@@ -79,22 +79,23 @@ describe('useCasesMttr', () => {
     const { result } = renderHook(() => useCasesMttr(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toEqual({
-      stat: '2h',
-      isLoading: false,
-      percentage: {
-        percent: '+100.0%',
-        color: 'danger',
-        note: i18n.STAT_DIFFERENCE({
-          upOrDown: 'up',
-          percentageChange: '100.0%',
-          stat: '1h',
-          statType: 'case resolution time',
-        }),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '2h',
+        isLoading: false,
+        percentage: {
+          percent: '+100.0%',
+          color: 'danger',
+          note: i18n.STAT_DIFFERENCE({
+            upOrDown: 'up',
+            percentageChange: '100.0%',
+            stat: '1h',
+            statType: 'case resolution time',
+          }),
+        },
+        ...basicData,
+      })
+    );
   });
   it('finds negative percentage change', async () => {
     useKibanaMock().services.cases.api.cases.getCasesMetrics = mockGetCasesMetrics
@@ -103,22 +104,23 @@ describe('useCasesMttr', () => {
     const { result } = renderHook(() => useCasesMttr(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toEqual({
-      stat: '1h',
-      isLoading: false,
-      percentage: {
-        percent: '-50.0%',
-        color: 'success',
-        note: i18n.STAT_DIFFERENCE({
-          upOrDown: 'down',
-          percentageChange: '50.0%',
-          stat: '2h',
-          statType: 'case resolution time',
-        }),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '1h',
+        isLoading: false,
+        percentage: {
+          percent: '-50.0%',
+          color: 'success',
+          note: i18n.STAT_DIFFERENCE({
+            upOrDown: 'down',
+            percentageChange: '50.0%',
+            stat: '2h',
+            statType: 'case resolution time',
+          }),
+        },
+        ...basicData,
+      })
+    );
   });
   it('finds zero percentage change', async () => {
     useKibanaMock().services.cases.api.cases.getCasesMetrics = mockGetCasesMetrics.mockReturnValue({
@@ -127,17 +129,18 @@ describe('useCasesMttr', () => {
     const { result } = renderHook(() => useCasesMttr(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toEqual({
-      stat: '2h',
-      isLoading: false,
-      percentage: {
-        percent: '0.0%',
-        color: 'hollow',
-        note: i18n.NO_CHANGE('case resolution time'),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '2h',
+        isLoading: false,
+        percentage: {
+          percent: '0.0%',
+          color: 'hollow',
+          note: i18n.NO_CHANGE('case resolution time'),
+        },
+        ...basicData,
+      })
+    );
   });
   it('handles null mttr - current time range', async () => {
     useKibanaMock().services.cases.api.cases.getCasesMetrics = mockGetCasesMetrics
@@ -146,17 +149,18 @@ describe('useCasesMttr', () => {
     const { result } = renderHook(() => useCasesMttr(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toEqual({
-      stat: '-',
-      isLoading: false,
-      percentage: {
-        percent: null,
-        color: 'hollow',
-        note: i18n.NO_DATA_CURRENT('case'),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '-',
+        isLoading: false,
+        percentage: {
+          percent: null,
+          color: 'hollow',
+          note: i18n.NO_DATA_CURRENT('case'),
+        },
+        ...basicData,
+      })
+    );
   });
   it('handles null mttr - compare time range', async () => {
     useKibanaMock().services.cases.api.cases.getCasesMetrics = mockGetCasesMetrics
@@ -165,17 +169,18 @@ describe('useCasesMttr', () => {
     const { result } = renderHook(() => useCasesMttr(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toEqual({
-      stat: '2h',
-      isLoading: false,
-      percentage: {
-        percent: null,
-        color: 'hollow',
-        note: i18n.NO_DATA_COMPARE('case'),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '2h',
+        isLoading: false,
+        percentage: {
+          percent: null,
+          color: 'hollow',
+          note: i18n.NO_DATA_COMPARE('case'),
+        },
+        ...basicData,
+      })
+    );
   });
   it('handles null mttr - current & compare time range', async () => {
     useKibanaMock().services.cases.api.cases.getCasesMetrics = mockGetCasesMetrics
@@ -188,34 +193,37 @@ describe('useCasesMttr', () => {
     const { result, rerender } = renderHook(() => useCasesMttr(ourProps), {
       wrapper: wrapperContainer,
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toEqual({
-      stat: '2h',
-      isLoading: false,
-      percentage: {
-        percent: '0.0%',
-        color: 'hollow',
-        note: i18n.NO_CHANGE('case resolution time'),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '2h',
+        isLoading: false,
+        percentage: {
+          percent: '0.0%',
+          color: 'hollow',
+          note: i18n.NO_CHANGE('case resolution time'),
+        },
+        ...basicData,
+      })
+    );
+
     ourProps = {
       ...props,
       from: '2020-07-08T08:20:18.966Z',
       to: '2020-07-09T08:20:18.966Z',
     };
     rerender();
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toEqual({
-      stat: '-',
-      isLoading: false,
-      percentage: {
-        percent: null,
-        color: 'hollow',
-        note: i18n.NO_DATA('case'),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '-',
+        isLoading: false,
+        percentage: {
+          percent: null,
+          color: 'hollow',
+          note: i18n.NO_DATA('case'),
+        },
+        ...basicData,
+      })
+    );
   });
   it('handles undefined mttr - current & compare time range', async () => {
     useKibanaMock().services.cases.api.cases.getCasesMetrics = mockGetCasesMetrics
@@ -229,18 +237,18 @@ describe('useCasesMttr', () => {
       wrapper: wrapperContainer,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current).toEqual({
-      stat: '2h',
-      isLoading: false,
-      percentage: {
-        percent: '0.0%',
-        color: 'hollow',
-        note: i18n.NO_CHANGE('case resolution time'),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '2h',
+        isLoading: false,
+        percentage: {
+          percent: '0.0%',
+          color: 'hollow',
+          note: i18n.NO_CHANGE('case resolution time'),
+        },
+        ...basicData,
+      })
+    );
 
     ourProps = {
       ...props,
@@ -253,16 +261,17 @@ describe('useCasesMttr', () => {
       rerender();
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toEqual({
-      stat: '-',
-      isLoading: false,
-      percentage: {
-        percent: null,
-        color: 'hollow',
-        note: i18n.NO_DATA('case'),
-      },
-      ...basicData,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        stat: '-',
+        isLoading: false,
+        percentage: {
+          percent: null,
+          color: 'hollow',
+          note: i18n.NO_DATA('case'),
+        },
+        ...basicData,
+      })
+    );
   });
 });

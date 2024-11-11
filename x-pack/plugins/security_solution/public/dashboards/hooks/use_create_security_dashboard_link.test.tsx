@@ -89,10 +89,10 @@ describe('useCreateSecurityDashboardLink', () => {
       expect(result.current.isLoading).toEqual(true);
       expect(result.current.url).toEqual('/app/security/dashboards/create');
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      expect(result.current.isLoading).toEqual(false);
-      expect(result.current.url).toEqual('/app/security/dashboards/create');
+      await waitFor(() => {
+        expect(result.current.isLoading).toEqual(false);
+        expect(result.current.url).toEqual('/app/security/dashboards/create');
+      });
     });
   });
 });

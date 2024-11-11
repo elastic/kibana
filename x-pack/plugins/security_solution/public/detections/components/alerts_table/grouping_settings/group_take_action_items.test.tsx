@@ -30,8 +30,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current(getActionItemsParams).length).toEqual(3);
+    await waitFor(() => expect(result.current(getActionItemsParams).length).toEqual(3));
   });
 
   it('returns all take actions items if currentStatus is []', async () => {
@@ -45,8 +44,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current(getActionItemsParams).length).toEqual(3);
+    await waitFor(() => expect(result.current(getActionItemsParams).length).toEqual(3));
   });
 
   it('returns all take actions items if currentStatus.length > 1', async () => {
@@ -60,8 +58,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current(getActionItemsParams).length).toEqual(3);
+    await waitFor(() => expect(result.current(getActionItemsParams).length).toEqual(3));
   });
 
   it('returns acknowledged & closed take actions items if currentStatus === ["open"]', async () => {
@@ -75,11 +72,12 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    const currentParams = result.current(getActionItemsParams);
-    expect(currentParams.length).toEqual(2);
-    expect(currentParams[0].key).toEqual('acknowledge');
-    expect(currentParams[1].key).toEqual('close');
+    await waitFor(() => {
+      const currentParams = result.current(getActionItemsParams);
+      expect(currentParams.length).toEqual(2);
+      expect(currentParams[0].key).toEqual('acknowledge');
+      expect(currentParams[1].key).toEqual('close');
+    });
   });
 
   it('returns open & acknowledged take actions items if currentStatus === ["closed"]', async () => {
@@ -93,11 +91,12 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    const currentParams = result.current(getActionItemsParams);
-    expect(currentParams.length).toEqual(2);
-    expect(currentParams[0].key).toEqual('open');
-    expect(currentParams[1].key).toEqual('acknowledge');
+    await waitFor(() => {
+      const currentParams = result.current(getActionItemsParams);
+      expect(currentParams.length).toEqual(2);
+      expect(currentParams[0].key).toEqual('open');
+      expect(currentParams[1].key).toEqual('acknowledge');
+    });
   });
 
   it('returns open & closed take actions items if currentStatus === ["acknowledged"]', async () => {
@@ -111,12 +110,12 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    const currentParams = result.current(getActionItemsParams);
-    expect(currentParams.length).toEqual(2);
-    expect(currentParams[0].key).toEqual('open');
-    expect(currentParams[1].key).toEqual('close');
+    await waitFor(() => {
+      const currentParams = result.current(getActionItemsParams);
+      expect(currentParams.length).toEqual(2);
+      expect(currentParams[0].key).toEqual('open');
+      expect(currentParams[1].key).toEqual('close');
+    });
   });
 
   it('returns empty take actions items if showAlertStatusActions is false', async () => {
@@ -129,8 +128,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current(getActionItemsParams).length).toEqual(0);
+    await waitFor(() => expect(result.current(getActionItemsParams).length).toEqual(0));
   });
 
   it('returns array take actions items if showAlertStatusActions is true', async () => {
@@ -143,7 +141,6 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current(getActionItemsParams).length).toEqual(3);
+    await waitFor(() => expect(result.current(getActionItemsParams).length).toEqual(3));
   });
 });
