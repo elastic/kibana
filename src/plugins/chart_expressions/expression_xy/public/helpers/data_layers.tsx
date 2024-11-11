@@ -131,6 +131,7 @@ export const getFormattedRow = (
 ): { row: Datatable['rows'][number]; formattedColumns: Record<string, true> } =>
   columns.reduce(
     (formattedInfo, { id }) => {
+      console.count('iterations');
       const record = formattedInfo.row[id];
       if (
         record != null &&
@@ -159,12 +160,15 @@ export const getFormattedTable = (
   accessors: Array<string | ExpressionValueVisDimension>,
   xScaleType: XScaleType
 ): { table: Datatable; formattedColumns: Record<string, true> } => {
+  debugger;
   console.time('getFormattedTable');
   const columnsFormatters = table.columns.reduce<Record<string, IFieldFormat>>(
     (formatters, { id, meta }) => {
-      const accessor: string | ExpressionValueVisDimension | undefined = accessors.find(
-        (a) => getAccessorByDimension(a, table.columns) === id
-      );
+      console.count('iterations');
+      const accessor: string | ExpressionValueVisDimension | undefined = accessors.find((a) => {
+        console.count('iterations');
+        return getAccessorByDimension(a, table.columns) === id;
+      });
 
       return {
         ...formatters,
@@ -182,6 +186,7 @@ export const getFormattedTable = (
     formattedColumns: {},
   };
   for (const row of table.rows) {
+    console.count('iterations');
     const formattedRowInfo = getFormattedRow(
       row,
       table.columns,

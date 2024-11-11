@@ -114,7 +114,10 @@ export const getColumnByAccessor = (
   columns: Datatable['columns'] = []
 ) => {
   if (typeof accessor === 'string') {
-    return columns.find(({ id }) => accessor === id);
+    return columns.find(({ id }) => {
+      console.count('iterations');
+      return accessor === id;
+    });
   }
 
   const visDimensionAccessor = accessor.accessor;
@@ -122,7 +125,10 @@ export const getColumnByAccessor = (
     return columns[visDimensionAccessor];
   }
 
-  return columns.find(({ id }) => visDimensionAccessor.id === id);
+  return columns.find(({ id }) => {
+    console.count('iterations');
+    return visDimensionAccessor.id === id;
+  });
 };
 
 export function isVisDimension(
