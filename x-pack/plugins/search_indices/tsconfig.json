@@ -38,7 +38,8 @@
     "@kbn/search-api-keys-components",
     "@kbn/search-shared-ui",
     "@kbn/deeplinks-search",
-    "@kbn/core-chrome-browser"
+    "@kbn/core-chrome-browser",
+    "@kbn/serverless"
   ],
   "exclude": [
     "target/**/*",

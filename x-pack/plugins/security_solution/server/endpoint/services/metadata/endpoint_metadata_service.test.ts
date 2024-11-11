@@ -76,6 +76,18 @@ describe('EndpointMetadataService', () => {
       const response = await metadataService.findHostMetadataForFleetAgents(fleetAgentIds);
       expect(response).toEqual([endpointMetadataDoc]);
     });
+
+    it('should validate agent is visible in current space', async () => {
+      const data = testMockedContext.applyMetadataMocks(
+        testMockedContext.esClient,
+        testMockedContext.fleetServices
+      );
+      await metadataService.findHostMetadataForFleetAgents([data.unitedMetadata.agent.id]);
+
+      expect(testMockedContext.fleetServices.ensureInCurrentSpace).toHaveBeenCalledWith({
+        agentIds: [data.unitedMetadata.agent.id],
+      });
+    });
   });
 
   describe('#getHostMetadataList', () => {
@@ -217,6 +229,34 @@ describe('EndpointMetadataService', () => {
       const endpointPackagePolicies = await metadataService.getAllEndpointPackagePolicies();
       const expected: PackagePolicy[] = [mockPolicy];
       expect(endpointPackagePolicies).toEqual(expected);
+    });
+  });
+
+  describe('#getHostMetadata()', () => {
+    it('should validate agent is visible in current space', async () => {
+      const data = testMockedContext.applyMetadataMocks(
+        testMockedContext.esClient,
+        testMockedContext.fleetServices
+      );
+      await metadataService.getHostMetadata(data.unitedMetadata.agent.id);
+
+      expect(testMockedContext.fleetServices.ensureInCurrentSpace).toHaveBeenCalledWith({
+        agentIds: [data.unitedMetadata.agent.id],
+      });
+    });
+  });
+
+  describe('#getMetadataForEndpoints()', () => {
+    it('should validate agent is visible in current space', async () => {
+      const data = testMockedContext.applyMetadataMocks(
+        testMockedContext.esClient,
+        testMockedContext.fleetServices
+      );
+      await metadataService.getMetadataForEndpoints([data.unitedMetadata.agent.id]);
+
+      expect(testMockedContext.fleetServices.ensureInCurrentSpace).toHaveBeenCalledWith({
+        agentIds: [data.unitedMetadata.agent.id],
+      });
     });
   });
 });

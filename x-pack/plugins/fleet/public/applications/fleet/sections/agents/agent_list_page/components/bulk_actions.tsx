@@ -79,7 +79,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] =
     useState<boolean>(false);
 
-  // update the query removing the "managed" agents
+  // update the query removing the "managed" agents in any state (unenrolled, offline, etc)
   const selectionQuery = useMemo(() => {
     if (totalManagedAgentIds.length) {
       const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${totalManagedAgentIds

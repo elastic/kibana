@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiThemeProvider } from '@elastic/eui';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import crypto from 'crypto';
@@ -81,45 +82,48 @@ const renderPrivilegeRolesForm = ({
   preSelectedRoles?: Role[];
 } = {}) => {
   return render(
-    <IntlProvider locale="en">
-      <EditSpaceProvider
-        {...{
-          logger,
-          i18n,
-          http,
-          theme,
-          overlays,
-          notifications,
-          spacesManager,
-          serverBasePath: '',
-          getUrlForApp: jest.fn((_) => _),
-          navigateToUrl: jest.fn(),
-          license: licenseMock,
-          capabilities: {
-            navLinks: {},
-            management: {},
-            catalogue: {},
-            spaces: { manage: true },
-          },
-          dispatch: dispatchMock,
-          state: {
-            roles: new Map(),
-            fetchRolesError: false,
-          },
-          invokeClient: spacesClientsInvocatorMock,
-        }}
-      >
-        <PrivilegesRolesForm
+    <EuiThemeProvider>
+      <IntlProvider locale="en">
+        <EditSpaceProvider
           {...{
-            space,
-            features: kibanaFeatures,
-            closeFlyout,
-            defaultSelected: preSelectedRoles,
-            onSaveCompleted,
+            logger,
+            i18n,
+            http,
+            theme,
+            overlays,
+            notifications,
+            spacesManager,
+            serverBasePath: '',
+            getUrlForApp: jest.fn((_) => _),
+            navigateToUrl: jest.fn(),
+            license: licenseMock,
+            isRoleManagementEnabled: true,
+            capabilities: {
+              navLinks: {},
+              management: {},
+              catalogue: {},
+              spaces: { manage: true },
+            },
+            dispatch: dispatchMock,
+            state: {
+              roles: new Map(),
+              fetchRolesError: false,
+            },
+            invokeClient: spacesClientsInvocatorMock,
           }}
-        />
-      </EditSpaceProvider>
-    </IntlProvider>
+        >
+          <PrivilegesRolesForm
+            {...{
+              space,
+              features: kibanaFeatures,
+              closeFlyout,
+              defaultSelected: preSelectedRoles,
+              onSaveCompleted,
+            }}
+          />
+        </EditSpaceProvider>
+      </IntlProvider>
+    </EuiThemeProvider>
   );
 };
 

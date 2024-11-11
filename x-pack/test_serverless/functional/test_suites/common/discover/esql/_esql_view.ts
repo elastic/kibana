@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
     'svlCommonPage',
     'common',
@@ -29,14 +30,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
     'timePicker',
     'unifiedFieldList',
+    'unifiedSearch',
   ]);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/194305
-  describe.skip('discover esql view', function () {
+  describe('discover esql view', function () {
     // see details: https://github.com/elastic/kibana/issues/188816
     this.tags(['failsOnMKI']);
 
@@ -257,7 +258,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('switch modal', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/189636
+    describe.skip('switch modal', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -275,6 +277,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should not show switch modal when switching to a data view while a saved search is open', async () => {
         await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
@@ -309,6 +313,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
+      });
+
+      it('should show available data views after switching to classic mode', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedSearch.switchToDataViewMode();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        const availableDataViews = await PageObjects.unifiedSearch.getDataViewList(
+          'discover-dataView-switch-link'
+        );
+        expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+        await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });
 

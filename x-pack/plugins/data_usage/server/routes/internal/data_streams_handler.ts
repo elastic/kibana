@@ -5,31 +5,16 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient, RequestHandler } from '@kbn/core/server';
-import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
+import { RequestHandler } from '@kbn/core/server';
+import { DataUsageRequestHandlerContext } from '../../types';
 import { errorHandler } from '../error_handler';
-
-export interface MeteringStats {
-  name: string;
-  num_docs: number;
-  size_in_bytes: number;
-}
-
-interface MeteringStatsResponse {
-  datastreams: MeteringStats[];
-}
-
-const getMeteringStats = (client: ElasticsearchClient) => {
-  return client.transport.request<MeteringStatsResponse>({
-    method: 'GET',
-    path: '/_metering/stats',
-  });
-};
+import { DataUsageService } from '../../services';
+import { getMeteringStats } from '../../utils/get_metering_stats';
 
 export const getDataStreamsHandler = (
-  dataUsageContext: DataUsageContext
+  dataUsageService: DataUsageService
 ): RequestHandler<never, unknown, DataUsageRequestHandlerContext> => {
-  const logger = dataUsageContext.logFactory.get('dataStreamsRoute');
+  const logger = dataUsageService.getLogger('dataStreamsRoute');
 
   return async (context, _, response) => {
     logger.debug('Retrieving user data streams');
@@ -40,12 +25,15 @@ export const getDataStreamsHandler = (
         core.elasticsearch.client.asSecondaryAuthUser
       );
 
-      const body = meteringStats
-        .sort((a, b) => b.size_in_bytes - a.size_in_bytes)
-        .map((stat) => ({
-          name: stat.name,
-          storageSizeBytes: stat.size_in_bytes,
-        }));
+      const body =
+        meteringStats && !!meteringStats.length
+          ? meteringStats
+              .sort((a, b) => b.size_in_bytes - a.size_in_bytes)
+              .map((stat) => ({
+                name: stat.name,
+                storageSizeBytes: stat.size_in_bytes ?? 0,
+              }))
+          : [];
 
       return response.ok({
         body,

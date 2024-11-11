@@ -42,9 +42,9 @@ import type { DataGridItem, IndexPagination, RenderCellValue } from './types';
 export const INIT_MAX_COLUMNS = 10;
 
 /**
- * The default threshold value for the number of rows at which the column chart visibility is set to true.
+ * The default maximum row count value, set to 10000 due to ES limitations.
  */
-export const COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD = 10000;
+export const MAX_ROW_COUNT = 10000;
 
 /**
  * Enum for index status

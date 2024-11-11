@@ -33,6 +33,16 @@
         }
       ],
       "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "asset": {
+          "properties": {
+            "criticality": {
+              "type": "keyword"
+            }
+          }
+        },
         "entity": {
           "properties": {
             "definitionId": {
@@ -65,9 +75,20 @@
             "lastSeenTimestamp": {
               "type": "date"
             },
+            "name": {
+              "type": "text",
+              "fields": {
+                "text": {
+                  "type": "keyword"
+                }
+              }
+            },
             "schemaVersion": {
               "type": "keyword",
               "ignore_above": 1024
+            },
+            "source": {
+              "type": "keyword"
             },
             "type": {
               "type": "keyword",
@@ -85,58 +106,41 @@
         "host": {
           "properties": {
             "architecture": {
-              "type": "keyword",
-              "ignore_above": 1024,
-              "fields": {
-                "text": {
-                  "type": "text"
-                }
-              }
+              "type": "keyword"
+            },
+            "domain": {
+              "type": "keyword"
             },
             "hostname": {
-              "type": "keyword",
-              "ignore_above": 1024,
-              "fields": {
-                "text": {
-                  "type": "text"
-                }
-              }
+              "type": "keyword"
             },
             "id": {
-              "type": "keyword",
-              "ignore_above": 1024,
-              "fields": {
-                "text": {
-                  "type": "text"
-                }
-              }
+              "type": "keyword"
             },
             "ip": {
-              "type": "keyword",
-              "ignore_above": 1024,
-              "fields": {
-                "text": {
-                  "type": "text"
-                }
-              }
+              "type": "ip"
             },
             "mac": {
-              "type": "keyword",
-              "ignore_above": 1024,
-              "fields": {
-                "text": {
-                  "type": "text"
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "risk": {
+              "properties": {
+                "calculated_level": {
+                  "type": "keyword"
+                },
+                "calculated_score": {
+                  "type": "float"
+                },
+                "calculated_score_norm": {
+                  "type": "float"
                 }
               }
             },
-            "name": {
-              "type": "keyword",
-              "ignore_above": 1024,
-              "fields": {
-                "text": {
-                  "type": "text"
-                }
-              }
+            "type": {
+              "type": "keyword"
             }
           }
         },
@@ -194,6 +198,16 @@
         }
       ],
       "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "asset": {
+          "properties": {
+            "criticality": {
+              "type": "keyword"
+            }
+          }
+        },
         "entity": {
           "properties": {
             "definitionId": {
@@ -226,9 +240,20 @@
             "lastSeenTimestamp": {
               "type": "date"
             },
+            "name": {
+              "type": "text",
+              "fields": {
+                "text": {
+                  "type": "keyword"
+                }
+              }
+            },
             "schemaVersion": {
               "type": "keyword",
               "ignore_above": 1024
+            },
+            "source": {
+              "type": "keyword"
             },
             "type": {
               "type": "keyword",
@@ -253,40 +278,38 @@
         "user": {
           "properties": {
             "domain": {
-              "type": "keyword",
-              "ignore_above": 1024,
-              "fields": {
-                "text": {
-                  "type": "text"
-                }
-              }
+              "type": "keyword"
             },
             "email": {
-              "type": "keyword",
-              "ignore_above": 1024,
-              "fields": {
-                "text": {
-                  "type": "text"
-                }
-              }
+              "type": "keyword"
+            },
+            "full_name": {
+              "type": "keyword"
+            },
+            "hash": {
+              "type": "keyword"
             },
             "id": {
-              "type": "keyword",
-              "ignore_above": 1024,
-              "fields": {
-                "text": {
-                  "type": "text"
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "risk": {
+              "properties": {
+                "calculated_level": {
+                  "type": "keyword"
+                },
+                "calculated_score": {
+                  "type": "float"
+                },
+                "calculated_score_norm": {
+                  "type": "float"
                 }
               }
             },
-            "name": {
-              "type": "keyword",
-              "ignore_above": 1024,
-              "fields": {
-                "text": {
-                  "type": "text"
-                }
-              }
+            "roles": {
+              "type": "keyword"
             }
           }
         }

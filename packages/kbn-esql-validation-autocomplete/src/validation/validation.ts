@@ -21,12 +21,11 @@ import {
   ESQLSource,
   walk,
 } from '@kbn/esql-ast';
-import type { ESQLAstField } from '@kbn/esql-ast/src/types';
+import type { ESQLAstField, ESQLIdentifier } from '@kbn/esql-ast/src/types';
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
   FunctionParameter,
-  FunctionDefinition,
 } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
@@ -54,6 +53,11 @@ import {
   isAggFunction,
   getQuotedColumnName,
   isInlineCastItem,
+  getSignaturesWithMatchingArity,
+  isIdentifier,
+  isFunctionOperatorParam,
+  isMaybeAggFunction,
+  isParametrized,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import { getMessageFromId, errors } from './errors';
@@ -74,7 +78,7 @@ import {
   retrieveFieldsFromStringSources,
 } from './resources';
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
-import { getParamAtPosition } from '../autocomplete/helper';
+import { getParamAtPosition } from '../shared/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 import { compareTypesWithLiterals } from '../shared/esql_types';
 
@@ -88,7 +92,7 @@ function validateFunctionLiteralArg(
   const messages: ESQLMessage[] = [];
   if (isLiteralItem(actualArg)) {
     if (
-      actualArg.literalType === 'string' &&
+      actualArg.literalType === 'keyword' &&
       argDef.acceptedValues &&
       isValidLiteralOption(actualArg, argDef)
     ) {
@@ -112,7 +116,7 @@ function validateFunctionLiteralArg(
           values: {
             name: astFunction.name,
             argType: argDef.type as string,
-            value: typeof actualArg.value === 'number' ? actualArg.value : String(actualArg.value),
+            value: actualArg.text,
             givenType: actualArg.literalType,
           },
           locations: actualArg.location,
@@ -235,7 +239,7 @@ function validateFunctionColumnArg(
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
-  if (!isColumnItem(actualArg)) {
+  if (!(isColumnItem(actualArg) || isIdentifier(actualArg))) {
     return messages;
   }
 
@@ -309,21 +313,6 @@ function validateFunctionColumnArg(
   return messages;
 }
 
-function extractCompatibleSignaturesForFunction(
-  fnDef: FunctionDefinition,
-  astFunction: ESQLFunction
-) {
-  return fnDef.signatures.filter((def) => {
-    if (def.minParams) {
-      return astFunction.args.length >= def.minParams;
-    }
-    return (
-      astFunction.args.length >= def.params.filter(({ optional }) => !optional).length &&
-      astFunction.args.length <= def.params.length
-    );
-  });
-}
-
 function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
   if (isInlineCastItem(arg)) {
     return removeInlineCasts(arg.value);
@@ -332,7 +321,7 @@ function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
 }
 
 function validateFunction(
-  astFunction: ESQLFunction,
+  fn: ESQLFunction,
   parentCommand: string,
   parentOption: string | undefined,
   references: ReferenceMaps,
@@ -341,16 +330,20 @@ function validateFunction(
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
 
-  if (astFunction.incomplete) {
+  if (fn.incomplete) {
     return messages;
   }
-  const fnDefinition = getFunctionDefinition(astFunction.name)!;
 
-  const isFnSupported = isSupportedFunction(astFunction.name, parentCommand, parentOption);
+  if (isFunctionOperatorParam(fn)) {
+    return messages;
+  }
+
+  const fnDefinition = getFunctionDefinition(fn.name)!;
+  const isFnSupported = isSupportedFunction(fn.name, parentCommand, parentOption);
 
   if (!isFnSupported.supported) {
     if (isFnSupported.reason === 'unknownFunction') {
-      messages.push(errors.unknownFunction(astFunction));
+      messages.push(errors.unknownFunction(fn));
     }
     // for nested functions skip this check and make the nested check fail later on
     if (isFnSupported.reason === 'unsupportedFunction' && !isNested) {
@@ -359,16 +352,16 @@ function validateFunction(
           ? getMessageFromId({
               messageId: 'unsupportedFunctionForCommandOption',
               values: {
-                name: astFunction.name,
+                name: fn.name,
                 command: parentCommand.toUpperCase(),
                 option: parentOption.toUpperCase(),
               },
-              locations: astFunction.location,
+              locations: fn.location,
             })
           : getMessageFromId({
               messageId: 'unsupportedFunctionForCommand',
-              values: { name: astFunction.name, command: parentCommand.toUpperCase() },
-              locations: astFunction.location,
+              values: { name: fn.name, command: parentCommand.toUpperCase() },
+              locations: fn.location,
             })
       );
     }
@@ -376,7 +369,7 @@ function validateFunction(
       return messages;
     }
   }
-  const matchingSignatures = extractCompatibleSignaturesForFunction(fnDefinition, astFunction);
+  const matchingSignatures = getSignaturesWithMatchingArity(fnDefinition, fn);
   if (!matchingSignatures.length) {
     const { max, min } = getMaxMinNumberOfParams(fnDefinition);
     if (max === min) {
@@ -384,24 +377,24 @@ function validateFunction(
         getMessageFromId({
           messageId: 'wrongArgumentNumber',
           values: {
-            fn: astFunction.name,
+            fn: fn.name,
             numArgs: max,
-            passedArgs: astFunction.args.length,
+            passedArgs: fn.args.length,
           },
-          locations: astFunction.location,
+          locations: fn.location,
         })
       );
-    } else if (astFunction.args.length > max) {
+    } else if (fn.args.length > max) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentNumberTooMany',
           values: {
-            fn: astFunction.name,
+            fn: fn.name,
             numArgs: max,
-            passedArgs: astFunction.args.length,
-            extraArgs: astFunction.args.length - max,
+            passedArgs: fn.args.length,
+            extraArgs: fn.args.length - max,
           },
-          locations: astFunction.location,
+          locations: fn.location,
         })
       );
     } else {
@@ -409,19 +402,19 @@ function validateFunction(
         getMessageFromId({
           messageId: 'wrongArgumentNumberTooFew',
           values: {
-            fn: astFunction.name,
+            fn: fn.name,
             numArgs: min,
-            passedArgs: astFunction.args.length,
-            missingArgs: min - astFunction.args.length,
+            passedArgs: fn.args.length,
+            missingArgs: min - fn.args.length,
           },
-          locations: astFunction.location,
+          locations: fn.location,
         })
       );
     }
   }
   // now perform the same check on all functions args
-  for (let i = 0; i < astFunction.args.length; i++) {
-    const arg = astFunction.args[i];
+  for (let i = 0; i < fn.args.length; i++) {
+    const arg = fn.args[i];
 
     const allMatchingArgDefinitionsAreConstantOnly = matchingSignatures.every((signature) => {
       return signature.params[i]?.constantOnly;
@@ -461,7 +454,7 @@ function validateFunction(
           // use the nesting flag for now just for stats and metrics
           // TODO: revisit this part later on to make it more generic
           ['stats', 'inlinestats', 'metrics'].includes(parentCommand)
-            ? isNested || !isAssignment(astFunction)
+            ? isNested || !isAssignment(fn)
             : false
         );
 
@@ -469,7 +462,7 @@ function validateFunction(
           const consolidatedMessage = getMessageFromId({
             messageId: 'expectedConstant',
             values: {
-              fn: astFunction.name,
+              fn: fn.name,
               given: subArg.text,
             },
             locations: subArg.location,
@@ -487,7 +480,7 @@ function validateFunction(
   }
   // check if the definition has some specific validation to apply:
   if (fnDefinition.validate) {
-    const payloads = fnDefinition.validate(astFunction);
+    const payloads = fnDefinition.validate(fn);
     if (payloads.length) {
       messages.push(...payloads);
     }
@@ -496,7 +489,7 @@ function validateFunction(
   const failingSignatures: ESQLMessage[][] = [];
   for (const signature of matchingSignatures) {
     const failingSignature: ESQLMessage[] = [];
-    astFunction.args.forEach((outerArg, index) => {
+    fn.args.forEach((outerArg, index) => {
       const argDef = getParamAtPosition(signature, index);
       if ((!outerArg && argDef?.optional) || !argDef) {
         // that's ok, just skip it
@@ -517,7 +510,7 @@ function validateFunction(
           validateInlineCastArg,
         ].flatMap((validateFn) => {
           return validateFn(
-            astFunction,
+            fn,
             arg,
             {
               ...argDef,
@@ -536,7 +529,7 @@ function validateFunction(
           ? collapseWrongArgumentTypeMessages(
               messagesFromAllArgElements,
               outerArg,
-              astFunction.name,
+              fn.name,
               argDef.type as string,
               parentCommand,
               references
@@ -614,10 +607,11 @@ function validateSetting(
  * recursively terminate at either a literal or an aggregate function.
  */
 const isFunctionAggClosed = (fn: ESQLFunction): boolean =>
-  isAggFunction(fn) || areFunctionArgsAggClosed(fn);
+  isMaybeAggFunction(fn) || areFunctionArgsAggClosed(fn);
 
 const areFunctionArgsAggClosed = (fn: ESQLFunction): boolean =>
-  fn.args.every((arg) => isLiteralItem(arg) || (isFunctionItem(arg) && isFunctionAggClosed(arg)));
+  fn.args.every((arg) => isLiteralItem(arg) || (isFunctionItem(arg) && isFunctionAggClosed(arg))) ||
+  isFunctionOperatorParam(fn);
 
 /**
  * Looks for first nested aggregate function in an aggregate function, recursively.
@@ -625,7 +619,7 @@ const areFunctionArgsAggClosed = (fn: ESQLFunction): boolean =>
 const findNestedAggFunctionInAggFunction = (agg: ESQLFunction): ESQLFunction | undefined => {
   for (const arg of agg.args) {
     if (isFunctionItem(arg)) {
-      return isAggFunction(arg) ? arg : findNestedAggFunctionInAggFunction(arg);
+      return isMaybeAggFunction(arg) ? arg : findNestedAggFunctionInAggFunction(arg);
     }
   }
 };
@@ -642,7 +636,7 @@ const findNestedAggFunction = (
   fn: ESQLFunction,
   parentIsAgg: boolean = false
 ): ESQLFunction | undefined => {
-  if (isAggFunction(fn)) {
+  if (isMaybeAggFunction(fn)) {
     return parentIsAgg ? fn : findNestedAggFunctionInAggFunction(fn);
   }
 
@@ -690,7 +684,7 @@ const validateAggregates = (
         hasMissingAggregationFunctionError = true;
         messages.push(errors.noAggFunction(command, aggregate));
       }
-    } else if (isColumnItem(aggregate)) {
+    } else if (isColumnItem(aggregate) || isIdentifier(aggregate)) {
       messages.push(errors.unknownAggFunction(aggregate));
     } else {
       // Should never happen.
@@ -849,14 +843,13 @@ function validateSource(
 }
 
 function validateColumnForCommand(
-  column: ESQLColumn,
+  column: ESQLColumn | ESQLIdentifier,
   commandName: string,
   references: ReferenceMaps
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
-
   if (commandName === 'row') {
-    if (!references.variables.has(column.name)) {
+    if (!references.variables.has(column.name) && !isParametrized(column)) {
       messages.push(errors.unknownColumn(column));
     }
   } else {
@@ -1005,7 +998,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
               )
             );
           }
-          if (isColumnItem(arg)) {
+          if (isColumnItem(arg) || isIdentifier(arg)) {
             if (command.name === 'stats' || command.name === 'inlinestats') {
               messages.push(errors.unknownAggFunction(arg));
             } else {
@@ -1089,7 +1082,7 @@ function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>) {
 }
 
 export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
-  getFieldsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
+  getColumnsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
   getPreferences: [],

@@ -10,17 +10,17 @@ import {
   TimelineResponse,
   TimelineTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/timeline';
-import { FtrProviderContext } from '../../../../../api_integration/ftr_provider_context';
+import { TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
+import TestAgent from 'supertest/lib/agent';
+import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
+import { createBasicTimeline } from '../../utils/timelines';
 
-import { createBasicTimeline } from './helpers';
-
-export default function ({ getService }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
-  const supertest = getService('supertest');
+export default function ({ getService }: FtrProviderContextWithSpaces) {
+  const utils = getService('securitySolutionUtils');
+  let supertest: TestAgent;
 
   describe('Timeline - Saved Objects', () => {
-    beforeEach(() => kibanaServer.savedObjects.cleanStandardList());
-    afterEach(() => kibanaServer.savedObjects.cleanStandardList());
+    before(async () => (supertest = await utils.createSuperTest()));
 
     describe('Persist a timeline', () => {
       it('Create a timeline just with a title', async () => {
@@ -136,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
           sort: { columnId: '@timestamp', sortDirection: 'desc' },
         };
 
-        const response = await supertest.post('/api/timeline').set('kbn-xsrf', 'true').send({
+        const response = await supertest.post(TIMELINE_URL).set('kbn-xsrf', 'true').send({
           timelineId: null,
           version: null,
           timeline: timelineObject,
@@ -178,7 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
         const newTitle = 'new title';
 
         const responseToTest = await supertest
-          .patch('/api/timeline')
+          .patch(TIMELINE_URL)
           .set('kbn-xsrf', 'true')
           .send({
             timelineId: savedObjectId,
@@ -383,7 +383,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { savedObjectId } = response.body.data && response.body.data.persistTimeline.timeline;
 
         const responseToTest = await supertest
-          .delete('/api/timeline')
+          .delete(TIMELINE_URL)
           .set('kbn-xsrf', 'true')
           .send({
             savedObjectIds: [savedObjectId],
@@ -407,7 +407,7 @@ export default function ({ getService }: FtrProviderContext) {
             : '';
 
         const responseToTest = await supertest
-          .delete('/api/timeline')
+          .delete(TIMELINE_URL)
           .set('kbn-xsrf', 'true')
           .send({
             savedObjectIds: [savedObjectId1, savedObjectId2],

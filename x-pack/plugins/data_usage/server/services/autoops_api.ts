@@ -12,13 +12,22 @@ import apm from 'elastic-apm-node';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import { LogMeta } from '@kbn/core/server';
-import { UsageMetricsResponseSchemaBody } from '../../common/rest_types';
-import { appContextService } from '../app_context';
+import {
+  UsageMetricsAutoOpsResponseSchema,
+  UsageMetricsAutoOpsResponseSchemaBody,
+  UsageMetricsRequestBody,
+} from '../../common/rest_types';
+import { AppContextService } from './app_context';
 import { AutoOpsConfig } from '../types';
+import { AutoOpsError } from './errors';
 
-class AutoOpsAPIService {
-  public async autoOpsUsageMetricsAPI(requestBody: UsageMetricsResponseSchemaBody) {
-    const logger = appContextService.getLogger().get();
+const AGENT_CREATION_FAILED_ERROR = 'AutoOps API could not create the autoops agent';
+const AUTO_OPS_AGENT_CREATION_PREFIX = '[AutoOps API] Creating autoops agent failed';
+const AUTO_OPS_MISSING_CONFIG_ERROR = 'Missing autoops configuration';
+export class AutoOpsAPIService {
+  constructor(private appContextService: AppContextService) {}
+  public async autoOpsUsageMetricsAPI(requestBody: UsageMetricsRequestBody) {
+    const logger = this.appContextService.getLogger().get();
     const traceId = apm.currentTransaction?.traceparent;
     const withRequestIdMessage = (message: string) => `${message} [Request Id: ${traceId}]`;
 
@@ -28,10 +37,10 @@ class AutoOpsAPIService {
       },
     };
 
-    const autoopsConfig = appContextService.getConfig()?.autoops;
+    const autoopsConfig = this.appContextService.getConfig()?.autoops;
     if (!autoopsConfig) {
-      logger.error('[AutoOps API] Missing autoops configuration', errorMetadata);
-      throw new Error('missing autoops configuration');
+      logger.error(`[AutoOps API] ${AUTO_OPS_MISSING_CONFIG_ERROR}`, errorMetadata);
+      throw new AutoOpsError(AUTO_OPS_MISSING_CONFIG_ERROR);
     }
 
     logger.debug(
@@ -58,9 +67,9 @@ class AutoOpsAPIService {
       }),
     };
 
-    const cloudSetup = appContextService.getCloud();
+    const cloudSetup = this.appContextService.getCloud();
     if (!cloudSetup?.isServerlessEnabled) {
-      requestConfig.data.stack_version = appContextService.getKibanaVersion();
+      requestConfig.data.stack_version = this.appContextService.getKibanaVersion();
     }
 
     const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
@@ -78,11 +87,11 @@ class AutoOpsAPIService {
       },
     };
 
-    const response = await axios<UsageMetricsResponseSchemaBody>(requestConfig).catch(
+    const response = await axios<UsageMetricsAutoOpsResponseSchemaBody>(requestConfig).catch(
       (error: Error | AxiosError) => {
         if (!axios.isAxiosError(error)) {
           logger.error(
-            `[AutoOps API] Creating autoops failed with an error ${error} ${requestConfigDebugStatus}`,
+            `${AUTO_OPS_AGENT_CREATION_PREFIX} with an error ${error} ${requestConfigDebugStatus}`,
             errorMetadataWithRequestConfig
           );
           throw new Error(withRequestIdMessage(error.message));
@@ -93,7 +102,7 @@ class AutoOpsAPIService {
         if (error.response) {
           // The request was made and the server responded with a status code and error data
           logger.error(
-            `[AutoOps API] Creating autoops failed because the AutoOps API responding with a status code that falls out of the range of 2xx: ${JSON.stringify(
+            `${AUTO_OPS_AGENT_CREATION_PREFIX} because the AutoOps API responded with a status code that falls out of the range of 2xx: ${JSON.stringify(
               error.response.status
             )}} ${JSON.stringify(error.response.data)}} ${requestConfigDebugStatus}`,
             {
@@ -107,31 +116,29 @@ class AutoOpsAPIService {
               },
             }
           );
-          throw new Error(
-            withRequestIdMessage(`the AutoOps API could not create the autoops agent`)
-          );
+          throw new AutoOpsError(withRequestIdMessage(AGENT_CREATION_FAILED_ERROR));
         } else if (error.request) {
           // The request was made but no response was received
           logger.error(
-            `[AutoOps API] Creating autoops agent failed while sending the request to the AutoOps API: ${errorLogCodeCause} ${requestConfigDebugStatus}`,
+            `${AUTO_OPS_AGENT_CREATION_PREFIX} while sending the request to the AutoOps API: ${errorLogCodeCause} ${requestConfigDebugStatus}`,
             errorMetadataWithRequestConfig
           );
           throw new Error(withRequestIdMessage(`no response received from the AutoOps API`));
         } else {
           // Something happened in setting up the request that triggered an Error
           logger.error(
-            `[AutoOps API] Creating autoops agent failed to be created ${errorLogCodeCause} ${requestConfigDebugStatus}`,
+            `${AUTO_OPS_AGENT_CREATION_PREFIX} to be created ${errorLogCodeCause} ${requestConfigDebugStatus}`,
             errorMetadataWithRequestConfig
           );
-          throw new Error(
-            withRequestIdMessage('the AutoOps API could not create the autoops agent')
-          );
+          throw new AutoOpsError(withRequestIdMessage(AGENT_CREATION_FAILED_ERROR));
         }
       }
     );
 
-    logger.debug(`[AutoOps API] Created an autoops agent ${response}`);
-    return response;
+    const validatedResponse = UsageMetricsAutoOpsResponseSchema.body().validate(response.data);
+
+    logger.debug(`[AutoOps API] Successfully created an autoops agent ${response}`);
+    return validatedResponse;
   }
 
   private createTlsConfig(autoopsConfig: AutoOpsConfig | undefined) {
@@ -171,5 +178,3 @@ class AutoOpsAPIService {
     return error.cause;
   };
 }
-
-export const autoopsApiService = new AutoOpsAPIService();

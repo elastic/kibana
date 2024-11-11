@@ -22,7 +22,8 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
     .delete({
       path: '/api/spaces/space/{id}',
       access: 'public',
-      description: `Delete a space`,
+      summary: `Delete a space`,
+      description: `When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.`,
       options: {
         tags: ['oas-tag:spaces'],
       },
@@ -30,11 +31,28 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route delegates authorization to the spaces service via a scoped spaces client',
+          },
+        },
         validate: {
           request: {
             params: schema.object({
-              id: schema.string(),
+              id: schema.string({
+                meta: { description: 'The space identifier.' },
+              }),
             }),
+          },
+          response: {
+            204: {
+              description: 'Indicates a successful call.',
+            },
+            404: {
+              description: 'Indicates that the request failed.',
+            },
           },
         },
       },

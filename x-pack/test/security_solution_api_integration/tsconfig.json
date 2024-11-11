@@ -50,5 +50,7 @@
     "@kbn/search-types",
     "@kbn/security-plugin",
     "@kbn/ftr-common-functional-ui-services",
+    "@kbn/spaces-plugin",
+    "@kbn/elastic-assistant-plugin",
   ]
 }
