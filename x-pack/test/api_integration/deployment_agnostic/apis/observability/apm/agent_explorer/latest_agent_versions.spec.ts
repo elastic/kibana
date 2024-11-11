@@ -23,9 +23,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     it('returns a version when agent is listed in the file', async () => {
       const { status, body } = await callApi();
       expect(status).to.be(200);
-
       const agents = body.data;
-
       const nodeAgent = agents[nodeAgentName] as ElasticApmAgentLatestVersion;
       expect(nodeAgent?.latest_version).not.to.be(undefined);
     });
