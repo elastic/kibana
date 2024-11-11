@@ -20,6 +20,7 @@ import { IndexPattern, EngineDescriptor } from './common.gen';
 
 export type GetEntityStoreStatusResponse = z.infer<typeof GetEntityStoreStatusResponse>;
 export const GetEntityStoreStatusResponse = z.object({
+  status: z.enum(['not_installed', 'installing', 'running', 'stopped', 'error']).optional(),
   engines: z.array(EngineDescriptor).optional(),
 });
 
