@@ -121,7 +121,6 @@ export const registerEnabledProfileProviders = <
 const createRootProfileProviders = async (providerServices: ProfileProviderServices) => [
   createExampleRootProfileProvider(),
   createExampleSolutionViewRootProfileProvider(),
-  createSecurityRootProfileProvider(providerServices),
   await createSecurityRootProfileProvider(providerServices),
 ];
 
