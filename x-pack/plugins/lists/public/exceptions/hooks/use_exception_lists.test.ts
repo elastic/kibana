@@ -79,23 +79,23 @@ describe('useExceptionLists', () => {
       })
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => {
+      const expectedListItemsResult: ExceptionListSchema[] = getFoundExceptionListSchemaMock().data;
 
-    const expectedListItemsResult: ExceptionListSchema[] = getFoundExceptionListSchemaMock().data;
-
-    expect(result.current).toEqual([
-      false,
-      expectedListItemsResult,
-      {
-        page: 1,
-        perPage: 20,
-        total: 1,
-      },
-      expect.any(Function),
-      expect.any(Function),
-      { field: 'created_at', order: 'desc' },
-      expect.any(Function),
-    ]);
+      expect(result.current).toEqual([
+        false,
+        expectedListItemsResult,
+        {
+          page: 1,
+          perPage: 20,
+          total: 1,
+        },
+        expect.any(Function),
+        expect.any(Function),
+        { field: 'created_at', order: 'desc' },
+        expect.any(Function),
+      ]);
+    });
   });
 
   test('does not fetch specific list id if it is added to the hideLists array', async () => {
@@ -117,17 +117,17 @@ describe('useExceptionLists', () => {
       })
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
-      filters:
-        '(not exception-list.attributes.list_id: listId-1* AND not exception-list-agnostic.attributes.list_id: listId-1*)',
-      http: mockKibanaHttpService,
-      namespaceTypes: 'single,agnostic',
-      pagination: { page: 1, perPage: 20 },
-      signal: new AbortController().signal,
-      sort: { field: 'created_at', order: 'desc' },
-    });
+    await waitFor(() =>
+      expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
+        filters:
+          '(not exception-list.attributes.list_id: listId-1* AND not exception-list-agnostic.attributes.list_id: listId-1*)',
+        http: mockKibanaHttpService,
+        namespaceTypes: 'single,agnostic',
+        pagination: { page: 1, perPage: 20 },
+        signal: new AbortController().signal,
+        sort: { field: 'created_at', order: 'desc' },
+      })
+    );
   });
 
   test('applies filters to query', async () => {
@@ -152,20 +152,20 @@ describe('useExceptionLists', () => {
       })
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
-      filters:
-        '(exception-list.attributes.created_by:Moi OR exception-list-agnostic.attributes.created_by:Moi) AND (exception-list.attributes.name.text:Sample Endpoint OR exception-list-agnostic.attributes.name.text:Sample Endpoint) AND (not exception-list.attributes.list_id: listId-1* AND not exception-list-agnostic.attributes.list_id: listId-1*)',
-      http: mockKibanaHttpService,
-      namespaceTypes: 'single,agnostic',
-      pagination: { page: 1, perPage: 20 },
-      signal: new AbortController().signal,
-      sort: {
-        field: 'created_at',
-        order: 'desc',
-      },
-    });
+    await waitFor(() =>
+      expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
+        filters:
+          '(exception-list.attributes.created_by:Moi OR exception-list-agnostic.attributes.created_by:Moi) AND (exception-list.attributes.name.text:Sample Endpoint OR exception-list-agnostic.attributes.name.text:Sample Endpoint) AND (not exception-list.attributes.list_id: listId-1* AND not exception-list-agnostic.attributes.list_id: listId-1*)',
+        http: mockKibanaHttpService,
+        namespaceTypes: 'single,agnostic',
+        pagination: { page: 1, perPage: 20 },
+        signal: new AbortController().signal,
+        sort: {
+          field: 'created_at',
+          order: 'desc',
+        },
+      })
+    );
   });
 
   test('fetches a new exception list and its items when props change', async () => {
@@ -211,9 +211,7 @@ describe('useExceptionLists', () => {
       notifications: mockKibanaNotificationsService,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(spyOnfetchExceptionLists).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(spyOnfetchExceptionLists).toHaveBeenCalledTimes(2));
   });
 
   test('fetches list when refreshExceptionList callback invoked', async () => {
@@ -241,9 +239,7 @@ describe('useExceptionLists', () => {
       result.current[4]();
     }
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(spyOnfetchExceptionLists).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(spyOnfetchExceptionLists).toHaveBeenCalledTimes(2));
   });
 
   test('invokes notifications service if "fetchExceptionLists" fails', async () => {
@@ -266,11 +262,11 @@ describe('useExceptionLists', () => {
       })
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(mockKibanaNotificationsService.toasts.addError).toHaveBeenCalledWith(mockError, {
-      title: 'Uh oh',
+    await waitFor(() => {
+      expect(mockKibanaNotificationsService.toasts.addError).toHaveBeenCalledWith(mockError, {
+        title: 'Uh oh',
+      });
+      expect(spyOnfetchExceptionLists).toHaveBeenCalledTimes(1);
     });
-    expect(spyOnfetchExceptionLists).toHaveBeenCalledTimes(1);
   });
 });

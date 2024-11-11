@@ -72,10 +72,11 @@ describe('useDockerKPIMetricsCharts', () => {
     const { result } = renderHook(() =>
       useDockerContainerKpiCharts({ dataViewId: metricsDataViewId })
     );
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toHaveLength(expectedOrder.length);
-    result.current.forEach((chart, index) => {
-      expect(chart).toHaveProperty('id', expectedOrder[index]);
+    await waitFor(() => {
+      expect(result.current).toHaveLength(expectedOrder.length);
+      result.current.forEach((chart, index) => {
+        expect(chart).toHaveProperty('id', expectedOrder[index]);
+      });
     });
   });
 });
@@ -110,10 +111,11 @@ describe('useK8sContainerKPIMetricsCharts', () => {
     const { result } = renderHook(() =>
       useK8sContainerKpiCharts({ dataViewId: metricsDataViewId })
     );
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toHaveLength(expectedOrder.length);
-    result.current.forEach((chart, index) => {
-      expect(chart).toHaveProperty('id', expectedOrder[index]);
+    await waitFor(() => {
+      expect(result.current).toHaveLength(expectedOrder.length);
+      result.current.forEach((chart, index) => {
+        expect(chart).toHaveProperty('id', expectedOrder[index]);
+      });
     });
   });
 });

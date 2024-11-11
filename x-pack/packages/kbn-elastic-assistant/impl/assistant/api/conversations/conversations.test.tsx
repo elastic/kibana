@@ -34,17 +34,17 @@ describe('conversations api', () => {
       const deleteProps = { http, toasts, id: 'test' } as unknown as DeleteConversationParams;
 
       renderHook(() => deleteConversation(deleteProps));
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      expect(deleteProps.http.fetch).toHaveBeenCalledWith(
-        '/api/security_ai_assistant/current_user/conversations/test',
-        {
-          method: 'DELETE',
-          signal: undefined,
-          version: '2023-10-31',
-        }
-      );
-      expect(toasts.addError).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(deleteProps.http.fetch).toHaveBeenCalledWith(
+          '/api/security_ai_assistant/current_user/conversations/test',
+          {
+            method: 'DELETE',
+            signal: undefined,
+            version: '2023-10-31',
+          }
+        );
+        expect(toasts.addError).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -60,17 +60,17 @@ describe('conversations api', () => {
     await act(async () => {
       const getProps = { http, toasts, id: 'test' } as unknown as GetConversationByIdParams;
       renderHook(() => getConversationById(getProps));
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      expect(getProps.http.fetch).toHaveBeenCalledWith(
-        '/api/security_ai_assistant/current_user/conversations/test',
-        {
-          method: 'GET',
-          signal: undefined,
-          version: '2023-10-31',
-        }
-      );
-      expect(toasts.addError).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(getProps.http.fetch).toHaveBeenCalledWith(
+          '/api/security_ai_assistant/current_user/conversations/test',
+          {
+            method: 'GET',
+            signal: undefined,
+            version: '2023-10-31',
+          }
+        );
+        expect(toasts.addError).not.toHaveBeenCalled();
+      });
     });
   });
 

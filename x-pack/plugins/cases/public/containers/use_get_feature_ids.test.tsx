@@ -36,8 +36,6 @@ describe('useGetFeaturesIds', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({
         query: {
@@ -70,8 +68,6 @@ describe('useGetFeaturesIds', () => {
     renderHook(() => useGetFeatureIds(['alert-id-1'], true), {
       wrapper: appMockRender.AppWrapper,
     });
-
-    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({

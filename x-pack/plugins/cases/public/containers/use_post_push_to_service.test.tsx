@@ -51,10 +51,10 @@ describe('usePostPushToService', () => {
       result.current.mutate({ caseId, connector });
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    await waitFor(() => {
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    });
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
@@ -67,9 +67,7 @@ describe('usePostPushToService', () => {
       result.current.mutate({ caseId, connector });
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(spy).toHaveBeenCalledWith({ caseId, connectorId: connector.id });
+    await waitFor(() => expect(spy).toHaveBeenCalledWith({ caseId, connectorId: connector.id }));
   });
 
   it('shows a success toaster', async () => {
@@ -81,12 +79,12 @@ describe('usePostPushToService', () => {
       result.current.mutate({ caseId, connector });
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(addSuccess).toHaveBeenCalledWith({
-      title: 'Successfully sent to My connector',
-      className: 'eui-textBreakWord',
-    });
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith({
+        title: 'Successfully sent to My connector',
+        className: 'eui-textBreakWord',
+      })
+    );
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -100,8 +98,6 @@ describe('usePostPushToService', () => {
       result.current.mutate({ caseId, connector });
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 });

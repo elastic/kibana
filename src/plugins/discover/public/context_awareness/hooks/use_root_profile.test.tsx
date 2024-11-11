@@ -47,22 +47,25 @@ describe('useRootProfile', () => {
 
   it('should return rootProfileLoading as false', async () => {
     const { result } = render();
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current.rootProfileLoading).toBe(false);
-    expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
+    await waitFor(() => {
+      expect(result.current.rootProfileLoading).toBe(false);
+      expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
+    });
   });
 
   it('should return rootProfileLoading as true when solutionNavId changes', async () => {
     const { result, rerender } = render();
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current.rootProfileLoading).toBe(false);
-    expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
+    await waitFor(() => {
+      expect(result.current.rootProfileLoading).toBe(false);
+      expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
+    });
     act(() => mockSolutionNavId$.next('newSolutionNavId'));
     rerender();
     expect(result.current.rootProfileLoading).toBe(true);
     expect((result.current as Record<string, unknown>).AppWrapper).toBeUndefined();
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current.rootProfileLoading).toBe(false);
-    expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
+    await waitFor(() => {
+      expect(result.current.rootProfileLoading).toBe(false);
+      expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
+    });
   });
 });

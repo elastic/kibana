@@ -48,10 +48,10 @@ describe('useReplaceCustomField', () => {
       result.current.mutate(sampleData);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    await waitFor(() => {
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    });
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
@@ -64,16 +64,16 @@ describe('useReplaceCustomField', () => {
       result.current.mutate(sampleData);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(patchCustomFieldSpy).toHaveBeenCalledWith({
-      caseId: sampleData.caseId,
-      customFieldId: sampleData.customFieldId,
-      request: {
-        value: sampleData.customFieldValue,
-        caseVersion: sampleData.caseVersion,
-      },
-    });
+    await waitFor(() =>
+      expect(patchCustomFieldSpy).toHaveBeenCalledWith({
+        caseId: sampleData.caseId,
+        customFieldId: sampleData.customFieldId,
+        request: {
+          value: sampleData.customFieldValue,
+          caseVersion: sampleData.caseVersion,
+        },
+      })
+    );
   });
 
   it('calls the api when invoked with the correct parameters of toggle field', async () => {
@@ -92,16 +92,16 @@ describe('useReplaceCustomField', () => {
       result.current.mutate(newData);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(patchCustomFieldSpy).toHaveBeenCalledWith({
-      caseId: newData.caseId,
-      customFieldId: newData.customFieldId,
-      request: {
-        value: newData.customFieldValue,
-        caseVersion: newData.caseVersion,
-      },
-    });
+    await waitFor(() =>
+      expect(patchCustomFieldSpy).toHaveBeenCalledWith({
+        caseId: newData.caseId,
+        customFieldId: newData.customFieldId,
+        request: {
+          value: newData.customFieldValue,
+          caseVersion: newData.caseVersion,
+        },
+      })
+    );
   });
 
   it('calls the api when invoked with the correct parameters with null value', async () => {
@@ -120,16 +120,16 @@ describe('useReplaceCustomField', () => {
       result.current.mutate(newData);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(patchCustomFieldSpy).toHaveBeenCalledWith({
-      caseId: newData.caseId,
-      customFieldId: newData.customFieldId,
-      request: {
-        value: newData.customFieldValue,
-        caseVersion: newData.caseVersion,
-      },
-    });
+    await waitFor(() =>
+      expect(patchCustomFieldSpy).toHaveBeenCalledWith({
+        caseId: newData.caseId,
+        customFieldId: newData.customFieldId,
+        request: {
+          value: newData.customFieldValue,
+          caseVersion: newData.caseVersion,
+        },
+      })
+    );
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -145,8 +145,6 @@ describe('useReplaceCustomField', () => {
       result.current.mutate(sampleData);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 });

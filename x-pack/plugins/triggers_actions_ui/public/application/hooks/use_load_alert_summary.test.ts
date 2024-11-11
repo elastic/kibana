@@ -79,8 +79,6 @@ describe('useLoadAlertSummary', () => {
       })
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
     const body = JSON.stringify({
       fixed_interval: fixedInterval,
       gte: utcFrom,
@@ -88,11 +86,14 @@ describe('useLoadAlertSummary', () => {
       featureIds,
       filter: [filter],
     });
-    expect(mockedPostAPI).toHaveBeenCalledWith(
-      '/internal/rac/alerts/_alert_summary',
-      expect.objectContaining({
-        body,
-      })
+
+    await waitFor(() =>
+      expect(mockedPostAPI).toHaveBeenCalledWith(
+        '/internal/rac/alerts/_alert_summary',
+        expect.objectContaining({
+          body,
+        })
+      )
     );
   });
 
@@ -107,8 +108,6 @@ describe('useLoadAlertSummary', () => {
       })
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current.error).toMatch(error.message);
+    await waitFor(() => expect(result.current.error).toMatch(error.message));
   });
 });

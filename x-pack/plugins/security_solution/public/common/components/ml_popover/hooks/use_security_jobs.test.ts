@@ -83,10 +83,10 @@ describe('useSecurityJobs', () => {
       const { result } = renderHook(() => useSecurityJobs(), {
         wrapper: TestProviders,
       });
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      expect(result.current.isMlAdmin).toEqual(true);
-      expect(result.current.isLicensed).toEqual(true);
+      await waitFor(() => {
+        expect(result.current.isMlAdmin).toEqual(true);
+        expect(result.current.isLicensed).toEqual(true);
+      });
     });
 
     it('renders a toast error if an ML call fails', async () => {

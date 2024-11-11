@@ -39,14 +39,14 @@ describe('useBulkGetCases', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(spy).toHaveBeenCalledWith(
-      expect.anything(),
-      {
-        ids: ['case-1'],
-      },
-      expect.any(AbortSignal)
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith(
+        expect.anything(),
+        {
+          ids: ['case-1'],
+        },
+        expect.any(AbortSignal)
+      )
     );
   });
 
@@ -58,7 +58,7 @@ describe('useBulkGetCases', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    expect(spy).not.toHaveBeenCalled();
+    await waitFor(() => expect(spy).not.toHaveBeenCalled());
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -67,8 +67,6 @@ describe('useBulkGetCases', () => {
     renderHook(() => useBulkGetCases(['case-1'], true), {
       wrapper: appMockRender.AppWrapper,
     });
-
-    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith(

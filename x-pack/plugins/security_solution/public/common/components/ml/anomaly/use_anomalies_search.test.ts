@@ -94,17 +94,17 @@ describe('useAggregatedAnomaliesByJob', () => {
       wrapper: TestProviders,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current.data).toEqual(
-      expect.arrayContaining([
-        {
-          count: 99,
-          name: jobId,
-          job,
-          entity: AnomalyEntity.Host,
-        },
-      ])
+    await waitFor(() =>
+      expect(result.current.data).toEqual(
+        expect.arrayContaining([
+          {
+            count: 99,
+            name: jobId,
+            job,
+            entity: AnomalyEntity.Host,
+          },
+        ])
+      )
     );
   });
 
@@ -160,8 +160,6 @@ describe('useAggregatedAnomaliesByJob', () => {
       wrapper: TestProviders,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(mockAddToastError).not.toBeCalled();
+    await waitFor(() => expect(mockAddToastError).not.toBeCalled());
   });
 });

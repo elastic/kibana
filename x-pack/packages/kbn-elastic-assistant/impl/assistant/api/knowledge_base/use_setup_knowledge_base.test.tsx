@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { useSetupKnowledgeBase, UseSetupKnowledgeBaseParams } from './use_setup_knowledge_base';
 import { postKnowledgeBase as _postKnowledgeBase } from './api';
 import { useMutation as _useMutation } from '@tanstack/react-query';
@@ -51,10 +51,8 @@ describe('useSetupKnowledgeBase', () => {
     jest.clearAllMocks();
   });
   it('should call api to post knowledge base setup', async () => {
-    await act(async () => {
-      renderHook(() => useSetupKnowledgeBase(defaultProps));
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
+    renderHook(() => useSetupKnowledgeBase(defaultProps));
+    await waitFor(() => {
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/',
         {
@@ -74,36 +72,27 @@ describe('useSetupKnowledgeBase', () => {
         opts.onError(e);
       }
     });
-    await act(async () => {
-      renderHook(() => useSetupKnowledgeBase(defaultProps));
-      await waitFor(() => new Promise((resolve) => resolve(null)));
 
+    renderHook(() => useSetupKnowledgeBase(defaultProps));
+    await waitFor(() =>
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/something',
         {
           method: 'POST',
           version: '1',
         }
-      );
-    });
+      )
+    );
   });
 
   it('should return setup response', async () => {
-    await act(async () => {
-      const { result } = renderHook(() => useSetupKnowledgeBase(defaultProps));
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      await expect(result.current).resolves.toStrictEqual(statusResponse);
-    });
+    const { result } = renderHook(() => useSetupKnowledgeBase(defaultProps));
+    await waitFor(() => expect(result.current).resolves.toStrictEqual(statusResponse));
   });
 
   it('should display error toast when api throws error', async () => {
     postKnowledgeBaseMock.mockRejectedValue(new Error('this is an error'));
-    await act(async () => {
-      renderHook(() => useSetupKnowledgeBase(defaultProps));
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      expect(toasts.addError).toHaveBeenCalled();
-    });
+    renderHook(() => useSetupKnowledgeBase(defaultProps));
+    await waitFor(() => expect(toasts.addError).toHaveBeenCalled());
   });
 });

@@ -83,9 +83,7 @@ describe('UseChoices', () => {
       })
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current).toEqual(useChoicesResponse);
+    await waitFor(() => expect(result.current).toEqual(useChoicesResponse));
   });
 
   it('returns an empty array if the field is not in response', async () => {
@@ -98,12 +96,12 @@ describe('UseChoices', () => {
       })
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current).toEqual({
-      isLoading: false,
-      choices: { priority: [], category: getChoicesResponse },
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        isLoading: false,
+        choices: { priority: [], category: getChoicesResponse },
+      })
+    );
   });
 
   it('returns an empty array when connector is not presented', async () => {
@@ -137,12 +135,12 @@ describe('UseChoices', () => {
       })
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-      text: 'An error occurred',
-      title: 'Unable to get choices',
-    });
+    await waitFor(() =>
+      expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        text: 'An error occurred',
+        title: 'Unable to get choices',
+      })
+    );
   });
 
   it('it displays an error when http throws an error', async () => {
@@ -159,9 +157,11 @@ describe('UseChoices', () => {
       })
     );
 
-    expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-      text: 'An error occurred',
-      title: 'Unable to get choices',
-    });
+    await waitFor(() =>
+      expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        text: 'An error occurred',
+        title: 'Unable to get choices',
+      })
+    );
   });
 });

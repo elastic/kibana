@@ -35,9 +35,9 @@ describe('useCreateListIndex', () => {
     act(() => {
       result.current.start();
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(Api.createListIndex).toHaveBeenCalledWith(expect.objectContaining({ http: httpMock }));
+    await waitFor(() =>
+      expect(Api.createListIndex).toHaveBeenCalledWith(expect.objectContaining({ http: httpMock }))
+    );
   });
 
   it('should call onError callback when Api.createListIndex fails', async () => {
@@ -51,9 +51,9 @@ describe('useCreateListIndex', () => {
     act(() => {
       result.current.start();
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(onError).toHaveBeenCalledWith(new Error('Mocked error'), undefined, undefined);
+    await waitFor(() =>
+      expect(onError).toHaveBeenCalledWith(new Error('Mocked error'), undefined, undefined)
+    );
   });
 
   it('should not invalidate read index query on failure', async () => {
@@ -67,9 +67,7 @@ describe('useCreateListIndex', () => {
     act(() => {
       result.current.start();
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(invalidateQueriesSpy).not.toHaveBeenCalled();
+    await waitFor(() => expect(invalidateQueriesSpy).not.toHaveBeenCalled());
   });
 
   it('should invalidate read index query on success', async () => {
@@ -81,8 +79,8 @@ describe('useCreateListIndex', () => {
     act(() => {
       result.current.start();
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(invalidateQueriesSpy).toHaveBeenCalledWith(['detectionEngine', 'listIndex']);
+    await waitFor(() =>
+      expect(invalidateQueriesSpy).toHaveBeenCalledWith(['detectionEngine', 'listIndex'])
+    );
   });
 });

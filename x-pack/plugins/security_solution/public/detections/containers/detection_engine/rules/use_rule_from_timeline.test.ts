@@ -347,15 +347,16 @@ describe('useRuleFromTimeline', () => {
 
     it('resets timeline sourcerer if it originally had different data view from the timeline used in the rule', async () => {
       renderHook(() => useRuleFromTimeline(setRuleQuery));
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-      expect(setRuleQuery).toHaveBeenCalled();
-      expect(mockDispatch).toHaveBeenNthCalledWith(4, {
-        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
-        payload: {
-          id: 'timeline',
-          selectedDataViewId: 'security-solution',
-          selectedPatterns: ['auditbeat-*'],
-        },
+      await waitFor(() => {
+        expect(setRuleQuery).toHaveBeenCalled();
+        expect(mockDispatch).toHaveBeenNthCalledWith(4, {
+          type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
+          payload: {
+            id: 'timeline',
+            selectedDataViewId: 'security-solution',
+            selectedPatterns: ['auditbeat-*'],
+          },
+        });
       });
     });
   });

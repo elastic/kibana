@@ -580,9 +580,9 @@ describe('useSetupTechnology', () => {
       })
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
+    await waitFor(() =>
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED)
+    );
 
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);

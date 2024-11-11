@@ -35,9 +35,7 @@ describe.skip('useReadListIndex', () => {
       wrapper: queryWrapper,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(Api.readListIndex).toHaveBeenCalled();
+    await waitFor(() => expect(Api.readListIndex).toHaveBeenCalled());
   });
 
   it('should not call Api.readListIndex when is not enabled', async () => {
@@ -56,8 +54,6 @@ describe.skip('useReadListIndex', () => {
       wrapper: queryWrapper,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(onError).toHaveBeenCalledWith(new Error('Mocked error'));
+    await waitFor(() => expect(onError).toHaveBeenCalledWith(new Error('Mocked error')));
   });
 });

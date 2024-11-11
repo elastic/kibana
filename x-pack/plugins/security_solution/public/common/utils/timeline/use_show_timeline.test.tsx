@@ -79,33 +79,25 @@ describe('use show timeline', () => {
 
   it('shows timeline for routes on default', async () => {
     const { result } = renderHook(() => useShowTimeline());
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    const showTimeline = result.current;
-    expect(showTimeline).toEqual([true]);
+    await waitFor(() => expect(result.current).toEqual([true]));
   });
 
   it('hides timeline for blacklist routes', async () => {
     mockUseLocation.mockReturnValueOnce({ pathname: '/rules/add_rules' });
     const { result } = renderHook(() => useShowTimeline());
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    const showTimeline = result.current;
-    expect(showTimeline).toEqual([false]);
+    await waitFor(() => expect(result.current).toEqual([false]));
   });
 
   it('shows timeline for partial blacklist routes', async () => {
     mockUseLocation.mockReturnValueOnce({ pathname: '/rules' });
     const { result } = renderHook(() => useShowTimeline());
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    const showTimeline = result.current;
-    expect(showTimeline).toEqual([true]);
+    await waitFor(() => expect(result.current).toEqual([true]));
   });
 
   it('hides timeline for sub blacklist routes', async () => {
     mockUseLocation.mockReturnValueOnce({ pathname: '/administration/policy' });
     const { result } = renderHook(() => useShowTimeline());
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    const showTimeline = result.current;
-    expect(showTimeline).toEqual([false]);
+    await waitFor(() => expect(result.current).toEqual([false]));
   });
 });
 

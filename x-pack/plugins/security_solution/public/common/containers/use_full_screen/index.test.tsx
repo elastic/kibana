@@ -26,8 +26,7 @@ describe('useFullScreen', () => {
       ({ result } = renderHook(() => useGlobalFullScreen(), {
         wrapper: WrapperContainer,
       }));
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-      expect(result.current.globalFullScreen).toEqual(false);
+      await waitFor(() => expect(result.current.globalFullScreen).toEqual(false));
 
       act(() => {
         result.current.setGlobalFullScreen(true);

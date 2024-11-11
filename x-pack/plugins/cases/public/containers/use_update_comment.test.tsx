@@ -48,10 +48,10 @@ describe('useUpdateComment', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    await waitFor(() => {
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    });
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
@@ -64,12 +64,12 @@ describe('useUpdateComment', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(patchCommentSpy).toHaveBeenCalledWith({
-      ...sampleUpdate,
-      owner: 'securitySolution',
-    });
+    await waitFor(() =>
+      expect(patchCommentSpy).toHaveBeenCalledWith({
+        ...sampleUpdate,
+        owner: 'securitySolution',
+      })
+    );
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -83,8 +83,6 @@ describe('useUpdateComment', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 });

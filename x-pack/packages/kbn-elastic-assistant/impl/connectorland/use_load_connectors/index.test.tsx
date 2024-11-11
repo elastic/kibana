@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { useLoadConnectors, Props } from '.';
 import { mockConnectors } from '../../mock/connectors';
 
@@ -69,35 +69,27 @@ describe('useLoadConnectors', () => {
     jest.clearAllMocks();
   });
   it('should call api to load action types', async () => {
-    await act(async () => {
-      renderHook(() => useLoadConnectors(defaultProps));
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
+    renderHook(() => useLoadConnectors(defaultProps));
+    await waitFor(() => {
       expect(defaultProps.http.get).toHaveBeenCalledWith('/api/actions/connectors');
       expect(toasts.addError).not.toHaveBeenCalled();
     });
   });
 
   it('should return sorted action types, removing isMissingSecrets and wrong action type ids', async () => {
-    await act(async () => {
-      const { result } = renderHook(() => useLoadConnectors(defaultProps));
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      await expect(result.current).resolves.toStrictEqual(
+    const { result } = renderHook(() => useLoadConnectors(defaultProps));
+    await waitFor(() => {
+      expect(result.current).resolves.toStrictEqual(
         // @ts-ignore ts does not like config, but we define it in the mock data
         loadConnectorsResult.map((c) => ({ ...c, apiProvider: c.config.apiProvider }))
       );
     });
   });
   it('should display error toast when api throws error', async () => {
-    await act(async () => {
-      const mockHttp = {
-        get: jest.fn().mockRejectedValue(new Error('this is an error')),
-      } as unknown as Props['http'];
-      renderHook(() => useLoadConnectors({ ...defaultProps, http: mockHttp }));
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      expect(toasts.addError).toHaveBeenCalled();
-    });
+    const mockHttp = {
+      get: jest.fn().mockRejectedValue(new Error('this is an error')),
+    } as unknown as Props['http'];
+    renderHook(() => useLoadConnectors({ ...defaultProps, http: mockHttp }));
+    await waitFor(() => expect(toasts.addError).toHaveBeenCalled());
   });
 });

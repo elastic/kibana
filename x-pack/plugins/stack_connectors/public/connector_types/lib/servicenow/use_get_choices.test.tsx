@@ -80,12 +80,12 @@ describe('useGetChoices', () => {
       })
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current).toEqual({
-      isLoading: false,
-      choices: getChoicesResponse,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        isLoading: false,
+        choices: getChoicesResponse,
+      })
+    );
   });
 
   it('returns an empty array when connector is not presented', async () => {
@@ -116,9 +116,7 @@ describe('useGetChoices', () => {
       })
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(onSuccess).toHaveBeenCalledWith(getChoicesResponse);
+    await waitFor(() => expect(onSuccess).toHaveBeenCalledWith(getChoicesResponse));
   });
 
   it('it displays an error when service fails', async () => {
@@ -137,12 +135,12 @@ describe('useGetChoices', () => {
       })
     );
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-      text: 'An error occurred',
-      title: 'Unable to get choices',
-    });
+    await waitFor(() =>
+      expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        text: 'An error occurred',
+        title: 'Unable to get choices',
+      })
+    );
   });
 
   it('it displays an error when http throws an error', async () => {
@@ -160,10 +158,12 @@ describe('useGetChoices', () => {
       })
     );
 
-    expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-      text: 'An error occurred',
-      title: 'Unable to get choices',
-    });
+    await waitFor(() =>
+      expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        text: 'An error occurred',
+        title: 'Unable to get choices',
+      })
+    );
   });
 
   it('returns an empty array if the response is not an array', async () => {
@@ -182,9 +182,11 @@ describe('useGetChoices', () => {
       })
     );
 
-    expect(result.current).toEqual({
-      isLoading: false,
-      choices: [],
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        isLoading: false,
+        choices: [],
+      });
     });
   });
 });

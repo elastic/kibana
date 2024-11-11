@@ -202,13 +202,13 @@ describe('useTimelineTypes', () => {
         })
       );
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
-      expect(result.current).toEqual({
-        timelineType: 'default',
-        timelineTabs: result.current.timelineTabs,
-        timelineFilters: result.current.timelineFilters,
-      });
+      await waitFor(() =>
+        expect(result.current).toEqual({
+          timelineType: 'default',
+          timelineTabs: result.current.timelineTabs,
+          timelineFilters: result.current.timelineFilters,
+        })
+      );
     });
   });
 });

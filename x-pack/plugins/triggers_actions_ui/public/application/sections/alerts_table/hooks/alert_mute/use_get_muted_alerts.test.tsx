@@ -35,8 +35,6 @@ describe('useGetMutedAlerts', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
     await waitFor(() => {
       expect(muteAlertInstanceSpy).toHaveBeenCalledWith(
         expect.anything(),
@@ -53,7 +51,7 @@ describe('useGetMutedAlerts', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    expect(spy).not.toHaveBeenCalled();
+    await waitFor(() => expect(spy).not.toHaveBeenCalled());
   });
 
   it('shows a toast error when the api returns an error', async () => {
@@ -62,8 +60,6 @@ describe('useGetMutedAlerts', () => {
     renderHook(() => useGetMutedAlerts(ruleIds), {
       wrapper: appMockRender.AppWrapper,
     });
-
-    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();

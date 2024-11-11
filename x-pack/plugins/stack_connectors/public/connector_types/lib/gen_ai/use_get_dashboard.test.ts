@@ -111,11 +111,12 @@ describe('useGetDashboard', () => {
 
   it('handles the case where connectorId is empty string', async () => {
     const { result } = renderHook(() => useGetDashboard({ ...defaultArgs, connectorId: '' }));
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(mockDashboard).not.toHaveBeenCalled();
-    expect(mockGetRedirectUrl).not.toHaveBeenCalled();
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.dashboardUrl).toBe(null);
+    await waitFor(() => {
+      expect(mockDashboard).not.toHaveBeenCalled();
+      expect(mockGetRedirectUrl).not.toHaveBeenCalled();
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.dashboardUrl).toBe(null);
+    });
   });
 
   it('handles the case where the dashboard locator is not available.', async () => {
@@ -123,19 +124,21 @@ describe('useGetDashboard', () => {
       services: { ...mockServices, dashboard: {} },
     });
     const { result } = renderHook(() => useGetDashboard(defaultArgs));
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.dashboardUrl).toBe(null);
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.dashboardUrl).toBe(null);
+    });
   });
 
   it('correctly handles errors and displays the appropriate toast messages.', async () => {
     mockDashboard.mockRejectedValue(new Error('Error fetching dashboard'));
     const { result } = renderHook(() => useGetDashboard(defaultArgs));
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current.isLoading).toBe(false);
-    expect(mockToasts.addDanger).toHaveBeenCalledWith({
-      title: 'Error finding OpenAI Token Usage Dashboard.',
-      text: 'Error fetching dashboard',
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(mockToasts.addDanger).toHaveBeenCalledWith({
+        title: 'Error finding OpenAI Token Usage Dashboard.',
+        text: 'Error fetching dashboard',
+      });
     });
   });
 });

@@ -30,11 +30,12 @@ describe('useGetTags', () => {
         <TestProviders>{children}</TestProviders>
       ),
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(spyOnGetTags).toBeCalledWith({
-      owner: [SECURITY_SOLUTION_OWNER],
-      signal: abortCtrl.signal,
-    });
+    await waitFor(() =>
+      expect(spyOnGetTags).toBeCalledWith({
+        owner: [SECURITY_SOLUTION_OWNER],
+        signal: abortCtrl.signal,
+      })
+    );
   });
 
   it('displays and error toast when an error occurs', async () => {

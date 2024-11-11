@@ -130,7 +130,7 @@ describe('useBulkGetMaintenanceWindows', () => {
       }
     );
 
-    expect(spy).not.toHaveBeenCalled();
+    await waitFor(() => expect(spy).not.toHaveBeenCalled());
   });
 
   it('does not call the api if license is not platinum', async () => {
@@ -150,7 +150,7 @@ describe('useBulkGetMaintenanceWindows', () => {
       }
     );
 
-    expect(spy).not.toHaveBeenCalled();
+    await waitFor(() => expect(spy).not.toHaveBeenCalled());
   });
 
   it('does not call the api if capabilities are not adequate', async () => {
@@ -175,7 +175,7 @@ describe('useBulkGetMaintenanceWindows', () => {
       }
     );
 
-    expect(spy).not.toHaveBeenCalled();
+    await waitFor(() => expect(spy).not.toHaveBeenCalled());
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -193,8 +193,6 @@ describe('useBulkGetMaintenanceWindows', () => {
         wrapper: appMockRender.AppWrapper,
       }
     );
-
-    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({

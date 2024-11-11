@@ -92,19 +92,20 @@ describe('useAlertsPrivileges', () => {
 
   test('init', async () => {
     const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toEqual({
-      hasEncryptionKey: null,
-      hasIndexManage: null,
-      hasIndexRead: null,
-      hasIndexMaintenance: null,
-      hasIndexWrite: null,
-      hasIndexUpdateDelete: null,
-      hasKibanaCRUD: false,
-      hasKibanaREAD: false,
-      isAuthenticated: null,
-      loading: false,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        hasEncryptionKey: null,
+        hasIndexManage: null,
+        hasIndexRead: null,
+        hasIndexMaintenance: null,
+        hasIndexWrite: null,
+        hasIndexUpdateDelete: null,
+        hasKibanaCRUD: false,
+        hasKibanaREAD: false,
+        isAuthenticated: null,
+        loading: false,
+      })
+    );
   });
 
   test('if there is an error when fetching user privilege, we should get back false for all index related properties', async () => {
@@ -113,19 +114,20 @@ describe('useAlertsPrivileges', () => {
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
     const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toEqual({
-      hasEncryptionKey: false,
-      hasIndexManage: false,
-      hasIndexMaintenance: false,
-      hasIndexRead: false,
-      hasIndexWrite: false,
-      hasIndexUpdateDelete: false,
-      hasKibanaCRUD: true,
-      hasKibanaREAD: true,
-      isAuthenticated: false,
-      loading: false,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        hasEncryptionKey: false,
+        hasIndexManage: false,
+        hasIndexMaintenance: false,
+        hasIndexRead: false,
+        hasIndexWrite: false,
+        hasIndexUpdateDelete: false,
+        hasKibanaCRUD: true,
+        hasKibanaREAD: true,
+        isAuthenticated: false,
+        loading: false,
+      })
+    );
   });
 
   test('returns "hasIndexManage" is false if the privilege does not have cluster manage', async () => {
@@ -138,19 +140,20 @@ describe('useAlertsPrivileges', () => {
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
     const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toEqual({
-      hasEncryptionKey: true,
-      hasIndexManage: false,
-      hasIndexMaintenance: true,
-      hasIndexRead: true,
-      hasIndexWrite: true,
-      hasIndexUpdateDelete: true,
-      hasKibanaCRUD: true,
-      hasKibanaREAD: true,
-      isAuthenticated: true,
-      loading: false,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        hasEncryptionKey: true,
+        hasIndexManage: false,
+        hasIndexMaintenance: true,
+        hasIndexRead: true,
+        hasIndexWrite: true,
+        hasIndexUpdateDelete: true,
+        hasKibanaCRUD: true,
+        hasKibanaREAD: true,
+        isAuthenticated: true,
+        loading: false,
+      })
+    );
   });
 
   test('returns "hasIndexManage" is true if the privilege has cluster manage', async () => {
@@ -160,19 +163,20 @@ describe('useAlertsPrivileges', () => {
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
     const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toEqual({
-      hasEncryptionKey: true,
-      hasIndexManage: true,
-      hasIndexMaintenance: true,
-      hasIndexRead: true,
-      hasIndexWrite: true,
-      hasIndexUpdateDelete: true,
-      hasKibanaCRUD: true,
-      hasKibanaREAD: true,
-      isAuthenticated: true,
-      loading: false,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        hasEncryptionKey: true,
+        hasIndexManage: true,
+        hasIndexMaintenance: true,
+        hasIndexRead: true,
+        hasIndexWrite: true,
+        hasIndexUpdateDelete: true,
+        hasKibanaCRUD: true,
+        hasKibanaREAD: true,
+        isAuthenticated: true,
+        loading: false,
+      })
+    );
   });
 
   test('returns "hasKibanaCRUD" as false if user does not have SIEM Kibana "all" privileges', async () => {
@@ -183,19 +187,20 @@ describe('useAlertsPrivileges', () => {
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
     const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toEqual({
-      hasEncryptionKey: true,
-      hasIndexManage: true,
-      hasIndexMaintenance: true,
-      hasIndexRead: true,
-      hasIndexWrite: true,
-      hasIndexUpdateDelete: true,
-      hasKibanaCRUD: false,
-      hasKibanaREAD: true,
-      isAuthenticated: true,
-      loading: false,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        hasEncryptionKey: true,
+        hasIndexManage: true,
+        hasIndexMaintenance: true,
+        hasIndexRead: true,
+        hasIndexWrite: true,
+        hasIndexUpdateDelete: true,
+        hasKibanaCRUD: false,
+        hasKibanaREAD: true,
+        isAuthenticated: true,
+        loading: false,
+      })
+    );
   });
 
   test('returns "hasKibanaREAD" as false if user does not have at least SIEM Kibana "read" privileges', async () => {
@@ -206,18 +211,19 @@ describe('useAlertsPrivileges', () => {
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
     const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(result.current).toEqual({
-      hasEncryptionKey: true,
-      hasIndexManage: true,
-      hasIndexMaintenance: true,
-      hasIndexRead: true,
-      hasIndexWrite: true,
-      hasIndexUpdateDelete: true,
-      hasKibanaCRUD: false,
-      hasKibanaREAD: false,
-      isAuthenticated: true,
-      loading: false,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        hasEncryptionKey: true,
+        hasIndexManage: true,
+        hasIndexMaintenance: true,
+        hasIndexRead: true,
+        hasIndexWrite: true,
+        hasIndexUpdateDelete: true,
+        hasKibanaCRUD: false,
+        hasKibanaREAD: false,
+        isAuthenticated: true,
+        loading: false,
+      })
+    );
   });
 });

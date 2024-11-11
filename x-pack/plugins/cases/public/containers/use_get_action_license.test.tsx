@@ -30,8 +30,7 @@ describe('useGetActionLicense', () => {
       wrapper: appMockRenderer.AppWrapper,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(spyOnGetActionLicense).toBeCalledWith(abortCtrl.signal);
+    await waitFor(() => expect(spyOnGetActionLicense).toBeCalledWith(abortCtrl.signal));
   });
 
   it('unhappy path', async () => {

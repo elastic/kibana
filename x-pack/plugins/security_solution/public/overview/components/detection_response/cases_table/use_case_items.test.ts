@@ -90,22 +90,20 @@ describe('useCaseItems', () => {
     mockCasesApi.mockReturnValue(mockCasesResult);
     const { result } = renderUseCaseItems();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(result.current).toEqual({
-      items: parsedCasesItems,
-      isLoading: false,
-      updatedAt: dateNow,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        items: parsedCasesItems,
+        isLoading: false,
+        updatedAt: dateNow,
+      })
+    );
   });
 
   test('it should call setQuery when fetching', async () => {
     mockCasesApi.mockReturnValue(mockCasesResult);
     renderUseCaseItems();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(mockSetQuery).toHaveBeenCalled();
+    await waitFor(() => expect(mockSetQuery).toHaveBeenCalled());
   });
 
   test('it should call deleteQuery when unmounting', async () => {
@@ -128,13 +126,13 @@ describe('useCaseItems', () => {
 
     const { result } = renderUseCaseItems();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(mockDateNow).toHaveBeenCalled();
-    expect(result.current).toEqual({
-      items: parsedCasesItems,
-      isLoading: false,
-      updatedAt: newDateNow,
+    await waitFor(() => {
+      expect(mockDateNow).toHaveBeenCalled();
+      expect(result.current).toEqual({
+        items: parsedCasesItems,
+        isLoading: false,
+        updatedAt: newDateNow,
+      });
     });
   });
 
