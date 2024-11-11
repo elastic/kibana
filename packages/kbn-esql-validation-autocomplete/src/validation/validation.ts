@@ -83,6 +83,7 @@ import { getParamAtPosition } from '../shared/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 import { compareTypesWithLiterals } from '../shared/esql_types';
 
+const NO_MESSAGE: ESQLMessage[] = [];
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
   actualArg: ESQLAstItem,
@@ -336,10 +337,10 @@ function validateIfHasUnsupportedCommandPrior(
       getMessageFromId({
         messageId: 'fnUnsupportedAfterCommand',
         values: {
-          function: astFunction.name.toUpperCase(),
+          function: fn.name.toUpperCase(),
           command: unsupportedCommandsPrior[0].name.toUpperCase(),
         },
-        locations: astFunction.location,
+        locations: fn.location,
       }),
     ];
   }
@@ -347,7 +348,7 @@ function validateIfHasUnsupportedCommandPrior(
 }
 
 function validateMatchFunction({
-  astFunction,
+  fn,
   parentCommand,
   parentOption,
   references,
@@ -356,7 +357,7 @@ function validateMatchFunction({
   parentAst,
   currentCommandIndex,
 }: {
-  astFunction: ESQLFunction;
+  fn: ESQLFunction;
   parentCommand: string;
   parentOption?: string;
   references: ReferenceMaps;
@@ -365,15 +366,22 @@ function validateMatchFunction({
   parentAst?: ESQLCommand[];
   currentCommandIndex?: number;
 }): ESQLMessage[] {
-  if (astFunction.name === 'match') {
-    return validateIfHasUnsupportedCommandPrior(astFunction, parentAst, currentCommandIndex, [
-      'limit',
-    ]);
+  if (fn.name === 'match') {
+    if (parentCommand !== 'where') {
+      return [
+        getMessageFromId({
+          messageId: 'onlyWhereCommandSupported',
+          values: { fn: fn.name },
+          locations: fn.location,
+        }),
+      ];
+    }
+    return validateIfHasUnsupportedCommandPrior(fn, parentAst, currentCommandIndex, ['limit']);
   }
   return NO_MESSAGE;
 }
 function validateQSTRFunction({
-  astFunction,
+  fn,
   parentCommand,
   parentOption,
   references,
@@ -382,7 +390,7 @@ function validateQSTRFunction({
   parentAst,
   currentCommandIndex,
 }: {
-  astFunction: ESQLFunction;
+  fn: ESQLFunction;
   parentCommand: string;
   parentOption?: string;
   references: ReferenceMaps;
@@ -391,8 +399,8 @@ function validateQSTRFunction({
   parentAst?: ESQLCommand[];
   currentCommandIndex?: number;
 }): ESQLMessage[] {
-  if (astFunction.name === 'qstr') {
-    return validateIfHasUnsupportedCommandPrior(astFunction, parentAst, currentCommandIndex, [
+  if (fn.name === 'qstr') {
+    return validateIfHasUnsupportedCommandPrior(fn, parentAst, currentCommandIndex, [
       'show',
       'row',
       'dissect',
@@ -415,7 +423,7 @@ const textSearchFunctionsValidators = {
 };
 
 function validateFunction({
-  astFunction,
+  fn,
   parentCommand,
   parentOption,
   references,
@@ -424,7 +432,7 @@ function validateFunction({
   parentAst,
   currentCommandIndex,
 }: {
-  astFunction: ESQLFunction;
+  fn: ESQLFunction;
   parentCommand: string;
   parentOption?: string;
   references: ReferenceMaps;
@@ -442,6 +450,20 @@ function validateFunction({
 
   const isFnSupported = isSupportedFunction(fn.name, parentCommand, parentOption);
 
+  if (textSearchFunctionsValidators[fn.name]) {
+    const validator = textSearchFunctionsValidators[fn.name];
+    messages.push(
+      ...validator({
+        fn,
+        parentCommand,
+        parentOption,
+        references,
+        isNested,
+        parentAst,
+        currentCommandIndex,
+      })
+    );
+  }
   if (!isFnSupported.supported) {
     if (isFnSupported.reason === 'unknownFunction') {
       messages.push(errors.unknownFunction(fn));
@@ -532,7 +554,7 @@ function validateFunction({
 
       if (isFunctionItem(subArg)) {
         const messagesFromArg = validateFunction({
-          astFunction: subArg,
+          fn: subArg,
           parentCommand,
           parentOption,
           references,
@@ -772,7 +794,7 @@ const validateAggregates = (
     if (isFunctionItem(aggregate)) {
       messages.push(
         ...validateFunction({
-          astFunction: aggregate,
+          fn: aggregate,
           parentCommand: command.name,
           parentOption: undefined,
           references,
@@ -853,7 +875,7 @@ const validateByGrouping = (
         if (isFunctionItem(field)) {
           messages.push(
             ...validateFunction({
-              astFunction: field,
+              fn: field,
               parentCommand: commandName,
               parentOption: 'by',
               references: referenceMaps,
@@ -906,7 +928,7 @@ function validateOption(
           if (isFunctionItem(arg)) {
             messages.push(
               ...validateFunction({
-                astFunction: arg,
+                fn: arg,
                 parentCommand: command.name,
                 parentOption: option.name,
                 references: referenceMaps,
@@ -1111,7 +1133,7 @@ function validateCommand(
           if (isFunctionItem(arg)) {
             messages.push(
               ...validateFunction({
-                astFunction: arg,
+                fn: arg,
                 parentCommand: command.name,
                 parentOption: undefined,
                 references,

@@ -433,6 +433,16 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           }
         ),
       };
+    case 'onlyWhereCommandSupported':
+      return {
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.onlyWhereCommandSupported',
+          {
+            defaultMessage: '[{fn}] function is only supported in WHERE commands',
+            values: { fn: out.fn.toUpperCase() },
+          }
+        ),
+      };
   }
   return { message: '' };
 }

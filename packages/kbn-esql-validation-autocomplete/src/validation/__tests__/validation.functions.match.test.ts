@@ -29,6 +29,7 @@ describe('validation', () => {
       for (const command of ['EVAL']) {
         await expectErrors(`FROM index | ${command} MATCH(keywordField, "value")`, [
           `${command} does not support function match`,
+          '[MATCH] function is only supported in WHERE commands',
         ]);
       }
     });
@@ -44,7 +45,6 @@ describe('validation', () => {
       );
     });
   });
-  // Skip for now, until QSRT is enabled again
   describe('QSRT function', () => {
     it('no error if valid', async () => {
       const { expectErrors } = await setup();
