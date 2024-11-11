@@ -100,6 +100,14 @@ describe('single line query', () => {
         expect(text).toBe('FROM a | STATS A(1), B(2) BY asdf');
       });
     });
+
+    describe('GROK', () => {
+      test('two basic arguments', () => {
+        const { text } = reprint('FROM search-movies | GROK Awards "text"');
+
+        expect(text).toBe('FROM search-movies | GROK Awards "text"');
+      });
+    });
   });
 
   describe('expressions', () => {
