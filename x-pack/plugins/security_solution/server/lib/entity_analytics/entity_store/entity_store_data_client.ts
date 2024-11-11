@@ -21,6 +21,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
 import moment from 'moment';
 import type {
+  GetEntityStoreStatusResponse,
   InitEntityStoreRequestBody,
   InitEntityStoreResponse,
 } from '../../../../common/api/entity_analytics/entity_store/enablement.gen';
@@ -34,7 +35,7 @@ import type {
   InspectQuery,
 } from '../../../../common/api/entity_analytics';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
-import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
+import { ENGINE_STATUS, ENTITY_STORE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
 import { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import { getUnitedEntityDefinition } from './united_entity_definitions';
 import {
@@ -149,6 +150,23 @@ export class EntityStoreDataClient {
 
     const engines = await Promise.all(promises);
     return { engines, succeeded: true };
+  }
+
+  public async status(): Promise<GetEntityStoreStatusResponse> {
+    const { engines, count } = await this.engineClient.list();
+
+    let status = ENTITY_STORE_STATUS.RUNNING;
+    if (count === 0) {
+      status = ENTITY_STORE_STATUS.NOT_INSTALLED;
+    } else if (engines.some((engine) => engine.status === ENGINE_STATUS.ERROR)) {
+      status = ENTITY_STORE_STATUS.ERROR;
+    } else if (engines.every((engine) => engine.status === ENGINE_STATUS.STOPPED)) {
+      status = ENTITY_STORE_STATUS.STOPPED;
+    } else if (engines.some((engine) => engine.status === ENGINE_STATUS.INSTALLING)) {
+      status = ENTITY_STORE_STATUS.INSTALLING;
+    }
+
+    return { engines, status };
   }
 
   public async init(

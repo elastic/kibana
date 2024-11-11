@@ -16,11 +16,11 @@
 
 import { z } from '@kbn/zod';
 
-import { IndexPattern, EngineDescriptor } from './common.gen';
+import { IndexPattern, EngineDescriptor, StoreStatus } from './common.gen';
 
 export type GetEntityStoreStatusResponse = z.infer<typeof GetEntityStoreStatusResponse>;
 export const GetEntityStoreStatusResponse = z.object({
-  status: z.enum(['not_installed', 'installing', 'running', 'stopped', 'error']).optional(),
+  status: StoreStatus.optional(),
   engines: z.array(EngineDescriptor).optional(),
 });
 

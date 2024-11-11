@@ -5,26 +5,30 @@
  * 2.0.
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-
-import type { InitEntityStoreResponse } from '../../../../../common/api/entity_analytics/entity_store/enablement.gen';
-import { InitEntityStoreRequestBody } from '../../../../../common/api/entity_analytics/entity_store/enablement.gen';
+import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/enablement.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
 
-export const enableEntityStoreRoute = (
+export const getEntityStoreStatusRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
   config: EntityAnalyticsRoutesDeps['config']
 ) => {
   router.versioned
-    .post({
+    .get({
       access: 'public',
-      path: '/api/entity_store/enable',
+      path: '/api/entity_store/status',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -34,14 +38,14 @@ export const enableEntityStoreRoute = (
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: {
-            body: buildRouteValidationWithZod(InitEntityStoreRequestBody),
-          },
-        },
+        validate: {},
       },
 
-      async (context, request, response): Promise<IKibanaResponse<InitEntityStoreResponse>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<GetEntityStoreStatusResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const secSol = await context.securitySolution;
         const { pipelineDebugMode } = config.entityAnalytics.entityStore.developer;
@@ -49,9 +53,9 @@ export const enableEntityStoreRoute = (
         await checkAndInitAssetCriticalityResources(context, logger);
 
         try {
-          const body: InitEntityStoreResponse = await secSol
+          const body: GetEntityStoreStatusResponse = await secSol
             .getEntityStoreDataClient()
-            .enable(request.body, { pipelineDebugMode });
+            .status();
 
           return response.ok({ body });
         } catch (e) {

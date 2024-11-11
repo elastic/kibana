@@ -57,13 +57,7 @@ paths:
                 type: object
                 properties:
                   status: 
-                    type: string
-                    enum:
-                      - not_installed
-                      - installing
-                      - running
-                      - stopped
-                      - error
+                    $ref: './common.schema.yaml#/components/schemas/StoreStatus'
                   engines:
                     type: array
                     items:

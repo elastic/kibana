@@ -41,6 +41,15 @@ components:
         - stopped
         - updating
         - error
+    
+    StoreStatus:
+      type: string
+      enum:
+        - not_installed
+        - installing
+        - running
+        - stopped
+        - error
 
     IndexPattern:
       type: string
