@@ -110,11 +110,11 @@ All columns that belong to the same layer pane group are sorted in the table.
 
 preview::[]
 
-Assign a color to each term in a table with color mapping.
+For term-based metrics, assign a color to each term with color mapping. 
 
 . Create a custom table.
  
-. In the layer pane, select a *Rows* or *Metrics* field.
+. In the layer pane, select a *Rows* or *Metrics* field. 
 
 . In the *Color by value* option, select *Cell* or *Text*.
 
@@ -124,7 +124,7 @@ Assign a color to each term in a table with color mapping.
 
 . Select a color palette and mode.
 
-. Click *Add assignment* to assign a color to a specific term, or click *Add all unassigned terms* to assign colors to all terms. 
+. Click *Add assignment* to assign a color to a specific term, or click *Add all unassigned terms* to assign colors to all terms. Assigning colors to dates is unsupported.
 
 . Configure color assignments. You can also select whether unassigned terms should be mapped to the selected color palette or a single color. 
 
