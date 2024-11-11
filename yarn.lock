@@ -6916,6 +6916,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/task-evaluation-framework@link:x-pack/packages/ai-infra/task-evaluation-framework":
+  version "0.0.0"
+  uid ""
+
 "@kbn/task-manager-fixture-plugin@link:x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture":
   version "0.0.0"
   uid ""

@@ -1830,6 +1830,8 @@
       "@kbn/synthetics-plugin/*": ["x-pack/plugins/observability_solution/synthetics/*"],
       "@kbn/synthetics-private-location": ["x-pack/packages/kbn-synthetics-private-location"],
       "@kbn/synthetics-private-location/*": ["x-pack/packages/kbn-synthetics-private-location/*"],
+      "@kbn/task-evaluation-framework": ["x-pack/packages/ai-infra/task-evaluation-framework"],
+      "@kbn/task-evaluation-framework/*": ["x-pack/packages/ai-infra/task-evaluation-framework/*"],
       "@kbn/task-manager-fixture-plugin": ["x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture"],
       "@kbn/task-manager-fixture-plugin/*": ["x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture/*"],
       "@kbn/task-manager-performance-plugin": ["x-pack/test/plugin_api_perf/plugins/task_manager_performance"],

@@ -1476,6 +1476,7 @@
     "@kbn/stdio-dev-helpers": "link:packages/kbn-stdio-dev-helpers",
     "@kbn/storybook": "link:packages/kbn-storybook",
     "@kbn/synthetics-e2e": "link:x-pack/plugins/observability_solution/synthetics/e2e",
+    "@kbn/task-evaluation-framework": "link:x-pack/packages/ai-infra/task-evaluation-framework",
     "@kbn/telemetry-tools": "link:packages/kbn-telemetry-tools",
     "@kbn/test": "link:packages/kbn-test",
     "@kbn/test-eui-helpers": "link:packages/kbn-test-eui-helpers",
