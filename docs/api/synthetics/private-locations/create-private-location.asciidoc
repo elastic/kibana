@@ -44,7 +44,7 @@ Here is an example of a POST request to create a private location:
 
 [source,sh]
 --------------------------------------------------
-POST /api/private_locations
+POST /api/synthetics/private_locations
 {
   "label": "Private Location 1",
   "agentPolicyId": "abcd1234",
