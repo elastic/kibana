@@ -9,12 +9,12 @@ import { log, timerange } from '@kbn/apm-synthtrace-client';
 import { first, last } from 'lodash';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const logSynthtrace = getService('logSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const serviceName = 'synth-go';
   const start = new Date('2024-01-01T00:00:00.000Z').getTime();
@@ -45,25 +45,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
     return response;
   }
-
-  registry.when(
-    'Logs error rate timeseries when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
-      describe('Logs error rate api', () => {
-        it('handles the empty state', async () => {
-          const response = await getLogsErrorRateTimeseries();
-          expect(response.status).to.be(200);
-          expect(response.body.currentPeriod).to.empty();
-        });
+  describe('logs error rate timeseries', () => {
+    describe('when data is not loaded', () => {
+      it('handles empty state', async () => {
+        const response = await getLogsErrorRateTimeseries();
+        expect(response.status).to.be(200);
+        expect(response.body.currentPeriod).to.empty();
       });
-    }
-  );
+    });
 
-  registry.when(
-    'Logs error rate timeseries when data loaded',
-    { config: 'basic', archives: [] },
-    () => {
+    describe('when data loaded', () => {
+      let logSynthtrace: LogsSynthtraceEsClient;
+
+      before(async () => {
+        logSynthtrace = await synthtrace.createLogsSynthtraceEsClient();
+      });
+
+      after(async () => {
+        await logSynthtrace.clean();
+      });
+
       describe('Logs without log level field', () => {
         before(async () => {
           return logSynthtrace.index([
@@ -170,6 +171,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
       });
-    }
-  );
+    });
+  });
 }
