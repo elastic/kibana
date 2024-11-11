@@ -198,8 +198,10 @@ If available, include the link of the conversation at the end of your answer.`
       instruction_type: 'application_instruction',
       text: dedent(
         `The execute_connector function can be used to invoke Kibana connectors.
-        For Slack connectors, the "params" object must include a "message" field. Make sure the
-        "message" field in "params" is defined, when the function is called.`
+        To send to the Slack connector, you need the following arguments:
+          - the "id" of the connector
+          - the "params" parameter that you will fill with the message
+        Both these arguments are required.`
       ),
     };
     functionClient.registerAdhocInstruction(slackConnectorInstruction);
