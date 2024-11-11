@@ -20959,7 +20959,7 @@ paths:
         - Elastic Agents
   /api/fleet/agents/status_runtime_field:
     get:
-      operationId: '%2Fapi%2Ffleet%2Fagents%2Fstatus_runtime_field#0'
+      operationId: get-fleet-agents-status-runtime-field
       parameters:
         - description: The version of the API to use
           in: header
