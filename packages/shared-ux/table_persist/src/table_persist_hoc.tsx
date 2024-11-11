@@ -13,8 +13,11 @@ import { PropertySort } from './types';
 
 export interface EuiTablePersistInjectedProps<T> {
   euiTablePersist: {
+    /** The EuiInMemoryTable onTableChange prop */
     onTableChange: (change: CriteriaWithPagination<T>) => void;
+    /** The EuiInMemoryTable sorting prop */
     sorting: { sort: PropertySort<T> } | true;
+    /** The EuiInMemoryTable pagination.pageSize value */
     pageSize: number;
   };
 }
@@ -24,6 +27,7 @@ export type EuiTablePersistPropsGetter<T extends object, P extends object> = (
 ) => EuiTablePersistProps<T>;
 
 export type HOCProps<T extends object, P extends object> = P & {
+  /** Custom value for the EuiTablePersist HOC */
   euiTablePersistProps?: Partial<EuiTablePersistProps<T>>;
 };
 
