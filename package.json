@@ -1202,7 +1202,6 @@
     "pdfmake": "^0.2.15",
     "peggy": "^1.2.0",
     "polished": "^3.7.2",
-    "prettier-eslint": "^16.3.0",
     "pretty-ms": "6.0.0",
     "prop-types": "^15.8.1",
     "proxy-from-env": "1.0.0",
