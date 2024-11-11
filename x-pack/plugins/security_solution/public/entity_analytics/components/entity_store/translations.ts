@@ -64,7 +64,7 @@ export const ENABLEMENT_DESCRIPTION_BOTH = i18n.translate(
 );
 
 export const ENABLEMENT_WARNING_SELECT_TO_PROCEED = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.entityStore.enablement.description.both',
+  'xpack.securitySolution.entityAnalytics.entityStore.enablement.description.enablementWarningMessage',
   {
     defaultMessage: 'Please enable at least one option to proceed.',
   }

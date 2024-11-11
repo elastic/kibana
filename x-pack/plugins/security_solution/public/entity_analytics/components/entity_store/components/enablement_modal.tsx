@@ -74,6 +74,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
   }
   const proceedWarning = (
     <EuiCallOut
+      size="s"
       color="danger"
       css={css`
         border-radius: ${euiTheme.border.radius.medium};
@@ -147,10 +148,10 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem>{!enablementOptions && proceedWarning}</EuiFlexItem>
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          {!enablementOptions ? <EuiFlexItem>{proceedWarning}</EuiFlexItem> : null}
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="row">
+            <EuiFlexGroup direction="row" justifyContent="flexEnd">
               <EuiButtonEmpty onClick={() => toggle(false)}>{'Cancel'}</EuiButtonEmpty>
               <EuiButton onClick={enableStore(enablements)} fill>
                 <FormattedMessage
