@@ -656,7 +656,7 @@ export class FlyoutClass extends Component<
 }
 
 export const Flyout = withEuiTablePersist(FlyoutClass, {
-  tableId: 'savedObjectsUnmatchedReferences',
+  tableId: 'savedObjectsMgmtUnmatchedReferences',
   pageSizeOptions: PAGE_SIZE_OPTIONS,
   initialPageSize: 5,
 });

@@ -24,7 +24,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
-} from '@kbn/shared-ux-table-persist/src';
+} from '@kbn/shared-ux-table-persist';
 
 import { SourceFiltersTableFilter } from '../../types';
 

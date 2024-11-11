@@ -16,7 +16,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
-} from '@kbn/shared-ux-table-persist/src';
+} from '@kbn/shared-ux-table-persist';
 import { ScriptedFieldItem } from '../../types';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];

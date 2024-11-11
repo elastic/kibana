@@ -34,7 +34,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
-} from '@kbn/shared-ux-table-persist/src';
+} from '@kbn/shared-ux-table-persist';
 
 import { DataView } from '@kbn/data-views-plugin/public';
 import { StartServices } from '../../../../../types';
