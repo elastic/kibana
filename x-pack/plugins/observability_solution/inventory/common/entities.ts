@@ -23,6 +23,7 @@ export const entityColumnIdsRt = t.union([
   t.literal(ENTITY_LAST_SEEN),
   t.literal(ENTITY_TYPE),
   t.literal('alertsCount'),
+  t.literal('actions'),
 ]);
 
 export type EntityColumnIds = t.TypeOf<typeof entityColumnIdsRt>;
