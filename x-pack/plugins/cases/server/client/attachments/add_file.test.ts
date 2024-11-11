@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
 import type { File } from '@kbn/files-plugin/common';
 
 import type { Case } from '../../../common';
@@ -20,7 +21,9 @@ const buildAttachmentRequestFromFileJSONMock = buildAttachmentRequestFromFileJSO
 
 describe('addFile', () => {
   const caseId = 'test-case';
-  const file = 'theFile';
+  const file = new Readable();
+  file.push('theFile');
+  file.push(null);
   const owner = 'cases';
 
   const clientArgs = createCasesClientMockArgs();
@@ -33,20 +36,6 @@ describe('addFile', () => {
     jest.clearAllMocks();
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({});
     casesClient.cases.get.mockResolvedValue({ id: caseId, owner } as unknown as Case);
-  });
-
-  it('throws an error when the request has excess fields', async () => {
-    await expect(
-      addFile(
-        {
-          caseId,
-          // @ts-expect-error
-          fileRequest: { file, filename: 'foobar', mimeType: 'text/plain', foo: 'bar' },
-        },
-        clientArgs,
-        casesClient
-      )
-    ).rejects.toThrow('invalid keys "foo"');
   });
 
   it('throws an error if the filename is missing', async () => {
@@ -62,11 +51,7 @@ describe('addFile', () => {
 
   it('throws an error if the mimeType is not part of the allowed mime types', async () => {
     await expect(
-      addFile(
-        { caseId, fileRequest: { file, filename: 'foobar', mimeType: 'foo/bar' } },
-        clientArgs,
-        casesClient
-      )
+      addFile({ caseId, file, filename: 'foobar', mimeType: 'foo/bar' }, clientArgs, casesClient)
     ).rejects.toThrow('The mime type field value foo/bar is not allowed.');
   });
 
@@ -76,11 +61,7 @@ describe('addFile', () => {
     });
 
     await expect(
-      addFile(
-        { caseId, fileRequest: { file, filename: 'foobar', mimeType: 'text/plain' } },
-        clientArgs,
-        casesClient
-      )
+      addFile({ caseId, file, filename: 'foobar', mimeType: 'text/plain' }, clientArgs, casesClient)
     ).rejects.toThrow(
       `The case with id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
     );
@@ -101,7 +82,9 @@ describe('addFile', () => {
       addFile(
         {
           caseId,
-          fileRequest: { file, filename: 'foobar', mimeType: 'text/plain' },
+          file,
+          filename: 'foobar',
+          mimeType: 'text/plain',
         },
         clientArgs,
         casesClient
@@ -133,7 +116,9 @@ describe('addFile', () => {
       addFile(
         {
           caseId,
-          fileRequest: { file, filename: fileMetadata.name, mimeType: fileMetadata.mimeType },
+          file,
+          filename: fileMetadata.name,
+          mimeType: fileMetadata.mimeType,
         },
         clientArgs,
         casesClient

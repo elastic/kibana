@@ -52,11 +52,11 @@ export const BulkDeleteFileAttachmentsRequestRt = rt.strict({
 export const PostFileAttachmentRequestRt = rt.intersection([
   rt.strict({
     file: rt.unknown,
-    filename: limitedStringSchema({ fieldName: 'filename', min: 1, max: MAX_FILENAME_LENGTH }),
   }),
   rt.exact(
     rt.partial({
       mimeType: mimeTypeString,
+      filename: limitedStringSchema({ fieldName: 'filename', min: 1, max: MAX_FILENAME_LENGTH }),
     })
   ),
 ]);

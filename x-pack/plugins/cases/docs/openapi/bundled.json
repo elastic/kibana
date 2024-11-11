@@ -1893,10 +1893,9 @@
             "schema": {
               "title": "Add case file request properties",
               "required": [
-                "file",
-                "filename"
+                "file"
               ],
-              "description": "Defines the file that will be attached to the case.",
+              "description": "Defines the file that will be attached to the case. Optional parameters will be generated automatically from the file metadata if not defined.",
               "type": "object",
               "properties": {
                 "file": {

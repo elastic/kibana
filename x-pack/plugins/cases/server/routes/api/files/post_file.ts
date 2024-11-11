@@ -6,11 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
+import mime from 'mime-types';
+import { parse } from 'path';
+
 import { schema } from '@kbn/config-schema';
 import { ReplaySubject } from 'rxjs';
 
-import type { Readable } from 'stream';
 import { AbortedUploadError } from '@kbn/files-plugin/server/file/errors';
+import type { HapiReadableStream } from '../../../client/attachments/types';
 import type { attachmentApiV1 } from '../../../../common/types/api';
 
 import { CASE_FILES_URL, MAX_FILE_SIZE } from '../../../../common/constants';
@@ -52,13 +55,17 @@ export const postFileRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
 
       const fileRequest = request.body as attachmentApiV1.PostFileAttachmentRequest;
-      const caseId = request.params.case_id;
+      const file = fileRequest.file as HapiReadableStream;
+
+      const fileExtension = parse(file.hapi.filename).ext.toLowerCase();
+      const metadataMimeType = mime.lookup(fileExtension) || '';
+      const metadataFilename = parse(file.hapi.filename).name;
 
       const res: caseDomainV1.Case = await casesClient.attachments.addFile({
-        file: fileRequest.file as Readable,
-        filename: fileRequest.filename,
-        mimeType: fileRequest.mimeType,
-        caseId,
+        file,
+        filename: fileRequest.filename ?? metadataFilename,
+        mimeType: fileRequest.mimeType ?? metadataMimeType,
+        caseId: request.params.case_id,
         $abort,
       });
 

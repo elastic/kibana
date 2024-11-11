@@ -134,6 +134,13 @@ export interface UpdateArgs {
   updateRequest: AttachmentPatchRequest;
 }
 
+export interface HapiReadableStream extends Readable {
+  hapi: {
+    filename: string;
+    headers: Record<string, string>;
+  };
+}
+
 /**
  * The arguments needed for attaching a file to a case.
  */

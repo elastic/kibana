@@ -9,11 +9,10 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Readable } from 'stream';
 import type { Owner } from '../../../common/constants/types';
-import type { Case } from '../../../common/types/domain';
+import { FileAttachmentPayloadRt, type Case } from '../../../common/types/domain';
 import type { CasesClient, CasesClientArgs } from '..';
 import type { AddFileArgs } from './types';
 
-import { PostFileAttachmentRequestRt } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import { validateMaxUserActions } from '../../common/validators';
@@ -33,7 +32,7 @@ export const addFile = async (
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<Case> => {
-  const { caseId, file, filename, mimeType: mime, $abort } = addFileArgs;
+  const { caseId, file, filename, mimeType, $abort } = addFileArgs;
   const {
     logger,
     authorization,
@@ -46,10 +45,10 @@ export const addFile = async (
   let createdFile;
 
   try {
-    decodeWithExcessOrThrow(PostFileAttachmentRequestRt)({
+    decodeWithExcessOrThrow(FileAttachmentPayloadRt)({
       file,
       filename,
-      mimeType: mime,
+      mimeType,
     });
 
     // This will perform an authorization check to ensure the user has access to the parent case
@@ -71,7 +70,7 @@ export const addFile = async (
 
     createdFile = await fileService.create({
       name: filename,
-      mime,
+      mime: mimeType,
       fileKind: constructFileKindIdByOwner(owner as Owner),
       meta: { caseIds: [caseId], owner: [owner] },
     });
