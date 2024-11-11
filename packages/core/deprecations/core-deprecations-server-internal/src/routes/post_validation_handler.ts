@@ -38,7 +38,6 @@ export function createRouteDeprecationsHandler({
   return (req: CoreKibanaRequest, metadata: PostValidationMetadata) => {
     const hasRouteDeprecation = getIsRouteApiDeprecation(metadata);
     const hasAccessDeprecation = getIsAccessApiDeprecation(metadata);
-
     const isApiDeprecation = hasAccessDeprecation || hasRouteDeprecation;
     if (isApiDeprecation && req.route.routePath) {
       const counterName = buildApiDeprecationId({

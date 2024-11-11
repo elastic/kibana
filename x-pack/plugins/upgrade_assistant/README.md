@@ -284,21 +284,22 @@ yarn start --plugin-path=examples/routing_example --plugin-path=examples/develop
 The following comprehensive deprecated routes examples are registered inside the folder: `examples/routing_example/server/routes/deprecated_routes`
 
 Run them in the console to trigger the deprecation condition so they show up in the UA:
+We need to explicitly set the query param `elasticInternalOrigin` to `false` to track the request as non-internal origin.
 
 ```
 # Route deprecations for Versioned routes: Version 1 is deprecated
-GET kbn:/api/routing_example/d/versioned_route?apiVersion=2023-10-31
+GET kbn:/api/routing_example/d/versioned_route?apiVersion=2023-10-31&elasticInternalOrigin=false
 
-# Route deprecations for Non-versioned routes
-GET kbn:/api/routing_example/d/removed_route
-GET kbn:/api/routing_example/d/deprecated_route
-POST kbn:/api/routing_example/d/migrated_route
+# Route deprecations for Non-versioned routes?elasticInternalOrigin=false
+GET kbn:/api/routing_example/d/removed_route?elasticInternalOrigin=false
+GET kbn:/api/routing_example/d/deprecated_route?elasticInternalOrigin=false
+POST kbn:/api/routing_example/d/migrated_route?elasticInternalOrigin=false
 {}
 
 # Access deprecations
-GET kbn:/api/routing_example/d/internal_deprecated_route
-GET kbn:/internal/routing_example/d/internal_only_route
-GET kbn:/internal/routing_example/d/internal_versioned_route?apiVersion=1
+GET kbn:/api/routing_example/d/internal_deprecated_route?elasticInternalOrigin=false
+GET kbn:/internal/routing_example/d/internal_only_route?elasticInternalOrigin=false
+GET kbn:/internal/routing_example/d/internal_versioned_route?apiVersion=1&elasticInternalOrigin=false
 ```
 
 1. You can also mark as deprecated in the UA to remove the deprecation from the list.

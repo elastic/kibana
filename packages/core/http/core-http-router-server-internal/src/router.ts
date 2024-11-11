@@ -343,7 +343,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       emit?.onPostValidation(req, {
         deprecated: req.route.options.deprecated,
         isInternalApiRequest: req.isInternalApiRequest,
-        isPublicAccess: isPublicUnversionedRoute,
+        isPublicAccess: req.route.options.access === 'public',
       });
       return response;
     }
@@ -351,7 +351,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     emit?.onPostValidation(kibanaRequest, {
       deprecated: kibanaRequest.route.options.deprecated,
       isInternalApiRequest: kibanaRequest.isInternalApiRequest,
-      isPublicAccess: isPublicUnversionedRoute,
+      isPublicAccess: kibanaRequest.route.options.access === 'public',
     });
 
     try {
