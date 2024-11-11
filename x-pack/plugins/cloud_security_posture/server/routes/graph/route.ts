@@ -21,8 +21,10 @@ export const defineGraphRoute = (router: CspRouter) =>
       access: 'internal',
       enableQueryVersion: true,
       path: GRAPH_ROUTE_PATH,
-      options: {
-        tags: ['access:cloud-security-posture-read'],
+      security: {
+        authz: {
+          requiredPrivileges: ['cloud-security-posture-read'],
+        },
       },
     })
     .addVersion(

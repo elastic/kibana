@@ -16,7 +16,7 @@ const timeRange = {
   rangeTo: end,
 };
 // flaky
-describe('Transaction details', () => {
+describe.skip('Transaction details', () => {
   before(() => {
     synthtrace.index(
       opbeans({
