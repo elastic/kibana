@@ -54,18 +54,18 @@ export default ({ getService }: FtrProviderContext) => {
           eventTypes: [TELEMETRY_DATA_STREAM_EVENT.eventType],
           withTimeoutMs: 1000,
           fromTimestamp: new Date().toISOString(),
-          filters: {
-            'properties.datastream_name': {
-              eq: dsName,
-            },
-          },
         };
 
         await waitFor(
           async () => {
-            const eventCount = await ebtServer.getEventCount(opts);
+            const events = await ebtServer
+              .getEvents(Number.MAX_SAFE_INTEGER, opts)
+              .then((result) => result.map((ev) => ev.properties.items))
+              .then((result) => result.flat())
+              .then((result) => result.filter((ev) => (ev as any).datastream_name === dsName));
 
             const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
+            const eventCount = events.length;
 
             return hasRun && eventCount === 1;
           },
@@ -87,11 +87,17 @@ export default ({ getService }: FtrProviderContext) => {
         const regex = new RegExp(`^\.ds-${dsName}-\\d{4}.\\d{2}.\\d{2}-\\d{6}$`);
         await waitFor(
           async () => {
-            const events = await ebtServer.getEvents(Number.MAX_SAFE_INTEGER, opts);
-            const filtered = events.filter((ev) => regex.test(ev.properties.index_name as string));
+            const events = await ebtServer
+              .getEvents(Number.MAX_SAFE_INTEGER, opts)
+              .then((result) => result.map((ev) => ev.properties.items))
+              .then((result) => result.flat())
+              .then((result) =>
+                result.filter((ev) => regex.test((ev as any).index_name as string))
+              );
+
             const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
 
-            return hasRun && filtered.length === NUM_INDICES;
+            return hasRun && events.length === NUM_INDICES;
           },
           'waitForTaskToRun',
           logger
@@ -120,19 +126,19 @@ export default ({ getService }: FtrProviderContext) => {
           eventTypes: [TELEMETRY_ILM_POLICY_EVENT.eventType],
           withTimeoutMs: 1000,
           fromTimestamp: new Date().toISOString(),
-          filters: {
-            'properties.policy_name': {
-              eq: policyName,
-            },
-          },
         };
 
         await waitFor(
           async () => {
-            const events = await ebtServer.getEventCount(opts);
+            const events = await ebtServer
+              .getEvents(Number.MAX_SAFE_INTEGER, opts)
+              .then((result) => result.map((ev) => ev.properties.items))
+              .then((result) => result.flat())
+              .then((result) => result.filter((ev) => (ev as any).policy_name === policyName));
+
             const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
 
-            return hasRun && events === 1;
+            return hasRun && events.length === 1;
           },
           'waitForTaskToRun',
           logger
@@ -146,19 +152,19 @@ export default ({ getService }: FtrProviderContext) => {
           eventTypes: [TELEMETRY_ILM_STATS_EVENT.eventType],
           withTimeoutMs: 1000,
           fromTimestamp: new Date().toISOString(),
-          filters: {
-            'properties.policy_name': {
-              eq: policyName,
-            },
-          },
         };
 
         await waitFor(
           async () => {
-            const events = await ebtServer.getEventCount(opts);
+            const events = await ebtServer
+              .getEvents(Number.MAX_SAFE_INTEGER, opts)
+              .then((result) => result.map((ev) => ev.properties.items))
+              .then((result) => result.flat())
+              .then((result) => result.filter((ev) => (ev as any).policy_name === policyName));
+
             const hasRun = await taskHasRun(TASK_ID, kibanaServer, runAt);
 
-            return hasRun && events === NUM_INDICES;
+            return hasRun && events.length === NUM_INDICES;
           },
           'waitForTaskToRun',
           logger

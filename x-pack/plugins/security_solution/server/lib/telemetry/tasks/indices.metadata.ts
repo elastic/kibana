@@ -23,7 +23,13 @@ import {
 } from '../event_based/events';
 import type { CommonPrefixesConfig } from '../collections_helpers';
 import { telemetryConfiguration } from '../configuration';
-import type { DataStream } from '../indices.metadata.types';
+import type {
+  DataStream,
+  DataStreams,
+  IlmPolicies,
+  IlmsStats,
+  IndicesStats,
+} from '../indices.metadata.types';
 import { TelemetryCounter } from '../types';
 
 const COUNTER_LABELS = ['security_solution', 'indices-metadata'];
@@ -58,52 +64,63 @@ export function createTelemetryIndicesMetadataTaskConfig() {
       };
 
       const publishDatastreamsStats = (stats: DataStream[]): number => {
-        let counter = 0;
-        for (const ds of stats) {
-          sender.reportEBT(TELEMETRY_DATA_STREAM_EVENT.eventType, ds);
-          counter++;
-        }
-        log.info(`Sent data streams`, { count: counter } as LogMeta);
-        return counter;
+        const events: DataStreams = {
+          items: stats,
+        };
+        sender.reportEBT(TELEMETRY_DATA_STREAM_EVENT, events);
+        log.info(`Sent data streams`, { count: events.items.length } as LogMeta);
+        return events.items.length;
       };
 
       const publishIndicesStats = async (indices: string[]): Promise<number> => {
-        let counter = 0;
+        const indicesStats: IndicesStats = {
+          items: [],
+        };
+
         for await (const stat of receiver.getIndicesStats(
           indices.slice(0, taskConfig.indices_threshold),
           queryConfig
         )) {
-          sender.reportEBT(TELEMETRY_INDEX_STATS_EVENT.eventType, stat);
-          counter++;
+          indicesStats.items.push(stat);
         }
-        log.info(`Sent indices stats`, { count: counter } as LogMeta);
-        return counter;
+        sender.reportEBT(TELEMETRY_INDEX_STATS_EVENT, indicesStats);
+        log.info(`Sent indices stats`, { count: indicesStats.items.length } as LogMeta);
+        return indicesStats.items.length;
       };
 
       const publishIlmStats = async (indices: string[]): Promise<Set<string>> => {
         const ilmNames = new Set<string>();
+        const ilmsStats: IlmsStats = {
+          items: [],
+        };
+
         for await (const stat of receiver.getIlmsStats(indices, queryConfig)) {
           if (stat.policy_name !== undefined) {
             ilmNames.add(stat.policy_name);
-            sender.reportEBT(TELEMETRY_ILM_STATS_EVENT.eventType, stat);
+            ilmsStats.items.push(stat);
           }
         }
+
+        sender.reportEBT(TELEMETRY_ILM_STATS_EVENT, ilmsStats);
         log.info(`Sent ILM stats`, { count: ilmNames.size } as LogMeta);
 
         return ilmNames;
       };
 
       const publishIlmPolicies = async (ilmNames: Set<string>): Promise<number> => {
-        let counter = 0;
+        const ilmPolicies: IlmPolicies = {
+          items: [],
+        };
+
         for await (const policy of receiver.getIlmsPolicies(
           Array.from(ilmNames.values()),
           queryConfig
         )) {
-          sender.reportEBT(TELEMETRY_ILM_POLICY_EVENT.eventType, policy);
-          counter++;
+          ilmPolicies.items.push(policy);
         }
-        log.info(`Sent ILM policies`, { count: counter } as LogMeta);
-        return counter;
+        sender.reportEBT(TELEMETRY_ILM_POLICY_EVENT, ilmPolicies);
+        log.info(`Sent ILM policies`, { count: ilmPolicies.items.length } as LogMeta);
+        return ilmPolicies.items.length;
       };
 
       const incrementCounter = (type: TelemetryCounter, name: string, value: number) => {

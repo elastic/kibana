@@ -7,7 +7,7 @@
 
 import type { AxiosInstance, AxiosResponse } from 'axios';
 import axios, { AxiosHeaders } from 'axios';
-import type { EventType, Logger } from '@kbn/core/server';
+import type { EventTypeOpts, Logger } from '@kbn/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
@@ -182,11 +182,11 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
     this.composite.updateDefaultQueueConfig(config);
   }
 
-  public reportEBT(eventType: EventType, eventData: object): void {
+  public reportEBT<T>(eventTypeOpts: EventTypeOpts<T>, eventData: T): void {
     this.ebtEventsSent.push({
-      eventType,
-      eventData,
+      eventType: eventTypeOpts.eventType,
+      eventData: eventData as object,
     });
-    this.composite.reportEBT(eventType, eventData);
+    this.composite.reportEBT(eventTypeOpts, eventData);
   }
 }

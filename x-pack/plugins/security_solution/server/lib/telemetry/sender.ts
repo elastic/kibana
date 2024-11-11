@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import { URL } from 'url';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import type { EventType, Logger, LogMeta } from '@kbn/core/server';
+import type { EventTypeOpts, Logger, LogMeta } from '@kbn/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { AxiosInstance } from 'axios';
@@ -92,7 +92,7 @@ export interface ITelemetryEventsSender {
   /**
    * Reports EBT events
    */
-  reportEBT: (eventType: EventType, eventData: object) => void;
+  reportEBT: <T>(eventTypeOpts: EventTypeOpts<T>, eventData: T) => void;
 }
 
 export class TelemetryEventsSender implements ITelemetryEventsSender {
@@ -435,8 +435,8 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     this.getAsyncTelemetrySender().updateDefaultQueueConfig(config);
   }
 
-  public reportEBT(eventType: EventType, eventData: object): void {
-    this.getAsyncTelemetrySender().reportEBT(eventType, eventData);
+  public reportEBT<T>(eventTypeOpts: EventTypeOpts<T>, eventData: T): void {
+    this.getAsyncTelemetrySender().reportEBT(eventTypeOpts, eventData);
   }
 
   private getAsyncTelemetrySender(): IAsyncTelemetryEventsSender {

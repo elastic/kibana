@@ -8,6 +8,10 @@
 import type { DateTime } from '@elastic/elasticsearch/lib/api/types';
 import type { Nullable } from './types';
 
+export interface IlmPolicies {
+  items: IlmPolicy[];
+}
+
 export interface IlmPolicy {
   policy_name: string;
   modified_date: DateTime;
@@ -26,11 +30,19 @@ export interface IlmPhase {
   min_age: string;
 }
 
+export interface IlmsStats {
+  items: IlmStats[];
+}
+
 export interface IlmStats {
   index_name: string;
   phase?: string;
   age?: string;
   policy_name?: string;
+}
+
+export interface IndicesStats {
+  items: IndexStats[];
 }
 
 export interface IndexStats {
@@ -47,6 +59,9 @@ export interface Index {
   ilm_policy?: string;
 }
 
+export interface DataStreams {
+  items: DataStream[];
+}
 export interface DataStream {
   datastream_name: string;
   indices?: Index[];

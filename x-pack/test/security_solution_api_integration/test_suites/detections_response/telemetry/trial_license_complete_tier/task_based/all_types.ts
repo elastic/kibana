@@ -86,14 +86,18 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(stats.indices_metadata).to.be.an('array');
         const events = stats.indices_metadata as any[];
+
         expect(events).to.not.be.empty();
 
         const eventTypes = events.map((e) => e.eventType);
         expect(eventTypes).to.contain('telemetry_index_stats_event');
         expect(eventTypes).to.contain('telemetry_data_stream_event');
 
-        const indexStats = events.find((e) => e.eventType === 'telemetry_index_stats_event');
-        expect(indexStats.eventData).to.have.keys(
+        const indicesStats = events.find((e) => e.eventType === 'telemetry_index_stats_event');
+        expect(indicesStats).to.be.ok();
+        expect(indicesStats.eventData).to.be.ok();
+        expect(indicesStats.eventData.items).to.not.be.empty();
+        expect(indicesStats.eventData.items[0]).to.have.keys(
           'index_name',
           'query_total',
           'query_time_in_millis',
@@ -103,7 +107,10 @@ export default ({ getService }: FtrProviderContext) => {
         );
 
         const dataStreamStats = events.find((e) => e.eventType === 'telemetry_data_stream_event');
-        expect(dataStreamStats.eventData).to.have.keys('datastream_name', 'indices');
+        expect(dataStreamStats).to.be.ok();
+        expect(dataStreamStats.eventData).to.be.ok();
+        expect(dataStreamStats.eventData.items).to.not.be.empty();
+        expect(dataStreamStats.eventData.items[0]).to.have.keys('datastream_name', 'indices');
       });
     });
   });

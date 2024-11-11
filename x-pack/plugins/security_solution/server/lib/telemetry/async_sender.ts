@@ -8,7 +8,7 @@ import axios from 'axios';
 import * as rx from 'rxjs';
 import _, { cloneDeep } from 'lodash';
 
-import type { AnalyticsServiceSetup, EventType, Logger, LogMeta } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, EventTypeOpts, Logger, LogMeta } from '@kbn/core/server';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type { ITelemetryReceiver } from './receiver';
@@ -205,11 +205,11 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
     }
   }
 
-  public reportEBT(eventType: EventType, eventData: object) {
+  public reportEBT<T>(eventTypeOpts: EventTypeOpts<T>, eventData: T): void {
     if (!this.analytics) {
       throw Error('analytics is unavailable');
     }
-    this.analytics.reportEvent(eventType, eventData);
+    this.analytics.reportEvent(eventTypeOpts.eventType, eventData as object);
   }
 
   // internal methods
