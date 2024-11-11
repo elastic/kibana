@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { schema } from '@kbn/config-schema';
+import { ApiMessageCode } from '../../types/graph/v1';
 
 export const graphRequestSchema = schema.object({
   nodesLimit: schema.maybe(schema.number()),
