@@ -9,7 +9,7 @@ export KIBANA_DIR
 export XPACK_DIR="$KIBANA_DIR/x-pack"
 
 export CACHE_DIR="$HOME/.kibana"
-export ES_CACHE_DIR="$HOME/.es-snapshot-cache"
+export ES_SNAPSHOT_MANIFEST="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/9.0.0/archives/20241111-031745_fae80f85/manifest.json"
 PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR
 export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
