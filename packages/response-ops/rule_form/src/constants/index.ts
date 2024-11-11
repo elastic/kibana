@@ -17,8 +17,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { RuleFormData } from '../types';
 
-export * from './alerts';
-export * from './i18n_weekdays';
 export * from './routes';
 export * from './rule_flapping';
 

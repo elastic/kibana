@@ -106,27 +106,22 @@ import type { RulesListProps } from './application/sections/rules_list/component
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 
 export type {
-  ActionConnector,
   ActionConnectorFieldsProps,
   ActionConnectorProps,
   ActionParamsProps,
   ActionReadOnlyElementProps,
   ActionTypeModel,
-  ActionTypeRegistryContract,
   ConnectorValidationError,
   ConnectorValidationFunc,
   CustomConnectorSelectionItem,
   GenericValidationResult,
   PreConfiguredActionConnector,
   SystemAction,
-  UserConfiguredActionConnector,
 } from '@kbn/alerts-ui-shared/src/common/types';
-
-export type { ValidationResult } from '@kbn/response-ops-rule-form';
 
 export { ActionConnectorMode } from '@kbn/alerts-ui-shared/src/common/types';
 
-export type { ActionVariables, RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
+export type { ActionVariables } from '@kbn/triggers-actions-ui-types';
 
 export {
   CONTEXT_ACTION_VARIABLES,
@@ -161,6 +156,12 @@ export {
   AlertHistoryEsIndexConnectorId,
 };
 export type {
+  ActionConnector,
+  ActionTypeRegistryContract,
+  UserConfiguredActionConnector,
+  ValidationResult,
+  RuleType,
+  RuleTypeIndex,
   ActionType,
   AlertStatus,
   AlertSummaryTimeRange,
