@@ -13,7 +13,7 @@ import type {
   DiffableRule,
   RuleNameOverrideObject,
 } from '../../../../../../../../common/api/detection_engine';
-import { AutocompleteField } from '../../../../../../rule_creation_ui/components/autocomplete_field';
+import { EsFieldSelectorField } from '../../../../../../rule_creation_ui/components/es_field_selector_field';
 import { useRuleIndexPattern } from '../../../../../../rule_creation_ui/pages/form';
 import { getUseRuleIndexPatternParameters } from '../utils';
 import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
@@ -48,7 +48,7 @@ export function RuleNameOverrideEdit({
   return (
     <UseField
       path="ruleNameOverride"
-      component={AutocompleteField}
+      component={EsFieldSelectorField}
       componentProps={componentProps}
     />
   );

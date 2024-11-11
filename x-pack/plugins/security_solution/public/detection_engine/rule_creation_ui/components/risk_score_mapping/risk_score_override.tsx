@@ -19,7 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import { FieldComponent } from '@kbn/securitysolution-autocomplete';
+import { EsFieldSelector } from '@kbn/securitysolution-autocomplete';
 import * as i18n from './translations';
 import type { RiskScoreMapping } from '../../../../../common/api/detection_engine';
 
@@ -119,7 +119,7 @@ export function RiskScoreOverride({
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItemComboBoxColumn>
-                  <FieldComponent
+                  <EsFieldSelector
                     placeholder=""
                     indexPattern={indices}
                     selectedField={selectedField}

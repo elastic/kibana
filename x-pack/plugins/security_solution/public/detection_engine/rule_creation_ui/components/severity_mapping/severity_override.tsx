@@ -18,7 +18,7 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import {
-  FieldComponent,
+  EsFieldSelector,
   AutocompleteFieldMatchComponent,
 } from '@kbn/securitysolution-autocomplete';
 import type { Severity, SeverityMappingItem } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -162,7 +162,7 @@ function SeverityMappingRow({
     <EuiFlexItem key={`${severityMappingItem.severity}-${index}`}>
       <EuiFlexGroup data-test-subj="severityOverrideRow" alignItems="center" gutterSize="s">
         <EuiFlexItemComboBoxColumn>
-          <FieldComponent
+          <EsFieldSelector
             placeholder=""
             selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
             isDisabled={isDisabled}

@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import { Field, UseField, useFormData } from '../../../../../../../shared_imports';
 import { schema } from '../../../../../../rule_creation_ui/components/step_about_rule/schema';
-import { AutocompleteField } from '../../../../../../rule_creation_ui/components/autocomplete_field';
+import { EsFieldSelectorField } from '../../../../../../rule_creation_ui/components/es_field_selector_field';
 import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
 import { getUseRuleIndexPatternParameters } from '../utils';
 import { useRuleIndexPattern } from '../../../../../../rule_creation_ui/pages/form';
@@ -53,7 +53,7 @@ export function TimestampOverrideEdit({
     <>
       <UseField
         path="timestampOverride"
-        component={AutocompleteField}
+        component={EsFieldSelectorField}
         componentProps={componentProps}
       />
       <TimestampFallbackDisabled />
