@@ -61,9 +61,9 @@ steps:
             - exit_status: '1'
               limit: 2
 
-       - label: Running exception_lists:common:lists:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:common:lists:qa:serverless:release
-        key: exception_lists:common:lists:qa:serverless:release
+      - label: Running exception_lists:auth:common:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:auth:common:qa:serverless:release
+        key: exception_lists:auth:common:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -75,9 +75,9 @@ steps:
             - exit_status: '1'
               limit: 2
 
-       - label: Running exception_lists:items:lists:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:items:lists:qa:serverless:release
-        key: exception_lists:items:lists:qa:serverless:release
+      - label: Running exception_lists:auth:items:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:auth:items:qa:serverless
+        key: exception_lists:auth:items:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
