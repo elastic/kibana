@@ -116,7 +116,7 @@
     "@elastic/datemath": "5.0.3",
     "@elastic/ebt": "^1.1.1",
     "@elastic/ecs": "^8.11.1",
-    "@elastic/elasticsearch": "^8.15.0",
+    "@elastic/elasticsearch": "^8.15.1",
     "@elastic/ems-client": "8.5.3",
     "@elastic/eui": "97.3.0",
     "@elastic/filesaver": "1.1.2",
