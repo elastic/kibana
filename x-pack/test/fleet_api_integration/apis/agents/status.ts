@@ -217,7 +217,6 @@ export default function ({ getService }: FtrProviderContext) {
         results: {
           events: 0,
           other: 0,
-          total: 8,
           online: 2,
           active: 8,
           all: 11,
@@ -228,10 +227,6 @@ export default function ({ getService }: FtrProviderContext) {
           unenrolled: 1,
         },
       });
-    });
-
-    it('should work with deprecated api', async () => {
-      await supertest.get(`/api/fleet/agent-status`).set('kbn-xsrf', 'xxxx').expect(200);
     });
 
     it('should work with adequate package privileges', async () => {
@@ -296,7 +291,6 @@ export default function ({ getService }: FtrProviderContext) {
         results: {
           events: 0,
           other: 0,
-          total: 10,
           online: 3,
           active: 10,
           all: 11,

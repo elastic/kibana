@@ -7,15 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
+import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import { getMonitorsByLocation } from './get_location_monitors';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import {
-  privateLocationsSavedObjectId,
-  privateLocationsSavedObjectName,
-} from '../../../../common/saved_objects/private_locations';
-import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
+import { privateLocationSavedObjectName } from '../../../../common/saved_objects/private_locations';
 
 export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined> = () => ({
   method: 'DELETE',
@@ -28,12 +25,16 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
       }),
     },
   },
-  handler: async ({ response, savedObjectsClient, syntheticsMonitorClient, request, server }) => {
+  handler: async (routeContext) => {
+    await migrateLegacyPrivateLocations(routeContext);
+
+    const { savedObjectsClient, syntheticsMonitorClient, request, response, server } = routeContext;
     const { locationId } = request.params as { locationId: string };
 
     const { locations } = await getPrivateLocationsAndAgentPolicies(
       savedObjectsClient,
-      syntheticsMonitorClient
+      syntheticsMonitorClient,
+      true
     );
 
     if (!locations.find((loc) => loc.id === locationId)) {
@@ -55,17 +56,8 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
       });
     }
 
-    const remainingLocations = locations.filter((loc) => loc.id !== locationId);
-
-    await savedObjectsClient.create<SyntheticsPrivateLocationsAttributes>(
-      privateLocationsSavedObjectName,
-      { locations: remainingLocations },
-      {
-        id: privateLocationsSavedObjectId,
-        overwrite: true,
-      }
-    );
-
-    return;
+    await savedObjectsClient.delete(privateLocationSavedObjectName, locationId, {
+      force: true,
+    });
   },
 });
