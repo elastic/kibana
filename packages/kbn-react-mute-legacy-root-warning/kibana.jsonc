@@ -1,5 +1,5 @@
 {
-  "type": "shared-browser",
+  "type": "shared-common",
   "id": "@kbn/react-mute-legacy-root-warning",
   "owner": "@elastic/appex-sharedux"
 }

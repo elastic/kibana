@@ -16,6 +16,8 @@ import '@testing-library/jest-dom';
  * But since newer versions it has stabilised itself
  */
 import { configure } from '@testing-library/react';
+import { version as REACT_VERSION } from 'react';
+import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
 
 // instead of default 'data-testid', use kibana's 'data-test-subj'
 configure({ testIdAttribute: 'data-test-subj', asyncUtilTimeout: 4500 });
@@ -50,3 +52,14 @@ console.error = (...args) => {
 
   originalConsoleError(...args);
 };
+
+/**
+ * After we upgrade to React 18, we will see a warning in the console that we are using the legacy ReactDOM.render API.
+ * This warning is expected as we are in the process of migrating to the new createRoot API.
+ * However, it is very noisy and we want to mute it for now.
+ * Tracking issue to clean this up https://github.com/elastic/kibana/issues/199100
+ */
+if (REACT_VERSION.startsWith('18.')) {
+  console.warn('Running with React@18 and muting the legacy ReactDOM.render warning');
+  muteLegacyRootWarning();
+}
