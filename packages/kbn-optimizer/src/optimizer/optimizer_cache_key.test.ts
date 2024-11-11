@@ -88,6 +88,7 @@ describe('getOptimizerCacheKey()', () => {
           "browserslistEnv": "dev",
           "dist": false,
           "optimizerCacheKey": "♻",
+          "reactVersion": "17",
           "repoRoot": <absolute path>,
           "themeTags": Array [
             "v8dark",
