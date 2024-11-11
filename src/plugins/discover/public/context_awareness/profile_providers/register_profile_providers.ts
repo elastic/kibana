@@ -123,7 +123,6 @@ const createRootProfileProviders = async (providerServices: ProfileProviderServi
   createExampleSolutionViewRootProfileProvider(),
   createSecurityRootProfileProvider(providerServices),
   await createSecurityRootProfileProvider(providerServices),
-  createExampleFallbackRootProfileProvider(),
 ];
 
 /**

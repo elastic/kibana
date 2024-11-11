@@ -62,8 +62,6 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
-import { getCellRendererForGivenRecord } from './one_discover/cell_renderers';
-import { createSecuritySolutionDiscoverAppWrapperGetter } from './one_discover/app_wrapper';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -227,7 +225,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.stop();
   }
 
-  public registerDiscoverSharedFeatures(
+  public async registerDiscoverSharedFeatures(
     core: CoreSetup<StartPluginsDependencies, PluginStart>,
     plugins: SetupPlugins
   ) {
@@ -235,7 +233,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const discoverFeatureRegistry = discoverShared.features.registry;
     const cellRendererFeature: SecuritySolutionCellRenderFeature = {
       id: 'security-solution-cell-render',
-      getRender: getCellRendererForGivenRecord,
+      getRender: await this.getLazyDiscoverSharedDeps().then(
+        (m) => m.getCellRendererForGivenRecord
+      ),
     };
 
     const appWrapperFeature: SecuritySolutionAppWrapperFeature = {
@@ -244,6 +244,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const [coreStart, startPlugins] = await core.getStartServices();
 
         const services = await this.services.generateServices(coreStart, startPlugins);
+
+        const { createSecuritySolutionDiscoverAppWrapperGetter } =
+          await this.getLazyDiscoverSharedDeps();
 
         return createSecuritySolutionDiscoverAppWrapperGetter({
           core: coreStart,
@@ -268,6 +271,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     discoverFeatureRegistry.register(cellRendererFeature);
     discoverFeatureRegistry.register(appWrapperFeature);
     discoverFeatureRegistry.register(securityReduxStoreInitFeature);
+  }
+
+  public async getLazyDiscoverSharedDeps() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "one_discover_shared_deps" */
+      './one_discover'
+    );
   }
 
   /**
