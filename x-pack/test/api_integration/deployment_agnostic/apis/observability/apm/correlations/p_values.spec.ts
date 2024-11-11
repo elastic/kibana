@@ -6,11 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { ARCHIVER_ROUTES } from '../constants/archiver';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiClient = getService('apmApiClient');
-  const registry = getService('registry');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const esArchiver = getService('esArchiver');
 
   const endpoint = 'POST /internal/apm/correlations/p_values/transactions';
 
@@ -41,22 +42,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   });
 
-  registry.when('p values without data', { config: 'trial', archives: [] }, () => {
-    it('handles the empty state', async () => {
-      const response = await apmApiClient.readUser({
-        endpoint,
-        ...getOptions(),
+  describe('p values', () => {
+    describe('without data', () => {
+      it('handles the empty state', async () => {
+        const response = await apmApiClient.readUser({
+          endpoint,
+          ...getOptions(),
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body?.failedTransactionsCorrelations.length).to.be(0);
+      });
+    });
+
+    describe('with data and default args', () => {
+      before(async () => {
+        await esArchiver.load(ARCHIVER_ROUTES['8.0.0']);
+      });
+      after(async () => {
+        await esArchiver.unload(ARCHIVER_ROUTES['8.0.0']);
       });
 
-      expect(response.status).to.be(200);
-      expect(response.body?.failedTransactionsCorrelations.length).to.be(0);
-    });
-  });
-
-  registry.when(
-    'p values with data and default args',
-    { config: 'trial', archives: ['8.0.0'] },
-    () => {
       it('returns p values', async () => {
         const response = await apmApiClient.readUser({
           endpoint,
@@ -66,6 +72,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.eql(200);
         expect(response.body?.failedTransactionsCorrelations.length).to.be(15);
       });
-    }
-  );
+    });
+  });
 }
