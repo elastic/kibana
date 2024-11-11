@@ -42,6 +42,20 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
       await testSubjects.existOrFail('indexNameField');
       await testSubjects.setValue('indexNameField', value);
     },
+    async expectCloseCreateIndexButtonExists() {
+      await testSubjects.existOrFail('closeCreateIndex');
+    },
+    async clickCloseCreateIndexButton() {
+      await testSubjects.existOrFail('closeCreateIndex');
+      await testSubjects.click('closeCreateIndex');
+    },
+    async expectSkipButtonExists() {
+      await testSubjects.existOrFail('createIndexSkipBtn');
+    },
+    async clickSkipButton() {
+      await testSubjects.existOrFail('createIndexSkipBtn');
+      await testSubjects.click('createIndexSkipBtn');
+    },
     async expectCreateIndexButtonToExist() {
       await testSubjects.existOrFail('createIndexBtn');
     },

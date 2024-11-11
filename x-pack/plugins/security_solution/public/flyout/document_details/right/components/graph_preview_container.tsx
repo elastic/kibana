@@ -33,7 +33,6 @@ export const GraphPreviewContainer: React.FC = () => {
   const { isLoading, isError, data } = useFetchGraphData({
     req: {
       query: {
-        actorIds: [],
         eventIds,
         start: moment(timestamp).subtract(30, 'minutes').toISOString(),
         end: moment(timestamp).add(30, 'minutes').toISOString(),
