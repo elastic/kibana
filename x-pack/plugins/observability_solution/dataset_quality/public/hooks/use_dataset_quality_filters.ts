@@ -49,7 +49,7 @@ export const useDatasetQualityFilters = () => {
       datasets.reduce(
         (acc: Filters, dataset) => ({
           namespaces: [...new Set([...acc.namespaces, dataset.namespace])],
-          qualities: [...new Set([...acc.qualities, dataset.degradedDocs.quality])],
+          qualities: [...new Set([...acc.qualities, dataset.quality])],
           filteredIntegrations: [
             ...new Set([...acc.filteredIntegrations, dataset.integration?.name ?? 'none']),
           ],

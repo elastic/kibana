@@ -10,6 +10,7 @@ import type {
   GraphRequest,
   GraphResponse,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
+import { useMemo } from 'react';
 import { EVENT_GRAPH_VISUALIZATION_API } from '../../../../../common/constants';
 import { useHttp } from '../../../../common/lib/kibana';
 
@@ -82,7 +83,10 @@ export const useFetchGraphData = ({
   const queryClient = useQueryClient();
   const { esQuery, eventIds, start, end } = req.query;
   const http = useHttp();
-  const QUERY_KEY = ['useFetchGraphData', eventIds, start, end, esQuery];
+  const QUERY_KEY = useMemo(
+    () => ['useFetchGraphData', eventIds, start, end, esQuery],
+    [end, esQuery, eventIds, start]
+  );
 
   const { isLoading, isError, data, isFetching } = useQuery<GraphResponse>(
     QUERY_KEY,

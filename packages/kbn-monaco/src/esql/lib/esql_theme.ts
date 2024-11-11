@@ -74,7 +74,6 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'asc',
         'desc',
         'nulls_order',
-        'match',
       ],
       euiThemeVars.euiColorAccentText,
       true // isBold

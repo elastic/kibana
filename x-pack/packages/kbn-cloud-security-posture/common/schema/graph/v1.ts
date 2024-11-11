@@ -6,8 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ApiMessageCode } from '../../types/graph/v1';
 
 export const graphRequestSchema = schema.object({
+  nodesLimit: schema.maybe(schema.number()),
+  showUnknownTarget: schema.maybe(schema.boolean()),
   query: schema.object({
     eventIds: schema.arrayOf(schema.string()),
     // TODO: use zod for range validation instead of config schema
@@ -32,6 +35,9 @@ export const graphResponseSchema = () =>
       schema.oneOf([entityNodeDataSchema, groupNodeDataSchema, labelNodeDataSchema])
     ),
     edges: schema.arrayOf(edgeDataSchema),
+    messages: schema.maybe(
+      schema.arrayOf(schema.oneOf([schema.literal(ApiMessageCode.ReachedNodesLimit)]))
+    ),
   });
 
 export const colorSchema = schema.oneOf([
