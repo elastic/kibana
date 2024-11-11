@@ -318,6 +318,31 @@ function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
 }
 const NO_MESSAGE: ESQLMessage[] = [];
 
+function validateIfHasUnsupportedCommandPrior(
+  astFunction: ESQLFunction,
+  parentAst: ESQLCommand[],
+  currentCommandIndex: number,
+  unsupportedCommands: string[]
+) {
+  const unsupportedCommandsPrior = parentAst.filter(
+    (cmd, idx) => idx <= currentCommandIndex && unsupportedCommands.includes(cmd.name)
+  );
+
+  if (unsupportedCommandsPrior.length > 0) {
+    return [
+      getMessageFromId({
+        messageId: 'fnUnsupportedAfterCommand',
+        values: {
+          function: astFunction.name.toUpperCase(),
+          command: unsupportedCommandsPrior[0].name.toUpperCase(),
+        },
+        locations: astFunction.location,
+      }),
+    ];
+  }
+  return NO_MESSAGE;
+}
+
 function validateMatchFunction({
   astFunction,
   parentCommand,
@@ -338,21 +363,9 @@ function validateMatchFunction({
   currentCommandIndex?: number;
 }): ESQLMessage[] {
   if (astFunction.name === 'match') {
-    const hasLimitClausePrior =
-      parentAst.filter((cmd, idx) => idx <= currentCommandIndex && cmd.name === 'limit').length > 0;
-
-    if (hasLimitClausePrior) {
-      return [
-        getMessageFromId({
-          messageId: 'fnUnsupportedAfterCommand',
-          values: {
-            function: astFunction.name.toUpperCase(),
-            command: 'LIMIT',
-          },
-          locations: astFunction.location,
-        }),
-      ];
-    }
+    return validateIfHasUnsupportedCommandPrior(astFunction, parentAst, currentCommandIndex, [
+      'limit',
+    ]);
   }
   return NO_MESSAGE;
 }
@@ -375,41 +388,28 @@ function validateQSTRFunction({
   parentAst?: ESQLCommand[];
   currentCommandIndex?: number;
 }): ESQLMessage[] {
-  const messages: ESQLMessage[] = [];
   if (astFunction.name === 'qstr') {
-    const notSupported = parentAst.find(
-      (cmd, idx) =>
-        idx <= currentCommandIndex &&
-        [
-          'show',
-          'row',
-          'dissect',
-          'enrich',
-          'eval',
-          'grok',
-          'keep',
-          'mv_expand',
-          'rename',
-          'stats',
-          'limit',
-        ].includes(cmd.name)
-    );
-
-    if (notSupported) {
-      return [
-        getMessageFromId({
-          messageId: 'fnUnsupportedAfterCommand',
-          values: {
-            function: astFunction.name.toUpperCase(),
-            command: notSupported.name.toUpperCase(),
-          },
-          locations: astFunction.location,
-        }),
-      ];
-    }
+    return validateIfHasUnsupportedCommandPrior(astFunction, parentAst, currentCommandIndex, [
+      'show',
+      'row',
+      'dissect',
+      'enrich',
+      'eval',
+      'grok',
+      'keep',
+      'mv_expand',
+      'rename',
+      'stats',
+      'limit',
+    ]);
   }
   return NO_MESSAGE;
 }
+
+const textSearchFunctionsValidators = {
+  match: validateMatchFunction,
+  qstr: validateQSTRFunction,
+};
 
 function validateFunction({
   astFunction,
@@ -439,16 +439,18 @@ function validateFunction({
 
   const isFnSupported = isSupportedFunction(astFunction.name, parentCommand, parentOption);
 
-  messages.push(
-    ...validateMatchFunction({
-      astFunction,
-      parentCommand,
-      parentOption,
-      references,
-      parentAst,
-      currentCommandIndex,
-    })
-  );
+  if (textSearchFunctionsValidators[astFunction.name]) {
+    messages.push(
+      ...textSearchFunctionsValidators[astFunction.name]({
+        astFunction,
+        parentCommand,
+        parentOption,
+        references,
+        parentAst,
+        currentCommandIndex,
+      })
+    );
+  }
 
   if (!isFnSupported.supported) {
     if (isFnSupported.reason === 'unknownFunction') {
