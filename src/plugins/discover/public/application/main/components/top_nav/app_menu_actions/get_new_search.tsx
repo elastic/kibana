@@ -15,6 +15,10 @@ export const getNewSearchAppMenuItem = ({
 }: {
   onNewSearch: () => void;
 }): AppMenuActionPrimary => {
+  let isModifierKeyPressed = false;
+  document.addEventListener('mousedown', (event: MouseEvent) => {
+    isModifierKeyPressed = event.metaKey || event.ctrlKey;
+  });
   return {
     id: AppMenuActionId.new,
     type: AppMenuActionType.primary,
@@ -28,7 +32,13 @@ export const getNewSearchAppMenuItem = ({
       iconType: 'plus',
       testId: 'discoverNewButton',
       onClick: () => {
-        onNewSearch();
+        const newDiscoverUrl = `${window.location.origin}/app/discover`;
+        if (isModifierKeyPressed) {
+          window.open(newDiscoverUrl, '_blank');
+        } else {
+          onNewSearch();
+        }
+        isModifierKeyPressed = false;
       },
     },
   };
