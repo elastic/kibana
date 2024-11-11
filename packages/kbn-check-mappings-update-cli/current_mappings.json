@@ -2847,7 +2847,7 @@
         "type": "keyword"
       },
       "last_installation_date": {
-        "type": "integer"
+        "type": "date"
       },
       "product_name": {
         "type": "keyword"
