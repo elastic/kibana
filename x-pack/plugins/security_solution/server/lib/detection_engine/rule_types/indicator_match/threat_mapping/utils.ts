@@ -189,7 +189,9 @@ export const decodeThreatMatchNamedQuery = (encoded: string): DecodedThreatNamed
 export const extractNamedQueries = (
   hit: SignalSourceHit | ThreatListItem
 ): DecodedThreatNamedQuery[] =>
-  hit.matched_queries?.map((match) => decodeThreatMatchNamedQuery(match)) ?? [];
+  Array.isArray(hit.matched_queries)
+    ? hit.matched_queries.map((match) => decodeThreatMatchNamedQuery(match))
+    : [];
 
 export const buildExecutionIntervalValidator: (interval: string) => () => void = (interval) => {
   const intervalDuration = parseInterval(interval);
