@@ -375,20 +375,6 @@
           },
           {
             "parentPluginId": "@kbn/doc-links",
-            "id": "def-common.DocLinks.functionbeat",
-            "type": "Object",
-            "tags": [],
-            "label": "functionbeat",
-            "description": [],
-            "signature": [
-              "{ readonly base: string; }"
-            ],
-            "path": "packages/kbn-doc-links/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/doc-links",
             "id": "def-common.DocLinks.winlogbeat",
             "type": "Object",
             "tags": [],
@@ -490,7 +476,7 @@
             "label": "kibana",
             "description": [],
             "signature": [
-              "{ readonly askElastic: string; readonly createGithubIssue: string; readonly feedback: string; readonly guide: string; readonly autocompleteSuggestions: string; readonly secureSavedObject: string; readonly xpackSecurity: string; }"
+              "{ readonly askElastic: string; readonly createGithubIssue: string; readonly feedback: string; readonly guide: string; readonly autocompleteSuggestions: string; readonly secureSavedObject: string; readonly xpackSecurity: string; readonly dashboardImportExport: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
