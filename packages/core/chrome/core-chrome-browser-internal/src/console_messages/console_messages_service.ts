@@ -11,8 +11,8 @@
 export interface ConsoleMessagesStartDeps {
   isDev: boolean;
   mode: 'warn' | 'error' | false;
-  warn?: (title: string, text: string) => void;
-  error?: (title: string, text: string) => void;
+  onWarn?: (title: string, text: string) => void;
+  onError?: (title: string, text: string) => void;
 }
 
 const noop = () => {};
@@ -25,7 +25,7 @@ type ConsolePlaceholder = (typeof consolePlaceholders)[number];
 export class ConsoleMessagesService {
   public setup() {}
 
-  public start({ isDev, mode, error = noop, warn = noop }: ConsoleMessagesStartDeps) {
+  public start({ isDev, mode, onError = noop, onWarn = noop }: ConsoleMessagesStartDeps) {
     if (!isDev || !mode) {
       return;
     }
@@ -82,9 +82,9 @@ export class ConsoleMessagesService {
 
         // Only post a toast if it's an error or warning.
         if (method === 'error') {
-          error('Error in console (dev only)', message);
+          onError('Error in console (dev only)', message);
         } else if (method === 'warn') {
-          warn('Warning in console (dev only)', message);
+          onWarn('Warning in console (dev only)', message);
         }
       };
 
@@ -96,7 +96,9 @@ export class ConsoleMessagesService {
 
     if (mode === 'warn' || mode === 'error') {
       intercept('error');
-    } else if (mode === 'warn') {
+    }
+
+    if (mode === 'warn') {
       intercept('warn');
     }
 

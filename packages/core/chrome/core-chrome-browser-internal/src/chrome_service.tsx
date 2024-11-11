@@ -24,6 +24,7 @@ import {
 import { parse } from 'url';
 import { setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
+import { apm } from '@elastic/apm-rum';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
@@ -308,11 +309,21 @@ export class ChromeService {
       })
     );
 
+    // This can later be augmented to include a UX notification,
+    // e.g. a toast, count, or developer menu.
+    const logError = async (text: string, type: 'warn' | 'error') => {
+      const error = new Error(text, { cause: { type } });
+      apm.captureError(error);
+    };
+
+    const onWarn = (_title: string, text: string) => logError(text, 'warn');
+    const onError = (_title: string, text: string) => logError(text, 'error');
+
     this.consoleMessages.start({
       isDev: this.params.coreContext.env.mode.dev,
       mode: injectedMetadata.isConsoleMessagesEnabled(),
-      warn: (title, text) => notifications.toasts.addWarning(title, { text }),
-      error: (title, text) => notifications.toasts.addDanger(title, { text }),
+      onWarn,
+      onError,
     });
 
     const navControls = this.navControls.start();

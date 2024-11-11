@@ -11,9 +11,14 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const config = {
   path: 'dev.consoleMessages',
-  schema: schema.oneOf([schema.literal(false), schema.literal('warn'), schema.literal('error')], {
-    defaultValue: false,
-  }),
+  schema: schema.conditional(
+    schema.contextRef('dev'),
+    true,
+    schema.oneOf([schema.literal(false), schema.literal('warn'), schema.literal('error')], {
+      defaultValue: 'warn',
+    }),
+    schema.never()
+  ),
 };
 
 export type ConsoleMessagesType = TypeOf<typeof config.schema>;
