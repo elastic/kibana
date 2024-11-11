@@ -112,7 +112,7 @@ describe('single line query', () => {
           'FROM index | DISSECT input "pattern" APPEND_SEPARATOR="<separator>"'
         );
 
-        expect(text).toBe('FROM index | DISSECT input "pattern" APPEND_SEPARATOR="<separator>"');
+        expect(text).toBe('FROM index | DISSECT input "pattern" APPEND_SEPARATOR = "<separator>"');
       });
     });
   });

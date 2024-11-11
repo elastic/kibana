@@ -379,7 +379,7 @@ export class BasicPrettyPrinter {
         args += (args ? ', ' : '') + arg;
       }
 
-      const separator = commandOptionsWithEqualsSeparator.has(ctx.node.name) ? '=' : ' ';
+      const separator = commandOptionsWithEqualsSeparator.has(ctx.node.name) ? ' = ' : ' ';
       const argsFormatted = args ? `${separator}${args}` : '';
       const optionFormatted = `${option}${argsFormatted}`;
 
