@@ -78,7 +78,6 @@ export function SearchBar() {
         <UnifiedSearchBar
           appName="Inventory"
           displayStyle="inPage"
-          showDatePicker={false}
           indexPatterns={dataView ? [dataView] : undefined}
           renderQueryInputAppend={() => <ControlGroups />}
           onQuerySubmit={handleQuerySubmit}
@@ -86,6 +85,10 @@ export function SearchBar() {
             defaultMessage:
               'Search for your entities by name or its metadata (e.g. entity.type : service)',
           })}
+          showDatePicker={false}
+          showFilterBar
+          showQueryInput
+          showQueryMenu
         />
       </EuiFlexItem>
 

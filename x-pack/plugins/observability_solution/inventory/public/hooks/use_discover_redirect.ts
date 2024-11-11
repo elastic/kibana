@@ -5,18 +5,15 @@
  * 2.0.
  */
 import {
-  ENTITY_TYPE,
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
   ENTITY_LAST_SEEN,
+  ENTITY_TYPE,
 } from '@kbn/observability-shared-plugin/common';
 import { useCallback } from 'react';
-import { type PhrasesFilter, buildPhrasesFilter } from '@kbn/es-query';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { Entity, EntityColumnIds } from '../../common/entities';
 import { unflattenEntity } from '../../common/utils/unflatten_entity';
 import { useKibana } from './use_kibana';
-import { useInventoryParams } from './use_inventory_params';
 import { useUnifiedSearchContext } from './use_unified_search_context';
 
 const ACTIVE_COLUMNS: EntityColumnIds[] = [ENTITY_DISPLAY_NAME, ENTITY_TYPE, ENTITY_LAST_SEEN];
@@ -25,32 +22,19 @@ export const useDiscoverRedirect = () => {
   const {
     services: { share, application, entityManager },
   } = useKibana();
-  const {
-    query: { kuery, entityTypes },
-  } = useInventoryParams('/*');
 
-  const { dataView } = useUnifiedSearchContext();
+  const { dataView, searchState } = useUnifiedSearchContext();
 
   const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
 
   const getDiscoverEntitiesRedirectUrl = useCallback(
     (entity?: Entity) => {
-      const filters: PhrasesFilter[] = [];
-
-      const entityTypeField = (dataView?.getFieldByName(ENTITY_TYPE) ??
-        entity?.[ENTITY_TYPE]) as DataViewField;
-
-      if (entityTypes && entityTypeField && dataView) {
-        const entityTypeFilter = buildPhrasesFilter(entityTypeField, entityTypes, dataView);
-        filters.push(entityTypeFilter);
-      }
-
       const entityKqlFilter = entity
         ? entityManager.entityClient.asKqlFilter(unflattenEntity(entity))
         : '';
 
       const kueryWithEntityDefinitionFilters = [
-        kuery,
+        searchState.query.query,
         entityKqlFilter,
         `${ENTITY_DEFINITION_ID} : builtin*`,
       ]
@@ -62,17 +46,18 @@ export const useDiscoverRedirect = () => {
             indexPatternId: dataView?.id ?? '',
             columns: ACTIVE_COLUMNS,
             query: { query: kueryWithEntityDefinitionFilters, language: 'kuery' },
-            filters,
+            filters: [...searchState.filters, ...searchState.panelFilters],
           })
         : undefined;
     },
     [
       application.capabilities.discover?.show,
+      dataView?.id,
       discoverLocator,
       entityManager.entityClient,
-      entityTypes,
-      kuery,
-      dataView,
+      searchState.filters,
+      searchState.panelFilters,
+      searchState.query.query,
     ]
   );
 
