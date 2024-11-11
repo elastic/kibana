@@ -2,6 +2,9 @@
   "type": "plugin",
   "id": "@kbn/search-playground",
   "owner": "@elastic/search-kibana",
+  // @kbn/enterprise-search-plugin (platform) and @kbn/serverless-search (search) depend on it
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "searchPlayground",
     "server": true,
