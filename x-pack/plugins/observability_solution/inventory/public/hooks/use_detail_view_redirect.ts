@@ -15,7 +15,7 @@ import { useCallback } from 'react';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { castArray } from 'lodash';
-import { isEntityOfType } from '../../common/utils/entity_type_guards';
+import { isBuiltinEntityOfType } from '../../common/utils/entity_type_guards';
 import type { InventoryEntity } from '../../common/entities';
 import { useKibana } from './use_kibana';
 
@@ -51,14 +51,14 @@ export const useDetailViewRedirect = () => {
       });
       const identityFields = castArray(entity.entityIdentityFields);
 
-      if (isEntityOfType('host', entity) || isEntityOfType('container', entity)) {
+      if (isBuiltinEntityOfType('host', entity) || isBuiltinEntityOfType('container', entity)) {
         return assetDetailsLocator?.getRedirectUrl({
           assetId: identityFieldsValue[identityFields[0]],
           assetType: entity.entityType,
         });
       }
 
-      if (isEntityOfType('service', entity)) {
+      if (isBuiltinEntityOfType('service', entity)) {
         return serviceOverviewLocator?.getRedirectUrl({
           serviceName: identityFieldsValue[identityFields[0]],
           environment: entity.service?.environment,
