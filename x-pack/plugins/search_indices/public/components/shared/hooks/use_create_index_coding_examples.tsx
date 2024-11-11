@@ -8,7 +8,7 @@
 import { CreateIndexCodeExamples } from '../../../types';
 import { DenseVectorSeverlessCodeExamples } from '../../../code_examples/create_index';
 
-export const useStartPageCodingExamples = (): CreateIndexCodeExamples => {
+export const useCreateIndexCodingExamples = (): CreateIndexCodeExamples => {
   // TODO: in the future this will be dynamic based on the onboarding token
   // or project sub-type
   return DenseVectorSeverlessCodeExamples;
