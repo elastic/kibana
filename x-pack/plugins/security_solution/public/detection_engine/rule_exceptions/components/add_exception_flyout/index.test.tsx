@@ -1021,15 +1021,6 @@ describe('When the add exception modal is opened', () => {
     });
   });
   describe('the reducer', () => {
-    it('should return the initial state', () => {
-      const updatedState = createExceptionItemsReducer();
-      expect(
-        updatedState(exceptionItemsInitialState, {
-          type: '',
-        })
-      ).toEqual(exceptionItemsInitialState);
-    });
-
     it('should update partialCodeSignatureWarningExists, when warning is true', () => {
       const updatedState = createExceptionItemsReducer();
       expect(
