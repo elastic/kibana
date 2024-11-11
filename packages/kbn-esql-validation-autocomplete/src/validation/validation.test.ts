@@ -700,7 +700,6 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from a_index | dissect textField .', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        'Unknown column [textField.]',
       ]);
       testErrorsAndWarnings('from a_index | dissect textField %a', [
         "SyntaxError: mismatched input '%' expecting QUOTED_STRING",
@@ -751,7 +750,6 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from a_index | grok textField .', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        'Unknown column [textField.]',
       ]);
       testErrorsAndWarnings('from a_index | grok textField %a', [
         "SyntaxError: mismatched input '%' expecting QUOTED_STRING",
@@ -1741,7 +1739,7 @@ describe('validation logic', () => {
     it('should basically work when all callbacks are passed', async () => {
       const allErrors = await Promise.all(
         fixtures.testCases
-          .filter(({ query }) => query === 'from index [METADATA _id, _source2]')
+          .filter(({ query }) => query === 'from index METADATA _id, _source2')
           .map(({ query }) =>
             validateQuery(
               query,
@@ -1753,7 +1751,7 @@ describe('validation logic', () => {
       );
       for (const [index, { errors }] of Object.entries(allErrors)) {
         expect(errors.map((e) => ('severity' in e ? e.message : e.text))).toEqual(
-          fixtures.testCases.filter(({ query }) => query === 'from index [METADATA _id, _source2]')[
+          fixtures.testCases.filter(({ query }) => query === 'from index METADATA _id, _source2')[
             Number(index)
           ].error
         );

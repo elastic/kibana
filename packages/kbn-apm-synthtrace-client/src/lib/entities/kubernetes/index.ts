@@ -55,9 +55,9 @@ export class K8sEntity extends Serializable<EntityFields> {
     super({
       ...fields,
       'entity.type': entityTypeWithSchema,
-      'entity.definitionId': `builtin_${entityTypeWithSchema}`,
-      'entity.identityFields': identityFields,
-      'entity.displayName': getDisplayName({ identityFields, fields }),
+      'entity.definition_id': `builtin_${entityTypeWithSchema}`,
+      'entity.identity_fields': identityFields,
+      'entity.display_name': getDisplayName({ identityFields, fields }),
     });
   }
 }

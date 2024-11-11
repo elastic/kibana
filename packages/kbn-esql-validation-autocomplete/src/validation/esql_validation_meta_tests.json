@@ -2666,8 +2666,7 @@
     {
       "query": "from a_index | dissect textField .",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        "Unknown column [textField.]"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -2761,8 +2760,7 @@
     {
       "query": "from a_index | grok textField .",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        "Unknown column [textField.]"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -9945,70 +9943,6 @@
       "error": [
         "SyntaxError: mismatched input '(metadata' expecting <EOF>"
       ],
-      "warning": []
-    },
-    {
-      "query": "from index [METADATA _id]",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index [METADATA _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [metadata _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [METADATA _id, _source]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [METADATA _id, _source2]",
-      "error": [
-        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored, _index_mode]"
-      ],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [metadata _id, _source] [METADATA _id2]",
-      "error": [
-        "SyntaxError: mismatched input '[' expecting <EOF>"
-      ],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index metadata _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index METADATA _id, _source",
-      "error": [],
       "warning": []
     },
     {

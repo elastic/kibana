@@ -32,6 +32,13 @@ export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRoute
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because the privileges are not defined yet.',
+          },
+        },
         validate: {
           request: {
             body: buildRouteValidationWithZod(CelInputRequestBody),
@@ -78,7 +85,7 @@ export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRoute
           };
 
           const graph = await getCelGraph({ model });
-          const results = await graph.invoke(parameters, options);
+          const results = await graph.withConfig({ runName: 'CEL' }).invoke(parameters, options);
 
           return res.ok({ body: CelInputResponse.parse(results) });
         } catch (e) {
