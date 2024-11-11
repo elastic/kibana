@@ -16,6 +16,7 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 
 import { AddExceptionFlyout } from '.';
+import { initialState as exceptionItemsInitialState, createExceptionItemsReducer } from './reducer';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
@@ -1017,6 +1018,26 @@ describe('When the add exception modal is opened', () => {
           wrapper.find('[data-test-subj="addToListsRadioOption"] input').getDOMNode()
         ).toBeEnabled();
       });
+    });
+  });
+  describe('the reducer', () => {
+    it('should return the initial state', () => {
+      const updatedState = createExceptionItemsReducer();
+      expect(
+        updatedState(exceptionItemsInitialState, {
+          type: '',
+        })
+      ).toEqual(exceptionItemsInitialState);
+    });
+
+    it('should update partialCodeSignatureWarningExists, when warning is true', () => {
+      const updatedState = createExceptionItemsReducer();
+      expect(
+        updatedState(exceptionItemsInitialState, {
+          type: 'setPartialCodeSignature',
+          warningExists: true,
+        })
+      ).toEqual({ ...exceptionItemsInitialState, partialCodeSignatureWarningExists: true });
     });
   });
 });
