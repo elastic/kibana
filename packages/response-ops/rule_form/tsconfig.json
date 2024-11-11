@@ -39,5 +39,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
+    "@kbn/alerts-as-data-utils",
   ]
 }
