@@ -23,33 +23,30 @@ import { routeWithNamespace } from '../../../../../../common/utils/security_solu
  * @param log The tooling logger
  * @param entry The entry to create
  * @param space The Kibana Space to create the entry in (optional)
+ * @param expectedHttpCode The expected http status code (optional)
  */
 export const createEntry = async ({
   supertest,
   log,
   entry,
   space,
+  expectedHttpCode = 200,
 }: {
   supertest: SuperTest.Agent;
   log: ToolingLog;
   entry: KnowledgeBaseEntryCreateProps;
   space?: string;
+  expectedHttpCode?: number;
 }): Promise<KnowledgeBaseEntryResponse> => {
   const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL, space);
   const response = await supertest
     .post(route)
     .set('kbn-xsrf', 'true')
     .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .send(entry);
-  if (response.status !== 200) {
-    throw new Error(
-      `Unexpected non 200 ok when attempting to create entry: ${JSON.stringify(
-        response.status
-      )},${JSON.stringify(response, null, 4)}`
-    );
-  } else {
-    return response.body;
-  }
+    .send(entry)
+    .expect(expectedHttpCode);
+
+  return response.body;
 };
 
 /**
@@ -59,6 +56,7 @@ export const createEntry = async ({
  * @param entry The entry to create
  * @param user The user to create the entry on behalf of
  * @param space The Kibana Space to create the entry in (optional)
+ * @param expectedHttpCode The expected http status code (optional)
  */
 export const createEntryForUser = async ({
   supertestWithoutAuth,
@@ -66,12 +64,14 @@ export const createEntryForUser = async ({
   entry,
   user,
   space,
+  expectedHttpCode = 200,
 }: {
   supertestWithoutAuth: SuperTest.Agent;
   log: ToolingLog;
   entry: KnowledgeBaseEntryCreateProps;
   user: User;
   space?: string;
+  expectedHttpCode?: number;
 }): Promise<KnowledgeBaseEntryResponse> => {
   const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL, space);
   const response = await supertestWithoutAuth
@@ -79,14 +79,8 @@ export const createEntryForUser = async ({
     .auth(user.username, user.password)
     .set('kbn-xsrf', 'true')
     .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .send(entry);
-  if (response.status !== 200) {
-    throw new Error(
-      `Unexpected non 200 ok when attempting to create entry: ${JSON.stringify(
-        response.status
-      )},${JSON.stringify(response, null, 4)}`
-    );
-  } else {
-    return response.body;
-  }
+    .send(entry)
+    .expect(expectedHttpCode);
+
+  return response.body;
 };

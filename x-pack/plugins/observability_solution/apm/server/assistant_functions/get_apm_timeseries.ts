@@ -138,8 +138,7 @@ export function registerGetApmTimeseriesFunction({
         content: timeseries.map((series): Omit<ApmTimeseries, 'data'> => omit(series, 'data')),
         data: timeseries,
       };
-    },
-    ['observability']
+    }
   );
 }
 

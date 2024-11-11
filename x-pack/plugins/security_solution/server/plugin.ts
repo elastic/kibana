@@ -19,6 +19,7 @@ import type { ILicense } from '@kbn/licensing-plugin/server';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { ensureIndicesExistsForPolicies } from './endpoint/migrations/ensure_indices_exists_for_policies';
 import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
 import { registerAgentRoutes } from './endpoint/routes/agent';
 import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
@@ -123,6 +124,7 @@ import { getAssistantTools } from './assistant/tools';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
+import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -135,6 +137,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   private readonly ruleMonitoringService: IRuleMonitoringService;
   private readonly endpointAppContextService = new EndpointAppContextService();
+  private readonly siemMigrationsService: SiemMigrationsService;
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
   private readonly asyncTelemetryEventsSender: IAsyncTelemetryEventsSender;
@@ -159,6 +162,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.productFeaturesService = new ProductFeaturesService(
       this.logger,
       this.config.experimentalFeatures
+    );
+    this.siemMigrationsService = new SiemMigrationsService(
+      this.config,
+      this.logger,
+      this.pluginContext.env.packageInfo.version
     );
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
@@ -225,6 +233,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerEntityStoreFieldRetentionEnrichTask({
         getStartServices: core.getStartServices,
         logger: this.logger,
+        telemetry: core.analytics,
         taskManager: plugins.taskManager,
       });
     }
@@ -236,6 +245,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins,
       endpointAppContextService: this.endpointAppContextService,
       ruleMonitoringService: this.ruleMonitoringService,
+      siemMigrationsService: this.siemMigrationsService,
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
       buildFlavor: pluginContext.env.packageInfo.buildFlavor,
@@ -427,7 +437,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     core
       .getStartServices()
-      .then(async ([_, depsStart]) => {
+      .then(async ([coreStart, depsStart]) => {
         appClientFactory.setup({
           getSpaceId: depsStart.spaces?.spacesService?.getSpaceId,
           config,
@@ -477,6 +487,8 @@ export class Plugin implements ISecuritySolutionPlugin {
          * Register a config for the security guide
          */
         plugins.guidedOnboarding?.registerGuideConfig(siemGuideId, getSiemGuideConfig());
+
+        this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
       })
       .catch(() => {}); // it shouldn't reject, but just in case
 
@@ -595,8 +607,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.fleet
         .fleetSetupCompleted()
         .then(async () => {
+          logger.info('Dependent plugin setup complete');
+
           if (this.manifestTask) {
-            logger.info('Dependent plugin setup complete - Starting ManifestTask');
+            logger.info('Starting ManifestTask');
             await this.manifestTask.start({
               taskManager,
             });
@@ -614,6 +628,10 @@ export class Plugin implements ISecuritySolutionPlugin {
           );
 
           await turnOffAgentPolicyFeatures(fleetServices, productFeaturesService, logger);
+
+          // Ensure policies have backing DOT indices (We don't need to `await` this.
+          // It can run in the background)
+          ensureIndicesExistsForPolicies(this.endpointAppContextService).catch(() => {});
         })
         .catch(() => {});
 
@@ -715,6 +733,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.endpointAppContextService.stop();
     this.policyWatcher?.stop();
     this.completeExternalResponseActionsTask.stop().catch(() => {});
+    this.siemMigrationsService.stop();
     licenseService.stop();
   }
 }

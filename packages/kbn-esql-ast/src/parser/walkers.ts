@@ -30,6 +30,7 @@ import {
   type EnrichCommandContext,
   type FieldContext,
   type FieldsContext,
+  type AggFieldsContext,
   type FromCommandContext,
   FunctionContext,
   type GrokCommandContext,
@@ -59,8 +60,6 @@ import {
   type ValueExpressionContext,
   ValueExpressionDefaultContext,
   InlineCastContext,
-  InputNamedOrPositionalParamContext,
-  InputParamContext,
   IndexPatternContext,
   InlinestatsCommandContext,
 } from '../antlr/esql_parser';
@@ -85,8 +84,9 @@ import {
   createInlineCast,
   createUnknownItem,
   createOrderExpression,
+  createFunctionCall,
+  createParam,
 } from './factories';
-import { getPosition } from './helpers';
 
 import {
   ESQLLiteral,
@@ -96,9 +96,6 @@ import {
   ESQLAstItem,
   ESQLAstField,
   ESQLInlineCast,
-  ESQLUnnamedParamLiteral,
-  ESQLPositionalParamLiteral,
-  ESQLNamedParamLiteral,
   ESQLOrderExpression,
 } from '../types';
 import { firstItem, lastItem } from '../visitor/utils';
@@ -389,50 +386,8 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
     const values: ESQLLiteral[] = [];
 
     for (const child of ctx.children) {
-      if (child instanceof InputParamContext) {
-        const literal: ESQLUnnamedParamLiteral = {
-          type: 'literal',
-          literalType: 'param',
-          paramType: 'unnamed',
-          text: ctx.getText(),
-          name: '',
-          value: '',
-          location: getPosition(ctx.start, ctx.stop),
-          incomplete: Boolean(ctx.exception),
-        };
-        values.push(literal);
-      } else if (child instanceof InputNamedOrPositionalParamContext) {
-        const text = child.getText();
-        const value = text.slice(1);
-        const valueAsNumber = Number(value);
-        const isPositional = String(valueAsNumber) === value;
-
-        if (isPositional) {
-          const literal: ESQLPositionalParamLiteral = {
-            type: 'literal',
-            literalType: 'param',
-            paramType: 'positional',
-            value: valueAsNumber,
-            text,
-            name: '',
-            location: getPosition(ctx.start, ctx.stop),
-            incomplete: Boolean(ctx.exception),
-          };
-          values.push(literal);
-        } else {
-          const literal: ESQLNamedParamLiteral = {
-            type: 'literal',
-            literalType: 'param',
-            paramType: 'named',
-            value,
-            text,
-            name: '',
-            location: getPosition(ctx.start, ctx.stop),
-            incomplete: Boolean(ctx.exception),
-          };
-          values.push(literal);
-        }
-      }
+      const param = createParam(child);
+      if (param) values.push(param);
     }
 
     return values;
@@ -477,12 +432,7 @@ export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstIt
   }
   if (ctx instanceof FunctionContext) {
     const functionExpressionCtx = ctx.functionExpression();
-    const fn = createFunction(
-      functionExpressionCtx.identifierOrParameter().getText().toLowerCase(),
-      ctx,
-      undefined,
-      'variadic-call'
-    );
+    const fn = createFunctionCall(ctx);
     const asteriskArg = functionExpressionCtx.ASTERISK()
       ? createColumnStar(functionExpressionCtx.ASTERISK()!)
       : undefined;
@@ -596,6 +546,21 @@ export function visitField(ctx: FieldContext) {
   return collectBooleanExpression(ctx.booleanExpression());
 }
 
+export function collectAllAggFields(ctx: AggFieldsContext | undefined): ESQLAstField[] {
+  const ast: ESQLAstField[] = [];
+  if (!ctx) {
+    return ast;
+  }
+  try {
+    for (const aggField of ctx.aggField_list()) {
+      ast.push(...(visitField(aggField.field()) as ESQLAstField[]));
+    }
+  } catch (e) {
+    // do nothing
+  }
+  return ast;
+}
+
 export function collectAllFields(ctx: FieldsContext | undefined): ESQLAstField[] {
   const ast: ESQLAstField[] = [];
   if (!ctx) {
@@ -652,7 +617,7 @@ const visitOrderExpression = (ctx: OrderExpressionContext): ESQLOrderExpression 
     return arg;
   }
 
-  return createOrderExpression(ctx, arg, order, nulls);
+  return createOrderExpression(ctx, arg as ESQLColumn, order, nulls);
 };
 
 export function visitOrderExpressions(

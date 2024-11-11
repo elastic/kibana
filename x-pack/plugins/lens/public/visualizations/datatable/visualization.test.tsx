@@ -28,6 +28,7 @@ import {
   DatatableExpressionFunction,
 } from '../../../common/expressions';
 import { getColorStops } from '../../shared_components/coloring';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 
 jest.mock('../../shared_components/coloring', () => {
   return {
@@ -46,6 +47,7 @@ function mockFrame(): FramePublicAPI {
 const mockServices = {
   paletteService: chartPluginMock.createPaletteRegistry(),
   kibanaTheme: themeServiceMock.createStartContract(),
+  formatFactory: fieldFormatsServiceMock.createStartContract().deserialize,
 };
 
 const datatableVisualization = getDatatableVisualization(mockServices);

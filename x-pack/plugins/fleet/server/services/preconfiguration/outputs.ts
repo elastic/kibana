@@ -74,7 +74,6 @@ export async function createOrUpdatePreconfiguredOutputs(
   }
 
   const existingOutputs = await outputService.bulkGet(
-    soClient,
     outputs.map(({ id }) => id),
     { ignoreNotFound: true }
   );
@@ -319,7 +318,6 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       isDifferent(existingOutput.round_robin, preconfiguredOutput.round_robin) ||
       isDifferent(existingOutput.hash, preconfiguredOutput.hash) ||
       isDifferent(existingOutput.topic, preconfiguredOutput.topic) ||
-      isDifferent(existingOutput.topics, preconfiguredOutput.topics) ||
       isDifferent(existingOutput.headers, preconfiguredOutput.headers) ||
       isDifferent(existingOutput.timeout, preconfiguredOutput.timeout) ||
       isDifferent(existingOutput.broker_timeout, preconfiguredOutput.broker_timeout) ||

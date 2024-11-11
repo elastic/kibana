@@ -20,6 +20,7 @@ export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
   public id = ACTION_VIEW_SAVED_SEARCH;
   public readonly type = ACTION_VIEW_SAVED_SEARCH;
+  public readonly order = 20; // Same order as ACTION_OPEN_IN_DISCOVER
 
   constructor(
     private readonly application: ApplicationStart,
@@ -43,7 +44,7 @@ export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
   }
 
   getIconType(): string | undefined {
-    return 'inspect';
+    return 'discoverApp';
   }
 
   async isCompatible({ embeddable }: EmbeddableApiContext) {

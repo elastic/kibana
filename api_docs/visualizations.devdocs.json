@@ -6976,7 +6976,23 @@
             "section": "def-public.PublishesViewMode",
             "text": "PublishesViewMode"
           },
-          ">) | undefined; disableTriggers: boolean; timeRange$: ",
+          ">) | undefined; hasLockedHoverActions$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean>; lockHoverActions: (lock: boolean) => void; disableTriggers: boolean; savedObjectId: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string | undefined>; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -7088,15 +7104,7 @@
             "section": "def-public.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; savedObjectId: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<string | undefined>; render: (domNode: HTMLElement) => Promise<void>; getEditHref: () => Promise<string | undefined>; reload: () => Promise<void>; updateInput: (changes: Partial<",
+          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; getEditHref: () => Promise<string | undefined>; reload: () => Promise<void>; updateInput: (changes: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -13862,7 +13870,7 @@
             "label": "fittingFunction",
             "description": [],
             "signature": [
-              "\"None\" | \"Average\" | \"Zero\" | \"Nearest\" | \"Linear\" | \"Carry\" | \"Lookahead\" | undefined"
+              "\"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,

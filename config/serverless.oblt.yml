@@ -183,6 +183,7 @@ xpack.apm.featureFlags.storageExplorerAvailable: false
 
 ## Set the AI Assistant type
 aiAssistantManagementSelection.preferredAIAssistantType: "observability"
+xpack.observabilityAIAssistant.scope: "observability"
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: observability
@@ -207,3 +208,6 @@ xpack.ml.compatibleModuleType: 'observability'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
+
+# Disable role management (custom roles)
+xpack.security.roleManagementEnabled: false

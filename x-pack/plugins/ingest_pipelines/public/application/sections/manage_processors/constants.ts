@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { GeoipDatabase } from '../../../../common/types';
+import type { GeoipDatabase, DatabaseNameOption } from '../../../../common/types';
 
 export const ADD_DATABASE_MODAL_TITLE_ID = 'manageProcessorsAddGeoipDatabase';
 export const ADD_DATABASE_MODAL_FORM_ID = 'manageProcessorsAddGeoipDatabaseForm';
@@ -24,7 +24,7 @@ export const DATABASE_TYPE_OPTIONS = [
     }),
   },
 ];
-export const GEOIP_NAME_OPTIONS = [
+export const GEOIP_NAME_OPTIONS: DatabaseNameOption[] = [
   {
     value: 'GeoIP2-Anonymous-IP',
     text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.anonymousIPDatabaseName', {
@@ -71,7 +71,7 @@ export const GEOIP_NAME_OPTIONS = [
     }),
   },
 ];
-export const IPINFO_NAME_OPTIONS = [
+export const IPINFO_NAME_OPTIONS: DatabaseNameOption[] = [
   {
     value: 'asn',
     text: i18n.translate('xpack.ingestPipelines.manageProcessors.ipinfo.freeAsnDatabaseName', {

@@ -8,12 +8,12 @@
 import React from 'react';
 import { DataContext } from './table_basic';
 import { createGridCell } from './cell_value';
+import { getTransposeId } from '@kbn/transpose-utils';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { DatatableArgs } from '../../../../common/expressions';
 import { DataContextType } from './types';
 import { render, screen } from '@testing-library/react';
-import { getTransposeId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 describe('datatable cell renderer', () => {
   const innerCellColorFnMock = jest.fn().mockReturnValue('blue');

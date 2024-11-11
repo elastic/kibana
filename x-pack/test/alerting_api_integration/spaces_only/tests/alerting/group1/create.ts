@@ -341,13 +341,14 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         )
         .expect(200);
 
-      const response = await supertest.get(
-        `${getUrlPrefix(
-          Spaces.space1.id
-        )}/internal/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
-      );
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          filter: `alert.attributes.params.risk_score:40`,
+        })
+        .expect(200);
 
-      expect(response.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
       expect(response.body.total).to.equal(1);
       expect(response.body.data[0].mapped_params).to.eql({
@@ -394,20 +395,18 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should not allow providing simple custom ids (non uuid)', async () => {
-      const customId = '1';
-      const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${customId}`)
-        .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData());
+    it('should create a rule with a predefined non random ID', async () => {
+      const ruleId = 'my_id';
 
-      expect(response.status).to.eql(400);
-      expect(response.body).to.eql({
-        statusCode: 400,
-        error: 'Bad Request',
-        message:
-          'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.: Bad Request',
-      });
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData())
+        .expect(200);
+
+      objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+      expect(response.body.id).to.eql(ruleId);
     });
 
     it('should return 409 when document with id already exists', async () => {

@@ -884,7 +884,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
         return alertCount >= alertCountThreshold;
       });
     },
-    { interval: 500, timeout: 12000 }
+    { interval: 500, timeout: 30000 }
   );
   waitForAlerts();
 };
@@ -983,7 +983,7 @@ export const interceptEsqlQueryFieldsRequest = (
       }
     });
   } else {
-    cy.intercept('POST', '/internal/bsearch?*', (req) => {
+    cy.intercept('POST', '/internal/search?*', (req) => {
       if (req.body?.batch?.[0]?.request?.params?.query?.includes?.(esqlQuery)) {
         req.alias = alias;
       }

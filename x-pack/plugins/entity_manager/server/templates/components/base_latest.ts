@@ -22,7 +22,7 @@ export const entitiesLatestBaseComponentTemplateConfig: ClusterPutComponentTempl
       properties: {
         entity: {
           properties: {
-            displayName: {
+            display_name: {
               type: 'text',
               fields: {
                 keyword: {
@@ -30,9 +30,6 @@ export const entitiesLatestBaseComponentTemplateConfig: ClusterPutComponentTempl
                   type: 'keyword',
                 },
               },
-            },
-            firstSeenTimestamp: {
-              type: 'date',
             },
           },
         },
