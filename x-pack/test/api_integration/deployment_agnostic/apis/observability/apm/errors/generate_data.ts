@@ -35,14 +35,12 @@ export async function generateData({
     .service({ name: serviceName, environment: 'production', agentName: 'go' })
     .instance('instance-a');
 
-  const interval = '1m';
-
   const { bananaTransaction, appleTransaction } = config;
+  const interval = timerange(start, end).interval('1m');
 
   const documents = [appleTransaction, bananaTransaction].flatMap((transaction, index) => {
     return [
-      timerange(start, end)
-        .interval(interval)
+      interval
         .rate(transaction.successRate)
         .generator((timestamp) =>
           serviceGoProdInstance
@@ -51,23 +49,20 @@ export async function generateData({
             .duration(1000)
             .success()
         ),
-      timerange(start, end)
-        .interval(interval)
-        .rate(transaction.failureRate)
-        .generator((timestamp) =>
-          serviceGoProdInstance
-            .transaction({ transactionName: transaction.name })
-            .errors(
-              serviceGoProdInstance
-                .error({ message: `Error ${index}`, type: transaction.name })
-                .timestamp(timestamp)
-            )
-            .duration(1000)
-            .timestamp(timestamp)
-            .failure()
-        ),
+      interval.rate(transaction.failureRate).generator((timestamp) =>
+        serviceGoProdInstance
+          .transaction({ transactionName: transaction.name })
+          .errors(
+            serviceGoProdInstance
+              .error({ message: `Error ${index}`, type: transaction.name })
+              .timestamp(timestamp)
+          )
+          .duration(1000)
+          .timestamp(timestamp)
+          .failure()
+      ),
     ];
   });
 
-  await apmSynthtraceEsClient.index(documents);
+  return await apmSynthtraceEsClient.index(documents);
 }

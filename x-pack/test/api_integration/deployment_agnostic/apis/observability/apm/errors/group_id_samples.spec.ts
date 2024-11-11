@@ -83,7 +83,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       describe('error group id', () => {
         before(async () => {
           apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-          await generateData({ serviceName, start, end, apmSynthtraceEsClient });
+          return generateData({ serviceName, start, end, apmSynthtraceEsClient });
         });
 
         after(() => apmSynthtraceEsClient.clean());
@@ -114,7 +114,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         before(async () => {
           apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-          await generateData({ serviceName, start, end, apmSynthtraceEsClient });
+          return generateData({ serviceName, start, end, apmSynthtraceEsClient });
         });
 
         after(() => apmSynthtraceEsClient.clean());
@@ -156,7 +156,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const groupId = getErrorGroupingKey(errorMessage);
 
           apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-          await apmSynthtraceEsClient.index([
+          await apmSynthtraceEsClient.index(
             timerange(start, end)
               .interval('15m')
               .rate(1)
@@ -178,8 +178,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                     .sample(true)
                     .errors(instance.error({ message: errorMessage }).timestamp(timestamp)),
                 ];
-              }),
-          ]);
+              })
+          );
 
           errorGroupSamplesResponse = (await callErrorGroupSamplesApi({ groupId })).body;
         });

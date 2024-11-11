@@ -72,5 +72,5 @@ export async function generateData({
     ];
   });
 
-  await apmSynthtraceEsClient.index(documents);
+  return await apmSynthtraceEsClient.index(documents);
 }
