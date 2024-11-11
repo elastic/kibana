@@ -201,6 +201,7 @@ export function createTestEsCluster<
 
   const esArgs = assignArgs(defaultEsArgs, customEsArgs);
 
+  // Use 'trial' license if FIPS mode is enabled, otherwise use the provided license or default to 'basic'
   const testLicense: ArtifactLicense = getFips() === 1 ? 'trial' : license ? license : 'basic';
 
   const config = {
