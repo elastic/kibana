@@ -11,25 +11,15 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
       high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
        – 
     </span>
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="none"
-      key="badge-wrapper-sum nginx.access.body_sent.bytes-nginx.access.remote_ip-undefined-72.57.0.53"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <ExplorerChartLabelBadge
-          entity={
-            Object {
-              "$$hashKey": "object:813",
-              "fieldName": "nginx.access.remote_ip",
-              "fieldValue": "72.57.0.53",
-            }
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <ExplorerChartLabelBadge
+      entity={
+        Object {
+          "$$hashKey": "object:813",
+          "fieldName": "nginx.access.remote_ip",
+          "fieldValue": "72.57.0.53",
+        }
+      }
+    />
      
     <span
       className="ml-explorer-chart-info-icon"
@@ -98,25 +88,15 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
   <span
     className="ml-explorer-chart-label-badges"
   >
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="none"
-      key="badge-wrapper-sum nginx.access.body_sent.bytes-nginx.access.remote_ip-undefined-72.57.0.53"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <ExplorerChartLabelBadge
-          entity={
-            Object {
-              "$$hashKey": "object:813",
-              "fieldName": "nginx.access.remote_ip",
-              "fieldValue": "72.57.0.53",
-            }
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <ExplorerChartLabelBadge
+      entity={
+        Object {
+          "$$hashKey": "object:813",
+          "fieldName": "nginx.access.remote_ip",
+          "fieldValue": "72.57.0.53",
+        }
+      }
+    />
   </span>
 </Fragment>
 `;
