@@ -1900,7 +1900,7 @@ export const functions = {
 
   \`\`\`
   ROW a = "Hello!"
-  | EVAL triple_a = REPEAT(a, 3);
+  | EVAL triple_a = REPEAT(a, 3)
   \`\`\`
   `,
               description:

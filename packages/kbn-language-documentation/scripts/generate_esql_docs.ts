@@ -15,6 +15,9 @@ import { functions } from '../src/sections/generated/scalar_functions';
 
 (function () {
   const pathToElasticsearch = process.argv[2];
+  if (!pathToElasticsearch) {
+    throw new Error('Path to Elasticsearch is required');
+  }
   const { scalarFunctions, aggregationFunctions } = loadFunctionDocs(pathToElasticsearch);
   writeFunctionDocs(
     scalarFunctions,
