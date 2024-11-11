@@ -252,5 +252,5 @@ export interface AssistantToolParams {
     ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
   >;
   size?: number;
-  telemetry: AnalyticsServiceSetup;
+  telemetry?: AnalyticsServiceSetup;
 }
