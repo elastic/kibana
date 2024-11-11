@@ -81,8 +81,7 @@ export function registerEndpointRoutes(
         version: '2023-10-31',
         security: {
           authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
+            requiredPrivileges: ['securitySolution'],
           },
         },
         validate: {

@@ -37,8 +37,7 @@ export const registerResolverRoutes = (
       path: '/api/endpoint/resolver/tree',
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
+          requiredPrivileges: ['securitySolution'],
         },
       },
       validate: validateTree,
@@ -52,8 +51,7 @@ export const registerResolverRoutes = (
       path: '/api/endpoint/resolver/events',
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
+          requiredPrivileges: ['securitySolution'],
         },
       },
       validate: validateEvents,
@@ -70,8 +68,7 @@ export const registerResolverRoutes = (
       path: '/api/endpoint/resolver/entity',
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
+          requiredPrivileges: ['securitySolution'],
         },
       },
       validate: validateEntities,
