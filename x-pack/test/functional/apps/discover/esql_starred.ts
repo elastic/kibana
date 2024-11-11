@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const log = getService('log');
   const monacoEditor = getService('monacoEditor');
   const { common, discover, header, unifiedFieldList, security } = getPageObjects([
     'common',
@@ -81,7 +80,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('ESQLEditor-toggle-query-history-button');
       const historyItem = await esql.getHistoryItem(0);
       await testSubjects.moveMouseTo('~ESQLFavoriteButton');
-      (await historyItem.findByTestSubject('ESQLFavoriteButton')).click();
+      const button = await historyItem.findByTestSubject('ESQLFavoriteButton');
+      await button.click();
 
       await header.waitUntilLoadingHasFinished();
       await testSubjects.click('starred-queries-tab');
@@ -130,13 +130,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('starred-queries-tab');
 
       const starredItem = await esql.getStarredItem(0);
-      (await starredItem.findByTestSubject('ESQLFavoriteButton')).click();
+      const button = await starredItem.findByTestSubject('ESQLFavoriteButton');
+      await button.click();
       await testSubjects.click('esqlEditor-discard-starred-query-discard-btn');
 
       await header.waitUntilLoadingHasFinished();
 
       const starredItems = await esql.getStarredItems();
-      log.debug('starredItems', starredItems);
       expect(starredItems[0][0]).to.be('No items found');
     });
   });
