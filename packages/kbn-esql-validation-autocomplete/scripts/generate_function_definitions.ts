@@ -246,12 +246,22 @@ const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
  * @returns
  */
 function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): FunctionDefinition {
+  let supportedCommandsAndOptions =
+    ESFunctionDefinition.type === 'eval'
+      ? scalarSupportedCommandsAndOptions
+      : aggregationSupportedCommandsAndOptions;
+
+  // MATCH and QSRT has limited supported for where commands only
+  if (['match', 'qstr'].includes(ESFunctionDefinition.name)) {
+    supportedCommandsAndOptions = {
+      supportedCommands: ['where'],
+      supportedOptions: [],
+    };
+  }
   const ret = {
     type: ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
-    ...(ESFunctionDefinition.type === 'eval'
-      ? scalarSupportedCommandsAndOptions
-      : aggregationSupportedCommandsAndOptions),
+    ...supportedCommandsAndOptions,
     description: ESFunctionDefinition.description,
     alias: aliasTable[ESFunctionDefinition.name],
     ignoreAsSuggestion: ESFunctionDefinition.snapshot_only,
