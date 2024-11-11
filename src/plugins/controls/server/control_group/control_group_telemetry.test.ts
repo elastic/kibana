@@ -7,16 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import { type ControlGroupSerializedState } from '../../common';
-import {
-  type ControlGroupTelemetry,
-  controlGroupTelemetry,
-  initializeControlGroupTelemetry,
-} from './control_group_telemetry';
+import { controlGroupTelemetry, initializeControlGroupTelemetry } from './control_group_telemetry';
+import { ControlGroupSavedObjectState, ControlGroupTelemetry } from './types';
 
 // controls attributes with all settings ignored + 3 options lists + hierarchical chaining + label above
-const rawControlAttributes1: SerializableRecord & ControlGroupSerializedState = {
+const rawControlAttributes1: ControlGroupSavedObjectState = {
   controlStyle: 'twoLine',
   chainingSystem: 'NONE',
   showApplySelections: true,
@@ -27,7 +22,7 @@ const rawControlAttributes1: SerializableRecord & ControlGroupSerializedState = 
 };
 
 // controls attributes with some settings ignored + 2 range sliders, 1 time slider + No chaining  + label inline
-const rawControlAttributes2: SerializableRecord & ControlGroupSerializedState = {
+const rawControlAttributes2: ControlGroupSavedObjectState = {
   controlStyle: 'oneLine',
   chainingSystem: 'NONE',
   showApplySelections: false,
@@ -38,7 +33,7 @@ const rawControlAttributes2: SerializableRecord & ControlGroupSerializedState = 
 };
 
 // controls attributes with no settings ignored + 2 options lists, 1 range slider, 1 time slider + hierarchical chaining + label inline
-const rawControlAttributes3: SerializableRecord & ControlGroupSerializedState = {
+const rawControlAttributes3: ControlGroupSavedObjectState = {
   controlStyle: 'oneLine',
   chainingSystem: 'HIERARCHICAL',
   showApplySelections: false,

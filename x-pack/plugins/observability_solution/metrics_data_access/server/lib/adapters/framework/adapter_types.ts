@@ -17,7 +17,6 @@ import {
 } from '@kbn/data-plugin/server';
 import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import { VisTypeTimeseriesSetup } from '@kbn/vis-type-timeseries-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { PluginSetupContract as AlertingPluginContract } from '@kbn/alerting-plugin/server';
@@ -37,7 +36,6 @@ export interface InfraServerPluginSetupDeps {
   share: SharePluginSetup;
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
-  visTypeTimeseries: VisTypeTimeseriesSetup;
   ml?: MlPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
 }

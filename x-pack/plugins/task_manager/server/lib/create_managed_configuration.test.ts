@@ -15,6 +15,7 @@ import {
 import { mockLogger } from '../test_utils';
 import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET, TaskManagerConfig } from '../config';
 import { MsearchError } from './msearch_error';
+import { BulkUpdateError } from './bulk_update_error';
 
 describe('createManagedConfiguration()', () => {
   let clock: sinon.SinonFakeTimers;
@@ -272,6 +273,45 @@ describe('createManagedConfiguration()', () => {
       test('should decrease configuration at the next interval when an msearch 503 error is emitted', async () => {
         const { subscription, errors$ } = setupScenario(10);
         errors$.next(new MsearchError(503));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
+
+      test('should decrease configuration at the next interval when a bulkPartialUpdate 429 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(
+          new BulkUpdateError({ statusCode: 429, message: 'test', type: 'too_many_requests' })
+        );
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
+
+      test('should decrease configuration at the next interval when a bulkPartialUpdate 500 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(
+          new BulkUpdateError({ statusCode: 500, message: 'test', type: 'server_error' })
+        );
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 8);
+      });
+
+      test('should decrease configuration at the next interval when a bulkPartialUpdate 503 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(10);
+        errors$.next(
+          new BulkUpdateError({ statusCode: 503, message: 'test', type: 'unavailable' })
+        );
         clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
         expect(subscription).toHaveBeenCalledTimes(1);
         expect(subscription).toHaveBeenNthCalledWith(1, 10);

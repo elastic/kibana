@@ -38,14 +38,32 @@ describe.skip('onRequestInterceptor', () => {
 
   function initKbnServer(router: IRouter, basePath: IBasePath) {
     router.get(
-      { path: '/np_foo', validate: false },
+      {
+        path: '/np_foo',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
       (context: unknown, req: KibanaRequest, h: KibanaResponseFactory) => {
         return h.ok({ body: { path: req.url.pathname, basePath: basePath.get(req) } });
       }
     );
 
     router.get(
-      { path: '/some/path/s/np_foo/bar', validate: false },
+      {
+        path: '/some/path/s/np_foo/bar',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
       (context: unknown, req: KibanaRequest, h: KibanaResponseFactory) => {
         return h.ok({ body: { path: req.url.pathname, basePath: basePath.get(req) } });
       }
@@ -54,6 +72,12 @@ describe.skip('onRequestInterceptor', () => {
     router.get(
       {
         path: '/i/love/np_spaces',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           query: schema.object({
             queryParam: schema.string({

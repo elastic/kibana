@@ -36,6 +36,9 @@
     "initialize-server:lists:complete": "node ./scripts/index.js server lists_and_exception_lists trial_license_complete_tier",
     "run-tests:lists:complete": "node ./scripts/index.js runner lists_and_exception_lists trial_license_complete_tier",
 
+    "initialize-server:lists:essentials_only": "node ./scripts/index.js server lists_and_exception_lists essentials_tier",
+    "run-tests:lists:essentials_only": "node ./scripts/index.js runner lists_and_exception_lists essentials_tier",
+
     "initialize-server:edr-workflows": "node ./scripts/index.js server edr_workflows trial_license_complete_tier",
     "run-tests:edr-workflows": "node ./scripts/index.js runner edr_workflows trial_license_complete_tier",
 
@@ -135,6 +138,21 @@
     "edr_workflows:response_actions:qa:serverless:release": "npm run run-tests:edr-workflows response_actions serverless qaEnv",
     "edr_workflows:response_actions:server:ess": "npm run initialize-server:edr-workflows response_actions ess",
     "edr_workflows:response_actions:runner:ess": "npm run run-tests:edr-workflows response_actions ess essEnv",
+
+    "exception_lists:auth:lists:server:serverless": "npm run initialize-server:lists:essentials_only authorization/exceptions/lists serverless",
+    "exception_lists:auth:lists:runner:serverless": "npm run run-tests:lists:essentials_only authorization/exceptions/lists serverless serverlessEnv",
+    "exception_lists:auth:lists:qa:serverless": "npm run run-tests:lists:essentials_only authorization/exceptions/lists serverless qaPeriodicEnv",
+    "exception_lists:auth:lists:qa:serverless:release": "npm run run-tests:lists:essentials_only authorization/exceptions/lists serverless qaEnv",
+
+    "exception_lists:auth:common:server:serverless": "npm run initialize-server:lists:essentials_only authorization/exceptions/common serverless",
+    "exception_lists:auth:common:runner:serverless": "npm run run-tests:lists:essentials_only authorization/exceptions/common serverless serverlessEnv",
+    "exception_lists:auth:common:qa:serverless": "npm run run-tests:lists:essentials_only authorization/exceptions/common serverless qaPeriodicEnv",
+    "exception_lists:auth:common:qa:serverless:release": "npm run run-tests:lists:essentials_only authorization/exceptions/common serverless qaEnv",
+
+    "exception_lists:auth:items:server:serverless": "npm run initialize-server:lists:essentials_only authorization/exceptions/items serverless",
+    "exception_lists:auth:items:runner:serverless": "npm run run-tests:lists:essentials_only authorization/exceptions/items serverless serverlessEnv",
+    "exception_lists:auth:items:qa:serverless": "npm run run-tests:lists:essentials_only authorization/exceptions/items serverless qaPeriodicEnv",
+    "exception_lists:auth:items:qa:serverless:release": "npm run run-tests:lists:essentials_only authorization/exceptions/items serverless qaEnv",
 
     "exception_lists_items:server:serverless": "npm run initialize-server:lists:complete exception_lists_items serverless",
     "exception_lists_items:runner:serverless": "npm run run-tests:lists:complete exception_lists_items serverless serverlessEnv",
