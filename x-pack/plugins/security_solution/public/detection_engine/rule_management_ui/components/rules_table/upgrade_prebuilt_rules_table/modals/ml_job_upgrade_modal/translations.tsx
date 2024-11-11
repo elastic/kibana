@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MlJobCompatibilityLink } from '../../../../common/components/links_to_docs';
+import { MlJobCompatibilityLink } from '../../../../../../../common/components/links_to_docs';
 
 export const ML_JOB_UPGRADE_MODAL_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.mlJobUpgradeModal.messageTitle',
