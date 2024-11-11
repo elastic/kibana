@@ -134,7 +134,7 @@ describe('Home page', () => {
         );
       });
 
-      it.skip('Navigates to discover with kuery filter', () => {
+      it('Navigates to discover with kuery filter', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
