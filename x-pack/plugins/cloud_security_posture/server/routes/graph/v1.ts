@@ -164,7 +164,6 @@ const fetchGraph = async ({
 | SORT isAlert DESC`;
 
   logger.trace(`Executing query [${query}]`);
-  logger.trace(JSON.stringify(buildDslFilter(eventIds, start, end, esQuery)));
 
   return await esClient.asCurrentUser.helpers
     .esql({
