@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-import request from 'superagent';
-
-export function parseBfetchResponse(resp: request.Response): Array<Record<string, any>> {
-  return resp.text
-    .trim()
-    .split('\n')
-    .map((item) => JSON.parse(item));
-}
+export const ILM_LOCATOR_ID = 'ILM_LOCATOR_ID';
+export * from './src/policies';

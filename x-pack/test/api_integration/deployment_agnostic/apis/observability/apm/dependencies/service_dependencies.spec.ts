@@ -5,26 +5,26 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { ServiceNode } from '@kbn/apm-plugin/common/connections';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { DependencyNode } from '@kbn/apm-plugin/common/connections';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { generateData } from './generate_data';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
-  const registry = getService('registry');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
   const dependencyName = 'elasticsearch';
+  const serviceName = 'synth-go';
 
   async function callApi() {
     return await apmApiClient.readUser({
-      endpoint: 'GET /internal/apm/dependencies/upstream_services',
+      endpoint: 'GET /internal/apm/services/{serviceName}/dependencies',
       params: {
+        path: { serviceName },
         query: {
-          dependencyName,
           environment: 'production',
-          kuery: '',
           numBuckets: 20,
           offset: '1d',
           start: new Date(start).toISOString(),
@@ -34,36 +34,37 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when(
-    'Dependency upstream services when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
-      it('handles empty state', async () => {
+  describe('Dependency for service', () => {
+    describe('when data is not loaded', () => {
+      it('handles empty state #1', async () => {
         const { status, body } = await callApi();
 
         expect(status).to.be(200);
-        expect(body.services).to.empty();
+        expect(body.serviceDependencies).to.empty();
       });
-    }
-  );
+    });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177137
-  registry.when('Dependency upstream services', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         await generateData({ apmSynthtraceEsClient, start, end });
       });
       after(() => apmSynthtraceEsClient.clean());
 
-      it('returns a list of upstream services for the dependency', async () => {
+      it('returns a list of dependencies for a service', async () => {
         const { status, body } = await callApi();
 
         expect(status).to.be(200);
-        expect(body.services.map(({ location }) => (location as ServiceNode).serviceName)).to.eql([
-          'synth-go',
-        ]);
+        expect(
+          body.serviceDependencies.map(
+            ({ location }) => (location as DependencyNode).dependencyName
+          )
+        ).to.eql([dependencyName]);
 
-        const currentStatsLatencyValues = body.services[0].currentStats.latency.timeseries;
+        const currentStatsLatencyValues =
+          body.serviceDependencies[0].currentStats.latency.timeseries;
         expect(currentStatsLatencyValues.every(({ y }) => y === 1000000)).to.be(true);
       });
     });
