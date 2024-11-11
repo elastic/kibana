@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toClientContract } from './helpers';
+import { allLocationsToClientContract } from './helpers';
 
 const testLocations = {
   locations: [
@@ -56,7 +56,7 @@ const testLocations2 = {
 describe('toClientContract', () => {
   it('formats SO attributes to client contract with falsy geo location', () => {
     // @ts-ignore fixtures are purposely wrong types for testing
-    expect(toClientContract(testLocations)).toEqual([
+    expect(allLocationsToClientContract(testLocations)).toEqual([
       {
         agentPolicyId: 'e3134290-0f73-11ee-ba15-159f4f728deb',
         geo: {
@@ -86,7 +86,7 @@ describe('toClientContract', () => {
 
   it('formats SO attributes to client contract with truthy geo location', () => {
     // @ts-ignore fixtures are purposely wrong types for testing
-    expect(toClientContract(testLocations2)).toEqual([
+    expect(allLocationsToClientContract(testLocations2)).toEqual([
       {
         agentPolicyId: 'e3134290-0f73-11ee-ba15-159f4f728deb',
         geo: {

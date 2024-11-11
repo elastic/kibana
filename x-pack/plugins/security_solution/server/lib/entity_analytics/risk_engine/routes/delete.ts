@@ -23,8 +23,10 @@ export const riskEngineCleanupRoute = (
     .delete({
       access: 'public',
       path: RISK_ENGINE_CLEANUP_URL,
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(

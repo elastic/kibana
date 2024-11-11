@@ -100,7 +100,6 @@ export abstract class ExportType<
     }
   }
 
-  // needed to be protected vs private for the csv search source immediate export type
   protected getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
     const { uiSettings: uiSettingsService } = this.startDeps;
     const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
