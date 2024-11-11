@@ -44,5 +44,5 @@ export function mergeEntitiesList(entities: Entity[]): Entity[] {
     }
   }
 
-  return Array.from(Object.values(instances));
+  return Object.values(instances);
 }
