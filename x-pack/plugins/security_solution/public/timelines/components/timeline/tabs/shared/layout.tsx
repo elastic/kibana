@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlyoutHeader, EuiBadge } from '@elastic/eui';
 import styled from 'styled-components';
 
 export const TabHeaderContainer = styled.div`
@@ -33,45 +26,11 @@ export const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   }
 `;
 
-export const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
-  overflow-y: hidden;
-  flex: 1;
-
-  .euiFlyoutBody__overflow {
-    overflow: hidden;
-    mask-image: none;
-  }
-
-  .euiFlyoutBody__overflowContent {
-    padding: 0;
-    height: 100%;
-    display: flex;
-  }
-`;
-
-export const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
-  background: none;
-  &.euiFlyoutFooter {
-    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0;`}
-  }
-`;
-
 export const FullWidthFlexGroup = styled(EuiFlexGroup)`
   margin: 0;
   width: 100%;
   overflow: hidden;
 `;
-
-export const ScrollableFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
-  overflow: hidden;
-`;
-
-export const SourcererFlex = styled(EuiFlexItem)`
-  align-items: flex-end;
-`;
-
-SourcererFlex.displayName = 'SourcererFlex';
 
 export const VerticalRule = styled.div`
   width: 2px;

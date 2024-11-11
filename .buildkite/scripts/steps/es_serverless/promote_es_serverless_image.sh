@@ -78,4 +78,5 @@ steps:
     build:
       env:
         IMAGES_CONFIG="kibana/images.yml"
+        RETRY="1"
 EOF
