@@ -3261,6 +3261,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.NavigationTreeDefinitionUI.id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"security\" | \"es\" | \"oblt\""
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-public.NavigationTreeDefinitionUI.body",
             "type": "Array",
             "tags": [],
@@ -3630,11 +3644,14 @@
           {
             "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-public.SolutionNavigationDefinition.id",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "id",
             "description": [
               "Unique id for the solution navigation."
+            ],
+            "signature": [
+              "\"security\" | \"es\" | \"oblt\""
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
@@ -3736,50 +3753,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-browser",
-        "id": "def-public.SolutionNavigationDefinitions",
-        "type": "Interface",
-        "tags": [],
-        "label": "SolutionNavigationDefinitions",
-        "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.SolutionNavigationDefinitions.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[id: string]: SolutionNavigationDefinition<AppDeepLinkId>",
-            "description": [],
-            "signature": [
-              "[id: string]:  ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.SolutionNavigationDefinition",
-                "text": "SolutionNavigationDefinition"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.AppDeepLinkId",
-                "text": "AppDeepLinkId"
-              },
-              ">"
-            ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -3846,7 +3819,7 @@
         "label": "ChromeHelpExtensionLinkBase",
         "description": [],
         "signature": [
-          "{ rel?: string | undefined; 'data-test-subj'?: string | undefined; iconType?: ",
+          "{ 'data-test-subj'?: string | undefined; rel?: string | undefined; iconType?: ",
           "IconType",
           " | undefined; target?: string | (string & {}) | undefined; }"
         ],
@@ -4221,6 +4194,84 @@
         "description": [],
         "signature": [
           "\"hidden\" | \"visible\""
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.SolutionId",
+        "type": "Type",
+        "tags": [],
+        "label": "SolutionId",
+        "description": [],
+        "signature": [
+          "\"security\" | \"es\" | \"oblt\""
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.SolutionNavigationDefinitions",
+        "type": "Type",
+        "tags": [],
+        "label": "SolutionNavigationDefinitions",
+        "description": [],
+        "signature": [
+          "{ security?: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.SolutionNavigationDefinition",
+            "text": "SolutionNavigationDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.AppDeepLinkId",
+            "text": "AppDeepLinkId"
+          },
+          "> | undefined; es?: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.SolutionNavigationDefinition",
+            "text": "SolutionNavigationDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.AppDeepLinkId",
+            "text": "AppDeepLinkId"
+          },
+          "> | undefined; oblt?: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.SolutionNavigationDefinition",
+            "text": "SolutionNavigationDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.AppDeepLinkId",
+            "text": "AppDeepLinkId"
+          },
+          "> | undefined; }"
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,

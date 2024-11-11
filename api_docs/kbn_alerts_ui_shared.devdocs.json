@@ -6150,7 +6150,7 @@
         "signature": [
           "{ [x: string]: Pick<",
           "OptionsListControlState",
-          ", \"selectedOptions\" | \"title\" | \"fieldName\" | \"exclude\" | \"existsSelected\">; }"
+          ", \"title\" | \"fieldName\" | \"exclude\" | \"existsSelected\" | \"selectedOptions\">; }"
         ],
         "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
         "deprecated": false,

@@ -31,15 +31,16 @@ export const useGetDataUsageDataStreams = ({
   selectedDataStreams?: string[];
   options?: UseQueryOptions<GetDataUsageDataStreamsResponse, IHttpFetchError>;
 }): UseQueryResult<GetDataUsageDataStreamsResponse, IHttpFetchError> => {
-  const http = useKibanaContextForPlugin().services.http;
+  const { http } = useKibanaContextForPlugin().services;
 
   return useQuery<GetDataUsageDataStreamsResponse, IHttpFetchError>({
     queryKey: ['get-data-usage-data-streams'],
     ...options,
     keepPreviousData: true,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const dataStreamsResponse = await http
         .get<GetDataUsageDataStreamsResponse>(DATA_USAGE_DATA_STREAMS_API_ROUTE, {
+          signal,
           version: '1',
         })
         .catch((error) => {

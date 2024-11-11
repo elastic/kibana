@@ -12,8 +12,8 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
@@ -73,7 +73,7 @@ export const CorrelationsOverview: React.FC = () => {
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
   useEffect(() => {
-    if (isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.viewCase) {
+    if (isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.createCase) {
       goToCorrelationsTab();
     }
   }, [activeStep, goToCorrelationsTab, isTourShown]);
