@@ -125,7 +125,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h1 id="addPanelsFlyout">
             <FormattedMessage
               id="dashboard.solutionToolbar.addPanelFlyout.headingText"
@@ -148,6 +148,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<
             <EuiForm component="form" fullWidth>
               <EuiFormRow css={{ backgroundColor: euiTheme.colors.emptyShade }}>
                 <EuiFieldSearch
+                  compressed
                   autoFocus
                   value={searchTerm}
                   onChange={(e) => {
@@ -281,7 +282,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<
             <EuiButtonEmpty onClick={close} data-test-subj="dashboardPanelSelectionCloseBtn">
               <FormattedMessage
                 id="dashboard.solutionToolbar.addPanelFlyout.cancelButtonText"
-                defaultMessage="Close"
+                defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
