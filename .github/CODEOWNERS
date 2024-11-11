@@ -90,8 +90,8 @@ x-pack/plugins/cloud_integrations/cloud_full_story @elastic/kibana-core
 x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_links @elastic/kibana-core
 x-pack/plugins/cloud @elastic/kibana-core
-x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
-x-pack/packages/kbn-cloud-security-posture-common @elastic/kibana-cloud-security-posture
+x-pack/packages/kbn-cloud-security-posture/public @elastic/kibana-cloud-security-posture
+x-pack/packages/kbn-cloud-security-posture/common @elastic/kibana-cloud-security-posture
 x-pack/packages/kbn-cloud-security-posture/graph @elastic/kibana-cloud-security-posture
 x-pack/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
 packages/shared-ux/code_editor/impl @elastic/appex-sharedux
@@ -466,6 +466,7 @@ examples/feature_control_examples @elastic/kibana-security
 examples/feature_flags_example @elastic/kibana-core
 x-pack/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
 x-pack/plugins/features @elastic/kibana-core
+x-pack/test/security_api_integration/plugins/features_provider @elastic/kibana-security
 x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 examples/field_formats_example @elastic/kibana-data-discovery
 src/plugins/field_formats @elastic/kibana-data-discovery
@@ -523,7 +524,6 @@ x-pack/plugins/index_management @elastic/kibana-management
 x-pack/packages/index-management/index_management_shared_types @elastic/kibana-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 x-pack/packages/ml/inference_integration_flyout @elastic/ml-ui
-x-pack/packages/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/plugins/inference @elastic/appex-ai-infra
 x-pack/packages/kbn-infra-forge @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
@@ -687,6 +687,7 @@ packages/presentation/presentation_containers @elastic/kibana-presentation
 src/plugins/presentation_panel @elastic/kibana-presentation
 packages/presentation/presentation_publishing @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
+x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
 x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-team
 packages/kbn-profiling-utils @elastic/obs-ux-infra_services-team
@@ -778,6 +779,7 @@ x-pack/plugins/searchprofiler @elastic/kibana-management
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
 x-pack/packages/security/api_key_management @elastic/kibana-security
 x-pack/packages/security/authorization_core @elastic/kibana-security
+x-pack/packages/security/authorization_core_common @elastic/kibana-security
 x-pack/packages/security/form_components @elastic/kibana-security
 packages/kbn-security-hardening @elastic/kibana-security
 x-pack/plugins/security @elastic/kibana-security
@@ -785,6 +787,7 @@ x-pack/packages/security/plugin_types_common @elastic/kibana-security
 x-pack/packages/security/plugin_types_public @elastic/kibana-security
 x-pack/packages/security/plugin_types_server @elastic/kibana-security
 x-pack/packages/security/role_management_model @elastic/kibana-security
+x-pack/packages/security-solution/common @elastic/security-threat-hunting-investigations
 x-pack/packages/security-solution/distribution_bar @elastic/kibana-cloud-security-posture
 x-pack/plugins/security_solution_ess @elastic/security-solution
 x-pack/packages/security-solution/features @elastic/security-threat-hunting-explore
