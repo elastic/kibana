@@ -5326,7 +5326,12 @@
   version "0.0.0"
   uid ""
 
+
 "@kbn/index-adapter@link:packages/kbn-index-adapter":
+  version "0.0.0"
+  uid ""
+
+"@kbn/index-lifecycle-management-common-shared@link:x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared":
   version "0.0.0"
   uid ""
 
