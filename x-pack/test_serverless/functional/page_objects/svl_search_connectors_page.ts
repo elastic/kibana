@@ -53,9 +53,8 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await testSubjects.existOrFail('serverlessSearchEditConnectorType');
         await testSubjects.existOrFail('serverlessSearchEditConnectorTypeChoices');
         await testSubjects.click('serverlessSearchEditConnectorTypeChoices');
-        await testSubjects.exists('serverlessSearchConnectorServiceType-zoom');
+        await testSubjects.exists(`serverlessSearchConnectorServiceType-${type}`);
         await testSubjects.click(`serverlessSearchConnectorServiceType-${type}`);
-        await testSubjects.existOrFail('serverlessSearchConnectorServiceType-zoom');
       },
       async expectConnectorIdToMatchUrl(connectorId: string) {
         expect(await browser.getCurrentUrl()).contain(`/app/connectors/${connectorId}`);
