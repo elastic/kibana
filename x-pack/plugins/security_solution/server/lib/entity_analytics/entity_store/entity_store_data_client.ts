@@ -20,13 +20,17 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
 import moment from 'moment';
+import type {
+  InitEntityStoreRequestBody,
+  InitEntityStoreResponse,
+} from '../../../../common/api/entity_analytics/entity_store/enablement.gen';
 import type { AppClient } from '../../..';
+import { EntityType } from '../../../../common/api/entity_analytics';
 import type {
   Entity,
   EngineDataviewUpdateResult,
   InitEntityEngineRequestBody,
   InitEntityEngineResponse,
-  EntityType,
   InspectQuery,
 } from '../../../../common/api/entity_analytics';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
@@ -126,6 +130,27 @@ export class EntityStoreDataClient {
     });
   }
 
+  public async enable(
+    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityStoreRequestBody,
+    { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
+  ): Promise<InitEntityStoreResponse> {
+    if (!this.options.taskManager) {
+      throw new Error('Task Manager is not available');
+    }
+
+    // Immediately defer the initialization to the next tick. This way we don't block on the init preflight checks
+    const run = <T>(fn: () => Promise<T>) =>
+      new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
+    const promises = Object.values(EntityType.Values).map((entity) =>
+      run(() =>
+        this.init(entity, { indexPattern, filter, fieldHistoryLength }, { pipelineDebugMode })
+      )
+    );
+
+    const engines = await Promise.all(promises);
+    return { engines, succeeded: true };
+  }
+
   public async init(
     entityType: EntityType,
     { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody,
@@ -137,7 +162,16 @@ export class EntityStoreDataClient {
 
     const { config } = this.options;
 
-    await this.riskScoreDataClient.createRiskScoreLatestIndex();
+    await this.riskScoreDataClient.createRiskScoreLatestIndex().catch((e) => {
+      if (e.meta.body.error.type === 'resource_already_exists_exception') {
+        this.options.logger.debug(
+          `Risk score index for ${entityType} already exists, skipping creation.`
+        );
+        return;
+      }
+
+      throw e;
+    });
 
     const requiresMigration =
       await this.assetCriticalityMigrationClient.isEcsDataMigrationRequired();
