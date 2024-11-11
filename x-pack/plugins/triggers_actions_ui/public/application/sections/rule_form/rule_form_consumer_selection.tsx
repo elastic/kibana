@@ -10,6 +10,7 @@ import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { IErrorObject, RuleCreationValidConsumer } from '../../../types';
+import { useKibana } from '../../../common/lib/kibana';
 
 const SELECT_LABEL: string = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.selectLabel',
@@ -80,6 +81,8 @@ export interface RuleFormConsumerSelectionProps {
 const SINGLE_SELECTION = { asPlainText: true };
 
 export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps) => {
+  const { isServerless } = useKibana().services;
+
   const { consumers, errors, onChange, selectedConsumer, initialSelectedConsumer } = props;
   const isInvalid = (errors?.consumer as string[])?.length > 0;
 
@@ -149,7 +152,16 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (consumers.length <= 1) {
+  useEffect(() => {
+    if (consumers.length === 1) {
+      onChange(consumers[0] as RuleCreationValidConsumer);
+    } else if (isServerless && consumers.includes(AlertConsumers.OBSERVABILITY)) {
+      onChange(AlertConsumers.OBSERVABILITY as RuleCreationValidConsumer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [consumers]);
+
+  if (consumers.length <= 1 || (isServerless && consumers.includes(AlertConsumers.OBSERVABILITY))) {
     return null;
   }
 
