@@ -774,6 +774,15 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
     forceDSL?: boolean
   ) => ExpressionAstExpression | string | null;
 
+  toESQL: (
+    state: T,
+    layerId: string,
+    indexPatterns: IndexPatternMap,
+    dateRange: DateRange,
+    nowInstant: Date,
+    searchSessionId?: string
+  ) => string | null;
+
   getDatasourceSuggestionsForField: (
     state: T,
     field: unknown,

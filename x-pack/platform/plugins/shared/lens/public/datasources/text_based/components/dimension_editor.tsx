@@ -7,19 +7,20 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, useEuiTheme, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiText, useEuiTheme } from '@elastic/eui';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
 import type {
   TextBasedPrivateState,
-  TextBasedLayer,
   DatasourceDimensionEditorProps,
   DataType,
 } from '@kbn/lens-common';
-import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
+import { mergeLayer, updateColumnLabel } from '../utils';
 import type { FormatSelectorProps } from '../../form_based/dimension_panel/format_selector';
 import { FormatSelector } from '../../form_based/dimension_panel/format_selector';
+import type { TemporaryState } from '../../form_based/dimension_panel/dimensions_editor_helpers';
+import { updateColumnParam } from '../../form_based/operations';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import { isNotNumeric, isNumeric } from '../utils';
 import { fetchFieldsFromESQLExpression } from './fetch_fields_from_esql_expression';
@@ -100,8 +101,14 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     return layerColumns?.find((column) => column.columnId === props.columnId);
   }, [props.columnId, props.layerId, props.state.layers]);
 
+  const incompleteInfo = (props.state.layers[props.layerId].incompleteColumns ?? {})[
+    props.columnId
+  ];
+
+  const [temporaryState, setTemporaryState] = useState<TemporaryState>('none');
+
   const updateLayer = useCallback(
-    (newLayer: Partial<TextBasedLayer>) =>
+    (newLayer: Partial<TextBasedPrivateState>) =>
       setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
     [layerId, setState]
   );
@@ -109,15 +116,18 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   const onFormatChange = useCallback<FormatSelectorProps['onChange']>(
     (newFormat) => {
       updateLayer(
-        updateColumnFormat({
+        updateColumnParam({
           layer: state.layers[layerId],
           columnId,
+          paramName: 'format',
           value: newFormat,
         })
       );
     },
     [columnId, layerId, state.layers, updateLayer]
   );
+
+  const currentFieldIsInvalid = useMemo(() => false, [state.layers, layerId, columnId]);
 
   return (
     <>

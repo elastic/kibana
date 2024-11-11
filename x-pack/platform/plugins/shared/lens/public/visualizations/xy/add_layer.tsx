@@ -118,7 +118,7 @@ export function AddLayerButton({
       type: LayerTypes.ESQL,
       disabled: false,
       label: i18n.translate('xpack.lens.configPanel.esqlLayer', {
-        defaultMessage: 'ES|QL',
+        defaultMessage: 'ES|QL Layer',
       }),
       icon: 'logoElasticsearch',
       toolTipContent: i18n.translate('xpack.lens.configPanel.esqlLayerTooltip', {
