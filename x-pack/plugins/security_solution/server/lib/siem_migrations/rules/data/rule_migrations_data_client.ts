@@ -18,7 +18,7 @@ export type CreateRuleMigrationInput = Omit<RuleMigration, '@timestamp' | 'statu
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
 export type RuleMigrationAllDataStats = Array<RuleMigrationDataStats & { migration_id: string }>;
 
-export type IndexNameProvider = (migrationId: string) => Promise<string>;
+export type IndexNameProvider = () => Promise<string>;
 export type IndexNameProviders = Record<AdapterId, IndexNameProvider>;
 
 export class RuleMigrationsDataClient {

@@ -21,6 +21,7 @@ export function getRuleMigrationAgent({
 }: MigrateRuleGraphParams) {
   const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({ model, prebuiltRulesMap, logger });
   const translationNode = getTranslateQueryNode({
+    model,
     inferenceClient,
     resourceRetriever,
     connectorId,

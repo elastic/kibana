@@ -7,13 +7,17 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
+import { StringOutputParser } from '@langchain/core/output_parsers';
+import { isEmpty } from 'lodash/fp';
 import type { GraphNode } from '../../types';
 import { getEsqlKnowledgeBase } from './esql_knowledge_base_caller';
-import { getEsqlTranslationPrompt } from './prompt';
+import { getEsqlTranslationPrompt, getInlineQueryPrompt } from './prompt';
 import { SiemMigrationRuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { RuleResourceRetriever } from '../../../util/rule_resource_retriever';
+import type { ChatModel } from '../../../util/actions_client_chat';
 
 interface GetTranslateQueryNodeParams {
+  model: ChatModel;
   inferenceClient: InferenceClient;
   resourceRetriever: RuleResourceRetriever;
   connectorId: string;
@@ -21,16 +25,24 @@ interface GetTranslateQueryNodeParams {
 }
 
 export const getTranslateQueryNode = ({
-  resourceRetriever,
+  model,
   inferenceClient,
+  resourceRetriever,
   connectorId,
   logger,
 }: GetTranslateQueryNodeParams): GraphNode => {
   const esqlKnowledgeBaseCaller = getEsqlKnowledgeBase({ inferenceClient, connectorId, logger });
   return async (state) => {
+    let query = state.original_rule.query;
+
     const resources = await resourceRetriever.getResources(state.original_rule);
-    const prompt = getEsqlTranslationPrompt(state, resources);
-    logger.info(prompt);
+    if (!isEmpty(resources)) {
+      const inlineQueryPrompt = getInlineQueryPrompt(state, resources);
+      const stringParser = new StringOutputParser();
+      query = await model.pipe(stringParser).invoke(inlineQueryPrompt);
+    }
+
+    const prompt = getEsqlTranslationPrompt(state, query);
     const response = await esqlKnowledgeBaseCaller(prompt);
 
     const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';

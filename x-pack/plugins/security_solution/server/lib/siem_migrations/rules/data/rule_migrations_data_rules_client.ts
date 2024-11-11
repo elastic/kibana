@@ -28,8 +28,8 @@ const BULK_MAX_SIZE = 500 as const;
 
 export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient {
   /** Indexes an array of rule migrations to be processed */
-  async create(migrationId: string, ruleMigrations: CreateRuleMigrationInput[]): Promise<void> {
-    const index = await this.getIndexName(migrationId);
+  async create(ruleMigrations: CreateRuleMigrationInput[]): Promise<void> {
+    const index = await this.getIndexName();
 
     let ruleMigrationsSlice: CreateRuleMigrationInput[];
     while ((ruleMigrationsSlice = ruleMigrations.splice(0, BULK_MAX_SIZE)).length) {
@@ -55,7 +55,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
 
   /** Retrieves an array of rule documents of a specific migrations */
   async get(migrationId: string): Promise<StoredRuleMigration[]> {
-    const index = await this.getIndexName(migrationId);
+    const index = await this.getIndexName();
     const query = this.getFilterQuery(migrationId);
 
     const storedRuleMigrations = await this.esClient
@@ -75,7 +75,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
    * - Multiple tasks should not process the same migration simultaneously.
    */
   async takePending(migrationId: string, size: number): Promise<StoredRuleMigration[]> {
-    const index = await this.getIndexName(migrationId);
+    const index = await this.getIndexName();
     const query = this.getFilterQuery(migrationId, SiemMigrationStatus.PENDING);
 
     const storedRuleMigrations = await this.esClient
@@ -149,20 +149,6 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     );
   }
 
-  // /** Updates all the rule migration with the provided id with status `processing` or `failed` back to `pending` */
-  // async releaseProcessable(migrationId: string): Promise<void> {
-  //   const index = await this.getIndexName(migrationId););
-  //   const query = this.getFilterQuery(migrationId, [
-  //     SiemMigrationStatus.PROCESSING,
-  //     SiemMigrationStatus.FAILED,
-  //   ]);
-  //   const script = { source: `ctx._source['status'] = '${SiemMigrationStatus.PENDING}'` };
-  //   await this.esClient.updateByQuery({ index, query, script, refresh: true }).catch((error) => {
-  //     this.logger.error(`Error releasing rule migrations status to pending: ${error.message}`);
-  //     throw error;
-  //   });
-  // }
-
   /** Updates all the rule migration with the provided id and with status `statusToQuery` to `statusToUpdate` */
   async updateStatus(
     migrationId: string,
@@ -170,7 +156,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     statusToUpdate: SiemMigrationStatus,
     { refresh = false }: { refresh?: boolean } = {}
   ): Promise<void> {
-    const index = await this.getIndexName(migrationId);
+    const index = await this.getIndexName();
     const query = this.getFilterQuery(migrationId, statusToQuery);
     const script = { source: `ctx._source['status'] = '${statusToUpdate}'` };
     await this.esClient.updateByQuery({ index, query, script, refresh }).catch((error) => {
@@ -181,7 +167,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
 
   /** Retrieves the stats for the rule migrations with the provided id */
   async getStats(migrationId: string): Promise<RuleMigrationDataStats> {
-    const index = await this.getIndexName(migrationId);
+    const index = await this.getIndexName();
     const query = this.getFilterQuery(migrationId);
     const aggregations = {
       pending: { filter: { term: { status: SiemMigrationStatus.PENDING } } },
@@ -212,7 +198,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
 
   /** Retrieves the stats for all the rule migrations aggregated by migration id */
   async getAllStats(): Promise<RuleMigrationAllDataStats> {
-    const index = await this.getIndexName('*');
+    const index = await this.getIndexName();
     const aggregations = {
       migrationIds: {
         terms: { field: 'migration_id' },

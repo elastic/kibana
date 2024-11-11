@@ -68,12 +68,9 @@ export class RuleMigrationsDataService {
   }
 
   private createIndexNameProvider(adapter: AdapterId, spaceId: string) {
-    return async (migrationId: string) => {
-      const suffix = `${migrationId}-${spaceId}`;
-      if (!suffix.includes('*')) {
-        await this.adapters[adapter].createIndex(suffix);
-      }
-      return this.adapters[adapter].getIndexName(suffix);
+    return async () => {
+      await this.adapters[adapter].createIndex(spaceId); // This will resolve instantly when the index is already created
+      return this.adapters[adapter].getIndexName(spaceId);
     };
   }
 }
