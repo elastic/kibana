@@ -73,5 +73,16 @@ describe('isRetryableEsClientError', () => {
         expect(isRetryableEsClientError(error)).toEqual(true);
       }
     );
+
+    it('ResponseError with 404 status code and message "Unknown resource."', () => {
+      const error = new esErrors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 404,
+          body: { message: 'Unknown resource.' },
+        })
+      );
+
+      expect(isRetryableEsClientError(error)).toEqual(true);
+    });
   });
 });

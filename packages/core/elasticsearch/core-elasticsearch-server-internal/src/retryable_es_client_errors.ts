@@ -30,6 +30,8 @@ export const isRetryableEsClientError = (e: EsErrors.ElasticsearchClientError): 
     e instanceof EsErrors.TimeoutError ||
     (e instanceof EsErrors.ResponseError &&
       (retryResponseStatuses.includes(e?.statusCode!) ||
+        // Check for the specific 404 error with "Unknown resource"
+        (e?.statusCode === 404 && e?.body?.message === 'Unknown resource.') ||
         // ES returns a 400 Bad Request when trying to close or delete an
         // index while snapshots are in progress. This should have been a 503
         // so once https://github.com/elastic/elasticsearch/issues/65883 is
