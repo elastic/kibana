@@ -60,7 +60,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         }
       );
 
-      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
