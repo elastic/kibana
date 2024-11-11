@@ -9,13 +9,13 @@
 
 export { DataStreamAdapter } from './src/data_stream_adapter';
 export { DataStreamSpacesAdapter } from './src/data_stream_spaces_adapter';
-export { retryTransientEsErrors } from '@kbn/index-adapter/src/retry_transient_es_errors';
-export { ecsFieldMap, type EcsFieldMap } from '@kbn/index-adapter/src/field_maps/ecs_field_map';
 
+export { retryTransientEsErrors, ecsFieldMap } from '@kbn/index-adapter';
 export type {
   SetComponentTemplateParams,
   SetIndexTemplateParams,
   InstallParams,
+  EcsFieldMap,
 } from '@kbn/index-adapter';
 
 export * from '@kbn/index-adapter/src/field_maps/types';
