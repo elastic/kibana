@@ -30,6 +30,8 @@ export const getMergedDataQualityContextProps = (
     ilmPhases,
     selectedIlmPhaseOptions,
     setSelectedIlmPhaseOptions,
+    defaultStartTime,
+    defaultEndTime,
   } = {
     isILMAvailable: true,
     addSuccessToast: jest.fn(),
@@ -69,6 +71,8 @@ export const getMergedDataQualityContextProps = (
       },
     ],
     setSelectedIlmPhaseOptions: jest.fn(),
+    defaultStartTime: 'now-7d/d',
+    defaultEndTime: 'now/d',
     ...dataQualityContextProps,
   };
 
@@ -90,5 +94,7 @@ export const getMergedDataQualityContextProps = (
     ilmPhases,
     selectedIlmPhaseOptions,
     setSelectedIlmPhaseOptions,
+    defaultStartTime,
+    defaultEndTime,
   };
 };
