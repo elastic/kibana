@@ -78,15 +78,6 @@ describe('single line query', () => {
       });
     });
 
-    describe('SHOW', () => {
-      /** @todo Enable once show command args are parsed as columns.  */
-      test.skip('info page', () => {
-        const { text } = reprint('SHOW info');
-
-        expect(text).toBe('SHOW info');
-      });
-    });
-
     describe('STATS', () => {
       test('with aggregates assignment', () => {
         const { text } = reprint('FROM a | STATS var = agg(123, fn(true))');
