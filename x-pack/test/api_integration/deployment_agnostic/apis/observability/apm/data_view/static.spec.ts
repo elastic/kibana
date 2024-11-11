@@ -61,7 +61,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     after(async () => {
       await supertestEditorWithApiKey.destroy();
-      await supertestEditorWithCookieCredentials.destroy();
     });
 
     function deleteDataView(spaceId: string) {
