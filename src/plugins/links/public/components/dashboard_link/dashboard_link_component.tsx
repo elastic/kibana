@@ -154,6 +154,10 @@ export const DashboardLinkComponent = ({
     <EuiListGroupItem
       size={linkSize}
       color="text"
+      style={{
+        fontStyle: link.italic ? 'italic' : 'normal',
+        fontWeight: link.bold ? 'bold' : 'normal',
+      }}
       {...onClickProps}
       id={id}
       showToolTip={true}

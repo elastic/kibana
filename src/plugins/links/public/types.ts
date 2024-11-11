@@ -70,6 +70,8 @@ export type ResolvedLink = Link & {
   description?: string;
   error?: Error;
   size?: 'xs' | 's' | 'm' | 'l';
+  italic?: boolean;
+  bold?: boolean;
 };
 
 export interface DashboardItem {

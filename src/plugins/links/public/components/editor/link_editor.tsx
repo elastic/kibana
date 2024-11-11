@@ -62,6 +62,8 @@ export const LinkEditor = ({
   const [linkOptions, setLinkOptions] = useState<LinkOptions | undefined>();
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
   const [linkSize, setLinkSize] = useState<'xs' | 's' | 'm' | 'l'>('xs');
+  const [italic, setItalic] = useState<boolean>(false);
+  const [bold, setBold] = useState<boolean>(false);
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
     return ([DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE] as LinkType[]).map((type) => {
@@ -143,6 +145,10 @@ export const LinkEditor = ({
               data-test-subj="links--linkEditor--linkLabel--input"
             />
           </EuiFormRow>
+          <EuiFilterGroup>
+            <EuiFilterButton onChange={() => setItalic(!italic)}>I</EuiFilterButton>
+            <EuiFilterButton onChange={() => setBold(!bold)}>B</EuiFilterButton>
+          </EuiFilterGroup>
           <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkSizeLabel()}>
             <EuiFlexItem grow={false}>
               <EuiFilterGroup>
@@ -194,6 +200,8 @@ export const LinkEditor = ({
                     title: defaultLinkLabel ?? '',
                     description: linkDescription,
                     size: linkSize,
+                    italic: !!italic,
+                    bold: !!bold,
                   });
 
                   onClose();
