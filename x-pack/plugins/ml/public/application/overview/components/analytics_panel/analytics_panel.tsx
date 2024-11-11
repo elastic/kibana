@@ -119,6 +119,9 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
           })}
         </EuiLink>,
       ]}
+      ariaLabel={i18n.translate('xpack.ml.overview.analyticsListPanel.ariaLabel', {
+        defaultMessage: 'data frame analytics panel',
+      })}
     >
       {noDFAJobs ? <AnalyticsEmptyPrompt /> : null}
 
