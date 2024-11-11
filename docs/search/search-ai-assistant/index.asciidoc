@@ -47,7 +47,9 @@ Elastic does not control third-party tools, and assumes no responsibility or lia
 === Using AI Assistant
 
 To open AI Assistant, select the **AI Assistant** button in the top toolbar in the UI.
-// You can also use the <<kibana-concepts-finding-your-apps-objects,global search field>> to find AI Assistant.
+You can also use the global search field in the UI to find AI Assistant.
+// <<kibana-concepts-finding-your-apps-objects,global search field>>
+// TODO link will be available once https://github.com/elastic/kibana/pull/199352 is merged.
 
 [role="screenshot"]
 image::images/ai-assistant-button.png[AI Assistant button,50]
