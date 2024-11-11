@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { castArray } from 'lodash';
 import type { InventoryEntity } from '../../../common/entities';
-import { isEntityOfType } from '../../../common/utils/entity_type_guards';
+import { isBuiltinEntityOfType } from '../../../common/utils/entity_type_guards';
 
 interface EntityIconProps {
   entity: InventoryEntity;
@@ -20,7 +20,7 @@ interface EntityIconProps {
 export function EntityIcon({ entity }: EntityIconProps) {
   const defaultIconSize = euiThemeVars.euiSizeL;
 
-  if (isEntityOfType('host', entity) || isEntityOfType('container', entity)) {
+  if (isBuiltinEntityOfType('host', entity) || isBuiltinEntityOfType('container', entity)) {
     const cloudProvider = castArray(entity.cloud?.provider)[0];
 
     return (
@@ -41,7 +41,7 @@ export function EntityIcon({ entity }: EntityIconProps) {
     );
   }
 
-  if (isEntityOfType('service', entity)) {
+  if (isBuiltinEntityOfType('service', entity)) {
     return <AgentIcon agentName={castArray(entity.agent?.name)[0]} role="presentation" />;
   }
 

@@ -8,7 +8,7 @@
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { InventoryEntity } from '../entities';
 
-interface EntityMap {
+interface BuiltinEntityMap {
   host: InventoryEntity & { cloud?: { provider?: string[] } };
   container: InventoryEntity & { cloud?: { provider?: string[] } };
   service: InventoryEntity & {
@@ -17,9 +17,9 @@ interface EntityMap {
   };
 }
 
-export const isEntityOfType = <T extends keyof EntityMap>(
+export const isBuiltinEntityOfType = <T extends keyof BuiltinEntityMap>(
   type: T,
   entity: InventoryEntity
-): entity is EntityMap[T] => {
+): entity is BuiltinEntityMap[T] => {
   return entity.entityType === type;
 };
