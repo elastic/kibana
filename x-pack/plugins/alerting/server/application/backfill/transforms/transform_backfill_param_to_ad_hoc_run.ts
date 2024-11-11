@@ -6,6 +6,7 @@
  */
 
 import { isString } from 'lodash';
+import { DenormalizedAction } from '../../../rules_client';
 import { AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { calculateSchedule } from '../../../backfill_client/lib';
 import { adHocRunStatus } from '../../../../common/constants';
@@ -15,6 +16,7 @@ import { ScheduleBackfillParam } from '../methods/schedule/types';
 export const transformBackfillParamToAdHocRun = (
   param: ScheduleBackfillParam,
   rule: RuleDomain,
+  actions: DenormalizedAction[],
   spaceId: string
 ): AdHocRunSO => {
   const schedule = calculateSchedule(param.start, rule.schedule.interval, param.end);
@@ -32,7 +34,7 @@ export const transformBackfillParamToAdHocRun = (
       params: rule.params,
       apiKeyOwner: rule.apiKeyOwner,
       apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
-      actions: param.runActions ? rule.actions : [],
+      actions: param.runActions ? (actions as unknown as AdHocRunSO['rule']['actions']) : [],
       consumer: rule.consumer,
       enabled: rule.enabled,
       schedule: rule.schedule,

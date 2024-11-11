@@ -23,6 +23,8 @@ import {
   TaskPriority,
 } from '@kbn/task-manager-plugin/server';
 import { isNumber } from 'lodash';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import { asyncForEach } from '@kbn/std';
 import {
   ScheduleBackfillError,
   ScheduleBackfillParam,
@@ -42,6 +44,8 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_o
 import { TaskRunnerFactory } from '../task_runner';
 import { RuleTypeRegistry } from '../types';
 import { createBackfillError } from './lib';
+import { denormalizeActions } from '../rules_client/lib/denormalize_actions';
+import { NormalizedAlertActionWithGeneratedValues } from '../rules_client';
 
 export const BACKFILL_TASK_TYPE = 'ad_hoc_run-backfill';
 
@@ -53,6 +57,7 @@ interface ConstructorOpts {
 }
 
 interface BulkQueueOpts {
+  actionsClient: ActionsClient;
   auditLogger?: AuditLogger;
   params: ScheduleBackfillParams;
   rules: RuleDomain[];
@@ -86,6 +91,7 @@ export class BackfillClient {
   }
 
   public async bulkQueue({
+    actionsClient,
     auditLogger,
     params,
     rules,
@@ -118,7 +124,7 @@ export class BackfillClient {
 
     const soToCreateIndexOrErrorMap: Map<number, number | ScheduleBackfillError> = new Map();
 
-    params.forEach((param: ScheduleBackfillParam, ndx: number) => {
+    await asyncForEach(params, async (param: ScheduleBackfillParam, ndx: number) => {
       // For this schedule request, look up the rule or return error
       const { rule, error } = getRuleOrError(param.ruleId, rules, ruleTypeRegistry);
       if (rule) {
@@ -129,19 +135,21 @@ export class BackfillClient {
           name: `rule`,
           type: RULE_SAVED_OBJECT_TYPE,
         };
+        const { references: actionReferences, actions } = await denormalizeActions(
+          () => Promise.resolve(actionsClient),
+          rule.actions as NormalizedAlertActionWithGeneratedValues[]
+        );
         adHocSOsToCreate.push({
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          attributes: transformBackfillParamToAdHocRun(param, rule, spaceId),
-          references: [reference], // TODO need to extract action references here
+          attributes: transformBackfillParamToAdHocRun(param, rule, actions, spaceId),
+          references: [reference, ...actionReferences],
         });
       } else if (error) {
         // keep track of the error encountered for this request by index so
         // we can return it in order
         soToCreateIndexOrErrorMap.set(ndx, error);
         this.logger.warn(
-          `No rule found for ruleId ${param.ruleId} - not scheduling backfill for ${JSON.stringify(
-            param
-          )}`
+          `Error for ruleId ${param.ruleId} - not scheduling backfill for ${JSON.stringify(param)}`
         );
       }
     });
@@ -175,7 +183,7 @@ export class BackfillClient {
             })
           );
         }
-        return transformAdHocRunToBackfillResult(so, adHocSOsToCreate?.[index]);
+        return transformAdHocRunToBackfillResult(actionsClient, so, adHocSOsToCreate?.[index]);
       }
     );
 
@@ -340,6 +348,17 @@ function getRuleOrError(
   if (!rule.apiKey) {
     return {
       error: createBackfillError(`Rule ${ruleId} has no API key`, ruleId, rule.name),
+    };
+  }
+
+  // validate that we can run all the actions that are configured
+  const hasUnsupportedActions = rule.actions.some(
+    (action) => action.frequency?.notifyWhen !== 'onActiveAlert'
+  );
+
+  if (hasUnsupportedActions) {
+    return {
+      error: createBackfillError(`Rule ${ruleId} has unsupported actions`, ruleId, rule.name),
     };
   }
 
