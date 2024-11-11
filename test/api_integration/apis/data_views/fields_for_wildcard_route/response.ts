@@ -82,7 +82,8 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('fields_for_wildcard_route response', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/199413
+  describe.skip('fields_for_wildcard_route response', () => {
     before(() =>
       esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
     );
