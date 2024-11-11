@@ -60,15 +60,9 @@ export default function ({ getService }: FtrProviderContext) {
       httpMonitorJson = _httpMonitorJson;
     });
 
-    const testPolicyName = 'Fleet test server policy' + Date.now();
-
-    it('adds a test fleet policy', async () => {
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
-      testFleetPolicyID = apiResponse.body.item.id;
-    });
-
     it('add a test private location', async () => {
-      await testPrivateLocations.setTestLocations([testFleetPolicyID]);
+      const loc = await testPrivateLocations.addPrivateLocation();
+      testFleetPolicyID = loc.id;
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
@@ -287,8 +281,9 @@ export default function ({ getService }: FtrProviderContext) {
       const deleteResponse = await supertestAPI
         .delete(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
-        .send({ ids })
-        .expect(200);
+        .send({ ids });
+
+      expect(deleteResponse.status).eql(200);
 
       expect(deleteResponse.body).to.have.length(2);
 

@@ -3572,6 +3572,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "synthetics-private-location": {
+    "dynamic": false,
+    "properties": {}
+  },
   "synthetics-privates-locations": {
     "dynamic": false,
     "properties": {}
