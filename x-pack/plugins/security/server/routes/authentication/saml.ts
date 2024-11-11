@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 
 import type { RouteDefinitionParams } from '..';
 import { SAMLAuthenticationProvider, SAMLLogin } from '../../authentication';
@@ -27,6 +28,7 @@ export function defineSAMLRoutes({
     '/api/security/saml/callback',
     ...(buildFlavor !== 'serverless' ? ['/api/security/v1/saml'] : []),
   ]) {
+    const isDeprecated = path === '/api/security/v1/saml';
     router.post(
       {
         path,
@@ -48,10 +50,27 @@ export function defineSAMLRoutes({
           authRequired: false,
           xsrfRequired: false,
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+          ...(isDeprecated && {
+            deprecated: {
+              documentationUrl:
+                'https://elastic.co/guide/en/elasticsearch/reference/current/saml-guide-stack.html',
+              severity: 'critical',
+              message: i18n.translate('xpack.security.deprecations.samlPostRouteMessage', {
+                defaultMessage:
+                  'The "{path}" URL is deprecated and will be removed in the next major version, please use "/api/security/saml/callback" instead.',
+                values: { path },
+              }),
+              reason: {
+                type: 'migrate',
+                newApiMethod: 'POST',
+                newApiPath: '/api/security/saml/callback',
+              },
+            },
+          }),
         },
       },
       async (context, request, response) => {
-        if (path === '/api/security/v1/saml') {
+        if (isDeprecated) {
           const serverBasePath = basePath.serverBasePath;
           logger.warn(
             // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
