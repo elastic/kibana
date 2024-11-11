@@ -36,7 +36,8 @@ export default function (providerContext: FtrProviderContext) {
     return res?._source?.['epm-packages'] as Installation;
   };
 
-  describe('Installs a package using stream-based approach', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/199701
+  describe.skip('Installs a package using stream-based approach', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
