@@ -43,6 +43,10 @@ const mapAdHocDataView = (adHocDataView: DataView): DataViewListItemEnhanced => 
   };
 };
 
+const nonShrinkableContainerCss = css`
+  min-width: 0;
+`;
+
 export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
@@ -238,12 +242,7 @@ export function ChangeDataView({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <>
-        <EuiFlexItem
-          grow={true}
-          css={css`
-            min-width: 0;
-          `}
-        >
+        <EuiFlexItem grow={true} css={nonShrinkableContainerCss}>
           <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <EuiFlexItem
               grow={false}
@@ -259,12 +258,7 @@ export function ChangeDataView({
                 defaultMessage: 'Data view',
               })}
             </EuiFlexItem>
-            <EuiFlexItem
-              grow={true}
-              css={css`
-                min-width: 0;
-              `}
-            >
+            <EuiFlexItem grow={true} css={nonShrinkableContainerCss}>
               <EuiPopover
                 panelClassName="changeDataViewPopover"
                 button={createTrigger()}
