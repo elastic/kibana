@@ -238,7 +238,12 @@ export function ChangeDataView({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <>
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem
+          grow={true}
+          css={css`
+            min-width: 0;
+          `}
+        >
           <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <EuiFlexItem
               grow={false}
@@ -254,7 +259,12 @@ export function ChangeDataView({
                 defaultMessage: 'Data view',
               })}
             </EuiFlexItem>
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem
+              grow={true}
+              css={css`
+                min-width: 0;
+              `}
+            >
               <EuiPopover
                 panelClassName="changeDataViewPopover"
                 button={createTrigger()}
