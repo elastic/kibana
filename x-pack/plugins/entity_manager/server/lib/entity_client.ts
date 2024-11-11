@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
+import { Entity, EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
+import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { Logger } from '@kbn/logging';
 import {
   installEntityDefinition,
@@ -23,6 +25,8 @@ import { stopTransforms } from './entities/stop_transforms';
 import { deleteIndices } from './entities/delete_index';
 import { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
+import { EntitySource, getEntityInstancesQuery } from './queries';
+import { mergeEntitiesList } from './queries/utils';
 
 export class EntityClient {
   constructor(
@@ -186,5 +190,46 @@ export class EntityClient {
       definition,
       this.options.logger
     );
+  }
+
+  async searchEntities({ sources, limit = 10 }: { sources: EntitySource[]; limit?: number }) {
+    const entities = await Promise.all(
+      sources.map(async (source) => {
+        const esClient = createObservabilityEsClient({
+          client: this.options.clusterClient.asCurrentUser,
+          logger: this.options.logger,
+          plugin: `@kbn/entityManager-plugin`,
+        });
+
+        const requiredFields = [...source.identity_fields, ...source.metadata_fields];
+        const { fields } = await esClient.client.fieldCaps({
+          index: source.index_patterns,
+          fields: requiredFields,
+        });
+
+        const sourceHasIdentityFields = source.identity_fields.every((field) => !!fields[field]);
+        if (!sourceHasIdentityFields) {
+          return [];
+        }
+
+        const availableMetadataFields = source.metadata_fields.filter((field) => fields[field]);
+
+        const query = getEntityInstancesQuery(
+          { ...source, metadata_fields: availableMetadataFields },
+          limit
+        );
+        this.options.logger.info(`Entity query: ${query}`);
+
+        return await esClient.esql('search_entities', { query }).then((result) =>
+          esqlResultToPlainObjects(result).map((entity) => {
+            entity['entity.id'] = source.identity_fields.map((field) => entity[field]).join(':');
+            entity['entity.type'] = source.type;
+            return entity as Entity;
+          })
+        );
+      })
+    ).then((results) => results.flat());
+
+    return mergeEntitiesList(entities);
   }
 }

@@ -23,6 +23,13 @@ export interface MetadataRecord {
   [key: string]: string[] | MetadataRecord | string;
 }
 
+export interface Entity {
+  'entity.id': string;
+  'entity.last_seen_timestamp': string;
+  'entity.type': string;
+  [metadata: string]: any;
+}
+
 const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
 type Literal = z.infer<typeof literalSchema>;
 type Metadata = Literal | { [key: string]: Metadata } | Metadata[];

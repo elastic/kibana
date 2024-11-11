@@ -5,7 +5,33 @@
  * 2.0.
  */
 import type { Plugin as PluginClass } from '@kbn/core/public';
+import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { CloudStart } from '@kbn/cloud-plugin/public';
+import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
+import { ObservabilityAIAssistantPublicSetup } from '@kbn/observability-ai-assistant-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { EntityClient } from './lib/entity_client';
+
+export interface EntityManagerPluginSetup {
+  data: DataPublicPluginSetup;
+  observability: ObservabilityAIAssistantPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
+  serverless?: ServerlessPluginSetup;
+  usageCollection: UsageCollectionSetup;
+}
+
+export interface EntityManagerPluginStart {
+  data: DataPublicPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
+  cloud?: CloudStart;
+  serverless?: ServerlessPluginStart;
+  observabilityShared: ObservabilitySharedPluginStart;
+}
 
 export interface EntityManagerPublicPluginSetup {
   entityClient: EntityClient;
