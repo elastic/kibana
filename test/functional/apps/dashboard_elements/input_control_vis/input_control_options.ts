@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('input control options', () => {
     before(async () => {
       await visualize.initTests();
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('visualize');
       await visualize.loadSavedVisualization('input control options', {
         navigateToVisualize: false,
