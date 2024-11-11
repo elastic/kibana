@@ -10,7 +10,7 @@
 /packages/kbn-docs-utils/ @elastic/kibana-tech-leads @elastic/kibana-operations
 
 # Virtual teams
-/x-pack/plugins/rule_registry/ @elastic/rac
+/x-pack/plugins/rule_registry/ @elastic/response-ops @elastic/obs-ux-management-team
 
 # App
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
