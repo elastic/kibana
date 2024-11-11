@@ -15,6 +15,7 @@ import type {
   ESQLLocation,
   ESQLMessage,
 } from '@kbn/esql-ast';
+import { ESQLIdentifier } from '@kbn/esql-ast/src/types';
 import type { ErrorTypes, ErrorValues } from './types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
@@ -492,7 +493,7 @@ export const errors = {
   unknownFunction: (fn: ESQLFunction): ESQLMessage =>
     errors.byId('unknownFunction', fn.location, fn),
 
-  unknownColumn: (column: ESQLColumn): ESQLMessage =>
+  unknownColumn: (column: ESQLColumn | ESQLIdentifier): ESQLMessage =>
     errors.byId('unknownColumn', column.location, {
       name: column.name,
     }),
@@ -509,9 +510,12 @@ export const errors = {
       expression: fn.text,
     }),
 
-  unknownAggFunction: (col: ESQLColumn, type: string = 'FieldAttribute'): ESQLMessage =>
-    errors.byId('unknownAggregateFunction', col.location, {
-      value: col.name,
+  unknownAggFunction: (
+    node: ESQLColumn | ESQLIdentifier,
+    type: string = 'FieldAttribute'
+  ): ESQLMessage =>
+    errors.byId('unknownAggregateFunction', node.location, {
+      value: node.name,
       type,
     }),
 

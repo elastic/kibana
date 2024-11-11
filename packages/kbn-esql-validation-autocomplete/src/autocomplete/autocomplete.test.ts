@@ -11,12 +11,7 @@ import { suggest } from './autocomplete';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
-import {
-  getDateLiterals,
-  getSafeInsertText,
-  TIME_SYSTEM_PARAMS,
-  TRIGGER_SUGGESTION_COMMAND,
-} from './factories';
+import { getSafeInsertText, TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import {
@@ -34,8 +29,7 @@ import {
   fields,
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
-import { ESQL_COMMON_NUMERIC_TYPES, ESQL_STRING_TYPES } from '../shared/esql_types';
-import { log10ParameterTypes, powParameterTypes } from './__tests__/constants';
+import { ESQL_STRING_TYPES } from '../shared/esql_types';
 import { getRecommendedQueries } from './recommended_queries/templates';
 import { getDateHistogramCompletionItem } from './commands/stats/util';
 
@@ -766,6 +760,21 @@ describe('autocomplete', () => {
         ['and', 'or', 'not']
       )
     );
+
+    // WHERE function <suggest>
+    testSuggestions(
+      'FROM index1 | WHERE ABS(integerField) i/',
+      getFunctionSignaturesByReturnType(
+        'where',
+        'any',
+        {
+          builtin: true,
+          skipAssign: true,
+        },
+        ['integer'],
+        ['and', 'or', 'not']
+      )
+    );
   });
 
   describe('advancing the cursor and opening the suggestion menu automatically ✨', () => {
@@ -1295,27 +1304,35 @@ describe('autocomplete', () => {
 
   describe('Replacement ranges are attached when needed', () => {
     testSuggestions('FROM a | WHERE doubleField IS NOT N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 35 } },
-      { text: 'IS NULL', rangeToReplace: { start: 36, end: 36 } },
+      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 36 } },
+      { text: 'IS NULL', rangeToReplace: { start: 37, end: 37 } },
       '!= $0',
       '== $0',
       'IN $0',
       'AND $0',
       'NOT',
       'OR $0',
+      // pipe doesn't make sense here, but Monaco will filter it out.
+      // see https://github.com/elastic/kibana/issues/199401 for an explanation
+      // of why this happens
+      '| ',
     ]);
     testSuggestions('FROM a | WHERE doubleField IS N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 31 } },
-      { text: 'IS NULL', rangeToReplace: { start: 28, end: 31 } },
-      { text: '!= $0', rangeToReplace: { start: 32, end: 32 } },
+      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 32 } },
+      { text: 'IS NULL', rangeToReplace: { start: 28, end: 32 } },
+      { text: '!= $0', rangeToReplace: { start: 33, end: 33 } },
       '== $0',
       'IN $0',
       'AND $0',
       'NOT',
       'OR $0',
+      // pipe doesn't make sense here, but Monaco will filter it out.
+      // see https://github.com/elastic/kibana/issues/199401 for an explanation
+      // of why this happens
+      '| ',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
+      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 35 } },
       'IS NULL',
       '!= $0',
       '== $0',
@@ -1324,6 +1341,7 @@ describe('autocomplete', () => {
       'NOT',
       'OR $0',
     ]);
+
     describe('dot-separated field names', () => {
       testSuggestions(
         'FROM a | KEEP field.nam/',

@@ -20,6 +20,7 @@ import {
   getAllFunctions,
   getCommandDefinition,
   isColumnItem,
+  isIdentifier,
   isSourceItem,
   shouldBeQuotedText,
 } from '../shared/helpers';
@@ -138,7 +139,7 @@ function extractUnquotedFieldText(
   if (errorType === 'syntaxError') {
     // scope it down to column items for now
     const { node } = getAstContext(query, ast, possibleStart - 1);
-    if (node && isColumnItem(node)) {
+    if (node && (isColumnItem(node) || isIdentifier(node))) {
       return {
         start: node.location.min + 1,
         name: query.substring(node.location.min, end).trimEnd(),
@@ -379,7 +380,7 @@ function inferCodeFromError(
   if (error.message.startsWith('SyntaxError: token recognition error at:')) {
     // scope it down to column items for now
     const { node } = getAstContext(rawText, ast, error.startColumn - 2);
-    return node && isColumnItem(node) ? 'quotableFields' : undefined;
+    return node && (isColumnItem(node) || isIdentifier(node)) ? 'quotableFields' : undefined;
   }
 }
 

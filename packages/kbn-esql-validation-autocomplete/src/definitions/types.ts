@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
+import type {
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLCommandOption,
+  ESQLFunction,
+  ESQLMessage,
+} from '@kbn/esql-ast';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
 
 /**
@@ -177,6 +183,7 @@ export interface CommandBaseDefinition<CommandName extends string> {
     getColumnsByType: GetColumnsByTypeFn,
     columnExists: (column: string) => boolean,
     getSuggestedVariableName: () => string,
+    getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
     getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
   ) => Promise<SuggestionRawDefinition[]>;
   /** @deprecated this property will disappear in the future */

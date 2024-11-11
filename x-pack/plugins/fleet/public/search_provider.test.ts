@@ -133,7 +133,7 @@ describe('Package search provider', () => {
     test('returns formatted results', () => {
       getTestScheduler().run(({ expectObservable, hot }) => {
         mockSendGetPackages.mockReturnValue(
-          hot('--(a|)', { a: { data: { response: testResponse } } })
+          hot('--(a|)', { a: { data: { items: testResponse } } })
         );
         setupMock.getStartServices.mockReturnValue(
           hot('--(a|)', { a: [coreMock.createStart()] }) as any
@@ -217,7 +217,7 @@ describe('Package search provider', () => {
 
     test('calls EPR once only', () => {
       getTestScheduler().run(({ hot }) => {
-        mockSendGetPackages.mockReturnValue(hot('--(a|)', { a: { data: { response: [] } } }));
+        mockSendGetPackages.mockReturnValue(hot('--(a|)', { a: { data: { items: [] } } }));
         setupMock.getStartServices.mockReturnValue(
           hot('--(a|)', { a: [coreMock.createStart()] }) as any
         );
@@ -237,7 +237,7 @@ describe('Package search provider', () => {
 
     test('completes without returning results if aborted', () => {
       getTestScheduler().run(({ expectObservable, hot }) => {
-        mockSendGetPackages.mockReturnValue(hot('--(a|)', { a: { data: { response: [] } } }));
+        mockSendGetPackages.mockReturnValue(hot('--(a|)', { a: { data: { items: [] } } }));
         setupMock.getStartServices.mockReturnValue(
           hot('--(a|)', { a: [coreMock.createStart()] }) as any
         );
@@ -258,7 +258,7 @@ describe('Package search provider', () => {
     test('respect maximum results', () => {
       getTestScheduler().run(({ hot, expectObservable }) => {
         mockSendGetPackages.mockReturnValue(
-          hot('--(a|)', { a: { data: { response: testResponse } } })
+          hot('--(a|)', { a: { data: { items: testResponse } } })
         );
         setupMock.getStartServices.mockReturnValue(
           hot('--(a|)', { a: [coreMock.createStart()] }) as any
@@ -292,7 +292,7 @@ describe('Package search provider', () => {
       test('without packages tag, without search term', () => {
         getTestScheduler().run(({ hot, expectObservable }) => {
           mockSendGetPackages.mockReturnValue(
-            hot('--(a|)', { a: { data: { response: testResponse } } })
+            hot('--(a|)', { a: { data: { items: testResponse } } })
           );
           setupMock.getStartServices.mockReturnValue(
             hot('--(a|)', { a: [coreMock.createStart()] }) as any
@@ -314,7 +314,7 @@ describe('Package search provider', () => {
       test('with integration tag, with no search term', () => {
         getTestScheduler().run(({ hot, expectObservable }) => {
           mockSendGetPackages.mockReturnValue(
-            hot('--(a|)', { a: { data: { response: testResponse } } })
+            hot('--(a|)', { a: { data: { items: testResponse } } })
           );
           setupMock.getStartServices.mockReturnValue(
             hot('--(a|)', { a: [coreMock.createStart()] }) as any
@@ -397,7 +397,7 @@ describe('Package search provider', () => {
       test('with integration tag, with search term', () => {
         getTestScheduler().run(({ hot, expectObservable }) => {
           mockSendGetPackages.mockReturnValue(
-            hot('--(a|)', { a: { data: { response: testResponse } } })
+            hot('--(a|)', { a: { data: { items: testResponse } } })
           );
           setupMock.getStartServices.mockReturnValue(
             hot('--(a|)', { a: [coreMock.createStart()] }) as any
