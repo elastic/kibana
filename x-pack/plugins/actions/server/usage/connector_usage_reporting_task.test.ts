@@ -230,10 +230,11 @@ describe('ConnectorUsageReportingTask', () => {
     const response = await taskRunner.run();
 
     expect(logger.warn).toHaveBeenCalledWith(
-      'Missing required project id while running actions:connector_usage_reporting'
+      'Missing required project id while running actions:connector_usage_reporting, reporting task will be deleted'
     );
 
     expect(response).toEqual({
+      shouldDeleteTask: true,
       state: {
         attempts: 0,
         lastReportedUsageDate,

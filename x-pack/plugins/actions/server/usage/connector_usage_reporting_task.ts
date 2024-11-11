@@ -111,10 +111,11 @@ export class ConnectorUsageReportingTask {
 
     if (!this.projectId) {
       this.logger.warn(
-        `Missing required project id while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
+        `Missing required project id while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}, reporting task will be deleted`
       );
       return {
         state,
+        shouldDeleteTask: true,
       };
     }
 
