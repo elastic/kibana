@@ -6,6 +6,7 @@
  */
 import { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { PreviousMonitorForUpdate } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
 import { RouteContext } from '../../types';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { FailedPolicyUpdate } from '../../../synthetics_service/private_location/synthetics_private_location';
@@ -28,7 +29,7 @@ import {
 export interface MonitorConfigUpdate {
   normalizedMonitor: SyntheticsMonitor;
   monitorWithRevision: SyntheticsMonitorWithSecretsAttributes;
-  previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>;
+  previousMonitor: PreviousMonitorForUpdate;
   decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
 }
 
@@ -167,7 +168,7 @@ export const rollbackFailedUpdates = async ({
   monitorsToUpdate,
 }: {
   monitorsToUpdate: Array<{
-    previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>;
+    previousMonitor: PreviousMonitorForUpdate;
     decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
   }>;
   routeContext: RouteContext;

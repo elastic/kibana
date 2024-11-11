@@ -7,6 +7,7 @@
 import { sha256 } from 'js-sha256';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
+import { PreviousMonitorForUpdate } from '../monitor_cruds/bulk_cruds/edit_monitor_bulk';
 import type { MonitorUpdateEvent } from '../../telemetry/types';
 
 import { TelemetryEventsSender } from '../../telemetry/sender';
@@ -109,7 +110,7 @@ export function formatTelemetryEvent({
 
 export function formatTelemetryUpdateEvent(
   currentMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>,
-  previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>,
+  previousMonitor: PreviousMonitorForUpdate,
   stackVersion: string,
   isInlineScript: boolean,
   errors?: ServiceLocationErrors | null

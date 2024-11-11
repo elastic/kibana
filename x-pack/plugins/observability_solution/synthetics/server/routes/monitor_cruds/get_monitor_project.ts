@@ -32,7 +32,7 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
     } = routeContext;
 
     const { projectName } = request.params;
-    const { per_page: perPage = 500, search_after: searchAfter } = request.query;
+    const { per_page: perPage = 1000, search_after: searchAfter } = request.query;
     const decodedProjectName = decodeURI(projectName);
     const decodedSearchAfter = searchAfter ? decodeURI(searchAfter) : undefined;
 
