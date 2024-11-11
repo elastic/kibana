@@ -12,7 +12,7 @@ const POLL_INTERVAL = 5; // seconds
 
 export class AutoDeploy {
   private inferError: Error | null = null;
-  constructor(private http: HttpSetup, private inferenceId: string) {}
+  constructor(private readonly http: HttpSetup, private readonly inferenceId: string) {}
 
   public async deploy() {
     this.inferError = null;
@@ -61,28 +61,16 @@ export class AutoDeploy {
   }
 
   private async pollIsDeployed() {
-    let setDeploymentReady: (value: boolean) => void = () => {};
-    let rejectWithError: (error: Error) => void = () => {};
-
-    const run = async () => {
-      if (this.inferError) {
-        return rejectWithError(this.inferError);
+    while (true) {
+      if (this.inferError !== null) {
+        throw this.inferError;
       }
-
       const isDeployed = await this.isDeployed();
       if (isDeployed) {
-        setDeploymentReady(true);
-      } else {
-        setTimeout(() => {
-          run();
-        }, POLL_INTERVAL * 1000);
+        // break out of the loop once we have a successful deployment
+        return;
       }
-    };
-    run();
-
-    return new Promise((resolve, reject) => {
-      setDeploymentReady = resolve;
-      rejectWithError = reject;
-    });
+      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL * 1000));
+    }
   }
 }
