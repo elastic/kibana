@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  PublishesBlockingError,
-  PublishesDataLoading,
-  PublishesDataViews,
-  PublishesSavedObjectId,
-  StateComparators,
+import {
+  getUnchangingComparator,
+  type PublishesBlockingError,
+  type PublishesDataLoading,
+  type PublishesDataViews,
+  type PublishesSavedObjectId,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { BehaviorSubject } from 'rxjs';
 import type { IntegrationCallbacks, LensInternalApi, LensRuntimeState } from '../types';
 import { buildObservableVariable } from '../helper';
+import { SharingSavedObjectProps } from '../../types';
 
 export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateSavedObjectId'> &
@@ -25,7 +27,10 @@ export interface StateManagementConfig {
     PublishesBlockingError;
   serialize: () => Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>;
   comparators: StateComparators<
-    Pick<LensRuntimeState, 'attributes' | 'savedObjectId' | 'abortController'>
+    Pick<LensRuntimeState, 'attributes' | 'savedObjectId' | 'abortController'> & {
+      managed?: boolean | undefined;
+      sharingSavedObjectProps?: SharingSavedObjectProps | undefined;
+    }
   >;
   cleanup: () => void;
 }
@@ -86,6 +91,8 @@ export function initializeStateManagement(
       ],
       savedObjectId: savedObjectIdComparator,
       abortController: abortControllerComparator,
+      sharingSavedObjectProps: getUnchangingComparator(),
+      managed: getUnchangingComparator(),
     },
     cleanup: noop,
   };

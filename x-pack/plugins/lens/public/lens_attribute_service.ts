@@ -6,18 +6,21 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { SavedObjectReference } from '@kbn/core/types';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { noop } from 'lodash';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { LensPluginStartDependencies } from './plugin';
 import type {
   LensSavedObject,
   LensSavedObjectAttributes as LensSavedObjectAttributesWithoutReferences,
 } from '../common/content_management';
+import { extract, inject } from '../common/embeddable_factory';
 import { SavedObjectIndexStore, checkForDuplicateTitle } from './persistence';
 import { DOC_TYPE } from '../common/constants';
 import { SharingSavedObjectProps } from './types';
-import { LensSavedObjectAttributes } from './react_embeddable/types';
+import { LensRuntimeState, LensSavedObjectAttributes } from './react_embeddable/types';
 
 type Reference = LensSavedObject['references'][number];
 
@@ -40,6 +43,14 @@ export interface LensAttributesService {
     savedObjectId?: string
   ) => Promise<string>;
   checkForDuplicateTitle: (props: CheckDuplicateTitleProps) => Promise<{ isDuplicate: boolean }>;
+  injectReferences: (
+    runtimeState: LensRuntimeState,
+    references: SavedObjectReference[] | undefined
+  ) => LensRuntimeState;
+  extractReferences: (runtimeState: LensRuntimeState) => {
+    rawState: LensRuntimeState;
+    references: SavedObjectReference[];
+  };
 }
 
 export const savedObjectToEmbeddableAttributes = (
@@ -121,6 +132,20 @@ export function getLensAttributeService(
           }
         ),
       };
+    },
+    // Make sure to inject references from the container down to the runtime state
+    // this ensure migrations/copy to spaces works correctly
+    injectReferences: (runtimeState, references) => {
+      return inject(
+        runtimeState as unknown as EmbeddableStateWithType,
+        references ?? runtimeState.attributes.references
+      ) as unknown as LensRuntimeState;
+    },
+    // Make sure to move the internal references into the parent references
+    // so migrations/move to spaces can work properly
+    extractReferences: (runtimeState) => {
+      const { state, references } = extract(runtimeState as unknown as EmbeddableStateWithType);
+      return { rawState: state as unknown as LensRuntimeState, references };
     },
   };
 }

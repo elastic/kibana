@@ -401,7 +401,11 @@ export class LensPlugin {
           // deserialize the saved object from visualize library
           // this make sure to fit into the new embeddable model, where the following build()
           // function expects a fully loaded runtime state
-          const state = await deserializeState(attributeService, { savedObjectId: savedObject.id });
+          const state = await deserializeState(
+            attributeService,
+            { savedObjectId: savedObject.id },
+            savedObject.references
+          );
           container.addNewPanel({
             panelType: LENS_EMBEDDABLE_TYPE,
             initialState: state,

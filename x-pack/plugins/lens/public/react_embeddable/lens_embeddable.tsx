@@ -37,7 +37,8 @@ export const createLensEmbeddableFactory = (
      * This is called before the build and will make sure that the
      * final state will contain the attributes object
      */
-    deserializeState: async ({ rawState }) => deserializeState(services.attributeService, rawState),
+    deserializeState: async ({ rawState, references }) =>
+      deserializeState(services.attributeService, rawState, references),
     /**
      * This is called after the deserialize, so some assumptions can be made about its arguments:
      * @param state     the Lens "runtime" state, which means that 'attributes' is always present.
@@ -99,7 +100,7 @@ export const createLensEmbeddableFactory = (
       );
 
       const searchContextConfig = initializeSearchContext(initialState, internalApi, parentApi);
-      const integrationsConfig = initializeIntegrations(getState);
+      const integrationsConfig = initializeIntegrations(getState, services);
       const actionsConfig = initializeActionApi(
         uuid,
         initialState,

@@ -13,10 +13,13 @@ import {
 import { noop } from 'lodash';
 import type { HasSerializableState } from '@kbn/presentation-containers';
 import { emptySerializer, isTextBasedLanguage } from '../helper';
-import type { GetStateType } from '../types';
+import type { GetStateType, LensEmbeddableStartServices } from '../types';
 import type { IntegrationCallbacks } from '../types';
 
-export function initializeIntegrations(getLatestState: GetStateType): {
+export function initializeIntegrations(
+  getLatestState: GetStateType,
+  { attributeService }: LensEmbeddableStartServices
+): {
   api: Omit<
     IntegrationCallbacks,
     | 'updateState'
@@ -33,7 +36,10 @@ export function initializeIntegrations(getLatestState: GetStateType): {
 } {
   return {
     api: {
-      serializeState: () => ({ rawState: getLatestState(), references: [] }),
+      serializeState: () => {
+        const currentState = getLatestState();
+        return attributeService.extractReferences(currentState);
+      },
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,
       getSavedVis: () => getLatestState().attributes,

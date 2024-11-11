@@ -18,6 +18,7 @@ import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { RenderMode } from '@kbn/expressions-plugin/common';
+import { SavedObjectReference } from '@kbn/core/types';
 import { LensRuntimeState, LensSerializedState } from './types';
 import type { LensAttributesService } from '../lens_attribute_service';
 
@@ -46,8 +47,7 @@ export function createEmptyLensState(
   };
 }
 
-// Shared logic to ensure the attributes are correctly loaded
-export async function deserializeState(
+async function createRuntimeState(
   attributeService: LensAttributesService,
   rawState: LensSerializedState
 ) {
@@ -62,6 +62,22 @@ export async function deserializeState(
     }
   }
   return ('attributes' in rawState ? rawState : { attributes: rawState }) as LensRuntimeState;
+}
+
+// Shared logic to ensure the attributes are correctly loaded
+// Make sure to inject references from the container down to the runtime state
+// this ensure migrations/copy to spaces works correctly
+export async function deserializeState(
+  attributeService: LensAttributesService,
+  rawState: LensSerializedState,
+  references?: SavedObjectReference[]
+) {
+  const filteredRefs = references?.filter(({ type }) => type !== 'lens');
+  const runtimeState = await createRuntimeState(attributeService, rawState);
+  return attributeService.injectReferences(
+    runtimeState,
+    filteredRefs?.length ? filteredRefs : undefined
+  );
 }
 
 export function emptySerializer() {

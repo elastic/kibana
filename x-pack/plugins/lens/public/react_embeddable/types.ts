@@ -45,6 +45,7 @@ import type {
   IUiSettingsClient,
   KibanaExecutionContext,
   OverlayRef,
+  SavedObjectReference,
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { TimefilterContract, FilterManager } from '@kbn/data-plugin/public';
@@ -75,6 +76,7 @@ import type {
   IndexPatternMap,
   IndexPatternRef,
   LensTableRowContextMenuEvent,
+  SharingSavedObjectProps,
   Simplify,
   UserMessage,
   VisualizationMap,
@@ -166,7 +168,14 @@ export interface LensByReference {
   savedObjectId?: string;
 }
 
-export type LensPropsVariants = LensByValue & LensByReference;
+interface ContentManagementProps {
+  sharingSavedObjectProps?: SharingSavedObjectProps;
+  managed?: boolean;
+}
+
+export type LensPropsVariants = (LensByValue & LensByReference) & {
+  references?: SavedObjectReference[];
+};
 
 export interface ViewInDiscoverCallbacks extends LensApiProps {
   canViewUnderlyingData$: PublishingSubject<boolean>;
@@ -324,9 +333,10 @@ export type LensRendererProps = Simplify<LensRendererPrivateProps>;
  * * other props from the embeddable
  */
 export type LensRuntimeState = Simplify<
-  Omit<ComponentSerializedProps, 'attributes'> & {
+  Omit<ComponentSerializedProps, 'attributes' | 'references'> & {
     attributes: NonNullable<LensSerializedState['attributes']>;
-  } & Pick<LensComponentForwardedProps, 'viewMode' | 'abortController' | 'executionContext'>
+  } & Pick<LensComponentForwardedProps, 'viewMode' | 'abortController' | 'executionContext'> &
+    ContentManagementProps
 >;
 
 export interface LensInspectorAdapters {
