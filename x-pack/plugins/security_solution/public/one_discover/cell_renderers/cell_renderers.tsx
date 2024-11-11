@@ -14,7 +14,9 @@ import type { Maybe } from '../../../common/search_strategy';
 import { DefaultCellRenderer } from '../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { ONE_DISCOVER_SCOPE_ID } from '../constants';
 
-export type SecuritySolutionRowCellRendererGetter = SecuritySolutionCellRenderFeature['getRender'];
+export type SecuritySolutionRowCellRendererGetter = ReturnType<
+  SecuritySolutionCellRenderFeature['getRender']
+>;
 
 const ALLOWED_DISCOVER_RENDERED_FIELDS = ['host.name', 'user.name', 'source.ip', 'destination.ip'];
 

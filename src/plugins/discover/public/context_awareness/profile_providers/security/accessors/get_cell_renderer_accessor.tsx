@@ -11,12 +11,14 @@ import React from 'react';
 import { SecuritySolutionCellRenderFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 
-export const createCellRendererAccessor = (
+export const createCellRendererAccessor = async (
   cellRendererFeature?: SecuritySolutionCellRenderFeature
 ) => {
+  if (!cellRendererFeature) return undefined;
+  const cellRendererGetter = await cellRendererFeature.getRender();
   function getCellRenderer(fieldName: string) {
     if (!cellRendererFeature) return undefined;
-    const CellRenderer = cellRendererFeature.getRender(fieldName);
+    const CellRenderer = cellRendererGetter(fieldName);
     if (!CellRenderer) return undefined;
     return React.memo(function SecuritySolutionCellRenderer(props: DataGridCellValueElementProps) {
       return <CellRenderer {...props} />;

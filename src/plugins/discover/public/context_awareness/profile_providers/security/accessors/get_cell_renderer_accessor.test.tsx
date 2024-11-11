@@ -15,7 +15,7 @@ import { render } from '@testing-library/react';
 
 const cellRendererFeature: SecuritySolutionCellRenderFeature = {
   id: 'security-solution-cell-render',
-  getRender: (fieldName: string) => {
+  getRender: async () => (fieldName: string) => {
     if (fieldName === 'host.name') {
       return (props: DataGridCellValueElementProps) => {
         return <div data-test-subj="cell-render-feature">{props.columnId}</div>;
@@ -34,24 +34,24 @@ const mockCellProps = {
 } as DataGridCellValueElementProps;
 
 describe('getCellRendererAccessort', () => {
-  it('should return a cell renderer', () => {
-    const getCellRenderer = createCellRendererAccessor(cellRendererFeature);
-    const CellRenderer = getCellRenderer('host.name') as React.FC<DataGridCellValueElementProps>;
+  it('should return a cell renderer', async () => {
+    const getCellRenderer = await createCellRendererAccessor(cellRendererFeature);
+    expect(getCellRenderer).toBeDefined();
+    const CellRenderer = getCellRenderer?.('host.name') as React.FC<DataGridCellValueElementProps>;
     expect(CellRenderer).toBeDefined();
     const { getByTestId } = render(<CellRenderer {...mockCellProps} />);
     expect(getByTestId('cell-render-feature')).toBeVisible();
     expect(getByTestId('cell-render-feature')).toHaveTextContent('host.name');
   });
 
-  it('should return undefined if cellRendererFeature is not defined', () => {
-    const getCellRenderer = createCellRendererAccessor();
-    const cellRenderer = getCellRenderer('host.name');
-    expect(cellRenderer).toBeUndefined();
+  it('should return undefined if cellRendererFeature is not defined', async () => {
+    const getCellRenderer = await createCellRendererAccessor();
+    expect(getCellRenderer).toBeUndefined();
   });
 
-  it('should return undefined if cellRendererFeature.getRender returns undefined', () => {
-    const getCellRenderer = createCellRendererAccessor(cellRendererFeature);
-    const cellRenderer = getCellRenderer('user.name');
+  it('should return undefined if cellRendererGetter returns undefined', async () => {
+    const getCellRenderer = await createCellRendererAccessor(cellRendererFeature);
+    const cellRenderer = getCellRenderer?.('user.name');
     expect(cellRenderer).toBeUndefined();
   });
 });

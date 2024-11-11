@@ -233,9 +233,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const discoverFeatureRegistry = discoverShared.features.registry;
     const cellRendererFeature: SecuritySolutionCellRenderFeature = {
       id: 'security-solution-cell-render',
-      getRender: await this.getLazyDiscoverSharedDeps().then(
-        (m) => m.getCellRendererForGivenRecord
-      ),
+      getRender: async () => {
+        const { getCellRendererForGivenRecord } = await this.getLazyDiscoverSharedDeps();
+        return getCellRendererForGivenRecord;
+      },
     };
 
     const appWrapperFeature: SecuritySolutionAppWrapperFeature = {

@@ -7,16 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import { SecuritySolutionAppWrapperFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
-import { CustomCellRenderer } from '@kbn/unified-data-table';
+import React, { FunctionComponent, useMemo } from 'react';
+import { CustomCellRenderer, DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { RootProfileProvider, SolutionType } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
 import { SecurityProfileProviderFactory } from '../types';
 import { createCellRendererAccessor } from '../accessors/get_cell_renderer_accessor';
+import { createAppWrapperAccessor } from '../accessors/get_app_wrapper_accessor';
+
+interface SecurityRootProfileContext {
+  store?: unknown;
+  appWrapper?: (props: { children?: React.ReactNode }) => JSX.Element;
+  getCellRenderer?: (
+    fieldName: string
+  ) => FunctionComponent<DataGridCellValueElementProps> | undefined;
+}
 
 export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
-  Promise<RootProfileProvider>
+  Promise<RootProfileProvider<SecurityRootProfileContext>>
 > = async (services: ProfileProviderServices) => {
   const { discoverFeaturesRegistry } = services;
   const cellRendererFeature = discoverFeaturesRegistry.getById('security-solution-cell-render');
@@ -25,39 +33,33 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
     'security-solution-redux-store-init'
   );
 
-  const getCellRenderer = createCellRendererAccessor(cellRendererFeature);
-
-  let store: unknown;
-  let appWrapperGetter:
-    | Awaited<ReturnType<SecuritySolutionAppWrapperFeature['getWrapper']>>
-    | undefined;
-
   return {
     profileId: 'security-root-profile',
     isExperimental: true,
     profile: {
-      getRenderAppWrapper: (PrevWrapper) =>
+      getRenderAppWrapper: (PrevWrapper, params) =>
         React.memo(({ children }) => {
-          const AppWrapper = useMemo(() => appWrapperGetter?.({ store }) ?? PrevWrapper, []);
+          const AppWrapper = useMemo(() => params.context.appWrapper ?? PrevWrapper, []);
           return <AppWrapper>{children}</AppWrapper>;
         }),
-      getCellRenderers: (prev) => (params) => {
-        const entries = prev(params);
-        const customCellRenderers = [
-          'host.name',
-          'user.name',
-          'source.ip',
-          'destination.ip',
-        ].reduce<CustomCellRenderer>((acc, fieldName) => {
-          if (!entries[fieldName]) return acc;
-          acc[fieldName] = getCellRenderer(fieldName) ?? entries[fieldName];
-          return acc;
-        }, {});
-        return {
-          ...entries,
-          ...customCellRenderers,
-        };
-      },
+      getCellRenderers:
+        (prev, { context }) =>
+        (params) => {
+          const entries = prev(params);
+          const customCellRenderers = [
+            'host.name',
+            'user.name',
+            'source.ip',
+            'destination.ip',
+          ].reduce<CustomCellRenderer>((acc, fieldName) => {
+            acc[fieldName] = context.getCellRenderer?.(fieldName) ?? entries[fieldName];
+            return acc;
+          }, {});
+          return {
+            ...entries,
+            ...customCellRenderers,
+          };
+        },
     },
     resolve: async (params) => {
       if (params.solutionNavId !== SolutionType.Security) {
@@ -66,13 +68,17 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
         };
       }
 
-      store = await reduxStoreInitFeature?.get();
-      appWrapperGetter = await appWrapperFeature?.getWrapper();
+      const store = await reduxStoreInitFeature?.get();
+      const getAppWrapper = await createAppWrapperAccessor(appWrapperFeature);
+      const getCellRenderer = await createCellRendererAccessor(cellRendererFeature);
 
       return {
         isMatch: true,
         context: {
           solutionType: SolutionType.Security,
+          store,
+          appWrapper: getAppWrapper?.({ store }),
+          getCellRenderer,
         },
       };
     },

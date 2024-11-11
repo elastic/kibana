@@ -35,9 +35,9 @@ export interface ObservabilityLogsAIAssistantFeature {
 /** ***************************** Security **********/
 export interface SecuritySolutionCellRenderFeature {
   id: 'security-solution-cell-render';
-  getRender: (
-    fieldName: string
-  ) => ((props: DataGridCellValueElementProps) => ReactElement) | undefined;
+  getRender: () => Promise<
+    (fieldName: string) => ((props: DataGridCellValueElementProps) => ReactElement) | undefined
+  >;
 }
 
 interface SecuritySolutionAppWrapperFeatureArgs {
