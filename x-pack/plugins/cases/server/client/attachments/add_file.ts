@@ -33,7 +33,7 @@ export const addFile = async (
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<Case> => {
-  const { caseId, fileRequest } = addFileArgs;
+  const { caseId, file, filename, mimeType: mime, $abort } = addFileArgs;
   const {
     logger,
     authorization,
@@ -46,11 +46,11 @@ export const addFile = async (
   let createdFile;
 
   try {
-    const {
+    decodeWithExcessOrThrow(PostFileAttachmentRequestRt)({
       file,
       filename,
       mimeType: mime,
-    } = decodeWithExcessOrThrow(PostFileAttachmentRequestRt)(fileRequest);
+    });
 
     // This will perform an authorization check to ensure the user has access to the parent case
     const theCase = await casesClient.cases.get({
@@ -76,7 +76,7 @@ export const addFile = async (
       meta: { caseIds: [caseId], owner: [owner] },
     });
 
-    await createdFile.uploadContent(file as Readable);
+    await createdFile.uploadContent(file as Readable, $abort);
 
     const commentReq = buildAttachmentRequestFromFileJSON({
       owner,

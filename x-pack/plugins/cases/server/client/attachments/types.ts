@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Readable } from 'stream';
+import type { ReplaySubject } from 'rxjs';
 import type {
   BulkCreateAttachmentsRequest,
   AttachmentPatchRequest,
   AttachmentRequest,
   FindAttachmentsQueryParams,
-  PostFileAttachmentRequest,
 } from '../../../common/types/api';
 
 /**
@@ -143,7 +143,19 @@ export interface AddFileArgs {
    */
   caseId: string;
   /**
-   * The file to upload and its metadata.
+   * The file to upload
    */
-  fileRequest: PostFileAttachmentRequest;
+  file: Readable;
+  /**
+   * The name of the file to upload
+   */
+  filename: string;
+  /**
+   * The mime type of the file to upload
+   */
+  mimeType?: string;
+  /**
+   * An observable that can be used to abort the upload at any time.
+   */
+  $abort?: ReplaySubject<unknown>;
 }

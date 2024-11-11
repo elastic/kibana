@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
+import { ReplaySubject } from 'rxjs';
+
+import type { Readable } from 'stream';
+import { AbortedUploadError } from '@kbn/files-plugin/server/file/errors';
+import type { attachmentApiV1 } from '../../../../common/types/api';
+
 import { CASE_FILES_URL, MAX_FILE_SIZE } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import type { attachmentApiV1 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 
 export const postFileRoute = createCasesRoute({
@@ -32,10 +38,15 @@ export const postFileRoute = createCasesRoute({
        * If the user configured a custom value the validation will still fail when calling the service.
        */
       maxBytes: MAX_FILE_SIZE,
+      output: 'stream',
+      parse: true,
       accepts: 'multipart/form-data',
     },
   },
   handler: async ({ context, request, response }) => {
+    const $abort = new ReplaySubject();
+    const sub = request.events.aborted$.subscribe($abort);
+
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
@@ -43,16 +54,30 @@ export const postFileRoute = createCasesRoute({
       const fileRequest = request.body as attachmentApiV1.PostFileAttachmentRequest;
       const caseId = request.params.case_id;
 
-      const res: caseDomainV1.Case = await casesClient.attachments.addFile({ fileRequest, caseId });
+      const res: caseDomainV1.Case = await casesClient.attachments.addFile({
+        file: fileRequest.file as Readable,
+        filename: fileRequest.filename,
+        mimeType: fileRequest.mimeType,
+        caseId,
+        $abort,
+      });
 
       return response.ok({
         body: res,
       });
     } catch (error) {
+      if (error instanceof AbortedUploadError) {
+        throw new Boom.Boom(error, {
+          statusCode: 499,
+          message: error.message,
+        });
+      }
       throw createCaseError({
         message: `Failed to attach file to case in route: ${error}`,
         error,
       });
+    } finally {
+      sub.unsubscribe();
     }
   },
 });
