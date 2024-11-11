@@ -30,6 +30,11 @@ export interface UseFetchGraphDataParams {
      * Defaults to true.
      */
     enabled?: boolean;
+    /**
+     * If true, the query will refetch on window focus.
+     * Defaults to true.
+     */
+    refetchOnWindowFocus?: boolean;
   };
 }
 
@@ -72,7 +77,10 @@ export const useFetchGraphData = ({
         body: JSON.stringify(req),
       });
     },
-    options
+    {
+      enabled: options?.enabled ?? true,
+      refetchOnWindowFocus: options?.refetchOnWindowFocus ?? true,
+    }
   );
 
   return {

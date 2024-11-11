@@ -83,6 +83,34 @@ describe('useGraphPreview', () => {
     expect(hookResult.result.current.isAuditLog).toEqual(false);
   });
 
+  it(`should return false when timestamp is missing`, () => {
+    const getFieldsData: GetFieldsData = (field: string) => {
+      if (field === '@timestamp') {
+        return;
+      } else if (field === 'kibana.alert.original_event.id') {
+        return 'eventId';
+      } else if (field === 'actor.entity.id') {
+        return 'actorId';
+      }
+
+      return mockFieldData[field];
+    };
+
+    hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action'],
+          },
+        },
+      },
+    });
+
+    expect(hookResult.result.current.isAuditLog).toEqual(false);
+  });
+
   it(`should return true when alert is has graph preview`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
       if (field === 'kibana.alert.original_event.id') {

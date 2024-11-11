@@ -7,15 +7,14 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
 import { GraphPreview } from './graph_preview';
 import { useFetchGraphData } from '../hooks/use_fetch_graph_data';
 import { useGraphPreview } from '../hooks/use_graph_preview';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
-
-const DEFAULT_FROM = 'now-60d/d';
-const DEFAULT_TO = 'now/d';
+import { getField } from '../../shared/utils';
 
 /**
  * Graph preview under Overview, Visualizations. It shows a graph representation of entities.
@@ -28,15 +27,20 @@ export const GraphPreviewContainer: React.FC = () => {
     ecsData: dataAsNestedObject,
   });
 
+  const timestamp = getField(getFieldsData('@timestamp'));
+
   // TODO: default start and end might not capture the original event
-  const graphFetchQuery = useFetchGraphData({
+  const { isLoading, isError, data } = useFetchGraphData({
     req: {
       query: {
         actorIds: [],
         eventIds,
-        start: DEFAULT_FROM,
-        end: DEFAULT_TO,
+        start: moment(timestamp).subtract(30, 'minutes').toISOString(),
+        end: moment(timestamp).add(30, 'minutes').toISOString(),
       },
+    },
+    options: {
+      refetchOnWindowFocus: false,
     },
   });
 
@@ -53,18 +57,14 @@ export const GraphPreviewContainer: React.FC = () => {
       }}
       data-test-subj={GRAPH_PREVIEW_TEST_ID}
       content={
-        !graphFetchQuery.isLoading && !graphFetchQuery.isError
+        !isLoading && !isError
           ? {
               paddingSize: 'none',
             }
           : undefined
       }
     >
-      <GraphPreview
-        isLoading={graphFetchQuery.isLoading}
-        isError={graphFetchQuery.isError}
-        data={graphFetchQuery.data}
-      />
+      <GraphPreview isLoading={isLoading} isError={isError} data={data} />
     </ExpandablePanel>
   );
 };
