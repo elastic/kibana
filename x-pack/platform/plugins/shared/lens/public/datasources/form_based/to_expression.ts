@@ -80,6 +80,7 @@ function getExpressionForLayer(
   nowInstant: Date,
   searchSessionId?: string,
   forceDSL?: boolean
+  returnESQL?: boolean
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
   if (columnOrder.length === 0 || !indexPattern) {
@@ -362,6 +363,10 @@ function getExpressionForLayer(
       esAggsIdMap = updatedEsAggsIdMap;
     } else {
       esAggsIdMap = esqlLayer.esAggsIdMap;
+
+      if (returnESQL) {
+        return esqlLayer;
+      }
     }
 
     const columnsWithFormatters = columnEntries.filter(
@@ -564,6 +569,7 @@ export function toExpression(
   nowInstant: Date,
   searchSessionId?: string,
   forceDSL?: boolean
+  returnESQL?: boolean
 ) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
@@ -575,6 +581,7 @@ export function toExpression(
       nowInstant,
       searchSessionId,
       forceDSL
+      returnESQL
     );
   }
 
