@@ -108,6 +108,14 @@ describe('single line query', () => {
         expect(text).toBe('FROM search-movies | GROK Awards "text"');
       });
     });
+
+    describe('DISSECT', () => {
+      test('two basic arguments', () => {
+        const { text } = reprint('FROM index | DISSECT input "pattern"');
+
+        expect(text).toBe('FROM index | DISSECT input "pattern"');
+      });
+    });
   });
 
   describe('expressions', () => {
