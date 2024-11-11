@@ -499,6 +499,9 @@ describe('RelatedIntegrations form part', () => {
         comboBoxToggleButton: screen.getByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID),
         optionIndex: 0,
       });
+      await waitFor(() => {
+        expect(screen.getByTestId(VERSION_INPUT_TEST_ID)).toHaveValue('^1.2.0');
+      });
       await setVersion({ input: screen.getByTestId(VERSION_INPUT_TEST_ID), value: '1.0.0' });
       await submitForm();
       await waitFor(() => {
@@ -613,6 +616,9 @@ describe('RelatedIntegrations form part', () => {
       await addRelatedIntegrationRow();
       await selectFirstEuiComboBoxOption({
         comboBoxToggleButton: screen.getByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID),
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId(VERSION_INPUT_TEST_ID)).toHaveValue('^1.0.0');
       });
       await setVersion({ input: screen.getByTestId(VERSION_INPUT_TEST_ID), value: '100' });
 
