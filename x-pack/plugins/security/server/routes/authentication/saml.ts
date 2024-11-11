@@ -54,7 +54,7 @@ export function defineSAMLRoutes({
             deprecated: {
               documentationUrl:
                 'https://elastic.co/guide/en/elasticsearch/reference/current/saml-guide-stack.html',
-              severity: 'critical',
+              severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.samlPostRouteMessage', {
                 defaultMessage:
                   'The "{path}" URL is deprecated and will be removed in the next major version, please use "/api/security/saml/callback" instead.',

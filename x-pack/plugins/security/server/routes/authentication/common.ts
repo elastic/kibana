@@ -62,7 +62,7 @@ export function defineCommonRoutes({
           ...(isDeprecated && {
             deprecated: {
               documentationUrl: 'https://elastic.co/',
-              severity: 'critical',
+              severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.logoutRouteMessage', {
                 defaultMessage:
                   'The "{path}" URL is deprecated and will be removed in the next major version, please use "/api/security/logout" instead.',
@@ -130,7 +130,7 @@ export function defineCommonRoutes({
           ...(isDeprecated && {
             deprecated: {
               documentationUrl: 'https://elastic.co/', // ToDo
-              severity: 'critical',
+              severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.meRouteMessage', {
                 defaultMessage:
                   'The "{path}" endpoint is deprecated and will be removed in the next major version.',

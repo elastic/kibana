@@ -45,7 +45,7 @@ export function defineOIDCRoutes({
             deprecated: {
               documentationUrl:
                 'https://elastic.co/guide/en/elasticsearch/reference/current/oidc-guide.html',
-              severity: 'critical',
+              severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.oidcImplicitRouteMessage', {
                 defaultMessage:
                   'The "{path}" URL is deprecated and will be removed in the next major version, please use "/api/security/oidc/implicit" instead.',
@@ -143,7 +143,7 @@ export function defineOIDCRoutes({
             deprecated: {
               documentationUrl:
                 'https://elastic.co/guide/en/elasticsearch/reference/current/oidc-guide.html',
-              severity: 'critical',
+              severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.oidcCallbackRouteMessage', {
                 defaultMessage:
                   'The "{path}" URL is deprecated and will be removed in the next major version, please use "/api/security/oidc/callback" instead.',
@@ -250,7 +250,7 @@ export function defineOIDCRoutes({
             deprecated: {
               documentationUrl:
                 'https://elastic.co/guide/en/elasticsearch/reference/current/oidc-guide.html',
-              severity: 'critical',
+              severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.oidcInitiateRouteMessage', {
                 defaultMessage:
                   'The "{path}" URL is deprecated and will be removed in the next major version, please use "/api/security/oidc/initiate_login" instead.',
