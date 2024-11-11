@@ -30,6 +30,7 @@ import { ActionsClient } from '@kbn/actions-plugin/server';
 import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { FindResponse } from '../ai_assistant_data_clients/find';
 import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
@@ -322,6 +323,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
+  llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   isOssModel?: boolean;
   conversationId?: string;
@@ -353,6 +355,7 @@ export const langChainExecute = async ({
   isOssModel,
   context,
   actionsClient,
+  llmTasks,
   inference,
   request,
   logger,
@@ -409,6 +412,7 @@ export const langChainExecute = async ({
     conversationId,
     connectorId,
     esClient,
+    llmTasks,
     inference,
     isStream,
     llmType: getLlmType(actionTypeId),

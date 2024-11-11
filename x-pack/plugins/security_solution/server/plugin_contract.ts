@@ -46,6 +46,7 @@ import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -89,6 +90,7 @@ export interface SecuritySolutionPluginStartDependencies {
   telemetry?: TelemetryPluginStart;
   share: SharePluginStart;
   actions: ActionsPluginStartContract;
+  llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
 }
 

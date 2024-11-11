@@ -33,5 +33,6 @@
     "@kbn/zod",
     "@kbn/data-views-plugin",
     "@kbn/user-profile-components",
+    "@kbn/product-doc-common"
   ]
 }

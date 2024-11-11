@@ -35,6 +35,7 @@
       "inspector",
       "kubernetesSecurity",
       "lens",
+      "llmTasks",
       "licensing",
       "maps",
       "navigation",
@@ -59,7 +60,8 @@
       "unifiedDocViewer",
       "charts",
       "entityManager",
-      "inference"
+      "inference",
+      "productDocBase"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",

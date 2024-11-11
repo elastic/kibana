@@ -78,7 +78,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
       },
-
+      llmTasks: startPlugins.llmTasks,
       inference: startPlugins.inference,
 
       telemetry: core.analytics,

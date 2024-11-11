@@ -24,9 +24,12 @@ paths:
                     type: boolean
                   assistantModelEvaluation:
                     type: boolean
+                  assistantProductDocumentation:
+                    type: boolean
                 required:
                   - assistantKnowledgeBaseByDefault
                   - assistantModelEvaluation
+                  - assistantProductDocumentation
         '400':
           description: Generic Error
           content:

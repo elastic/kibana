@@ -552,18 +552,46 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { packageService } = fleetStartServices;
 
     this.licensing$ = plugins.licensing.license$;
-
     // Assistant Tool and Feature Registration
-    plugins.elasticAssistant.registerTools(
-      APP_UI_ID,
-      getAssistantTools({
-        assistantKnowledgeBaseByDefault:
-          config.experimentalFeatures.assistantKnowledgeBaseByDefault,
-      })
-    );
+    if (!config.experimentalFeatures.assistantProductDocumentation) {
+      plugins.elasticAssistant.registerTools(
+        APP_UI_ID,
+        getAssistantTools({
+          assistantKnowledgeBaseByDefault:
+            config.experimentalFeatures.assistantKnowledgeBaseByDefault,
+          productDocumentationAvailable: false,
+        })
+      );
+    } else {
+      // known caveat -> server restart required once documentation is installed/uninstalled
+      plugins.llmTasks.retrieveDocumentationAvailable().then(
+        (productDocumentationAvailable = false) => {
+          plugins.elasticAssistant.registerTools(
+            APP_UI_ID,
+            getAssistantTools({
+              assistantKnowledgeBaseByDefault:
+                config.experimentalFeatures.assistantKnowledgeBaseByDefault,
+              productDocumentationAvailable,
+            })
+          );
+        },
+        () => {
+          plugins.elasticAssistant.registerTools(
+            APP_UI_ID,
+            getAssistantTools({
+              assistantKnowledgeBaseByDefault:
+                config.experimentalFeatures.assistantKnowledgeBaseByDefault,
+              productDocumentationAvailable: false,
+            })
+          );
+        }
+      );
+    }
+
     const features = {
       assistantKnowledgeBaseByDefault: config.experimentalFeatures.assistantKnowledgeBaseByDefault,
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
+      assistantProductDocumentation: config.experimentalFeatures.assistantProductDocumentation,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);

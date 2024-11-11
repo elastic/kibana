@@ -31,6 +31,7 @@ import {
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
+import { ProductDocumentationManagement } from '../../assistant/settings/alerts_settings/product_documentation';
 import { KnowledgeBaseTour } from '../../tour/knowledge_base';
 import { AlertsSettingsManagement } from '../../assistant/settings/alerts_settings/alerts_settings_management';
 import { useKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_knowledge_base_entries';
@@ -73,7 +74,10 @@ interface Params {
 
 export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ dataViews }) => {
   const {
-    assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
+    assistantFeatures: {
+      assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault,
+      assistantProductDocumentation: productDocumentationEnabled,
+    },
     assistantAvailability: { hasManageGlobalKnowledgeBase, isAssistantEnabled },
     http,
     toasts,
@@ -402,6 +406,12 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
+      {productDocumentationEnabled && (
+        <>
+          <EuiSpacer size="m" />
+          <ProductDocumentationManagement />
+        </>
+      )}
       <EuiSpacer size="m" />
       <AlertsSettingsManagement
         knowledgeBase={knowledgeBase}

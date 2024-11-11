@@ -17,6 +17,7 @@
       "ml",
       "taskManager",
       "licensing",
+      "llmTasks",
       "inference",
       "spaces",
       "security"

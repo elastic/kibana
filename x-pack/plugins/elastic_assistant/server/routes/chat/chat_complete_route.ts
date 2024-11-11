@@ -71,6 +71,7 @@ export const chatCompleteRoute = (
         try {
           telemetry = ctx.elasticAssistant.telemetry;
           const inference = ctx.elasticAssistant.inference;
+          const llmTasks = ctx.elasticAssistant.llmTasks;
 
           // Perform license and authenticated user checks
           const checkResponse = performChecks({
@@ -200,6 +201,7 @@ export const chatCompleteRoute = (
             conversationId: conversationId ?? newConversation?.id,
             context: ctx,
             getElser,
+            llmTasks,
             logger,
             inference,
             messages: messages ?? [],

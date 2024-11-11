@@ -20,6 +20,7 @@ import type {
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -69,6 +70,7 @@ export interface ElasticAssistantPluginStart {
    * Inference plugin start contract.
    */
   inference: InferenceServerStart;
+  llmTasks: LlmTasksPluginStart;
   /**
    * Register features to be used by the elastic assistant.
    *
@@ -109,6 +111,7 @@ export interface ElasticAssistantPluginSetupDependencies {
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
+  llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
   security: SecurityServiceStart;
@@ -131,6 +134,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
+  llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   telemetry: AnalyticsServiceSetup;
 }
@@ -242,6 +246,7 @@ export interface AssistantToolParams {
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
   llm?: ActionsClientLlm | AssistantToolLlm;
+  llmTasks?: LlmTasksPluginStart;
   isOssModel?: boolean;
   logger: Logger;
   onNewReplacements?: (newReplacements: Replacements) => void;

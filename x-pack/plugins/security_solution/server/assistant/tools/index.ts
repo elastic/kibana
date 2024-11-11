@@ -7,6 +7,7 @@
 
 import type { AssistantTool } from '@kbn/elastic-assistant-plugin/server';
 
+import { PRODUCT_DOCUMENTATION_TOOL } from './product_docs/product_documentation_tool';
 import { NL_TO_ESQL_TOOL } from './esql/nl_to_esql_tool';
 import { ALERT_COUNTS_TOOL } from './alert_counts/alert_counts_tool';
 import { OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL } from './open_and_acknowledged_alerts/open_and_acknowledged_alerts_tool';
@@ -16,8 +17,10 @@ import { SECURITY_LABS_KNOWLEDGE_BASE_TOOL } from './security_labs/security_labs
 
 export const getAssistantTools = ({
   assistantKnowledgeBaseByDefault,
+  productDocumentationAvailable,
 }: {
   assistantKnowledgeBaseByDefault?: boolean;
+  productDocumentationAvailable?: boolean;
 }): AssistantTool[] => {
   const tools = [
     ALERT_COUNTS_TOOL,
@@ -29,6 +32,10 @@ export const getAssistantTools = ({
 
   if (assistantKnowledgeBaseByDefault) {
     tools.push(SECURITY_LABS_KNOWLEDGE_BASE_TOOL);
+  }
+
+  if (productDocumentationAvailable) {
+    tools.push(PRODUCT_DOCUMENTATION_TOOL);
   }
 
   return tools;

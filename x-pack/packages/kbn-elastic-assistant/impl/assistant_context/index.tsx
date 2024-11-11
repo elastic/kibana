@@ -14,8 +14,9 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import { NavigateToAppOptions, type OverlayStart, UserProfileService } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
+import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -76,6 +77,8 @@ export interface AssistantProviderProps {
   title?: string;
   toasts?: IToasts;
   currentAppId: string;
+  overlays: OverlayStart;
+  productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
 }
 
@@ -127,6 +130,8 @@ export interface UseAssistantContext {
   unRegisterPromptContext: UnRegisterPromptContext;
   currentAppId: string;
   codeBlockRef: React.MutableRefObject<(codeBlock: string) => void>;
+  overlays: OverlayStart;
+  productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
 }
 
@@ -147,6 +152,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   baseConversations,
   navigateToApp,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
+  overlays,
+  productDocBase,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
   currentAppId,
@@ -302,6 +309,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseConversations,
       currentAppId,
       codeBlockRef,
+      overlays,
+      productDocBase,
       userProfileService,
     }),
     [
@@ -337,6 +346,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseConversations,
       currentAppId,
       codeBlockRef,
+      overlays,
+      productDocBase,
       userProfileService,
     ]
   );
