@@ -246,4 +246,54 @@ describe('mustache lambdas', () => {
       expect(logger.warn).toHaveBeenCalledWith(`mustache render error: invalid number: 'nope'`);
     });
   });
+
+  describe('EncodeURI', () => {
+    it('valid string is successful', () => {
+      const uri = 'https://www.elastic.co?foo=bar&baz= qux'; // note the space
+      const template = dedent`
+          {{#EncodeURI}} {{uri}} {{/EncodeURI}}
+        `.trim();
+
+      expect(renderMustacheString(logger, template, { uri }, 'none')).toEqual(
+        'https://www.elastic.co?foo=bar&baz=%20qux'
+      );
+    });
+
+    it('logs an error message and returns empty string on errors', () => {
+      const uri = '\uDC00'; // invalid UTF-8
+      const template = dedent`
+          {{#EncodeURI}} {{uri}} {{/EncodeURI}}
+        `.trim();
+
+      expect(renderMustacheString(logger, template, { uri }, 'none')).toMatch('URI malformed');
+      expect(logger.warn).toHaveBeenCalledWith(
+        `mustache render error: error with encodeURI(\"${uri}\"): URI malformed`
+      );
+    });
+  });
+
+  describe('EncodeURIComponent', () => {
+    it('valid string is successful', () => {
+      const uri = 'https://www.elastic.co?foo=bar&baz= qux'; // note the space
+      const template = dedent`
+          {{#EncodeURIComponent}} {{uri}} {{/EncodeURIComponent}}
+        `.trim();
+
+      expect(renderMustacheString(logger, template, { uri }, 'none')).toEqual(
+        'https%3A%2F%2Fwww.elastic.co%3Ffoo%3Dbar%26baz%3D%20qux'
+      );
+    });
+
+    it('logs an error message and returns empty string on errors', () => {
+      const uri = '\uDC00'; // invalid UTF-8
+      const template = dedent`
+          {{#EncodeURIComponent}} {{uri}} {{/EncodeURIComponent}}
+        `.trim();
+
+      expect(renderMustacheString(logger, template, { uri }, 'none')).toMatch('URI malformed');
+      expect(logger.warn).toHaveBeenCalledWith(
+        `mustache render error: error with encodeURIComponent(\"${uri}\"): URI malformed`
+      );
+    });
+  });
 });
