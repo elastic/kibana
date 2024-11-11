@@ -314,28 +314,30 @@ describe('quick fixes logic', () => {
           { equalityCheck: 'include', ...options }
         );
       }
-      // for (const fn of getAllFunctions({ type: 'agg' })) {
-      //   // add an A to the function name to make it invalid
-      //   testQuickFixes(
-      //     `FROM index | STATS ${BROKEN_PREFIX}${fn.name}()`,
-      //     [fn.name].map(toFunctionSignature),
-      //     { equalityCheck: 'include', ...options }
-      //   );
-      //   testQuickFixes(
-      //     `FROM index | STATS var0 = ${BROKEN_PREFIX}${fn.name}()`,
-      //     [fn.name].map(toFunctionSignature),
-      //     { equalityCheck: 'include', ...options }
-      //   );
-      // }
-      // // it should preserve the arguments
-      // testQuickFixes(`FROM index | EVAL rAund(numberField)`, ['round(numberField)'], {
-      //   equalityCheck: 'include',
-      //   ...options,
-      // });
-      // testQuickFixes(`FROM index | STATS AVVG(numberField)`, ['avg(numberField)'], {
-      //   equalityCheck: 'include',
-      //   ...options,
-      // });
+      for (const fn of getAllFunctions({ type: 'agg' })) {
+        if (['match', 'qstr', '?'].includes(fn.name)) continue;
+
+        // add an A to the function name to make it invalid
+        testQuickFixes(
+          `FROM index | STATS ${BROKEN_PREFIX}${fn.name}()`,
+          [fn.name].map(toFunctionSignature),
+          { equalityCheck: 'include', ...options }
+        );
+        testQuickFixes(
+          `FROM index | STATS var0 = ${BROKEN_PREFIX}${fn.name}()`,
+          [fn.name].map(toFunctionSignature),
+          { equalityCheck: 'include', ...options }
+        );
+      }
+      // it should preserve the arguments
+      testQuickFixes(`FROM index | EVAL rAund(numberField)`, ['round(numberField)'], {
+        equalityCheck: 'include',
+        ...options,
+      });
+      testQuickFixes(`FROM index | STATS AVVG(numberField)`, ['avg(numberField)'], {
+        equalityCheck: 'include',
+        ...options,
+      });
     }
   });
 

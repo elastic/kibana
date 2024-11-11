@@ -448,6 +448,9 @@ function validateFunction({
   if (fn.incomplete) {
     return messages;
   }
+  if (isFunctionOperatorParam(fn)) {
+    return messages;
+  }
   const fnDefinition = getFunctionDefinition(fn.name)!;
 
   const isFnSupported = isSupportedFunction(fn.name, parentCommand, parentOption);
