@@ -146,14 +146,7 @@ export async function createOrUpdateIndex({
     });
   } else {
     try {
-      await retryTransientEsErrors(
-        () =>
-          esClient.indices.create({
-            index: name,
-            mappings: { _meta: { name: 'migration name #1' } },
-          }),
-        { logger }
-      );
+      await retryTransientEsErrors(() => esClient.indices.create({ index: name }), { logger });
     } catch (error) {
       if (error?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
         logger.error(`Error creating index ${name} - ${error.message}`);
@@ -175,9 +168,12 @@ export async function createIndex({ logger, esClient, name }: CreateIndexParams)
   // check if index exists
   let indexExists = false;
   try {
-    indexExists = await retryTransientEsErrors(() => esClient.indices.exists({ index: name }), {
-      logger,
-    });
+    indexExists = await retryTransientEsErrors(
+      () => esClient.indices.exists({ index: name, expand_wildcards: 'all' }),
+      {
+        logger,
+      }
+    );
   } catch (error) {
     if (error?.statusCode !== 404) {
       logger.error(`Error fetching index for ${name} - ${error.message}`);
