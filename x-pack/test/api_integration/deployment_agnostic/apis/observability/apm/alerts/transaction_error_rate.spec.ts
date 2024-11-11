@@ -31,14 +31,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('transaction error rate alert', () => {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
-    let supertest: SupertestWithRoleScopeType;
+    let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
     let roleAuthc: RoleCredentials;
 
     before(async () => {
-      supertest = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
-        withInternalHeaders: true,
-        useCookieHeader: true,
-      });
+      supertestViewerWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'viewer',
+        {
+          withInternalHeaders: true,
+          useCookieHeader: true,
+        }
+      );
 
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
@@ -81,7 +84,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     after(async () => {
       await apmSynthtraceEsClient.clean();
-      await supertest.destroy();
+      await supertestViewerWithCookieCredentials.destroy();
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 

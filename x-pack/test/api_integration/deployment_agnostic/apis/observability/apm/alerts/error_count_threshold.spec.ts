@@ -31,7 +31,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('error count threshold alert', () => {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
-    let supertestWithRoleScope: SupertestWithRoleScopeType;
+    let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
     let roleAuthc: RoleCredentials;
 
     const javaErrorMessage = 'a java error';
@@ -52,12 +52,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     };
 
     before(async () => {
-      supertestWithRoleScope = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
-        withInternalHeaders: true,
-        useCookieHeader: true,
-      });
+      supertestViewerWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'viewer',
+        {
+          withInternalHeaders: true,
+          useCookieHeader: true,
+        }
+      );
 
-      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
 
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
@@ -113,7 +116,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     after(async () => {
       await apmSynthtraceEsClient.clean();
-      await supertestWithRoleScope.destroy();
+      await supertestViewerWithCookieCredentials.destroy();
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
