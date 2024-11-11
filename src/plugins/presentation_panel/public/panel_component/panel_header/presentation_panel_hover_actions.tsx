@@ -435,7 +435,7 @@ export const PresentationPanelHoverActions = ({
       onClick={() => {
         setIsContextMenuOpen(!isContextMenuOpen);
         if (apiCanLockHoverActions(api)) {
-          api?.lockHoverActions(!hasLockedHoverActions);
+          api.lockHoverActions(!hasLockedHoverActions);
         }
       }}
       iconType="boxesVertical"
@@ -464,7 +464,9 @@ export const PresentationPanelHoverActions = ({
       onMouseOver={updateCombineHoverActions}
       onFocus={updateCombineHoverActions}
       ref={anchorRef}
-      className="embPanel__hoverActionsAnchor"
+      className={classNames('embPanel__hoverActionsAnchor', {
+        'embPanel__hoverActionsAnchor--lockHoverActions': hasLockedHoverActions,
+      })}
       data-test-embeddable-id={api?.uuid}
       data-test-subj={`embeddablePanelHoverActions-${(title || defaultTitle || '').replace(
         /\s/g,
@@ -495,21 +497,20 @@ export const PresentationPanelHoverActions = ({
           pointer-events: all; // Re-enable pointer-events for hover actions
         }
 
-        &:hover {
+        &:hover,
+        &:focus-within,
+        &.embPanel__hoverActionsAnchor--lockHoverActions {
           .embPanel {
             outline: ${viewMode === 'edit' ? DASHED_OUTLINE : SOLID_OUTLINE};
             z-index: ${euiThemeVars.euiZLevel2};
           }
-        }
+          .embPanel__hoverActionsWrapper {
+            z-index: ${euiThemeVars.euiZLevel9};
+            top: -${euiThemeVars.euiSizeXL};
 
-        &:hover .embPanel__hoverActionsWrapper,
-        &:focus-within .embPanel__hoverActionsWrapper,
-        .embPanel__hoverActionsWrapper--lockHoverActions {
-          z-index: ${euiThemeVars.euiZLevel9};
-          top: -${euiThemeVars.euiSizeXL};
-
-          .embPanel__hoverActions {
-            opacity: 1;
+            .embPanel__hoverActions {
+              opacity: 1;
+            }
           }
         }
       `}
@@ -518,9 +519,7 @@ export const PresentationPanelHoverActions = ({
       {api ? (
         <div
           ref={hoverActionsRef}
-          className={classNames('embPanel__hoverActionsWrapper', {
-            'embPanel__hoverActionsWrapper--lockHoverActions': hasLockedHoverActions,
-          })}
+          className="embPanel__hoverActionsWrapper"
           css={css`
             height: ${euiThemeVars.euiSizeXL};
             position: absolute;
