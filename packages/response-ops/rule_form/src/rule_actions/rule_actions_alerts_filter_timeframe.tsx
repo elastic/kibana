@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import { ISO_WEEKDAYS, type IsoWeekday, type AlertsFilterTimeframe } from '@kbn/alerting-types';
-import { I18N_WEEKDAY_OPTIONS_DDD } from '../constants';
+import { I18N_WEEKDAY_OPTIONS_DDD } from '@kbn/alerts-ui-shared/src/common/constants';
 import type { RuleAction } from '../types';
 
 export interface RuleActionsAlertsFilterTimeframeProps {

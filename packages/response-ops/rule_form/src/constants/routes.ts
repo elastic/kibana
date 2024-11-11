@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ALERTS_FEATURE_ID = 'alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
 export const BASE_RAC_ALERTS_API_PATH = '/internal/rac/alerts';
