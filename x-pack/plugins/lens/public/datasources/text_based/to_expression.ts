@@ -16,7 +16,7 @@ function getExpressionForLayer(
   layerId: string,
   refs: IndexPatternRef[]
 ): Ast | null {
-  if (!layer.columns || layer.columns?.length === 0) {
+  if (!layer.columns || !Array.isArray(layer.columns) || layer.columns?.length === 0) {
     return null;
   }
 
@@ -24,16 +24,18 @@ function getExpressionForLayer(
   layer.columns.forEach((col) => {
     if (idMapper[col.fieldName]) {
       idMapper[col.fieldName].push({
+        ...col,
         id: col.columnId,
-        label: col.fieldName,
+        label: col.customLabel ? col.label : col.fieldName,
       } as OriginalColumn);
     } else {
       idMapper = {
         ...idMapper,
         [col.fieldName]: [
           {
+            ...col,
             id: col.columnId,
-            label: col.fieldName,
+            label: col.customLabel ? col.label : col.fieldName,
           } as OriginalColumn,
         ],
       };

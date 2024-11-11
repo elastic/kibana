@@ -472,6 +472,19 @@ export function getFormBasedDatasource({
       );
     },
 
+    toESQL: (state, layerId, indexPatterns, dateRange, nowInstant, searchSessionId) => {
+      return toExpression(
+        state,
+        layerId,
+        indexPatterns,
+        uiSettings,
+        dateRange,
+        nowInstant,
+        searchSessionId,
+        true
+      );
+    },
+
     LayerSettingsComponent(props) {
       if (props.layerId && props.state.layers[props.layerId].query) {
         return null;
@@ -713,6 +726,14 @@ export function getFormBasedDatasource({
         datasourceId: DATASOURCE_ID,
         datasourceAliasIds: ALIAS_IDS,
         getTableSpec: () => {
+          if (Array.isArray(layer.columns)) {
+            return (
+              layer.columns.map((column) => ({
+                columnId: column.columnId,
+                fields: [column.fieldName],
+              })) || []
+            );
+          }
           // consider also referenced columns in this case
           // but map fields to the top referencing column
           const fieldsPerColumn: Record<string, string[]> = {};
@@ -736,9 +757,21 @@ export function getFormBasedDatasource({
           }));
         },
         isTextBasedLanguage: () => {
-          return true;
+          if (layer && Array.isArray(layer.columns)) return true;
+          return false;
         },
         getOperationForColumnId: (columnId: string) => {
+          if (layer && Array.isArray(layer.columns)) {
+            const column = layer.columns.find((c) => c.columnId === columnId);
+            if (!column) {
+              return null;
+            }
+            return {
+              scale: 'interval',
+              dataType: column.meta.type,
+              isBucketed: true,
+            };
+          }
           if (layer && layer.columns[columnId]) {
             if (!isReferenced(layer, columnId)) {
               return columnToOperation(

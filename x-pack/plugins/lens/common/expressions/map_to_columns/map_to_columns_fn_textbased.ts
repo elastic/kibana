@@ -35,12 +35,14 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
       if (idMap[column.id].length === 1) {
         const originalColumn = idMap[column.id][0];
         return {
+          ...originalColumn,
           ...column,
           id: originalColumn.id,
-          name: originalColumn.label,
+          name: originalColumn.meta?.label || originalColumn.label,
           meta: {
             ...column.meta,
-            params: originalColumn.params,
+            label: originalColumn.meta?.label || originalColumn.label,
+            params: originalColumn.params || column.params,
             field: originalColumn.sourceField,
           },
         };

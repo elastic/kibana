@@ -129,6 +129,8 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
   const layer = state.layers[target.layerId];
   const indexPattern = indexPatterns[layer.indexPatternId];
   const targetColumn = layer.columns[target.columnId];
+
+  if (Array.isArray(layer.columns)) return;
   // discourage already used operations for a field
   const alreadyUsedOperations = new Set(
     Object.values(layer.columns)

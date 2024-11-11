@@ -73,7 +73,8 @@ function getExpressionForLayer(
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
   nowInstant: Date,
-  searchSessionId?: string
+  searchSessionId?: string,
+  returnESQL?: boolean
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
   if (columnOrder.length === 0 || !indexPattern) {
@@ -355,6 +356,10 @@ function getExpressionForLayer(
       esAggsIdMap = updatedEsAggsIdMap;
     } else {
       esAggsIdMap = esqlLayer.esAggsIdMap;
+
+      if (returnESQL) {
+        return esqlLayer;
+      }
     }
 
     const columnsWithFormatters = columnEntries.filter(
@@ -554,7 +559,8 @@ export function toExpression(
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
   nowInstant: Date,
-  searchSessionId?: string
+  searchSessionId?: string,
+  returnESQL?: boolean
 ) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
@@ -563,7 +569,8 @@ export function toExpression(
       uiSettings,
       dateRange,
       nowInstant,
-      searchSessionId
+      searchSessionId,
+      returnESQL
     );
   }
 

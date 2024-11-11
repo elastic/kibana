@@ -289,7 +289,11 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const { dataViews } = props.framePublicAPI;
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
-  const isTextBasedLanguage = layerDatasourceState.layers[layerId].query !== undefined;
+  const isTextBasedLanguage =
+    layerDatasourceState !== undefined &&
+    layerDatasourceState.layers &&
+    layerDatasourceState.layers[layerId] &&
+    layerDatasourceState?.layers[layerId].query !== undefined;
 
   const visualizationLayerSettings = useMemo(
     () =>
@@ -301,6 +305,8 @@ export function LayerPanel(props: LayerPanelProps) {
     [activeVisualization, layerId, props.framePublicAPI, visualizationState]
   );
 
+  const adHocDataViews = Object.values(framePublicAPI.dataViews.indexPatterns ?? {});
+
   const compatibleActions = useMemo<LayerAction[]>(
     () =>
       [
@@ -308,34 +314,55 @@ export function LayerPanel(props: LayerPanelProps) {
           ? [
               {
                 execute: () => {
-                  updateDataLayerState({
+                  const esql = datasourceMap[datasourceId].toESQL(
+                    layerDatasourceState,
+                    layerId,
+                    adHocDataViews.reduce((acc, obj) => {
+                      acc[obj.id] = obj;
+                      return acc;
+                    }, {}),
+                    dateRange,
+                    new Date()
+                  );
+
+                  const columns = Object.keys(esql.esAggsIdMap).map((key) => {
+                    return {
+                      ...esql.esAggsIdMap[key][0],
+                      columnId: esql.esAggsIdMap[key][0].id,
+                      fieldName: key,
+                      meta: {
+                        type: esql.esAggsIdMap[key][0].dataType,
+                        label: esql.esAggsIdMap[key][0].label,
+                      },
+                    };
+                  });
+
+                  setQuery({ esql: esql.esql });
+
+                  const newState = {
                     ...layerDatasourceState,
                     layers: {
                       ...layerDatasourceState.layers,
                       [layerId]: {
                         indexPatternId: layerDatasourceState.layers[layerId].indexPatternId,
                         linkToLayers: [],
-                        columns: [],
+                        columns,
                         columnOrder: [],
                         sampling: 1,
                         ignoreGlobalFilters: false,
                         query: {
-                          esql: datasourceMap[datasourceId].toExpression(
-                            layerDatasourceState,
-                            layerId,
-                            [],
-                            dateRange,
-                            Date.now()
-                          ),
+                          esql: esql.esql,
                         },
                       },
                     },
-                  });
+                  };
+                  updateDatasource(datasourceId, newState);
+                  // updateDataLayerState(newState);
                 },
                 displayName: i18n.translate('xpack.lens.convert', {
                   defaultMessage: 'Convert to ESQL',
                 }),
-                icon: 'gear',
+                icon: 'sortUp',
                 'data-test-subj': 'lnsConvertLayer',
                 order: 0,
                 isCompatible: true,
@@ -393,15 +420,32 @@ export function LayerPanel(props: LayerPanelProps) {
       visualizationLayerSettings,
       layerDatasource?.LayerSettingsComponent,
       onCloneLayer,
+      datasourceMap,
+      datasourceId,
+      layerDatasourceState,
+      adHocDataViews,
+      dateRange,
+      updateDatasource,
       onRemoveLayer,
     ]
   );
   const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);
 
-  const prevQuery = useRef<AggregateQuery | Query>(layerDatasourceState.layers[layerId].query);
-  const [query, setQuery] = useState<AggregateQuery | Query>(
-    layerDatasourceState?.layers[layerId]?.query ? layerDatasourceState.layers[layerId].query : ''
-  );
+  const hasQuery = (layerDatasource) => {
+    if (!layerDatasource) return false;
+    if (!layerDatasource.layers[layerId]) return false;
+    if (!layerDatasource.layers[layerId].query) return false;
+    return true;
+  };
+
+  const initialQuery = hasQuery(layerDatasourceState)
+    ? layerDatasourceState.layers[layerId].query
+    : { esql: '' };
+
+  const prevQuery = useRef<AggregateQuery | Query>(initialQuery);
+
+  const [query, setQuery] = useState<AggregateQuery | Query>(initialQuery);
+
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
@@ -410,7 +454,6 @@ export function LayerPanel(props: LayerPanelProps) {
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
   const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
 
-  const adHocDataViews = Object.values(framePublicAPI.dataViews.indexPatterns ?? {});
   const hideTimeFilterInfo = false;
 
   const runQuery = useCallback(
@@ -425,7 +468,7 @@ export function LayerPanel(props: LayerPanelProps) {
       prevQuery.current = q;
       setIsVisualizationLoading(false);
     },
-    [datasourceMap, visualizationMap, adHocDataViews]
+    [updateDatasource, datasourceId, layerDatasourceState, layerId]
   );
 
   return (

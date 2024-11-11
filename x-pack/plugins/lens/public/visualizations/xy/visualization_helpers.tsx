@@ -473,8 +473,8 @@ export const isBucketed = (op: OperationMetadata) => op.isBucketed;
 export const isTimeChart = (
   dataLayers: XYDataLayerConfig[],
   frame?: Pick<FramePublicAPI, 'datasourceLayers'> | undefined
-) =>
-  Boolean(
+) => {
+  return Boolean(
     dataLayers.length &&
       dataLayers.every(
         (dataLayer) =>
@@ -482,3 +482,4 @@ export const isTimeChart = (
           checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
       )
   );
+};
