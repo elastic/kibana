@@ -68,7 +68,7 @@ const indexContentFile = async ({
   });
 
   if (response.errors) {
-    const error = response.items.find((item) => item.index!.error)!.index!.error!;
+    const error = response.items.find((item) => item.index?.error)?.index?.error ?? 'unknown error';
     throw new Error(`Error indexing documents: ${JSON.stringify(error)}`);
   }
 };

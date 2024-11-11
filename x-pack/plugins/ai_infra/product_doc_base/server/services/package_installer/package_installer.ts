@@ -66,11 +66,12 @@ export class PackageInstaller {
    * Will not upgrade products that are not already installed
    */
   async ensureUpToDate({}: {}) {
-    const repositoryVersions = await fetchArtifactVersions({
-      artifactRepositoryUrl: this.artifactRepositoryUrl,
-    });
-
-    const installStatuses = await this.productDocClient.getInstallationStatus();
+    const [repositoryVersions, installStatuses] = await Promise.all([
+      fetchArtifactVersions({
+        artifactRepositoryUrl: this.artifactRepositoryUrl,
+      }),
+      this.productDocClient.getInstallationStatus(),
+    ]);
 
     const toUpdate: Array<{
       productName: ProductName;
