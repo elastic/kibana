@@ -501,7 +501,7 @@ x-pack/plugins/observability_solution/infra @elastic/obs-ux-logs-team @elastic/o
 x-pack/plugins/ingest_pipelines @elastic/kibana-management
 src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
-x-pack/plugins/integration_assistant @elastic/security-solution
+x-pack/plugins/integration_assistant @elastic/security-scalability
 src/plugins/interactive_setup @elastic/kibana-security
 test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-interpreter @elastic/kibana-visualizations
@@ -714,6 +714,7 @@ examples/screenshot_mode_example @elastic/appex-sharedux
 src/plugins/screenshot_mode @elastic/appex-sharedux
 x-pack/examples/screenshotting_example @elastic/appex-sharedux
 x-pack/plugins/screenshotting @elastic/kibana-reporting-services
+packages/kbn-screenshotting-server @elastic/appex-sharedux
 packages/kbn-search-api-panels @elastic/search-kibana
 packages/kbn-search-connectors @elastic/search-kibana
 x-pack/plugins/search_connectors @elastic/search-kibana
@@ -940,6 +941,7 @@ packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-xstate-utils @elastic/obs-ux-logs-team
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
+packages/kbn-zod @elastic/kibana-core
 packages/kbn-zod-helpers @elastic/security-detection-rule-management
 ####
 ## Everything below this line overrides the default assignments for each package.
