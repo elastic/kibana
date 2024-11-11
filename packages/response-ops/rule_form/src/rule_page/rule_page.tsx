@@ -29,7 +29,7 @@ import {
   RuleFormData,
   RulePageFooter,
   RulePageNameInput,
-} from '..';
+} from '../..';
 import { useRuleFormState } from '../hooks';
 import {
   DISABLED_ACTIONS_WARNING_TITLE,
