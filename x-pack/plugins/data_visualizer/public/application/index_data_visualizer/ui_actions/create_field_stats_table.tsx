@@ -5,29 +5,22 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import type { PresentationContainer } from '@kbn/presentation-containers';
-import { tracksOverlays } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
-import { isDefined } from '@kbn/ml-is-defined';
 import { COMMON_VISUALIZATION_GROUPING } from '@kbn/visualizations-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { FIELD_STATS_EMBEDDABLE_TYPE } from '../embeddables/field_stats/constants';
+
 import type { DataVisualizerStartDependencies } from '../../common/types/data_visualizer_plugin';
 import type {
   FieldStatisticsTableEmbeddableApi,
   FieldStatsControlsApi,
 } from '../embeddables/field_stats/types';
-import { FieldStatsInitializerViewType } from '../embeddables/grid_embeddable/types';
 import type { FieldStatsInitialState } from '../embeddables/grid_embeddable/types';
-import { getOrCreateDataViewByIndexPattern } from '../search_strategy/requests/get_data_view_by_index_pattern';
-import { FieldStatisticsInitializer } from '../embeddables/field_stats/field_stats_initializer';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -57,6 +50,21 @@ async function updatePanelFromFlyoutEdits({
   initialState: FieldStatsInitialState;
   fieldStatsControlsApi?: FieldStatsControlsApi;
 }) {
+  const [
+    { getOrCreateDataViewByIndexPattern },
+    { FieldStatisticsInitializer },
+    { tracksOverlays },
+    { toMountPoint },
+    { KibanaContextProvider },
+    { isDefined },
+  ] = await Promise.all([
+    import('../search_strategy/requests/get_data_view_by_index_pattern'),
+    import('../embeddables/field_stats/field_stats_initializer'),
+    import('@kbn/presentation-containers'),
+    import('@kbn/react-kibana-mount'),
+    import('@kbn/kibana-react-plugin/public'),
+    import('@kbn/ml-is-defined'),
+  ]);
   const parentApi = api.parentApi;
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
   const services = {
@@ -148,6 +156,16 @@ export function createAddFieldStatsTableAction(
       );
     },
     async execute(context) {
+      const [
+        { IncompatibleActionError },
+        { FIELD_STATS_EMBEDDABLE_TYPE },
+        { FieldStatsInitializerViewType },
+      ] = await Promise.all([
+        import('@kbn/ui-actions-plugin/public'),
+        import('../embeddables/field_stats/constants'),
+        import('../embeddables/grid_embeddable/types'),
+      ]);
+
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
