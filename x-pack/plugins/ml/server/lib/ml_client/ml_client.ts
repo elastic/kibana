@@ -615,10 +615,6 @@ export function getMlClient(
         p
       );
     },
-    async postData(...p: Parameters<MlClient['postData']>) {
-      await jobIdsCheck('anomaly-detector', p);
-      return mlClient.postData(...p);
-    },
     async previewDatafeed(...p: Parameters<MlClient['previewDatafeed']>) {
       await datafeedIdsCheck(p);
       return mlClient.previewDatafeed(...p);
