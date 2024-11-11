@@ -22,14 +22,26 @@ export const observabilityAppTitle = i18n.translate(
   }
 );
 
-export const betaBadgeTitle = i18n.translate('xpack.observabilityLogsExplorer.betaBadgeTitle', {
-  defaultMessage: 'Beta',
-});
-
-export const betaBadgeDescription = i18n.translate(
-  'xpack.observabilityLogsExplorer.betaBadgeDescription',
+export const deprecationBadgeTitle = i18n.translate(
+  'xpack.observabilityLogsExplorer.deprecationBadgeTitle',
   {
-    defaultMessage: 'This application is in beta and therefore subject to change.',
+    defaultMessage: 'Deprecation notice',
+  }
+);
+
+export const deprecationBadgeDescription = i18n.translate(
+  'xpack.observabilityLogsExplorer.deprecationBadgeDescription',
+  {
+    defaultMessage:
+      'Discover now brings together the functionality of both Logs Stream and Logs Explorer, which are set to be deprecated.',
+  }
+);
+
+export const deprecationBadgeGuideline = i18n.translate(
+  'xpack.observabilityLogsExplorer.deprecationBadgeGuideline',
+  {
+    defaultMessage:
+      'If you still need access to Logs Stream, you can temporarily re-enable it in Advanced Settings.',
   }
 );
 
