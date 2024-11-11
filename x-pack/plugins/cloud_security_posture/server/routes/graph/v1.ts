@@ -372,28 +372,6 @@ const createEdgesAndGroups = (context: ParseContext) => {
         }
       });
 
-      let groupEdgesColor: Color = 'primary';
-
-      edgeLabelsIds.forEach((edgeLabelId) => {
-        (nodesMap[edgeLabelId] as Writable<LabelNodeDataModel>).parentId = groupNode.id;
-        connectEntitiesAndLabelNode(
-          edgesMap,
-          nodesMap,
-          groupNode.id,
-          edgeLabelId,
-          groupNode.id
-        );
-
-        if ((nodesMap[edgeLabelId] as LabelNodeDataModel).color === 'danger') {
-          groupEdgesColor = 'danger';
-        } else if (
-          (nodesMap[edgeLabelId] as LabelNodeDataModel).color === 'warning' &&
-          groupEdgesColor !== 'danger'
-        ) {
-          groupEdgesColor = 'warning';
-        }
-      });
-
       connectEntitiesAndLabelNode(
         edgesMap,
         nodesMap,
