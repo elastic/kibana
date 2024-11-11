@@ -84,11 +84,15 @@ export {
   DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
   DEFAULT_LATEST_ALERTS,
   DEFEND_INSIGHTS_STORAGE_KEY,
+  END_LOCAL_STORAGE_KEY,
+  FILTERS_LOCAL_STORAGE_KEY,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
   /** The local storage key that specifies the maximum number of alerts to send as context */
   MAX_ALERTS_LOCAL_STORAGE_KEY,
+  QUERY_LOCAL_STORAGE_KEY,
   /** The local storage key that specifies whether the settings tour should be shown */
   SHOW_SETTINGS_TOUR_LOCAL_STORAGE_KEY,
+  START_LOCAL_STORAGE_KEY,
 } from './impl/assistant_context/constants';
 
 export { useLoadConnectors } from './impl/connectorland/use_load_connectors';

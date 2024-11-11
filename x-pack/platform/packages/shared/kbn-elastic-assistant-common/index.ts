@@ -41,3 +41,6 @@ export { getRawDataOrDefault } from './impl/alerts/helpers/get_raw_data_or_defau
 
 /** Return true if the provided size is out of range */
 export { sizeIsOutOfRange } from './impl/alerts/helpers/size_is_out_of_range';
+
+/** The default (relative) start e.g. `now-24h` and end date range */
+export { DEFAULT_END, DEFAULT_START } from './impl/alerts/get_open_and_acknowledged_alerts_query';
