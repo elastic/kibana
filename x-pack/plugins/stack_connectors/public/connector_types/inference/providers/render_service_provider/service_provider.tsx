@@ -26,7 +26,7 @@ interface ServiceProviderProps {
   searchValue?: string;
 }
 
-type ProviderSolution = 'Observability' | 'Security' | 'Search';
+export type ProviderSolution = 'Observability' | 'Security' | 'Search';
 
 interface ServiceProviderRecord {
   icon: string;

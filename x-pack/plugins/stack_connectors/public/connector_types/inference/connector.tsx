@@ -123,7 +123,6 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       const newTaskType = currentTaskTypes?.find((p) => p.task_type === taskType);
 
       setSelectedTaskType(taskType);
-      generateInferenceEndpointId(config, setFieldValue);
 
       // transform the schema
       const newTaskTypeSchema = Object.keys(newTaskType?.configuration ?? {}).map((k) => ({
@@ -151,6 +150,10 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
           taskTypeConfig: configDefaults,
         },
       });
+      generateInferenceEndpointId(
+        { ...config, taskType, taskTypeConfig: configDefaults },
+        setFieldValue
+      );
     },
     [config, providers, setFieldValue, updateFieldValues]
   );
