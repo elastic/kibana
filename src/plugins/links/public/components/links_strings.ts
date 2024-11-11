@@ -139,6 +139,11 @@ export const LinksStrings = {
         i18n.translate('links.linkEditor.linkSizeLabel', {
           defaultMessage: 'Size',
         }),
+      linkSizeXS: () =>
+        i18n.translate('links.linkEditor.linkSizeXS', { defaultMessage: 'Extra small' }),
+      linkSizeS: () => i18n.translate('links.linkEditor.linkSizeS', { defaultMessage: 'Small' }),
+      linkSizeM: () => i18n.translate('links.linkEditor.linkSizeM', { defaultMessage: 'Medium' }),
+      linkSizeL: () => i18n.translate('links.linkEditor.linkSizeL', { defaultMessage: 'Large' }),
     },
   },
 };

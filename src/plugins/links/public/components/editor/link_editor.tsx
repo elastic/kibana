@@ -26,7 +26,8 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiRadioGroupOption,
-  EuiRange,
+  EuiFilterButton,
+  EuiFilterGroup,
 } from '@elastic/eui';
 
 import {
@@ -144,21 +145,20 @@ export const LinkEditor = ({
           </EuiFormRow>
           <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkSizeLabel()}>
             <EuiFlexItem grow={false}>
-              <EuiRange
-                ticks={[
-                  { label: 'xs', value: 0 },
-                  { label: 's', value: 5 },
-                  { label: 'm', value: 10 },
-                  { label: 'l', value: 15 },
-                ]}
-                min={0}
-                max={15}
-                tickInterval={5}
-                value={linkSize}
-                showTicks
-                onChange={(e) => setLinkSize(e.currentTarget.value as 'xs' | 's' | 'm' | 'l')}
-                aria-label="Link size"
-              />
+              <EuiFilterGroup>
+                <EuiFilterButton onClick={() => setLinkSize('xs')}>
+                  {LinksStrings.editor.linkEditor.linkSizeXS()}
+                </EuiFilterButton>
+                <EuiFilterButton onClick={() => setLinkSize('s')}>
+                  {LinksStrings.editor.linkEditor.linkSizeS()}
+                </EuiFilterButton>
+                <EuiFilterButton onClick={() => setLinkSize('m')}>
+                  {LinksStrings.editor.linkEditor.linkSizeM()}
+                </EuiFilterButton>
+                <EuiFilterButton onClick={() => setLinkSize('l')}>
+                  {LinksStrings.editor.linkEditor.linkSizeL()}
+                </EuiFilterButton>
+              </EuiFilterGroup>
             </EuiFlexItem>
           </EuiFormRow>
           <LinkOptionsComponent
