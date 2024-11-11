@@ -105,7 +105,7 @@ export const LinkEditor = ({
           iconType={'arrowLeft'}
           onClick={() => onClose()}
         >
-          <EuiTitle size="m" aria-label={LinksStrings.editor.linkEditor.getGoBackAriaLabel()}>
+          <EuiTitle size="s" aria-label={LinksStrings.editor.linkEditor.getGoBackAriaLabel()}>
             <h2>
               {link
                 ? LinksStrings.editor.getEditLinkTitle()
@@ -118,6 +118,7 @@ export const LinkEditor = ({
         <EuiForm component="form" fullWidth>
           <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkTypePickerLabel()}>
             <EuiRadioGroup
+              compressed
               options={linkTypes}
               idSelected={selectedLinkType}
               onChange={(id) => {
@@ -136,6 +137,7 @@ export const LinkEditor = ({
           />
           <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkTextLabel()}>
             <EuiFieldText
+              compressed
               placeholder={
                 (linkDestination ? defaultLinkLabel : '') ||
                 LinksStrings.editor.linkEditor.getLinkTextPlaceholder()
@@ -178,8 +180,8 @@ export const LinkEditor = ({
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              flush="left"
               onClick={() => onClose()}
-              iconType="cross"
               data-test-subj="links--linkEditor--closeBtn"
             >
               {LinksStrings.editor.getCancelButtonLabel()}
@@ -187,6 +189,7 @@ export const LinkEditor = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              fill
               disabled={!linkDestination}
               onClick={() => {
                 // this check should always be true, since the button is disabled otherwise - this is just for type safety

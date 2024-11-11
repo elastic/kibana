@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
+import { generatePath } from 'react-router-dom';
 
-const INDEX_DETAILS_PATH = '/app/elasticsearch/indices/index_details';
+import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
+import { INDICES_APP_BASE, SEARCH_INDICES_DETAILS_PATH } from '../routes';
+
+const INDEX_DETAILS_FULL_PATH = `${INDICES_APP_BASE}${SEARCH_INDICES_DETAILS_PATH}`;
 
 function getIndexDetailsPath(http: HttpSetup, indexName: string) {
-  return http.basePath.prepend(`${INDEX_DETAILS_PATH}/${encodeURIComponent(indexName)}`);
+  return http.basePath.prepend(generatePath(INDEX_DETAILS_FULL_PATH, { indexName }));
 }
 
 export const navigateToIndexDetails = (
