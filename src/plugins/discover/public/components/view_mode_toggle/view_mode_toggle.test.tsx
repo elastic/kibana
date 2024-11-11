@@ -115,7 +115,7 @@ describe('Document view mode toggle component', () => {
     expect(findTestSubject(component, 'dscViewModeDocumentButton').exists()).toBe(false);
     expect(findTestSubject(component, 'dscViewModePatternAnalysisButton').exists()).toBe(false);
     expect(findTestSubject(component, 'dscViewModeFieldStatsButton').exists()).toBe(false);
-    expect(findTestSubject(component, 'dscViewModeDocumentButton').text()).toBe('Results (10)');
+    expect(findTestSubject(component, 'discoverQueryHits').text()).toBe('10');
   });
 
   it('should set the view mode to VIEW_MODE.DOCUMENT_LEVEL when dscViewModeDocumentButton is clicked', async () => {
