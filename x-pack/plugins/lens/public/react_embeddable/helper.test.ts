@@ -11,16 +11,24 @@ import { deserializeState } from './helper';
 describe('Embeddable helpers', () => {
   describe('deserializeState', () => {
     it('should forward a by value raw state', async () => {
+      const attributeService = makeAttributeService(defaultDoc);
       const rawState = {
         attributes: defaultDoc,
       };
-      const runtimeState = await deserializeState(makeAttributeService(defaultDoc), rawState);
-      expect(runtimeState).toBe(rawState);
+      const runtimeState = await deserializeState(attributeService, rawState);
+      expect(runtimeState).toEqual(rawState);
+      expect(attributeService.injectReferences).toHaveBeenCalled();
     });
 
     it('should wrap Lens doc/attributes into component state shape', async () => {
-      const runtimeState = await deserializeState(makeAttributeService(defaultDoc), defaultDoc);
-      expect(runtimeState).toEqual(expect.objectContaining({ attributes: defaultDoc }));
+      const attributeService = makeAttributeService(defaultDoc);
+      const runtimeState = await deserializeState(attributeService, defaultDoc);
+      expect(runtimeState).toEqual(
+        expect.objectContaining({
+          attributes: { ...defaultDoc, references: defaultDoc.references },
+        })
+      );
+      expect(attributeService.injectReferences).toHaveBeenCalled();
     });
 
     it('load a by-ref doc from the attribute service', async () => {
@@ -30,6 +38,7 @@ describe('Embeddable helpers', () => {
       });
 
       expect(attributeService.loadFromLibrary).toHaveBeenCalledWith('123');
+      expect(attributeService.injectReferences).toHaveBeenCalled();
     });
 
     it('should fallback to an empty Lens doc if the saved object is not found', async () => {
@@ -40,6 +49,81 @@ describe('Embeddable helpers', () => {
       });
       // check the visualizationType set to null for empty state
       expect(runtimeState.attributes.visualizationType).toBeNull();
+      expect(attributeService.injectReferences).toHaveBeenCalled();
+    });
+
+    describe('injected references should overwrite inner ones', () => {
+      // There are 4 possible scenarios here for reference injections:
+      // * default space for a by-value
+      // * default space for a by-ref with a "lens" panel reference type
+      // * other space for a by-value with new ref ids
+      // * other space for a by-ref with new ref ids + "lens" panel reference type
+
+      it('should inject correctly serialized references into runtime state for a by value in the default space', async () => {
+        const attributeService = makeAttributeService(defaultDoc);
+        const mockedReferences = [
+          { id: 'serializedRefs', name: 'index-pattern-0', type: 'mocked-reference' },
+        ];
+        const runtimeState = await deserializeState(
+          attributeService,
+          {
+            attributes: defaultDoc,
+          },
+          mockedReferences
+        );
+        expect(attributeService.injectReferences).toHaveBeenCalled();
+        expect(runtimeState.attributes.references).toEqual(mockedReferences);
+      });
+
+      it('should inject correctly serialized references into runtime state for a by ref in the default space', async () => {
+        const attributeService = makeAttributeService(defaultDoc);
+        const mockedReferences = [{ id: 'serializedRefs', name: 'index-pattern-0', type: 'lens' }];
+        const runtimeState = await deserializeState(
+          attributeService,
+          {
+            attributes: defaultDoc,
+          },
+          mockedReferences
+        );
+        expect(attributeService.injectReferences).toHaveBeenCalled();
+        // Note the original references should be kept
+        expect(runtimeState.attributes.references).toEqual(defaultDoc.references);
+      });
+
+      it('should inject correctly serialized references into runtime state for a by value in another space', async () => {
+        const attributeService = makeAttributeService(defaultDoc);
+        const mockedReferences = [
+          { id: 'serializedRefs', name: 'index-pattern-0', type: 'mocked-reference' },
+        ];
+        const runtimeState = await deserializeState(
+          attributeService,
+          {
+            attributes: defaultDoc,
+          },
+          mockedReferences
+        );
+        expect(attributeService.injectReferences).toHaveBeenCalled();
+        // note: in this case the references are swapped
+        expect(runtimeState.attributes.references).toEqual(mockedReferences);
+      });
+
+      it('should inject correctly serialized references into runtime state for a by ref in another space', async () => {
+        const attributeService = makeAttributeService(defaultDoc);
+        const mockedReferences = [
+          { id: 'serializedRefs', name: 'index-pattern-0', type: 'mocked-reference' },
+          { id: 'serializedPanelRef', name: 'index-pattern-1', type: 'lens' },
+        ];
+        const runtimeState = await deserializeState(
+          attributeService,
+          {
+            attributes: defaultDoc,
+          },
+          mockedReferences
+        );
+        expect(attributeService.injectReferences).toHaveBeenCalled();
+        // note: in this case the references are swapped (filtering the "lens" panel one)
+        expect(runtimeState.attributes.references).toEqual(mockedReferences.slice(0, 1));
+      });
     });
   });
 });
