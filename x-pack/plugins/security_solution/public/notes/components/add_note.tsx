@@ -28,6 +28,7 @@ import {
   userClosedCreateErrorToast,
 } from '../store/notes.slice';
 import { MarkdownEditor } from '../../common/components/markdown_editor';
+import { NotesEventTypes } from '../../common/lib/telemetry';
 
 export const MARKDOWN_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.notes.addNote.markdownAriaLabel',
@@ -96,7 +97,7 @@ export const AddNote = memo(
       if (onNoteAdd) {
         onNoteAdd();
       }
-      telemetry.reportAddNoteFromExpandableFlyoutClicked({
+      telemetry.reportEvent(NotesEventTypes.AddNoteFromExpandableFlyoutClicked, {
         isRelatedToATimeline: timelineId != null,
       });
       setEditorValue('');

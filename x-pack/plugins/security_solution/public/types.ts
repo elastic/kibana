@@ -84,7 +84,6 @@ import type { Assets } from './assets';
 import type { Investigations } from './investigations';
 import type { MachineLearning } from './machine_learning';
 
-import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
@@ -93,6 +92,7 @@ import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
 import type { OnboardingService } from './onboarding/service';
 import type { SolutionNavigation } from './app/solution_navigation/solution_navigation';
+import type { TelemetryServiceStart } from './common/lib/telemetry';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -188,7 +188,7 @@ export type StartServices = CoreStart &
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
     contentManagement: ContentManagementPublicStart;
-    telemetry: TelemetryClientStart;
+    telemetry: TelemetryServiceStart;
     customDataService: DataPublicPluginStart;
     topValuesPopover: TopValuesPopoverService;
     timelineDataService: DataPublicPluginStart;
