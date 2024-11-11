@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const kibanaServer = getService('kibanaServer');
 
-  describe('extension getRenderAppWrapper', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/199356
+  describe.skip('extension getRenderAppWrapper', () => {
     before(async () => {
       await svlCommonPage.loginAsAdmin();
     });

@@ -116,6 +116,8 @@ const waitForModalLoad = async (options?: {
 
 describe('rules_settings_modal', () => {
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const [
       {
         application: { capabilities },
