@@ -207,6 +207,10 @@ export const MAX_UNASSOCIATED_NOTES = 'securitySolution:maxUnassociatedNotes' as
 export const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
   'securitySolution:enableVisualizationsInFlyout' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the Graph Visualizations for alerts and events */
+export const ENABLE_GRAPH_VISUALIZATION_SETTING =
+  'securitySolution:enableGraphVisualization' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
