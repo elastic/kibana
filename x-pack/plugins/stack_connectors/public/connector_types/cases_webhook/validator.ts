@@ -111,6 +111,7 @@ export const isUrlButCanBeEmpty =
   (message: string) =>
   (...args: Parameters<ValidationFunc>) => {
     const [{ value }] = args;
+
     const error: ValidationError<ERROR_CODE> = {
       code: 'ERR_FIELD_FORMAT',
       formatType: 'URL',

@@ -8,7 +8,11 @@
 import React, { FunctionComponent, useState } from 'react';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiSwitch } from '@elastic/eui';
-import { FIELD_TYPES, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  FIELD_TYPES,
+  UseField,
+  useFormContext,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { JsonFieldWrapper, MustacheTextFieldWrapper } from '@kbn/triggers-actions-ui-plugin/public';
 import { containsCommentsOrEmpty, containsTitleAndDesc, isUrlButCanBeEmpty } from '../validator';
@@ -24,7 +28,13 @@ interface Props {
 }
 
 export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
-  const [isAddCommentToggled, setIsAddCommentToggled] = useState(false);
+  const { getFieldDefaultValue } = useFormContext();
+
+  const hasCommentDefaultValue =
+    !!getFieldDefaultValue<boolean | undefined>('config.createCommentUrl') ||
+    !!getFieldDefaultValue<boolean | undefined>('config.createCommentJson');
+
+  const [isAddCommentToggled, setIsAddCommentToggled] = useState(Boolean(hasCommentDefaultValue));
 
   const onAddCommentToggle = () => {
     setIsAddCommentToggled((prev) => !prev);
@@ -133,7 +143,12 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
         />
         {isAddCommentToggled && (
           <>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
+            <EuiText>
+              <small>
+                <p>{i18n.STEP_4B_DESCRIPTION}</p>
+              </small>
+            </EuiText>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <UseField
