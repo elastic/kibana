@@ -45,10 +45,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       });
 
-      after(async () => {
-        await supertestViewerWithCookieCredentials.destroy();
-      });
-
       describe('and there are log documents', () => {
         before(async () => {
           await synthtraceLogsEsClient.index([

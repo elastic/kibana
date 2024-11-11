@@ -56,10 +56,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
     });
 
-    after(async () => {
-      await supertestEditorWithCookieCredentials.destroy();
-    });
-
     describe('gets the degraded fields per data stream', () => {
       before(async () => {
         await synthtraceLogsEsClient.index([

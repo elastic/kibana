@@ -76,7 +76,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await synthtraceLogsEsClient.clean();
-      await supertestEditorWithCookieCredentials.destroy();
     });
 
     it('returns no values when provided field has no degraded values', async () => {

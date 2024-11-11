@@ -78,10 +78,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       });
 
-      after(async () => {
-        await supertestViewerWithCookieCredentials.destroy();
-      });
-
       it('returns lastActivity as undefined when user does not have access to the data stream', async () => {
         const resp = await callApiAs(
           supertestViewerWithCookieCredentials,
@@ -105,10 +101,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             withInternalHeaders: true,
           }
         );
-      });
-
-      after(async () => {
-        await supertestEditorWithCookieCredentials.destroy();
       });
 
       it('returns error when dataStream param is not provided', async () => {
