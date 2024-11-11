@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
-import React, { useCallback, useEffect } from 'react';
+import type { SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
 import deepEqual from 'fast-deep-equal';
+import React, { useCallback, useEffect } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
 import { getKqlFieldsWithFallback } from '../../utils/get_kql_field_names_with_fallback';

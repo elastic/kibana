@@ -23,7 +23,10 @@ export const useDiscoverRedirect = () => {
     services: { share, application, entityManager },
   } = useKibana();
 
-  const { dataView, searchState } = useUnifiedSearchContext();
+  const {
+    dataView,
+    searchState: { query, filters, panelFilters },
+  } = useUnifiedSearchContext();
 
   const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
 
@@ -34,7 +37,7 @@ export const useDiscoverRedirect = () => {
         : '';
 
       const kueryWithEntityDefinitionFilters = [
-        searchState.query.query,
+        query.query,
         entityKqlFilter,
         `${ENTITY_DEFINITION_ID} : builtin*`,
       ]
@@ -46,7 +49,7 @@ export const useDiscoverRedirect = () => {
             indexPatternId: dataView?.id ?? '',
             columns: ACTIVE_COLUMNS,
             query: { query: kueryWithEntityDefinitionFilters, language: 'kuery' },
-            filters: [...searchState.filters, ...searchState.panelFilters],
+            filters: [...filters, ...panelFilters],
           })
         : undefined;
     },
@@ -55,9 +58,9 @@ export const useDiscoverRedirect = () => {
       dataView?.id,
       discoverLocator,
       entityManager.entityClient,
-      searchState.filters,
-      searchState.panelFilters,
-      searchState.query.query,
+      filters,
+      panelFilters,
+      query.query,
     ]
   );
 
