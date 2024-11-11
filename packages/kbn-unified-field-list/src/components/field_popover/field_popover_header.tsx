@@ -27,7 +27,6 @@ import type { AddFieldFilterHandler } from '../../types';
 export interface FieldPopoverHeaderProps {
   field: DataViewField;
   closePopover: EuiPopoverProps['closePopover'];
-  buttonAddBreakdownFieldProps?: Partial<EuiButtonIconProps>;
   buttonAddFieldToWorkspaceProps?: Partial<EuiButtonIconProps>;
   buttonAddFilterProps?: Partial<EuiButtonIconProps>;
   buttonEditFieldProps?: Partial<EuiButtonIconProps>;
@@ -45,7 +44,6 @@ export interface FieldPopoverHeaderProps {
 export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   field,
   closePopover,
-  buttonAddBreakdownFieldProps,
   buttonAddFieldToWorkspaceProps,
   buttonAddFilterProps,
   buttonEditFieldProps,
@@ -103,13 +101,10 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
         </EuiFlexItem>
         {onAddBreakdownField && (
           <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_addBreakdownField">
-            <EuiToolTip
-              content={buttonAddBreakdownFieldProps?.['aria-label'] ?? addBreakdownFieldTooltip}
-            >
+            <EuiToolTip content={addBreakdownFieldTooltip}>
               <EuiButtonIcon
                 data-test-subj={`fieldPopoverHeader_addBreakdownField-${field.name}`}
                 aria-label={addBreakdownFieldTooltip}
-                {...(buttonAddBreakdownFieldProps || {})}
                 iconType="visBarVerticalStacked"
                 onClick={() => {
                   closePopover();

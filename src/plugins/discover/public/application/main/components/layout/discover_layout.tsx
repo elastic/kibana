@@ -264,7 +264,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [dataView, query]
   );
 
-  const onSetBreakdownField = useCallback(
+  const onAddBreakdownField = useCallback(
     (field: DataViewField | undefined) => {
       stateContainer.appState.update({ breakdownField: field?.name });
     },
@@ -441,7 +441,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 additionalFilters={customFilters}
                 columns={currentColumns}
                 documents$={stateContainer.dataState.data$.documents$}
-                onAddBreakdownField={canSetBreakdownField ? onSetBreakdownField : undefined}
+                onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
                 onAddFilter={onFilter}
                 onChangeDataView={stateContainer.actions.onChangeDataView}
