@@ -26,6 +26,7 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import type { TimeRange } from '../../../rule_gaps/types';
 import { useScheduleRuleRun } from '../../../rule_gaps/logic/use_schedule_rule_run';
 import { useIsPrebuiltRulesCustomizationEnabled } from '../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
+import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
 export const useRulesTableActions = ({
   showExceptionsDuplicateConfirmation,
@@ -128,7 +129,7 @@ export const useRulesTableActions = ({
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.MANUAL_RULE_RUN });
         const modalManualRuleRunConfirmationResult = await showManualRuleRunConfirmation();
-        telemetry.reportManualRuleRunOpenModal({
+        telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunOpenModal, {
           type: 'single',
         });
         if (modalManualRuleRunConfirmationResult === null) {
