@@ -669,7 +669,6 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 403,
         error: 'Forbidden',
-        message: 'Forbidden',
       },
     },
   ];

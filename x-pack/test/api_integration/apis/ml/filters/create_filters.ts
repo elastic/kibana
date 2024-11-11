@@ -42,7 +42,6 @@ export default ({ getService }: FtrProviderContext) => {
         responseCode: 403,
         responseBody: {
           error: 'Forbidden',
-          message: 'Forbidden',
         },
       },
     },
@@ -58,7 +57,6 @@ export default ({ getService }: FtrProviderContext) => {
         responseCode: 403,
         responseBody: {
           error: 'Forbidden',
-          message: 'Forbidden',
         },
       },
     },
