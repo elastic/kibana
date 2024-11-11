@@ -6,14 +6,9 @@
  */
 
 import path from 'path';
-import { Worker, MessagePort, MessageChannel } from 'worker_threads';
+import { Worker } from 'worker_threads';
 import { CelValidationWorkerOutOfMemoryError } from './errors';
-import {
-  ValidateCelRequest,
-  ValidateCelResponse,
-  ValidateCelResponseType,
-  WorkerData,
-} from './worker';
+import { ValidateCelRequest, ValidateCelResponse, ValidateCelResponseType } from './worker';
 
 export class CelValidator {
   private worker?: Worker;
@@ -54,17 +49,12 @@ export class CelValidator {
     );
   }
 
-  private createWorker(port: MessagePort): Worker {
-    const workerData: WorkerData = {
-      port,
-    };
+  private createWorker(): Worker {
     return new Worker(this.workerModulePath, {
-      workerData,
       resourceLimits: {
         maxYoungGenerationSizeMb: this.workerMaxYoungHeapSizeMb,
         maxOldGenerationSizeMb: this.workerMaxOldHeapSizeMb,
       },
-      transferList: [port],
     });
   }
 
@@ -84,8 +74,7 @@ export class CelValidator {
     try {
       return await new Promise<string>(async (resolve, reject) => {
         try {
-          const { port1: myPort, port2: theirPort } = new MessageChannel();
-          this.worker = this.createWorker(theirPort);
+          this.worker = this.createWorker();
           this.worker.on('error', (workerError: NodeJS.ErrnoException) => {
             console.log(`Worker error: ${workerError}`);
             if (workerError.code === 'ERR_WORKER_OUT_OF_MEMORY') {
@@ -97,7 +86,7 @@ export class CelValidator {
           this.worker.on('exit', () => {
             console.log('Worker exited');
           });
-          myPort.on('message', ({ type, error, data, message }: ValidateCelResponse) => {
+          this.worker.on('message', ({ type, error, data, message }: ValidateCelResponse) => {
             if (type === ValidateCelResponseType.Error) {
               reject(new Error(`CEL validation returned the following error: ${error}`));
               return;
@@ -115,7 +104,7 @@ export class CelValidator {
               inputProgram,
             },
           };
-          myPort.postMessage(validateCelRequest); // Call the worker's validation function
+          this.worker.postMessage(validateCelRequest); // Call the worker's validation function
         } catch (error) {
           reject(error);
         }

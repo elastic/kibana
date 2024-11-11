@@ -8,17 +8,14 @@
 import path from 'path';
 import fs from 'fs';
 import './wasm/wasm_exec';
-import { isMainThread, workerData, MessagePort } from 'worker_threads';
+import { parentPort, isMainThread } from 'worker_threads';
 
 declare global {
   export function formatCelProgram(input: string): { Format: string; Err?: string };
   export function stopFormatCelProgram(): void;
 }
-export {};
 
-export interface WorkerData {
-  port: MessagePort;
-}
+let myParentPort: MessagePort;
 
 export interface ValidateCelRequest {
   data: { inputProgram: string };
@@ -60,13 +57,13 @@ export type ValidateCelResponse =
   | ValidateCelErrorResponse;
 
 if (!isMainThread) {
-  const { port } = workerData as WorkerData;
-  console.log('calling execute');
-  port.on('message', execute);
+  if (parentPort) {
+    parentPort.on('message', execute);
+  }
 }
+
 async function execute({ data: { inputProgram } }: ValidateCelRequest) {
   console.log('Calling ValidateCel in Worker');
-  const { port } = workerData as WorkerData;
   const wasmPath = path.join(__dirname, 'wasm');
   const file = fs.readFileSync(path.join(wasmPath, 'celformat.wasm'));
   // @ts-expect-error
@@ -83,7 +80,9 @@ async function execute({ data: { inputProgram } }: ValidateCelRequest) {
         type: ValidateCelResponseType.Error,
         error: 'Failed to format CEL Program',
       };
-      port.postMessage(errorResponse);
+      if (parentPort) {
+        parentPort.postMessage(errorResponse);
+      }
     }
 
     if (value.Err) {
@@ -91,7 +90,9 @@ async function execute({ data: { inputProgram } }: ValidateCelRequest) {
         type: ValidateCelResponseType.Error,
         error: value.Err,
       };
-      port.postMessage(errorResponse);
+      if (parentPort) {
+        parentPort.postMessage(errorResponse);
+      }
     } else {
       const successResponse: ValidateCelResponse = {
         type: ValidateCelResponseType.Data,
@@ -100,7 +101,9 @@ async function execute({ data: { inputProgram } }: ValidateCelRequest) {
         },
       };
       console.log('Worker: Posting message back to main script');
-      port.postMessage(successResponse);
+      if (parentPort) {
+        parentPort.postMessage(successResponse);
+      }
     }
   } finally {
     global.stopFormatCelProgram();
