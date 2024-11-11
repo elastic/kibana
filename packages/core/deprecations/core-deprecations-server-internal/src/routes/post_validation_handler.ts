@@ -11,7 +11,7 @@ import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-server-int
 import type { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { isObject } from 'lodash';
-import { RouteDeprecationInfo } from '@kbn/core-http-server/src/router/route';
+import { RouteDeprecationInfo } from '@kbn/core-http-server/src/router/route'; // shouldn't use deep imports
 import { buildApiDeprecationId } from '../deprecations';
 
 interface Dependencies {
