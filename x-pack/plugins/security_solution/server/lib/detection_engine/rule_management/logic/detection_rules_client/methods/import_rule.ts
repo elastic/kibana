@@ -19,6 +19,7 @@ import { validateMlAuth, toggleRuleEnabledOnUpdate } from '../utils';
 import { createRule } from './create_rule';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
 import { createRuleImportErrorObject } from '../../import/errors';
+import { calculateRuleSource } from '../mergers/rule_source/calculate_rule_source';
 
 interface ImportRuleOptions {
   actionsClient: ActionsClient;
@@ -57,12 +58,19 @@ export const importRule = async ({
 
   if (existingRule && overwriteRules) {
     let ruleWithUpdates = await applyRuleUpdate({
-      prebuiltRuleAssetClient,
       existingRule,
       ruleUpdate: rule,
     });
-    // applyRuleUpdate prefers the existing rule's values for `rule_source` and `immutable`, but we want to use the importing rule's calculated values
-    ruleWithUpdates = { ...ruleWithUpdates, ...overrideFields };
+
+    // If no override fields are provided, we calculate the rule source
+    if (overrideFields == null) {
+      ruleWithUpdates.rule_source = await calculateRuleSource({
+        rule: ruleWithUpdates,
+        prebuiltRuleAssetClient,
+      });
+    } else {
+      ruleWithUpdates = { ...ruleWithUpdates, ...overrideFields };
+    }
 
     const updatedRule = await rulesClient.update({
       id: existingRule.id,

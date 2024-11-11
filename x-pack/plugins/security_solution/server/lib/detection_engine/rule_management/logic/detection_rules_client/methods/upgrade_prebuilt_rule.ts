@@ -15,6 +15,7 @@ import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
+import { calculateRuleSource } from '../mergers/rule_source/calculate_rule_source';
 import { ClientError, validateMlAuth } from '../utils';
 import { createRule } from './create_rule';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
@@ -70,9 +71,12 @@ export const upgradePrebuiltRule = async ({
 
   // Else, recreate the rule from scratch with the passed payload.
   const updatedRule = await applyRuleUpdate({
-    prebuiltRuleAssetClient,
     existingRule,
     ruleUpdate: ruleAsset,
+  });
+  updatedRule.rule_source = await calculateRuleSource({
+    rule: updatedRule,
+    prebuiltRuleAssetClient,
   });
 
   const updatedInternalRule = await rulesClient.update({
