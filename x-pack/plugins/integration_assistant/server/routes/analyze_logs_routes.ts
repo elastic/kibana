@@ -36,6 +36,13 @@ export function registerAnalyzeLogsRoutes(
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because the privileges are not defined yet.',
+          },
+        },
         validate: {
           request: {
             body: buildRouteValidationWithZod(AnalyzeLogsRequestBody),
@@ -91,7 +98,9 @@ export function registerAnalyzeLogsRoutes(
             logSamples,
           };
           const graph = await getLogFormatDetectionGraph({ model, client });
-          const graphResults = await graph.invoke(logFormatParameters, options);
+          const graphResults = await graph
+            .withConfig({ runName: 'Log Format' })
+            .invoke(logFormatParameters, options);
           const graphLogFormat = graphResults.results.samplesFormat.name;
           if (graphLogFormat === 'unsupported') {
             throw new UnsupportedLogFormatError(GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT);

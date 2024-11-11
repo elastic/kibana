@@ -74,12 +74,15 @@ interface Params {
 export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ dataViews }) => {
   const {
     assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
-    assistantAvailability: { hasManageGlobalKnowledgeBase },
+    assistantAvailability: { hasManageGlobalKnowledgeBase, isAssistantEnabled },
     http,
     toasts,
   } = useAssistantContext();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
-  const { data: kbStatus, isFetched } = useKnowledgeBaseStatus({ http });
+  const { data: kbStatus, isFetched } = useKnowledgeBaseStatus({
+    http,
+    enabled: isAssistantEnabled,
+  });
   const isKbSetup = isKnowledgeBaseSetup(kbStatus);
 
   const [deleteKBItem, setDeleteKBItem] = useState<DocumentEntry | IndexEntry | null>(null);
@@ -159,29 +162,35 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   } = useKnowledgeBaseEntries({
     http,
     toasts,
-    enabled: enableKnowledgeBaseByDefault,
+    enabled: enableKnowledgeBaseByDefault && isAssistantEnabled,
+    isRefetching: kbStatus?.is_setup_in_progress,
   });
+
+  const resetStateAndCloseFlyout = useCallback(() => {
+    setOriginalEntry(undefined);
+    setSelectedEntry(undefined);
+    setDuplicateKBItem(null);
+    closeFlyout();
+  }, [closeFlyout]);
 
   // Flyout Save/Cancel Actions
   const onSaveConfirmed = useCallback(async () => {
     if (isKnowledgeBaseEntryResponse(selectedEntry)) {
       await updateEntries([selectedEntry]);
-      closeFlyout();
+      resetStateAndCloseFlyout();
     } else if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
       if (originalEntry) {
         setDuplicateKBItem(selectedEntry);
         return;
       }
       await createEntry(selectedEntry);
-      closeFlyout();
+      resetStateAndCloseFlyout();
     }
-  }, [selectedEntry, originalEntry, updateEntries, closeFlyout, createEntry]);
+  }, [selectedEntry, updateEntries, resetStateAndCloseFlyout, originalEntry, createEntry]);
 
   const onSaveCancelled = useCallback(() => {
-    setOriginalEntry(undefined);
-    setSelectedEntry(undefined);
-    closeFlyout();
-  }, [closeFlyout]);
+    resetStateAndCloseFlyout();
+  }, [resetStateAndCloseFlyout]);
 
   const { value: existingIndices } = useAsync(() => {
     const indices: string[] = [];
@@ -190,13 +199,15 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
         indices.push(entry.index);
       }
     });
-    return dataViews.getExistingIndices(indices);
+
+    return indices.length ? dataViews.getExistingIndices(indices) : Promise.resolve([]);
   }, [entries.data]);
 
   const { getColumns } = useKnowledgeBaseTable();
   const columns = useMemo(
     () =>
       getColumns({
+        isKbSetupInProgress: kbStatus?.is_setup_in_progress ?? false,
         existingIndices,
         isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => {
           return (
@@ -219,7 +230,14 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           openFlyout();
         },
       }),
-    [entries.data, existingIndices, getColumns, hasManageGlobalKnowledgeBase, openFlyout]
+    [
+      entries.data,
+      existingIndices,
+      getColumns,
+      hasManageGlobalKnowledgeBase,
+      kbStatus?.is_setup_in_progress,
+      openFlyout,
+    ]
   );
 
   // Refresh button
@@ -310,10 +328,9 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   const handleDuplicateEntry = useCallback(async () => {
     if (duplicateKBItem) {
       await createEntry(duplicateKBItem);
-      closeFlyout();
-      setDuplicateKBItem(null);
+      resetStateAndCloseFlyout();
     }
-  }, [closeFlyout, createEntry, duplicateKBItem]);
+  }, [createEntry, duplicateKBItem, resetStateAndCloseFlyout]);
 
   if (!enableKnowledgeBaseByDefault) {
     return (
@@ -421,6 +438,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
             />
           ) : (
             <IndexEntryEditor
+              http={http}
               entry={selectedEntry as IndexEntry}
               originalEntry={originalEntry as IndexEntry}
               dataViews={dataViews}

@@ -347,7 +347,7 @@
     "/api/actions": {
       "get": {
         "deprecated": true,
-        "operationId": "%2Fapi%2Factions#0",
+        "operationId": "get-actions",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -372,7 +372,7 @@
     "/api/actions/action": {
       "post": {
         "deprecated": true,
-        "operationId": "%2Fapi%2Factions%2Faction#0",
+        "operationId": "post-actions-action",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -496,7 +496,7 @@
       "delete": {
         "deprecated": true,
         "description": "WARNING: When you delete a connector, it cannot be recovered.",
-        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D#0",
+        "operationId": "delete-actions-action-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -542,7 +542,7 @@
       },
       "get": {
         "deprecated": true,
-        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D#1",
+        "operationId": "get-actions-action-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -628,7 +628,7 @@
       },
       "put": {
         "deprecated": true,
-        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D#2",
+        "operationId": "put-actions-action-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -754,7 +754,7 @@
     "/api/actions/action/{id}/_execute": {
       "post": {
         "deprecated": true,
-        "operationId": "%2Fapi%2Factions%2Faction%2F%7Bid%7D%2F_execute#0",
+        "operationId": "post-actions-action-id-execute",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -871,7 +871,7 @@
     "/api/actions/connector/{id}": {
       "delete": {
         "description": "WARNING: When you delete a connector, it cannot be recovered.",
-        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#0",
+        "operationId": "delete-actions-connector-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -916,7 +916,7 @@
         ]
       },
       "get": {
-        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#1",
+        "operationId": "get-actions-connector-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1001,7 +1001,7 @@
         ]
       },
       "post": {
-        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%3F%7D#0",
+        "operationId": "post-actions-connector-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1130,7 +1130,7 @@
         ]
       },
       "put": {
-        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#2",
+        "operationId": "put-actions-connector-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1257,7 +1257,7 @@
     "/api/actions/connector/{id}/_execute": {
       "post": {
         "description": "You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.",
-        "operationId": "%2Fapi%2Factions%2Fconnector%2F%7Bid%7D%2F_execute#0",
+        "operationId": "post-actions-connector-id-execute",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1374,7 +1374,7 @@
     "/api/actions/connector_types": {
       "get": {
         "description": "You do not need any Kibana feature privileges to run this API.",
-        "operationId": "%2Fapi%2Factions%2Fconnector_types#0",
+        "operationId": "get-actions-connector-types",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1407,7 +1407,7 @@
     },
     "/api/actions/connectors": {
       "get": {
-        "operationId": "%2Fapi%2Factions%2Fconnectors#0",
+        "operationId": "get-actions-connectors",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1432,7 +1432,7 @@
     "/api/actions/list_action_types": {
       "get": {
         "deprecated": true,
-        "operationId": "%2Fapi%2Factions%2Flist_action_types#0",
+        "operationId": "get-actions-list-action-types",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1456,7 +1456,7 @@
     },
     "/api/alerting/rule/{id}": {
       "delete": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D#2",
+        "operationId": "delete-alerting-rule-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1510,7 +1510,7 @@
         ]
       },
       "get": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D#0",
+        "operationId": "get-alerting-rule-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -2388,7 +2388,7 @@
         ]
       },
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%3F%7D#0",
+        "operationId": "post-alerting-rule-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -3568,7 +3568,7 @@
         ]
       },
       "put": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D#1",
+        "operationId": "put-alerting-rule-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4736,7 +4736,7 @@
     },
     "/api/alerting/rule/{id}/_disable": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_disable#0",
+        "operationId": "post-alerting-rule-id-disable",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4810,7 +4810,7 @@
     },
     "/api/alerting/rule/{id}/_enable": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_enable#0",
+        "operationId": "post-alerting-rule-id-enable",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4866,7 +4866,7 @@
     },
     "/api/alerting/rule/{id}/_mute_all": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_mute_all#0",
+        "operationId": "post-alerting-rule-id-mute-all",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4922,7 +4922,7 @@
     },
     "/api/alerting/rule/{id}/_unmute_all": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_unmute_all#0",
+        "operationId": "post-alerting-rule-id-unmute-all",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4978,7 +4978,7 @@
     },
     "/api/alerting/rule/{id}/_update_api_key": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_update_api_key#0",
+        "operationId": "post-alerting-rule-id-update-api-key",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -5037,7 +5037,7 @@
     },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_mute#0",
+        "operationId": "post-alerting-rule-rule-id-alert-alert-id-mute",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -5102,7 +5102,7 @@
     },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute": {
       "post": {
-        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_unmute#0",
+        "operationId": "post-alerting-rule-rule-id-alert-alert-id-unmute",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -5167,7 +5167,7 @@
     },
     "/api/alerting/rules/_find": {
       "get": {
-        "operationId": "%2Fapi%2Falerting%2Frules%2F_find#0",
+        "operationId": "get-alerting-rules-find",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6177,7 +6177,7 @@
     },
     "/api/security/role": {
       "get": {
-        "operationId": "%2Fapi%2Fsecurity%2Frole#0",
+        "operationId": "get-security-role",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6214,7 +6214,7 @@
     },
     "/api/security/role/{name}": {
       "delete": {
-        "operationId": "%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#1",
+        "operationId": "delete-security-role-name",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6259,7 +6259,7 @@
         ]
       },
       "get": {
-        "operationId": "%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#0",
+        "operationId": "get-security-role-name",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6305,7 +6305,7 @@
       },
       "put": {
         "description": "Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.",
-        "operationId": "%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#2",
+        "operationId": "put-security-role-name",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6624,7 +6624,7 @@
     },
     "/api/security/roles": {
       "post": {
-        "operationId": "%2Fapi%2Fsecurity%2Froles#0",
+        "operationId": "post-security-roles",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6934,8 +6934,8 @@
     },
     "/api/spaces/_copy_saved_objects": {
       "post": {
-        "description": "It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved searches, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.",
-        "operationId": "%2Fapi%2Fspaces%2F_copy_saved_objects#0",
+        "description": "It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved searches, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: ALL of [copySavedObjectsToSpaces].",
+        "operationId": "post-spaces-copy-saved-objects",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -7033,7 +7033,7 @@
     },
     "/api/spaces/_disable_legacy_url_aliases": {
       "post": {
-        "operationId": "%2Fapi%2Fspaces%2F_disable_legacy_url_aliases#0",
+        "operationId": "post-spaces-disable-legacy-url-aliases",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -7109,7 +7109,7 @@
     "/api/spaces/_get_shareable_references": {
       "post": {
         "description": "Collect references and space contexts for saved objects.",
-        "operationId": "%2Fapi%2Fspaces%2F_get_shareable_references#0",
+        "operationId": "post-spaces-get-shareable-references",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -7177,8 +7177,8 @@
     },
     "/api/spaces/_resolve_copy_saved_objects_errors": {
       "post": {
-        "description": "Overwrite saved objects that are returned as errors from the copy saved objects to space API.",
-        "operationId": "%2Fapi%2Fspaces%2F_resolve_copy_saved_objects_errors#0",
+        "description": "Overwrite saved objects that are returned as errors from the copy saved objects to space API.<br/><br/>[Required authorization] Route required privileges: ALL of [copySavedObjectsToSpaces].",
+        "operationId": "post-spaces-resolve-copy-saved-objects-errors",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -7299,7 +7299,7 @@
     "/api/spaces/_update_objects_spaces": {
       "post": {
         "description": "Update one or more saved objects to add or remove them from some spaces.",
-        "operationId": "%2Fapi%2Fspaces%2F_update_objects_spaces#0",
+        "operationId": "post-spaces-update-objects-spaces",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -7385,7 +7385,7 @@
     },
     "/api/spaces/space": {
       "get": {
-        "operationId": "%2Fapi%2Fspaces%2Fspace#0",
+        "operationId": "get-spaces-space",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -7465,7 +7465,7 @@
         ]
       },
       "post": {
-        "operationId": "%2Fapi%2Fspaces%2Fspace#1",
+        "operationId": "post-spaces-space",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -7566,7 +7566,7 @@
     "/api/spaces/space/{id}": {
       "delete": {
         "description": "When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.",
-        "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2",
+        "operationId": "delete-spaces-space-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -7614,7 +7614,7 @@
         ]
       },
       "get": {
-        "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#0",
+        "operationId": "get-spaces-space-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -7649,7 +7649,7 @@
         ]
       },
       "put": {
-        "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#1",
+        "operationId": "put-spaces-space-id",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -7758,7 +7758,7 @@
     },
     "/api/status": {
       "get": {
-        "operationId": "%2Fapi%2Fstatus#0",
+        "operationId": "get-status",
         "parameters": [
           {
             "description": "The version of the API to use",

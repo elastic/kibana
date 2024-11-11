@@ -154,14 +154,7 @@ afterAll(() => {
   consoleDebugMock.mockRestore();
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/196463
-// FLAKY: https://github.com/elastic/kibana/issues/196464
-// FLAKY: https://github.com/elastic/kibana/issues/196465
-// FLAKY: https://github.com/elastic/kibana/issues/196466
-// FLAKY: https://github.com/elastic/kibana/issues/196467
-// FLAKY: https://github.com/elastic/kibana/issues/196468
-// FLAKY: https://github.com/elastic/kibana/issues/196469
-describe.skip('When on the package policy create page', () => {
+describe('When on the package policy create page', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -868,7 +861,7 @@ describe.skip('When on the package policy create page', () => {
 
       test('should create agentless agent policy and package policy when in cloud and agentless API url is set', async () => {
         fireEvent.click(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ));
-        fireEvent.click(renderResult.getByText('Agentless'));
+        fireEvent.click(renderResult.getAllByText('Agentless')[0]);
         await act(async () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });

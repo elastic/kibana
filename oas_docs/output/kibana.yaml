@@ -78,7 +78,7 @@ paths:
   /api/actions:
     get:
       deprecated: true
-      operationId: '%2Fapi%2Factions#0'
+      operationId: get-actions
       parameters:
         - description: The version of the API to use
           in: header
@@ -95,7 +95,7 @@ paths:
   /api/actions/action:
     post:
       deprecated: true
-      operationId: '%2Fapi%2Factions%2Faction#0'
+      operationId: post-actions-action
       parameters:
         - description: The version of the API to use
           in: header
@@ -188,7 +188,7 @@ paths:
     delete:
       deprecated: true
       description: 'WARNING: When you delete a connector, it cannot be recovered.'
-      operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D#0'
+      operationId: delete-actions-action-id
       parameters:
         - description: The version of the API to use
           in: header
@@ -219,7 +219,7 @@ paths:
         - connectors
     get:
       deprecated: true
-      operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D#1'
+      operationId: get-actions-action-id
       parameters:
         - description: The version of the API to use
           in: header
@@ -285,7 +285,7 @@ paths:
         - connectors
     put:
       deprecated: true
-      operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D#2'
+      operationId: put-actions-action-id
       parameters:
         - description: The version of the API to use
           in: header
@@ -378,7 +378,7 @@ paths:
   '/api/actions/action/{id}/_execute':
     post:
       deprecated: true
-      operationId: '%2Fapi%2Factions%2Faction%2F%7Bid%7D%2F_execute#0'
+      operationId: post-actions-action-id-execute
       parameters:
         - description: The version of the API to use
           in: header
@@ -464,7 +464,7 @@ paths:
   /api/actions/connector_types:
     get:
       description: You do not need any Kibana feature privileges to run this API.
-      operationId: '%2Fapi%2Factions%2Fconnector_types#0'
+      operationId: get-actions-connector-types
       parameters:
         - description: The version of the API to use
           in: header
@@ -489,7 +489,7 @@ paths:
   '/api/actions/connector/{id}':
     delete:
       description: 'WARNING: When you delete a connector, it cannot be recovered.'
-      operationId: '%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#0'
+      operationId: delete-actions-connector-id
       parameters:
         - description: The version of the API to use
           in: header
@@ -519,7 +519,7 @@ paths:
       tags:
         - connectors
     get:
-      operationId: '%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#1'
+      operationId: get-actions-connector-id
       parameters:
         - description: The version of the API to use
           in: header
@@ -584,7 +584,7 @@ paths:
       tags:
         - connectors
     post:
-      operationId: '%2Fapi%2Factions%2Fconnector%2F%7Bid%3F%7D#0'
+      operationId: post-actions-connector-id
       parameters:
         - description: The version of the API to use
           in: header
@@ -680,7 +680,7 @@ paths:
       tags:
         - connectors
     put:
-      operationId: '%2Fapi%2Factions%2Fconnector%2F%7Bid%7D#2'
+      operationId: put-actions-connector-id
       parameters:
         - description: The version of the API to use
           in: header
@@ -776,7 +776,7 @@ paths:
       description: >-
         You can use this API to test an action that involves interaction with
         Kibana services or integrations with third-party systems.
-      operationId: '%2Fapi%2Factions%2Fconnector%2F%7Bid%7D%2F_execute#0'
+      operationId: post-actions-connector-id-execute
       parameters:
         - description: The version of the API to use
           in: header
@@ -861,7 +861,7 @@ paths:
         - connectors
   /api/actions/connectors:
     get:
-      operationId: '%2Fapi%2Factions%2Fconnectors#0'
+      operationId: get-actions-connectors
       parameters:
         - description: The version of the API to use
           in: header
@@ -878,7 +878,7 @@ paths:
   /api/actions/list_action_types:
     get:
       deprecated: true
-      operationId: '%2Fapi%2Factions%2Flist_action_types#0'
+      operationId: get-actions-list-action-types
       parameters:
         - description: The version of the API to use
           in: header
@@ -1282,7 +1282,7 @@ paths:
         - alerting
   '/api/alerting/rule/{id}':
     delete:
-      operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D#2'
+      operationId: delete-alerting-rule-id
       parameters:
         - description: The version of the API to use
           in: header
@@ -1318,7 +1318,7 @@ paths:
       tags:
         - alerting
     get:
-      operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D#0'
+      operationId: get-alerting-rule-id
       parameters:
         - description: The version of the API to use
           in: header
@@ -2116,7 +2116,7 @@ paths:
       tags:
         - alerting
     post:
-      operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%3F%7D#0'
+      operationId: post-alerting-rule-id
       parameters:
         - description: The version of the API to use
           in: header
@@ -3239,7 +3239,7 @@ paths:
       tags:
         - alerting
     put:
-      operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D#1'
+      operationId: put-alerting-rule-id
       parameters:
         - description: The version of the API to use
           in: header
@@ -4336,7 +4336,7 @@ paths:
         - alerting
   '/api/alerting/rule/{id}/_disable':
     post:
-      operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_disable#0'
+      operationId: post-alerting-rule-id-disable
       parameters:
         - description: The version of the API to use
           in: header
@@ -4385,7 +4385,7 @@ paths:
         - alerting
   '/api/alerting/rule/{id}/_enable':
     post:
-      operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_enable#0'
+      operationId: post-alerting-rule-id-enable
       parameters:
         - description: The version of the API to use
           in: header
@@ -4422,7 +4422,7 @@ paths:
         - alerting
   '/api/alerting/rule/{id}/_mute_all':
     post:
-      operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_mute_all#0'
+      operationId: post-alerting-rule-id-mute-all
       parameters:
         - description: The version of the API to use
           in: header
@@ -4459,7 +4459,7 @@ paths:
         - alerting
   '/api/alerting/rule/{id}/_unmute_all':
     post:
-      operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_unmute_all#0'
+      operationId: post-alerting-rule-id-unmute-all
       parameters:
         - description: The version of the API to use
           in: header
@@ -4496,7 +4496,7 @@ paths:
         - alerting
   '/api/alerting/rule/{id}/_update_api_key':
     post:
-      operationId: '%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_update_api_key#0'
+      operationId: post-alerting-rule-id-update-api-key
       parameters:
         - description: The version of the API to use
           in: header
@@ -4535,8 +4535,7 @@ paths:
         - alerting
   '/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute':
     post:
-      operationId: >-
-        %2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_mute#0
+      operationId: post-alerting-rule-rule-id-alert-alert-id-mute
       parameters:
         - description: The version of the API to use
           in: header
@@ -4579,8 +4578,7 @@ paths:
         - alerting
   '/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute':
     post:
-      operationId: >-
-        %2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_unmute#0
+      operationId: post-alerting-rule-rule-id-alert-alert-id-unmute
       parameters:
         - description: The version of the API to use
           in: header
@@ -4623,7 +4621,7 @@ paths:
         - alerting
   /api/alerting/rules/_find:
     get:
-      operationId: '%2Fapi%2Falerting%2Frules%2F_find#0'
+      operationId: get-alerting-rules-find
       parameters:
         - description: The version of the API to use
           in: header
@@ -6318,49 +6316,110 @@ paths:
     post:
       description: Create a new agent key for APM.
       operationId: createAgentKey
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                privileges:
-                  items:
-                    enum:
-                      - 'event:write'
-                      - 'config_agent:read'
-                    type: string
-                  type: array
+              $ref: '#/components/schemas/APM_UI_agent_keys_object'
         required: true
       responses:
         '200':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  api_key:
-                    type: string
-                  encoded:
-                    type: string
-                  expiration:
-                    format: int64
-                    type: integer
-                  id:
-                    type: string
-                  name:
-                    type: string
+                $ref: '#/components/schemas/APM_UI_agent_keys_response'
           description: Agent key created successfully
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_403_response'
+          description: Forbidden response
+        '500':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_500_response'
+          description: Internal Server Error response
       summary: Create an APM agent key
       tags:
         - APM agent keys
+  /api/apm/fleet/apm_server_schema:
+    post:
+      operationId: saveApmServerSchema
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                schema:
+                  additionalProperties: true
+                  description: Schema object
+                  example:
+                    foo: bar
+                  type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_403_response'
+          description: Forbidden response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Save APM server schema
+      tags:
+        - APM server schema
   '/api/apm/services/{serviceName}/annotation':
     post:
       description: Create a new annotation for a specific service.
       operationId: createAnnotation
       parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
         - description: The name of the service
           in: path
           name: serviceName
@@ -6371,63 +6430,39 @@ paths:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
             schema:
-              type: object
-              properties:
-                '@timestamp':
-                  type: string
-                message:
-                  type: string
-                service:
-                  type: object
-                  properties:
-                    environment:
-                      type: string
-                    version:
-                      type: string
-                tags:
-                  items:
-                    type: string
-                  type: array
+              $ref: '#/components/schemas/APM_UI_create_annotation_object'
         required: true
       responses:
         '200':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  _id:
-                    type: string
-                  _index:
-                    type: string
-                  _source:
-                    type: object
-                    properties:
-                      '@timestamp':
-                        type: string
-                      annotation:
-                        type: string
-                      event:
-                        type: object
-                        properties:
-                          created:
-                            type: string
-                      message:
-                        type: string
-                      service:
-                        type: object
-                        properties:
-                          environment:
-                            type: string
-                          name:
-                            type: string
-                          version:
-                            type: string
-                      tags:
-                        items:
-                          type: string
-                        type: array
+                $ref: '#/components/schemas/APM_UI_create_annotation_response'
           description: Annotation created successfully
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_403_response'
+          description: Forbidden response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
       summary: Create a service annotation
       tags:
         - APM annotations
@@ -6436,6 +6471,7 @@ paths:
       description: Search for annotations related to a specific service.
       operationId: getAnnotation
       parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
         - description: The name of the service
           in: path
           name: serviceName
@@ -6465,27 +6501,484 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  annotations:
-                    items:
-                      type: object
-                      properties:
-                        '@timestamp':
-                          type: number
-                        id:
-                          type: string
-                        text:
-                          type: string
-                        type:
-                          enum:
-                            - version
-                          type: string
-                    type: array
+                $ref: '#/components/schemas/APM_UI_annotation_search_response'
           description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '500':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_500_response'
+          description: Internal Server Error response
       summary: Search for annotations
       tags:
         - APM annotations
+  /api/apm/settings/agent-configuration:
+    delete:
+      operationId: deleteAgentConfiguration
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: '#/components/schemas/APM_UI_service_object'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/APM_UI_delete_agent_configurations_response
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_403_response'
+          description: Forbidden response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Delete agent configuration
+      tags:
+        - APM agent configuration
+    get:
+      operationId: getAgentConfigurations
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_agent_configurations_response'
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Get a list of agent configurations
+      tags:
+        - APM agent configuration
+    put:
+      operationId: createUpdateAgentConfiguration
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
+        - description: If the config exists ?overwrite=true is required
+          in: query
+          name: overwrite
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: '#/components/schemas/APM_UI_agent_configuration_intake_object'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_403_response'
+          description: Forbidden response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Create or update agent configuration
+      tags:
+        - APM agent configuration
+  /api/apm/settings/agent-configuration/agent_name:
+    get:
+      description: Retrieve `agentName` for a service.
+      operationId: getAgentNameForService
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - description: The name of the service
+          example: node
+          in: query
+          name: serviceName
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_service_agent_name_response'
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Get agent name for service
+      tags:
+        - APM agent configuration
+  /api/apm/settings/agent-configuration/environments:
+    get:
+      operationId: getEnvironmentsForService
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - description: The name of the service
+          in: query
+          name: serviceName
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_service_environments_response'
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Get environments for service
+      tags:
+        - APM agent configuration
+  /api/apm/settings/agent-configuration/search:
+    post:
+      description: >
+        This endpoint allows to search for single agent configuration and update
+        'applied_by_agent' field.
+      operationId: searchSingleConfiguration
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: '#/components/schemas/APM_UI_search_agent_configuration_object'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/APM_UI_search_agent_configuration_response
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Lookup single agent configuration
+      tags:
+        - APM agent configuration
+  /api/apm/settings/agent-configuration/view:
+    get:
+      operationId: getSingleAgentConfiguration
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - description: Service name
+          example: node
+          in: query
+          name: name
+          schema:
+            type: string
+        - description: Service environment
+          example: prod
+          in: query
+          name: environment
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/APM_UI_single_agent_configuration_response
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '404':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_404_response'
+          description: Not found response
+      summary: Get single agent configuration
+      tags:
+        - APM agent configuration
+  /api/apm/sourcemaps:
+    get:
+      description: 'Returns an array of Fleet artifacts, including source map uploads.'
+      operationId: getSourceMaps
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - description: Page number
+          in: query
+          name: page
+          schema:
+            type: number
+        - description: Number of records per page
+          in: query
+          name: perPage
+          schema:
+            type: number
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_source_maps_response'
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '500':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_500_response'
+          description: Internal Server Error response
+        '501':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_501_response'
+          description: Not Implemented response
+      summary: Get source maps
+      tags:
+        - APM sourcemaps
+    post:
+      description: Upload a source map for a specific service and version.
+      operationId: uploadSourceMap
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
+      requestBody:
+        content:
+          multipart/form-data; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: '#/components/schemas/APM_UI_upload_source_map_object'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_upload_source_maps_response'
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_403_response'
+          description: Forbidden response
+        '500':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_500_response'
+          description: Internal Server Error response
+        '501':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_501_response'
+          description: Not Implemented response
+      summary: Upload source map
+      tags:
+        - APM sourcemaps
+  '/api/apm/sourcemaps/{id}':
+    delete:
+      description: Delete a previously uploaded source map.
+      operationId: deleteSourceMap
+      parameters:
+        - $ref: '#/components/parameters/APM_UI_elastic_api_version'
+        - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
+        - description: Source map identifier
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_400_response'
+          description: Bad Request response
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_403_response'
+          description: Forbidden response
+        '500':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_500_response'
+          description: Internal Server Error response
+        '501':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/APM_UI_501_response'
+          description: Not Implemented response
+      summary: Delete source map
+      tags:
+        - APM sourcemaps
   /api/asset_criticality:
     delete:
       description: Delete the asset criticality record for a specific asset if it exists.
@@ -20191,7 +20684,7 @@ paths:
         - Prompts API
   /api/security/role:
     get:
-      operationId: '%2Fapi%2Fsecurity%2Frole#0'
+      operationId: get-security-role
       parameters:
         - description: The version of the API to use
           in: header
@@ -20218,7 +20711,7 @@ paths:
         - roles
   '/api/security/role/{name}':
     delete:
-      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#1'
+      operationId: delete-security-role-name
       parameters:
         - description: The version of the API to use
           in: header
@@ -20248,7 +20741,7 @@ paths:
       tags:
         - roles
     get:
-      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#0'
+      operationId: get-security-role-name
       parameters:
         - description: The version of the API to use
           in: header
@@ -20284,7 +20777,7 @@ paths:
       description: >-
         Create a new Kibana role or update the attributes of an existing role.
         Kibana roles are stored in the Elasticsearch native realm.
-      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#2'
+      operationId: put-security-role-name
       parameters:
         - description: The version of the API to use
           in: header
@@ -20567,7 +21060,7 @@ paths:
         - roles
   /api/security/roles:
     post:
-      operationId: '%2Fapi%2Fsecurity%2Froles#0'
+      operationId: post-security-roles
       parameters:
         - description: The version of the API to use
           in: header
@@ -20857,8 +21350,10 @@ paths:
         visualizations, data views, and saved searches, as required. You can
         request to overwrite any objects that already exist in the target space
         if they share an identifier or you can use the resolve copy saved
-        objects conflicts API to do this on a per-object basis.
-      operationId: '%2Fapi%2Fspaces%2F_copy_saved_objects#0'
+        objects conflicts API to do this on a per-object
+        basis.<br/><br/>[Required authorization] Route required privileges: ALL
+        of [copySavedObjectsToSpaces].
+      operationId: post-spaces-copy-saved-objects
       parameters:
         - description: The version of the API to use
           in: header
@@ -20945,7 +21440,7 @@ paths:
         - spaces
   /api/spaces/_disable_legacy_url_aliases:
     post:
-      operationId: '%2Fapi%2Fspaces%2F_disable_legacy_url_aliases#0'
+      operationId: post-spaces-disable-legacy-url-aliases
       parameters:
         - description: The version of the API to use
           in: header
@@ -20999,7 +21494,7 @@ paths:
   /api/spaces/_get_shareable_references:
     post:
       description: Collect references and space contexts for saved objects.
-      operationId: '%2Fapi%2Fspaces%2F_get_shareable_references#0'
+      operationId: post-spaces-get-shareable-references
       parameters:
         - description: The version of the API to use
           in: header
@@ -21046,8 +21541,9 @@ paths:
     post:
       description: >-
         Overwrite saved objects that are returned as errors from the copy saved
-        objects to space API.
-      operationId: '%2Fapi%2Fspaces%2F_resolve_copy_saved_objects_errors#0'
+        objects to space API.<br/><br/>[Required authorization] Route required
+        privileges: ALL of [copySavedObjectsToSpaces].
+      operationId: post-spaces-resolve-copy-saved-objects-errors
       parameters:
         - description: The version of the API to use
           in: header
@@ -21142,7 +21638,7 @@ paths:
   /api/spaces/_update_objects_spaces:
     post:
       description: Update one or more saved objects to add or remove them from some spaces.
-      operationId: '%2Fapi%2Fspaces%2F_update_objects_spaces#0'
+      operationId: post-spaces-update-objects-spaces
       parameters:
         - description: The version of the API to use
           in: header
@@ -21205,7 +21701,7 @@ paths:
         - spaces
   /api/spaces/space:
     get:
-      operationId: '%2Fapi%2Fspaces%2Fspace#0'
+      operationId: get-spaces-space
       parameters:
         - description: The version of the API to use
           in: header
@@ -21261,7 +21757,7 @@ paths:
       tags:
         - spaces
     post:
-      operationId: '%2Fapi%2Fspaces%2Fspace#1'
+      operationId: post-spaces-space
       parameters:
         - description: The version of the API to use
           in: header
@@ -21350,7 +21846,7 @@ paths:
       description: >-
         When you delete a space, all saved objects that belong to the space are
         automatically deleted, which is permanent and cannot be undone.
-      operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2'
+      operationId: delete-spaces-space-id
       parameters:
         - description: The version of the API to use
           in: header
@@ -21382,7 +21878,7 @@ paths:
       tags:
         - spaces
     get:
-      operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#0'
+      operationId: get-spaces-space-id
       parameters:
         - description: The version of the API to use
           in: header
@@ -21405,7 +21901,7 @@ paths:
       tags:
         - spaces
     put:
-      operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#1'
+      operationId: put-spaces-space-id
       parameters:
         - description: The version of the API to use
           in: header
@@ -21499,7 +21995,7 @@ paths:
         - spaces
   /api/status:
     get:
-      operationId: '%2Fapi%2Fstatus#0'
+      operationId: get-status
       parameters:
         - description: The version of the API to use
           in: header
@@ -25481,6 +25977,24 @@ components:
       required: true
       schema:
         type: string
+    APM_UI_elastic_api_version:
+      description: The version of the API to use
+      in: header
+      name: elastic-api-version
+      required: true
+      schema:
+        default: '2023-10-31'
+        enum:
+          - '2023-10-31'
+        type: string
+    APM_UI_kbn_xsrf:
+      description: A required header to protect against CSRF attacks
+      in: header
+      name: kbn-xsrf
+      required: true
+      schema:
+        example: 'true'
+        type: string
     Cases_alert_id:
       description: An identifier for the alert.
       in: path
@@ -26059,6 +26573,471 @@ components:
           description: Specifies the data type for the field.
           example: scaled_float
           type: string
+    APM_UI_400_response:
+      type: object
+      properties:
+        error:
+          description: Error type
+          example: Not Found
+          type: string
+        message:
+          description: Error message
+          example: Not Found
+          type: string
+        statusCode:
+          description: Error status code
+          example: 400
+          type: number
+    APM_UI_401_response:
+      type: object
+      properties:
+        error:
+          description: Error type
+          example: Unauthorized
+          type: string
+        message:
+          description: Error message
+          type: string
+        statusCode:
+          description: Error status code
+          example: 401
+          type: number
+    APM_UI_403_response:
+      type: object
+      properties:
+        error:
+          description: Error type
+          example: Forbidden
+          type: string
+        message:
+          description: Error message
+          type: string
+        statusCode:
+          description: Error status code
+          example: 403
+          type: number
+    APM_UI_404_response:
+      type: object
+      properties:
+        error:
+          description: Error type
+          example: Not Found
+          type: string
+        message:
+          description: Error message
+          example: Not Found
+          type: string
+        statusCode:
+          description: Error status code
+          example: 404
+          type: number
+    APM_UI_500_response:
+      type: object
+      properties:
+        error:
+          description: Error type
+          example: Internal Server Error
+          type: string
+        message:
+          description: Error message
+          type: string
+        statusCode:
+          description: Error status code
+          example: 500
+          type: number
+    APM_UI_501_response:
+      type: object
+      properties:
+        error:
+          description: Error type
+          example: Not Implemented
+          type: string
+        message:
+          description: Error message
+          example: Not Implemented
+          type: string
+        statusCode:
+          description: Error status code
+          example: 501
+          type: number
+    APM_UI_agent_configuration_intake_object:
+      type: object
+      properties:
+        agent_name:
+          description: Agent name
+          type: string
+        service:
+          $ref: '#/components/schemas/APM_UI_service_object'
+        settings:
+          $ref: '#/components/schemas/APM_UI_settings_object'
+      required:
+        - service
+        - settings
+    APM_UI_agent_configuration_object:
+      description: Agent configuration
+      type: object
+      properties:
+        '@timestamp':
+          description: Timestamp
+          example: 1730194190636
+          type: number
+        agent_name:
+          description: Agent name
+          type: string
+        applied_by_agent:
+          description: Applied by agent
+          example: true
+          type: boolean
+        etag:
+          description: Etag
+          example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85
+          type: string
+        service:
+          $ref: '#/components/schemas/APM_UI_service_object'
+        settings:
+          $ref: '#/components/schemas/APM_UI_settings_object'
+      required:
+        - service
+        - settings
+        - '@timestamp'
+        - etag
+    APM_UI_agent_configurations_response:
+      type: object
+      properties:
+        configurations:
+          description: Agent configuration
+          items:
+            $ref: '#/components/schemas/APM_UI_agent_configuration_object'
+          type: array
+    APM_UI_agent_keys_object:
+      type: object
+      properties:
+        name:
+          description: Agent name
+          type: string
+        privileges:
+          description: Privileges configuration
+          items:
+            enum:
+              - 'event:write'
+              - 'config_agent:read'
+            type: string
+          type: array
+      required:
+        - name
+        - privileges
+    APM_UI_agent_keys_response:
+      type: object
+      properties:
+        agentKey:
+          description: Agent key
+          type: object
+          properties:
+            api_key:
+              type: string
+            encoded:
+              type: string
+            expiration:
+              format: int64
+              type: integer
+            id:
+              type: string
+            name:
+              type: string
+          required:
+            - id
+            - name
+            - api_key
+            - encoded
+    APM_UI_annotation_search_response:
+      type: object
+      properties:
+        annotations:
+          description: Annotations
+          items:
+            type: object
+            properties:
+              '@timestamp':
+                type: number
+              id:
+                type: string
+              text:
+                type: string
+              type:
+                enum:
+                  - version
+                type: string
+          type: array
+    APM_UI_base_source_map_object:
+      type: object
+      properties:
+        compressionAlgorithm:
+          description: Compression Algorithm
+          type: string
+        created:
+          description: Created date
+          type: string
+        decodedSha256:
+          description: Decoded SHA-256
+          type: string
+        decodedSize:
+          description: Decoded size
+          type: number
+        encodedSha256:
+          description: Encoded SHA-256
+          type: string
+        encodedSize:
+          description: Encoded size
+          type: number
+        encryptionAlgorithm:
+          description: Encryption Algorithm
+          type: string
+        id:
+          description: Identifier
+          type: string
+        identifier:
+          description: Identifier
+          type: string
+        packageName:
+          description: Package name
+          type: string
+        relative_url:
+          description: Relative URL
+          type: string
+        type:
+          description: Type
+          type: string
+    APM_UI_create_annotation_object:
+      type: object
+      properties:
+        '@timestamp':
+          description: Timestamp
+          type: string
+        message:
+          description: Message
+          type: string
+        service:
+          description: Service
+          type: object
+          properties:
+            environment:
+              type: string
+            version:
+              type: string
+          required:
+            - version
+        tags:
+          description: Tags
+          items:
+            type: string
+          type: array
+      required:
+        - '@timestamp'
+        - service
+    APM_UI_create_annotation_response:
+      type: object
+      properties:
+        _id:
+          description: Identifier
+          type: string
+        _index:
+          description: Index
+          type: string
+        _source:
+          description: Response
+          type: object
+          properties:
+            '@timestamp':
+              type: string
+            annotation:
+              type: object
+              properties:
+                title:
+                  type: string
+                type:
+                  type: string
+            event:
+              type: object
+              properties:
+                created:
+                  type: string
+            message:
+              type: string
+            service:
+              type: object
+              properties:
+                environment:
+                  type: string
+                name:
+                  type: string
+                version:
+                  type: string
+            tags:
+              items:
+                type: string
+              type: array
+    APM_UI_delete_agent_configurations_response:
+      type: object
+      properties:
+        result:
+          description: Result
+          type: string
+    APM_UI_search_agent_configuration_object:
+      type: object
+      properties:
+        etag:
+          description: If etags match then `applied_by_agent` field will be set to `true`
+          example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85
+          type: string
+        mark_as_applied_by_agent:
+          description: >
+            `markAsAppliedByAgent=true` means "force setting it to true
+            regardless of etag".
+
+            This is needed for Jaeger agent that doesn't have etags
+          type: boolean
+        service:
+          $ref: '#/components/schemas/APM_UI_service_object'
+      required:
+        - service
+    APM_UI_search_agent_configuration_response:
+      type: object
+      properties:
+        _id:
+          description: Identifier
+          type: string
+        _index:
+          description: Index
+          type: string
+        _score:
+          description: Score
+          type: number
+        _source:
+          $ref: '#/components/schemas/APM_UI_agent_configuration_object'
+    APM_UI_service_agent_name_response:
+      type: object
+      properties:
+        agentName:
+          description: Agent name
+          example: nodejs
+          type: string
+    APM_UI_service_environment_object:
+      type: object
+      properties:
+        alreadyConfigured:
+          description: Already configured
+          type: boolean
+        name:
+          description: Service environment name
+          example: ALL_OPTION_VALUE
+          type: string
+    APM_UI_service_environments_response:
+      type: object
+      properties:
+        environments:
+          description: Service environment list
+          items:
+            $ref: '#/components/schemas/APM_UI_service_environment_object'
+          type: array
+    APM_UI_service_object:
+      description: Service
+      type: object
+      properties:
+        environment:
+          description: Environment
+          example: prod
+          type: string
+        name:
+          description: Name
+          example: node
+          type: string
+    APM_UI_settings_object:
+      additionalProperties:
+        type: string
+      description: Agent configuration settings
+      type: object
+    APM_UI_single_agent_configuration_response:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+          required:
+            - id
+        - $ref: '#/components/schemas/APM_UI_agent_configuration_object'
+    APM_UI_source_maps_response:
+      type: object
+      properties:
+        artifacts:
+          description: Artifacts
+          items:
+            allOf:
+              - type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      bundleFilepath:
+                        type: string
+                      serviceName:
+                        type: string
+                      serviceVersion:
+                        type: string
+                      sourceMap:
+                        type: object
+                        properties:
+                          file:
+                            type: string
+                          mappings:
+                            type: string
+                          sourceRoot:
+                            type: string
+                          sources:
+                            items:
+                              type: string
+                            type: array
+                          sourcesContent:
+                            items:
+                              type: string
+                            type: array
+                          version:
+                            type: number
+              - $ref: '#/components/schemas/APM_UI_base_source_map_object'
+          type: array
+    APM_UI_upload_source_map_object:
+      type: object
+      properties:
+        bundle_filepath:
+          description: >-
+            The absolute path of the final bundle as used in the web
+            application.
+          type: string
+        service_name:
+          description: The name of the service that the service map should apply to.
+          type: string
+        service_version:
+          description: The version of the service that the service map should apply to.
+          type: string
+        sourcemap:
+          description: >
+            The source map. String or file upload. It must follow the
+
+            [source map revision 3
+            proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k).
+          format: binary
+          type: string
+      required:
+        - service_name
+        - service_version
+        - bundle_filepath
+        - sourcemap
+    APM_UI_upload_source_maps_response:
+      allOf:
+        - type: object
+          properties:
+            body:
+              type: string
+        - $ref: '#/components/schemas/APM_UI_base_source_map_object'
     Cases_4xx_response:
       properties:
         error:
@@ -39170,6 +40149,8 @@ components:
     Security_Entity_Analytics_API_EngineDescriptor:
       type: object
       properties:
+        error:
+          type: object
         fieldHistoryLength:
           type: integer
         filter:
@@ -42555,6 +43536,9 @@ security:
   - basicAuth: []
 tags:
   - name: alerting
+  - description: |
+      Adjust APM agent configuration without need to redeploy your application.
+    name: APM agent configuration
   - description: >
       Configure APM agent keys to authorize requests from APM agents to the APM
       Server.
@@ -42564,6 +43548,10 @@ tags:
       Annotations enable you to easily see how events are impacting the
       performance of your applications.
     name: APM annotations
+  - description: Create APM fleet server schema.
+    name: APM server schema
+  - description: Configure APM source maps.
+    name: APM sourcemaps
   - description: Case APIs enable you to open and track issues.
     name: cases
   - name: connectors

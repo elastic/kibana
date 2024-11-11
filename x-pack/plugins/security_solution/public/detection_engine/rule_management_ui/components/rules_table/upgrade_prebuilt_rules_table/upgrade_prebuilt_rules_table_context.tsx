@@ -8,8 +8,8 @@
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 import type { RulesUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { RuleUpgradeConflictsResolverTab } from '../../../../rule_management/components/rule_details/three_way_diff/rule_upgrade_conflicts_resolver_tab';
 import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
@@ -76,10 +76,13 @@ export interface UpgradePrebuiltRulesTableState {
    */
   loadingRules: RuleSignatureId[];
   /**
-  /**
    * The timestamp for when the rules were successfully fetched
    */
   lastUpdated: number;
+  /**
+   * Feature Flag to enable prebuilt rules customization
+   */
+  isPrebuiltRulesCustomizationEnabled: boolean;
 }
 
 export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
@@ -108,13 +111,12 @@ interface UpgradePrebuiltRulesTableContextProviderProps {
 export const UpgradePrebuiltRulesTableContextProvider = ({
   children,
 }: UpgradePrebuiltRulesTableContextProviderProps) => {
-  const isPrebuiltRulesCustomizationEnabled = useIsExperimentalFeatureEnabled(
-    'prebuiltRulesCustomizationEnabled'
-  );
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const [filterOptions, setFilterOptions] = useState<UpgradePrebuiltRulesTableFilterOptions>({
     filter: '',
     tags: [],
+    ruleSource: [],
   });
 
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
@@ -318,6 +320,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         isUpgradingSecurityPackages,
         loadingRules,
         lastUpdated: dataUpdatedAt,
+        isPrebuiltRulesCustomizationEnabled,
       },
       actions,
     };
@@ -334,6 +337,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     loadingRules,
     dataUpdatedAt,
     actions,
+    isPrebuiltRulesCustomizationEnabled,
   ]);
 
   return (

@@ -8,7 +8,7 @@
  */
 
 import { camelCase } from 'lodash';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { builtinFunctions } from '../../definitions/builtin';
 import { aggregationFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
@@ -177,7 +177,7 @@ export function getFunctionSignaturesByReturnType(
         ({ returnType }) =>
           expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
       );
-      if (!filteredByReturnType.length) {
+      if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
         return false;
       }
       if (paramsTypes?.length) {
@@ -244,7 +244,17 @@ export function getDateLiteralsByFieldType(_requestedType: FieldType | FieldType
 }
 
 export function createCustomCallbackMocks(
-  customFields?: ESQLRealField[],
+  /**
+   * Columns that will come from Elasticsearch since the last command
+   * e.g. the test case may be `FROM index | EVAL foo = 1 | KEEP /`
+   *
+   * In this case, the columns available for the KEEP command will be the ones
+   * that were available after the EVAL command
+   *
+   * `FROM index | EVAL foo = 1 | LIMIT 0` will be used to fetch columns. The response
+   * will include "foo" as a column.
+   */
+  customColumnsSinceLastCommand?: ESQLRealField[],
   customSources?: Array<{ name: string; hidden: boolean }>,
   customPolicies?: Array<{
     name: string;
@@ -253,11 +263,11 @@ export function createCustomCallbackMocks(
     enrichFields: string[];
   }>
 ) {
-  const finalFields = customFields || fields;
+  const finalColumnsSinceLastCommand = customColumnsSinceLastCommand || fields;
   const finalSources = customSources || indexes;
   const finalPolicies = customPolicies || policies;
   return {
-    getFieldsFor: jest.fn(async () => finalFields),
+    getColumnsFor: jest.fn(async () => finalColumnsSinceLastCommand),
     getSources: jest.fn(async () => finalSources),
     getPolicies: jest.fn(async () => finalPolicies),
   };
@@ -302,7 +312,7 @@ export const setup = async (caret = '/') => {
       querySansCaret,
       pos,
       ctx,
-      getAstAndSyntaxErrors,
+      (_query: string | undefined) => parse(_query, { withFormatting: true }),
       opts.callbacks ?? callbacks
     );
   };
