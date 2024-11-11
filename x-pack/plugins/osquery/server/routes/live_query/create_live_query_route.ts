@@ -12,6 +12,7 @@ import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { PLUGIN_ID } from '../../../common';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createLiveQueryRequestBodySchema } from '../../../common/api';
 import { API_VERSIONS } from '../../../common/constants';
@@ -27,14 +28,14 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
     .post({
       access: 'public',
       path: '/api/osquery/live_queries',
+      options: { authRequired: true },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
         security: {
           authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
+            requiredPrivileges: [`${PLUGIN_ID}-writeLiveQueries`],
           },
         },
         validate: {
