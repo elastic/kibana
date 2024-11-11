@@ -8,14 +8,24 @@
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { GenericMetric } from './rule_condition_chart';
 
-export const getLensOperationFromRuleMetric = (metric: GenericMetric): string => {
+export interface LensOperation {
+  operation: string;
+  operationWithField: string;
+  sourceField: string;
+}
+
+export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOperation => {
   const { aggType, field, filter } = metric;
   let operation: string = aggType;
   const operationArgs: string[] = [];
   const aggFilter = JSON.stringify(filter || '').replace(/"|\\/g, '');
 
   if (aggType === Aggregators.RATE) {
-    return `counter_rate(max(${field}), kql='${aggFilter}')`;
+    return {
+      operation,
+      operationWithField: `counter_rate(max(${field}), kql='${aggFilter}')`,
+      sourceField: field || '',
+    };
   }
 
   if (aggType === Aggregators.AVERAGE) operation = 'average';
@@ -41,7 +51,11 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): string =>
 
   if (aggFilter) operationArgs.push(`kql='${aggFilter}'`);
 
-  return operation + '(' + operationArgs.join(', ') + ')';
+  return {
+    operation,
+    operationWithField: operation + '(' + operationArgs.join(', ') + ')',
+    sourceField: sourceField || '',
+  };
 };
 
 export const getBufferThreshold = (threshold?: number): string =>

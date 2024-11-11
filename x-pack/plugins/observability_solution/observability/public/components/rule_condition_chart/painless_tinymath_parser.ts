@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LensOperation } from './helpers';
+
 // This is a parser of a subset operations/expression/statement of Painless  A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, = to be used in Lens formula editor that uses TinyMath
 // The goal is to parse painless expressions to a format that can be used in Lens formula editor
 // The parser will also replace the characters A-Z with the values from aggMap
@@ -13,7 +15,7 @@
 // This parser is using a simple recursive function to parse the expression and replace the characters with the values from aggMap
 
 export interface AggMap {
-  [key: string]: string;
+  [key: string]: LensOperation;
 }
 interface PainlessTinyMathParserProps {
   equation: string;
@@ -81,7 +83,10 @@ export class PainlessTinyMathParser {
       .sort()
       .reverse()
       .forEach((metricName) => {
-        parsedInputString = parsedInputString.replaceAll(metricName, aggMap[metricName]);
+        parsedInputString = parsedInputString.replaceAll(
+          metricName,
+          aggMap[metricName].operationWithField
+        );
       });
 
     return parsedInputString;
