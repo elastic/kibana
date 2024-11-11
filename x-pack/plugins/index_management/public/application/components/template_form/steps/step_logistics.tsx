@@ -274,10 +274,14 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       });
 
     useEffect(() => {
-      if (indexPatternsField && indexPatternsField.some((pattern) => pattern === 'logs-*-*')) {
+      if (
+        indexPatternsField &&
+        indexPatternsField.length === 1 &&
+        indexPatternsField[0] === 'logs-*-*'
+      ) {
         setFieldValue('indexMode', LOGSDB_INDEX_MODE);
       }
-    }, [getFormData, indexPatternsField, setFieldValue]);
+    }, [indexPatternsField, setFieldValue]);
 
     /**
      * When the consumer call validate() on this step, we submit the form so it enters the "isSubmitted" state
