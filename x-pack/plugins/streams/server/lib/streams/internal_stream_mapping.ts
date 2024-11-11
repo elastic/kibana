@@ -9,7 +9,7 @@ import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { STREAMS_INDEX } from '../../../common/constants';
 
 export function createStreamsIndex(scopedClusterClient: IScopedClusterClient) {
-  return scopedClusterClient.asCurrentUser.indices.create({
+  return scopedClusterClient.asInternalUser.indices.create({
     index: STREAMS_INDEX,
     mappings: {
       dynamic: 'strict',

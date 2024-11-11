@@ -19,7 +19,7 @@ export const enableStreamsRoute = createServerRoute({
     access: 'public',
     security: {
       authz: {
-        requiredPrivileges: ['streams_enable'],
+        requiredPrivileges: ['streams_write'],
       },
     },
   },

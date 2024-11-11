@@ -15,7 +15,7 @@ export const resyncStreamsRoute = createServerRoute({
     access: 'public',
     security: {
       authz: {
-        requiredPrivileges: ['streams_fork'],
+        requiredPrivileges: ['streams_write'],
       },
     },
   },

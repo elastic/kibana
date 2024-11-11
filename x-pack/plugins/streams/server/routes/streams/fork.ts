@@ -24,7 +24,7 @@ export const forkStreamsRoute = createServerRoute({
     access: 'public',
     security: {
       authz: {
-        requiredPrivileges: ['streams_fork'],
+        requiredPrivileges: ['streams_write'],
       },
     },
   },

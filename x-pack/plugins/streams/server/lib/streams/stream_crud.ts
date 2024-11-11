@@ -6,11 +6,10 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { get } from 'lodash';
 import { Logger } from '@kbn/logging';
 import { FieldDefinition, StreamDefinition } from '../../../common/types';
 import { STREAMS_INDEX } from '../../../common/constants';
-import { DefinitionNotFound, IndexTemplateNotFound } from './errors';
+import { DefinitionNotFound } from './errors';
 import { deleteTemplate, upsertTemplate } from './index_templates/manage_index_templates';
 import { generateLayer } from './component_templates/generate_layer';
 import { generateIngestPipeline } from './ingest_pipelines/generate_ingest_pipeline';
@@ -26,6 +25,11 @@ import {
 } from './ingest_pipelines/manage_ingest_pipelines';
 import { getAncestors } from './helpers/hierarchy';
 import { MalformedFields } from './errors/malformed_fields';
+import {
+  deleteDataStream,
+  rolloverDataStreamIfNecessary,
+  upsertDataStream,
+} from './data_streams/manage_data_streams';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
@@ -41,35 +45,40 @@ interface DeleteStreamParams extends BaseParams {
 }
 
 export async function deleteStreamObjects({ id, scopedClusterClient, logger }: DeleteStreamParams) {
-  await scopedClusterClient.asCurrentUser.delete({
-    id,
-    index: STREAMS_INDEX,
-    refresh: 'wait_for',
-  });
   await deleteTemplate({
-    esClient: scopedClusterClient.asSecondaryAuthUser,
+    esClient: scopedClusterClient.asCurrentUser,
     name: getIndexTemplateName(id),
     logger,
   });
   await deleteComponent({
-    esClient: scopedClusterClient.asSecondaryAuthUser,
+    esClient: scopedClusterClient.asCurrentUser,
     name: getComponentTemplateName(id),
     logger,
   });
   await deleteIngestPipeline({
-    esClient: scopedClusterClient.asSecondaryAuthUser,
+    esClient: scopedClusterClient.asCurrentUser,
     id: getProcessingPipelineName(id),
     logger,
   });
   await deleteIngestPipeline({
-    esClient: scopedClusterClient.asSecondaryAuthUser,
+    esClient: scopedClusterClient.asCurrentUser,
     id: getReroutePipelineName(id),
     logger,
+  });
+  await deleteDataStream({
+    esClient: scopedClusterClient.asCurrentUser,
+    name: id,
+    logger,
+  });
+  await scopedClusterClient.asInternalUser.delete({
+    id,
+    index: STREAMS_INDEX,
+    refresh: 'wait_for',
   });
 }
 
 async function upsertInternalStream({ definition, scopedClusterClient }: BaseParamsWithDefinition) {
-  return scopedClusterClient.asCurrentUser.index({
+  return scopedClusterClient.asInternalUser.index({
     id: definition.id,
     index: STREAMS_INDEX,
     document: definition,
@@ -80,7 +89,7 @@ async function upsertInternalStream({ definition, scopedClusterClient }: BasePar
 type ListStreamsParams = BaseParams;
 
 export async function listStreams({ scopedClusterClient }: ListStreamsParams) {
-  const response = await scopedClusterClient.asCurrentUser.search<StreamDefinition>({
+  const response = await scopedClusterClient.asInternalUser.search<StreamDefinition>({
     index: STREAMS_INDEX,
     size: 10000,
     fields: ['id'],
@@ -97,7 +106,7 @@ interface ReadStreamParams extends BaseParams {
 
 export async function readStream({ id, scopedClusterClient }: ReadStreamParams) {
   try {
-    const response = await scopedClusterClient.asCurrentUser.get<StreamDefinition>({
+    const response = await scopedClusterClient.asInternalUser.get<StreamDefinition>({
       id,
       index: STREAMS_INDEX,
     });
@@ -130,7 +139,7 @@ interface ReadDescendantsParams extends BaseParams {
 }
 
 export async function readDescendants({ id, scopedClusterClient }: ReadDescendantsParams) {
-  const response = await scopedClusterClient.asCurrentUser.search<StreamDefinition>({
+  const response = await scopedClusterClient.asInternalUser.search<StreamDefinition>({
     index: STREAMS_INDEX,
     size: 10000,
     body: {
@@ -214,37 +223,6 @@ export async function checkStreamExists({ id, scopedClusterClient }: ReadStreamP
   }
 }
 
-export async function readIndexTemplate({
-  scopedClusterClient,
-  definition,
-}: BaseParamsWithDefinition) {
-  const response = await scopedClusterClient.asSecondaryAuthUser.indices.getIndexTemplate({
-    name: `${definition.id}@stream`,
-  });
-  const indexTemplate = response.index_templates.find(
-    (doc) => doc.name === `${definition.id}@stream`
-  );
-  if (!indexTemplate) {
-    throw new IndexTemplateNotFound(`Unable to find index_template for ${definition.id}`);
-  }
-  return indexTemplate;
-}
-
-export async function getIndexTemplateComponents({
-  scopedClusterClient,
-  definition,
-}: BaseParamsWithDefinition) {
-  const indexTemplate = await readIndexTemplate({ scopedClusterClient, definition });
-  return {
-    composedOf: indexTemplate.index_template.composed_of,
-    ignoreMissing: get(
-      indexTemplate,
-      'index_template.ignore_missing_component_templates',
-      []
-    ) as string[],
-  };
-}
-
 interface SyncStreamParams {
   scopedClusterClient: IScopedClusterClient;
   definition: StreamDefinition;
@@ -258,17 +236,13 @@ export async function syncStream({
   rootDefinition,
   logger,
 }: SyncStreamParams) {
-  await upsertInternalStream({
-    scopedClusterClient,
-    definition,
-  });
   await upsertComponent({
-    esClient: scopedClusterClient.asSecondaryAuthUser,
+    esClient: scopedClusterClient.asCurrentUser,
     logger,
     component: generateLayer(definition.id, definition),
   });
   await upsertIngestPipeline({
-    esClient: scopedClusterClient.asSecondaryAuthUser,
+    esClient: scopedClusterClient.asCurrentUser,
     logger,
     pipeline: generateIngestPipeline(definition.id, definition),
   });
@@ -276,12 +250,12 @@ export async function syncStream({
     definition,
   });
   await upsertIngestPipeline({
-    esClient: scopedClusterClient.asSecondaryAuthUser,
+    esClient: scopedClusterClient.asCurrentUser,
     logger,
     pipeline: reroutePipeline,
   });
   await upsertTemplate({
-    esClient: scopedClusterClient.asSecondaryAuthUser,
+    esClient: scopedClusterClient.asCurrentUser,
     logger,
     template: generateIndexTemplate(definition.id),
   });
@@ -290,9 +264,23 @@ export async function syncStream({
       definition: rootDefinition,
     });
     await upsertIngestPipeline({
-      esClient: scopedClusterClient.asSecondaryAuthUser,
+      esClient: scopedClusterClient.asCurrentUser,
       logger,
       pipeline: parentReroutePipeline,
     });
   }
+  await upsertDataStream({
+    esClient: scopedClusterClient.asCurrentUser,
+    logger,
+    name: definition.id,
+  });
+  await upsertInternalStream({
+    scopedClusterClient,
+    definition,
+  });
+  await rolloverDataStreamIfNecessary({
+    esClient: scopedClusterClient.asCurrentUser,
+    name: definition.id,
+    logger,
+  });
 }

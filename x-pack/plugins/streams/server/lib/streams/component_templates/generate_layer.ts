@@ -30,6 +30,7 @@ export function generateLayer(
     template: {
       settings: isRoot(definition.id) ? logsSettings : {},
       mappings: {
+        subobjects: false,
         properties,
       },
     },

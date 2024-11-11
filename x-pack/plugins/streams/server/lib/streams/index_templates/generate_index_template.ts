@@ -11,9 +11,6 @@ import { getIndexTemplateName } from './name';
 
 export function generateIndexTemplate(id: string) {
   const composedOf = id.split('.').reduce((acc, _, index, array) => {
-    if (index === array.length - 1) {
-      return acc;
-    }
     const parent = array.slice(0, index + 1).join('.');
     return [...acc, `${parent}@stream.layer`];
   }, [] as string[]);

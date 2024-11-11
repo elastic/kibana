@@ -75,7 +75,7 @@ export class StreamsPlugin
             read: [],
           },
           ui: ['read', 'write'],
-          api: ['streams_enable', 'streams_fork', 'streams_read'],
+          api: ['streams_write', 'streams_read'],
         },
         read: {
           app: ['streams', 'kibana'],
