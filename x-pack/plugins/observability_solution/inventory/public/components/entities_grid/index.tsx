@@ -16,8 +16,7 @@ import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react'
 import { last } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import { EntityColumnIds } from '../../../common/entities';
-import { APIReturnType } from '../../api';
+import { EntityColumnIds, InventoryEntity } from '../../../common/entities';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 import { getColumns } from './grid_columns';
 import { AlertsBadge } from '../alerts_badge/alerts_badge';
@@ -25,12 +24,9 @@ import { EntityName } from './entity_name';
 import { EntityActions } from '../entity_actions';
 import { useDiscoverRedirect } from '../../hooks/use_discover_redirect';
 
-type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
-type InventoryLatestEntities = InventoryEntitiesAPIReturnType['entities'];
-
 interface Props {
   loading: boolean;
-  entities: InventoryLatestEntities;
+  entities: InventoryEntity[];
   sortDirection: 'asc' | 'desc';
   sortField: string;
   pageIndex: number;
