@@ -244,6 +244,7 @@ import type {
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type {
+  GetEntityStoreStatusResponse,
   InitEntityStoreRequestBodyInput,
   InitEntityStoreResponse,
 } from './entity_analytics/entity_store/enablement.gen';
@@ -1360,6 +1361,18 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async getEntityStoreStatus() {
+    this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreStatus`);
+    return this.kbnClient
+      .request<GetEntityStoreStatusResponse>({
+        path: '/api/entity_store/status',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }

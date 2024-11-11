@@ -18,6 +18,11 @@ import { z } from '@kbn/zod';
 
 import { IndexPattern, EngineDescriptor } from './common.gen';
 
+export type GetEntityStoreStatusResponse = z.infer<typeof GetEntityStoreStatusResponse>;
+export const GetEntityStoreStatusResponse = z.object({
+  engines: z.array(EngineDescriptor).optional(),
+});
+
 export type InitEntityStoreRequestBody = z.infer<typeof InitEntityStoreRequestBody>;
 export const InitEntityStoreRequestBody = z.object({
   /**

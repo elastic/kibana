@@ -4,7 +4,7 @@ info:
   title: Enable Entity Store
   version: '2023-10-31'
 paths:
-   /api/entity_store/enable:
+  /api/entity_store/enable:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
@@ -41,4 +41,30 @@ paths:
                     type: array
                     items:
                       $ref: './common.schema.yaml#/components/schemas/EngineDescriptor'
-                  
+  
+  /api/entity_store/status:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetEntityStoreStatus
+      summary: Get the status of the Entity Store
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: 
+                    type: string
+                    enum:
+                      - not_installed
+                      - installing
+                      - running
+                      - stopped
+                      - error
+                  engines:
+                    type: array
+                    items:
+                      $ref: './common.schema.yaml#/components/schemas/EngineDescriptor'
