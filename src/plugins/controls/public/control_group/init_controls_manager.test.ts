@@ -284,7 +284,7 @@ describe('getNewControlState', () => {
       new BehaviorSubject<ControlPanelsState>(intialControlsState)
     );
     expect(controlsManager.getNewControlState()).toEqual({
-      grow: true,
+      grow: false,
       width: 'medium',
       dataViewId: 'myOtherDataViewId',
     });
