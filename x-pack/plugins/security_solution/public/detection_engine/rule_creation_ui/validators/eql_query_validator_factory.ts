@@ -45,7 +45,7 @@ export function eqlQueryValidatorFactory({
         ? await data.dataViews.get(dataViewId)
         : undefined;
 
-      const dataViewTitle = dataView?.getIndexPattern() ?? indexPatterns?.join() ?? '';
+      const dataViewTitle = dataView?.getIndexPattern() ?? indexPatterns?.join(',') ?? '';
       const runtimeMappings = dataView?.getRuntimeMappings() ?? {};
 
       const response = await validateEql({
