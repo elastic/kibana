@@ -528,7 +528,7 @@ const inFunctions: FunctionDefinition[] = [
   ],
 }));
 
-const logicFunctions: FunctionDefinition[] = [
+export const logicalOperators: FunctionDefinition[] = [
   {
     name: 'and',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.andDoc', {
@@ -649,7 +649,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   ...comparisonFunctions,
   ...likeFunctions,
   ...inFunctions,
-  ...logicFunctions,
+  ...logicalOperators,
   ...nullFunctions,
   ...otherDefinitions,
 ];
