@@ -429,3 +429,7 @@
 
 # Reporting
 #CC# /x-pack/plugins/reporting/ @elastic/kibana-reporting-services
+
+# See https://github.com/elastic/kibana/pull/199404
+# Prevent backport assignments
+* @kibanamachine
