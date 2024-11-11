@@ -246,7 +246,10 @@ const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
  * @returns
  */
 function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): FunctionDefinition {
-  let supportedCommandsAndOptions =
+  let supportedCommandsAndOptions: Pick<
+    FunctionDefinition,
+    'supportedCommands' | 'supportedOptions'
+  > =
     ESFunctionDefinition.type === 'eval'
       ? scalarSupportedCommandsAndOptions
       : aggregationSupportedCommandsAndOptions;

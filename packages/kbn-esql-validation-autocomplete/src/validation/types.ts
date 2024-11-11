@@ -200,6 +200,10 @@ export interface ValidationErrors {
       nestedAgg: string;
     };
   };
+  onlyWhereCommandSupported: {
+    message: string;
+    type: { fn: string };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

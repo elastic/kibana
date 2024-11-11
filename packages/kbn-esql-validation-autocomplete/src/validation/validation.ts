@@ -324,10 +324,13 @@ function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
 
 function validateIfHasUnsupportedCommandPrior(
   fn: ESQLFunction,
-  parentAst: ESQLCommand[],
-  currentCommandIndex: number,
-  unsupportedCommands: string[]
+  parentAst: ESQLCommand[] = [],
+  unsupportedCommands: string[],
+  currentCommandIndex?: number
 ) {
+  if (currentCommandIndex === undefined) {
+    return NO_MESSAGE;
+  }
   const unsupportedCommandsPrior = parentAst.filter(
     (cmd, idx) => idx <= currentCommandIndex && unsupportedCommands.includes(cmd.name)
   );
@@ -347,7 +350,7 @@ function validateIfHasUnsupportedCommandPrior(
   return NO_MESSAGE;
 }
 
-function validateMatchFunction({
+const validateMatchFunction: FunctionValidator = ({
   fn,
   parentCommand,
   parentOption,
@@ -356,16 +359,7 @@ function validateMatchFunction({
   isNested,
   parentAst,
   currentCommandIndex,
-}: {
-  fn: ESQLFunction;
-  parentCommand: string;
-  parentOption?: string;
-  references: ReferenceMaps;
-  forceConstantOnly?: boolean;
-  isNested?: boolean;
-  parentAst?: ESQLCommand[];
-  currentCommandIndex?: number;
-}): ESQLMessage[] {
+}) => {
   if (fn.name === 'match') {
     if (parentCommand !== 'where') {
       return [
@@ -376,20 +370,12 @@ function validateMatchFunction({
         }),
       ];
     }
-    return validateIfHasUnsupportedCommandPrior(fn, parentAst, currentCommandIndex, ['limit']);
+    return validateIfHasUnsupportedCommandPrior(fn, parentAst, ['limit'], currentCommandIndex);
   }
   return NO_MESSAGE;
-}
-function validateQSTRFunction({
-  fn,
-  parentCommand,
-  parentOption,
-  references,
-  forceConstantOnly = false,
-  isNested,
-  parentAst,
-  currentCommandIndex,
-}: {
+};
+
+type FunctionValidator = (args: {
   fn: ESQLFunction;
   parentCommand: string;
   parentOption?: string;
@@ -398,26 +384,42 @@ function validateQSTRFunction({
   isNested?: boolean;
   parentAst?: ESQLCommand[];
   currentCommandIndex?: number;
-}): ESQLMessage[] {
+}) => ESQLMessage[];
+
+const validateQSTRFunction: FunctionValidator = ({
+  fn,
+  parentCommand,
+  parentOption,
+  references,
+  forceConstantOnly = false,
+  isNested,
+  parentAst,
+  currentCommandIndex,
+}) => {
   if (fn.name === 'qstr') {
-    return validateIfHasUnsupportedCommandPrior(fn, parentAst, currentCommandIndex, [
-      'show',
-      'row',
-      'dissect',
-      'enrich',
-      'eval',
-      'grok',
-      'keep',
-      'mv_expand',
-      'rename',
-      'stats',
-      'limit',
-    ]);
+    return validateIfHasUnsupportedCommandPrior(
+      fn,
+      parentAst,
+      [
+        'show',
+        'row',
+        'dissect',
+        'enrich',
+        'eval',
+        'grok',
+        'keep',
+        'mv_expand',
+        'rename',
+        'stats',
+        'limit',
+      ],
+      currentCommandIndex
+    );
   }
   return NO_MESSAGE;
-}
+};
 
-const textSearchFunctionsValidators = {
+const textSearchFunctionsValidators: Record<string, FunctionValidator> = {
   match: validateMatchFunction,
   qstr: validateQSTRFunction,
 };
@@ -450,7 +452,7 @@ function validateFunction({
 
   const isFnSupported = isSupportedFunction(fn.name, parentCommand, parentOption);
 
-  if (textSearchFunctionsValidators[fn.name]) {
+  if (typeof textSearchFunctionsValidators[fn.name] === 'function') {
     const validator = textSearchFunctionsValidators[fn.name];
     messages.push(
       ...validator({
@@ -1151,7 +1153,7 @@ function validateCommand(
             messages.push(
               ...validateOption(
                 arg,
-                commandDef.options.find(({ name }) => name === astFunction.name),
+                commandDef.options.find(({ name }) => name === arg.name),
                 command,
                 references
               )
@@ -1171,7 +1173,7 @@ function validateCommand(
                 values: {
                   command: command.name.toUpperCase(),
                   type: 'date_period',
-                  value: astFunction.name,
+                  value: arg.name,
                 },
                 locations: arg.location,
               })
