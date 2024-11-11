@@ -17,10 +17,10 @@ import { SECURITY_LABS_KNOWLEDGE_BASE_TOOL } from './security_labs/security_labs
 
 export const getAssistantTools = ({
   assistantKnowledgeBaseByDefault,
-  productDocumentationAvailable,
+  assistantProductDocumentation,
 }: {
   assistantKnowledgeBaseByDefault?: boolean;
-  productDocumentationAvailable?: boolean;
+  assistantProductDocumentation?: boolean;
 }): AssistantTool[] => {
   const tools = [
     ALERT_COUNTS_TOOL,
@@ -34,7 +34,7 @@ export const getAssistantTools = ({
     tools.push(SECURITY_LABS_KNOWLEDGE_BASE_TOOL);
   }
 
-  if (productDocumentationAvailable) {
+  if (assistantProductDocumentation) {
     tools.push(PRODUCT_DOCUMENTATION_TOOL);
   }
 

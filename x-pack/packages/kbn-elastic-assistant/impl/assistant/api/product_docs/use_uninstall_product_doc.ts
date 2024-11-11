@@ -6,9 +6,9 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type { UninstallResponse } from '@kbn/product-doc-base-plugin/common/http_api/installation';
+import * as i18n from './translations';
 import { REACT_QUERY_KEYS } from './const';
 import { useAssistantContext } from '../../../..';
 
@@ -25,14 +25,7 @@ export function useUninstallProductDoc() {
     },
     {
       onSuccess: () => {
-        toasts?.addSuccess(
-          i18n.translate(
-            'xpack.observabilityAiAssistantManagement.kb.uninstallProductDoc.successNotification',
-            {
-              defaultMessage: 'The Elastic documentation was successfully uninstalled',
-            }
-          )
-        );
+        toasts?.addSuccess(i18n.UNINSTALL_SUCCESS);
 
         queryClient.invalidateQueries({
           queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS],
@@ -41,12 +34,7 @@ export function useUninstallProductDoc() {
       },
       onError: (error) => {
         toasts?.addError(new Error(error.body?.message ?? error.message), {
-          title: i18n.translate(
-            'xpack.observabilityAiAssistantManagement.kb.uninstallProductDoc.errorNotification',
-            {
-              defaultMessage: 'Something went wrong while uninstalling the Elastic documentation',
-            }
-          ),
+          title: i18n.UNINSTALL_ERROR,
         });
       },
     }

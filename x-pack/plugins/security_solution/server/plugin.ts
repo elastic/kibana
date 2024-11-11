@@ -558,7 +558,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       getAssistantTools({
         assistantKnowledgeBaseByDefault:
           config.experimentalFeatures.assistantKnowledgeBaseByDefault,
-        productDocumentationAvailable: config.experimentalFeatures.assistantProductDocumentation,
+        assistantProductDocumentation: config.experimentalFeatures.assistantProductDocumentation,
       })
     );
 
