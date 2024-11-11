@@ -11,7 +11,7 @@ import { useCreateIndex as useCreateIndexApi } from '../../../hooks/api/use_crea
 
 import { useKibana } from '../../../hooks/use_kibana';
 
-import { navigateToIndexDetails } from './utils';
+import { navigateToIndexDetails } from '../../utils';
 
 export const useCreateIndex = () => {
   const { application, http } = useKibana().services;
