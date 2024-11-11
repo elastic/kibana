@@ -43,7 +43,10 @@ export const commandsWithNoCommaArgSeparator = new Set(['grok', 'dissect']);
  * sign to separate the option label from the option value.
  *
  * ```
- * DISSECT input "pattern" APPEND_SEPARATOR="separator"
+ * DISSECT input "pattern" APPEND_SEPARATOR = "separator"
+ *                                          |
+ *                                          |
+ *                                          equals sign
  * ```
  */
 export const commandOptionsWithEqualsSeparator = new Set(['append_separator']);
