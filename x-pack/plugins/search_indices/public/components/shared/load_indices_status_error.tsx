@@ -15,14 +15,14 @@ export interface StartPageErrorProps {
   error: unknown;
 }
 
-export const StartPageError = ({ error }: StartPageErrorProps) => {
+export const LoadIndicesStatusError = ({ error }: StartPageErrorProps) => {
   return (
     <EuiEmptyPrompt
       iconType="error"
       color="danger"
       title={
         <h2>
-          {i18n.translate('xpack.searchIndices.startPage.statusFetchError.title', {
+          {i18n.translate('xpack.searchIndices.shared.statusFetchError.title', {
             defaultMessage: 'Error loading indices',
           })}
         </h2>
@@ -31,7 +31,7 @@ export const StartPageError = ({ error }: StartPageErrorProps) => {
         <EuiCodeBlock css={{ textAlign: 'left' }}>
           {getErrorMessage(
             error,
-            i18n.translate('xpack.searchIndices.startPage.statusFetchError.unknownError', {
+            i18n.translate('xpack.searchIndices.shared.statusFetchError.unknownError', {
               defaultMessage: 'Unknown error fetching indices.',
             })
           )}
