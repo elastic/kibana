@@ -42,33 +42,43 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   describe('Data view static', () => {
-    let supertest: SupertestWithRoleScope;
+    let supertestEditorWithApiKey: SupertestWithRoleScope;
+    let supertestEditorWithCookieCredentials: SupertestWithRoleScope;
 
     before(async () => {
-      supertest = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
+      supertestEditorWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
         withInternalHeaders: true,
       });
+
+      supertestEditorWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'editor',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        }
+      );
     });
 
     after(async () => {
-      await supertest.destroy();
+      await supertestEditorWithApiKey.destroy();
+      await supertestEditorWithCookieCredentials.destroy();
     });
 
     function deleteDataView(spaceId: string) {
-      return supertest.delete(
+      return supertestEditorWithApiKey.delete(
         `/s/${spaceId}/api/saved_objects/index-pattern/${getStaticDataViewId(spaceId)}?force=true`
       );
     }
 
     function getDataView({ spaceId }: { spaceId: string }) {
       const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
-      return supertest.get(
+      return supertestEditorWithApiKey.get(
         `${spacePrefix}/api/saved_objects/index-pattern/${getStaticDataViewId(spaceId)}`
       );
     }
 
     function getDataViewSuggestions(field: string) {
-      return supertest
+      return supertestEditorWithCookieCredentials
         .post(`/internal/kibana/suggestions/values/${dataViewPattern}`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send({ query: '', field, method: 'terms_agg' });
@@ -97,7 +107,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177120
     describe('when mappings and APM data exists', () => {
       let synthtrace: ApmSynthtraceEsClient;
 
