@@ -113,7 +113,6 @@ export const createNewRuleAsset = ({
     rule['security-rule'].rule_id
   }?refresh`;
   cy.log('URL', url);
-  cy.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
   cy.waitUntil(
     () => {
       return cy
