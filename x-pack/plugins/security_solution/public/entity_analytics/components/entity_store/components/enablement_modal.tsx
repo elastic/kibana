@@ -153,7 +153,12 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="row" justifyContent="flexEnd">
               <EuiButtonEmpty onClick={() => toggle(false)}>{'Cancel'}</EuiButtonEmpty>
-              <EuiButton onClick={enableStore(enablements)} fill>
+              <EuiButton
+                onClick={enableStore(enablements)}
+                fill
+                isDisabled={!enablementOptions}
+                aria-disabled={!enablementOptions}
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.enablements.modal.enable"
                   defaultMessage="Enable"
