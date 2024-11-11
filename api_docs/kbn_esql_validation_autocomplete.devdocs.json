@@ -1041,7 +1041,7 @@
           "\nThis function returns the variable or field matching a column"
         ],
         "signature": [
-          "(column: ",
+          "(node: ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -1049,6 +1049,8 @@
             "section": "def-common.ESQLColumn",
             "text": "ESQLColumn"
           },
+          " | ",
+          "ESQLIdentifier",
           ", { fields, variables }: Pick<",
           "ReferenceMaps",
           ", \"fields\" | \"variables\">) => ",
@@ -1076,9 +1078,9 @@
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
             "id": "def-common.getColumnForASTNode.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "column",
+            "label": "node",
             "description": [],
             "signature": [
               {
@@ -1087,7 +1089,9 @@
                 "docId": "kibKbnEsqlAstPluginApi",
                 "section": "def-common.ESQLColumn",
                 "text": "ESQLColumn"
-              }
+              },
+              " | ",
+              "ESQLIdentifier"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,

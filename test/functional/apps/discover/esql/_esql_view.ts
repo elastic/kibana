@@ -25,14 +25,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const { common, discover, dashboard, header, timePicker, unifiedFieldList } = getPageObjects([
-    'common',
-    'discover',
-    'dashboard',
-    'header',
-    'timePicker',
-    'unifiedFieldList',
-  ]);
+  const dataViews = getService('dataViews');
+  const { common, discover, dashboard, header, timePicker, unifiedFieldList, unifiedSearch } =
+    getPageObjects([
+      'common',
+      'discover',
+      'dashboard',
+      'header',
+      'timePicker',
+      'unifiedFieldList',
+      'unifiedSearch',
+    ]);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -304,6 +307,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
+      });
+
+      it('should show available data views after switching to classic mode', async () => {
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await browser.refresh();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedSearch.switchToDataViewMode();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        const availableDataViews = await unifiedSearch.getDataViewList(
+          'discover-dataView-switch-link'
+        );
+        expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+        await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });
 
