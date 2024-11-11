@@ -553,40 +553,14 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.licensing$ = plugins.licensing.license$;
     // Assistant Tool and Feature Registration
-    if (!config.experimentalFeatures.assistantProductDocumentation) {
-      plugins.elasticAssistant.registerTools(
-        APP_UI_ID,
-        getAssistantTools({
-          assistantKnowledgeBaseByDefault:
-            config.experimentalFeatures.assistantKnowledgeBaseByDefault,
-          productDocumentationAvailable: false,
-        })
-      );
-    } else {
-      // known caveat -> server restart required once documentation is installed/uninstalled
-      plugins.llmTasks.retrieveDocumentationAvailable().then(
-        (productDocumentationAvailable = false) => {
-          plugins.elasticAssistant.registerTools(
-            APP_UI_ID,
-            getAssistantTools({
-              assistantKnowledgeBaseByDefault:
-                config.experimentalFeatures.assistantKnowledgeBaseByDefault,
-              productDocumentationAvailable,
-            })
-          );
-        },
-        () => {
-          plugins.elasticAssistant.registerTools(
-            APP_UI_ID,
-            getAssistantTools({
-              assistantKnowledgeBaseByDefault:
-                config.experimentalFeatures.assistantKnowledgeBaseByDefault,
-              productDocumentationAvailable: false,
-            })
-          );
-        }
-      );
-    }
+    plugins.elasticAssistant.registerTools(
+      APP_UI_ID,
+      getAssistantTools({
+        assistantKnowledgeBaseByDefault:
+          config.experimentalFeatures.assistantKnowledgeBaseByDefault,
+        productDocumentationAvailable: config.experimentalFeatures.assistantProductDocumentation,
+      })
+    );
 
     const features = {
       assistantKnowledgeBaseByDefault: config.experimentalFeatures.assistantKnowledgeBaseByDefault,

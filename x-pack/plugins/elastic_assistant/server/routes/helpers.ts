@@ -323,7 +323,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
-  llmTasks: LlmTasksPluginStart;
+  llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
   isOssModel?: boolean;
   conversationId?: string;

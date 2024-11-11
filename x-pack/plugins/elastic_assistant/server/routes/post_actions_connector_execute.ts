@@ -99,7 +99,8 @@ export const postActionsConnectorExecuteRoute = (
           // get the actions plugin start contract from the request context:
           const actions = ctx.elasticAssistant.actions;
           const inference = ctx.elasticAssistant.inference;
-          const llmTasks = ctx.elasticAssistant.llmTasks;
+          const productDocsAvailable =
+            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const connectors = await actionsClient.getBulk({ ids: [connectorId] });
           const connector = connectors.length > 0 ? connectors[0] : undefined;
@@ -143,7 +144,6 @@ export const postActionsConnectorExecuteRoute = (
             conversationId,
             context: ctx,
             getElser,
-            llmTasks,
             logger,
             inference,
             messages: (newMessage ? [newMessage] : messages) ?? [],
@@ -154,6 +154,7 @@ export const postActionsConnectorExecuteRoute = (
             response,
             telemetry,
             systemPrompt,
+            ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
           });
         } catch (err) {
           logger.error(err);

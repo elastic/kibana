@@ -151,7 +151,8 @@ export const postEvaluateRoute = (
           const esClient = ctx.core.elasticsearch.client.asCurrentUser;
 
           const inference = ctx.elasticAssistant.inference;
-          const llmTasks = ctx.elasticAssistant.llmTasks;
+          const productDocsAvailable =
+            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
 
           // Data clients
           const anonymizationFieldsDataClient =
@@ -274,7 +275,6 @@ export const postEvaluateRoute = (
                 isEnabledKnowledgeBase,
                 kbDataClient: dataClients?.kbDataClient,
                 llm,
-                llmTasks,
                 isOssModel,
                 logger,
                 request: skeletonRequest,
@@ -284,6 +284,7 @@ export const postEvaluateRoute = (
                 inference,
                 connectorId: connector.id,
                 size,
+                ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
               };
 
               const tools: StructuredTool[] = assistantTools.flatMap(
