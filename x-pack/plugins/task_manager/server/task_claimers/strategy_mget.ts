@@ -300,6 +300,9 @@ interface SearchAvailableTasksResponse {
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
 
+let lastPartitionWarningLog: number | undefined;
+export const NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL = 60000;
+
 async function searchAvailableTasks({
   definitions,
   taskTypes,
@@ -320,9 +323,21 @@ async function searchAvailableTasks({
     definitions,
   });
   const partitions = await taskPartitioner.getPartitions();
-  if (partitions.length === 0) {
+  if (
+    partitions.length === 0 &&
+    (lastPartitionWarningLog == null ||
+      lastPartitionWarningLog <= Date.now() - NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL)
+  ) {
     logger.warn(
       `Background task node "${taskPartitioner.getPodName()}" has no assigned partitions, claiming against all partitions`
+    );
+    lastPartitionWarningLog = Date.now();
+  }
+
+  if (partitions.length !== 0 && lastPartitionWarningLog) {
+    lastPartitionWarningLog = undefined;
+    logger.info(
+      `Background task node "${taskPartitioner.getPodName()}" now claiming with assigned partitions`
     );
   }
 
