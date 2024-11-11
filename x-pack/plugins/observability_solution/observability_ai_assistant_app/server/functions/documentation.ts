@@ -20,7 +20,7 @@ export async function registerDocumentationFunction({
 
   functions.registerInstruction(({ availableFunctionNames }) => {
     return availableFunctionNames.includes(RETRIEVE_DOCUMENTATION_NAME)
-      ? `When asked questions about the Elastic stack, You should use the ${RETRIEVE_DOCUMENTATION_NAME} function before answering,
+      ? `When asked questions about the Elastic stack or products, You should use the ${RETRIEVE_DOCUMENTATION_NAME} function before answering,
       to retrieve documentation related to the question. Consider that the documentation returned by the function
       is always more up to date and accurate than any own internal knowledge you might have.`
       : undefined;
