@@ -115,6 +115,14 @@ describe('single line query', () => {
 
         expect(text).toBe('FROM index | DISSECT input "pattern"');
       });
+
+      test('with APPEND_SEPARATOR option', () => {
+        const { text } = reprint(
+          'FROM index | DISSECT input "pattern" APPEND_SEPARATOR="<separator>"'
+        );
+
+        expect(text).toBe('FROM index | DISSECT input "pattern" APPEND_SEPARATOR="<separator>"');
+      });
     });
   });
 
