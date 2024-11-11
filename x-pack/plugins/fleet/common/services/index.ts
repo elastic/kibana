@@ -90,3 +90,5 @@ export {
   getFleetServerVersionMessage,
   isAgentVersionLessThanFleetServer,
 } from './check_fleet_server_versions';
+
+export * from './agent_utils';

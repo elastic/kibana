@@ -7,6 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { DataView, SortDirection } from '@kbn/data-plugin/common';
 import { ReportingAPIClient } from '@kbn/reporting-public';
@@ -19,14 +20,19 @@ import {
   useKibanaVersion,
   useStartServices,
 } from '../../../../../../hooks';
+import type { Agent } from '../../../../../../../common';
+import { getSortConfig, removeSOAttributes } from '../../../../../../../common';
 
-export function useExportCSV() {
+import { getSortFieldForAPI } from './use_fetch_agents_data';
+
+export function useExportCSV(
+  agents: Agent[] | string,
+  sortOptions?: { field?: string; direction?: string }
+) {
   const startServices = useStartServices();
   const { notifications, http, uiSettings } = startServices;
   const kibanaVersion = useKibanaVersion();
-  const [runtimeFields, setRuntimeFields] = useState<string>(
-    'emit(doc["active"].value == false ? "unenrolled" : "online")'
-  );
+  const [runtimeFields, setRuntimeFields] = useState<string>('emit("online")');
 
   useEffect(() => {
     const getRuntimeFields = async () => {
@@ -37,12 +43,14 @@ export function useExportCSV() {
   }, []);
 
   // TODO pass columns from Agent list UI
+  // TODO how to set readable column names?
   const columns = [
-    'agent.id',
-    'policy_id', // policy name would need a data view + enrich processor
-    'local_metadata.host.hostname',
-    'last_checkin',
-    'status',
+    { field: 'agent.id' },
+    { field: 'status' },
+    { field: 'local_metadata.host.hostname' },
+    { field: 'policy_id' }, // policy name would need to be enriched
+    { field: 'last_checkin' },
+    { field: 'local_metadata.elastic.agent.version' },
   ];
 
   const index = new DataView({
@@ -52,7 +60,6 @@ export function useExportCSV() {
       runtimeFieldMap: {
         status: {
           type: 'keyword',
-          // TODO all statuses, needs a new API to get the runtime field script from backend
           script: {
             source: runtimeFields,
           },
@@ -61,6 +68,18 @@ export function useExportCSV() {
     },
     fieldFormats: {} as FieldFormatsStartCommon,
   });
+
+  let query: string;
+  if (Array.isArray(agents)) {
+    query = `agent.id:(${agents.map((agent) => agent.id).join(' OR ')})`;
+  } else {
+    query = agents;
+  }
+
+  const sortField = getSortFieldForAPI(sortOptions?.field ?? 'enrolled_at');
+  const sortOrder = (sortOptions?.direction as SortDirection) ?? SortDirection.desc;
+
+  const sort = getSortConfig(sortField, sortOrder);
 
   const searchSource: SearchSourceFields = {
     type: 'search',
@@ -73,45 +92,18 @@ export function useExportCSV() {
         index: 'fleet-agents',
         params: {},
       },
-      // TODO pass query from Agent list UI
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                last_checkin: {
-                  format: 'strict_date_optional_time',
-                  gte: '2024-10-15T08:44:13.937Z',
-                },
-              },
-            },
-            {
-              term: {
-                active: true,
-              },
-            },
-          ],
-        },
-      },
+      query: toElasticsearchQuery(fromKueryExpression(removeSOAttributes(query))),
     },
-    fields: columns.map((field) => ({ field })),
+    fields: columns,
     index,
-    // TODO pass sort order from Agent list UI
-    sort: [
-      {
-        last_checkin: {
-          order: SortDirection.desc,
-          format: 'strict_date_optional_time',
-        },
-      },
-    ],
+    sort,
   };
 
   const getJobParams = () => {
     return {
       title: 'Agent List',
       objectType: 'search',
-      columns,
+      columns: columns.map((column) => column.field),
       searchSource,
     };
   };

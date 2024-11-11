@@ -77,6 +77,8 @@ export {
   INVALID_NAMESPACE_CHARACTERS,
   getFileMetadataIndexName,
   getFileDataIndexName,
+  removeSOAttributes,
+  getSortConfig,
 } from './services';
 
 export type { FleetAuthz } from './authz';

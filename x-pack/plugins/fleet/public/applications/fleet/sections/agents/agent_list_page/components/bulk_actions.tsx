@@ -46,6 +46,8 @@ export interface Props {
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   allTags: string[];
   agentPolicies: AgentPolicy[];
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -58,6 +60,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   refreshAgents,
   allTags,
   agentPolicies,
+  sortField,
+  sortOrder,
 }) => {
   const licenseService = useLicense();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
@@ -100,7 +104,10 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
   const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
 
-  const { generateReportingJobCSV } = useExportCSV();
+  const { generateReportingJobCSV } = useExportCSV(agents, {
+    field: sortField,
+    direction: sortOrder,
+  });
 
   const menuItems = [
     {
