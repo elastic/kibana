@@ -316,12 +316,13 @@ describe('AssetCriticalityDataClient', () => {
         recordsStream: Readable.from(recordsStream),
         retries: 3,
         flushBytes: 1_000,
+        streamIndexStart: 9,
       });
 
       expect(result).toEqual({
         errors: [
           {
-            index: 2,
+            index: 10,
             message: 'Duplicated entity',
           },
         ],
