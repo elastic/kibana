@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const synthtrace = getService('logSynthtraceEsClient');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+
   const to = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
 
   const apacheAccessDatasetName = 'apache.access';
