@@ -102,7 +102,7 @@ export const createFileAttachment = async ({
     .set('kbn-xsrf', 'true')
     .set(headers)
     .field('file', params.file as string)
-    .field('filename', params.filename)
+    .field('filename', params.filename ?? '')
     .field('mimeType', params.mimeType ?? '')
     .expect(expectedHttpCode);
 
