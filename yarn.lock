@@ -1721,12 +1721,12 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@^8.15.0":
-  version "8.15.0"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.15.0.tgz#cb29b3ae33203c545d435cf3dc4b557c8b4961d5"
-  integrity sha512-mG90EMdTDoT6GFSdqpUAhWK9LGuiJo6tOWqs0Usd/t15mPQDj7ZqHXfCBqNkASZpwPZpbAYVjd57S6nbUBINCg==
+"@elastic/elasticsearch@^8.15.1":
+  version "8.15.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.15.1.tgz#ca294ba11ed1514bf87d4a2e253b11f6cefd8552"
+  integrity sha512-L3YzSaxrasMMGtcxnktiUDjS5f177L0zpHsBH+jL0LgPhdMk9xN/VKrAaYzvri86IlV5IbveA0ANV6o/BDUmhQ==
   dependencies:
-    "@elastic/transport" "^8.7.0"
+    "@elastic/transport" "^8.8.1"
     tslib "^2.4.0"
 
 "@elastic/ems-client@8.5.3":
@@ -1906,10 +1906,10 @@
     undici "^5.28.3"
     yaml "^2.2.2"
 
-"@elastic/transport@^8.3.1", "@elastic/transport@^8.7.0":
-  version "8.7.0"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.7.0.tgz#006987fc5583f61c266e0b1003371e82efc7a6b5"
-  integrity sha512-IqXT7a8DZPJtqP2qmX1I2QKmxYyN27kvSW4g6pInESE1SuGwZDp2FxHJ6W2kwmYOJwQdAt+2aWwzXO5jHo9l4A==
+"@elastic/transport@^8.3.1", "@elastic/transport@^8.8.1":
+  version "8.8.1"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.8.1.tgz#d64244907bccdad5626c860b492faeef12194b1f"
+  integrity sha512-4RQIiChwNIx3B0O+2JdmTq/Qobj6+1g2RQnSv1gt4V2SVfAYjGwOKu0ZMKEHQOXYNG6+j/Chero2G9k3/wXLEw==
   dependencies:
     "@opentelemetry/api" "1.x"
     debug "^4.3.4"
