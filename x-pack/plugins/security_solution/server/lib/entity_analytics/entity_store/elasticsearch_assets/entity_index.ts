@@ -24,7 +24,6 @@ export const createEntityIndex = async ({ entityType, esClient, namespace, logge
     options: {
       index: getEntitiesIndexName(entityType, namespace),
     },
-    waitForStatus: 'yellow',
   });
 };
 

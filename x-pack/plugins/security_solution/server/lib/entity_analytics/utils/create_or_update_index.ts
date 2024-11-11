@@ -12,8 +12,6 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
-type IndexStatus = 'green' | 'yellow' | 'red';
-
 /**
  * It's check for index existatnce, and create index
  * or update existing index mappings
@@ -21,12 +19,10 @@ type IndexStatus = 'green' | 'yellow' | 'red';
 export const createOrUpdateIndex = async ({
   esClient,
   logger,
-  waitForStatus,
   options,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-  waitForStatus?: IndexStatus;
   options: IndicesCreateRequest;
 }): Promise<IndicesCreateResponse | void> => {
   try {
@@ -57,14 +53,6 @@ export const createOrUpdateIndex = async ({
     } else {
       try {
         await esClient.indices.create(options);
-        if (waitForStatus) {
-          await waitForIndexStatus({
-            index: options.index,
-            status: waitForStatus,
-            esClient,
-            logger,
-          });
-        }
       } catch (err) {
         // If the index already exists, we can ignore the error
         if (err?.meta?.body?.error?.type === 'resource_already_exists_exception') {
@@ -80,24 +68,4 @@ export const createOrUpdateIndex = async ({
     logger.error(fullErrorMessage);
     throw new Error(fullErrorMessage);
   }
-};
-
-const waitForIndexStatus = async ({
-  index,
-  status,
-  esClient,
-  logger,
-}: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  status: IndexStatus;
-  index: string;
-}) => {
-  const healthRes = await esClient.cluster.health({
-    index,
-    wait_for_status: status,
-  });
-
-  logger.debug(`Index ${index} is ${status}`);
-  return healthRes;
 };
