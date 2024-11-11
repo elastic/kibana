@@ -40,10 +40,15 @@ function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisua
 
 function getNewShape(
   groups: TableSuggestionColumn[],
-  subVisualizationId?: PieVisualizationState['shape']
+  subVisualizationId?: PieVisualizationState['shape'],
+  currentShape?: PieVisualizationState['shape']
 ) {
   if (subVisualizationId) {
     return subVisualizationId;
+  }
+
+  if (currentShape) {
+    return currentShape;
   }
 
   let newShape: PieVisualizationState['shape'] | undefined;
@@ -52,7 +57,7 @@ function getNewShape(
     newShape = PieChartTypes.PIE;
   }
 
-  return newShape ?? PieChartTypes.DONUT;
+  return newShape ?? PieChartTypes.PIE;
 }
 
 function hasCustomSuggestionsExists(shape: PieChartType | string | undefined) {
@@ -122,7 +127,11 @@ export function suggestions({
     groups.length <= PartitionChartsMeta.pie.maxBuckets &&
     !hasCustomSuggestionsExists(subVisualizationId)
   ) {
-    const newShape = getNewShape(groups, subVisualizationId as PieVisualizationState['shape']);
+    const newShape = getNewShape(
+      groups,
+      subVisualizationId as PieVisualizationState['shape'],
+      state?.shape
+    );
     const baseSuggestion: VisualizationSuggestion<PieVisualizationState> = {
       title: i18n.translate('xpack.lens.pie.suggestionLabel', {
         defaultMessage: '{chartName}',
