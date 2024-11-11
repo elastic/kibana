@@ -26,6 +26,17 @@ describe('getArtifactName', () => {
       })
     ).toEqual('kb-product-doc-elasticsearch-8.17');
   });
+
+  it('generates a lowercase name', () => {
+    expect(
+      getArtifactName({
+        // @ts-expect-error testing
+        productName: 'ElasticSearch',
+        productVersion: '8.17',
+        excludeExtension: true,
+      })
+    ).toEqual('kb-product-doc-elasticsearch-8.17');
+  });
 });
 
 describe('parseArtifactName', () => {
@@ -45,5 +56,9 @@ describe('parseArtifactName', () => {
 
   it('returns undefined if the provided string does not match the artifact name pattern', () => {
     expect(parseArtifactName('some-wrong-name')).toEqual(undefined);
+  });
+
+  it('returns undefined if the provided string is not strictly lowercase', () => {
+    expect(parseArtifactName('kb-product-doc-Security-8.17')).toEqual(undefined);
   });
 });

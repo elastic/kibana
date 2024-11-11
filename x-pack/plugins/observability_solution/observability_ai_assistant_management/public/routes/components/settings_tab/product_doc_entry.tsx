@@ -103,7 +103,10 @@ export function ProductDocEntry() {
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiHealth textSize="s" color="success">
-              Installed
+              {i18n.translate(
+                'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocInstalledLabel',
+                { defaultMessage: 'Installed' }
+              )}
             </EuiHealth>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

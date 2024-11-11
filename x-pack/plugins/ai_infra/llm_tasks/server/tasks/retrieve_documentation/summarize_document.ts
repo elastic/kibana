@@ -43,7 +43,7 @@ export const summarizeDocument = async ({
     id: 'summarize_document',
     connectorId,
     functionCalling,
-    system: `You are an helpful Elastic assistant, and your current task is to help answering the user question.
+    system: `You are an helpful Elastic assistant, and your current task is to help answer the user's question.
 
       Given a question and a document, please provide a condensed version of the document
       that can be used to answer the question.

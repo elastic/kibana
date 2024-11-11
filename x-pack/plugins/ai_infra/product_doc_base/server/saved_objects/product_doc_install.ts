@@ -35,7 +35,7 @@ export const productDocInstallStatusSavedObjectType: SavedObjectsType<ProductDoc
         product_name: { type: 'keyword' },
         product_version: { type: 'keyword' },
         installation_status: { type: 'keyword' },
-        last_installation_date: { type: 'integer' },
+        last_installation_date: { type: 'date' },
         index_name: { type: 'keyword' },
       },
     },

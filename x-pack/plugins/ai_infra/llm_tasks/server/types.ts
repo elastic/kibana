@@ -18,8 +18,14 @@ export interface PluginStartDependencies {
   productDocBase: ProductDocBaseStartContract;
 }
 
+/**
+ * Describes public llmTasks plugin contract returned at the `setup` stage.
+ */
 export interface LlmTasksPluginSetup {}
 
+/**
+ * Describes public llmTasks plugin contract returned at the `start` stage.
+ */
 export interface LlmTasksPluginStart {
   /**
    * Checks if all prerequisites to use the `retrieveDocumentation` task

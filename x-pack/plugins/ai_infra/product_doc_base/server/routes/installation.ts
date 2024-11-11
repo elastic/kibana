@@ -29,7 +29,14 @@ export const registerInstallationRoutes = ({
     {
       path: INSTALLATION_STATUS_API_PATH,
       validate: false,
-      options: { access: 'internal', tags: ['access:manage_llm_product_doc'] },
+      options: {
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['manage_llm_product_doc'],
+          },
+        },
+      },
     },
     async (ctx, req, res) => {
       const { installClient } = getServices();
@@ -51,7 +58,11 @@ export const registerInstallationRoutes = ({
       validate: false,
       options: {
         access: 'internal',
-        tags: ['access:manage_llm_product_doc'],
+        security: {
+          authz: {
+            requiredPrivileges: ['manage_llm_product_doc'],
+          },
+        },
         timeout: { idleSocket: 20 * 60 * 1000 }, // install can take time.
       },
     },
@@ -81,7 +92,11 @@ export const registerInstallationRoutes = ({
       validate: false,
       options: {
         access: 'internal',
-        tags: ['access:manage_llm_product_doc'],
+        security: {
+          authz: {
+            requiredPrivileges: ['manage_llm_product_doc'],
+          },
+        },
       },
     },
     async (ctx, req, res) => {

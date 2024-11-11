@@ -8,7 +8,7 @@
 import { type ProductName, DocumentationProduct } from './product';
 
 // kb-product-doc-elasticsearch-8.15.zip
-const artifactNameRegexp = /^kb-product-doc-([a-zA-Z]+)-([0-9]+\.[0-9]+)(\.zip)?$/;
+const artifactNameRegexp = /^kb-product-doc-([a-z]+)-([0-9]+\.[0-9]+)(\.zip)?$/;
 const allowedProductNames: ProductName[] = Object.values(DocumentationProduct);
 
 export const getArtifactName = ({
