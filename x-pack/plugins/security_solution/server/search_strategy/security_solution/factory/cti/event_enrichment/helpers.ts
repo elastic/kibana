@@ -46,7 +46,7 @@ export const buildIndicatorShouldClauses = (
 export const buildIndicatorEnrichments = (hits: estypes.SearchHit[]): CtiEnrichment[] => {
   return hits.flatMap<CtiEnrichment>(({ matched_queries: matchedQueries, ...hit }) => {
     return (
-      (matchedQueries as string[] | undefined)?.reduce<CtiEnrichment[]>(
+      (Array.isArray(matchedQueries) ? matchedQueries : [])?.reduce<CtiEnrichment[]>(
         (enrichments, matchedQuery) => {
           if (isValidEventField(matchedQuery)) {
             enrichments.push({
