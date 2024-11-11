@@ -94,7 +94,7 @@ Deprecated functionality does not have an immediate impact on your application, 
 you make the necessary updates after you upgrade to 8.16.0.
 
 [discrete]
-* The Logs Stream is now hidden by default in favor of the Logs Explorer app.
+.The Logs Stream is now hidden by default in favor of the Logs Explorer app.
 [%collapsible]
 ====
 *Details* +
@@ -105,7 +105,7 @@ You can still show the Logs Stream app again by navigating to Stack Management >
 ====
       
 [discrete]
-* Deprecates the Observability AI Assistant specific advanced setting `observability:aiAssistantLogsIndexPattern`.
+.Deprecates the Observability AI Assistant specific advanced setting `observability:aiAssistantLogsIndexPattern`.
 [%collapsible]
 ====
 *Details* +

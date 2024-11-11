@@ -18,7 +18,7 @@ const mockChatService = createMockChatService();
 
 let items: ReturnType<typeof getTimelineItemsfromConversation>;
 
-function Providers({ children }: { children: React.ReactElement }) {
+function Providers({ children }: { children: React.ReactNode }) {
   return (
     <IntlProvider locale="en" messages={{}}>
       <KibanaContextProvider

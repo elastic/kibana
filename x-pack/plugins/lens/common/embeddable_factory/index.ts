@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SavedObjectReference } from '@kbn/core/types';
 import {
@@ -21,7 +22,7 @@ export const inject: NonNullable<EmbeddableRegistryDefinition['inject']> = (
   state,
   references
 ): EmbeddableStateWithType => {
-  const typedState = state as unknown as LensRuntimeState;
+  const typedState = cloneDeep(state) as unknown as LensRuntimeState;
 
   // match references based on name, so only references associated with this lens panel are injected.
   const matchedReferences: SavedObjectReference[] = [];
