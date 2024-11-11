@@ -266,6 +266,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'data',
         'management:index_management',
         'serverlessConnectors',
+        'serverlessWebCrawlers',
         'build',
         'dev_tools',
         'searchPlayground',
