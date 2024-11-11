@@ -16,10 +16,6 @@ import {
   QueryLanguageEnum,
 } from '../../../../../../../../../common/api/detection_engine';
 import { EqlQueryEditAdapter } from './eql_query_edit_adapter';
-// import {
-//   debounceAsync,
-//   eqlValidator,
-// } from '@kbn/security-solution-plugin/public/detection_engine/rule_creation_ui/components/eql_query_bar/validators';
 
 export function EqlQueryEditForm(): JSX.Element {
   return (
@@ -32,15 +28,7 @@ export function EqlQueryEditForm(): JSX.Element {
   );
 }
 
-const kqlQuerySchema = {
-  eqlQuery: {
-    validations: [
-      // {
-      //   validator: debounceAsync(eqlValidator, 300),
-      // },
-    ],
-  },
-} as FormSchema<{
+const kqlQuerySchema = {} as FormSchema<{
   eqlQuery: RuleEqlQuery;
 }>;
 
