@@ -66,7 +66,7 @@ export const kafkaOutputBody = {
   type: 'kafka',
   is_default: false,
   hosts: ['example.com:2000'],
-  topics: [{ topic: 'test' }],
+  topic: 'test',
   auth_type: 'user_pass',
   username: 'kafka',
   password: 'kafka',
