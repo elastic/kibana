@@ -77,7 +77,7 @@ const getAllJourneys = (dir: string) => {
 };
 
 const getJourneysToRun = ({ journeyPath, group }: { journeyPath?: string; group?: string }) => {
-  group = 'maps';
+  group = 'maps'; // TODO REMOVE
   if (group && typeof group === 'string') {
     if (!(group in journeyTargetGroups)) {
       throw createFlagError(`Group '${group}' is not defined, try again`);
