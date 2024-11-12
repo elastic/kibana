@@ -41,6 +41,7 @@ import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_detail
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 import { createExpandableFlyoutApiMock } from '../../../../common/mock/expandable_flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/guided_onboarding_tour/tour_step');
@@ -233,6 +234,8 @@ describe('Body', () => {
   const mockRefetch = jest.fn();
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
+  const servicesMock = createStartServicesMock();
+
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
@@ -242,7 +245,9 @@ describe('Body', () => {
     mockUseCurrentUser.mockReturnValue({ username: 'test-username' });
     mockUseKibana.mockReturnValue({
       services: {
+        ...servicesMock,
         application: {
+          ...servicesMock.application,
           navigateToApp: jest.fn(),
           getUrlForApp: jest.fn(),
           capabilities: {

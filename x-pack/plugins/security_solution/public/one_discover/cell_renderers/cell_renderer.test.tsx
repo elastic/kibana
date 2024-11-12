@@ -77,7 +77,7 @@ describe('getCellRendererForGivenRecord', () => {
           { field: 'user.name', value: ['user1'] },
         ],
         eventId: '1',
-        scopeId: 'not-timeline',
+        scopeId: 'one-discover',
         linkValues: undefined,
         header: {
           id: 'host.name',
@@ -88,6 +88,12 @@ describe('getCellRendererForGivenRecord', () => {
         context: undefined,
         rowRenderers: undefined,
         ecsData: undefined,
+        colIndex: 0,
+        rowIndex: 0,
+        isExpandable: false,
+        isExpanded: false,
+        setCellProps: props.setCellProps,
+        columnId: 'host.name',
       },
       {}
     );
