@@ -7,7 +7,6 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { Readable } from 'stream';
 import type { Owner } from '../../../common/constants/types';
 import { FileAttachmentPayloadRt, type Case } from '../../../common/types/domain';
 import type { CasesClient, CasesClientArgs } from '..';
@@ -19,13 +18,11 @@ import { validateMaxUserActions } from '../../common/validators';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { Operations } from '../../authorization';
 import { validateRegisteredAttachments } from './validators';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { buildAttachmentRequestFromFileJSON } from '../utils';
+import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 
 /**
  * Create a file attachment to a case.
- *
- * @ignore
  */
 export const addFile = async (
   addFileArgs: AddFileArgs,
@@ -75,7 +72,7 @@ export const addFile = async (
       meta: { caseIds: [caseId], owner: [owner] },
     });
 
-    await createdFile.uploadContent(file as Readable, $abort);
+    await createdFile.uploadContent(file, $abort);
 
     const commentReq = buildAttachmentRequestFromFileJSON({
       owner,

@@ -11,7 +11,3 @@ properties:
   filename:
     description: The name of file being attached to the case. **This should not include the file extension.**
     type: string
-  mimeType:
-    description: The MIME type of the file being attached to the case.
-    type: string
-    example: image/jpeg

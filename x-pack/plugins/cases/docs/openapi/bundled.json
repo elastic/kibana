@@ -1874,7 +1874,7 @@
       "post": {
         "summary": "Attach a file to a case",
         "operationId": "addCaseFileDefaultSpace",
-        "description": "Attach a file to a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. The request must include:\n    - The `Content-Type: multipart/form-data` HTTP header.\n    - A link to the file that is being uploaded.\n",
+        "description": "Attach a file to a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. The request must include:\n- The `Content-Type: multipart/form-data` HTTP header.\n- A link to the file that is being uploaded.\n",
         "tags": [
           "cases"
         ],

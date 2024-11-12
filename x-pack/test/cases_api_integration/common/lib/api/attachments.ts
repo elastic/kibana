@@ -101,9 +101,7 @@ export const createFileAttachment = async ({
   const { body: theCase } = await apiCall
     .set('kbn-xsrf', 'true')
     .set(headers)
-    .field('file', params.file as string)
-    .field('filename', params.filename ?? '')
-    .field('mimeType', params.mimeType ?? '')
+    .attach('file', Buffer.from(params.file as unknown as string), params.filename)
     .expect(expectedHttpCode);
 
   return theCase;

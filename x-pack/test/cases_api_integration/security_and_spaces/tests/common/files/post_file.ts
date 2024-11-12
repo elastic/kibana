@@ -8,6 +8,16 @@
 import expect from '@kbn/expect';
 import { ExternalReferenceAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
+  obsSecRead,
+  secOnly,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { defaultUser, postCaseReq, postFileReq } from '../../../../common/lib/mock';
@@ -17,6 +27,7 @@ import {
   removeServerGeneratedPropertiesFromSavedObject,
   getAuthWithSuperUser,
   deleteAllCaseItems,
+  superUserSpace1Auth,
 } from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
@@ -24,6 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
+  const caseRequest = { ...postCaseReq, owner: SECURITY_SOLUTION_OWNER };
 
   describe('post_file', () => {
     afterEach(async () => {
@@ -32,12 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('happy path', () => {
       it('should post a file in space1', async () => {
-        const postedCase = await createCase(
-          supertest,
-          { ...postCaseReq, owner: SECURITY_SOLUTION_OWNER },
-          200,
-          authSpace1
-        );
+        const postedCase = await createCase(supertest, caseRequest, 200, authSpace1);
         const patchedCase = await createFileAttachment({
           supertest,
           caseId: postedCase.id,
@@ -58,8 +65,8 @@ export default ({ getService }: FtrProviderContext): void => {
           soType: 'file',
           type: 'savedObject',
         });
-        expect(fileMetadata.name).to.be(postFileReq.filename);
-        expect(fileMetadata.mimeType).to.be(postFileReq.mimeType);
+        expect(fileMetadata.name).to.be('foobar');
+        expect(fileMetadata.mimeType).to.be('text/plain');
         expect(fileMetadata.extension).to.be('txt');
 
         // updates the case correctly after adding a comment
@@ -70,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('unhappy path', () => {
       it('should return a 400 when posting a file without a filename', async () => {
-        const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
+        const postedCase = await createCase(supertest, caseRequest, 200, authSpace1);
         await createFileAttachment({
           supertest,
           caseId: postedCase.id,
@@ -83,7 +90,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should return a 400 when posting a file with a filename that is too long', async () => {
         const longFilename = Array(161).fill('a').toString();
 
-        const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
+        const postedCase = await createCase(supertest, caseRequest, 200, authSpace1);
         await createFileAttachment({
           supertest,
           caseId: postedCase.id,
@@ -94,13 +101,69 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return a 400 when posting a file with an invalid mime type', async () => {
-        const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
+        const postedCase = await createCase(supertest, caseRequest, 200, authSpace1);
         await createFileAttachment({
           supertest,
           caseId: postedCase.id,
-          params: { ...postFileReq, mimeType: 'foo/bar' },
+          params: { ...postFileReq, filename: 'foobar.124zas' },
           auth: authSpace1,
           expectedHttpCode: 400,
+        });
+      });
+    });
+
+    describe('rbac', () => {
+      const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+      afterEach(async () => {
+        await deleteAllCaseItems(es);
+      });
+
+      it('should not post a file when the user does not have permissions for that owner', async () => {
+        const postedCase = await createCase(supertest, caseRequest, 200, authSpace1);
+
+        await createFileAttachment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: postFileReq,
+          auth: { user: obsOnly, space: 'space1' },
+          expectedHttpCode: 403,
+        });
+      });
+
+      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+        it(`User ${
+          user.username
+        } with role(s) ${user.roles.join()} - should not post a file`, async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            caseRequest,
+            200,
+            superUserSpace1Auth
+          );
+
+          await createFileAttachment({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: postFileReq,
+            auth: { user, space: 'space1' },
+            expectedHttpCode: 403,
+          });
+        });
+      }
+
+      it('should not post a file in a space the user does not have permissions for', async () => {
+        const postedCase = await createCase(supertestWithoutAuth, caseRequest, 200, {
+          user: superUser,
+          space: 'space2',
+        });
+
+        await createFileAttachment({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: postFileReq,
+          auth: { user: secOnly, space: 'space2' },
+          expectedHttpCode: 403,
         });
       });
     });

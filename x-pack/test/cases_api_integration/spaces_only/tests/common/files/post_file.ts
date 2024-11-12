@@ -57,8 +57,8 @@ export default ({ getService }: FtrProviderContext): void => {
         soType: 'file',
         type: 'savedObject',
       });
-      expect(fileMetadata.name).to.be(postFileReq.filename);
-      expect(fileMetadata.mimeType).to.be(postFileReq.mimeType);
+      expect(fileMetadata.name).to.be('foobar');
+      expect(fileMetadata.mimeType).to.be('text/plain');
       expect(fileMetadata.extension).to.be('txt');
 
       // updates the case correctly after adding a comment

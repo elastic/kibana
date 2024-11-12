@@ -17,7 +17,6 @@ import {
 import {
   limitedArraySchema,
   limitedStringSchema,
-  mimeTypeString,
   NonEmptyString,
   paginationSchema,
 } from '../../../schema';
@@ -55,7 +54,6 @@ export const PostFileAttachmentRequestRt = rt.intersection([
   }),
   rt.exact(
     rt.partial({
-      mimeType: mimeTypeString,
       filename: limitedStringSchema({ fieldName: 'filename', min: 1, max: MAX_FILENAME_LENGTH }),
     })
   ),

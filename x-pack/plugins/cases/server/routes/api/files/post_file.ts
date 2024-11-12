@@ -16,7 +16,7 @@ import { AbortedUploadError } from '@kbn/files-plugin/server/file/errors';
 import type { HapiReadableStream } from '../../../client/attachments/types';
 import type { attachmentApiV1 } from '../../../../common/types/api';
 
-import { CASE_FILES_URL, MAX_FILE_SIZE } from '../../../../common/constants';
+import { CASE_FILES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { caseDomainV1 } from '../../../../common/types/domain';
@@ -34,13 +34,6 @@ export const postFileRoute = createCasesRoute({
     summary: 'Attach a file to a case',
     tags: ['oas-tag:cases'],
     body: {
-      /*
-       * The maximum file size allowed here is the upper limit allowed when registering the cases file
-       * kinds. We register the file kinds in x-pack/plugins/cases/public/files/index.ts.
-       *
-       * If the user configured a custom value the validation will still fail when calling the service.
-       */
-      maxBytes: MAX_FILE_SIZE,
       output: 'stream',
       parse: true,
       accepts: 'multipart/form-data',
@@ -57,14 +50,20 @@ export const postFileRoute = createCasesRoute({
       const fileRequest = request.body as attachmentApiV1.PostFileAttachmentRequest;
       const file = fileRequest.file as HapiReadableStream;
 
-      const fileExtension = parse(file.hapi.filename).ext.toLowerCase();
-      const metadataMimeType = mime.lookup(fileExtension) || '';
-      const metadataFilename = parse(file.hapi.filename).name;
+      let filename = fileRequest.filename;
+      let mimeType;
+
+      if (file.hapi != null) {
+        const parsedFilename = parse(file.hapi.filename);
+
+        filename ??= parsedFilename.name;
+        mimeType = mime.lookup(parsedFilename.ext.toLowerCase()) || undefined;
+      }
 
       const res: caseDomainV1.Case = await casesClient.attachments.addFile({
         file,
-        filename: fileRequest.filename ?? metadataFilename,
-        mimeType: fileRequest.mimeType ?? metadataMimeType,
+        filename: filename ?? '',
+        mimeType,
         caseId: request.params.case_id,
         $abort,
       });

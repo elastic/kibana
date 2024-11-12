@@ -68,9 +68,8 @@ export const postCommentUserReq: UserCommentAttachmentPayload = {
 };
 
 export const postFileReq: PostFileAttachmentRequest = {
-  file: 'This is a file, its a readable, its ok.',
-  filename: 'foobar',
-  mimeType: 'text/plain',
+  file: 'This is a file, a buffer will be created from this string.',
+  filename: 'foobar.txt',
 };
 
 export const postCommentAlertReq: AlertAttachmentPayload = {

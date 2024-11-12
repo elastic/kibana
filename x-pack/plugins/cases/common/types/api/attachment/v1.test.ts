@@ -399,7 +399,6 @@ describe('Attachments', () => {
     const defaultRequest = {
       file: 'Solve this fast!',
       filename: 'filename',
-      mimeType: 'image/jpeg',
     };
 
     it('has the expected attributes in request', () => {
@@ -437,14 +436,6 @@ describe('Attachments', () => {
             PostFileAttachmentRequestRt.decode({ ...defaultRequest, filename: '' })
           )
         ).toContain('The filename field cannot be an empty string.');
-      });
-
-      it('throws an error when the mimeType is not allowed', () => {
-        expect(
-          PathReporter.report(
-            PostFileAttachmentRequestRt.decode({ ...defaultRequest, mimeType: 'foo/bar' })
-          )
-        ).toContain('The mime type field value foo/bar is not allowed.');
       });
     });
   });

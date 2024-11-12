@@ -7323,8 +7323,10 @@ paths:
         **Cases** feature in the **Management**, **Observability**, or
         **Security** section of the Kibana feature privileges, depending on the
         owner of the case you're updating. The request must include:
-            - The `Content-Type: multipart/form-data` HTTP header.
-            - A link to the file that is being uploaded.
+
+        - The `Content-Type: multipart/form-data` HTTP header.
+
+        - A link to the file that is being uploaded.
       operationId: addCaseFileDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_kbn_xsrf'
