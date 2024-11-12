@@ -9,7 +9,7 @@ import './_explorer_chart_label.scss';
 import PropTypes from 'prop-types';
 import React, { Fragment, useCallback } from 'react';
 
-import { EuiIconTip, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 
 import { ExplorerChartLabelBadge } from './explorer_chart_label_badge';
 import { ExplorerChartInfoTooltip } from '../../explorer_chart_info_tooltip';
@@ -50,19 +50,10 @@ export function ExplorerChartLabel({
     const key = `${infoTooltip.chartFunction}-${entity.fieldName}-${entity.fieldType}-${entity.fieldValue}`;
     return (
       <Fragment key={`badge-wrapper-${key}`}>
-        {mode === 'embeddable' ? (
-          <span className="ml-explorer-chart-label-badge">
-            <EuiText size="xs">
-              <EuiTextColor color={'success'} component={'span'}>
-                {`${entity.fieldName}: ${entity.fieldValue}`}
-              </EuiTextColor>
-            </EuiText>
-          </span>
-        ) : (
-          <ExplorerChartLabelBadge entity={entity} />
-        )}
+        <ExplorerChartLabelBadge entity={entity} />
         {onSelectEntity !== undefined && (
           <EntityFilter
+            mode={mode}
             onFilter={applyFilter}
             influencerFieldName={entity.fieldName}
             influencerFieldValue={entity.fieldValue}
