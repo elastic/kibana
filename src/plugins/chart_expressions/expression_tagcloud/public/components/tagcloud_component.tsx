@@ -29,7 +29,7 @@ import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-comm
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { isMultiFieldKey } from '@kbn/data-plugin/common';
-import { KbnPalettes } from '@kbn/palettes';
+import { KbnPalettes, useKbnPalettes } from '@kbn/palettes';
 import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
@@ -42,7 +42,6 @@ export type TagCloudChartProps = TagcloudRendererConfig & {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   palettesRegistry: PaletteRegistry;
-  palettes: KbnPalettes;
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
   isDarkMode: boolean;
 };
@@ -51,13 +50,13 @@ const calculateWeight = (value: number, x1: number, y1: number, x2: number, y2: 
   ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
 
 const getColor = (
-  palettes: PaletteRegistry,
+  paletteService: PaletteRegistry,
   activePalette: PaletteOutput,
   text: string,
   values: string[],
   syncColors: boolean
 ) => {
-  return palettes?.get(activePalette?.name)?.getCategoricalColor(
+  return paletteService?.get(activePalette?.name)?.getCategoricalColor(
     [
       {
         name: text,
@@ -93,7 +92,6 @@ const ORIENTATIONS = {
 export const TagCloudChart = ({
   visData,
   visParams,
-  palettes,
   palettesRegistry,
   fireEvent,
   renderComplete,
@@ -102,6 +100,7 @@ export const TagCloudChart = ({
   isDarkMode,
 }: TagCloudChartProps) => {
   const [warning, setWarning] = useState(false);
+  const palettes = useKbnPalettes();
   const { bucket, metric, scale, palette, showLabel, orientation, colorMapping } = visParams;
 
   const bucketFormatter = useMemo(() => {

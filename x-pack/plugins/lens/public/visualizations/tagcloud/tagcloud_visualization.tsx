@@ -123,7 +123,8 @@ export const getTagcloudVisualization = ({
       kibanaTheme.theme$
         .subscribe({
           next(theme) {
-            colors = getColorsFromMapping(theme.darkMode, state.colorMapping);
+            const palettes = getKbnPalettes(theme);
+            colors = getColorsFromMapping(palettes, theme.darkMode, state.colorMapping);
           },
         })
         .unsubscribe();

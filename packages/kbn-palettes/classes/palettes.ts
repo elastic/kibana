@@ -21,8 +21,8 @@ export class KbnPalettes {
   }
 
   query = (id: string) => {
-    const aliasedId = this.#aliasMappings.get(id);
-    return this.#palettes.get(aliasedId ?? id);
+    const aliasedId = (this.#palettes.has(id) ? id : this.#aliasMappings.get(id)) ?? id;
+    return this.#palettes.get(aliasedId);
   };
 
   get = (id: string) => {

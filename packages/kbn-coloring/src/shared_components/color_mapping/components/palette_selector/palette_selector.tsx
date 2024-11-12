@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { EuiColorPalettePicker, EuiConfirmModal, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -75,6 +75,10 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
         </p>
       </EuiConfirmModal>
     ) : null;
+  const currentPaletteId = useMemo(
+    () => palettes.get(model.paletteId).id, // need to resolve aliased id
+    [model.paletteId, palettes]
+  );
 
   return (
     <>
@@ -112,7 +116,7 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
               switchPaletteFn(selectedPaletteId, false);
             }
           }}
-          valueOfSelected={model.paletteId}
+          valueOfSelected={currentPaletteId}
           selectionDisplay={'palette'}
           compressed={true}
         />
