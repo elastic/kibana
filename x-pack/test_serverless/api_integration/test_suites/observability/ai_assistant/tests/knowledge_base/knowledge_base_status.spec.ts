@@ -12,7 +12,7 @@ import {
   TINY_ELSER,
   deleteKnowledgeBaseModel,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
-import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/create_inference_endpoint';
+import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 

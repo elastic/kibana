@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/create_inference_endpoint';
+import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { MachineLearningProvider } from '../../../api_integration/services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '../../../functional/services/ml/api';
 

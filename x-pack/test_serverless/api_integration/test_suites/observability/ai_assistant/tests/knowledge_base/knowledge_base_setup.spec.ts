@@ -81,6 +81,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         })
         .expect(500);
 
+      // @ts-expect-error
       expect(res.body.message).to.include.string(
         'No known trained model with model_id [pt_tiny_elser]'
       );
