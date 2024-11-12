@@ -13,6 +13,7 @@ import { HeaderActions } from './components/header_actions';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { DocumentDetailsLeftPanelKey } from '../shared/constants/panel_keys';
 import { useDocumentDetailsContext } from '../shared/context';
+import { DocumentEventTypes } from '../../../common/lib/telemetry';
 
 interface PanelNavigationProps {
   /**
@@ -35,7 +36,7 @@ export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpanda
         scopeId,
       },
     });
-    telemetry.reportDetailsFlyoutOpened({
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: scopeId,
       panel: 'left',
     });
