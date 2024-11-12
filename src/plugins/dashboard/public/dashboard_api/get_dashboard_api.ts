@@ -71,12 +71,18 @@ export function getDashboardApi({
   const trackPanel = initializeTrackPanel(async (id: string) =>
     panelsManager ? await panelsManager.api.untilEmbeddableLoaded(id) : undefined
   );
+  function getPanelReferences(id: string) {
+    const panelReferences =  getReferencesForPanelId(id, references);
+    // references from old installations may not be prefixed with panel id
+    // fall back to passing all references in these cases to preserve backwards compatability
+    return panelReferences.length > 0 ? panelReferences : references;
+  }
   panelsManager = initializePanelsManager(
     incomingEmbeddable,
     initialState.panels,
     initialPanelsRuntimeState ?? {},
     trackPanel,
-    (id: string) => getReferencesForPanelId(id, references),
+    getPanelReferences,
     (refs: Reference[]) => references.push(...refs)
   );
   const dataLoadingManager = initializeDataLoadingManager(panelsManager.api.children$);
@@ -243,12 +249,17 @@ export function getDashboardApi({
           rawState: savedObjectResult?.dashboardInput?.controlGroupInput
             ? savedObjectResult.dashboardInput.controlGroupInput
             : ({
-                controlStyle: 'oneLine',
+                autoApplySelections: true,
                 chainingSystem: 'HIERARCHICAL',
+                controls: [],
+                ignoreParentSettings: {
+                  ignoreFilters: false,
+                  ignoreQuery: false,
+                  ignoreTimerange: false,
+                  ignoreValidations: false
+                },
+                labelPosition: 'oneLine',
                 showApplySelections: false,
-                panelsJSON: '{}',
-                ignoreParentSettingsJSON:
-                  '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
               } as ControlGroupSerializedState),
           references: getReferencesForControls(references),
         };
