@@ -67,13 +67,6 @@ export const getPostKnowledgeBaseRequest = (resource?: string) =>
     query: { resource },
   });
 
-export const getDeleteKnowledgeBaseRequest = (resource?: string) =>
-  requestMock.create({
-    method: 'delete',
-    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
-    query: { resource },
-  });
-
 export const getGetCapabilitiesRequest = () =>
   requestMock.create({
     method: 'get',
