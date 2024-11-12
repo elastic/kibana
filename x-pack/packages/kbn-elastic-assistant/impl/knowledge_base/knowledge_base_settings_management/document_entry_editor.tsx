@@ -14,18 +14,28 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { DocumentEntry } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
+import { isGlobalEntry } from './helpers';
 
 interface Props {
   entry?: DocumentEntry;
+  originalEntry?: DocumentEntry;
   setEntry: React.Dispatch<React.SetStateAction<Partial<DocumentEntry>>>;
   hasManageGlobalKnowledgeBase: boolean;
 }
 
 export const DocumentEntryEditor: React.FC<Props> = React.memo(
-  ({ entry, setEntry, hasManageGlobalKnowledgeBase }) => {
+  ({ entry, setEntry, hasManageGlobalKnowledgeBase, originalEntry }) => {
+    const privateUsers = useMemo(() => {
+      const originalUsers = originalEntry?.users;
+      if (originalEntry && !isGlobalEntry(originalEntry)) {
+        return originalUsers;
+      }
+      return undefined;
+    }, [originalEntry]);
+
     // Name
     const setName = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -38,12 +48,13 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
       (value: string) =>
         setEntry((prevEntry) => ({
           ...prevEntry,
-          users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : undefined,
+          users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : privateUsers,
         })),
-      [setEntry]
+      [privateUsers, setEntry]
     );
     const sharingOptions = [
       {
+        'data-test-subj': 'sharing-private-option',
         value: i18n.SHARING_PRIVATE_OPTION_LABEL,
         inputDisplay: (
           <EuiText size={'s'}>
@@ -57,6 +68,7 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
         ),
       },
       {
+        'data-test-subj': 'sharing-global-option',
         value: i18n.SHARING_GLOBAL_OPTION_LABEL,
         inputDisplay: (
           <EuiText size={'s'}>
@@ -111,6 +123,7 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
           fullWidth
         >
           <EuiSuperSelect
+            data-test-subj="sharing-select"
             options={sharingOptions}
             valueOfSelected={selectedSharingOption}
             onChange={setSharingOptions}

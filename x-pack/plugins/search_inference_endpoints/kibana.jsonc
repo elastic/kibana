@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/search-inference-endpoints",
   "owner": "@elastic/search-kibana",
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "searchInferenceEndpoints",
     "server": true,
@@ -13,12 +15,12 @@
     "requiredPlugins": [
       "actions",
       "features",
+      "ml",
       "share",
     ],
     "optionalPlugins": [
       "cloud",
       "console",
-      "ml"
     ],
     "requiredBundles": [
       "kibanaReact"

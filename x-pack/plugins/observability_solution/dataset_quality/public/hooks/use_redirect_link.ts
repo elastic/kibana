@@ -47,12 +47,16 @@ export const useRedirectLink = <T extends BasicDataStream>({
     share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);
 
   const isLogsExplorerAppAccessible = useObservable(
-    application.applications$.pipe(
-      map(
-        (apps) =>
-          (apps.get(OBSERVABILITY_LOGS_EXPLORER_APP_ID)?.status ?? AppStatus.inaccessible) ===
-          AppStatus.accessible
-      )
+    useMemo(
+      () =>
+        application.applications$.pipe(
+          map(
+            (apps) =>
+              (apps.get(OBSERVABILITY_LOGS_EXPLORER_APP_ID)?.status ?? AppStatus.inaccessible) ===
+              AppStatus.accessible
+          )
+        ),
+      [application.applications$]
     ),
     false
   );

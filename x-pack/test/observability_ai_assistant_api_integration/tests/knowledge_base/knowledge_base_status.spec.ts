@@ -17,7 +17,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     before(async () => {
       await createKnowledgeBaseModel(ml);
       await observabilityAIAssistantAPIClient
-        .editorUser({
+        .editor({
           endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
         })
         .expect(200);
@@ -29,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     it('returns correct status after knowledge base is setup', async () => {
       const res = await observabilityAIAssistantAPIClient
-        .editorUser({
+        .editor({
           endpoint: 'GET /internal/observability_ai_assistant/kb/status',
         })
         .expect(200);
@@ -41,7 +41,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
 
       const res = await observabilityAIAssistantAPIClient
-        .editorUser({
+        .editor({
           endpoint: 'GET /internal/observability_ai_assistant/kb/status',
         })
         .expect(200);
@@ -49,6 +49,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(res.body).to.eql({
         ready: false,
         model_name: TINY_ELSER.id,
+        enabled: true,
       });
     });
   });

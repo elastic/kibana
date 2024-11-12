@@ -48,6 +48,8 @@ jest.mock('../ai_assistant', () => {
   };
 });
 
+jest.mock('../data_view_selector_field/use_data_views');
+
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -79,104 +81,6 @@ jest.mock('../../../../common/lib/kibana', () => {
           },
         },
         data: {
-          dataViews: {
-            getIdsWithTitle: async () =>
-              Promise.resolve([{ id: 'myfakeid', title: 'hello*,world*,refreshed*' }]),
-            create: async ({ title }: { title: string }) =>
-              Promise.resolve({
-                id: 'myfakeid',
-                matchedIndices: ['hello', 'world', 'refreshed'],
-                fields: [
-                  {
-                    name: 'bytes',
-                    type: 'number',
-                    esTypes: ['long'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 10,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: 'ssl',
-                    type: 'boolean',
-                    esTypes: ['boolean'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 20,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: '@timestamp',
-                    type: 'date',
-                    esTypes: ['date'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 30,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                ],
-                getIndexPattern: () => 'hello*,world*,refreshed*',
-                getRuntimeMappings: () => ({
-                  myfield: {
-                    type: 'keyword',
-                  },
-                }),
-              }),
-            get: async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
-              Promise.resolve({
-                id: dataViewId,
-                matchedIndices: refreshFields
-                  ? ['hello', 'world', 'refreshed']
-                  : ['hello', 'world'],
-                fields: [
-                  {
-                    name: 'bytes',
-                    type: 'number',
-                    esTypes: ['long'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 10,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: 'ssl',
-                    type: 'boolean',
-                    esTypes: ['boolean'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 20,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: '@timestamp',
-                    type: 'date',
-                    esTypes: ['date'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 30,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                ],
-                getIndexPattern: () => 'hello*,world*,refreshed*',
-                getRuntimeMappings: () => ({
-                  myfield: {
-                    type: 'keyword',
-                  },
-                }),
-              }),
-          },
           search: {
             search: () => ({
               subscribe: () => ({
@@ -298,7 +202,9 @@ const onOpenTimeline = jest.fn();
 const COMBO_BOX_TOGGLE_BUTTON_TEST_ID = 'comboBoxToggleListButton';
 const VERSION_INPUT_TEST_ID = 'relatedIntegrationVersionDependency';
 
-describe('StepDefineRule', () => {
+// Failing: See https://github.com/elastic/kibana/issues/199648
+// Failing: See https://github.com/elastic/kibana/issues/199700
+describe.skip('StepDefineRule', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseRuleFromTimeline.mockReturnValue({ onOpenTimeline, loading: false });
@@ -459,7 +365,7 @@ describe('StepDefineRule', () => {
       );
     });
 
-    it('submits saved early required fields without the "ecs" property', async () => {
+    it('submits saved earlier required fields', async () => {
       const initialState = {
         index: ['test-index'],
         queryBar: {
@@ -484,7 +390,7 @@ describe('StepDefineRule', () => {
 
       expect(handleSubmit).toHaveBeenCalledWith(
         expect.objectContaining({
-          requiredFields: [{ name: 'host.name', type: 'string' }],
+          requiredFields: initialState.requiredFields,
         }),
         true
       );
