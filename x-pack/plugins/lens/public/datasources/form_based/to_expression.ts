@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { FeatureFlagsStart, IUiSettingsClient } from '@kbn/core/public';
 import { partition, uniq } from 'lodash';
 import seedrandom from 'seedrandom';
 import {
@@ -71,6 +71,7 @@ function getExpressionForLayer(
   layer: FormBasedLayer,
   indexPattern: IndexPattern,
   uiSettings: IUiSettingsClient,
+  featureFlags: FeatureFlagsStart,
   dateRange: DateRange,
   nowInstant: Date,
   searchSessionId?: string
@@ -170,7 +171,8 @@ function getExpressionForLayer(
     const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
 
     // esql mode variables
-    const canUseESQL = uiSettings.get(ENABLE_ESQL); // read from a setting
+    const lensESQLEnabled = featureFlags.getBooleanValue('lens.enable_esql', false);
+    const canUseESQL = lensESQLEnabled && uiSettings.get(ENABLE_ESQL); // read from a setting
     const esqlLayer =
       canUseESQL &&
       getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant);
@@ -552,6 +554,7 @@ export function toExpression(
   layerId: string,
   indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient,
+  featureFlags: FeatureFlagsStart,
   dateRange: DateRange,
   nowInstant: Date,
   searchSessionId?: string
@@ -561,6 +564,7 @@ export function toExpression(
       state.layers[layerId],
       indexPatterns[state.layers[layerId].indexPatternId],
       uiSettings,
+      featureFlags,
       dateRange,
       nowInstant,
       searchSessionId
