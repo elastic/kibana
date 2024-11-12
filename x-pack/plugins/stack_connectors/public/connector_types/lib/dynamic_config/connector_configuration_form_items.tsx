@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { ConfigEntryView, DisplayType } from './types';
+import { ConfigEntryView, DisplayType } from '../../../../common/dynamic_config/types';
 import { ConnectorConfigurationField } from './connector_configuration_field';
 
 interface ConnectorConfigurationFormItemsProps {
