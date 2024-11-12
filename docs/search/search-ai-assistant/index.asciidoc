@@ -2,7 +2,6 @@
 [[search-ai-assistant]]
 == AI Assistant
 
-preview:[]
 
 [TIP]
 ====
