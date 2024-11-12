@@ -14,6 +14,10 @@ export default function apmApiIntegrationTests({
     loadTestFile(require.resolve('./agent_explorer'));
     loadTestFile(require.resolve('./custom_dashboards'));
     loadTestFile(require.resolve('./dependencies'));
+    loadTestFile(require.resolve('./data_view'));
+    loadTestFile(require.resolve('./correlations'));
+    loadTestFile(require.resolve('./entities'));
     loadTestFile(require.resolve('./cold_start'));
+    loadTestFile(require.resolve('./infrastructure'));
   });
 }
