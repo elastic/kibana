@@ -29,7 +29,7 @@ const pageConfigurations = {
     dismissalStorageKey: 'log_settings_deprecation_callout_dismissed',
     message: i18n.translate('xpack.infra.logsDeprecationCallout.settings.exploreWithDiscover', {
       defaultMessage:
-        'These settings only apply to the legacy Logs Stream app, and we do not recommend configuring them. Instead, use Discover which makes viewing and inspecting your logs easier with more features, better performance, and more intuitive navigation.',
+        'These settings only apply to the legacy Logs Stream app. Switch to Discover for the same functionality plus more features, better performance, and more intuitive navigation.',
     }),
   },
 };
