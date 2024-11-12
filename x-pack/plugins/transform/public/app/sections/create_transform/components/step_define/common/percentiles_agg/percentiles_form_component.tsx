@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
@@ -13,7 +13,7 @@ import type { IPivotAggsConfigPercentiles, ValidationResultErrorType } from './t
 
 const ERROR_MESSAGES: Record<ValidationResultErrorType, string> = {
   INVALID_FORMAT: i18n.translate('xpack.transform.agg.popoverForm.invalidFormatError', {
-    defaultMessage: 'Enter a comma-separated list of percentile',
+    defaultMessage: 'Percentile must be a valid number',
   }),
   PERCENTILE_OUT_OF_RANGE: i18n.translate(
     'xpack.transform.agg.popoverForm.percentileOutOfRangeError',
@@ -33,16 +33,23 @@ export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent']
     aggConfig.percents?.map((p) => ({ label: p.toString() })) ?? []
   );
 
+  // This is used to prevent race condition when user is creating a new option, and the search value is cleared.
+  const isCreatingOption = useRef(false);
+
   const handleCreateOption = (inputValue: string) => {
     if (!isValid) return false;
+    isCreatingOption.current = true;
 
     const newOption = {
       label: inputValue,
     };
     const updatedOptions = [...selectedOptions, newOption];
-
     setSelectedOptions(updatedOptions);
     onChange({ percents: updatedOptions.map((option) => Number(option.label)) });
+
+    setTimeout(() => {
+      isCreatingOption.current = false;
+    }, 100);
   };
 
   const handleOptionsChange = (newOptions: Array<EuiComboBoxOptionOption<string>>) => {
@@ -51,6 +58,8 @@ export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent']
   };
 
   const handleSearchChange = (searchValue: string) => {
+    if (isCreatingOption.current) return;
+
     onChange({
       ...aggConfig,
       pendingPercentileInput: searchValue,
