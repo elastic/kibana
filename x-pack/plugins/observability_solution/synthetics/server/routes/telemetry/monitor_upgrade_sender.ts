@@ -7,7 +7,6 @@
 import { sha256 } from 'js-sha256';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
-import { PreviousMonitorForUpdate } from '../../synthetics_service/project_monitor/project_monitor_formatter';
 import type { MonitorUpdateEvent } from '../../telemetry/types';
 
 import { TelemetryEventsSender } from '../../telemetry/sender';
@@ -110,23 +109,22 @@ export function formatTelemetryEvent({
 
 export function formatTelemetryUpdateEvent(
   currentMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>,
-  previousMonitor: PreviousMonitorForUpdate,
+  previousMonitorUpdatedAt: string | undefined,
   stackVersion: string,
   isInlineScript: boolean,
   errors?: ServiceLocationErrors | null
 ) {
   let durationSinceLastUpdated: number = 0;
-  if (currentMonitor.updated_at && previousMonitor.updated_at) {
+  if (currentMonitor.updated_at && previousMonitorUpdatedAt) {
     durationSinceLastUpdated =
-      new Date(currentMonitor.updated_at).getTime() -
-      new Date(previousMonitor.updated_at).getTime();
+      new Date(currentMonitor.updated_at).getTime() - new Date(previousMonitorUpdatedAt).getTime();
   }
 
   return formatTelemetryEvent({
     stackVersion,
     monitor: currentMonitor as SavedObject<EncryptedSyntheticsMonitorAttributes>,
     durationSinceLastUpdated,
-    lastUpdatedAt: previousMonitor.updated_at,
+    lastUpdatedAt: previousMonitorUpdatedAt,
     isInlineScript,
     errors,
   });

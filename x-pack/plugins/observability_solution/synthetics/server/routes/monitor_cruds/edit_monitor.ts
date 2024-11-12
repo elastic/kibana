@@ -8,7 +8,6 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import { PreviousMonitorForUpdate } from '../../synthetics_service/project_monitor/project_monitor_formatter';
 import { invalidOriginError } from './add_monitor';
 import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
@@ -273,11 +272,7 @@ export const syncEditedMonitor = async ({
       server.telemetry,
       formatTelemetryUpdateEvent(
         editedMonitorSavedObject as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>,
-        {
-          ...decryptedPreviousMonitor.attributes,
-          id: decryptedPreviousMonitor.id,
-          updated_at: decryptedPreviousMonitor.updated_at,
-        } as PreviousMonitorForUpdate,
+        decryptedPreviousMonitor.updated_at,
         server.stackVersion,
         Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
         publicSyncErrors

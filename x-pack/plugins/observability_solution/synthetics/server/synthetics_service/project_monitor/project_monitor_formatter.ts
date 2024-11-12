@@ -47,6 +47,7 @@ type FailedError = Array<{ id?: string; reason: string; details: string; payload
 
 export interface ExistingMonitor {
   [ConfigKey.JOURNEY_ID]: string;
+  [ConfigKey.MONITOR_QUERY_ID]: string;
   [ConfigKey.CONFIG_ID]: string;
   [ConfigKey.REVISION]: number;
   [ConfigKey.MONITOR_TYPE]: string;

@@ -28,7 +28,6 @@ import {
   formatTelemetryDeleteEvent,
   sendTelemetryEvents,
 } from './monitor_upgrade_sender';
-import { PreviousMonitorForUpdate } from '../../synthetics_service/project_monitor/project_monitor_formatter';
 
 const stackVersion = '8.2.0';
 const id = '123456';
@@ -153,11 +152,7 @@ describe('monitor upgrade telemetry helpers', () => {
   it('handles formatting update events', () => {
     const actual = formatTelemetryUpdateEvent(
       createTestConfig({}, '2011-10-05T16:48:00.000Z'),
-      {
-        ...testConfig.attributes,
-        updated_at: testConfig.updated_at,
-        id: testConfig.id,
-      } as PreviousMonitorForUpdate,
+      testConfig.updated_at,
       stackVersion,
       false,
       errors
