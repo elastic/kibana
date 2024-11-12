@@ -24,6 +24,10 @@ export const inject: NonNullable<EmbeddableRegistryDefinition['inject']> = (
 ): EmbeddableStateWithType => {
   const typedState = cloneDeep(state) as unknown as LensRuntimeState;
 
+  if (typedState.savedObjectId) {
+    return typedState as unknown as EmbeddableStateWithType;
+  }
+
   // match references based on name, so only references associated with this lens panel are injected.
   const matchedReferences: SavedObjectReference[] = [];
 
