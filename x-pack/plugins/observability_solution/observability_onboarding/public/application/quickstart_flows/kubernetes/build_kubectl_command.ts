@@ -22,6 +22,7 @@ export function buildKubectlCommand({
   elasticAgentVersion,
 }: Params) {
   const escapedElasticsearchUrl = elasticsearchUrl.replace(/\//g, '\\/');
+  // Strip away the build metadata from the version
   const versionTag = elasticAgentVersion.split('+')[0];
 
   return `
