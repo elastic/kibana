@@ -13,17 +13,34 @@ export interface EntitySource {
   filters: string[];
 }
 
-export function getEntityInstancesQuery(source: EntitySource, limit: number): string {
-  let query = `FROM ${source.index_patterns} |`;
+const sourceCommand = (source: EntitySource) => {
+  let query = `FROM ${source.index_patterns}`;
+
+  const esMetadataFields = source.metadata_fields.filter((field) =>
+    ['_index', '_id'].includes(field)
+  );
+  if (esMetadataFields.length) {
+    query += ` METADATA ${esMetadataFields.join(',')}`;
+  }
+
+  return query;
+};
+
+const filterCommands = (source: EntitySource) => {
+  const commands: string[] = [];
 
   source.identity_fields.forEach((field) => {
-    query += `WHERE ${field} IS NOT NULL |`;
+    commands.push(`WHERE ${field} IS NOT NULL`);
   });
 
   source.filters.forEach((filter) => {
-    query += `WHERE ${filter} |`;
+    commands.push(`WHERE ${filter}`);
   });
 
+  return commands;
+};
+
+const statsCommand = (source: EntitySource) => {
   const aggs = [
     // default 'last_seen' attribute
     'entity.last_seen_timestamp=MAX(@timestamp)',
@@ -32,9 +49,17 @@ export function getEntityInstancesQuery(source: EntitySource, limit: number): st
       .map((field) => `metadata.${field}=VALUES(${field})`),
   ];
 
-  query += `STATS ${aggs.join(', ')} BY ${source.identity_fields.join(',')} |`;
-  query += `SORT entity.last_seen_timestamp DESC |`;
-  query += `LIMIT ${limit}`;
+  return `STATS ${aggs.join(', ')} BY ${source.identity_fields.join(',')}`;
+};
 
-  return query;
+export function getEntityInstancesQuery(source: EntitySource, limit: number): string {
+  const commands = [
+    sourceCommand(source),
+    ...filterCommands(source),
+    statsCommand(source),
+    `SORT entity.last_seen_timestamp DESC`,
+    `LIMIT ${limit}`,
+  ];
+
+  return commands.join('|');
 }
