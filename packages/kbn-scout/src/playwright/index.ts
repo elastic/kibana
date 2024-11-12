@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { startServersCli } from './src/cli/start_servers_cli';
+import { mergeTests } from 'playwright/test';
+import { scoutCoreFixtures } from './fixtures';
 
-export { expect, test, createPlaywrightConfig } from './src/playwright';
-export type { ScoutPlaywrightOptions, ScoutTestOptions } from './src/playwright';
+// Scout core fixtures: worker & test scope
+export const test = mergeTests(scoutCoreFixtures);
+
+export { createPlaywrightConfig } from './config';
+export { expect } from './expect';
+export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';

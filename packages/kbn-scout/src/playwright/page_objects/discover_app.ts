@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { startServersCli } from './src/cli/start_servers_cli';
+import { KibanaUrl } from '../../common/services/kibana_url';
+import { ScoutPage } from '../fixtures/types';
 
-export { expect, test, createPlaywrightConfig } from './src/playwright';
-export type { ScoutPlaywrightOptions, ScoutTestOptions } from './src/playwright';
+export class DiscoverApp {
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+
+  async goto() {
+    await this.page.goto(this.kbnUrl.app('discover'));
+  }
+}

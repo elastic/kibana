@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { startServersCli } from './src/cli/start_servers_cli';
+import { PlaywrightTestConfig, PlaywrightTestOptions } from 'playwright/test';
 
-export { expect, test, createPlaywrightConfig } from './src/playwright';
-export type { ScoutPlaywrightOptions, ScoutTestOptions } from './src/playwright';
+export type Protocol = 'http' | 'https';
+
+export interface ScoutTestOptions extends PlaywrightTestOptions {
+  serversConfigDir: string;
+}
+
+export interface ScoutPlaywrightOptions extends Pick<PlaywrightTestConfig, 'testDir' | 'workers'> {
+  testDir: string;
+  workers?: 1 | 2;
+}

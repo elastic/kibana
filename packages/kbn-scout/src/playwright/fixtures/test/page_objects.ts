@@ -7,7 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { startServersCli } from './src/cli/start_servers_cli';
+import { test as base } from '@playwright/test';
+import { KibanaUrl } from '../../../common';
+import { ScoutPage } from '../types';
+import { PageObjects, createLazyPageObjects } from '../../page_objects';
 
-export { expect, test, createPlaywrightConfig } from './src/playwright';
-export type { ScoutPlaywrightOptions, ScoutTestOptions } from './src/playwright';
+export const pageObjectsFixture = base.extend<{
+  page: ScoutPage;
+  kbnUrl: KibanaUrl;
+  pageObjects: PageObjects;
+}>({
+  pageObjects: async ({ page, kbnUrl }, use) => {
+    const pages = createLazyPageObjects(page, kbnUrl);
+
+    await use(pages);
+  },
+});

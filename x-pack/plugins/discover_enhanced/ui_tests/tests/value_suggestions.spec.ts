@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { subj } from '@kbn/test-subj-selector';
-import { expect } from '@playwright/test';
-import { test } from '../fixtures';
-import { DiscoverApp, DatePicker } from '../page_objects';
+import { test, expect } from '@kbn/scout';
 
 test.describe('Discover app - value suggestions', () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
@@ -26,32 +23,30 @@ test.describe('Discover app - value suggestions', () => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  test.beforeEach(async ({ page, kbnUrl, browserAuth }) => {
-    const discoverApp = new DiscoverApp(page, kbnUrl);
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await discoverApp.goto();
+    await pageObjects.discover.goto();
   });
 
-  test('dont show up if outside of range', async ({ page }) => {
-    const fromTime = 'Mar 1, 2020 @ 00:00:00.000';
-    const toTime = 'Nov 1, 2020 @ 00:00:00.000';
-    const datePicker = new DatePicker(page);
-    await datePicker.setAbsoluteRange(fromTime, toTime);
+  test('dont show up if outside of range', async ({ page, pageObjects }) => {
+    await pageObjects.datePicker.setAbsoluteRange({
+      from: 'Mar 1, 2020 @ 00:00:00.000',
+      to: 'Nov 1, 2020 @ 00:00:00.000',
+    });
 
-    await page.fill(subj('queryInput'), 'extension.raw : ');
-    await expect(page.locator(subj('autoCompleteSuggestionText'))).toHaveCount(0);
+    await page.testSubj.fill('queryInput', 'extension.raw : ');
+    await expect(page.testSubj.locator('autoCompleteSuggestionText')).toHaveCount(0);
   });
 
-  test('show up if in range', async ({ page }) => {
-    const fromTime = 'Sep 19, 2015 @ 06:31:44.000';
-    const toTime = 'Sep 23, 2015 @ 18:31:44.000';
-    const datePicker = new DatePicker(page);
-    await datePicker.setAbsoluteRange(fromTime, toTime);
-
-    await page.fill(subj('queryInput'), 'extension.raw : ');
-    await expect(page.locator(subj('autoCompleteSuggestionText'))).toHaveCount(5);
-    const actualSuggestions = await page
-      .locator(subj('autoCompleteSuggestionText'))
+  test('show up if in range', async ({ page, pageObjects }) => {
+    await pageObjects.datePicker.setAbsoluteRange({
+      from: 'Sep 19, 2015 @ 06:31:44.000',
+      to: 'Sep 23, 2015 @ 18:31:44.000',
+    });
+    await page.testSubj.fill('queryInput', 'extension.raw : ');
+    await expect(page.testSubj.locator('autoCompleteSuggestionText')).toHaveCount(5);
+    const actualSuggestions = await page.testSubj
+      .locator('autoCompleteSuggestionText')
       .allTextContents();
     expect(actualSuggestions.join(',')).toContain('jpg');
   });

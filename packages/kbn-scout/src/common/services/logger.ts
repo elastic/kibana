@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { startServersCli } from './src/cli/start_servers_cli';
+import { ToolingLog } from '@kbn/tooling-log';
+import { serviceLoadedMsg } from '../../playwright/utils';
 
-export { expect, test, createPlaywrightConfig } from './src/playwright';
-export type { ScoutPlaywrightOptions, ScoutTestOptions } from './src/playwright';
+export function createLogger() {
+  const log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
+
+  log.debug(serviceLoadedMsg('logger'));
+
+  return log;
+}

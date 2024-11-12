@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { startServersCli } from './src/cli/start_servers_cli';
+export { createEsClient, createKbnClient } from './clients';
+export { createScoutConfig } from './config';
+export { createEsArchiver } from './es_archiver';
+export { createKbnUrl } from './kibana_url';
+export { createSamlSessionManager } from './saml_auth';
+export { createLogger } from './logger';
 
-export { expect, test, createPlaywrightConfig } from './src/playwright';
-export type { ScoutPlaywrightOptions, ScoutTestOptions } from './src/playwright';
+export type { KibanaUrl } from './kibana_url';

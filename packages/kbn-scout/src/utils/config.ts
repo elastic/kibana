@@ -11,9 +11,9 @@ import path from 'path';
 import * as Fs from 'fs';
 import { ServerlessProjectType } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ScoutServerConfig } from '../types';
 import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
+import { ScoutServerConfig } from '../types';
 
 export const getProjectType = (kbnServerArgs: string[]) => {
   const options = getopts(kbnServerArgs);

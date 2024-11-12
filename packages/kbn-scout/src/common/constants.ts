@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { startServersCli } from './src/cli/start_servers_cli';
+import { Role } from '@kbn/test/src/auth/types';
 
-export { expect, test, createPlaywrightConfig } from './src/playwright';
-export type { ScoutPlaywrightOptions, ScoutTestOptions } from './src/playwright';
+export const PROJECT_DEFAULT_ROLES = new Map<string, Role>([
+  ['es', 'developer'],
+  ['security', 'editor'],
+  ['oblt', 'editor'],
+]);
