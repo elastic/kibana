@@ -30,6 +30,7 @@ import type {
 } from '../../../../types';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
+import type { FleetConfigType } from '../../../../../common/types';
 import {
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
@@ -118,6 +119,9 @@ export function getTemplate({
 
   const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries);
 
+  const isEventIngestedEnabled = (config?: FleetConfigType): boolean =>
+    Boolean(!config?.agentIdVerificationEnabled && config?.eventIngestedEnabled);
+
   template.composed_of = [
     ...esBaseComponents,
     ...(template.composed_of || []),
@@ -126,8 +130,7 @@ export function getTemplate({
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
       : []),
-    ...(!appContextService.getConfig()?.agentIdVerificationEnabled &&
-    appContextService.getConfig()?.eventIngestedEnabled
+    ...(isEventIngestedEnabled(appContextService.getConfig())
       ? [FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME]
       : []),
   ];
