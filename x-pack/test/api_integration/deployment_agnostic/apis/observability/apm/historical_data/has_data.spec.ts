@@ -15,7 +15,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const apmApiClient = getService('apmApi');
   const synthtrace = getService('synthtrace');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177385
   describe('Historical data ', () => {
     describe('when there is not data', () => {
       it('returns hasData=false', async () => {
