@@ -8,8 +8,17 @@
 import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
+import moment from 'moment';
 
 export const AI_ASSISTANT_KB_INFERENCE_ID = 'ai_assistant_kb_inference';
+
+export interface CreateInferenceEndpointResponse {
+  inference_id: string;
+  task_type: string;
+  service: string;
+  service_settings: { num_allocations: number; num_threads: number; model_id: string };
+  chunking_settings: { strategy: string; max_chunk_size: number; sentence_overlap: number };
+}
 
 export async function createInferenceEndpoint({
   esClient,
@@ -24,20 +33,23 @@ export async function createInferenceEndpoint({
 }) {
   try {
     logger.debug(`Creating inference endpoint "${AI_ASSISTANT_KB_INFERENCE_ID}"`);
-    const response = await esClient.asCurrentUser.transport.request({
-      method: 'PUT',
-      path: `_inference/sparse_embedding/${AI_ASSISTANT_KB_INFERENCE_ID}`,
-      body: {
-        service: 'elasticsearch',
-        service_settings: {
-          model_id: modelId,
-          num_allocations: 1,
-          num_threads: 1,
+    return await esClient.asCurrentUser.transport.request<CreateInferenceEndpointResponse>(
+      {
+        method: 'PUT',
+        path: `_inference/sparse_embedding/${AI_ASSISTANT_KB_INFERENCE_ID}`,
+        body: {
+          service: 'elasticsearch',
+          service_settings: {
+            model_id: modelId,
+            num_allocations: 1,
+            num_threads: 1,
+          },
         },
       },
-    });
-
-    return response;
+      {
+        requestTimeout: moment.duration(2, 'minutes').asMilliseconds(),
+      }
+    );
   } catch (e) {
     logger.error(
       `Failed to create inference endpoint "${AI_ASSISTANT_KB_INFERENCE_ID}": ${e.message}`

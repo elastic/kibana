@@ -6,7 +6,7 @@
  */
 
 import { ClusterComponentTemplate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AI_ASSISTANT_KB_INFERENCE_ID } from './create_inference_endpoint';
+import { AI_ASSISTANT_KB_INFERENCE_ID } from './inference_endpoint';
 
 const keyword = {
   type: 'keyword' as const,

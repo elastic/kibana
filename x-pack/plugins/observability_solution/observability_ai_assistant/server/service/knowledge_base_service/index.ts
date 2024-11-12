@@ -24,7 +24,7 @@ import {
   deleteInferenceEndpoint,
   getInferenceEndpoint,
   isInferenceEndpointMissingOrUnavailable,
-} from '../create_inference_endpoint';
+} from '../inference_endpoint';
 import { recallFromConnectors } from './recall_from_connectors';
 
 interface Dependencies {

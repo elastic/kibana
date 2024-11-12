@@ -13,8 +13,12 @@ import {
   MlDeploymentAllocationState,
   MlDeploymentState,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { InferenceEndpointResponse } from '../../service/create_inference_endpoint';
+import {
+  CreateInferenceEndpointResponse,
+  InferenceEndpointResponse,
+} from '../../service/inference_endpoint';
 import { Instruction, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
@@ -55,10 +59,11 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
   options: {
     tags: ['access:ai_assistant'],
     timeout: {
-      idleSocket: 20 * 60 * 1000, // 20 minutes
+      payload: moment.duration(20, 'minutes').asMilliseconds(),
+      idleSocket: moment.duration(20, 'minutes').asMilliseconds(),
     },
   },
-  handler: async (resources): Promise<any> => {
+  handler: async (resources): Promise<CreateInferenceEndpointResponse> => {
     const client = await resources.service.getClient({ request: resources.request });
 
     if (!client) {

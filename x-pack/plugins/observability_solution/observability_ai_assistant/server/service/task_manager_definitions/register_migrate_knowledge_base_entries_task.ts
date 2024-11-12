@@ -12,7 +12,7 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import { KnowledgeBaseEntry } from '../../../common';
 import { resourceNames } from '..';
-import { getInferenceEndpoint } from '../create_inference_endpoint';
+import { getInferenceEndpoint } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 
 const TASK_ID = 'ai-assistant-knowledge-base-migration-task-id';
