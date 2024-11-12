@@ -16,11 +16,11 @@ const parentClassName = css`
 `;
 
 interface Props {
-  query: string;
+  query?: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
-  onQueryChange: (payload: { dateRange?: TimeRange; query: string }) => void;
-  onQuerySubmit: (payload: { dateRange?: TimeRange; query: string }, isUpdate?: boolean) => void;
+  onQueryChange?: (payload: { dateRange?: TimeRange; query: string }) => void;
+  onQuerySubmit?: (payload: { dateRange?: TimeRange; query: string }, isUpdate?: boolean) => void;
   onRefresh?: Required<React.ComponentProps<typeof SearchBar>>['onRefresh'];
   placeholder?: string;
   dataViews?: DataView[];
@@ -42,20 +42,25 @@ export function StreamsAppSearchBar({
     },
   } = useKibana();
 
-  const queryObj = useMemo(() => ({ query, language: 'kuery' }), [query]);
+  const queryObj = useMemo(() => (query ? { query, language: 'kuery' } : undefined), [query]);
+
+  const showQueryInput = query === undefined;
 
   return (
     <div className={parentClassName}>
       <unifiedSearch.ui.SearchBar
         appName="streamsApp"
-        onQuerySubmit={({ dateRange, query: nextQuery }) => {
-          onQuerySubmit({ dateRange, query: (nextQuery?.query as string | undefined) ?? '' });
+        onQuerySubmit={({ dateRange, query: nextQuery }, isUpdate) => {
+          onQuerySubmit?.(
+            { dateRange, query: (nextQuery?.query as string | undefined) ?? '' },
+            isUpdate
+          );
         }}
         onQueryChange={({ dateRange, query: nextQuery }) => {
-          onQueryChange({ dateRange, query: (nextQuery?.query as string | undefined) ?? '' });
+          onQueryChange?.({ dateRange, query: (nextQuery?.query as string | undefined) ?? '' });
         }}
         query={queryObj}
-        showQueryInput
+        showQueryInput={showQueryInput}
         showFilterBar={false}
         showQueryMenu={false}
         showDatePicker={Boolean(dateRangeFrom && dateRangeTo)}

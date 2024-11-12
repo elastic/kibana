@@ -15,6 +15,7 @@ import type {
 } from '@kbn/observability-shared-plugin/public';
 import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/public/plugin';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
@@ -25,6 +26,7 @@ export interface StreamsAppSetupDependencies {
   dataViews: DataViewsPublicPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   unifiedSearch: {};
+  share: SharePublicSetup;
 }
 
 export interface StreamsAppStartDependencies {
@@ -33,6 +35,7 @@ export interface StreamsAppStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  share: SharePublicStart;
 }
 
 export interface StreamsAppPublicSetup {}

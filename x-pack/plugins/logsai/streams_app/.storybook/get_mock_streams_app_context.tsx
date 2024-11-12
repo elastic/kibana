@@ -11,6 +11,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 
 export function getMockStreamsAppContext(): StreamsAppKibanaContext {
@@ -25,6 +26,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         data: {} as unknown as DataPublicPluginStart,
         unifiedSearch: {} as unknown as UnifiedSearchPublicPluginStart,
         streams: {} as unknown as StreamsPluginStart,
+        share: {} as unknown as SharePublicStart,
       },
     },
     services: {

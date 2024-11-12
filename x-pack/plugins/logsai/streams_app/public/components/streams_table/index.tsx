@@ -22,14 +22,24 @@ type ListStreamItem = ListStreamResponse['hits'][number]['_source'];
 
 export function StreamsTable({
   listFetch,
+  query,
 }: {
   listFetch: AbortableAsyncState<ListStreamResponse>;
+  query: string;
 }) {
   const router = useStreamsAppRouter();
 
   const items = useMemo(() => {
     return listFetch.value?.hits.map((hit) => hit._source) ?? [];
   }, [listFetch.value?.hits]);
+
+  const filteredItems = useMemo(() => {
+    if (!query) {
+      return items;
+    }
+
+    return items.filter((item) => item.id.toLowerCase().startsWith(query.toLowerCase()));
+  }, [query, items]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<ListStreamItem>>>(() => {
     return [
@@ -64,7 +74,7 @@ export function StreamsTable({
           })}
         </h2>
       </EuiTitle>
-      <EuiBasicTable columns={columns} items={items} loading={listFetch.loading} />
+      <EuiBasicTable columns={columns} items={filteredItems} loading={listFetch.loading} />
     </EuiFlexGroup>
   );
 }

@@ -14,7 +14,8 @@
       "observabilityShared",
       "data",
       "dataViews",
-      "unifiedSearch"
+      "unifiedSearch",
+      "share"
     ],
     "requiredBundles": [
       "kibanaReact"

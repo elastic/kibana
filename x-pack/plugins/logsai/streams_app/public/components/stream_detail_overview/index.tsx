@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import moment from 'moment';
-import React, { useMemo, useState } from 'react';
 import { StreamDefinition } from '@kbn/streams-plugin/common';
-import { entitySourceQuery } from '../../../common/entity_source_query';
+import moment from 'moment';
+import React, { useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
-import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 
 export function StreamDetailOverview({ definition }: { definition?: StreamDefinition }) {
   const {
@@ -25,6 +24,7 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
         data,
         dataViews,
         streams: { streamsRepositoryClient },
+        share,
       },
     },
   } = useKibana();
@@ -32,25 +32,34 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
   const {
     timeRange,
     absoluteTimeRange: { start, end },
+    setTimeRange,
   } = useDateRange({ data });
-
-  const [displayedKqlFilter, setDisplayedKqlFilter] = useState('');
-  const [persistedKqlFilter, setPersistedKqlFilter] = useState('');
 
   const dataStream = definition?.id;
 
-  const queries = useMemo(() => {
-    if (!dataStream) {
+  const indexPatterns = useMemo(() => {
+    if (!definition?.id) {
       return undefined;
     }
 
-    const baseDslFilter = entitySourceQuery({
-      entity: {
-        _index: dataStream,
-      },
-    });
+    const isRoot = definition.id.indexOf('.') === -1;
 
-    const indexPatterns = [dataStream];
+    const dataStreamOfDefinition = definition.id;
+
+    return isRoot
+      ? [dataStreamOfDefinition, `${dataStreamOfDefinition}.*`]
+      : [`${dataStreamOfDefinition}*`];
+  }, [definition?.id]);
+
+  const discoverLocator = useMemo(
+    () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
+    [share.url.locators]
+  );
+
+  const queries = useMemo(() => {
+    if (!indexPatterns) {
+      return undefined;
+    }
 
     const baseQuery = `FROM ${indexPatterns.join(', ')}`;
 
@@ -61,18 +70,30 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
     const histogramQuery = `${baseQuery} | STATS metric = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${bucketSize} seconds)`;
 
     return {
+      baseQuery,
       histogramQuery,
-      baseDslFilter,
     };
-  }, [dataStream]);
+  }, [indexPatterns]);
+
+  const discoverLink = useMemo(() => {
+    if (!discoverLocator || !queries?.baseQuery) {
+      return undefined;
+    }
+
+    return discoverLocator.getRedirectUrl({
+      query: {
+        esql: queries.baseQuery,
+      },
+    });
+  }, [queries?.baseQuery, discoverLocator]);
 
   const histogramQueryFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      if (!queries?.histogramQuery || !dataStream) {
+      if (!queries?.histogramQuery || !indexPatterns) {
         return undefined;
       }
 
-      const existingIndices = await dataViews.getExistingIndices([dataStream]);
+      const existingIndices = await dataViews.getExistingIndices(indexPatterns);
 
       if (existingIndices.length === 0) {
         return undefined;
@@ -83,8 +104,6 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
           body: {
             operationName: 'get_histogram_for_stream',
             query: queries.histogramQuery,
-            filter: queries.baseDslFilter,
-            kuery: persistedKqlFilter,
             start,
             end,
           },
@@ -92,16 +111,7 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
         signal,
       });
     },
-    [
-      dataStream,
-      dataViews,
-      streamsRepositoryClient,
-      queries?.histogramQuery,
-      persistedKqlFilter,
-      start,
-      end,
-      queries?.baseDslFilter,
-    ]
+    [indexPatterns, dataViews, streamsRepositoryClient, queries?.histogramQuery, start, end]
   );
 
   const dataViewsFetch = useAbortableAsync(() => {
@@ -127,12 +137,15 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
         <EuiFlexGroup direction="row" gutterSize="s">
           <EuiFlexItem grow>
             <StreamsAppSearchBar
-              query={displayedKqlFilter}
-              onQueryChange={({ query: nextQuery }) => {
-                setDisplayedKqlFilter(nextQuery);
-              }}
-              onQuerySubmit={() => {
-                setPersistedKqlFilter(displayedKqlFilter);
+              onQuerySubmit={({ dateRange }, isUpdate) => {
+                if (!isUpdate) {
+                  histogramQueryFetch.refresh();
+                  return;
+                }
+
+                if (dateRange) {
+                  setTimeRange({ from: dateRange.from, to: dateRange?.to, mode: dateRange.mode });
+                }
               }}
               onRefresh={() => {
                 histogramQueryFetch.refresh();
@@ -148,6 +161,16 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
               dateRangeTo={timeRange.to}
             />
           </EuiFlexItem>
+          <EuiButton
+            data-test-subj="streamsDetailOverviewOpenInDiscoverButton"
+            iconType="discoverApp"
+            href={discoverLink}
+            color="text"
+          >
+            {i18n.translate('xpack.streams.streamDetailOverview.openInDiscoverButtonLabel', {
+              defaultMessage: 'Open in Discover',
+            })}
+          </EuiButton>
         </EuiFlexGroup>
         <EuiPanel hasShadow={false} hasBorder>
           <EuiFlexGroup direction="column">

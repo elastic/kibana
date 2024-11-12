@@ -58,6 +58,7 @@ export class StreamsAppPlugin
                   }),
                   app: STREAMS_APP_ID,
                   path: '/',
+                  isTechnicalPreview: true,
                   matchPath(currentPath: string) {
                     return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
                   },

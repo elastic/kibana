@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiIcon, EuiLink, EuiPanel } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
@@ -34,7 +34,6 @@ export function EntityDetailViewWithoutParams({
   };
 }) {
   const router = useStreamsAppRouter();
-
   useStreamsAppBreadcrumbs(() => {
     if (!entity.displayName) {
       return [];

@@ -6,13 +6,12 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiSearchBar } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsAppPageHeader } from '../streams_app_page_header';
 import { StreamsAppPageHeaderTitle } from '../streams_app_page_header/streams_app_page_header_title';
 import { StreamsAppPageBody } from '../streams_app_page_body';
-import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { StreamsTable } from '../streams_table';
 
 export function StreamListView() {
@@ -25,8 +24,6 @@ export function StreamListView() {
   } = useKibana();
 
   const [query, setQuery] = useState('');
-
-  const [submittedQuery, setSubmittedQuery] = useState('');
 
   const streamsListFetch = useStreamsAppFetch(
     ({ signal }) => {
@@ -52,16 +49,16 @@ export function StreamListView() {
       />
       <StreamsAppPageBody>
         <EuiFlexGroup direction="column">
-          <StreamsAppSearchBar
-            onQueryChange={(next) => {
-              setQuery(next.query);
-            }}
-            onQuerySubmit={(next) => {
-              setSubmittedQuery(next.query);
-            }}
+          <EuiSearchBar
             query={query}
+            box={{
+              incremental: true,
+            }}
+            onChange={(nextQuery) => {
+              setQuery(nextQuery.queryText);
+            }}
           />
-          <StreamsTable listFetch={streamsListFetch} />
+          <StreamsTable listFetch={streamsListFetch} query={query} />
         </EuiFlexGroup>
       </StreamsAppPageBody>
     </EuiFlexGroup>
