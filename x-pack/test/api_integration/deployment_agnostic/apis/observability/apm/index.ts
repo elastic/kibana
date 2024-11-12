@@ -12,10 +12,12 @@ export default function apmApiIntegrationTests({
 }: DeploymentAgnosticFtrProviderContext) {
   describe('APM', function () {
     loadTestFile(require.resolve('./agent_explorer'));
+    loadTestFile(require.resolve('./alerts'));
     loadTestFile(require.resolve('./mobile'));
     loadTestFile(require.resolve('./custom_dashboards'));
     loadTestFile(require.resolve('./dependencies'));
     loadTestFile(require.resolve('./environment'));
+    loadTestFile(require.resolve('./data_view'));
     loadTestFile(require.resolve('./correlations'));
     loadTestFile(require.resolve('./entities'));
     loadTestFile(require.resolve('./cold_start'));
