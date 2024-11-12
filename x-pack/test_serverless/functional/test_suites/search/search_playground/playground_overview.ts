@@ -69,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundHeaderComponentsToExist();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundHeaderComponentsToDisabled();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageComponentsToExist();
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageIndexCalloutExists();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageIndexButtonExists();
       });
 
       describe('with gen ai connectors', () => {
@@ -106,7 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('without any indices', () => {
-        it('hide no index callout when index added', async () => {
+        it('hide no create index button when index added', async () => {
           await createIndex();
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenFlyoutAndSelectIndex();
         });

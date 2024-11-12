@@ -156,6 +156,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchElasticsearchStartPage.expectAnalyzeLogsLink();
         await pageObjects.svlSearchElasticsearchStartPage.expectO11yTrialLink();
       });
+
+      it('should have close button', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectCloseCreateIndexButtonExists();
+        await pageObjects.svlSearchElasticsearchStartPage.clickCloseCreateIndexButton();
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
+      });
+      it('should have skip button', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectSkipButtonExists();
+        await pageObjects.svlSearchElasticsearchStartPage.clickSkipButton();
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
+      });
     });
     describe('viewer', function () {
       before(async () => {
