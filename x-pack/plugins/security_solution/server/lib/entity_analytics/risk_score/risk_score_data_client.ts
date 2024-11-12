@@ -136,14 +136,6 @@ export class RiskScoreDataClient {
         });
       }
 
-      // Delete the component template without the namespace in the name
-      await esClient.cluster.deleteComponentTemplate(
-        {
-          name: mappingComponentName,
-        },
-        { ignore: [404] }
-      );
-
       // Update the new component template with the required data
       await Promise.all([
         createOrUpdateComponentTemplate({
@@ -209,6 +201,14 @@ export class RiskScoreDataClient {
           }),
         },
       });
+
+      // Delete the component template without the namespace in the name
+      await esClient.cluster.deleteComponentTemplate(
+        {
+          name: mappingComponentName,
+        },
+        { ignore: [404] }
+      );
 
       this.options.auditLogger?.log({
         message: 'System installed risk engine Elasticsearch components',
