@@ -71,33 +71,10 @@ export const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   dataset: ENTITY_LATEST,
 });
 
-const entityArrayRt = t.array(t.string);
-export const entityTypesRt = new t.Type<string[], string, unknown>(
-  'entityTypesRt',
-  entityArrayRt.is,
-  (input, context) => {
-    if (typeof input === 'string') {
-      const arr = input.split(',');
-      const validation = entityArrayRt.decode(arr);
-      if (isRight(validation)) {
-        return t.success(validation.right);
-      }
-    } else if (Array.isArray(input)) {
-      const validation = entityArrayRt.decode(input);
-      if (isRight(validation)) {
-        return t.success(validation.right);
-      }
-    }
-
-    return t.failure(input, context);
-  },
-  (arr) => arr.join()
-);
-
 export type EntityGroup = {
   count: number;
 } & {
-  [key: string]: any;
+  [key: string]: string;
 };
 
 export type InventoryEntity = {

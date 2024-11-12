@@ -165,22 +165,19 @@ describe('Home page', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
+        cy.intercept('POST', 'internal/controls/optionsList/entities-*-latest').as(
+          'entityTypeControlGroupOptions'
+        );
         cy.intercept('GET', '/internal/inventory/entities?**').as('getEntities');
         cy.intercept('GET', '/internal/inventory/entities/types').as('getEntitiesTypes');
         cy.intercept('GET', '/internal/inventory/entities/group_by/**').as('getGroups');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
-        cy.wait('@getEntitiesTypes');
-        cy.getByTestSubj('entityTypesFilterComboBox').click();
-        cy.getByTestSubj('entityTypesFilterserviceOption')
-          .should('be.visible')
-          .click({ force: true });
+        cy.getByTestSubj('optionsList-control-entity.type').click();
+        cy.wait('@entityTypeControlGroupOptions');
+        cy.getByTestSubj('optionsList-control-selection-service').click();
         cy.wait('@getGroups');
-        cy.contains('service');
-        cy.getByTestSubj('inventoryGroup_entity.type_host').should('not.exist');
-        cy.getByTestSubj('inventoryGroup_entity.type_container').should('not.exist');
-        cy.getByTestSubj('inventoryGroup_entity.type_service').should('be.visible');
-        cy.getByTestSubj('inventoryGroupTitle_entity.type_service').click({ force: true });
+        cy.getByTestSubj('inventoryGroupTitle_entity.type_service').click();
         cy.wait('@getEntities');
         cy.get('server1').should('not.exist');
         cy.contains('synth-node-trace-logs');
@@ -191,20 +188,19 @@ describe('Home page', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
+        cy.intercept('POST', 'internal/controls/optionsList/entities-*-latest').as(
+          'entityTypeControlGroupOptions'
+        );
         cy.intercept('GET', '/internal/inventory/entities?**').as('getEntities');
         cy.intercept('GET', '/internal/inventory/entities/types').as('getEntitiesTypes');
         cy.intercept('GET', '/internal/inventory/entities/group_by/**').as('getGroups');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
-        cy.wait('@getEntitiesTypes');
-        cy.getByTestSubj('entityTypesFilterComboBox').click();
-        cy.getByTestSubj('entityTypesFilterhostOption').should('be.visible').click({ force: true });
+        cy.getByTestSubj('optionsList-control-entity.type').click();
+        cy.wait('@entityTypeControlGroupOptions');
+        cy.getByTestSubj('optionsList-control-selection-host').click();
         cy.wait('@getGroups');
-        cy.contains('host');
-        cy.getByTestSubj('inventoryGroup_entity.type_service').should('not.exist');
-        cy.getByTestSubj('inventoryGroup_entity.type_container').should('not.exist');
-        cy.getByTestSubj('inventoryGroup_entity.type_host').should('be.visible');
-        cy.getByTestSubj('inventoryGroupTitle_entity.type_host').click({ force: true });
+        cy.getByTestSubj('inventoryGroupTitle_entity.type_host').click();
         cy.wait('@getEntities');
         cy.contains('server1');
         cy.contains('synth-node-trace-logs').should('not.exist');
@@ -215,22 +211,19 @@ describe('Home page', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
+        cy.intercept('POST', 'internal/controls/optionsList/entities-*-latest').as(
+          'entityTypeControlGroupOptions'
+        );
         cy.intercept('GET', '/internal/inventory/entities?**').as('getEntities');
         cy.intercept('GET', '/internal/inventory/entities/types').as('getEntitiesTypes');
         cy.intercept('GET', '/internal/inventory/entities/group_by/**').as('getGroups');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
-        cy.wait('@getEntitiesTypes');
-        cy.getByTestSubj('entityTypesFilterComboBox').click();
-        cy.getByTestSubj('entityTypesFiltercontainerOption')
-          .should('be.visible')
-          .click({ force: true });
+        cy.getByTestSubj('optionsList-control-entity.type').click();
+        cy.wait('@entityTypeControlGroupOptions');
+        cy.getByTestSubj('optionsList-control-selection-container').click();
         cy.wait('@getGroups');
-        cy.contains('container');
-        cy.getByTestSubj('inventoryGroup_entity.type_host').should('not.exist');
-        cy.getByTestSubj('inventoryGroup_entity.type_service').should('not.exist');
-        cy.getByTestSubj('inventoryGroup_entity.type_container').should('be.visible');
-        cy.getByTestSubj('inventoryGroupTitle_entity.type_container').click({ force: true });
+        cy.getByTestSubj('inventoryGroupTitle_entity.type_container').click();
         cy.wait('@getEntities');
         cy.contains('server1').should('not.exist');
         cy.contains('synth-node-trace-logs').should('not.exist');

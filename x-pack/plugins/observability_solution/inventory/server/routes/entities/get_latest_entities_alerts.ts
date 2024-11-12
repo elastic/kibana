@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { AlertsClient } from '../../lib/create_alerts_client.ts/create_alerts_client';
 import { getGroupByTermsAgg } from './get_group_by_terms_agg';
@@ -20,11 +20,9 @@ type EntityTypeBucketsAggregation = Record<string, { buckets: Bucket[] }>;
 
 export async function getLatestEntitiesAlerts({
   alertsClient,
-  kuery,
   identityFieldsPerEntityType,
 }: {
   alertsClient: AlertsClient;
-  kuery?: string;
   identityFieldsPerEntityType: IdentityFieldsPerEntityType;
 }): Promise<Array<{ [key: string]: any; alertsCount?: number; entityType: string }>> {
   if (identityFieldsPerEntityType.size === 0) {
@@ -36,7 +34,7 @@ export async function getLatestEntitiesAlerts({
     track_total_hits: false,
     query: {
       bool: {
-        filter: [...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE), ...kqlQuery(kuery)],
+        filter: termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
       },
     },
   };
