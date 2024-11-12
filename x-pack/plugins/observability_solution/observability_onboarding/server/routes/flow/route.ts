@@ -300,7 +300,8 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
  *  --header "Accept: application/x-tar" \
  *  --header "Content-Type: text/tab-separated-values" \
  *  --header "kbn-xsrf: true" \
- *  --data $'system\tregistry\nproduct_service\tcustom\t/path/to/access.log\ncheckout_service\tcustom\t/path/to/access.log' \
+    --header "x-elastic-internal-origin: Kibana" \
+ *  --data $'system\tregistry\twebserver01\nproduct_service\tcustom\t/path/to/access.log\ncheckout_service\tcustom\t/path/to/access.log' \
  *  --output - | tar -tvf -
  * ```
  */
@@ -456,6 +457,16 @@ async function ensureInstalledIntegrations(
                   id: `filestream-${pkgName}`,
                   data_stream: dataStream,
                   paths: integration.logFilePaths,
+                  processors: [
+                    {
+                      add_fields: {
+                        target: 'service',
+                        fields: {
+                          name: pkgName,
+                        },
+                      },
+                    },
+                  ],
                 },
               ],
             },
