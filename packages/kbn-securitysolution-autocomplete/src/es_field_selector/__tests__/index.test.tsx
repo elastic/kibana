@@ -11,13 +11,13 @@ import React from 'react';
 import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import { FieldComponent } from '..';
+import { EsFieldSelector } from '..';
 import { fields, getField } from '../../fields/index.mock';
 
 describe('FieldComponent', () => {
   it('should render the component enabled and displays the selected field correctly', () => {
     const wrapper = render(
-      <FieldComponent
+      <EsFieldSelector
         isClearable={false}
         isDisabled={false}
         isLoading={false}
@@ -38,7 +38,7 @@ describe('FieldComponent', () => {
   });
   it('should render the component disabled if isDisabled is true', () => {
     const wrapper = render(
-      <FieldComponent
+      <EsFieldSelector
         isClearable={false}
         isDisabled={true}
         isLoading={false}
@@ -57,7 +57,7 @@ describe('FieldComponent', () => {
   });
   it('should render the loading spinner if isLoading is true when clicked', () => {
     const wrapper = render(
-      <FieldComponent
+      <EsFieldSelector
         isClearable={false}
         isDisabled={true}
         isLoading={true}
@@ -78,7 +78,7 @@ describe('FieldComponent', () => {
   });
   it('should allow user to clear values if isClearable is true', () => {
     const wrapper = render(
-      <FieldComponent
+      <EsFieldSelector
         indexPattern={{
           fields,
           id: '1234',
@@ -97,7 +97,7 @@ describe('FieldComponent', () => {
   });
   it('should change the selected value', async () => {
     const wrapper = render(
-      <FieldComponent
+      <EsFieldSelector
         isClearable={false}
         isDisabled={true}
         isLoading={false}
@@ -119,7 +119,7 @@ describe('FieldComponent', () => {
   it('it allows custom user input if "acceptsCustomOptions" is "true"', async () => {
     const mockOnChange = jest.fn();
     const wrapper = render(
-      <FieldComponent
+      <EsFieldSelector
         indexPattern={{
           fields,
           id: '1234',

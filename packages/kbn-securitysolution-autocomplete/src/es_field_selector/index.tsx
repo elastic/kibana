@@ -11,12 +11,22 @@ import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FieldProps } from './types';
-import { useField } from './use_field';
+import { FieldBaseProps } from './types';
+import { useEsField } from './use_es_field';
 
 const AS_PLAIN_TEXT = { asPlainText: true };
 
-export const FieldComponent: React.FC<FieldProps> = ({
+interface EsFieldSelectorProps extends FieldBaseProps {
+  isClearable?: boolean;
+  isDisabled?: boolean;
+  isLoading?: boolean;
+  placeholder: string;
+  acceptsCustomOptions?: boolean;
+  showMappingConflicts?: boolean;
+  'aria-label'?: string;
+}
+
+export function EsFieldSelector({
   fieldInputWidth,
   fieldTypeFilter = [],
   indexPattern,
@@ -30,18 +40,17 @@ export const FieldComponent: React.FC<FieldProps> = ({
   acceptsCustomOptions = false,
   showMappingConflicts = false,
   'aria-label': ariaLabel,
-}): JSX.Element => {
+}: EsFieldSelectorProps): JSX.Element {
   const {
     isInvalid,
     comboOptions,
     selectedComboOptions,
     fieldWidth,
-
     renderFields,
     handleTouch,
     handleValuesChange,
     handleCreateCustomOption,
-  } = useField({
+  } = useEsField({
     indexPattern,
     fieldTypeFilter,
     isRequired,
@@ -97,6 +106,4 @@ export const FieldComponent: React.FC<FieldProps> = ({
       aria-label={ariaLabel}
     />
   );
-};
-
-FieldComponent.displayName = 'Field';
+}

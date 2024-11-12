@@ -11,15 +11,6 @@ import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { FieldConflictsInfo } from '@kbn/securitysolution-list-utils';
 import { GetGenericComboBoxPropsReturn } from '../get_generic_combo_box_props';
 
-export interface FieldProps extends FieldBaseProps {
-  isClearable: boolean;
-  isDisabled: boolean;
-  isLoading: boolean;
-  placeholder: string;
-  acceptsCustomOptions?: boolean;
-  showMappingConflicts?: boolean;
-  'aria-label'?: string;
-}
 export interface FieldBaseProps {
   indexPattern: DataViewBase | undefined;
   fieldTypeFilter?: string[];
