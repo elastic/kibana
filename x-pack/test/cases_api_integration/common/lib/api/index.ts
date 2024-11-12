@@ -920,6 +920,37 @@ export const updateObservable = async ({
   return updatedCase;
 };
 
+export const deleteObservable = async ({
+  supertest,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+  headers = {},
+  caseId,
+  observableId,
+}: {
+  supertest: SuperTest.Agent;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+  headers?: Record<string, string | string[]>;
+  caseId: string;
+  observableId: string;
+}): Promise<void> => {
+  const apiCall = supertest.delete(
+    `${getSpaceUrlPrefix(auth?.space)}${INTERNAL_CASE_OBSERVABLES_PATCH_URL.replace(
+      '{case_id}',
+      caseId
+    ).replace('{observable_id}', observableId)}`
+  );
+  void setupAuth({ apiCall, headers, auth });
+
+  await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .set(headers)
+    .send()
+    .expect(expectedHttpCode);
+};
+
 export const similarCases = async ({
   supertest,
   body,

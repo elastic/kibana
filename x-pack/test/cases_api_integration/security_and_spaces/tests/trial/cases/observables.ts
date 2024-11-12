@@ -14,6 +14,8 @@ import {
   addObservable,
   similarCases,
   updateObservable,
+  deleteObservable,
+  getCase,
 } from '../../../../common/lib/api';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -179,6 +181,40 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(updatedObservable.observables[0].value).to.be('updated');
+      });
+    });
+
+    describe('delete observable', () => {
+      it('deletes an observable on a case', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        const newObservableData = {
+          isIoc: false,
+          hasBeenSighted: false,
+          value: 'test',
+          typeKey: '0ad4bf8e-575f-49ad-87ea-8bcafd5173e4',
+          description: '',
+        };
+
+        const {
+          observables: [observable],
+        } = await addObservable({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            observable: newObservableData,
+          },
+        });
+
+        await deleteObservable({
+          supertest,
+          caseId: postedCase.id,
+          observableId: observable.id as string,
+        });
+
+        const { observables } = await getCase({ supertest, caseId: postedCase.id });
+
+        expect(observables.length).to.be(0);
       });
     });
   });
