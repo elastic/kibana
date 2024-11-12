@@ -10,43 +10,46 @@ import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n-react';
 import React from 'react';
 
-const FEW_DEGRADED_DOCS_THRESHOLD = 0.0005;
+const FEW_DOCS_THRESHOLD = 0.0005;
 
 export function QualityPercentageIndicator({
   percentage,
-  degradedDocsCount,
+  docsCount,
+  tooltipContent,
 }: {
   percentage: number;
-  degradedDocsCount?: number;
+  docsCount?: number;
+  tooltipContent: (numberOfDocuments: number) => string;
 }) {
-  const isFewDegradedDocsAvailable = percentage && percentage < FEW_DEGRADED_DOCS_THRESHOLD;
+  const isFewDocsAvailable = percentage && percentage < FEW_DOCS_THRESHOLD;
 
-  return isFewDegradedDocsAvailable ? (
-    <DatasetWithFewDegradedDocs degradedDocsCount={degradedDocsCount} />
+  return isFewDocsAvailable ? (
+    <DatasetWithFewDocs docsCount={docsCount!} tooltipContent={tooltipContent} />
   ) : (
-    <DatasetWithManyDegradedDocs percentage={percentage} />
+    <DatasetWithManyDocs percentage={percentage} />
   );
 }
 
-const DatasetWithFewDegradedDocs = ({ degradedDocsCount }: { degradedDocsCount?: number }) => {
+const DatasetWithFewDocs = ({
+  docsCount,
+  tooltipContent,
+}: {
+  docsCount: number;
+  tooltipContent: (numberOfDocuments: number) => string;
+}) => {
   return (
     <EuiText size="s">
-      ~0%{' '}
-      <EuiToolTip
-        content={i18n.translate('xpack.datasetQuality.fewDegradedDocsTooltip', {
-          defaultMessage: '{degradedDocsCount} degraded docs in this data set.',
-          values: {
-            degradedDocsCount,
-          },
-        })}
-      >
+      {i18n.translate('xpack.datasetQuality.datasetWithFewDocs.TextLabel', {
+        defaultMessage: '~0%',
+      })}{' '}
+      <EuiToolTip content={tooltipContent(docsCount)}>
         <EuiIcon type="warning" color="warning" size="s" />
       </EuiToolTip>
     </EuiText>
   );
 };
 
-const DatasetWithManyDegradedDocs = ({ percentage }: { percentage: number }) => {
+const DatasetWithManyDocs = ({ percentage }: { percentage: number }) => {
   return (
     <EuiText size="s">
       <FormattedNumber value={percentage} />%

@@ -40,7 +40,7 @@ import { DatasetQualityDetailsLink } from './dataset_quality_details_link';
 import { FailedDocsPercentageLink } from './failed_docs_percentage_link';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
-  defaultMessage: 'Data Set Name',
+  defaultMessage: 'Data set name',
 });
 
 const namespaceColumnName = i18n.translate('xpack.datasetQuality.namespaceColumnName', {
@@ -56,19 +56,19 @@ const sizeColumnName = i18n.translate('xpack.datasetQuality.sizeColumnName', {
 });
 
 const degradedDocsColumnName = i18n.translate('xpack.datasetQuality.degradedDocsColumnName', {
-  defaultMessage: 'Degraded Docs (%)',
+  defaultMessage: 'Degraded docs (%)',
 });
 
 const failedDocsColumnName = i18n.translate('xpack.datasetQuality.failedDocsColumnName', {
-  defaultMessage: 'Failed Docs (%)',
+  defaultMessage: 'Failed docs (%)',
 });
 
 const datasetQualityColumnName = i18n.translate('xpack.datasetQuality.datasetQualityColumnName', {
-  defaultMessage: 'Data Set Quality',
+  defaultMessage: 'Data set quality',
 });
 
 const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivityColumnName', {
-  defaultMessage: 'Last Activity',
+  defaultMessage: 'Last activity',
 });
 
 const actionsColumnName = i18n.translate('xpack.datasetQuality.actionsColumnName', {
@@ -120,7 +120,7 @@ const degradedDocsColumnTooltip = (
 const failedDocsColumnTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.failedDocsColumnTooltip"
-    defaultMessage="The percentage of documents in the failure store for your data set."
+    defaultMessage="The percentage of docs sent to failure store due to an issue during ingestion."
   />
 );
 

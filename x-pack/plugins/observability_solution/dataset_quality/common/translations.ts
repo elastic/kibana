@@ -151,14 +151,14 @@ export const summaryPanelLast24hText = i18n.translate(
 export const summaryPanelQualityText = i18n.translate(
   'xpack.datasetQuality.summaryPanelQualityText',
   {
-    defaultMessage: 'Data Sets Quality',
+    defaultMessage: 'Data Set Quality',
   }
 );
 
 export const summaryPanelQualityTooltipText = i18n.translate(
   'xpack.datasetQuality.summaryPanelQualityTooltipText',
   {
-    defaultMessage: 'Quality is based on the percentage of degraded docs in a data set.',
+    defaultMessage: 'Quality is based on the percentage of degraded and failed docs in a data set.',
   }
 );
 
