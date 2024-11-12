@@ -17,7 +17,7 @@ import {
   ProductDocBaseStartContract,
   ProductDocBaseSetupDependencies,
   ProductDocBaseStartDependencies,
-  InternalRouteServices,
+  InternalServices,
 } from './types';
 import { productDocInstallStatusSavedObjectType } from './saved_objects';
 import { PackageInstaller } from './services/package_installer';
@@ -25,6 +25,7 @@ import { InferenceEndpointManager } from './services/inference_endpoint';
 import { ProductDocInstallClient } from './services/doc_install_status';
 import { SearchService } from './services/search';
 import { registerRoutes } from './routes';
+import { registerTaskDefinitions, scheduleEnsureUpToDateTask } from './tasks';
 
 export class ProductDocBasePlugin
   implements
@@ -36,26 +37,33 @@ export class ProductDocBasePlugin
     >
 {
   private logger: Logger;
-  private routeServices?: InternalRouteServices;
+  private internalServices?: InternalServices;
 
   constructor(private readonly context: PluginInitializerContext<ProductDocBaseConfig>) {
     this.logger = context.logger.get();
   }
   setup(
     coreSetup: CoreSetup<ProductDocBaseStartDependencies, ProductDocBaseStartContract>,
-    pluginsSetup: ProductDocBaseSetupDependencies
+    { taskManager }: ProductDocBaseSetupDependencies
   ): ProductDocBaseSetupContract {
+    const getServices = () => {
+      if (!this.internalServices) {
+        throw new Error('getServices called before #start');
+      }
+      return this.internalServices;
+    };
+
     coreSetup.savedObjects.registerType(productDocInstallStatusSavedObjectType);
+
+    registerTaskDefinitions({
+      taskManager,
+      getServices,
+    });
 
     const router = coreSetup.http.createRouter();
     registerRoutes({
       router,
-      getServices: () => {
-        if (!this.routeServices) {
-          throw new Error('getServices called before #start');
-        }
-        return this.routeServices;
-      },
+      getServices,
     });
 
     return {};
@@ -63,13 +71,12 @@ export class ProductDocBasePlugin
 
   start(
     core: CoreStart,
-    { licensing }: ProductDocBaseStartDependencies
+    { licensing, taskManager }: ProductDocBaseStartDependencies
   ): ProductDocBaseStartContract {
     const soClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([productDocInstallStatusSavedObjectTypeName])
     );
     const productDocClient = new ProductDocInstallClient({ soClient });
-    const installClient = productDocClient;
 
     const endpointManager = new InferenceEndpointManager({
       esClient: core.elasticsearch.client.asInternalUser,
@@ -91,16 +98,18 @@ export class ProductDocBasePlugin
       logger: this.logger.get('search-service'),
     });
 
-    // should we use taskManager for this?
-    packageInstaller.ensureUpToDate({}).catch((err) => {
-      this.logger.error(`Error checking if product documentation is up to date: ${err.message}`);
-    });
-
-    this.routeServices = {
+    this.internalServices = {
+      logger: this.logger,
       packageInstaller,
-      installClient,
+      installClient: productDocClient,
       licensing,
+      taskManager,
     };
+
+    const tasksLogger = this.logger.get('tasks');
+    scheduleEnsureUpToDateTask({ taskManager, logger: tasksLogger }).catch((err) => {
+      tasksLogger.error(`Error checking if product documentation is up to date: ${err.message}`);
+    });
 
     return {
       isInstalled: async () => {

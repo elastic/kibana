@@ -7,7 +7,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "productDocBase"],
-    "requiredPlugins": ["licensing"],
+    "requiredPlugins": ["licensing", "taskManager"],
     "requiredBundles": [],
     "optionalPlugins": [],
     "extraPublicDirs": []

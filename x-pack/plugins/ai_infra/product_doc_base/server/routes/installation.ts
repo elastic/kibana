@@ -15,15 +15,16 @@ import {
   UninstallResponse,
 } from '../../common/http_api/installation';
 import { InstallationStatus } from '../../common/install_status';
-import type { InternalRouteServices } from '../types';
+import type { InternalServices } from '../types';
 import { checkLicense } from '../services/package_installer';
+import { scheduleInstallAllTask, scheduleUninstallAllTask, waitUntilTaskCompleted } from '../tasks';
 
 export const registerInstallationRoutes = ({
   router,
   getServices,
 }: {
   router: IRouter;
-  getServices: () => InternalRouteServices;
+  getServices: () => InternalServices;
 }) => {
   router.get(
     {
@@ -67,7 +68,7 @@ export const registerInstallationRoutes = ({
       },
     },
     async (ctx, req, res) => {
-      const { packageInstaller, licensing } = getServices();
+      const { licensing, taskManager, logger } = getServices();
 
       const license = await licensing.getLicense();
       if (!checkLicense(license)) {
@@ -76,7 +77,8 @@ export const registerInstallationRoutes = ({
         });
       }
 
-      await packageInstaller.installAll({});
+      const taskId = await scheduleInstallAllTask({ taskManager, logger });
+      await waitUntilTaskCompleted({ taskId, taskManager, timeout: 10 * 60 });
 
       return res.ok<PerformInstallResponse>({
         body: {
@@ -100,9 +102,10 @@ export const registerInstallationRoutes = ({
       },
     },
     async (ctx, req, res) => {
-      const { packageInstaller } = getServices();
+      const { taskManager, logger } = getServices();
 
-      await packageInstaller.uninstallAll();
+      const taskId = await scheduleUninstallAllTask({ taskManager, logger });
+      await waitUntilTaskCompleted({ taskId, taskManager, timeout: 10 * 60 * 1000 });
 
       return res.ok<UninstallResponse>({
         body: {
