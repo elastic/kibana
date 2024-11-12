@@ -54,6 +54,7 @@ export const DashboardViewport = () => {
     viewMode,
     useMargins,
     uuid,
+    fullScreenMode,
   ] = useBatchedPublishingSubjects(
     dashboardApi.controlGroupApi$,
     dashboardApi.panelTitle,
@@ -63,7 +64,8 @@ export const DashboardViewport = () => {
     dashboardApi.panels$,
     dashboardApi.viewMode,
     dashboardApi.useMargins$,
-    dashboardApi.uuid$
+    dashboardApi.uuid$,
+    dashboardApi.fullScreenMode$
   );
   const onExit = useCallback(() => {
     dashboardApi.setFullScreenMode(false);
