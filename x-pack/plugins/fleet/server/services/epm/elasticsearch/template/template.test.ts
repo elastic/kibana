@@ -15,7 +15,6 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { errors } from '@elastic/elasticsearch';
 
 import {
-  FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
   FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
   STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
 } from '../../../../constants/fleet_es_assets';
@@ -139,14 +138,14 @@ describe('EPM template', () => {
       ...composedOfTemplates,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
-      FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
     ]);
   });
 
-  it('does not create fleet event ingested component template if event ingested flag is disabled', () => {
+  it('creates fleet event ingested component template if event ingested flag is enabled', () => {
     appContextService.start(
       createAppContextStartContractMock({
-        eventIngestedEnabled: false,
+        agentIdVerificationEnabled: false,
+        eventIngestedEnabled: true,
       })
     );
     const composedOfTemplates = ['component1', 'component2'];
@@ -166,7 +165,7 @@ describe('EPM template', () => {
       ...composedOfTemplates,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
-      FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+      FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
     ]);
   });
 
