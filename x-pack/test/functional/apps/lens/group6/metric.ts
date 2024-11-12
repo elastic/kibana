@@ -76,7 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should render a metric', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.switchToVisualization('lnsMetric', 'Metric');
 
@@ -349,7 +348,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('does carry custom formatting when transitioning from other visualization', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.switchToVisualization('lnsLegacyMetric');
       // await lens.clickLegacyMetric();
