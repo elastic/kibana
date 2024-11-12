@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { TelemetryEvent } from '../../types';
-import { TelemetryEventTypes } from '../../constants';
+import type { ManualRuleRunTelemetryEvent } from './types';
+import { ManualRuleRunEventTypes } from './types';
 
-export const manualRuleRunOpenModalEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.ManualRuleRunOpenModal,
+export const manualRuleRunOpenModalEvent: ManualRuleRunTelemetryEvent = {
+  eventType: ManualRuleRunEventTypes.ManualRuleRunOpenModal,
   schema: {
     type: {
       type: 'keyword',
@@ -21,8 +21,8 @@ export const manualRuleRunOpenModalEvent: TelemetryEvent = {
   },
 };
 
-export const manualRuleRunExecuteEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.ManualRuleRunExecute,
+export const manualRuleRunExecuteEvent: ManualRuleRunTelemetryEvent = {
+  eventType: ManualRuleRunEventTypes.ManualRuleRunExecute,
   schema: {
     rangeInMs: {
       type: 'integer',
@@ -50,8 +50,8 @@ export const manualRuleRunExecuteEvent: TelemetryEvent = {
   },
 };
 
-export const manualRuleRunCancelJobEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.ManualRuleRunCancelJob,
+export const manualRuleRunCancelJobEvent: ManualRuleRunTelemetryEvent = {
+  eventType: ManualRuleRunEventTypes.ManualRuleRunCancelJob,
   schema: {
     totalTasks: {
       type: 'integer',
@@ -77,3 +77,9 @@ export const manualRuleRunCancelJobEvent: TelemetryEvent = {
     },
   },
 };
+
+export const manualRuleRunTelemetryEvents = [
+  manualRuleRunCancelJobEvent,
+  manualRuleRunExecuteEvent,
+  manualRuleRunOpenModalEvent,
+];
