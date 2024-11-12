@@ -169,7 +169,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.clickNextButton();
       // todo more here
 
-      await testSubjects.click('closeDetailsButton');
+      await testSubjects.click('closeDetailsButtonz');
     });
 
     describe('Mappings step', () => {
