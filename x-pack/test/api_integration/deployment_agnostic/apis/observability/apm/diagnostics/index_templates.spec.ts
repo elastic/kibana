@@ -12,7 +12,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
-  const es = getService('es');
   const synthtrace = getService('synthtrace');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
