@@ -317,11 +317,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async cleanAnomalyDetection() {
+      await this.deleteAllAnomalyDetectionJobs();
       await this.deleteAllCalendars();
       await this.deleteAllFilters();
-      await this.deleteAllAnomalyDetectionJobs();
-      await this.deleteExpiredAnomalyDetectionData();
       await this.deleteAllAnnotations();
+      await this.deleteExpiredAnomalyDetectionData();
       await this.syncSavedObjects();
     },
 
@@ -1207,7 +1207,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteFilter(filterId: string) {
       log.debug(`Deleting filter with id '${filterId}'...`);
-      await esSupertest.delete(`/_ml/filters/${filterId}`);
+      const { body, status } = await esSupertest.delete(`/_ml/filters/${filterId}`);
+      this.assertResponseStatusCode(200, status, body);
 
       await this.waitForFilterToNotExist(filterId, `expected filter '${filterId}' to be deleted`);
       log.debug('> Filter deleted.');
