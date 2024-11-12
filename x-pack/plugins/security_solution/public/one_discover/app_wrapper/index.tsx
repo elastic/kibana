@@ -46,6 +46,13 @@ export const createSecuritySolutionDiscoverAppWrapperGetter = ({
 
       const userCasesPermissions = useMemo(() => plugins.cases.helpers.canUseCases([APP_ID]), []);
 
+      /**
+       *
+       * Since this component is meant to be used only in the context of Discover,
+       * these services are appended/overwritten to the existing services object
+       * provided by the Discover plugin.
+       *
+       */
       const securitySolutionServices = useMemo(
         () => ({
           cases: plugins.cases,
@@ -54,19 +61,6 @@ export const createSecuritySolutionDiscoverAppWrapperGetter = ({
         }),
         []
       );
-
-      /**
-       *
-       * Uses mainly discover services and adds security solution services
-       * only when it is needed.
-       *
-       */
-      const newServicesForSecurityInDiscover = useMemo(() => {
-        return {
-          ...discoverServices,
-          ...securitySolutionServices,
-        };
-      }, [discoverServices, securitySolutionServices]);
 
       const statefulEventContextValue = useMemo(
         () => ({
@@ -81,7 +75,7 @@ export const createSecuritySolutionDiscoverAppWrapperGetter = ({
       );
 
       return (
-        <KibanaContextProvider services={newServicesForSecurityInDiscover}>
+        <KibanaContextProvider services={securitySolutionServices}>
           <EuiThemeProvider>
             <MlCapabilitiesProvider>
               <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
