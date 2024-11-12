@@ -76,7 +76,7 @@ const getAllJourneys = (dir: string) => {
   return journeys;
 };
 
-const getJourneysToRun = ({ journeyPath, group }: { journeyPath?: string; group?: string }) => {
+const getJourneysToRun = ({ journeyPath, group }: { journeyPath?: string; group?: 'maps' }) => {
   if (group && typeof group === 'string') {
     if (!(group in journeyTargetGroups)) {
       throw createFlagError(`Group '${group}' is not defined, try again`);
