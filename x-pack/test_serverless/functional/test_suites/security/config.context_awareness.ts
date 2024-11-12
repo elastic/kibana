@@ -9,12 +9,16 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'security',
-  testFiles: [require.resolve('../common/discover/context_awareness')],
+  testFiles: [
+    require.resolve('./ftr/one_discover/context_awareness'),
+    require.resolve('../common/discover/context_awareness'),
+  ],
   junit: {
     reportName: 'Serverless Security Discover Context Awareness Functional Tests',
   },
   kbnServerArgs: [
     `--discover.experimental.enabledProfiles=${JSON.stringify([
+      'security-root-profile',
       'example-root-profile',
       'example-solution-view-root-profile',
       'example-data-source-profile',
