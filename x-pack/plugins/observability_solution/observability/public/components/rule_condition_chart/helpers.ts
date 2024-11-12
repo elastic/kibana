@@ -22,7 +22,7 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
 
   if (aggType === Aggregators.RATE) {
     return {
-      operation,
+      operation: 'counter_rate',
       operationWithField: `counter_rate(max(${field}), kql='${aggFilter}')`,
       sourceField: field || '',
     };

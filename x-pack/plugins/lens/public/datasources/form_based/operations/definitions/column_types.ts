@@ -41,6 +41,9 @@ export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
 
 export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
   sourceField: string;
+  params?: {
+    percentile?: number;
+  };
 }
 
 export interface ReferenceBasedIndexPatternColumn extends FormattedIndexPatternColumn {

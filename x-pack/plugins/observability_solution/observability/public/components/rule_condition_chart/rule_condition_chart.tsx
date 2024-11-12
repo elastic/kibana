@@ -356,23 +356,37 @@ export function RuleConditionChart({
       seriesType: seriesType ? seriesType : 'bar',
     };
 
-    const firstMetric = metrics.length > 0 ? metrics[0] : undefined;
+    const firstMetricAggMap = aggMap && metrics.length > 0 ? aggMap[metrics[0].name] : undefined;
+    const firstMetricAggType = metrics.length > 0 ? metrics[0].aggType : undefined;
 
-    const orderParams: TopValuesOrderParams =
-      aggMap && firstMetric
-        ? {
-            orderDirection: 'desc',
-            orderBy: { type: 'custom' },
-            orderAgg: {
-              label: aggMap[firstMetric.name].operationWithField,
-              dataType: 'number',
-              operationType: aggMap[firstMetric.name].operation,
-              sourceField: aggMap[firstMetric.name].sourceField,
-              isBucketed: false,
-              scale: 'ratio',
-            },
-          }
-        : undefined;
+    const orderParams: TopValuesOrderParams = firstMetricAggMap
+      ? {
+          orderDirection: 'desc',
+          orderBy: { type: 'custom' },
+          orderAgg: {
+            label: firstMetricAggMap.operationWithField,
+            dataType: 'number',
+            operationType:
+              firstMetricAggMap.operation === 'counter_rate' ||
+              firstMetricAggMap.operation === 'last_value'
+                ? 'max'
+                : firstMetricAggMap.operation,
+            sourceField: firstMetricAggMap.sourceField,
+            isBucketed: false,
+            scale: 'ratio',
+            params:
+              firstMetricAggType === 'p99'
+                ? {
+                    percentile: 99,
+                  }
+                : firstMetricAggType === 'p95'
+                ? {
+                    percentile: 95,
+                  }
+                : undefined,
+          },
+        }
+      : undefined;
 
     if (groupBy && groupBy?.length) {
       xYDataLayerOptions.breakdown = {
