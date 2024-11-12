@@ -9,6 +9,10 @@ import pLimit from 'p-limit';
 import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import {
+  MlDeploymentAllocationState,
+  MlDeploymentState,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { InferenceEndpointResponse } from '../../service/create_inference_endpoint';
 import { Instruction, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
@@ -21,9 +25,16 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   handler: async ({
     service,
     request,
-  }): Promise<
-    { ready: boolean; enabled: boolean } & Partial<InferenceEndpointResponse['endpoints'][0]>
-  > => {
+  }): Promise<{
+    errorMessage?: string;
+    ready: boolean;
+    enabled: boolean;
+    endpoint?: Partial<InferenceEndpointResponse['endpoints'][0]>;
+    model_stats?: {
+      deployment_state: MlDeploymentState | undefined;
+      allocation_state: MlDeploymentAllocationState | undefined;
+    };
+  }> => {
     const client = await service.getClient({ request });
 
     if (!client) {
@@ -36,6 +47,11 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
 
 const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+  params: t.partial({
+    query: t.partial({
+      model_id: t.string,
+    }),
+  }),
   options: {
     tags: ['access:ai_assistant'],
     timeout: {
@@ -49,7 +65,9 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    return await client.setupKnowledgeBase();
+    const { model_id: modelId } = resources.params?.query ?? {};
+
+    return await client.setupKnowledgeBase(modelId);
   },
 });
 

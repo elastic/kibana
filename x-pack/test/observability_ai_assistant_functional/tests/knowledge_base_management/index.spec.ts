@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import {
+  TINY_ELSER,
   clearKnowledgeBase,
   createKnowledgeBaseModel,
   deleteKnowledgeBaseModel,
@@ -56,7 +57,14 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       await Promise.all([
         // setup the knowledge base
         observabilityAIAssistantAPIClient
-          .editor({ endpoint: 'POST /internal/observability_ai_assistant/kb/setup' })
+          .editor({
+            endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+            params: {
+              query: {
+                model_id: TINY_ELSER.id,
+              },
+            },
+          })
           .expect(200),
 
         // login as editor

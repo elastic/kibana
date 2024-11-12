@@ -725,9 +725,9 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.getStatus();
   };
 
-  setupKnowledgeBase = () => {
+  setupKnowledgeBase = (modelId: string | undefined) => {
     const { esClient } = this.dependencies;
-    return this.dependencies.knowledgeBaseService.setup(esClient);
+    return this.dependencies.knowledgeBaseService.setup(esClient, modelId);
   };
 
   resetKnowledgeBase = () => {

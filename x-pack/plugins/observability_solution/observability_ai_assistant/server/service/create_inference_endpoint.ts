@@ -14,11 +14,13 @@ export const AI_ASSISTANT_KB_INFERENCE_ID = 'ai_assistant_kb_inference';
 export async function createInferenceEndpoint({
   esClient,
   logger,
+  modelId = '.elser_model_2',
 }: {
   esClient: {
     asCurrentUser: ElasticsearchClient;
   };
   logger: Logger;
+  modelId: string | undefined;
 }) {
   try {
     logger.debug(`Creating inference endpoint "${AI_ASSISTANT_KB_INFERENCE_ID}"`);
@@ -26,8 +28,9 @@ export async function createInferenceEndpoint({
       method: 'PUT',
       path: `_inference/sparse_embedding/${AI_ASSISTANT_KB_INFERENCE_ID}`,
       body: {
-        service: 'elser',
+        service: 'elasticsearch',
         service_settings: {
+          model_id: modelId,
           num_allocations: 1,
           num_threads: 1,
         },
@@ -70,7 +73,6 @@ export async function deleteInferenceEndpoint({
 
 export interface InferenceEndpointResponse {
   endpoints: Array<{
-    model_id: string;
     task_type: string;
     service: string;
     service_settings: {
@@ -101,25 +103,6 @@ export async function getInferenceEndpoint({
   } catch (e) {
     logger.error(`Failed to fetch inference endpoint: ${e.message}`);
     throw e;
-  }
-}
-
-export async function getInferenceEndpointStatus({
-  esClient,
-  logger,
-}: {
-  esClient: { asInternalUser: ElasticsearchClient };
-  logger: Logger;
-}) {
-  try {
-    const endpoint = await getInferenceEndpoint({ esClient, logger });
-    const ready = endpoint !== undefined;
-    return { ...endpoint, ready };
-  } catch (error) {
-    if (isInferenceEndpointMissingOrUnavailable(error)) {
-      return { ready: false };
-    }
-    throw error;
   }
 }
 

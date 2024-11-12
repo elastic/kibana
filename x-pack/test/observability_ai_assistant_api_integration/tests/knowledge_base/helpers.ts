@@ -6,6 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/create_inference_endpoint';
 import { MachineLearningProvider } from '../../../api_integration/services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '../../../functional/services/ml/api';
 
@@ -55,22 +56,13 @@ export async function clearConversations(es: Client) {
   });
 }
 
-export async function createInferenceEndpoint({ es, name }: { es: Client; name: string }) {
-  return es.transport.request({
-    method: 'PUT',
-    path: `_inference/sparse_embedding/${name}`,
-    body: {
-      service: 'elasticsearch',
-      service_settings: {
-        num_allocations: 1,
-        num_threads: 1,
-        model_id: 'pt_tiny_elser',
-      },
-    },
-  });
-}
-
-export async function deleteInferenceEndpoint({ es, name }: { es: Client; name: string }) {
+export async function deleteInferenceEndpoint({
+  es,
+  name = AI_ASSISTANT_KB_INFERENCE_ID,
+}: {
+  es: Client;
+  name?: string;
+}) {
   return es.transport.request({
     method: 'DELETE',
     path: `_inference/sparse_embedding/${name}`,

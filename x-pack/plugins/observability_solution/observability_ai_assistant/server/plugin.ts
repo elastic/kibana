@@ -116,6 +116,7 @@ export class ObservabilityAIAssistantPlugin
 
     // Using once to make sure the same model ID is used during service init and Knowledge base setup
     const getSearchConnectorModelId = once(async () => {
+      // TODO: Remove this once the modelId is removed from the config
       const configModelId = this.config.modelId;
       if (configModelId) {
         return configModelId;

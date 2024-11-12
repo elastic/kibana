@@ -22,7 +22,7 @@ import { getCategoryQuery } from '../util/get_category_query';
 import {
   createInferenceEndpoint,
   deleteInferenceEndpoint,
-  getInferenceEndpointStatus,
+  getInferenceEndpoint,
   isInferenceEndpointMissingOrUnavailable,
 } from '../create_inference_endpoint';
 import { recallFromConnectors } from './recall_from_connectors';
@@ -51,11 +51,14 @@ function throwKnowledgeBaseNotReady(body: any) {
 export class KnowledgeBaseService {
   constructor(private readonly dependencies: Dependencies) {}
 
-  async setup(esClient: {
-    asCurrentUser: ElasticsearchClient;
-    asInternalUser: ElasticsearchClient;
-  }) {
-    return createInferenceEndpoint({ esClient, logger: this.dependencies.logger });
+  async setup(
+    esClient: {
+      asCurrentUser: ElasticsearchClient;
+      asInternalUser: ElasticsearchClient;
+    },
+    modelId: string | undefined
+  ) {
+    return createInferenceEndpoint({ esClient, logger: this.dependencies.logger, modelId });
   }
 
   async reset(esClient: { asCurrentUser: ElasticsearchClient }) {
@@ -80,33 +83,31 @@ export class KnowledgeBaseService {
     namespace: string;
     user?: { name: string };
   }): Promise<RecalledEntry[]> {
-    const esQuery = {
-      bool: {
-        should: queries.map(({ text, boost = 1 }) => ({
-          semantic: {
-            field: 'semantic_text',
-            query: text,
-            boost,
-          },
-        })),
-        filter: [
-          ...getAccessQuery({
-            user,
-            namespace,
-          }),
-          ...getCategoryQuery({ categories }),
-
-          // exclude user instructions
-          { bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } } },
-        ],
-      },
-    };
-
     const response = await this.dependencies.esClient.asInternalUser.search<
       Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'title'> & { doc_id?: string }
     >({
       index: [resourceNames.aliases.kb],
-      query: esQuery,
+      query: {
+        bool: {
+          should: queries.map(({ text, boost = 1 }) => ({
+            semantic: {
+              field: 'semantic_text',
+              query: text,
+              boost,
+            },
+          })),
+          filter: [
+            ...getAccessQuery({
+              user,
+              namespace,
+            }),
+            ...getCategoryQuery({ categories }),
+
+            // exclude user instructions
+            { bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } } },
+          ],
+        },
+      },
       size: 20,
       _source: {
         includes: ['text', 'is_correction', 'labels', 'doc_id', 'title'],
@@ -433,14 +434,52 @@ export class KnowledgeBaseService {
   };
 
   getStatus = async () => {
-    const status = await getInferenceEndpointStatus({
+    let errorMessage = '';
+    const endpoint = await getInferenceEndpoint({
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
+    }).catch((error) => {
+      if (!isInferenceEndpointMissingOrUnavailable(error)) {
+        throw error;
+      }
+      this.dependencies.logger.error(`Failed to get inference endpoint: ${error.message}`);
+      errorMessage = error.message;
     });
 
+    const enabled = this.dependencies.enabled;
+    if (!endpoint) {
+      return { ready: false, enabled, errorMessage };
+    }
+
+    const modelId = endpoint.service_settings?.model_id;
+    const modelStats = await this.dependencies.esClient.asInternalUser.ml
+      .getTrainedModelsStats({ model_id: modelId })
+      .catch((error) => {
+        this.dependencies.logger.error(`Failed to get model stats: ${error.message}`);
+        errorMessage = error.message;
+      });
+
+    if (!modelStats) {
+      return { ready: false, enabled, errorMessage };
+    }
+
+    const elserModelStats = modelStats.trained_model_stats[0];
+    const deploymentState = elserModelStats.deployment_stats?.state;
+    const allocationState = elserModelStats.deployment_stats?.allocation_status.state;
+    const ready = deploymentState === 'started' && allocationState === 'fully_allocated';
+
+    this.dependencies.logger.debug(
+      `Model deployment state: ${deploymentState}, allocation state: ${allocationState}, ready: ${ready}`
+    );
+
     return {
-      ...status,
-      enabled: this.dependencies.enabled,
+      endpoint,
+      ready,
+      enabled,
+      model_stats: {
+        deployment_state: deploymentState,
+        allocation_state: allocationState,
+      },
     };
   };
 }
