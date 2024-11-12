@@ -38,8 +38,7 @@ export function runEslintWithTypes() {
           : undefined;
 
       const projects = TS_PROJECTS.filter((project) => {
-        // @kbn/dependency-usage is marked as module, configuration is not supported for it yet
-        if (project.isTypeCheckDisabled() || project.name === '@kbn/dependency-usage') {
+        if (project.isTypeCheckDisabled()) {
           log.verbose(`[${project.name}] skipping project with type checking disabled`);
           return false;
         }
@@ -66,7 +65,10 @@ export function runEslintWithTypes() {
       const failures = await Rx.lastValueFrom(
         Rx.from(projects).pipe(
           mergeMap(async (project) => {
-            const configFilePath = Path.resolve(project.directory, 'types.eslint.config.js');
+            const configFilePath = Path.resolve(
+              project.directory,
+              `types.eslint.config.${project.isEsm ? 'cjs' : 'js'}`
+            );
 
             Fs.writeFileSync(
               configFilePath,
