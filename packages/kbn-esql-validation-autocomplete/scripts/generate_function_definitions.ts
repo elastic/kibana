@@ -13,7 +13,7 @@ import { join } from 'path';
 import _ from 'lodash';
 import type { RecursivePartial } from '@kbn/utility-types';
 import { FunctionDefinition } from '../src/definitions/types';
-
+import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/shared/constants';
 const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],
   to_unsigned_long: ['to_ul', 'to_ulong'],
@@ -255,7 +255,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
       : aggregationSupportedCommandsAndOptions;
 
   // MATCH and QSRT has limited supported for where commands only
-  if (['match', 'qstr'].includes(ESFunctionDefinition.name)) {
+  if (FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)) {
     supportedCommandsAndOptions = {
       supportedCommands: ['where'],
       supportedOptions: [],
@@ -275,8 +275,9 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
           ...param,
           type: convertDateTime(param.type),
           description: undefined,
-          ...(idx === 0 && ['match', 'qstr'].includes(ESFunctionDefinition.name)
-            ? { fieldsOnly: true }
+          ...(idx === 0 && FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)
+            ? // Default to false. If set to true, this parameter does not accept a function or literal, only fields.
+              { fieldsOnly: true }
             : {}),
         })),
         returnType: convertDateTime(signature.returnType),

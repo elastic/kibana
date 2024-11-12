@@ -15,6 +15,7 @@ import type { CodeActionOptions } from './types';
 import type { ESQLRealField } from '../validation/types';
 import type { FieldType } from '../definitions/types';
 import type { ESQLCallbacks, PartialFieldsMetadataClient } from '../shared/types';
+import { FULL_TEXT_SEARCH_FUNCTIONS } from '../shared/constants';
 
 function getCallbackMocks(): jest.Mocked<ESQLCallbacks> {
   return {
@@ -285,8 +286,16 @@ describe('quick fixes logic', () => {
       { relaxOnMissingCallbacks: false },
     ]) {
       for (const fn of getAllFunctions({ type: 'eval' })) {
-        if (['match', 'qstr'].includes(fn.name)) continue;
-
+        if (FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.name)) {
+          testQuickFixes(
+            `FROM index | WHERE ${BROKEN_PREFIX}${fn.name}()`,
+            [fn.name].map(toFunctionSignature),
+            { equalityCheck: 'include', ...options }
+          );
+        }
+      }
+      for (const fn of getAllFunctions({ type: 'eval' })) {
+        if (FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.name)) continue;
         // add an A to the function name to make it invalid
         testQuickFixes(
           `FROM index | EVAL ${BROKEN_PREFIX}${fn.name}()`,
@@ -315,7 +324,7 @@ describe('quick fixes logic', () => {
         );
       }
       for (const fn of getAllFunctions({ type: 'agg' })) {
-        if (['match', 'qstr', '?'].includes(fn.name)) continue;
+        if (FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.name)) continue;
 
         // add an A to the function name to make it invalid
         testQuickFixes(

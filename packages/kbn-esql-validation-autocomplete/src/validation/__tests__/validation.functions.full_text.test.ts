@@ -26,12 +26,10 @@ describe('validation', () => {
         '[MATCH] function cannot be used after LIMIT',
       ]);
 
-      for (const command of ['EVAL']) {
-        await expectErrors(`FROM index | ${command} MATCH(keywordField, "value")`, [
-          `${command} does not support function match`,
-          '[MATCH] function is only supported in WHERE commands',
-        ]);
-      }
+      await expectErrors(`FROM index | EVAL MATCH(a, "value")`, [
+        'EVAL does not support function match',
+        '[MATCH] function is only supported in WHERE commands',
+      ]);
     });
 
     it('shows errors if argument is not an index field ', async () => {
@@ -51,23 +49,30 @@ describe('validation', () => {
       await expectErrors('FROM index | WHERE QSTR("keywordField:value") | LIMIT 10 ', []);
     });
 
-    it('shows errors if after incompatible commands ', async () => {
+    it('shows errors if comes after incompatible functions or commands ', async () => {
       const { expectErrors } = await setup();
-      await expectErrors('FROM index | LIMIT 10 | WHERE QSTR("keywordField:value")', [
-        '[QSTR] function cannot be used after LIMIT',
+      await expectErrors('ROW a = 1, b = "two", c = null | WHERE QSTR("keywordField:value")', [
+        '[QSTR] function cannot be used after ROW',
       ]);
-
-      await expectErrors(
-        'FROM index | EVAL a=CONCAT(keywordField, "_") | WHERE QSTR("keywordField:value")',
-        ['[QSTR] function cannot be used after EVAL']
-      );
-
-      for (const command of ['EVAL']) {
-        await expectErrors(`FROM index | ${command} QSTR("keywordField:value")`, [
-          `${command} does not support function qstr`,
-          '[QSTR] function cannot be used after EVAL',
+      for (const clause of [
+        { command: 'LIMIT', clause: 'LIMIT 10' },
+        { command: 'EVAL', clause: 'EVAL a=CONCAT(keywordField, "_")' },
+        { command: 'KEEP', clause: 'KEEP keywordField' },
+        { command: 'RENAME', clause: 'RENAME keywordField as a' },
+        { command: 'STATS', clause: 'STATS avg(doubleField) by keywordField' },
+      ]) {
+        await expectErrors(`FROM index | ${clause.clause} | WHERE QSTR("keywordField:value")`, [
+          `[QSTR] function cannot be used after ${clause.command}`,
         ]);
       }
+      await expectErrors(`FROM index | EVAL QSTR("keywordField:value")`, [
+        `EVAL does not support function qstr`,
+        '[QSTR] function cannot be used after EVAL',
+      ]);
+
+      await expectErrors(`FROM index | STATS avg(doubleField) by QSTR("keywordField:value")`, [
+        `STATS BY does not support function qstr`,
+      ]);
     });
   });
 });

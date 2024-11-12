@@ -1173,7 +1173,7 @@ async function getFunctionArgsSuggestions(
     );
 
     // Functions
-    if (typesToSuggestNext.every((d) => d.fieldsOnly !== true)) {
+    if (typesToSuggestNext.every((d) => !d.fieldsOnly)) {
       suggestions.push(
         ...getFunctionSuggestions({
           command: command.name,
