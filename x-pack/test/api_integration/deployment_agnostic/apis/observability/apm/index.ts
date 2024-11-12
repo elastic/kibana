@@ -13,7 +13,11 @@ export default function apmApiIntegrationTests({
   describe('APM', function () {
     loadTestFile(require.resolve('./agent_explorer'));
     loadTestFile(require.resolve('./errors'));
+    loadTestFile(require.resolve('./mobile'));
     loadTestFile(require.resolve('./custom_dashboards'));
     loadTestFile(require.resolve('./dependencies'));
+    loadTestFile(require.resolve('./correlations'));
+    loadTestFile(require.resolve('./entities'));
+    loadTestFile(require.resolve('./cold_start'));
   });
 }
