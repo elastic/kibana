@@ -264,7 +264,7 @@ export default function ({ getService }: FtrProviderContext) {
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query({ pattern: 'basic_index', allow_no_index: false })
+        .query({ pattern: 'basic_index' })
         .expect((response) => {
           if (response.statusCode !== 404) {
             log.debug(response.body);
