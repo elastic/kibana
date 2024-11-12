@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { testUsers } from '../test_users';
 
 const TEST_INDEX = 'logs-log.log-test';
 
@@ -20,7 +21,7 @@ const FLEET_EVENT_INGESTED_PIPELINE_VERSION = 1;
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const fleetAndAgents = getService('fleetAndAgents');
@@ -31,16 +32,18 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await fleetAndAgents.setup();
       // Use the custom log package to test the fleet final pipeline
-      await supertest
+      await supertestWithoutAuth
         .post(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
+        .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
 
     after(async () => {
-      await supertest
+      await supertestWithoutAuth
         .delete(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
+        .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
@@ -72,7 +75,10 @@ export default function (providerContext: FtrProviderContext) {
           ],
         },
       });
-      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx');
+      await supertestWithoutAuth
+        .post(`/api/fleet/setup`)
+        .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
+        .set('kbn-xsrf', 'xxxx');
       const pipelineRes = await es.ingest.getPipeline({ id: FLEET_EVENT_INGESTED_PIPELINE_ID });
       expect(pipelineRes).to.have.property(FLEET_EVENT_INGESTED_PIPELINE_ID);
       expect(pipelineRes[FLEET_EVENT_INGESTED_PIPELINE_ID].version).to.be(1);
