@@ -41,6 +41,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { useKbnPalettes } from '@kbn/palettes';
 import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
@@ -116,6 +117,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
+  const palettes = useKbnPalettes();
 
   const {
     table: visData,
@@ -311,6 +313,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         { ...props.uiState?.get('vis.colors', {}), ...props.visParams.labels.colorOverrides },
         visData.rows,
         props.palettesRegistry,
+        palettes,
         formatters,
         services.fieldFormats,
         syncColors,
@@ -324,6 +327,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       props.uiState,
       props.visParams.labels.colorOverrides,
       props.palettesRegistry,
+      palettes,
       formatters,
       services.fieldFormats,
       syncColors,
