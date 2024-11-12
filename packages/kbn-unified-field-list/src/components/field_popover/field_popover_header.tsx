@@ -99,21 +99,6 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
             <h5 className="eui-textBreakWord">{field.displayName}</h5>
           </EuiTitle>
         </EuiFlexItem>
-        {onAddBreakdownField && (
-          <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_addBreakdownField">
-            <EuiToolTip content={addBreakdownFieldTooltip}>
-              <EuiButtonIcon
-                data-test-subj={`fieldPopoverHeader_addBreakdownField-${field.name}`}
-                aria-label={addBreakdownFieldTooltip}
-                iconType="visBarVerticalStacked"
-                onClick={() => {
-                  closePopover();
-                  onAddBreakdownField(field);
-                }}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
         {onAddFieldToWorkspace && (
           <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_addField">
             <EuiToolTip
@@ -127,6 +112,21 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
                 onClick={() => {
                   closePopover();
                   onAddFieldToWorkspace(field);
+                }}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+        {onAddBreakdownField && (
+          <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_addBreakdownField">
+            <EuiToolTip content={addBreakdownFieldTooltip}>
+              <EuiButtonIcon
+                data-test-subj={`fieldPopoverHeader_addBreakdownField-${field.name}`}
+                aria-label={addBreakdownFieldTooltip}
+                iconType="visBarVerticalStacked"
+                onClick={() => {
+                  closePopover();
+                  onAddBreakdownField(field);
                 }}
               />
             </EuiToolTip>
