@@ -5,13 +5,13 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { generateData } from './generate_data';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -34,10 +34,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return response;
   }
 
-  registry.when(
-    'Infrastructure attributes when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
+  describe('Infrastructure attributes', () => {
+    describe('Infrastructure attributes when data is not loaded', () => {
       it('handles the empty state', async () => {
         const response = await callApi('synth-go');
         expect(response.status).to.be(200);
@@ -45,17 +43,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body.hostNames.length).to.be(0);
         expect(response.body.podNames.length).to.be(0);
       });
-    }
-  );
+    });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177386
-  registry.when('Infrastructure attributes', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
-      beforeEach(async () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         await generateData({ start, end, apmSynthtraceEsClient });
       });
 
-      afterEach(() => apmSynthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       describe('when service runs in container', () => {
         it('returns arrays of container ids and pod names', async () => {
