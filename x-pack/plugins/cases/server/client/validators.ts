@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { OBSERVABLE_TYPES_BUILTIN } from '../../common/constants';
 
 /**
  * Throws an error if the request has custom fields with duplicated keys.
@@ -45,14 +46,17 @@ export const validateDuplicatedLabelsInRequest = ({
   requestFields?: Array<{ label: string }>;
   fieldName: string;
 }) => {
-  const uniqueLabels = new Set<string>();
+  // NOTE: this prevents adding duplicates for the builtin types
+  const builtinLabels = OBSERVABLE_TYPES_BUILTIN.map((builtin) => builtin.label.toLowerCase());
+
+  const uniqueLabels = new Set<string>(builtinLabels);
   const duplicatedLabels = new Set<string>();
 
   requestFields.forEach((item) => {
-    if (uniqueLabels.has(item.label)) {
-      duplicatedLabels.add(item.label);
+    if (uniqueLabels.has(item.label.toLowerCase())) {
+      duplicatedLabels.add(item.label.toLowerCase());
     } else {
-      uniqueLabels.add(item.label);
+      uniqueLabels.add(item.label.toLowerCase());
     }
   });
 
