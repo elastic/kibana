@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
 import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import classNames from 'classnames';
 import type { Subscription } from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
-
-import './loading_indicator.scss';
 
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -59,7 +57,12 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
   }
 
   render() {
-    const className = classNames(!this.state.visible && 'kbnLoadingIndicator-hidden');
+    const indicatorHiddenCss = !this.state.visible
+      ? css`
+          visibility: hidden;
+          animation-play-state: paused;
+        `
+      : undefined;
 
     const testSubj = this.state.visible
       ? 'globalLoadingIndicator'
@@ -106,7 +109,7 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       logo
     ) : (
       <EuiProgress
-        className={className}
+        css={indicatorHiddenCss}
         data-test-subj={testSubj}
         max={this.props.maxAmount}
         value={this.props.valueAmount}
