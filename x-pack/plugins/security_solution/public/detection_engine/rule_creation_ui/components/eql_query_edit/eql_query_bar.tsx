@@ -70,7 +70,7 @@ export interface EqlQueryBarProps {
   isSizeOptionDisabled?: boolean;
   onEqlOptionsChange?: (field: FieldsEqlOptions, newValue: string | undefined) => void;
   onValidityChange?: (arg: boolean) => void;
-  onValiditingChange?: (arg: boolean) => void;
+  onValidatingChange?: (arg: boolean) => void;
 }
 
 export const EqlQueryBar: FC<EqlQueryBarProps> = ({
@@ -85,7 +85,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   isSizeOptionDisabled,
   onEqlOptionsChange,
   onValidityChange,
-  onValiditingChange,
+  onValidatingChange,
 }) => {
   const { addError } = useAppToasts();
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
@@ -115,10 +115,10 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   }, [error, addError]);
 
   useEffect(() => {
-    if (onValiditingChange) {
-      onValiditingChange(isValidating);
+    if (onValidatingChange) {
+      onValidatingChange(isValidating);
     }
-  }, [isValidating, onValiditingChange]);
+  }, [isValidating, onValidatingChange]);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -156,8 +156,8 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
       const newQuery = e.target.value;
-      if (onValiditingChange) {
-        onValiditingChange(true);
+      if (onValidatingChange) {
+        onValidatingChange(true);
       }
       setErrorMessages([]);
       setFieldValue({
@@ -169,7 +169,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
         saved_id: null,
       });
     },
-    [fieldValue, setFieldValue, onValiditingChange]
+    [fieldValue, setFieldValue, onValidatingChange]
   );
 
   return (

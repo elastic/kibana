@@ -189,7 +189,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
         loading={indexPatternsLoading}
         disabled={indexPatternsLoading}
         onValidityChange={setIsQueryBarValid}
-        onValiditingChange={setIsQueryBarValidating}
+        onValidatingChange={setIsQueryBarValidating}
         onEqlOptionsChange={onOptionsChange}
       />
     </Form>

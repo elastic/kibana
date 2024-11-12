@@ -33,7 +33,7 @@ interface EqlQueryEditProps {
   disabled?: boolean;
   onEqlOptionsChange?: (field: FieldsEqlOptions, newValue: string | undefined) => void;
   onValidityChange?: (arg: boolean) => void;
-  onValiditingChange?: (arg: boolean) => void;
+  onValidatingChange?: (arg: boolean) => void;
 }
 
 export function EqlQueryEdit({
@@ -48,7 +48,7 @@ export function EqlQueryEdit({
   disabled,
   onEqlOptionsChange,
   onValidityChange,
-  onValiditingChange,
+  onValidatingChange,
 }: EqlQueryEditProps): JSX.Element {
   const componentProps = useMemo(
     () => ({
@@ -63,7 +63,7 @@ export function EqlQueryEdit({
       idAria: 'ruleEqlQueryBar',
       dataTestSubj: 'ruleEqlQueryBar',
       onValidityChange,
-      onValiditingChange,
+      onValidatingChange,
     }),
     [
       eqlFieldsComboBoxOptions,
@@ -72,7 +72,7 @@ export function EqlQueryEdit({
       showFilterBar,
       onEqlOptionsChange,
       onValidityChange,
-      onValiditingChange,
+      onValidatingChange,
       dataView,
       loading,
       disabled,
