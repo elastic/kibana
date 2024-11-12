@@ -9,10 +9,17 @@ import {
   CREATE_FIELD_BUTTON,
   RUNTIME_FIELD_INPUT,
   SAVE_FIELD_BUTTON,
+  TIMELINE_CREATE_FIELD_BUTTON,
 } from '../screens/create_runtime_field';
 
 export const createField = (fieldName: string): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(CREATE_FIELD_BUTTON).click();
+  cy.get(RUNTIME_FIELD_INPUT).type(fieldName);
+  return cy.get(SAVE_FIELD_BUTTON).click();
+};
+
+export const timelineCreateField = (fieldName: string): Cypress.Chainable<JQuery<HTMLElement>> => {
+  cy.get(TIMELINE_CREATE_FIELD_BUTTON).click();
   cy.get(RUNTIME_FIELD_INPUT).type(fieldName);
   return cy.get(SAVE_FIELD_BUTTON).click();
 };

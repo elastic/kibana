@@ -35,3 +35,12 @@ export function generateRandomIndexName(
 
   return result;
 }
+
+export function getFirstNewIndexName(startingIndexNames: string[], currentIndexNames: string[]) {
+  for (const index of currentIndexNames) {
+    if (startingIndexNames.indexOf(index) === -1) {
+      return index;
+    }
+  }
+  return undefined;
+}

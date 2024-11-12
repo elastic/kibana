@@ -7,14 +7,21 @@
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { RootSchema } from '@kbn/core/public';
-import type { TelemetryEventTypes } from '../../constants';
 
-export interface PreviewRuleParams {
+interface PreviewRuleParams {
   ruleType: Type;
   loggedRequestsEnabled: boolean;
 }
 
+export enum PreviewRuleEventTypes {
+  PreviewRule = 'Preview rule',
+}
+
+export interface PreviewRuleTelemetryEventsMap {
+  [PreviewRuleEventTypes.PreviewRule]: PreviewRuleParams;
+}
+
 export interface PreviewRuleTelemetryEvent {
-  eventType: TelemetryEventTypes.PreviewRule;
-  schema: RootSchema<PreviewRuleParams>;
+  eventType: PreviewRuleEventTypes;
+  schema: RootSchema<PreviewRuleTelemetryEventsMap[PreviewRuleEventTypes]>;
 }

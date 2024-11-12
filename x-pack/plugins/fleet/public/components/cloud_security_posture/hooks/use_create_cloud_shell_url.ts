@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { PackagePolicy } from '../../../../common';
 
-import { useGetSettings } from '../../../hooks';
+import { useGetFleetServerHosts } from '../../../hooks';
 
 import { getCloudShellUrlFromPackagePolicy } from '../services';
 
@@ -20,13 +20,13 @@ export const useCreateCloudShellUrl = ({
   enrollmentAPIKey: string | undefined;
   packagePolicy?: PackagePolicy;
 }) => {
-  const { data, isLoading } = useGetSettings();
+  const { data, isLoading } = useGetFleetServerHosts();
 
   let isError = false;
   let error: string | undefined;
 
   // Default fleet server host
-  const fleetServerHost = data?.item.fleet_server_hosts?.[0];
+  const fleetServerHost = data?.items?.find((item) => item.is_default)?.host_urls?.[0];
 
   if (!fleetServerHost && !isLoading) {
     isError = true;
