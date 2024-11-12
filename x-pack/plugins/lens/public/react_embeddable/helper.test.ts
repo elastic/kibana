@@ -17,7 +17,6 @@ describe('Embeddable helpers', () => {
       };
       const runtimeState = await deserializeState(attributeService, rawState);
       expect(runtimeState).toEqual(rawState);
-      expect(attributeService.injectReferences).toHaveBeenCalled();
     });
 
     it('should wrap Lens doc/attributes into component state shape', async () => {
@@ -28,7 +27,6 @@ describe('Embeddable helpers', () => {
           attributes: { ...defaultDoc, references: defaultDoc.references },
         })
       );
-      expect(attributeService.injectReferences).toHaveBeenCalled();
     });
 
     it('load a by-ref doc from the attribute service', async () => {
@@ -38,7 +36,6 @@ describe('Embeddable helpers', () => {
       });
 
       expect(attributeService.loadFromLibrary).toHaveBeenCalledWith('123');
-      expect(attributeService.injectReferences).toHaveBeenCalled();
     });
 
     it('should fallback to an empty Lens doc if the saved object is not found', async () => {
@@ -49,15 +46,13 @@ describe('Embeddable helpers', () => {
       });
       // check the visualizationType set to null for empty state
       expect(runtimeState.attributes.visualizationType).toBeNull();
-      expect(attributeService.injectReferences).toHaveBeenCalled();
     });
 
     describe('injected references should overwrite inner ones', () => {
-      // There are 4 possible scenarios here for reference injections:
+      // There are 3 possible scenarios here for reference injections:
       // * default space for a by-value
       // * default space for a by-ref with a "lens" panel reference type
       // * other space for a by-value with new ref ids
-      // * other space for a by-ref with new ref ids + "lens" panel reference type
 
       it('should inject correctly serialized references into runtime state for a by value in the default space', async () => {
         const attributeService = makeAttributeService(defaultDoc);
@@ -77,15 +72,17 @@ describe('Embeddable helpers', () => {
 
       it('should inject correctly serialized references into runtime state for a by ref in the default space', async () => {
         const attributeService = makeAttributeService(defaultDoc);
-        const mockedReferences = [{ id: 'serializedRefs', name: 'index-pattern-0', type: 'lens' }];
+        const mockedReferences = [
+          { id: 'serializedRefs', name: 'index-pattern-0', type: 'mocked-reference' },
+        ];
         const runtimeState = await deserializeState(
           attributeService,
           {
-            attributes: defaultDoc,
+            savedObjectId: '123',
           },
           mockedReferences
         );
-        expect(attributeService.injectReferences).toHaveBeenCalled();
+        expect(attributeService.injectReferences).not.toHaveBeenCalled();
         // Note the original references should be kept
         expect(runtimeState.attributes.references).toEqual(defaultDoc.references);
       });
@@ -105,24 +102,6 @@ describe('Embeddable helpers', () => {
         expect(attributeService.injectReferences).toHaveBeenCalled();
         // note: in this case the references are swapped
         expect(runtimeState.attributes.references).toEqual(mockedReferences);
-      });
-
-      it('should inject correctly serialized references into runtime state for a by ref in another space', async () => {
-        const attributeService = makeAttributeService(defaultDoc);
-        const mockedReferences = [
-          { id: 'serializedRefs', name: 'index-pattern-0', type: 'mocked-reference' },
-          { id: 'serializedPanelRef', name: 'index-pattern-1', type: 'lens' },
-        ];
-        const runtimeState = await deserializeState(
-          attributeService,
-          {
-            attributes: defaultDoc,
-          },
-          mockedReferences
-        );
-        expect(attributeService.injectReferences).toHaveBeenCalled();
-        // note: in this case the references are swapped (filtering the "lens" panel one)
-        expect(runtimeState.attributes.references).toEqual(mockedReferences.slice(0, 1));
       });
     });
   });
