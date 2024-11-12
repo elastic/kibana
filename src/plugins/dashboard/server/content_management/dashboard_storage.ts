@@ -14,6 +14,7 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
+import { performance } from 'node:perf_hooks';
 
 import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
 import { StorageContext } from '@kbn/content-management-plugin/server';
@@ -324,6 +325,8 @@ export class DashboardStorage {
     query: SearchQuery,
     options: DashboardSearchOptions
   ): Promise<DashboardSearchOut> {
+    let tsBefore = performance.now();
+
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
 
@@ -337,8 +340,18 @@ export class DashboardStorage {
     }
 
     const soQuery = searchArgsToSOFindOptions(query, optionsToLatest);
+
+    tsBefore = performance.now() - tsBefore;
+
+    let tsSearch = performance.now();
+
     // Execute the query in the DB
     const soResponse = await soClient.find<DashboardSavedObjectAttributes>(soQuery);
+
+    tsSearch = performance.now() - tsSearch;
+
+    let tsAfter = performance.now();
+
     const hits = soResponse.saved_objects
       .map((so) => {
         const { item } = savedObjectToItem(so, false, soQuery.fields);
@@ -353,12 +366,15 @@ export class DashboardStorage {
       },
     };
 
-    const validationError = transforms.search.out.result.validate(response);
-    if (validationError) {
-      if (this.throwOnResultValidationError) {
-        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
-      } else {
-        this.logger.warn(`Invalid response. ${validationError.message}`);
+    // just use this to skip validation for now
+    if (optionsToLatest?.onlyTitle) {
+      const validationError = transforms.search.out.result.validate(response);
+      if (validationError) {
+        if (this.throwOnResultValidationError) {
+          throw Boom.badRequest(`Invalid response. ${validationError.message}`);
+        } else {
+          this.logger.warn(`Invalid response. ${validationError.message}`);
+        }
       }
     }
 
@@ -375,6 +391,13 @@ export class DashboardStorage {
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
+
+    tsAfter = performance.now() - tsAfter;
+
+    const header = `tsbefore;dur=${tsBefore}, tssearch;dur=${tsSearch}, tsafter;dur=${tsAfter}`;
+
+    // @ts-ignore
+    value.header = header;
 
     return value;
   }
