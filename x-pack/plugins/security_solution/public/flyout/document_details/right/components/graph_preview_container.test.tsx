@@ -28,15 +28,6 @@ jest.mock('../hooks/use_fetch_graph_data', () => ({
 }));
 const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
 
-const mockUseUiSetting = jest.fn().mockReturnValue([false]);
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...original,
-    useUiSetting$: () => mockUseUiSetting(),
-  };
-});
-
 const mockGraph = () => <div data-test-subj={GRAPH_PREVIEW_TEST_ID} />;
 
 jest.mock('@kbn/cloud-security-posture-graph', () => {

@@ -27,7 +27,9 @@ export const GraphPreviewContainer: React.FC = () => {
     ecsData: dataAsNestedObject,
   });
 
-  const timestamp = getField(getFieldsData('@timestamp'));
+  // Moment(null) will result null in timestamp, when timestamp is missing we wish to default to undefined
+  // so that the graph will show the default time range now+30m and now-30m
+  const timestamp = getField(getFieldsData('@timestamp')) ?? undefined;
 
   // TODO: default start and end might not capture the original event
   const { isLoading, isError, data } = useFetchGraphData({
