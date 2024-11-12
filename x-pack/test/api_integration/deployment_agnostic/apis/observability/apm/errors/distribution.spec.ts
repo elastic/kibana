@@ -69,7 +69,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         before(async () => {
           apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-          return generateData({ serviceName, start, end, apmSynthtraceEsClient });
+          await generateData({ serviceName, start, end, apmSynthtraceEsClient });
         });
 
         after(() => apmSynthtraceEsClient.clean());

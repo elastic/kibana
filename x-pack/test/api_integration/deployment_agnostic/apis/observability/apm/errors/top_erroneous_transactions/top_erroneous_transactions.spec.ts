@@ -26,7 +26,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
-  const groupId = '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03';
+  const groupId = '0000000000000000000000000Error 1';
 
   async function callApi(
     overrides?: RecursivePartial<
@@ -39,7 +39,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       params: {
         path: {
           serviceName,
-          groupId: 'test',
+          groupId,
           ...overrides?.path,
         },
         query: {
@@ -57,39 +57,34 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   describe('Top erroneous transactions', () => {
-    describe('when data is not loaded', () => {
-      it('handles the empty state', async () => {
-        const response = await callApi();
-        expect(response.status).to.be(200);
-        expect(response.body.topErroneousTransactions).to.be.empty();
-      });
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    before(async () => {
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+    });
+
+    it('handles the empty state', async () => {
+      const response = await callApi();
+      expect(response.status).to.be(200);
+      expect(response.body.topErroneousTransactions).to.be.empty();
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/177637
     describe('when data is loaded', () => {
       const {
-        firstTransaction: { name: firstTransactionName, failureRate: firstTransactionFailureRate },
-        secondTransaction: {
-          name: secondTransactionName,
-          failureRate: secondTransactionFailureRate,
+        bananaTransaction: {
+          name: bananaTransactionName,
+          failureRate: bananaTransactionFailureRate,
         },
+        appleTransaction: { name: appleTransactionName, failureRate: appleTransactionFailureRate },
       } = config;
 
       describe('returns the correct data', () => {
-        let apmSynthtraceEsClient: ApmSynthtraceEsClient;
-
-        before(async () => {
-          apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-          return generateData({ serviceName, start, end, apmSynthtraceEsClient });
-        });
-
-        after(() => apmSynthtraceEsClient.clean());
-
         describe('without comparison', () => {
           const numberOfBuckets = 15;
           let erroneousTransactions: ErroneousTransactions;
 
           before(async () => {
+            await generateData({ serviceName, start, end, apmSynthtraceEsClient });
             const response = await callApi({
               path: { groupId },
             });
@@ -100,37 +95,37 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             const { topErroneousTransactions } = erroneousTransactions;
             expect(topErroneousTransactions.length).to.be(2);
 
-            const firstTransaction = topErroneousTransactions.find(
-              (x) => x.transactionName === firstTransactionName
+            const bananaTransaction = topErroneousTransactions.find(
+              (x) => x.transactionName === bananaTransactionName
             );
-            expect(firstTransaction).to.not.be(undefined);
-            expect(firstTransaction?.occurrences).to.be(
-              firstTransactionFailureRate * numberOfBuckets
+            expect(bananaTransaction).to.not.be(undefined);
+            expect(bananaTransaction?.occurrences).to.be(
+              bananaTransactionFailureRate * numberOfBuckets
             );
 
-            const secondTransaction = topErroneousTransactions.find(
-              (x) => x.transactionName === secondTransactionName
+            const appleTransaction = topErroneousTransactions.find(
+              (x) => x.transactionName === appleTransactionName
             );
-            expect(secondTransaction).to.not.be(undefined);
-            expect(secondTransaction?.occurrences).to.be(
-              secondTransactionFailureRate * numberOfBuckets
+            expect(appleTransaction).to.not.be(undefined);
+            expect(appleTransaction?.occurrences).to.be(
+              appleTransactionFailureRate * numberOfBuckets
             );
           });
 
           it('displays the correct number of occurrences in time series', () => {
             const { topErroneousTransactions } = erroneousTransactions;
 
-            const firstTransaction = topErroneousTransactions.find(
-              (x) => x.transactionName === firstTransactionName
+            const bananaTransaction = topErroneousTransactions.find(
+              (x) => x.transactionName === bananaTransactionName
             );
-            const firstErrorCount = sumBy(firstTransaction?.currentPeriodTimeseries, 'y');
-            expect(firstErrorCount).to.be(firstTransactionFailureRate * numberOfBuckets);
+            const firstErrorCount = sumBy(bananaTransaction?.currentPeriodTimeseries, 'y');
+            expect(firstErrorCount).to.be(bananaTransactionFailureRate * numberOfBuckets);
 
-            const secondTransaction = topErroneousTransactions.find(
-              (x) => x.transactionName === secondTransactionName
+            const appleTransaction = topErroneousTransactions.find(
+              (x) => x.transactionName === appleTransactionName
             );
-            const secondErrorCount = sumBy(secondTransaction?.currentPeriodTimeseries, 'y');
-            expect(secondErrorCount).to.be(secondTransactionFailureRate * numberOfBuckets);
+            const secondErrorCount = sumBy(appleTransaction?.currentPeriodTimeseries, 'y');
+            expect(secondErrorCount).to.be(appleTransactionFailureRate * numberOfBuckets);
           });
         });
 
@@ -154,12 +149,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             it('returns some data', () => {
               const { topErroneousTransactions } = erroneousTransactions;
 
-              const hasCurrentPeriodData = topErroneousTransactions[0].currentPeriodTimeseries.some(
-                ({ y }) => isFiniteNumber(y)
-              );
+              const hasCurrentPeriodData =
+                topErroneousTransactions[0]?.currentPeriodTimeseries.some(({ y }) =>
+                  isFiniteNumber(y)
+                );
 
               const hasPreviousPeriodData =
-                topErroneousTransactions[0].previousPeriodTimeseries.some(({ y }) =>
+                topErroneousTransactions[0]?.previousPeriodTimeseries.some(({ y }) =>
                   isFiniteNumber(y)
                 );
 
@@ -169,22 +165,22 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
             it('has the same start time for both periods', () => {
               const { topErroneousTransactions } = erroneousTransactions;
-              expect(first(topErroneousTransactions[0].currentPeriodTimeseries)?.x).to.be(
-                first(topErroneousTransactions[0].previousPeriodTimeseries)?.x
+              expect(first(topErroneousTransactions[0]?.currentPeriodTimeseries)?.x).to.be(
+                first(topErroneousTransactions[0]?.previousPeriodTimeseries)?.x
               );
             });
 
             it('has same end time for both periods', () => {
               const { topErroneousTransactions } = erroneousTransactions;
-              expect(last(topErroneousTransactions[0].currentPeriodTimeseries)?.x).to.be(
-                last(topErroneousTransactions[0].previousPeriodTimeseries)?.x
+              expect(last(topErroneousTransactions[0]?.currentPeriodTimeseries)?.x).to.be(
+                last(topErroneousTransactions[0]?.previousPeriodTimeseries)?.x
               );
             });
 
             it('returns same number of buckets for both periods', () => {
               const { topErroneousTransactions } = erroneousTransactions;
-              expect(topErroneousTransactions[0].currentPeriodTimeseries.length).to.be(
-                topErroneousTransactions[0].previousPeriodTimeseries.length
+              expect(topErroneousTransactions[0]?.currentPeriodTimeseries.length).to.be(
+                topErroneousTransactions[0]?.previousPeriodTimeseries.length
               );
             });
           });
@@ -210,5 +206,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
     });
+
+    after(() => apmSynthtraceEsClient.clean());
   });
 }

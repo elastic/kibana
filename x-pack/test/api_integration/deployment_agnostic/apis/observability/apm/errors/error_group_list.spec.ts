@@ -25,11 +25,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function callApi(
+  const callApi = async (
     overrides?: RecursivePartial<
       APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>['params']
     >
-  ) {
+  ) => {
     return await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
       params: {
@@ -43,7 +43,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         },
       },
     });
-  }
+  };
   describe('Error Group List', () => {
     describe('when data is not loaded', () => {
       it('handles empty state', async () => {

@@ -8,12 +8,12 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export const config = {
-  firstTransaction: {
+  appleTransaction: {
     name: 'GET /apple 🍎 ',
     successRate: 75,
     failureRate: 25,
   },
-  secondTransaction: {
+  bananaTransaction: {
     name: 'GET /banana 🍌',
     successRate: 50,
     failureRate: 50,
@@ -37,9 +37,9 @@ export async function generateData({
 
   const interval = '1m';
 
-  const { firstTransaction, secondTransaction } = config;
+  const { bananaTransaction, appleTransaction } = config;
 
-  const documents = [firstTransaction, secondTransaction].flatMap((transaction) => {
+  const documents = [appleTransaction, bananaTransaction].flatMap((transaction, index) => {
     return [
       timerange(start, end)
         .interval(interval)
@@ -59,7 +59,7 @@ export async function generateData({
             .transaction({ transactionName: transaction.name })
             .errors(
               serviceGoProdInstance
-                .error({ message: 'Error 1', type: transaction.name })
+                .error({ message: `Error ${index}`, type: transaction.name })
                 .timestamp(timestamp)
             )
             .duration(1000)
@@ -69,5 +69,5 @@ export async function generateData({
     ];
   });
 
-  return await apmSynthtraceEsClient.index(documents);
+  await apmSynthtraceEsClient.index(documents);
 }
