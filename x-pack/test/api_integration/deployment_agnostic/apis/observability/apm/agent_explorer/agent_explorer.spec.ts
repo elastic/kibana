@@ -27,7 +27,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       APIClientRequestParamsOf<'GET /internal/apm/get_agents_per_service'>['params']
     >
   ) {
-    return await apmApiClient.readUser({
+    return apmApiClient.readUser({
       endpoint: 'GET /internal/apm/get_agents_per_service',
       params: {
         query: {

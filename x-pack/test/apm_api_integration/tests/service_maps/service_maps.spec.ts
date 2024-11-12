@@ -153,13 +153,11 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
       it('returns the correct data', () => {
         const elements: Array<{ data: Record<string, any> }> = response.body.elements;
-
         const serviceNames = uniq(
           elements
             .filter((element) => element.data['service.name'] !== undefined)
             .map((element) => element.data['service.name'])
         ).sort();
-
         expectSnapshot(serviceNames).toMatchInline(`
               Array [
                 "auditbeat",

@@ -26,6 +26,8 @@ import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 import { getColumns } from './grid_columns';
 import { AlertsBadge } from '../alerts_badge/alerts_badge';
 import { EntityName } from './entity_name';
+import { EntityActions } from '../entity_actions';
+import { useDiscoverRedirect } from '../../hooks/use_discover_redirect';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 type LatestEntities = InventoryEntitiesAPIReturnType['entities'];
@@ -38,7 +40,6 @@ interface Props {
   pageIndex: number;
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
-  onFilterByType: (entityType: string) => void;
 }
 
 const PAGE_SIZE = 20;
@@ -51,8 +52,9 @@ export function EntitiesGrid({
   pageIndex,
   onChangePage,
   onChangeSort,
-  onFilterByType,
 }: Props) {
+  const { getDiscoverRedirectUrl } = useDiscoverRedirect();
+
   const onSort: EuiDataGridSorting['onSort'] = useCallback(
     (newSortingColumns) => {
       const lastItem = last(newSortingColumns);
@@ -68,12 +70,14 @@ export function EntitiesGrid({
     [entities]
   );
 
+  const showActions = useMemo(() => !!getDiscoverRedirectUrl(), [getDiscoverRedirectUrl]);
+
   const columnVisibility = useMemo(
     () => ({
-      visibleColumns: getColumns({ showAlertsColumn }).map(({ id }) => id),
+      visibleColumns: getColumns({ showAlertsColumn, showActions }).map(({ id }) => id),
       setVisibleColumns: () => {},
     }),
-    [showAlertsColumn]
+    [showAlertsColumn, showActions]
   );
 
   const renderCellValue = useCallback(
@@ -85,20 +89,14 @@ export function EntitiesGrid({
 
       const columnEntityTableId = columnId as EntityColumnIds;
       const entityType = entity[ENTITY_TYPE];
+      const discoverUrl = getDiscoverRedirectUrl(entity);
 
       switch (columnEntityTableId) {
         case 'alertsCount':
           return entity?.alertsCount ? <AlertsBadge entity={entity} /> : null;
 
         case ENTITY_TYPE:
-          return (
-            <BadgeFilterWithPopover
-              field={ENTITY_TYPE}
-              value={entityType}
-              label={entityType}
-              onFilter={() => onFilterByType(entityType)}
-            />
-          );
+          return <BadgeFilterWithPopover field={ENTITY_TYPE} value={entityType} />;
         case ENTITY_LAST_SEEN:
           return (
             <FormattedMessage
@@ -127,11 +125,20 @@ export function EntitiesGrid({
           );
         case ENTITY_DISPLAY_NAME:
           return <EntityName entity={entity} />;
+        case 'actions':
+          return (
+            discoverUrl && (
+              <EntityActions
+                discoverUrl={discoverUrl}
+                entityIdentifyingValue={entity[ENTITY_DISPLAY_NAME]}
+              />
+            )
+          );
         default:
           return entity[columnId as EntityColumnIds] || '';
       }
     },
-    [entities, onFilterByType]
+    [entities, getDiscoverRedirectUrl]
   );
 
   if (loading) {
@@ -146,7 +153,7 @@ export function EntitiesGrid({
         'xpack.inventory.entitiesGrid.euiDataGrid.inventoryEntitiesGridLabel',
         { defaultMessage: 'Inventory entities grid' }
       )}
-      columns={getColumns({ showAlertsColumn })}
+      columns={getColumns({ showAlertsColumn, showActions })}
       columnVisibility={columnVisibility}
       rowCount={entities.length}
       renderCellValue={renderCellValue}
