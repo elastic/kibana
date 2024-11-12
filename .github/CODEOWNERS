@@ -2003,8 +2003,11 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 /x-pack/plugins/security_solution_serverless/**/*.scss @elastic/security-design
 
 # Logstash
-/x-pack/test/api_integration/apis/logstash @elastic/logstash
+/x-pack/test/functional/services/pipeline_* @elastic/logstash
+/x-pack/test/functional/page_objects/logstash_page.ts @elastic/logstash
 /x-pack/test/functional/apps/logstash @elastic/logstash
+/x-pack/test/monitoring_api_integration/fixtures/logstash @elastic/logstash
+/x-pack/test/api_integration/apis/logstash @elastic/logstash
 #CC# /x-pack/plugins/logstash/ @elastic/logstash
 
 # EUI team
