@@ -47,7 +47,6 @@ export interface AppDependencies {
   plugins: {
     cloud?: CloudSetup;
     share: SharePluginSetup;
-    infra: object | undefined;
   };
   services: {
     core: CoreStart;

@@ -10,9 +10,9 @@
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-server-internal';
 import type { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import { isObject } from 'lodash';
-import { RouteDeprecationInfo } from '@kbn/core-http-server/src/router/route';
+import type { PostValidationMetadata } from '@kbn/core-http-server';
 import { buildApiDeprecationId } from '../deprecations';
+import { getIsRouteApiDeprecation, getIsAccessApiDeprecation } from '../deprecations';
 
 interface Dependencies {
   coreUsageData: InternalCoreUsageDataSetup;
@@ -35,8 +35,11 @@ export function createRouteDeprecationsHandler({
 }: {
   coreUsageData: InternalCoreUsageDataSetup;
 }) {
-  return (req: CoreKibanaRequest, { deprecated }: { deprecated?: RouteDeprecationInfo }) => {
-    if (deprecated && isObject(deprecated) && req.route.routePath) {
+  return (req: CoreKibanaRequest, metadata: PostValidationMetadata) => {
+    const hasRouteDeprecation = getIsRouteApiDeprecation(metadata);
+    const hasAccessDeprecation = getIsAccessApiDeprecation(metadata);
+    const isApiDeprecation = hasAccessDeprecation || hasRouteDeprecation;
+    if (isApiDeprecation && req.route.routePath) {
       const counterName = buildApiDeprecationId({
         routeMethod: req.route.method,
         routePath: req.route.routePath,

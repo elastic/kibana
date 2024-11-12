@@ -48,7 +48,6 @@ import { Flyout } from '../../assistant/common/components/assistant_settings_man
 import { useFlyoutModalVisibility } from '../../assistant/common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import { IndexEntryEditor } from './index_entry_editor';
 import { DocumentEntryEditor } from './document_entry_editor';
-import { KnowledgeBaseSettings } from '../knowledge_base_settings';
 import { SetupKnowledgeBaseButton } from '../setup_knowledge_base_button';
 import { useDeleteKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries';
 import {
@@ -73,7 +72,6 @@ interface Params {
 
 export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ dataViews }) => {
   const {
-    assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
     assistantAvailability: { hasManageGlobalKnowledgeBase, isAssistantEnabled },
     http,
     toasts,
@@ -162,30 +160,35 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   } = useKnowledgeBaseEntries({
     http,
     toasts,
-    enabled: enableKnowledgeBaseByDefault && isAssistantEnabled,
+    enabled: isAssistantEnabled,
     isRefetching: kbStatus?.is_setup_in_progress,
   });
+
+  const resetStateAndCloseFlyout = useCallback(() => {
+    setOriginalEntry(undefined);
+    setSelectedEntry(undefined);
+    setDuplicateKBItem(null);
+    closeFlyout();
+  }, [closeFlyout]);
 
   // Flyout Save/Cancel Actions
   const onSaveConfirmed = useCallback(async () => {
     if (isKnowledgeBaseEntryResponse(selectedEntry)) {
       await updateEntries([selectedEntry]);
-      closeFlyout();
+      resetStateAndCloseFlyout();
     } else if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
       if (originalEntry) {
         setDuplicateKBItem(selectedEntry);
         return;
       }
       await createEntry(selectedEntry);
-      closeFlyout();
+      resetStateAndCloseFlyout();
     }
-  }, [selectedEntry, originalEntry, updateEntries, closeFlyout, createEntry]);
+  }, [selectedEntry, updateEntries, resetStateAndCloseFlyout, originalEntry, createEntry]);
 
   const onSaveCancelled = useCallback(() => {
-    setOriginalEntry(undefined);
-    setSelectedEntry(undefined);
-    closeFlyout();
-  }, [closeFlyout]);
+    resetStateAndCloseFlyout();
+  }, [resetStateAndCloseFlyout]);
 
   const { value: existingIndices } = useAsync(() => {
     const indices: string[] = [];
@@ -323,26 +326,10 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   const handleDuplicateEntry = useCallback(async () => {
     if (duplicateKBItem) {
       await createEntry(duplicateKBItem);
-      closeFlyout();
-      setDuplicateKBItem(null);
+      resetStateAndCloseFlyout();
     }
-  }, [closeFlyout, createEntry, duplicateKBItem]);
+  }, [createEntry, duplicateKBItem, resetStateAndCloseFlyout]);
 
-  if (!enableKnowledgeBaseByDefault) {
-    return (
-      <>
-        <KnowledgeBaseSettings
-          knowledgeBase={knowledgeBase}
-          setUpdatedKnowledgeBaseSettings={handleUpdateKnowledgeBaseSettings}
-        />
-        <AssistantSettingsBottomBar
-          hasPendingChanges={hasPendingChanges}
-          onCancelClick={onCancelClick}
-          onSaveButtonClicked={onSaveButtonClicked}
-        />
-      </>
-    );
-  }
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
@@ -434,6 +421,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
             />
           ) : (
             <IndexEntryEditor
+              http={http}
               entry={selectedEntry as IndexEntry}
               originalEntry={originalEntry as IndexEntry}
               dataViews={dataViews}
