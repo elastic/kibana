@@ -6,12 +6,20 @@
  */
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import {
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_DEFAULT_DURATION,
+} from '../../../../detection_engine/rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_THREAT_MATCH_QUERY } from '../../../../../common/constants';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { AboutStepRule, DefineStepRule, RuleStepsOrder, ScheduleStepRule } from './types';
-import { DataSourceType, GroupByOptions, RuleStep } from './types';
+import { DataSourceType, AlertSuppressionDurationType, RuleStep } from './types';
 import { fillEmptySeverityMappings } from './helpers';
 
 export const ruleStepsOrder: RuleStepsOrder = [
@@ -66,14 +74,11 @@ export const stepDefineDefaultValue: DefineStepRule = {
   newTermsFields: [],
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
-  groupByFields: [],
-  groupByRadioSelection: GroupByOptions.PerRuleExecution,
-  groupByDuration: {
-    value: 5,
-    unit: 'm',
-  },
-  suppressionMissingFields: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
-  enableThresholdSuppression: false,
+  [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: [],
+  [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: AlertSuppressionDurationType.PerRuleExecution,
+  [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: ALERT_SUPPRESSION_DEFAULT_DURATION,
+  [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: false,
 };
 
 export const stepAboutDefaultValue: AboutStepRule = {

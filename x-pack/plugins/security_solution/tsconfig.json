@@ -233,6 +233,7 @@
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-common",
     "@kbn/langchain",
-    "@kbn/discover-shared-plugin"
+    "@kbn/discover-shared-plugin",
+    "@kbn/react-hooks"
   ]
 }
