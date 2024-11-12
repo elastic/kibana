@@ -40,10 +40,11 @@ export const useMisconfigurationFindings = (options: UseCspOptions) => {
           params: buildMisconfigurationsFindingsQuery(options, rulesStates!),
         })
       );
-      if (!aggregations) throw new Error('expected aggregations to be defined');
+      if (!aggregations && options.ignore_unavailable === false)
+        throw new Error('expected aggregations to be defined');
 
       return {
-        count: getMisconfigurationAggregationCount(aggregations.count.buckets),
+        count: getMisconfigurationAggregationCount(aggregations?.count.buckets),
         rows: hits.hits.map((finding) => ({
           result: finding._source?.result,
           rule: finding?._source?.rule,

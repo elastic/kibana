@@ -74,6 +74,8 @@ export const buildEntityAlertsQuery = (
     size: size || 0,
     _source: false,
     fields: [
+      '_id',
+      '_index',
       'kibana.alert.rule.uuid',
       'signal.rule.name',
       'signal.rule.severity',

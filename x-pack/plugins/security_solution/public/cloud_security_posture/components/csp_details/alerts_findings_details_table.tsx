@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { capitalize } from 'lodash';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
-import { useMisconfigurationFindings } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
+import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import {
   ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS,
-  NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -23,18 +20,24 @@ import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks
 import { SecurityPageName } from '@kbn/deeplinks-security';
 
 import { buildEntityAlertsQuery } from '@kbn/cloud-security-posture-common/utils/helpers';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { DocumentDetailsRightPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
+import { SeverityBadge } from '../../../common/components/severity_badge';
 
 interface CspAlertsField {
+  _id: string[];
+  _index: string[];
   'kibana.alert.rule.uuid': string[];
   'kibana.alert.reason': string[];
   'signal.rule.name': string[];
-  'signal.rule.severity': string[];
+  'signal.rule.severity': Array<'low' | 'medium' | 'high' | 'critical'>;
 }
 
 interface AlertsDetailsFields {
@@ -52,16 +55,6 @@ export const AlertsDetailsTable = memo(
         ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS
       );
     }, []);
-
-    const { data: dataMisconfiguration } = useMisconfigurationFindings({
-      query: buildEntityFlyoutPreviewQuery(fieldName, queryName),
-      sort: [],
-      enabled: true,
-      pageSize: 1,
-    });
-
-    const passedFindings = dataMisconfiguration?.count.passed || 0;
-    const failedFindings = dataMisconfiguration?.count.failed || 0;
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
@@ -87,12 +80,8 @@ export const AlertsDetailsTable = memo(
 
     const getNavUrlParams = useGetNavigationUrlParams();
 
-    const getFindingsPageUrlFilteredByRuleAndResourceId = (ruleId: string, resourceId: string) => {
-      return getNavUrlParams({ 'rule.id': ruleId, 'resource.id': resourceId }, 'configurations');
-    };
-
-    const getFindingsPageUrl = (name: string, queryField: 'host.name' | 'user.name') => {
-      return getNavUrlParams({ [queryField]: name }, 'configurations', ['rule.name']);
+    const getAlertsPageUrl = (name: string, queryField: 'host.name' | 'user.name') => {
+      return getNavUrlParams({ [queryField]: name });
     };
 
     const { to, from } = useGlobalTime();
@@ -103,15 +92,16 @@ export const AlertsDetailsTable = memo(
       indexName: signalIndexName,
     });
 
-    const resultX = (data?.hits?.hits as AlertsDetailsFields[])?.map(
+    const alertDataResults = (data?.hits?.hits as AlertsDetailsFields[])?.map(
       (item: AlertsDetailsFields) => {
         return { fields: item.fields };
       }
     );
 
-    const severities = resultX?.map((item) => item.fields['signal.rule.severity'][0]) || [];
+    const severitiesMap =
+      alertDataResults?.map((item) => item.fields['signal.rule.severity'][0]) || [];
     const alertStats = Object.entries(
-      severities.reduce((acc: Record<string, number>, item) => {
+      severitiesMap.reduce((acc: Record<string, number>, item) => {
         acc[item] = (acc[item] || 0) + 1;
         return acc;
       }, {})
@@ -121,7 +111,7 @@ export const AlertsDetailsTable = memo(
       color: getSeverityColor(key),
     }));
 
-    const { pageOfItems, totalItemCount } = findingsPagination(resultX || []);
+    const { pageOfItems, totalItemCount } = findingsPagination(alertDataResults || []);
 
     const pagination = {
       pageIndex,
@@ -138,7 +128,42 @@ export const AlertsDetailsTable = memo(
       }
     };
 
+    const { openFlyout } = useExpandableFlyoutApi();
+
+    const handleOnEventAlertDetailPanelOpened = useCallback(
+      (eventId: string, indexName: string, tableId: string) => {
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            path: { tab: 'overview' },
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: tableId,
+            },
+          },
+        });
+      },
+      [openFlyout]
+    );
+
+    const tableId = fieldName === 'host.name' ? TableId.hostsPageEvents : TableId.usersPageEvents;
+
     const columns: Array<EuiBasicTableColumn<AlertsDetailsFields>> = [
+      {
+        field: 'fields',
+        name: '',
+        width: '5%',
+        render: (field: CspAlertsField) => (
+          <EuiLink
+            onClick={() =>
+              handleOnEventAlertDetailPanelOpened(field._id[0], field._index[0], tableId)
+            }
+          >
+            <EuiIcon type={'expand'} />
+          </EuiLink>
+        ),
+      },
       {
         field: 'fields',
         render: (field: CspAlertsField) => (
@@ -155,7 +180,12 @@ export const AlertsDetailsTable = memo(
       {
         field: 'fields',
         render: (field: CspAlertsField) => (
-          <EuiText size="s">{field['signal.rule.severity'][0]}</EuiText>
+          <EuiText size="s">
+            <SeverityBadge
+              value={field['signal.rule.severity'][0] as 'low' | 'medium' | 'high' | 'critical'}
+              data-test-subj="severityPropertyValue"
+            />
+          </EuiText>
         ),
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.misconfigurations.table.resultColumnName',
@@ -184,23 +214,15 @@ export const AlertsDetailsTable = memo(
       <>
         <EuiPanel hasShadow={false}>
           <SecuritySolutionLinkAnchor
-            deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-            path={`${getFindingsPageUrl(queryName, fieldName)}`}
+            deepLinkId={SecurityPageName.alerts}
+            path={`${getAlertsPageUrl(queryName, fieldName)}`}
             target={'_blank'}
             external={false}
-            onClick={() => {
-              uiMetricService.trackUiMetric(
-                METRIC_TYPE.CLICK,
-                NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT
-              );
-            }}
+            onClick={() => {}}
           >
-            {i18n.translate(
-              'xpack.securitySolution.flyout.left.insights.misconfigurations.tableTitle',
-              {
-                defaultMessage: 'Misconfigurations ',
-              }
-            )}
+            {i18n.translate('xpack.securitySolution.flyout.left.insights.alerts.tableTitle', {
+              defaultMessage: 'Alerts ',
+            })}
             <EuiIcon type={'popout'} />
           </SecuritySolutionLinkAnchor>
           <EuiSpacer size="xl" />
@@ -212,7 +234,6 @@ export const AlertsDetailsTable = memo(
             columns={columns}
             pagination={pagination}
             onChange={onTableChange}
-            // onChange={() => {}}
             data-test-subj={'securitySolutionFlyoutMisconfigurationFindingsTable'}
           />
         </EuiPanel>

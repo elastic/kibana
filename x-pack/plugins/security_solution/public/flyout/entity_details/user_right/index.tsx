@@ -132,7 +132,7 @@ export const UserPanel = ({
 
   const alertsCount = alertsOpenCount + alertsAcknowledgedCount;
 
-  const hasNonClosedAlerts = alertsCount;
+  const hasNonClosedAlerts = alertsCount > 0;
 
   useQueryInspector({
     deleteQuery,
@@ -215,7 +215,8 @@ export const UserPanel = ({
           <>
             <FlyoutNavigation
               flyoutIsExpandable={
-                !isPreviewMode && (hasUserDetailsData || hasMisconfigurationFindings)
+                !isPreviewMode &&
+                (hasUserDetailsData || hasMisconfigurationFindings || hasNonClosedAlerts)
               }
               expandDetails={openPanelFirstTab}
             />
