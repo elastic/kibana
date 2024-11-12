@@ -19,7 +19,7 @@ interface UseDataViewsResult {
 /**
  * Fetches known Kibana data views from the Data View Service.
  */
-export function useDataViews(): UseDataViewsResult {
+export function useDataViewListItems(): UseDataViewsResult {
   const {
     data: { dataViews: dataViewsService },
   } = useKibana().services;

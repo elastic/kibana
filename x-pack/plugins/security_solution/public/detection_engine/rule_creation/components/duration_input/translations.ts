@@ -34,3 +34,10 @@ export const DAYS = i18n.translate(
     defaultMessage: 'Days',
   }
 );
+
+export const DURATION_UNIT_SELECTOR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepScheduleRuleForm.durationUnitSelector',
+  {
+    defaultMessage: 'Duration unit selector',
+  }
+);

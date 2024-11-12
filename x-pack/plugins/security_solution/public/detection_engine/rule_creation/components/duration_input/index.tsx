@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFormRow, EuiSelect, transparentize } from '@elastic/eui';
-import React, { useCallback } from 'react';
-import styled from 'styled-components';
-
+import React, { memo, useCallback } from 'react';
+import { css } from '@emotion/css';
+import { EuiFieldNumber, EuiFormRow, EuiSelect, transparentize, useEuiTheme } from '@elastic/eui';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as I18n from './translations';
@@ -21,39 +20,10 @@ interface DurationInputProps {
   durationUnitOptions?: Array<{ value: 's' | 'm' | 'h' | 'd'; text: string }>;
 }
 
-const getNumberFromUserInput = (input: string, minimumValue = 0): number | undefined => {
-  const number = parseInt(input, 10);
-  if (Number.isNaN(number)) {
-    return minimumValue;
-  } else {
-    return Math.max(minimumValue, Math.min(number, Number.MAX_SAFE_INTEGER));
-  }
-};
-
-const StyledEuiFormRow = styled(EuiFormRow)`
-  max-width: 235px;
-
-  .euiFormControlLayout__append {
-    padding-inline: 0 !important;
-  }
-
-  .euiFormControlLayoutIcons {
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
-`;
-
-const MyEuiSelect = styled(EuiSelect)`
-  min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
-  box-shadow: none;
-  background: ${({ theme }) =>
-    transparentize(theme.eui.euiColorPrimary, 0.1)} !important; // Override focus states etc.
-  color: ${({ theme }) => theme.eui.euiColorPrimary};
-`;
-
 // This component is similar to the ScheduleItem component, but instead of combining the value
 // and unit into a single string it keeps them separate. This makes the component simpler and
 // allows for easier validation of values and units in APIs as well.
-const DurationInputComponent: React.FC<DurationInputProps> = ({
+export const DurationInput = memo(function DurationInputComponent({
   durationValueField,
   durationUnitField,
   minimumValue = 0,
@@ -64,7 +34,8 @@ const DurationInputComponent: React.FC<DurationInputProps> = ({
     { value: 'h', text: I18n.HOURS },
   ],
   ...props
-}: DurationInputProps) => {
+}: DurationInputProps): JSX.Element {
+  const { euiTheme } = useEuiTheme();
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(durationValueField);
   const { value: durationValue, setValue: setDurationValue } = durationValueField;
   const { value: durationUnit, setValue: setDurationUnit } = durationUnitField;
@@ -84,17 +55,40 @@ const DurationInputComponent: React.FC<DurationInputProps> = ({
     [minimumValue, setDurationValue]
   );
 
+  const durationFormRowStyle = css`
+    max-width: 235px;
+
+    .euiFormControlLayout__append {
+      padding-inline: 0 !important;
+    }
+
+    .euiFormControlLayoutIcons {
+      color: ${euiTheme.colors.primary};
+    }
+  `;
+  const durationUnitSelectStyle = css`
+    min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
+    box-shadow: none;
+    background: ${transparentize(
+      euiTheme.colors.primary,
+      0.1
+    )} !important; // Override focus states etc.
+    color: ${euiTheme.colors.primary};
+  `;
+
   // EUI missing some props
   const rest = { disabled: isDisabled, ...props };
 
   return (
-    <StyledEuiFormRow error={errorMessage} isInvalid={isInvalid}>
+    <EuiFormRow className={durationFormRowStyle} error={errorMessage} isInvalid={isInvalid}>
       <EuiFieldNumber
         append={
-          <MyEuiSelect
+          <EuiSelect
+            className={durationUnitSelectStyle}
             options={durationUnitOptions}
             onChange={onChangeTimeType}
             value={durationUnit}
+            aria-label={I18n.DURATION_UNIT_SELECTOR}
             data-test-subj="timeType"
             {...rest}
           />
@@ -106,8 +100,16 @@ const DurationInputComponent: React.FC<DurationInputProps> = ({
         data-test-subj="interval"
         {...rest}
       />
-    </StyledEuiFormRow>
+    </EuiFormRow>
   );
-};
+});
 
-export const DurationInput = React.memo(DurationInputComponent);
+function getNumberFromUserInput(input: string, minimumValue = 0): number | undefined {
+  const number = parseInt(input, 10);
+
+  if (Number.isNaN(number)) {
+    return minimumValue;
+  } else {
+    return Math.max(minimumValue, Math.min(number, Number.MAX_SAFE_INTEGER));
+  }
+}

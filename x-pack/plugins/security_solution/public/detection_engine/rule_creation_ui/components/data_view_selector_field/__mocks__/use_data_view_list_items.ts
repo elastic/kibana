@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const useDataViews = jest.fn().mockReturnValue({
+export const useDataViewListItems = jest.fn().mockReturnValue({
   data: [],
   isFetching: false,
 });
