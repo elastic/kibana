@@ -35,6 +35,7 @@ import { useObservedHost } from './hooks/use_observed_host';
 import { HostDetailsPanelKey } from '../host_details_left';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
+import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -130,7 +131,7 @@ export const HostPanel = ({
 
   const openTabPanel = useCallback(
     (tab?: EntityDetailsLeftPanelTab) => {
-      telemetry.reportRiskInputsExpandedFlyoutOpened({
+      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
         entity: 'host',
       });
 
