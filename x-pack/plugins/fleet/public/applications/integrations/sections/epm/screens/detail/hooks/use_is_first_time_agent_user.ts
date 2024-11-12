@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FleetAuthz } from '../../../../../../../../common';
 import {
   FLEET_SERVER_PACKAGE,
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -16,8 +17,10 @@ interface UseIsFirstTimeAgentUserResponse {
   isLoading?: boolean;
 }
 
-export const useIsFirstTimeAgentUserQuery = (): UseIsFirstTimeAgentUserResponse => {
-  const authz = useAuthz();
+export const useIsFirstTimeAgentUserQuery = (
+  authzContext?: FleetAuthz
+): UseIsFirstTimeAgentUserResponse => {
+  const authz = useAuthz() ?? authzContext;
   const {
     data: packagePolicies,
     isLoading: areAgentPoliciesLoading,

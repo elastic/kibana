@@ -10,6 +10,7 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 import { lazy } from 'react';
 
 import { FleetPlugin } from './plugin';
+import type { UIExtensionsStorage } from './types';
 export type { GetPackagesResponse } from './types';
 export { installationStatuses } from '../common/constants';
 
@@ -88,4 +89,22 @@ export const AvailablePackagesHook = () => {
   return import(
     './applications/integrations/sections/epm/screens/home/hooks/use_available_packages'
   );
+};
+export const Detail = () => {
+  return import('./applications/integrations/sections/epm/screens/detail');
+};
+export const UseIntegrationsState = () => {
+  return import('./applications/integrations/hooks/use_integrations_state');
+};
+
+export const UsePackageInstall = () => {
+  return import('./applications/integrations/hooks/use_package_install');
+};
+
+export const FleetStatusProvider = () => {
+  return import('./hooks/use_fleet_status');
+};
+
+export const UIExtensionsContextProvider = () => {
+  return import('./hooks/use_ui_extension');
 };

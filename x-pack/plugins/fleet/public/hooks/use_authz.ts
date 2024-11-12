@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { useIntegrationsStateContext } from '../applications/integrations/hooks';
+
 import { useStartServices } from './use_core';
 
 // Expose authz object, containing the privileges for Fleet and Integrations
 export function useAuthz() {
   const core = useStartServices();
-  return core.authz;
+  const { fleet } = useIntegrationsStateContext();
+  return core.authz ?? fleet.auth;
 }

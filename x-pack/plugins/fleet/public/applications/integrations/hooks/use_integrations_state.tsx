@@ -23,13 +23,20 @@ export const IntegrationsStateContextProvider: FunctionComponent<{
   children?: React.ReactNode;
 }> = ({ children }) => {
   const maybeState = useIntraAppState<undefined | IntegrationsAppBrowseRouteState>();
-  const fromIntegrationsRef = useRef<undefined | string>(maybeState?.fromIntegrations);
-
+  const stateRef = useRef(maybeState);
+  console.log('myState---', maybeState);
   const getFromIntegrations = useCallback(() => {
-    return fromIntegrationsRef.current;
+    return stateRef.current?.fromIntegrations;
   }, []);
   return (
-    <IntegrationsStateContext.Provider value={{ getFromIntegrations }}>
+    <IntegrationsStateContext.Provider
+      value={{
+        getFromIntegrations,
+        pkgkey: maybeState?.pkgkey,
+        panel: maybeState?.panel,
+        fleet: maybeState?.fleet,
+      }}
+    >
       {children}
     </IntegrationsStateContext.Provider>
   );

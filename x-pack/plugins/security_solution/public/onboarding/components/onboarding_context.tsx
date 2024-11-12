@@ -19,37 +19,38 @@ export interface OnboardingContextValue {
 }
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
-export const OnboardingContextProvider: React.FC<PropsWithChildren<{ spaceId: string }>> =
-  React.memo(({ children, spaceId }) => {
-    const { telemetry } = useKibana().services;
+export const OnboardingContextProvider: React.FC<
+  PropsWithChildren<{ spaceId: string; fleet: FleetStart }>
+> = React.memo(({ children, spaceId, fleet }) => {
+  const { telemetry } = useKibana().services;
 
-    const value = useMemo<OnboardingContextValue>(
-      () => ({
-        spaceId,
-        reportCardOpen: (cardId, { auto = false } = {}) => {
-          telemetry.reportEvent(OnboardingHubEventTypes.OnboardingHubStepOpen, {
-            stepId: cardId,
-            trigger: auto ? 'navigation' : 'click',
-          });
-        },
-        reportCardComplete: (cardId, { auto = false } = {}) => {
-          telemetry.reportEvent(OnboardingHubEventTypes.OnboardingHubStepFinished, {
-            stepId: cardId,
-            trigger: auto ? 'auto_check' : 'click',
-          });
-        },
-        reportCardLinkClicked: (cardId, linkId: string) => {
-          telemetry.reportEvent(OnboardingHubEventTypes.OnboardingHubStepLinkClicked, {
-            originStepId: cardId,
-            stepLinkId: linkId,
-          });
-        },
-      }),
-      [spaceId, telemetry]
-    );
+  const value = useMemo<OnboardingContextValue>(
+    () => ({
+      spaceId,
+      reportCardOpen: (cardId, { auto = false } = {}) => {
+        telemetry.reportEvent(OnboardingHubEventTypes.OnboardingHubStepOpen, {
+          stepId: cardId,
+          trigger: auto ? 'navigation' : 'click',
+        });
+      },
+      reportCardComplete: (cardId, { auto = false } = {}) => {
+        telemetry.reportEvent(OnboardingHubEventTypes.OnboardingHubStepFinished, {
+          stepId: cardId,
+          trigger: auto ? 'auto_check' : 'click',
+        });
+      },
+      reportCardLinkClicked: (cardId, linkId: string) => {
+        telemetry.reportEvent(OnboardingHubEventTypes.OnboardingHubStepLinkClicked, {
+          originStepId: cardId,
+          stepLinkId: linkId,
+        });
+      },
+    }),
+    [spaceId, telemetry]
+  );
 
-    return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
-  });
+  return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
+});
 OnboardingContextProvider.displayName = 'OnboardingContextProvider';
 
 export const useOnboardingContext = () => {

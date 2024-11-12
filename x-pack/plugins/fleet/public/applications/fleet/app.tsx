@@ -212,7 +212,7 @@ export const FleetAppContext: React.FC<{
                 <EuiThemeProvider darkMode={isDarkMode}>
                   <QueryClientProvider client={queryClient}>
                     <ReactQueryDevtools initialIsOpen={false} />
-                    <UIExtensionsContext.Provider value={extensions}>
+                    <UIExtensionsContext.Provider value={{}}>
                       <FleetStatusProvider defaultFleetStatus={fleetStatus}>
                         <SpaceSettingsContextProvider>
                           <Router history={history}>
