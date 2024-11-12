@@ -19,6 +19,7 @@ import type {
   List,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type {
+  RiskScoreMappingItem,
   Threats,
   ThreatSubtechnique,
   ThreatTechnique,
@@ -57,6 +58,8 @@ import type {
   RuleCreateProps,
   AlertSuppression,
   RequiredFieldInput,
+  SeverityMapping,
+  RelatedIntegrationArray,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
@@ -407,8 +410,9 @@ export const getStepDataDataSource = (
 /**
  * Strips away form rows that were not filled out by the user
  */
-const removeEmptyRequiredFields = (requiredFields: RequiredFieldInput[]): RequiredFieldInput[] =>
-  requiredFields.filter((field) => field.name !== '' && field.type !== '');
+export const removeEmptyRequiredFields = (
+  requiredFields: RequiredFieldInput[]
+): RequiredFieldInput[] => requiredFields.filter((field) => field.name !== '' && field.type !== '');
 
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
   const stepData = getStepDataDataSource(defineStepData);
@@ -418,7 +422,9 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
 
   const baseFields = {
     type: ruleType,
-    related_integrations: defineStepData.relatedIntegrations?.filter((ri) => !isEmpty(ri.package)),
+    related_integrations: defineStepData.relatedIntegrations
+      ? filterOutEmptyRelatedIntegrations(defineStepData.relatedIntegrations)
+      : undefined,
     ...(timeline.id != null &&
       timeline.title != null && {
         timeline_id: timeline.id,
@@ -624,12 +630,12 @@ export const formatAboutStepData = (
       : { field_names: investigationFields },
     risk_score: riskScore.value,
     risk_score_mapping: riskScore.isMappingChecked
-      ? riskScore.mapping.filter((m) => m.field != null && m.field !== '')
+      ? filterOutEmptyRiskScoreMappingItems(riskScore.mapping)
       : [],
     rule_name_override: ruleNameOverride !== '' ? ruleNameOverride : undefined,
     severity: severity.value,
     severity_mapping: severity.isMappingChecked
-      ? severity.mapping.filter((m) => m.field != null && m.field !== '' && m.value != null)
+      ? filterOutEmptySeverityMappingItems(severity.mapping)
       : [],
     threat: filterEmptyThreats(threat).map((singleThreat) => ({
       ...singleThreat,
@@ -644,6 +650,15 @@ export const formatAboutStepData = (
   };
   return resp;
 };
+
+export const filterOutEmptyRiskScoreMappingItems = (riskScoreMapping: RiskScoreMappingItem[]) =>
+  riskScoreMapping.filter((m) => m.field != null && m.field !== '');
+
+export const filterOutEmptySeverityMappingItems = (severityMapping: SeverityMapping) =>
+  severityMapping.filter((m) => m.field != null && m.field !== '' && m.value != null);
+
+export const filterOutEmptyRelatedIntegrations = (relatedIntegrations: RelatedIntegrationArray) =>
+  relatedIntegrations.filter((ri) => !isEmpty(ri.package));
 
 export const isRuleAction = (
   action: AlertingRuleAction | AlertingRuleSystemAction,

@@ -365,7 +365,7 @@ describe.skip('StepDefineRule', () => {
       );
     });
 
-    it('submits saved early required fields without the "ecs" property', async () => {
+    it('submits saved earlier required fields', async () => {
       const initialState = {
         index: ['test-index'],
         queryBar: {
@@ -390,7 +390,7 @@ describe.skip('StepDefineRule', () => {
 
       expect(handleSubmit).toHaveBeenCalledWith(
         expect.objectContaining({
-          requiredFields: [{ name: 'host.name', type: 'string' }],
+          requiredFields: initialState.requiredFields,
         }),
         true
       );
