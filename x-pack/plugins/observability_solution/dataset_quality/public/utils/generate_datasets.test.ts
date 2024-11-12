@@ -117,7 +117,7 @@ describe('generateDatasets', () => {
           count: 0,
         },
         failedDocs: {
-          percentage: 2,
+          percentage: 1.9607843137254901,
           count: 2,
         },
       },

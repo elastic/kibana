@@ -96,9 +96,9 @@ export class DataStreamStat {
       rawName: datasetName,
       type,
       name: dataset,
-      title: datasetIntegrationMap[datasetName]?.title || dataset,
+      title: datasetIntegrationMap[dataset]?.title || dataset,
       namespace,
-      integration: datasetIntegrationMap[datasetName]?.integration,
+      integration: datasetIntegrationMap[dataset]?.integration,
       quality: mapPercentageToQuality([degradedDocStat.percentage, failedDocStat.percentage]),
       docsInTimeRange: totalDocs,
       degradedDocs: {
