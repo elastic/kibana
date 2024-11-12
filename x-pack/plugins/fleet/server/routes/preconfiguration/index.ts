@@ -18,14 +18,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: PRECONFIGURATION_API_ROUTES.RESET_PATTERN,
-      access: 'internal',
+      access: 'public',
       fleetAuthz: {
         fleet: { all: true },
       },
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: false,
       },
 
@@ -34,14 +34,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: PRECONFIGURATION_API_ROUTES.RESET_ONE_PATTERN,
-      access: 'internal',
+      access: 'public',
       fleetAuthz: {
         fleet: { all: true },
       },
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: { request: PostResetOnePreconfiguredAgentPoliciesSchema },
       },
       resetOnePreconfigurationHandler
