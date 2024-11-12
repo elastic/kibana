@@ -1184,6 +1184,12 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async filterExists(filterId: string): Promise<boolean> {
+      const { status } = await esSupertest.get(`/_ml/filters/${filterId}`);
+      if (status !== 200) return false;
+      return true;
+    },
+
     async getFilter(filterId: string, expectedCode = 200) {
       const response = await esSupertest.get(`/_ml/filters/${filterId}`);
       this.assertResponseStatusCode(expectedCode, response.status, response.body);
@@ -1207,6 +1213,12 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteFilter(filterId: string) {
       log.debug(`Deleting filter with id '${filterId}'...`);
+
+      if ((await this.filterExists(filterId)) === false) {
+        log.debug('> Filter does not exist, nothing to delete');
+        return;
+      }
+
       const { body, status } = await esSupertest.delete(`/_ml/filters/${filterId}`);
       this.assertResponseStatusCode(200, status, body);
 
