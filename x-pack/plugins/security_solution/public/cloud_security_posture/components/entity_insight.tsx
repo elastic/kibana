@@ -18,6 +18,7 @@ import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_pr
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 import { AlertsPreview } from './alerts/alerts_preview';
 import { useGlobalTime } from '../../common/containers/use_global_time';
+import type { ParsedAlertsData } from '../../overview/components/detection_response/alerts_by_status/types';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
 import { useAlertsByStatus } from '../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -79,20 +80,20 @@ export const EntityInsight = <T,>({
     from,
   });
 
-  const alertsOpenCount = alertsData?.open?.total || 0;
+  const filteredAlertsData: ParsedAlertsData = alertsData
+    ? Object.fromEntries(Object.entries(alertsData).filter(([key]) => key !== 'closed'))
+    : {};
 
-  const alertsAcknowledgedCount = alertsData?.acknowledged?.total || 0;
+  const alertsOpenCount = filteredAlertsData?.open?.total || 0;
+
+  const alertsAcknowledgedCount = filteredAlertsData?.acknowledged?.total || 0;
 
   const alertsCount = alertsOpenCount + alertsAcknowledgedCount;
 
   if (alertsCount > 0) {
     insightContent.push(
       <>
-        <AlertsPreview
-          alertsData={alertsData}
-          alertsCount={alertsCount}
-          isPreviewMode={isPreviewMode}
-        />
+        <AlertsPreview alertsData={filteredAlertsData} isPreviewMode={isPreviewMode} />
         <EuiSpacer size="s" />
       </>
     );

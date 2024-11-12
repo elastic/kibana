@@ -48,7 +48,7 @@ describe('AlertsPreview', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsPreview alertsData={mockAlertsData} alertsCount={5} />
+        <AlertsPreview alertsData={mockAlertsData} />
       </TestProviders>
     );
 
@@ -58,7 +58,7 @@ describe('AlertsPreview', () => {
   it('renders correct alerts number', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsPreview alertsData={mockAlertsData} alertsCount={5} />
+        <AlertsPreview alertsData={mockAlertsData} />
       </TestProviders>
     );
 
@@ -68,10 +68,11 @@ describe('AlertsPreview', () => {
   it('renders correct number distribution bar based on severity', () => {
     const { queryAllByTestId } = render(
       <TestProviders>
-        <AlertsPreview alertsData={mockAlertsData} alertsCount={5} />
+        <AlertsPreview alertsData={mockAlertsData} />
       </TestProviders>
     );
 
-    expect(queryAllByTestId('undefined__part').length).toEqual(3);
+    // there should be 3 element with this id because we have 3 different severities in this test
+    expect(queryAllByTestId('AlertsPreviewDistributionBarTestId__part').length).toEqual(3);
   });
 });

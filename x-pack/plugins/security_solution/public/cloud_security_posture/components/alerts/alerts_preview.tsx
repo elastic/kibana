@@ -55,11 +55,9 @@ const AlertsCount = ({
 
 export const AlertsPreview = ({
   alertsData,
-  alertsCount,
   isPreviewMode,
 }: {
   alertsData: ParsedAlertsData;
-  alertsCount: number;
   isPreviewMode?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -82,6 +80,8 @@ export const AlertsPreview = ({
     color: getSeverityColor(key),
   }));
 
+  const totalAlertsCount = alertStats.reduce((total, item) => total + item.count, 0);
+
   return (
     <ExpandablePanel
       header={{
@@ -102,13 +102,16 @@ export const AlertsPreview = ({
       data-test-subj={'securitySolutionFlyoutInsightsAlerts'}
     >
       <EuiFlexGroup gutterSize="none">
-        <AlertsCount alertsTotal={getAbbreviatedNumber(alertsCount)} euiTheme={euiTheme} />
+        <AlertsCount alertsTotal={getAbbreviatedNumber(totalAlertsCount)} euiTheme={euiTheme} />
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem />
             <EuiFlexItem>
               <EuiSpacer />
-              <DistributionBar stats={alertStats.reverse()} />
+              <DistributionBar
+                stats={alertStats.reverse()}
+                data-test-subj="AlertsPreviewDistributionBarTestId"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
