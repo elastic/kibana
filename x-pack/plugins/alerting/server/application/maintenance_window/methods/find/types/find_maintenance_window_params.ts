@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export * from './v1';
+import { TypeOf } from '@kbn/config-schema';
+import { findMaintenanceWindowsParamsSchema } from '../schemas';
+
+export type FindMaintenanceWindowsParams = TypeOf<typeof findMaintenanceWindowsParamsSchema>;

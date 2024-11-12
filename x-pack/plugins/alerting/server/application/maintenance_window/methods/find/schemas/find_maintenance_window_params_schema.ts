@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export * from './v1';
+import { schema } from '@kbn/config-schema';
+
+export const findMaintenanceWindowsParamsSchema = schema.object({
+  perPage: schema.maybe(schema.number()),
+  page: schema.maybe(schema.number()),
+});
