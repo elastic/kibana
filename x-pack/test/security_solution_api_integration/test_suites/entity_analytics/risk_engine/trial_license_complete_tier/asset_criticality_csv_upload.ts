@@ -154,7 +154,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.errors).toEqual([
         {
-          index: 1,
+          index: 2,
           message:
             'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact',
         },
