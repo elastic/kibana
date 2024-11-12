@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { isEmpty } from 'lodash';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
 import { SyntheticsRestApiRouteFactory } from '../types';
@@ -31,6 +32,9 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
   }): Promise<any> => {
     const monitor = request.body as MonitorFields;
     const { monitorId } = request.params;
+    if (isEmpty(monitor)) {
+      return response.badRequest({ body: { message: 'Monitor data is empty.' } });
+    }
 
     const validationResult = validateMonitor(monitor);
 
