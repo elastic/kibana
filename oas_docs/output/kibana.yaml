@@ -40728,7 +40728,7 @@ paths:
         - $ref: '#/components/parameters/SLOs_space_id'
         - $ref: '#/components/parameters/SLOs_slo_id'
       responses:
-        '204':
+        '200':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
@@ -40772,7 +40772,7 @@ paths:
         - $ref: '#/components/parameters/SLOs_space_id'
         - $ref: '#/components/parameters/SLOs_slo_id'
       responses:
-        '200':
+        '204':
           description: Successful request
         '400':
           content:
