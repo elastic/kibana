@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -54,10 +54,7 @@ export function CreateEditPipelineLink({
   const { datasetDetails } = useDatasetQualityDetailsState();
   const { type, name } = datasetDetails;
 
-  const pipelineName = useMemo(
-    () => (areIntegrationAssetsAvailable ? `${type}-${name}@custom` : `${type}@custom`),
-    [areIntegrationAssetsAvailable, type, name]
-  );
+  const pipelineName = areIntegrationAssetsAvailable ? `${type}-${name}@custom` : `${type}@custom`;
 
   const ingestPipelineLocator = locators.get('INGEST_PIPELINES_APP_LOCATOR');
 
