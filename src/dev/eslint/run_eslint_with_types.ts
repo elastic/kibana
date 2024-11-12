@@ -38,7 +38,8 @@ export function runEslintWithTypes() {
           : undefined;
 
       const projects = TS_PROJECTS.filter((project) => {
-        if (project.isTypeCheckDisabled()) {
+        // @kbn/dependency-usage is marked as module, configuration is not supported for it yet
+        if (project.isTypeCheckDisabled() || project.name === '@kbn/dependency-usage') {
           log.verbose(`[${project.name}] skipping project with type checking disabled`);
           return false;
         }

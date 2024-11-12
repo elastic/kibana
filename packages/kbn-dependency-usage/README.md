@@ -152,5 +152,5 @@ bash scripts/dependency_usage.sh -p x-pack/plugins/security_solution -o ./tmp/re
 
 ---
 
-For further information on additional flags and options, refer to the script's inline documentation or help command.
+For further information on additional flags and options, refer to the script's help command.
 
