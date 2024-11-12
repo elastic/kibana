@@ -240,7 +240,7 @@ export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: a
   /** Helper text for the aggregation reflecting some configuration info */
   helperText?: () => string | undefined;
   /** Provides error message type */
-  getErrorMessageType?: () => V | undefined;
+  errorMessageType?: V | undefined;
 }
 
 interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {

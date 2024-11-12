@@ -9,16 +9,19 @@ import type { PivotAggsConfigWithExtra } from '../../../../../../common/pivot_ag
 
 export interface PercentilesAggConfig {
   /** Comma separated list */
-  percents: string;
+  percents: number[];
+  pendingPercentileInput?: string;
 }
 
-export type ValidationResultErrorType =
-  | 'INVALID_FORMAT'
-  | 'NEGATIVE_NUMBER'
-  | 'PERCENTILE_OUT_OF_RANGE';
+export type ValidationResultErrorType = 'INVALID_FORMAT' | 'PERCENTILE_OUT_OF_RANGE';
 
 export type IPivotAggsConfigPercentiles = PivotAggsConfigWithExtra<
   PercentilesAggConfig,
   { field: string; percents: number[] },
   ValidationResultErrorType
 >;
+
+export interface ValidationResult {
+  isValid: boolean;
+  errorType?: ValidationResultErrorType;
+}

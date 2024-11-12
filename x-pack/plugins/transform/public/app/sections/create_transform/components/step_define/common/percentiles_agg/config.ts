@@ -6,7 +6,7 @@
  */
 
 import { PercentilesAggForm } from './percentiles_form_component';
-import type { IPivotAggsConfigPercentiles, ValidationResultErrorType } from './types';
+import type { IPivotAggsConfigPercentiles, PercentilesAggConfig, ValidationResult } from './types';
 import type { PivotAggsConfigBase } from '../../../../../../common';
 import {
   isPivotAggsConfigWithUiBase,
@@ -14,62 +14,28 @@ import {
 } from '../../../../../../common';
 import type { PivotAggsConfigWithUiBase } from '../../../../../../common/pivot_aggs';
 
-/**
- * TODO this callback has been moved.
- * The logic of parsing the string should be improved.
- */
-function parsePercentsInput(inputValue: string | undefined) {
-  if (inputValue !== undefined) {
-    const strVals: string[] = inputValue.split(',');
-    const percents: number[] = [];
-    for (const str of strVals) {
-      if (str.trim().length > 0 && isNaN(str as any) === false) {
-        const val = Number(str);
-        if (val >= 0 && val <= 100) {
-          percents.push(val);
-        } else {
-          return [];
-        }
-      }
-    }
-
-    return percents;
+function validatePercentsInput(config: Partial<PercentilesAggConfig>): ValidationResult {
+  const allValues = [...(config.percents ?? [])];
+  // Combine existing percents with pending input for validation
+  if (config.pendingPercentileInput) {
+    const pendingValue = Number(config.pendingPercentileInput);
+    allValues.push(pendingValue);
   }
 
-  return [];
-}
-
-// Input string should only include comma separated numbers
-function validatePercentsInput(inputValue: unknown): {
-  isValid: boolean;
-  errorType?: ValidationResultErrorType;
-} {
-  if (typeof inputValue !== 'string') {
-    return { isValid: false, errorType: 'INVALID_FORMAT' };
+  if (allValues.some((value) => isNaN(value))) {
+    return {
+      isValid: false,
+      errorType: 'INVALID_FORMAT',
+    };
+  }
+  if (allValues.some((value) => value < 0 || value > 100)) {
+    return {
+      isValid: false,
+      errorType: 'PERCENTILE_OUT_OF_RANGE',
+    };
   }
 
-  // Remove all whitespace
-  const testInputValue = inputValue.split(' ').join('');
-
-  // Explicitly check for -0 to keep consistency with negative numbers
-  if (testInputValue.includes('-0')) {
-    return { isValid: false, errorType: 'NEGATIVE_NUMBER' };
-  }
-
-  // Check if it is a valid comma-separated list of numbers (including negative numbers)
-  if (/^-?\d+(?:,-?\d+)*$/.test(testInputValue)) {
-    const numbers = testInputValue.split(',').map(Number);
-    // Check for negative numbers
-    if (numbers.some((num) => num < 0)) {
-      return { isValid: false, errorType: 'NEGATIVE_NUMBER' };
-    }
-    // Check for numbers greater than 100
-    if (numbers.some((num) => num > 100)) {
-      return { isValid: false, errorType: 'PERCENTILE_OUT_OF_RANGE' };
-    }
-    return { isValid: true };
-  }
-  return { isValid: false, errorType: 'INVALID_FORMAT' };
+  return { isValid: true };
 }
 
 export function getPercentilesAggConfig(
@@ -84,13 +50,13 @@ export function getPercentilesAggConfig(
     AggFormComponent: PercentilesAggForm,
     field,
     aggConfig: {
-      percents: PERCENTILES_AGG_DEFAULT_PERCENTS.toString(),
+      percents: PERCENTILES_AGG_DEFAULT_PERCENTS,
     },
     setUiConfigFromEs(esAggDefinition) {
       const { field: esField, percents } = esAggDefinition;
 
       this.field = esField;
-      this.aggConfig.percents = percents.join(',');
+      this.aggConfig.percents = percents;
     },
     getEsAggConfig() {
       if (!this.isValid()) {
@@ -99,14 +65,13 @@ export function getPercentilesAggConfig(
 
       return {
         field: this.field as string,
-        percents: parsePercentsInput(this.aggConfig.percents),
+        percents: this.aggConfig.percents ?? [],
       };
     },
     isValid() {
-      return validatePercentsInput(this.aggConfig.percents).isValid;
-    },
-    getErrorMessageType() {
-      return validatePercentsInput(this.aggConfig.percents).errorType;
+      const validationResult = validatePercentsInput(this.aggConfig);
+      this.errorMessageType = validationResult.errorType;
+      return validationResult.isValid;
     },
   };
 }

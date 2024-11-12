@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import type { IPivotAggsConfigPercentiles, ValidationResultErrorType } from './types';
 
-const errorMessages: Record<ValidationResultErrorType, string> = {
+interface PercentOption {
+  label: string;
+}
+
+const ERROR_MESSAGES: Record<ValidationResultErrorType, string> = {
   INVALID_FORMAT: i18n.translate('xpack.transform.agg.popoverForm.invalidFormatError', {
     defaultMessage: 'Enter a comma-separated list of percentile',
-  }),
-  NEGATIVE_NUMBER: i18n.translate('xpack.transform.agg.popoverForm.negativeNumberError', {
-    defaultMessage: 'Percentiles must be positive numbers',
   }),
   PERCENTILE_OUT_OF_RANGE: i18n.translate(
     'xpack.transform.agg.popoverForm.percentileOutOfRangeError',
@@ -31,22 +33,56 @@ export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent']
   isValid,
   errorMessageType,
 }) => {
+  const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string }>>(
+    aggConfig.percents?.map((p) => ({ label: p.toString() })) ?? []
+  );
+
+  const handleCreateOption = (inputValue: string) => {
+    if (!isValid) return false;
+
+    const newOption: PercentOption = {
+      label: inputValue,
+    };
+    const updatedOptions = [...selectedOptions, newOption];
+
+    setSelectedOptions(updatedOptions);
+    onChange({ percents: updatedOptions.map((option) => Number(option.label)) });
+  };
+
+  const handleOptionsChange = (newOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    setSelectedOptions(newOptions);
+    onChange({ percents: newOptions.map((option) => Number(option.label)) });
+  };
+
+  const handleSearchChange = (searchValue: string) => {
+    onChange({
+      ...aggConfig,
+      pendingPercentileInput: searchValue,
+    });
+  };
+
+  const getErrorMessage = (): string | undefined => {
+    if (!isValid && errorMessageType) {
+      return ERROR_MESSAGES[errorMessageType];
+    }
+  };
+
   return (
     <>
       <EuiFormRow
         label={i18n.translate('xpack.transform.agg.popoverForm.percentsLabel', {
           defaultMessage: 'Percents',
         })}
-        error={!isValid && [errorMessages[errorMessageType as ValidationResultErrorType]]}
+        error={getErrorMessage()}
         isInvalid={!isValid}
       >
-        <EuiFieldText
-          value={aggConfig.percents}
-          onChange={(e) => {
-            onChange({
-              percents: e.target.value,
-            });
-          }}
+        <EuiComboBox
+          noSuggestions
+          selectedOptions={selectedOptions}
+          onCreateOption={handleCreateOption}
+          onChange={handleOptionsChange}
+          onSearchChange={handleSearchChange}
+          isInvalid={!isValid}
         />
       </EuiFormRow>
     </>
