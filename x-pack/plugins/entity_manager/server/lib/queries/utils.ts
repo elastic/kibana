@@ -6,6 +6,7 @@
  */
 
 import { Entity } from '@kbn/entities-schema';
+import { uniq } from 'lodash';
 
 function mergeEntities(entity1: Entity, entity2: Entity): Entity {
   const merged: Entity = {
@@ -22,7 +23,9 @@ function mergeEntities(entity1: Entity, entity2: Entity): Entity {
     _key.startsWith('metadata.')
   )) {
     if (merged[key]) {
-      merged[key] = Array.isArray(merged[key]) ? [...merged[key], value] : [merged[key], value];
+      merged[key] = uniq(
+        Array.isArray(merged[key]) ? [...merged[key], value] : [merged[key], value]
+      );
     } else {
       merged[key] = value;
     }

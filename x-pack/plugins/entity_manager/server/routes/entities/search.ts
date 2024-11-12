@@ -49,7 +49,7 @@ export const searchEntitiesPreviewRoute = createEntityManagerServerRoute({
     body: z.object({
       filters: z.optional(z.array(z.string())).default([]),
       metadata_fields: z.optional(z.array(z.string())).default([]),
-      limit: z.optional(z.number()).default(5),
+      limit: z.optional(z.number()).default(10),
       sources: z.array(
         z.object({
           type: z.string(),
@@ -60,7 +60,7 @@ export const searchEntitiesPreviewRoute = createEntityManagerServerRoute({
             .array(z.string())
             .transform((filters) => [
               ...filters,
-              `@timestamp >= "${moment().subtract(1, 'hour').toISOString()}"`,
+              `@timestamp >= "${moment().subtract(5, 'minutes').toISOString()}"`,
             ]),
         })
       ),

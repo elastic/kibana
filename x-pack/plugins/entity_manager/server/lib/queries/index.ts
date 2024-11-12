@@ -33,6 +33,7 @@ export function getEntityInstancesQuery(source: EntitySource, limit: number): st
   ];
 
   query += `STATS ${aggs.join(', ')} BY ${source.identity_fields.join(',')} |`;
+  query += `SORT entity.last_seen_timestamp DESC |`;
   query += `LIMIT ${limit}`;
 
   return query;

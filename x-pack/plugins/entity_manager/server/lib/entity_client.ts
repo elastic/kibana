@@ -209,9 +209,12 @@ export class EntityClient {
 
         const sourceHasIdentityFields = source.identity_fields.every((field) => !!fields[field]);
         if (!sourceHasIdentityFields) {
+          // we can't build entities without id fields so we ignore the source.
+          // filters should likely behave similarly.
           return [];
         }
 
+        // but metadata field not being available is fine
         const availableMetadataFields = source.metadata_fields.filter((field) => fields[field]);
 
         const query = getEntityInstancesQuery(
