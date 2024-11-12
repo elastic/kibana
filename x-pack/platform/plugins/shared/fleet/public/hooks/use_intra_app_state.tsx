@@ -16,6 +16,5 @@ import type { AnyIntraAppRouteState } from '../types';
  */
 export function useIntraAppState<S = AnyIntraAppRouteState>(): S | undefined {
   const location = useLocation();
-
   return location.state as S;
 }

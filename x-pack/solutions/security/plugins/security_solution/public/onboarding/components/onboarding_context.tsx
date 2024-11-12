@@ -35,18 +35,19 @@ export interface OnboardingContextValue {
 }
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
-export const OnboardingContextProvider: React.FC<PropsWithChildren<{ spaceId: string }>> =
-  React.memo(({ children, spaceId }) => {
-    const config = useFilteredConfig();
-    const telemetry = useOnboardingTelemetry();
+export const OnboardingContextProvider: React.FC<
+  PropsWithChildren<{ spaceId: string; fleet: FleetStart }>
+> = React.memo(({ children, spaceId, fleet }) => {
+  const config = useFilteredConfig();
+  const telemetry = useOnboardingTelemetry();
 
-    const value = useMemo<OnboardingContextValue>(
-      () => ({ spaceId, telemetry, config }),
-      [spaceId, telemetry, config]
-    );
+  const value = useMemo<OnboardingContextValue>(
+    () => ({ spaceId, telemetry, config }),
+    [spaceId, telemetry, config]
+  );
 
-    return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
-  });
+  return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
+});
 OnboardingContextProvider.displayName = 'OnboardingContextProvider';
 
 export const useOnboardingContext = () => {

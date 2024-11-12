@@ -116,9 +116,12 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   );
 
   const onButtonClick = () => {
-    if (onClickViewAgents) onClickViewAgents();
-    const href = getHref('agent_list');
-    application.navigateToUrl(href);
+    if (onClickViewAgents) {
+      onClickViewAgents();
+    } else {
+      const href = getHref('agent_list');
+      application.navigateToUrl(href);
+    }
   };
 
   if (!policyId || (agentCount === 0 && !showLoading)) {
