@@ -17,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
 
   describe('Indices', function () {
+    this.tags(['skipSvlSearch']);
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.svlCommonPage.loginAsAdmin();
@@ -53,7 +54,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         after(async () => {
           await esDeleteAllIndices(testIndexName);
         });
-        this.tags('skipSvlSearch');
         it('navigates to overview', async () => {
           await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
           await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();

@@ -41,7 +41,12 @@ export function registerEndpointSuggestionsRoutes(
     .post({
       access: 'internal',
       path: SUGGESTIONS_INTERNAL_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
