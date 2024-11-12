@@ -6,10 +6,10 @@
  */
 
 import type { EventLogTelemetryEvent } from './types';
-import { TelemetryEventTypes } from '../../constants';
+import { EventLogEventTypes } from './types';
 
 export const eventLogFilterByRunTypeEvent: EventLogTelemetryEvent = {
-  eventType: TelemetryEventTypes.EventLogFilterByRunType,
+  eventType: EventLogEventTypes.EventLogFilterByRunType,
   schema: {
     runType: {
       type: 'array',
@@ -24,7 +24,7 @@ export const eventLogFilterByRunTypeEvent: EventLogTelemetryEvent = {
 };
 
 export const eventLogShowSourceEventDateRangeEvent: EventLogTelemetryEvent = {
-  eventType: TelemetryEventTypes.EventLogShowSourceEventDateRange,
+  eventType: EventLogEventTypes.EventLogShowSourceEventDateRange,
   schema: {
     isVisible: {
       type: 'boolean',
@@ -35,3 +35,8 @@ export const eventLogShowSourceEventDateRangeEvent: EventLogTelemetryEvent = {
     },
   },
 };
+
+export const eventLogTelemetryEvents = [
+  eventLogFilterByRunTypeEvent,
+  eventLogShowSourceEventDateRangeEvent,
+];
