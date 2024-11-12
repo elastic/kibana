@@ -6,7 +6,7 @@
  */
 import type { FC } from 'react';
 import React from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
@@ -31,68 +31,64 @@ export const EntityFilter: FC<EntityFilterProps> = ({
   mode,
 }) => {
   return (
-    <EuiFlexGroup gutterSize="none" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={
+    <React.Fragment>
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="xpack.ml.entityFilter.addFilterTooltip"
+            defaultMessage="Filter for"
+          />
+        }
+      >
+        <EuiButtonIcon
+          size="s"
+          className="filter-button"
+          onClick={blurButtonOnClick(() => {
+            onFilter({
+              influencerFieldName,
+              influencerFieldValue,
+              action: ML_ENTITY_FIELD_OPERATIONS.ADD,
+            });
+          })}
+          iconType="plusInCircle"
+          aria-label={i18n.translate('xpack.ml.entityFilter.addFilterAriaLabel', {
+            defaultMessage: 'Add filter for {influencerFieldName} {influencerFieldValue}',
+            values: { influencerFieldName, influencerFieldValue },
+          })}
+        />
+      </EuiToolTip>
+      <EuiToolTip
+        content={
+          mode ? (
             <FormattedMessage
-              id="xpack.ml.entityFilter.addFilterTooltip"
-              defaultMessage="Filter for"
+              id="xpack.ml.entityFilter.filterOutTooltip"
+              defaultMessage={'Filter out'}
             />
-          }
-        >
-          <EuiButtonIcon
-            size="s"
-            className="filter-button"
-            onClick={blurButtonOnClick(() => {
-              onFilter({
-                influencerFieldName,
-                influencerFieldValue,
-                action: ML_ENTITY_FIELD_OPERATIONS.ADD,
-              });
-            })}
-            iconType="plusInCircle"
-            aria-label={i18n.translate('xpack.ml.entityFilter.addFilterAriaLabel', {
-              defaultMessage: 'Add filter for {influencerFieldName} {influencerFieldValue}',
-              values: { influencerFieldName, influencerFieldValue },
-            })}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={
-            mode ? (
-              <FormattedMessage
-                id="xpack.ml.entityFilter.filterOutTooltip"
-                defaultMessage={'Filter out'}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.ml.entityFilter.removeFilterTooltip"
-                defaultMessage={'Remove filter'}
-              />
-            )
-          }
-        >
-          <EuiButtonIcon
-            size="s"
-            className="filter-button"
-            onClick={blurButtonOnClick(() => {
-              onFilter({
-                influencerFieldName,
-                influencerFieldValue,
-                action: ML_ENTITY_FIELD_OPERATIONS.REMOVE,
-              });
-            })}
-            iconType="minusInCircle"
-            aria-label={i18n.translate('xpack.ml.entityFilter.removeFilterAriaLabel', {
-              defaultMessage: 'Remove filter for {influencerFieldName} {influencerFieldValue}',
-              values: { influencerFieldName, influencerFieldValue },
-            })}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.entityFilter.removeFilterTooltip"
+              defaultMessage={'Remove filter'}
+            />
+          )
+        }
+      >
+        <EuiButtonIcon
+          size="s"
+          className="filter-button"
+          onClick={blurButtonOnClick(() => {
+            onFilter({
+              influencerFieldName,
+              influencerFieldValue,
+              action: ML_ENTITY_FIELD_OPERATIONS.REMOVE,
+            });
+          })}
+          iconType="minusInCircle"
+          aria-label={i18n.translate('xpack.ml.entityFilter.removeFilterAriaLabel', {
+            defaultMessage: 'Remove filter for {influencerFieldName} {influencerFieldValue}',
+            values: { influencerFieldName, influencerFieldValue },
+          })}
+        />
+      </EuiToolTip>
+    </React.Fragment>
   );
 };
