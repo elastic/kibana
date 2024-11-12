@@ -16,7 +16,7 @@ import {
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
-import { DEFAULT_THREAT_MATCH_QUERY } from '../../../../../common/constants';
+import { DEFAULT_MAX_SIGNALS, DEFAULT_THREAT_MATCH_QUERY } from '../../../../../common/constants';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { AboutStepRule, DefineStepRule, RuleStepsOrder, ScheduleStepRule } from './types';
 import { DataSourceType, AlertSuppressionDurationType, RuleStep } from './types';
@@ -101,6 +101,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   setup: '',
   threatIndicatorPath: undefined,
   timestampOverrideFallbackDisabled: undefined,
+  maxSignals: DEFAULT_MAX_SIGNALS,
 };
 
 const DEFAULT_INTERVAL = '5m';
