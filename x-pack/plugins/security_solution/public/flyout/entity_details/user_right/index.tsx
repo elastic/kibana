@@ -33,6 +33,7 @@ import { UserDetailsPanelKey } from '../user_details_left';
 import { useObservedUser } from './hooks/use_observed_user';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { UserPreviewPanelFooter } from '../user_preview/footer';
+import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -123,7 +124,7 @@ export const UserPanel = ({
   const { openLeftPanel } = useExpandableFlyoutApi();
   const openPanelTab = useCallback(
     (tab?: EntityDetailsLeftPanelTab) => {
-      telemetry.reportRiskInputsExpandedFlyoutOpened({
+      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
         entity: 'user',
       });
 
