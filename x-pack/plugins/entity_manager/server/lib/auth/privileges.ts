@@ -66,7 +66,7 @@ export const entityDefinitionRuntimePrivileges = (sourceIndices: string[]) => ({
       privileges: ['create_index', 'delete_index', 'index', 'create_doc', 'auto_configure', 'read'],
     },
     {
-      names: [...BUILT_IN_ALLOWED_INDICES, ENTITY_INTERNAL_INDICES_PATTERN],
+      names: [...sourceIndices, ENTITY_INTERNAL_INDICES_PATTERN],
       privileges: ['read', 'view_index_metadata'],
     },
   ],
