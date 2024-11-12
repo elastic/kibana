@@ -115,7 +115,7 @@ const getComboBoxProps = (fields: ComboBoxFields): GetFieldComboBoxPropsReturn =
   };
 };
 
-export const useField = ({
+export const useEsField = ({
   indexPattern,
   fieldTypeFilter,
   isRequired,
