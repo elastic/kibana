@@ -58,12 +58,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           withInternalHeaders: true,
         }
       );
-
-      preExistingIntegrations = (
-        await callApiAs({
-          roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
-        })
-      ).integrations.map((integration: Integration) => integration.name);
     });
 
     after(async () => {
@@ -88,7 +82,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(body.integrations.map((integration: Integration) => integration.name).sort()).to.eql(
-          preExistingIntegrations.concat(['synthetics', 'system']).sort()
+          new Set(preExistingIntegrations.concat(['synthetics', 'system']).sort())
         );
 
         expect(
@@ -113,6 +107,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('gets the custom installed integrations', () => {
       before(async () => {
+        preExistingIntegrations = (
+          await callApiAs({
+            roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
+          })
+        ).integrations.map((integration: Integration) => integration.name);
+
         await Promise.all(
           customIntegrations.map((customIntegration: CustomIntegration) =>
             packageApi.installCustomIntegration({ roleAuthc: adminRoleAuthc, customIntegration })
@@ -126,7 +126,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(body.integrations.map((integration: Integration) => integration.name).sort()).to.eql(
-          preExistingIntegrations.concat('my.custom.integration').sort()
+          new Set(preExistingIntegrations.concat('my.custom.integration').sort())
         );
 
         expect(
