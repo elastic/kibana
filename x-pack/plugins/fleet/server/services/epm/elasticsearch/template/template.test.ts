@@ -14,7 +14,11 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
-import { STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS } from '../../../../constants/fleet_es_assets';
+import {
+  FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+  FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+} from '../../../../constants/fleet_es_assets';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
@@ -135,6 +139,34 @@ describe('EPM template', () => {
       ...composedOfTemplates,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+      FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
+    ]);
+  });
+
+  it('does not create fleet event ingested component template if event ingested flag is disabled', () => {
+    appContextService.start(
+      createAppContextStartContractMock({
+        eventIngestedEnabled: false,
+      })
+    );
+    const composedOfTemplates = ['component1', 'component2'];
+
+    const template = getTemplate({
+      templateIndexPattern: 'logs-*',
+      type: 'logs',
+      packageName: 'nginx',
+      composedOfTemplates,
+      templatePriority: 200,
+      mappings: { properties: [] },
+      isIndexModeTimeSeries: false,
+    });
+    expect(template.composed_of).toStrictEqual([
+      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
+      ...composedOfTemplates,
+      STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+      FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+      FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
     ]);
   });
 

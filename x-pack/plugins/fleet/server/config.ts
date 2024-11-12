@@ -170,6 +170,7 @@ export const config: PluginConfigDescriptor = {
       proxies: PreconfiguredFleetProxiesSchema,
       spaceSettings: PreconfiguredSpaceSettingsSchema,
       agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
+      eventIngestedEnabled: schema.boolean({ defaultValue: true }),
       setup: schema.maybe(
         schema.object({
           agentPolicySchemaUpgradeBatchSize: schema.maybe(schema.number()),

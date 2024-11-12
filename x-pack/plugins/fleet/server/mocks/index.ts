@@ -81,6 +81,7 @@ export const createAppContextStartContractMock = (
     agents: { enabled: true, elasticsearch: {} },
     enabled: true,
     agentIdVerificationEnabled: true,
+    eventIngestedEnabled: true,
     ...configOverrides,
   };
 
@@ -120,6 +121,7 @@ export const createAppContextStartContractMock = (
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
       agentIdVerificationEnabled: true,
+      eventIngestedEnabled: true,
     },
     config$,
     kibanaVersion: '8.99.0', // Fake version :)

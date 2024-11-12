@@ -74,11 +74,41 @@ export const FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_CONTENT = {
   },
 };
 
+export const FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME = '.fleet_event_ingested-1';
+
+export const FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_CONTENT = {
+  _meta: meta,
+  template: {
+    settings: {
+      index: {
+        final_pipeline: FLEET_FINAL_PIPELINE_ID,
+      },
+    },
+    mappings: {
+      properties: {
+        event: {
+          properties: {
+            ingested: {
+              type: 'date',
+              format: 'strict_date_time_no_millis||strict_date_optional_time||epoch_millis',
+              ignore_malformed: false,
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 export const FLEET_COMPONENT_TEMPLATES = [
   { name: FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME, body: FLEET_GLOBALS_COMPONENT_TEMPLATE_CONTENT },
   {
     name: FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
     body: FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_CONTENT,
+  },
+  {
+    name: FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
+    body: FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_CONTENT,
   },
 ];
 

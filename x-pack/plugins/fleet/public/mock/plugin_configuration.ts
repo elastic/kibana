@@ -13,6 +13,7 @@ export const createConfigurationMock = (): FleetConfigType => {
     registryUrl: '',
     registryProxyUrl: '',
     agentIdVerificationEnabled: true,
+    eventIngestedEnabled: true,
     agents: {
       enabled: true,
       elasticsearch: {
