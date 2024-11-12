@@ -12,13 +12,10 @@ import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
-import { DisplayType, FieldType } from '../lib/dynamic_config/types';
 import { useProviders } from './providers/get_providers';
-import { getTaskTypes } from './get_task_types';
-import { HttpSetup } from '@kbn/core-http-browser';
+import { DisplayType, FieldType } from '../../../common/dynamic_config/types';
 
 jest.mock('./providers/get_providers');
-jest.mock('./get_task_types');
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
@@ -37,13 +34,32 @@ jest.mock('@faker-js/faker', () => ({
 }));
 
 const mockProviders = useProviders as jest.Mock;
-const mockTaskTypes = getTaskTypes as jest.Mock;
 
 const providersSchemas = [
   {
     provider: 'openai',
     logo: '', // should be openai logo here, the hardcoded uses assets/images
-    taskTypes: ['completion', 'text_embedding'],
+    task_types: [
+      {
+        task_type: 'completion',
+        configuration: {
+          user: {
+            display: DisplayType.TEXTBOX,
+            label: 'User',
+            order: 1,
+            required: false,
+            sensitive: false,
+            tooltip: 'Specifies the user issuing the request.',
+            type: FieldType.STRING,
+            validations: [],
+            value: '',
+            ui_restrictions: [],
+            default_value: null,
+            depends_on: [],
+          },
+        },
+      },
+    ],
     configuration: {
       api_key: {
         display: DisplayType.TEXTBOX,
@@ -106,7 +122,16 @@ const providersSchemas = [
   {
     provider: 'googleaistudio',
     logo: '', // should be googleaistudio logo here, the hardcoded uses assets/images
-    taskTypes: ['completion', 'text_embedding'],
+    task_types: [
+      {
+        task_type: 'completion',
+        configuration: {},
+      },
+      {
+        task_type: 'text_embedding',
+        configuration: {},
+      },
+    ],
     configuration: {
       api_key: {
         display: DisplayType.TEXTBOX,
@@ -139,39 +164,6 @@ const providersSchemas = [
     },
   },
 ];
-const taskTypesSchemas: Record<string, any> = {
-  googleaistudio: [
-    {
-      task_type: 'completion',
-      configuration: {},
-    },
-    {
-      task_type: 'text_embedding',
-      configuration: {},
-    },
-  ],
-  openai: [
-    {
-      task_type: 'completion',
-      configuration: {
-        user: {
-          display: DisplayType.TEXTBOX,
-          label: 'User',
-          order: 1,
-          required: false,
-          sensitive: false,
-          tooltip: 'Specifies the user issuing the request.',
-          type: FieldType.STRING,
-          validations: [],
-          value: '',
-          ui_restrictions: [],
-          default_value: null,
-          depends_on: [],
-        },
-      },
-    },
-  ],
-};
 
 const openAiConnector = {
   actionTypeId: '.inference',
@@ -222,9 +214,6 @@ describe('ConnectorFields renders', () => {
       isLoading: false,
       data: providersSchemas,
     });
-    mockTaskTypes.mockImplementation(
-      (http: HttpSetup, provider: string) => taskTypesSchemas[provider]
-    );
   });
   test('openai provider fields are rendered', async () => {
     const { getAllByTestId } = render(
