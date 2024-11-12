@@ -11,6 +11,16 @@ import type { UIExtensionPoint, UIExtensionsStorage } from '../types';
 
 export const UIExtensionsContext = React.createContext<UIExtensionsStorage>({});
 
+export const UIExtensionsContextProvider = ({
+  values,
+  children,
+}: {
+  values: UIExtensionsStorage;
+  children: React.ReactNode;
+}) => {
+  return <UIExtensionsContext.Provider value={values}>{children}</UIExtensionsContext.Provider>;
+};
+
 type NarrowExtensionPoint<V extends UIExtensionPoint['view'], A = UIExtensionPoint> = A extends {
   view: V;
 }

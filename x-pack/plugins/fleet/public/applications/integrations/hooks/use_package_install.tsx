@@ -261,16 +261,18 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
   };
 }
 
-export const [
-  PackageInstallProvider,
-  useInstallPackage,
-  useSetPackageInstallStatus,
-  useGetPackageInstallStatus,
-  useUninstallPackage,
-] = createContainer(
+export const packageInstallContainer = createContainer(
   usePackageInstall,
   (value) => value.installPackage,
   (value) => value.setPackageInstallStatus,
   (value) => value.getPackageInstallStatus,
   (value) => value.uninstallPackage
 );
+
+export const [
+  PackageInstallProvider,
+  useInstallPackage,
+  useSetPackageInstallStatus,
+  useGetPackageInstallStatus,
+  useUninstallPackage,
+] = packageInstallContainer;

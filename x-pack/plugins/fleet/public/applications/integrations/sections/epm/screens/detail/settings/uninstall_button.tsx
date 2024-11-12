@@ -12,7 +12,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { InstallStatus } from '../../../../../types';
 import type { PackageInfo } from '../../../../../types';
 
-import { useAuthz, useGetPackageInstallStatus, useUninstallPackage } from '../../../../../hooks';
+import {
+  useAuthz,
+  useGetPackageInstallStatus,
+  useIntegrationsStateContext,
+  useUninstallPackage,
+} from '../../../../../hooks';
 
 import { ConfirmPackageUninstall } from './confirm_package_uninstall';
 
