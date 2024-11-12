@@ -9,51 +9,83 @@ import { z } from '@kbn/zod';
 
 const stringOrNumberOrBoolean = z.union([z.string(), z.number(), z.boolean()]);
 
-export const rerouteFilterConditionSchema = z.object({
+export const filterConditionSchema = z.object({
   field: z.string(),
   operator: z.enum(['eq', 'neq', 'lt', 'lte', 'gt', 'gte', 'contains', 'startsWith', 'endsWith']),
   value: stringOrNumberOrBoolean,
 });
 
-export type RerouteFilterCondition = z.infer<typeof rerouteFilterConditionSchema>;
+export type FilterCondition = z.infer<typeof filterConditionSchema>;
 
-export interface RerouteAndCondition {
-  and: RerouteCondition[];
+export interface AndCondition {
+  and: Condition[];
 }
 
 export interface RerouteOrCondition {
-  or: RerouteCondition[];
+  or: Condition[];
 }
 
-export type RerouteCondition = RerouteFilterCondition | RerouteAndCondition | RerouteOrCondition;
+export type Condition = FilterCondition | AndCondition | RerouteOrCondition | undefined;
 
-export const rerouteConditionSchema: z.ZodType<RerouteCondition> = z.lazy(() =>
+export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
   z.union([
-    rerouteFilterConditionSchema,
-    z.object({ and: z.array(rerouteConditionSchema) }),
-    z.object({ or: z.array(rerouteConditionSchema) }),
+    filterConditionSchema,
+    z.object({ and: z.array(conditionSchema) }),
+    z.object({ or: z.array(conditionSchema) }),
   ])
 );
 
-/**
- * Example of a "root" stream
- * {
- *   "id": "logs",
- * }
- *
- * Example of a forked stream
- * {
- *    "id": "logs.nginx",
- *    "condition": { field: 'log.logger, operator: 'eq', value": "nginx_proxy" }
- *    "forked_from": "logs"
- * }
- */
+export const grokProcessingDefinitionSchema = z.object({
+  type: z.literal('grok'),
+  field: z.string(),
+  patterns: z.array(z.string()),
+  pattern_definitions: z.optional(z.record(z.string())),
+});
 
-export const streamDefinitonSchema = z.object({
+export const dissectProcessingDefinitionSchema = z.object({
+  type: z.literal('dissect'),
+  field: z.string(),
+  pattern: z.string(),
+});
+
+export const processingDefinitionSchema = z.object({
+  condition: z.optional(conditionSchema),
+  config: z.discriminatedUnion('type', [
+    grokProcessingDefinitionSchema,
+    dissectProcessingDefinitionSchema,
+  ]),
+});
+
+export type ProcessingDefinition = z.infer<typeof processingDefinitionSchema>;
+
+export const fieldDefinitionSchema = z.object({
+  name: z.string(),
+  type: z.enum(['keyword', 'match_only_text', 'long', 'double', 'date', 'boolean', 'ip']),
+});
+
+export type FieldDefinition = z.infer<typeof fieldDefinitionSchema>;
+
+export const streamWithoutIdDefinitonSchema = z.object({
+  processing: z.array(processingDefinitionSchema).default([]),
+  fields: z.array(fieldDefinitionSchema).default([]),
+  children: z
+    .array(
+      z.object({
+        id: z.string(),
+        condition: conditionSchema,
+      })
+    )
+    .default([]),
+});
+
+export type StreamWithoutIdDefinition = z.infer<typeof streamDefinitonSchema>;
+
+export const streamDefinitonSchema = streamWithoutIdDefinitonSchema.extend({
   id: z.string(),
-  forked_from: z.optional(z.string()),
-  condition: z.optional(rerouteConditionSchema),
-  root: z.boolean().default(false),
 });
 
 export type StreamDefinition = z.infer<typeof streamDefinitonSchema>;
+
+export const streamDefinitonWithoutChildrenSchema = streamDefinitonSchema.omit({ children: true });
+
+export type StreamWithoutChildrenDefinition = z.infer<typeof streamDefinitonWithoutChildrenSchema>;

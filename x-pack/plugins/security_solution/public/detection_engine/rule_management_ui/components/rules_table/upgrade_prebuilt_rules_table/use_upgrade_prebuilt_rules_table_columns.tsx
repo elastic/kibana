@@ -6,7 +6,14 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiButtonEmpty, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade/rule_upgrade_state';
 import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
@@ -104,6 +111,35 @@ const INTEGRATIONS_COLUMN: TableColumn = {
   truncateText: true,
 };
 
+const MODIFIED_COLUMN: TableColumn = {
+  field: 'current_rule.rule_source',
+  name: <RulesTableEmptyColumnName name={i18n.COLUMN_MODIFIED} />,
+  align: 'center',
+  render: (ruleSource: Rule['rule_source']) => {
+    if (
+      ruleSource == null ||
+      ruleSource.type === 'internal' ||
+      (ruleSource.type === 'external' && ruleSource.is_customized === false)
+    ) {
+      return null;
+    }
+
+    return (
+      <EuiToolTip content={i18n.MODIFIED_TOOLTIP}>
+        <EuiBadge
+          color="hollow"
+          data-test-subj="upgradeRulesTableModifiedColumnBadge"
+          aria-label={i18n.MODIFIED_LABEL}
+        >
+          {i18n.MODIFIED_LABEL}
+        </EuiBadge>
+      </EuiToolTip>
+    );
+  },
+  width: '90px',
+  truncateText: true,
+};
+
 const createUpgradeButtonColumn = (
   upgradeRules: UpgradePrebuiltRulesTableActions['upgradeRules'],
   loadingRules: RuleSignatureId[],
@@ -124,15 +160,21 @@ const createUpgradeButtonColumn = (
       />
     );
 
+    const tooltipContent = isDisabledByConflicts
+      ? i18n.UPDATE_RULE_BUTTON_TOOLTIP_CONFLICTS
+      : undefined;
+
     return (
-      <EuiButtonEmpty
-        size="s"
-        disabled={isUpgradeButtonDisabled}
-        onClick={() => upgradeRules([ruleId])}
-        data-test-subj={`upgradeSinglePrebuiltRuleButton-${ruleId}`}
-      >
-        {isRuleUpgrading ? spinner : i18n.UPDATE_RULE_BUTTON}
-      </EuiButtonEmpty>
+      <EuiToolTip content={tooltipContent}>
+        <EuiButtonEmpty
+          size="s"
+          disabled={isUpgradeButtonDisabled}
+          onClick={() => upgradeRules([ruleId])}
+          data-test-subj={`upgradeSinglePrebuiltRuleButton-${ruleId}`}
+        >
+          {isRuleUpgrading ? spinner : i18n.UPDATE_RULE_BUTTON}
+        </EuiButtonEmpty>
+      </EuiToolTip>
     );
   },
   width: '10%',
@@ -154,9 +196,15 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
   } = useUpgradePrebuiltRulesTableContext();
   const isDisabled = isRefetching || isUpgradingSecurityPackages;
 
+  // TODO: move this change to the `INTEGRATIONS_COLUMN` when `prebuiltRulesCustomizationEnabled` feature flag is removed
+  if (isPrebuiltRulesCustomizationEnabled) {
+    INTEGRATIONS_COLUMN.width = '70px';
+  }
+
   return useMemo(
     () => [
       RULE_NAME_COLUMN,
+      ...(isPrebuiltRulesCustomizationEnabled ? [MODIFIED_COLUMN] : []),
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {

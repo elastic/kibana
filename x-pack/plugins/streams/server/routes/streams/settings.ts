@@ -8,8 +8,8 @@
 import { STREAMS_INDEX } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 
-export const getStreamsSettingsRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/_settings',
+export const getStreamsStatusRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_status',
   options: {
     security: {
       authz: {
@@ -28,6 +28,6 @@ export const getStreamsSettingsRoute = createServerRoute({
   },
 });
 
-export const streamsSettingsRoutes = {
-  ...getStreamsSettingsRoute,
+export const streamsStatusRoutes = {
+  ...getStreamsStatusRoute,
 };

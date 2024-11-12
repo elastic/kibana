@@ -28,6 +28,8 @@ import {
   ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY,
   ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY,
 } from '../translations';
+import { useEntityEnginePrivileges } from '../hooks/use_entity_engine_privileges';
+import { MissingPrivilegesCallout } from './missing_privileges_callout';
 
 export interface Enablements {
   riskScore: boolean;
@@ -59,6 +61,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
     riskScore: !!riskScore.checked,
     entityStore: !!entityStore.checked,
   });
+  const { data: privileges, isLoading: isLoadingPrivileges } = useEntityEnginePrivileges();
 
   if (!visible) {
     return null;
@@ -69,20 +72,13 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.enablements.modal.title"
-            defaultMessage="Additional charges may apply"
+            defaultMessage="Entity Analytics Enablement"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiFlexGroup direction="column">
-          <EuiText>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.enablements.modal.description"
-              defaultMessage="Please be aware that activating these features may incur additional charges depending on your subscription plan. Review your plan details carefully to avoid unexpected costs before proceeding."
-            />
-          </EuiText>
-          <EuiHorizontalRule margin="none" />
           <EuiFlexItem>
             <EuiSwitch
               label={
@@ -111,7 +107,9 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
                   />
                 }
                 checked={enablements.entityStore}
-                disabled={entityStore.disabled || false}
+                disabled={
+                  entityStore.disabled || (!isLoadingPrivileges && !privileges?.has_all_required)
+                }
                 onChange={() =>
                   setEnablements((prev) => ({ ...prev, entityStore: !prev.entityStore }))
                 }
@@ -121,6 +119,11 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
               </EuiToolTip>
             </EuiFlexGroup>
           </EuiFlexItem>
+          {!privileges || privileges.has_all_required ? null : (
+            <EuiFlexItem>
+              <MissingPrivilegesCallout privileges={privileges} />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <EuiText>{ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY}</EuiText>
           </EuiFlexItem>

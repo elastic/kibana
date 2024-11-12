@@ -6,4 +6,4 @@
  */
 
 export const ASSET_VERSION = 1;
-export const STREAMS_INDEX = '.streams';
+export const STREAMS_INDEX = '.kibana_streams';

@@ -25,7 +25,7 @@ import {
 import pRetry from 'p-retry';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { StructuredTool } from '@langchain/core/tools';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { AnalyticsServiceSetup, ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
@@ -269,9 +269,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   public setupKnowledgeBase = async ({
     soClient,
     v2KnowledgeBaseEnabled = true,
+    ignoreSecurityLabs = false,
   }: {
     soClient: SavedObjectsClientContract;
     v2KnowledgeBaseEnabled?: boolean;
+    ignoreSecurityLabs?: boolean;
   }): Promise<void> => {
     if (this.options.getIsKBSetupInProgress()) {
       this.options.logger.debug('Knowledge Base setup already in progress');
@@ -366,7 +368,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
 
-      if (v2KnowledgeBaseEnabled) {
+      if (v2KnowledgeBaseEnabled && !ignoreSecurityLabs) {
         const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
         if (!labsDocsLoaded) {
           this.options.logger.debug(`Loading Security Labs KB docs...`);
@@ -457,6 +459,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
           })
         : undefined;
+    // Intentionally no telemetry here - this path only used to install security docs
+    // Plans to make this function private in a different PR so no user entry ever is created in this path
     this.options.logger.debug(`created: ${created?.data.hits.hits.length ?? '0'}`);
     this.options.logger.debug(() => `errors: ${JSON.stringify(errors, null, 2)}`);
 
@@ -684,10 +688,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public createKnowledgeBaseEntry = async ({
     knowledgeBaseEntry,
+    telemetry,
     global = false,
   }: {
     knowledgeBaseEntry: KnowledgeBaseEntryCreateProps | LegacyKnowledgeBaseEntryCreateProps;
     global?: boolean;
+    telemetry: AnalyticsServiceSetup;
   }): Promise<KnowledgeBaseEntryResponse | null> => {
     const authenticatedUser = this.options.currentUser;
 
@@ -714,6 +720,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       user: authenticatedUser,
       knowledgeBaseEntry,
       global,
+      telemetry,
       isV2: this.options.v2KnowledgeBaseEnabled,
     });
   };

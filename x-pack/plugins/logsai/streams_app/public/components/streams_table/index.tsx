@@ -4,10 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import type { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import type { ListStreamResponse } from '@kbn/streams-plugin/server';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -16,22 +12,24 @@ import {
   EuiLink,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import { StreamDefinition } from '@kbn/streams-plugin/common';
+import React, { useMemo } from 'react';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-
-type ListStreamItem = ListStreamResponse['hits'][number]['_source'];
 
 export function StreamsTable({
   listFetch,
   query,
 }: {
-  listFetch: AbortableAsyncState<ListStreamResponse>;
+  listFetch: AbortableAsyncState<{ definitions: StreamDefinition[] }>;
   query: string;
 }) {
   const router = useStreamsAppRouter();
 
   const items = useMemo(() => {
-    return listFetch.value?.hits.map((hit) => hit._source) ?? [];
-  }, [listFetch.value?.hits]);
+    return listFetch.value?.definitions ?? [];
+  }, [listFetch.value?.definitions]);
 
   const filteredItems = useMemo(() => {
     if (!query) {
@@ -41,7 +39,7 @@ export function StreamsTable({
     return items.filter((item) => item.id.toLowerCase().startsWith(query.toLowerCase()));
   }, [query, items]);
 
-  const columns = useMemo<Array<EuiBasicTableColumn<ListStreamItem>>>(() => {
+  const columns = useMemo<Array<EuiBasicTableColumn<StreamDefinition>>>(() => {
     return [
       {
         field: 'id',

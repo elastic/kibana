@@ -25,8 +25,8 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { HostOverview } from '../../../../overview/components/host_overview';
@@ -71,6 +71,7 @@ import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -134,7 +135,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         banner: HOST_PREVIEW_BANNER,
       },
     });
-    telemetry.reportDetailsFlyoutOpened({
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: scopeId,
       panel: 'preview',
     });
@@ -359,11 +360,13 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
             name={hostName}
             direction="column"
             data-test-subj={HOST_DETAILS_MISCONFIGURATIONS_TEST_ID}
+            telemetrySuffix={'host-details'}
           />
           <VulnerabilitiesInsight
             hostName={hostName}
             direction="column"
             data-test-subj={HOST_DETAILS_VULNERABILITIES_TEST_ID}
+            telemetrySuffix={'host-details'}
           />
         </EuiFlexGrid>
         <EuiSpacer size="l" />

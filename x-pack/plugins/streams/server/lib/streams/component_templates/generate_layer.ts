@@ -5,26 +5,33 @@
  * 2.0.
  */
 
-import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ClusterPutComponentTemplateRequest,
+  MappingProperty,
+} from '@elastic/elasticsearch/lib/api/types';
+import { StreamDefinition } from '../../../../common/types';
 import { ASSET_VERSION } from '../../../../common/constants';
+import { logsSettings } from './logs_layer';
+import { isRoot } from '../helpers/hierarchy';
+import { getComponentTemplateName } from './name';
 
-export function generateLayer(id: string): ClusterPutComponentTemplateRequest {
+export function generateLayer(
+  id: string,
+  definition: StreamDefinition
+): ClusterPutComponentTemplateRequest {
+  const properties: Record<string, MappingProperty> = {};
+  definition.fields.forEach((field) => {
+    properties[field.name] = {
+      type: field.type,
+    };
+  });
   return {
-    name: `${id}@stream.layer`,
+    name: getComponentTemplateName(id),
     template: {
-      settings: {
-        index: {
-          lifecycle: {
-            name: 'logs',
-          },
-          codec: 'best_compression',
-          mapping: {
-            total_fields: {
-              ignore_dynamic_beyond_limit: true,
-            },
-            ignore_malformed: true,
-          },
-        },
+      settings: isRoot(definition.id) ? logsSettings : {},
+      mappings: {
+        subobjects: false,
+        properties,
       },
     },
     version: ASSET_VERSION,

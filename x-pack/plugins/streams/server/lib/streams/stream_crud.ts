@@ -5,25 +5,80 @@
  * 2.0.
  */
 
-import { SearchHit } from '@kbn/es-types';
-import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { get } from 'lodash';
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { Logger } from '@kbn/logging';
 import { STREAMS_INDEX } from '../../../common/constants';
-import { StreamDefinition } from '../../../common/types';
-import { ComponentTemplateNotFound, DefinitionNotFound, IndexTemplateNotFound } from './errors';
+import { FieldDefinition, StreamDefinition } from '../../../common/types';
+import { generateLayer } from './component_templates/generate_layer';
+import { deleteComponent, upsertComponent } from './component_templates/manage_component_templates';
+import { getComponentTemplateName } from './component_templates/name';
+import {
+  deleteDataStream,
+  rolloverDataStreamIfNecessary,
+  upsertDataStream,
+} from './data_streams/manage_data_streams';
+import { DefinitionNotFound } from './errors';
+import { MalformedFields } from './errors/malformed_fields';
+import { getAncestors } from './helpers/hierarchy';
+import { generateIndexTemplate } from './index_templates/generate_index_template';
+import { deleteTemplate, upsertTemplate } from './index_templates/manage_index_templates';
+import { getIndexTemplateName } from './index_templates/name';
+import { generateIngestPipeline } from './ingest_pipelines/generate_ingest_pipeline';
+import { generateReroutePipeline } from './ingest_pipelines/generate_reroute_pipeline';
+import {
+  deleteIngestPipeline,
+  upsertIngestPipeline,
+} from './ingest_pipelines/manage_ingest_pipelines';
+import { getProcessingPipelineName, getReroutePipelineName } from './ingest_pipelines/name';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
-  logger: Logger;
 }
 
 interface BaseParamsWithDefinition extends BaseParams {
   definition: StreamDefinition;
 }
 
-export async function createStream({ definition, scopedClusterClient }: BaseParamsWithDefinition) {
-  return scopedClusterClient.asCurrentUser.index({
+interface DeleteStreamParams extends BaseParams {
+  id: string;
+  logger: Logger;
+}
+
+export async function deleteStreamObjects({ id, scopedClusterClient, logger }: DeleteStreamParams) {
+  await deleteDataStream({
+    esClient: scopedClusterClient.asCurrentUser,
+    name: id,
+    logger,
+  });
+  await deleteTemplate({
+    esClient: scopedClusterClient.asCurrentUser,
+    name: getIndexTemplateName(id),
+    logger,
+  });
+  await deleteComponent({
+    esClient: scopedClusterClient.asCurrentUser,
+    name: getComponentTemplateName(id),
+    logger,
+  });
+  await deleteIngestPipeline({
+    esClient: scopedClusterClient.asCurrentUser,
+    id: getProcessingPipelineName(id),
+    logger,
+  });
+  await deleteIngestPipeline({
+    esClient: scopedClusterClient.asCurrentUser,
+    id: getReroutePipelineName(id),
+    logger,
+  });
+  await scopedClusterClient.asInternalUser.delete({
+    id,
+    index: STREAMS_INDEX,
+    refresh: 'wait_for',
+  });
+}
+
+async function upsertInternalStream({ definition, scopedClusterClient }: BaseParamsWithDefinition) {
+  return scopedClusterClient.asInternalUser.index({
     id: definition.id,
     index: STREAMS_INDEX,
     document: definition,
@@ -31,26 +86,52 @@ export async function createStream({ definition, scopedClusterClient }: BasePara
   });
 }
 
+type ListStreamsParams = BaseParams;
+
+export interface ListStreamResponse {
+  total: number;
+  definitions: StreamDefinition[];
+}
+
+export async function listStreams({
+  scopedClusterClient,
+}: ListStreamsParams): Promise<ListStreamResponse> {
+  const response = await scopedClusterClient.asInternalUser.search<StreamDefinition>({
+    index: STREAMS_INDEX,
+    size: 10000,
+    fields: ['id'],
+    _source: false,
+    sort: [{ id: 'asc' }],
+  });
+  const definitions = response.hits.hits.map((hit) => hit._source!);
+  const total = response.hits.total!;
+
+  return {
+    definitions,
+    total: typeof total === 'number' ? total : total.value,
+  };
+}
+
 interface ReadStreamParams extends BaseParams {
   id: string;
 }
 
-export async function readStream({ id, ...baseParams }: ReadStreamParams) {
-  const { scopedClusterClient } = baseParams;
+export interface ReadStreamResponse {
+  definition: StreamDefinition;
+}
+
+export async function readStream({
+  id,
+  scopedClusterClient,
+}: ReadStreamParams): Promise<ReadStreamResponse> {
   try {
-    const response = await scopedClusterClient.asCurrentUser.get<StreamDefinition>({
+    const response = await scopedClusterClient.asInternalUser.get<StreamDefinition>({
       id,
       index: STREAMS_INDEX,
     });
     const definition = response._source as StreamDefinition;
-    const indexTemplate = await readIndexTemplate({ ...baseParams, definition });
-    const componentTemplate = await readComponentTemplate({ ...baseParams, definition });
-    const ingestPipelines = await readIngestPipelines({ ...baseParams, definition });
     return {
       definition,
-      index_template: indexTemplate,
-      component_template: componentTemplate,
-      ingest_pipelines: ingestPipelines,
     };
   } catch (e) {
     if (e.meta?.statusCode === 404) {
@@ -60,89 +141,174 @@ export async function readStream({ id, ...baseParams }: ReadStreamParams) {
   }
 }
 
-type ListStreamsParams = BaseParams;
+interface ReadAncestorsParams extends BaseParams {
+  id: string;
+}
 
-export interface ListStreamResponse {
-  hits: Array<SearchHit<StreamDefinition>>;
-  total: {
-    value: number;
+export interface ReadAncestorsResponse {
+  ancestors: Array<{ definition: StreamDefinition }>;
+}
+
+export async function readAncestors({
+  id,
+  scopedClusterClient,
+}: ReadAncestorsParams): Promise<ReadAncestorsResponse> {
+  const ancestorIds = getAncestors(id);
+
+  return {
+    ancestors: await Promise.all(
+      ancestorIds.map((ancestorId) => readStream({ scopedClusterClient, id: ancestorId }))
+    ),
   };
 }
 
-export async function listStreams({
-  scopedClusterClient,
-  logger,
-}: ListStreamsParams): Promise<ListStreamResponse> {
-  const esClient = createObservabilityEsClient({
-    client: scopedClusterClient.asCurrentUser,
-    logger,
-    plugin: 'streams',
-  });
+interface ReadDescendantsParams extends BaseParams {
+  id: string;
+}
 
-  const response = await esClient.search<StreamDefinition>('list_streams', {
+export async function readDescendants({ id, scopedClusterClient }: ReadDescendantsParams) {
+  const response = await scopedClusterClient.asInternalUser.search<StreamDefinition>({
     index: STREAMS_INDEX,
-    allow_no_indices: true,
-    track_total_hits: true,
-    size: 10_000,
+    size: 10000,
+    body: {
+      query: {
+        bool: {
+          filter: {
+            prefix: {
+              id,
+            },
+          },
+          must_not: {
+            term: {
+              id,
+            },
+          },
+        },
+      },
+    },
   });
-
-  return {
-    hits: response.hits.hits,
-    total: response.hits.total,
-  };
+  return response.hits.hits.map((hit) => hit._source as StreamDefinition);
 }
 
-export async function readIndexTemplate({
-  scopedClusterClient,
-  definition,
-}: BaseParamsWithDefinition) {
-  const response = await scopedClusterClient.asSecondaryAuthUser.indices.getIndexTemplate({
-    name: `${definition.id}@stream`,
+export async function validateAncestorFields(
+  scopedClusterClient: IScopedClusterClient,
+  id: string,
+  fields: FieldDefinition[]
+) {
+  const { ancestors } = await readAncestors({
+    id,
+    scopedClusterClient,
   });
-  const indexTemplate = response.index_templates.find(
-    (doc) => doc.name === `${definition.id}@stream`
-  );
-  if (!indexTemplate) {
-    throw new IndexTemplateNotFound(`Unable to find index_template for ${definition.id}`);
+  for (const ancestor of ancestors) {
+    for (const field of fields) {
+      if (
+        ancestor.definition.fields.some(
+          (ancestorField) => ancestorField.type !== field.type && ancestorField.name === field.name
+        )
+      ) {
+        throw new MalformedFields(
+          `Field ${field.name} is already defined with incompatible type in the parent stream ${ancestor.definition.id}`
+        );
+      }
+    }
   }
-  return indexTemplate;
 }
 
-export async function readComponentTemplate({
-  scopedClusterClient,
-  definition,
-}: BaseParamsWithDefinition) {
-  const response = await scopedClusterClient.asSecondaryAuthUser.cluster.getComponentTemplate({
-    name: `${definition.id}@stream.layer`,
+export async function validateDescendantFields(
+  scopedClusterClient: IScopedClusterClient,
+  id: string,
+  fields: FieldDefinition[]
+) {
+  const descendants = await readDescendants({
+    id,
+    scopedClusterClient,
   });
-  const componentTemplate = response.component_templates.find(
-    (doc) => doc.name === `${definition.id}@stream.layer`
-  );
-  if (!componentTemplate) {
-    throw new ComponentTemplateNotFound(`Unable to find component_template for ${definition.id}`);
+  for (const descendant of descendants) {
+    for (const field of fields) {
+      if (
+        descendant.fields.some(
+          (descendantField) =>
+            descendantField.type !== field.type && descendantField.name === field.name
+        )
+      ) {
+        throw new MalformedFields(
+          `Field ${field.name} is already defined with incompatible type in the child stream ${descendant.id}`
+        );
+      }
+    }
   }
-  return componentTemplate;
 }
 
-export async function readIngestPipelines({
+export async function checkStreamExists({ id, scopedClusterClient }: ReadStreamParams) {
+  try {
+    await readStream({ id, scopedClusterClient });
+    return true;
+  } catch (e) {
+    if (e instanceof DefinitionNotFound) {
+      return false;
+    }
+    throw e;
+  }
+}
+
+interface SyncStreamParams {
+  scopedClusterClient: IScopedClusterClient;
+  definition: StreamDefinition;
+  rootDefinition?: StreamDefinition;
+  logger: Logger;
+}
+
+export async function syncStream({
   scopedClusterClient,
   definition,
-}: BaseParamsWithDefinition) {
-  const response = await scopedClusterClient.asSecondaryAuthUser.ingest.getPipeline({
-    id: `${definition.id}@stream.*`,
+  rootDefinition,
+  logger,
+}: SyncStreamParams) {
+  await upsertComponent({
+    esClient: scopedClusterClient.asCurrentUser,
+    logger,
+    component: generateLayer(definition.id, definition),
   });
-
-  return response;
-}
-
-export async function getIndexTemplateComponents(params: BaseParamsWithDefinition) {
-  const indexTemplate = await readIndexTemplate(params);
-  return {
-    composedOf: indexTemplate.index_template.composed_of,
-    ignoreMissing: get(
-      indexTemplate,
-      'index_template.ignore_missing_component_templates',
-      []
-    ) as string[],
-  };
+  await upsertIngestPipeline({
+    esClient: scopedClusterClient.asCurrentUser,
+    logger,
+    pipeline: generateIngestPipeline(definition.id, definition),
+  });
+  const reroutePipeline = await generateReroutePipeline({
+    definition,
+  });
+  await upsertIngestPipeline({
+    esClient: scopedClusterClient.asCurrentUser,
+    logger,
+    pipeline: reroutePipeline,
+  });
+  await upsertTemplate({
+    esClient: scopedClusterClient.asCurrentUser,
+    logger,
+    template: generateIndexTemplate(definition.id),
+  });
+  if (rootDefinition) {
+    const parentReroutePipeline = await generateReroutePipeline({
+      definition: rootDefinition,
+    });
+    await upsertIngestPipeline({
+      esClient: scopedClusterClient.asCurrentUser,
+      logger,
+      pipeline: parentReroutePipeline,
+    });
+  }
+  await upsertDataStream({
+    esClient: scopedClusterClient.asCurrentUser,
+    logger,
+    name: definition.id,
+  });
+  await upsertInternalStream({
+    scopedClusterClient,
+    definition,
+  });
+  await rolloverDataStreamIfNecessary({
+    esClient: scopedClusterClient.asCurrentUser,
+    name: definition.id,
+    logger,
+  });
 }

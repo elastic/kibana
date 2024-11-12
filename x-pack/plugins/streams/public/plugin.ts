@@ -46,7 +46,7 @@ export class Plugin implements StreamsPluginClass {
 const createStatusObservable = once((repositoryClient: StreamsRepositoryClient) => {
   return from(
     repositoryClient
-      .fetch('GET /internal/streams/_settings', {
+      .fetch('GET /internal/streams/_status', {
         signal: new AbortController().signal,
       })
       .then((response) => ({

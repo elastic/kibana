@@ -6,26 +6,26 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type { TelemetryEventTypes } from '../../constants';
 
-export interface OpenNoteInExpandableFlyoutClickedParams {
+interface OpenNoteInExpandableFlyoutClickedParams {
   location: string;
 }
 
-export interface AddNoteFromExpandableFlyoutClickedParams {
+interface AddNoteFromExpandableFlyoutClickedParams {
   isRelatedToATimeline: boolean;
 }
 
-export type NotesTelemetryEventParams =
-  | OpenNoteInExpandableFlyoutClickedParams
-  | AddNoteFromExpandableFlyoutClickedParams;
+export enum NotesEventTypes {
+  OpenNoteInExpandableFlyoutClicked = 'Open Note In Expandable Flyout Clicked',
+  AddNoteFromExpandableFlyoutClicked = 'Add Note From Expandable Flyout Clicked',
+}
 
-export type NotesTelemetryEvents =
-  | {
-      eventType: TelemetryEventTypes.OpenNoteInExpandableFlyoutClicked;
-      schema: RootSchema<OpenNoteInExpandableFlyoutClickedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.AddNoteFromExpandableFlyoutClicked;
-      schema: RootSchema<AddNoteFromExpandableFlyoutClickedParams>;
-    };
+export interface NotesTelemetryEventsMap {
+  [NotesEventTypes.OpenNoteInExpandableFlyoutClicked]: OpenNoteInExpandableFlyoutClickedParams;
+  [NotesEventTypes.AddNoteFromExpandableFlyoutClicked]: AddNoteFromExpandableFlyoutClickedParams;
+}
+
+export interface NotesTelemetryEvent {
+  eventType: NotesEventTypes;
+  schema: RootSchema<NotesTelemetryEventsMap[NotesEventTypes]>;
+}

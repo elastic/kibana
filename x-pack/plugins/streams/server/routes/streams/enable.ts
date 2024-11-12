@@ -8,9 +8,9 @@
 import { z } from '@kbn/zod';
 import { SecurityException } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
-import { bootstrapRootEntity } from '../../lib/streams/bootstrap_root_assets';
-import { createStream } from '../../lib/streams/stream_crud';
+import { syncStream } from '../../lib/streams/stream_crud';
 import { rootStreamDefinition } from '../../lib/streams/root_stream_definition';
+import { createStreamsIndex } from '../../lib/streams/internal_stream_mapping';
 
 export const enableStreamsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/_enable',
@@ -18,18 +18,15 @@ export const enableStreamsRoute = createServerRoute({
   options: {
     security: {
       authz: {
-        requiredPrivileges: ['streams_enable'],
+        requiredPrivileges: ['streams_write'],
       },
     },
   },
   handler: async ({ request, response, logger, getScopedClients }) => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
-      await bootstrapRootEntity({
-        esClient: scopedClusterClient.asSecondaryAuthUser,
-        logger,
-      });
-      await createStream({
+      await createStreamsIndex(scopedClusterClient);
+      await syncStream({
         scopedClusterClient,
         definition: rootStreamDefinition,
         logger,

@@ -9,8 +9,7 @@ import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
-import { readStream } from '../../lib/streams/stream_crud';
-import { StreamDefinition } from '../../../common';
+import { readAncestors, readStream } from '../../lib/streams/stream_crud';
 
 export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{id} 2023-10-31',
@@ -25,22 +24,27 @@ export const readStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ id: z.string() }),
   }),
-  handler: async ({
-    response,
-    params,
-    request,
-    logger,
-    getScopedClients,
-  }): Promise<{ definition: StreamDefinition }> => {
+  handler: async ({ response, params, request, logger, getScopedClients }) => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
       const streamEntity = await readStream({
-        logger,
         scopedClusterClient,
         id: params.path.id,
       });
 
-      return streamEntity;
+      const { ancestors } = await readAncestors({
+        id: streamEntity.definition.id,
+        scopedClusterClient,
+      });
+
+      const body = {
+        ...streamEntity.definition,
+        inheritedFields: ancestors.flatMap(({ definition: { id, fields } }) =>
+          fields.map((field) => ({ ...field, from: id }))
+        ),
+      };
+
+      return response.ok({ body });
     } catch (e) {
       if (e instanceof DefinitionNotFound) {
         throw notFound(e);

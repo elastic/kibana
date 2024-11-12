@@ -47,7 +47,7 @@ export function StreamDetailView() {
   const tabs: EntityViewTab[] = [
     {
       name: 'overview',
-      content: <StreamDetailOverview definition={streamEntity?.definition} />,
+      content: <StreamDetailOverview definition={streamEntity} />,
       label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
         defaultMessage: 'Overview',
       }),
