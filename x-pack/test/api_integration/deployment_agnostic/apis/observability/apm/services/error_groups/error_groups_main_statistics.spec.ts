@@ -11,16 +11,16 @@ import {
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { generateData, config } from './generate_data';
 
 type ErrorGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -46,24 +46,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when(
-    'Error groups main statistics when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
+  describe('Error groups main statistics', () => {
+    describe(' when data is not loaded', () => {
       it('handles empty state', async () => {
         const response = await callApi();
         expect(response.status).to.be(200);
         expect(response.body.errorGroups).to.empty();
       });
-    }
-  );
+    });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177664
-  registry.when('Error groups main statistics', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
       const { PROD_LIST_ERROR_RATE, PROD_ID_ERROR_RATE, ERROR_NAME_1, ERROR_NAME_2 } = config;
 
       before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         await generateData({ serviceName, start, end, apmSynthtraceEsClient });
       });
 

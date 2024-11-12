@@ -9,12 +9,12 @@ import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiClient = getService('apmApiClient');
-  const registry = getService('registry');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -38,10 +38,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when(
-    'Service node metadata when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
+  describe('Service node metadata', () => {
+    describe('when data is not loaded', () => {
       it('handles the empty state', async () => {
         const response = await callApi();
 
@@ -54,15 +52,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }
         `);
       });
-    }
-  );
+    });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177513
-  registry.when(
-    'Service node metadata when data is loaded',
-    { config: 'basic', archives: [] },
-    () => {
+    describe('when data is loaded', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         const instance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance(instanceName);
@@ -94,6 +90,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }
         `);
       });
-    }
-  );
+    });
+  });
 }

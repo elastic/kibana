@@ -1099,6 +1099,25 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       return body;
     },
 
+    async runRule(roleAuthc: RoleCredentials, ruleId: string) {
+      return await retry.tryForTime(retryTimeout, async () => {
+        try {
+          const response = await supertestWithoutAuth
+            .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
+            .set(samlAuth.getInternalRequestHeader())
+            .set(roleAuthc.apiKeyHeader)
+            .expect(204);
+
+          if (response.status !== 204) {
+            throw new Error(`runRuleSoon got ${response.status} status`);
+          }
+          return response;
+        } catch (error) {
+          throw new Error(`[Rule] Running a rule ${ruleId} failed: ${error}`);
+        }
+      });
+    },
+
     async findInRules(roleAuthc: RoleCredentials, ruleId: string) {
       const response = await supertestWithoutAuth
         .get('/api/alerting/rules/_find')

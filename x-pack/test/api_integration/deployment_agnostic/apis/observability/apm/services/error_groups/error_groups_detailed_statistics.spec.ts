@@ -14,17 +14,17 @@ import {
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { config, generateData } from './generate_data';
 import { getErrorGroupIds } from './get_error_group_ids';
 
 type ErrorGroupsDetailedStatistics =
   APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -52,23 +52,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when(
-    'Error groups detailed statistics when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
+  describe('Error groups detailed statistics', () => {
+    describe('when data is not loaded', () => {
       it('handles empty state', async () => {
         const response = await callApi();
         expect(response.status).to.be(200);
         expect(response.body).to.be.eql({ currentPeriod: {}, previousPeriod: {} });
       });
-    }
-  );
+    });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177656
-  registry.when('Error groups detailed statistics', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
       const { PROD_LIST_ERROR_RATE, PROD_ID_ERROR_RATE } = config;
       before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         await generateData({ serviceName, start, end, apmSynthtraceEsClient });
       });
 

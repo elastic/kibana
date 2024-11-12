@@ -7,25 +7,31 @@
 import expect from '@kbn/expect';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import archives_metadata from '../../../common/fixtures/es_archiver/archives_metadata';
+import archives_metadata from '../../../../../../../apm_api_integration/common/fixtures/es_archiver/archives_metadata';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
+import { ARCHIVER_ROUTES } from '../../constants/archiver';
 
 type ServiceOverviewInstanceDetails =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 type ServiceDetails = APIReturnType<'GET /internal/apm/services/{serviceName}/metadata/details'>;
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
   const archiveName = 'infra_metrics_and_apm';
+  const esArchiver = getService('esArchiver');
 
   const { start, end } = archives_metadata[archiveName];
 
-  registry.when(
-    'When data is loaded',
-    { config: 'basic', archives: ['infra_metrics_and_apm'] },
-    () => {
+  describe('Service infra metrics', () => {
+    describe('When data is loaded', () => {
+      before(async () => {
+        await esArchiver.load(ARCHIVER_ROUTES[archiveName]);
+      });
+      after(async () => {
+        await esArchiver.unload(ARCHIVER_ROUTES[archiveName]);
+      });
+
       describe('fetch service instance', () => {
         it('handles empty infra metrics data for a service node', async () => {
           const response = await apmApiClient.readUser({
@@ -169,6 +175,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(body.kubernetes?.replicasets).to.eql([]);
         });
       });
-    }
-  );
+    });
+  });
 }
