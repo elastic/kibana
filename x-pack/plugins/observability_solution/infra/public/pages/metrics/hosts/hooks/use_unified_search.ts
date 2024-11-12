@@ -10,9 +10,9 @@ import { buildEsQuery, Filter, fromKueryExpression, TimeRange, type Query } from
 import { Subscription, map, tap } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
 import { useSearchSessionContext } from '../../../../hooks/use_search_session';
 import { parseDateRange } from '../../../../utils/datemath';
-import { useKibanaQuerySettings } from '../../../../hooks/use_kibana_query_settings';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
