@@ -58,10 +58,10 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
 
   render() {
     const indicatorHiddenCss = !this.state.visible
-      ? css`
-          visibility: hidden;
-          animation-play-state: paused;
-        `
+      ? css({
+          visibility: 'hidden',
+          animationPlayState: 'paused',
+        })
       : undefined;
 
     const testSubj = this.state.visible

@@ -15,52 +15,52 @@ export const getCollapsibleNavStyles = (euiThemeContext: UseEuiTheme) => {
   const screenHeightBreakpoint = mathWithUnits(euiTheme.size.base, (x) => x * 15);
   const _euiYScroll = euiYScroll(euiThemeContext);
 
-  const navCss = css`
-    @media (max-height: ${screenHeightBreakpoint}) {
-      overflow-y: auto;
-    }
-  `;
+  const navCss = css({
+    [`@media (max-height: ${screenHeightBreakpoint})`]: {
+      overflowY: 'auto',
+    },
+  });
 
   const navRecentsListGroupCss = [
-    css`
-      max-height: calc(${euiTheme.size.base} * 10);
-      margin-right: -${euiTheme.size.s};
-    `,
+    css({
+      maxHeight: `calc(${euiTheme.size.base} * 10)`,
+      marginRight: `-${euiTheme.size.s}`,
+    }),
     _euiYScroll,
   ];
 
   const navSolutions = [
     _euiYScroll,
-    css`
+    css({
       /**
        * Allows the solutions nav group to be viewed on
        * very small screen sizes and when the browser Zoom is high
        */
-      @media (max-height: ${screenHeightBreakpoint}) {
-        flex: 1 0 auto;
-      }
-    `,
+      [`@media (max-height: ${screenHeightBreakpoint})`]: {
+        flex: '1 0 auto',
+      },
+    }),
   ];
 
   /**
    * 1. Increase the hit area of the link (anchor)
    * 2. Only show the text underline when hovering on the text/anchor portion
    */
-  const navSolutionGroupButton = css`
-    display: block; /* 1 */
+  const navSolutionGroupButton = css({
+    display: 'block' /* 1 */,
 
-    &:hover {
-      text-decoration: none; /* 2 */
-    }
-  `;
+    '&:hover': {
+      textDecoration: 'none' /* 2 */,
+    },
+  });
 
-  const navSolutionGroupLink = css`
-    display: block; /* 1 */
+  const navSolutionGroupLink = css({
+    display: 'block' /* 1 */,
 
-    &:hover {
-      text-decoration: underline; /* 2 */
-    }
-  `;
+    '&:hover': {
+      textDecoration: 'underline' /* 2 */,
+    },
+  });
 
   return {
     navCss,

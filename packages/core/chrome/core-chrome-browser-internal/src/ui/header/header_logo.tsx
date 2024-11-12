@@ -84,27 +84,29 @@ interface Props {
 }
 
 export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables }: Props) {
+  const { euiTheme } = useEuiTheme();
   const forceNavigation = useObservable(observables.forceNavigation$, false);
   const navLinks = useObservable(observables.navLinks$, []);
   const customBranding = useObservable(observables.customBranding$, {});
   const { customizedLogo, logo } = customBranding;
 
-  const { euiTheme } = useEuiTheme();
-  const headerLogoCss = css`
-    display: flex;
-    align-items: center;
-    height: ${euiTheme.size.xxl};
-    padding-inline: ${euiTheme.size.s};
-  `;
-  const headerLogoMarkCss = css`
-    margin-left: ${euiTheme.size.s};
-    fill: ${euiTheme.colors.ghost};
-  `;
+  const styles = {
+    logoCss: css({
+      display: 'flex',
+      alignItems: 'center',
+      height: euiTheme.size.xxl,
+      paddingInline: euiTheme.size.s,
+    }),
+    logoMarkCss: css({
+      marginLeft: euiTheme.size.s,
+      fill: euiTheme.colors.ghost,
+    }),
+  };
 
   return (
     <a
       onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
-      css={headerLogoCss}
+      css={styles.logoCss}
       href={href}
       data-test-subj="logo"
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
@@ -115,7 +117,7 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables 
       {customizedLogo ? (
         <img
           src={customizedLogo}
-          css={headerLogoMarkCss}
+          css={styles.logoMarkCss}
           style={{ maxWidth: '200px', maxHeight: '84px' }}
           alt="custom mark"
         />
