@@ -46,6 +46,12 @@ export const FLEET_GLOBALS_COMPONENT_TEMPLATE_CONTENT = {
 };
 export const FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME = '.fleet_agent_id_verification-1';
 
+export const INGESTED_MAPPING = {
+  type: 'date',
+  format: 'strict_date_time_no_millis||strict_date_optional_time||epoch_millis',
+  ignore_malformed: false,
+};
+
 export const FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_CONTENT = {
   _meta: meta,
   template: {
@@ -58,11 +64,7 @@ export const FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_CONTENT = {
       properties: {
         event: {
           properties: {
-            ingested: {
-              type: 'date',
-              format: 'strict_date_time_no_millis||strict_date_optional_time||epoch_millis',
-              ignore_malformed: false,
-            },
+            ingested: INGESTED_MAPPING,
             agent_id_status: {
               ignore_above: 1024,
               type: 'keyword',
@@ -88,11 +90,7 @@ export const FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_CONTENT = {
       properties: {
         event: {
           properties: {
-            ingested: {
-              type: 'date',
-              format: 'strict_date_time_no_millis||strict_date_optional_time||epoch_millis',
-              ignore_malformed: false,
-            },
+            ingested: INGESTED_MAPPING,
           },
         },
       },
