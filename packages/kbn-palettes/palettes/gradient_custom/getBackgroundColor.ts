@@ -8,11 +8,11 @@
  */
 
 import { ThemeMode } from '../../types';
-import { changeAlpha, combineColors } from '../../utils/color_math';
+// import { changeAlpha, combineColors } from '../../utils/color_math';
 
-export const getBackgroundColor2 = (mode: ThemeMode, fgColor: string) => {
-  return combineColors(changeAlpha(fgColor, 0.3), mode !== 'LIGHT' ? 'black' : 'white');
-};
+// export const getBackgroundColor2 = (mode: ThemeMode, fgColor: string) => {
+//   return combineColors(changeAlpha(fgColor, 0.3), mode !== 'LIGHT' ? 'black' : 'white');
+// };
 
 export const getBackgroundColor = (mode: ThemeMode) =>
   mode === 'LIGHT' ? '#F6F9FC' : mode === 'DARK' ? '#0E0F12' : '#07101F';
