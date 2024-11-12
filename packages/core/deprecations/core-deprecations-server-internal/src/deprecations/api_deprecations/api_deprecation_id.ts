@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import { RouterDeprecatedApiDetails } from '@kbn/core-http-server';
 
-const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
-
-export const fieldSupportsBreakdown = (field: DataViewField) =>
-  supportedTypes.has(field.type) &&
-  field.aggregatable &&
-  !field.scripted &&
-  field.timeSeriesMetric !== 'counter';
+export const buildApiDeprecationId = ({
+  routePath,
+  routeMethod,
+  routeVersion,
+}: Pick<RouterDeprecatedApiDetails, 'routeMethod' | 'routePath' | 'routeVersion'>): string => {
+  return [
+    routeVersion || 'unversioned',
+    routeMethod.toLocaleLowerCase(),
+    routePath.replace(/\/$/, ''),
+  ].join('|');
+};
