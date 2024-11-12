@@ -566,3 +566,5 @@ export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
 export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;
 export type SimilarCasesSearchRequest = rt.TypeOf<typeof SimilarCasesSearchRequestRt>;
 export type CasesSimilarResponse = rt.TypeOf<typeof CasesSimilarResponseRt>;
+export type SimilarCase = rt.TypeOf<typeof SimilarCaseRt>;
+export type SimilarCases = SimilarCase[];

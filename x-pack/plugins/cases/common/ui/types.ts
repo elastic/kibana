@@ -112,6 +112,7 @@ export type CaseUsers = GetCaseUsersResponse;
 export type CaseUICustomField = CaseUI['customFields'][number];
 export type CasesSimilarResponseUI = SnakeToCamelCase<CasesSimilarResponse>;
 export type SimilarCaseUI = Omit<SnakeToCamelCase<CasesSimilarResponseUI['cases'][0]>, 'comments'>;
+export type SimilarCasesUI = SimilarCaseUI[];
 
 export interface ResolvedCase {
   case: CaseUI;

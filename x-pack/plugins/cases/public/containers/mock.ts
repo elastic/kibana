@@ -469,7 +469,7 @@ export const allCases: CasesFindResponseUI = {
 };
 
 export const similarCases: CasesSimilarResponseUI = {
-  cases,
+  cases: cases.map((theCase) => ({ ...theCase, similarities: [] })),
   page: 1,
   perPage: 5,
   total: 10,

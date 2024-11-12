@@ -12,6 +12,8 @@ import type {
   CaseResolveResponse,
   CasesFindResponse,
   CasesSimilarResponse,
+  SimilarCase,
+  SimilarCases,
 } from '../../common/types/api';
 import type { Attachment, Case, Cases, UserActions } from '../../common/types/domain';
 import {
@@ -26,6 +28,8 @@ import type {
   AttachmentUI,
   ResolvedCase,
   CasesSimilarResponseUI,
+  SimilarCasesUI,
+  SimilarCaseUI,
 } from '../containers/types';
 
 export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
@@ -61,6 +65,16 @@ export const convertCaseToCamelCase = (theCase: Case): CaseUI => {
 };
 
 export const convertCasesToCamelCase = (cases: Cases): CasesUI => cases.map(convertCaseToCamelCase);
+
+export const convertSimilarCaseToCamelCase = (theCase: SimilarCase): SimilarCaseUI => {
+  const { comments, ...restCase } = theCase;
+  return {
+    ...convertToCamelCase<SimilarCase, SimilarCaseUI>(restCase),
+  };
+};
+
+export const convertSimilarCasesToCamelCase = (cases: SimilarCases): SimilarCasesUI =>
+  cases.map(convertSimilarCaseToCamelCase);
 
 export const convertCaseResolveToCamelCase = (res: CaseResolveResponse): ResolvedCase => {
   const { case: theCase, ...rest } = res;
@@ -131,7 +145,7 @@ export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): CasesFind
 export const convertSimilarCasesToCamel = (
   snakeCases: CasesSimilarResponse
 ): CasesSimilarResponseUI => ({
-  cases: convertCasesToCamelCase(snakeCases.cases),
+  cases: convertSimilarCasesToCamelCase(snakeCases.cases),
   page: snakeCases.page,
   perPage: snakeCases.per_page,
   total: snakeCases.total,
