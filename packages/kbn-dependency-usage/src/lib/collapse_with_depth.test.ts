@@ -11,26 +11,26 @@ import { createCollapseRegexWithDepth } from './collapse_with_depth';
 
 describe('createCollapseRegexWithDepth', () => {
   it('should generate regex with a base path and depth of 0', () => {
-    const basePath = 'app/components';
+    const basePath = ['app/components'];
     const depth = 0;
     const regex = createCollapseRegexWithDepth(basePath, depth);
 
-    expect(regex).toBe('^app/components');
+    expect(regex).toBe('^(app/components)');
   });
 
   it('should generate regex with a base path and depth of 1', () => {
-    const basePath = 'src';
+    const basePath = ['src'];
     const depth = 1;
     const regex = createCollapseRegexWithDepth(basePath, depth);
 
-    expect(regex).toBe('^src/([^/]+)');
+    expect(regex).toBe('^(src)/([^/]+)');
   });
 
   it('should generate regex with a base path and depth of 2', () => {
-    const basePath = 'src';
+    const basePath = ['src'];
     const depth = 2;
     const regex = createCollapseRegexWithDepth(basePath, depth);
 
-    expect(regex).toBe('^src/([^/]+)/([^/]+)');
+    expect(regex).toBe('^(src)/([^/]+)/([^/]+)');
   });
 });

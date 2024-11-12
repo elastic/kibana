@@ -34,9 +34,7 @@ const invokeDependencyCruiser = async (
 ) => {
   const collapseByNodeModule = !dependencyName || (dependencyName && summary);
   const collapseByNodeModuleRegex = '^node_modules/(@[^/]+/[^/]+|[^/]+)';
-  const collapseRules = aggregationGroups.map((group) =>
-    createCollapseRegexWithDepth(group, collapseDepth)
-  );
+  const collapseRules = [createCollapseRegexWithDepth(aggregationGroups, collapseDepth)];
 
   if (collapseByNodeModule) {
     collapseRules.push(collapseByNodeModuleRegex);

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function createCollapseRegexWithDepth(basePath: string, depth: number) {
-  let regex = `^${basePath}`;
+export function createCollapseRegexWithDepth(basePaths: string[], depth: number) {
+  let regex = `^(${basePaths.join('|')})`;
 
   for (let i = 0; i < depth; i++) {
     regex += `/([^/]+)`;

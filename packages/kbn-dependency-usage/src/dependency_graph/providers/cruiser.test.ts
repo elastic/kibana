@@ -83,7 +83,7 @@ describe('identifyDependencyUsage', () => {
   it('should respect collapseDepth param', async () => {
     (cruise as jest.Mock).mockResolvedValue(mockCruiseResult);
 
-    await identifyDependencyUsage([], undefined, {
+    await identifyDependencyUsage([], 'rxjs', {
       groupBy: 'owner',
       collapseDepth: 2,
       summary: false,
@@ -99,11 +99,11 @@ describe('identifyDependencyUsage', () => {
     const [, configWithDepth1] = (cruise as jest.Mock).mock.calls[1];
 
     expect(configWithDepth2.collapse).toMatchInlineSnapshot(
-      `"^x-pack/plugins/([^/]+)/([^/]+)|^x-pack/packages/([^/]+)/([^/]+)|^src/plugins/([^/]+)/([^/]+)|^packages/([^/]+)/([^/]+)|^src/([^/]+)/([^/]+)|^x-pack/test/([^/]+)/([^/]+)|^x-pack/test_serverless/([^/]+)/([^/]+)|^node_modules/(@[^/]+/[^/]+|[^/]+)"`
+      `"^(x-pack/plugins|x-pack/packages|src/plugins|packages|src|x-pack/test|x-pack/test_serverless)/([^/]+)/([^/]+)"`
     );
 
     expect(configWithDepth1.collapse).toMatchInlineSnapshot(
-      `"^x-pack/plugins/([^/]+)|^x-pack/packages/([^/]+)|^src/plugins/([^/]+)|^packages/([^/]+)|^src/([^/]+)|^x-pack/test/([^/]+)|^x-pack/test_serverless/([^/]+)|^node_modules/(@[^/]+/[^/]+|[^/]+)"`
+      `"^(x-pack/plugins|x-pack/packages|src/plugins|packages|src|x-pack/test|x-pack/test_serverless)/([^/]+)|^node_modules/(@[^/]+/[^/]+|[^/]+)"`
     );
   });
 
