@@ -20,7 +20,7 @@ import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
+  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
 } from '../../../../common/constants';
 import { convertTo } from '../../../../common/utils/formatters';
@@ -54,7 +54,7 @@ export function AlertHistoryChart({ rule, alert }: Props) {
     isError,
   } = useAlertsHistory({
     http,
-    ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
+    ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
     consumers: observabilityAlertFeatureIds,
     ruleId: rule.id,
     dateRange,
@@ -154,7 +154,7 @@ export function AlertHistoryChart({ rule, alert }: Props) {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <AlertSummaryWidget
-        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
         consumers={observabilityAlertFeatureIds}
         timeRange={getDefaultAlertSummaryTimeRange()}
         fullSize

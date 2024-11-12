@@ -17,7 +17,7 @@ import {
   AlertConsumers,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { omit } from 'lodash';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK } from '@kbn/observability-plugin/common/constants';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-plugin/common/constants';
 import { FunctionRegistrationParameters } from '.';
 
 const defaultFields = [
@@ -176,7 +176,7 @@ export function registerAlertsFunction({
         const kqlQuery = !filter ? [] : [toElasticsearchQuery(fromKueryExpression(filter))];
 
         const response = await alertsClient.find({
-          ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
+          ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
           consumers: [
             AlertConsumers.APM,
             AlertConsumers.INFRASTRUCTURE,

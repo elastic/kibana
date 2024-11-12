@@ -12,7 +12,7 @@ import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/pub
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
+  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
 } from '../../../common/constants';
 import { paths } from '../../../common/locators/paths';
@@ -238,7 +238,7 @@ export function OverviewPage() {
             hasError={false}
           >
             <AlertSummaryWidget
-              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
               consumers={observabilityAlertFeatureIds}
               filter={esQuery}
               fullSize
@@ -247,7 +247,7 @@ export function OverviewPage() {
             <AlertsStateTable
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               configurationId={AlertConsumers.OBSERVABILITY}
-              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
               consumers={observabilityAlertFeatureIds}
               hideLazyLoader
               id={ALERTS_TABLE_ID}

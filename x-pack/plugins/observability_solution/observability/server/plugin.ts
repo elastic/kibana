@@ -49,7 +49,7 @@ import { registerRoutes } from './routes/register_routes';
 import { threshold } from './saved_objects/threshold';
 import { AlertDetailsContextualInsightsService } from './services';
 import { uiSettings } from './ui_settings';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK } from '../common/constants';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../common/constants';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -70,10 +70,12 @@ interface PluginStart {
   dataViews: DataViewsServerPluginStart;
 }
 
-const alertingFeatures = OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK.map((ruleTypeId) => ({
-  ruleTypeId,
-  consumers: [observabilityFeatureId, ALERTING_FEATURE_ID],
-}));
+const alertingFeatures = OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES.map(
+  (ruleTypeId) => ({
+    ruleTypeId,
+    consumers: [observabilityFeatureId, ALERTING_FEATURE_ID],
+  })
+);
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   private logger: Logger;

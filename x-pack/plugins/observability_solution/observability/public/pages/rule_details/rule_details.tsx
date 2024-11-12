@@ -28,7 +28,7 @@ import { isRuleEditable } from './helpers/is_rule_editable';
 import { ruleDetailsLocatorID } from '../../../common';
 import {
   ALERT_STATUS_ALL,
-  OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
+  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
 } from '../../../common/constants';
 import {
@@ -229,7 +229,7 @@ export function RuleDetailsPage() {
 
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
-            ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+            ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
             consumers={observabilityAlertFeatureIds}
             onClick={handleAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}
@@ -257,7 +257,7 @@ export function RuleDetailsPage() {
 
       <RuleDetailsTabs
         esQuery={esQuery}
-        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
         rule={rule}
         ruleId={ruleId}
         ruleType={ruleType}

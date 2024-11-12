@@ -39,7 +39,7 @@ import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_buck
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import {
   ALERTS_URL_STORAGE_KEY,
-  OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
+  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
 } from '../../../common/constants';
 import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
@@ -253,7 +253,7 @@ function InternalAlertsPage() {
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertSummaryWidget
-              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
               consumers={observabilityAlertFeatureIds}
               filter={esQuery}
               fullSize
@@ -264,7 +264,7 @@ function InternalAlertsPage() {
           <EuiFlexItem>
             {esQuery && (
               <AlertsGrouping<AlertsByGroupingAgg>
-                ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+                ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
                 consumers={observabilityAlertFeatureIds}
                 defaultFilters={
                   ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? DEFAULT_FILTERS
@@ -291,7 +291,7 @@ function InternalAlertsPage() {
                   return (
                     <AlertsStateTable
                       id={ALERTS_TABLE_ID}
-                      ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
+                      ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
                       consumers={observabilityAlertFeatureIds}
                       configurationId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                       query={mergeBoolQueries(esQuery, groupQuery)}
