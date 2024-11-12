@@ -30,7 +30,7 @@ api-docs-lint-stateful: ## Run redocly API docs linter on kibana.yaml
 	@npx @redocly/cli lint "output/kibana.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
 
 .PHONY: api-docs-overlay
-api-docs-overlay: ## Run spectral API docs linter on kibana.serverless.yaml
+api-docs-overlay: ## Run spectral API docs linter on kibana.yaml
 	@npx bump overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
 	@npx bump overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
 	@npx bump overlay "output/kibana.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.tmp3.yaml"
@@ -39,11 +39,11 @@ api-docs-overlay: ## Run spectral API docs linter on kibana.serverless.yaml
 	rm output/kibana.tmp*.yaml
 
 .PHONY: api-docs-preview
-api-docs-preview: ## Generate a preview for kibana.yaml and kibana.serverless.yaml
+api-docs-preview: ## Generate a preview for kibana.yaml
 	@npx bump preview "output/kibana.yaml"
 
 .PHONY: api-docs-overlay-preview
-api-docs-overlay-preview: ## Generate a preview for kibana.new.yaml and kibana.serverless.new.yaml
+api-docs-overlay-preview: ## Generate a preview for kibana.new.yaml
 	@npx bump preview "output/kibana.new.yaml"
 
 help:  ## Display help
