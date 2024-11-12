@@ -18,7 +18,6 @@ export default function ({ getService }: FtrProviderContext) {
   describe('SyntheticsAPISecurity', function () {
     this.tags('skipCloud');
 
-    const supertest = getService('supertest');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
 
     const monitorTestService = new SyntheticsMonitorTestService(getService);
