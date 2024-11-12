@@ -19,6 +19,7 @@ import * as i18n from './translations';
 
 interface EsqlQueryEditProps {
   path: string;
+  fieldsToValidateOnChange?: string | string[];
   dataView: DataViewBase;
   required?: boolean;
   loading?: boolean;
@@ -28,6 +29,7 @@ interface EsqlQueryEditProps {
 
 export const EsqlQueryEdit = memo(function EsqlQueryEdit({
   path,
+  fieldsToValidateOnChange,
   dataView,
   required = false,
   loading = false,
@@ -49,6 +51,9 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
     () => ({
       label: i18n.ESQL_QUERY,
       labelAppend: <EsqlInfoIcon />,
+      fieldsToValidateOnChange: fieldsToValidateOnChange
+        ? [path, fieldsToValidateOnChange].flat()
+        : undefined,
       validations: [
         ...(required
           ? [
@@ -62,7 +67,7 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
         },
       ],
     }),
-    [required]
+    [required, path, fieldsToValidateOnChange]
   );
 
   return (

@@ -726,6 +726,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 <EsqlQueryEdit
                   key="QueryBarDefineRule"
                   path="queryBar"
+                  fieldsToValidateOnChange={ALERT_SUPPRESSION_FIELDS_FIELD_NAME}
                   required
                   dataView={indexPattern}
                   disabled={isLoading}
