@@ -9,6 +9,7 @@ import type { PropsWithChildren } from 'react';
 import React, { useState, useEffect } from 'react';
 
 import type { MlCapabilitiesResponse } from '@kbn/ml-plugin/public';
+import { isKibanaError } from '@kbn/securitysolution-t-grid/src/utils/api';
 import { emptyMlCapabilities } from '../../../../../common/machine_learning/empty_ml_capabilities';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useHttp } from '../../../lib/kibana';
@@ -49,7 +50,8 @@ export const MlCapabilitiesProvider = React.memo<PropsWithChildren<unknown>>(({ 
   }, [result]);
 
   useEffect(() => {
-    if (error) {
+    // ignore 403 errors as user might not have the required permissions to access ML
+    if (error && isKibanaError(error) && error.body.statusCode !== 403) {
       addError(error, {
         title: i18n.MACHINE_LEARNING_PERMISSIONS_FAILURE,
       });
