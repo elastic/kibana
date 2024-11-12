@@ -14,7 +14,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
   return {
     connectorConfigurationPage: {
       async createConnector() {
-        await testSubjects.click('serverlessSearchConnectorsOverviewCreateConnectorButton');
+        await testSubjects.click('serverlessSearchEmptyConnectorsPromptCreateConnectorButton');
         await testSubjects.existOrFail('serverlessSearchEditConnectorButton');
         await testSubjects.exists('serverlessSearchConnectorLinkElasticsearchRunWithDockerButton');
         await testSubjects.exists('serverlessSearchConnectorLinkElasticsearchRunFromSourceButton');
