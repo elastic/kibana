@@ -43,10 +43,8 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
     watch: ['config.createCommentUrl', 'config.createCommentJson'],
   });
 
-  const createCommentUrl = config && config.createCommentUrl ? config.createCommentUrl : undefined;
-
-  const createCommentJson =
-    config && config.createCommentJson ? config.createCommentJson : undefined;
+  const createCommentUrl = config?.createCommentUrl;
+  const createCommentJson = config?.createCommentJson;
 
   const hasCommentDefaultValue =
     !!getFieldDefaultValue<boolean | undefined>('config.createCommentUrl') ||
@@ -200,16 +198,16 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
                   path="config.createCommentUrl"
                   config={{
                     label: i18n.CREATE_COMMENT_URL,
+                    // fieldsToValidateOnChange: [
+                    //   'config.createCommentUrl',
+                    //   'config.createCommentJson',
+                    // ],
                     validations: [
                       {
                         validator: isUrlButCanBeEmpty(i18n.CREATE_COMMENT_URL_REQUIRED),
                       },
                       {
-                        validator: isCreateCommentEmpty(
-                          'Required field',
-                          createCommentUrl,
-                          createCommentJson
-                        ),
+                        validator: isCreateCommentEmpty('Required field', createCommentJson),
                       },
                     ],
                     helpText: i18n.CREATE_COMMENT_URL_HELP,
@@ -235,16 +233,16 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
                   config={{
                     helpText: i18n.CREATE_COMMENT_JSON_HELP,
                     label: i18n.CREATE_COMMENT_JSON,
+                    // fieldsToValidateOnChange: [
+                    //   'config.createCommentJson',
+                    //   'config.createCommentUrl',
+                    // ],
                     validations: [
                       {
                         validator: containsCommentsOrEmpty(i18n.CREATE_COMMENT_MESSAGE),
                       },
                       {
-                        validator: isCreateCommentEmpty(
-                          'Required field',
-                          createCommentUrl,
-                          createCommentJson
-                        ),
+                        validator: isCreateCommentEmpty('Required field', createCommentUrl),
                       },
                     ],
                   }}
