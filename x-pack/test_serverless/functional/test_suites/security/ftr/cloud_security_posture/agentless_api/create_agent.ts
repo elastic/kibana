@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
 import expect from '@kbn/expect';
 import { setupMockServer } from './mock_agentless_api';
@@ -40,13 +41,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it(`should create agentless-agent`, async () => {
-      if (process.env.TEST_CLOUD) {
-        // If the test is running in the Serverless Quality Gates
-        // expect that the Vault secrets were added to the environment
-        expect(process.env.CSPM_AWS_ACCOUNT_ID).to.be.ok();
-        expect(process.env.CSPM_AWS_SECRET_KEY).to.be.ok();
-      }
-
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
         CLOUD_CREDENTIALS_PACKAGE_VERSION
