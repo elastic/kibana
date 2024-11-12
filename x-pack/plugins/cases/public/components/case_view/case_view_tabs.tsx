@@ -30,6 +30,7 @@ import type { CaseUI } from '../../../common';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
+import { useGetSimilarCases } from '../../containers/use_get_similar_cases';
 
 const TabTitle = ({ title }: { title: string }) => (
   <EuiTitle size="xxs">
@@ -125,6 +126,35 @@ const AlertsBadge = ({
 
 AlertsBadge.displayName = 'AlertsBadge';
 
+const SimilarCasesBadge = ({
+  activeTab,
+  count,
+  isLoading,
+  euiTheme,
+}: {
+  activeTab: string;
+  count?: number;
+  isLoading: boolean;
+  euiTheme: EuiThemeComputed<{}>;
+}) => (
+  <>
+    {!isLoading && (
+      <EuiNotificationBadge
+        css={css`
+          margin-left: ${euiTheme.size.xs};
+        `}
+        data-test-subj="case-view-observables-stats-badge"
+        color={activeTab === CASE_VIEW_PAGE_TABS.SIMILAR_CASES ? 'accent' : 'subdued'}
+      >
+        {count ?? 0}
+      </EuiNotificationBadge>
+    )}
+    <ExperimentalBadge compact />
+  </>
+);
+
+SimilarCasesBadge.displayName = 'SimilarCasesBadge';
+
 export interface CaseViewTabsProps {
   caseData: CaseUI;
   activeTab: CASE_VIEW_PAGE_TABS;
@@ -142,6 +172,11 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
     () => ({ total: caseObservables.length }),
     [caseObservables.length]
   );
+  const { data: similarCasesData, isFetching: isLoadingSimilarCases } = useGetSimilarCases({
+    caseData,
+    pageSize: 0,
+    pageIndex: 0,
+  });
 
   const tabs = useMemo(
     () => [
@@ -192,7 +227,14 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       {
         id: CASE_VIEW_PAGE_TABS.SIMILAR_CASES,
         name: SIMILAR_CASES_TAB,
-        badge: <ExperimentalBadge compact />,
+        badge: (
+          <SimilarCasesBadge
+            activeTab={activeTab}
+            euiTheme={euiTheme}
+            count={similarCasesData?.total}
+            isLoading={isLoadingSimilarCases}
+          />
+        ),
       },
     ],
     [
@@ -204,6 +246,8 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       isLoading,
       fileStatsData,
       observableStatsData,
+      similarCasesData?.total,
+      isLoadingSimilarCases,
     ]
   );
 
