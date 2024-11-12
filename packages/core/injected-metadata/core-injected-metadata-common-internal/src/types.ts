@@ -41,6 +41,7 @@ export interface InjectedMetadataExternalUrlPolicy {
 /** @internal */
 export interface InjectedMetadataTheme {
   darkMode: DarkModeValue;
+  name: string;
   version: ThemeVersion;
   stylesheetPaths: {
     default: string[];

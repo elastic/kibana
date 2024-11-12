@@ -45,6 +45,7 @@ describe('ThemeService', () => {
       beforeEach(() => {
         injectedMetadata.getTheme.mockReturnValue({
           version: 'v8',
+          name: 'amsterdam',
           darkMode: false,
           stylesheetPaths: {
             dark: ['dark-1.css'],
@@ -88,6 +89,7 @@ describe('ThemeService', () => {
       beforeEach(() => {
         injectedMetadata.getTheme.mockReturnValue({
           version: 'v8',
+          name: 'amsterdam',
           darkMode: true,
           stylesheetPaths: {
             dark: ['dark-1.css'],
@@ -131,6 +133,7 @@ describe('ThemeService', () => {
       beforeEach(() => {
         injectedMetadata.getTheme.mockReturnValue({
           version: 'v8',
+          name: 'amsterdam',
           darkMode: 'system',
           stylesheetPaths: {
             dark: ['dark-1.css'],
@@ -244,6 +247,7 @@ describe('ThemeService', () => {
     it('exposes a `theme$` observable with the values provided by the injected metadata', async () => {
       injectedMetadata.getTheme.mockReturnValue({
         version: 'v8',
+        name: 'amsterdam',
         darkMode: true,
         stylesheetPaths: {
           dark: [],

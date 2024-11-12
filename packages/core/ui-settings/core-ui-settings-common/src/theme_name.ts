@@ -7,16 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Computes the themeTag that will be used on the client-side as `__kbnThemeTag__`
- * @see `packages/kbn-ui-shared-deps-src/theme.ts`
- */
-export const getThemeTag = ({
-  name,
-  darkMode,
-}: {
-  name: string;
-  darkMode: boolean;
-}) => {
-  return `${name}${darkMode ? 'dark' : 'light'}`;
+export const parseThemeNameValue = (value: unknown): string => {
+  if (typeof value !== 'string') {
+    return 'amsterdam';
+  }
+
+  return value;
 };

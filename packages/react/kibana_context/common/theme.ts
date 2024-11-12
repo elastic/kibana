@@ -7,16 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Computes the themeTag that will be used on the client-side as `__kbnThemeTag__`
- * @see `packages/kbn-ui-shared-deps-src/theme.ts`
- */
-export const getThemeTag = ({
-  name,
-  darkMode,
-}: {
-  name: string;
-  darkMode: boolean;
-}) => {
-  return `${name}${darkMode ? 'dark' : 'light'}`;
+import { EuiThemeSystem, EuiThemeAmsterdam } from '@elastic/eui';
+
+export interface ThemeConfig {
+  euiTheme: EuiThemeSystem;
+}
+
+const THEMES: Record<string, ThemeConfig> = {
+  amsterdam: {
+    euiTheme: EuiThemeAmsterdam,
+  },
 };
+
+export const getThemeConfigByName = (name: string): ThemeConfig | null => {
+  return THEMES[name as keyof typeof THEMES] || null;
+};
+
+export const DEFAULT_THEME_CONFIG = THEMES.amsterdam;

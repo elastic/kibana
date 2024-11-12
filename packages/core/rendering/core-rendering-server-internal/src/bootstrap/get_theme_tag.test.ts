@@ -13,7 +13,7 @@ describe('getThemeTag', () => {
   it('returns the correct value for version:v8 and darkMode:false', () => {
     expect(
       getThemeTag({
-        themeVersion: 'v8',
+        name: 'v8',
         darkMode: false,
       })
     ).toEqual('v8light');
@@ -21,7 +21,7 @@ describe('getThemeTag', () => {
   it('returns the correct value for version:v8 and darkMode:true', () => {
     expect(
       getThemeTag({
-        themeVersion: 'v8',
+        name: 'v8',
         darkMode: true,
       })
     ).toEqual('v8dark');

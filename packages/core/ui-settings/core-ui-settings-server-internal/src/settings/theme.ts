@@ -35,6 +35,7 @@ function getThemeInfo(options: GetThemeSettingsOptions) {
 
 interface GetThemeSettingsOptions {
   isDist?: boolean;
+  isThemeSwitcherEnabled?: boolean;
 }
 
 export const getThemeSettings = (
@@ -88,6 +89,29 @@ export const getThemeSettings = (
       value: 'v8' as ThemeVersion,
       readonly: true,
       schema: schema.literal('v8'),
+    },
+    /**
+     * Theme name is the (upcoming) replacement for theme versions.
+     */
+    'theme:name': {
+      name: i18n.translate('core.ui_settings.params.themeName', {
+        defaultMessage: 'Theme',
+      }),
+      type: 'select',
+      options: ['amsterdam'],
+      optionLabels: {
+        amsterdam: i18n.translate('core.ui_settings.params.themeName.options.amsterdam', {
+          defaultMessage: 'Amsterdam',
+        }),
+      },
+      value: 'amsterdam',
+      readonly: Object.hasOwn(options, 'isThemeSwitcherEnabled') ? !options.isThemeSwitcherEnabled : true,
+      requiresPageReload: true,
+      schema: schema.oneOf([
+        schema.literal('amsterdam'),
+        // Allow experimental themes
+        schema.string(),
+      ]),
     },
   };
 };
