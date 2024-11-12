@@ -27,6 +27,7 @@ import {
   DashboardPanelMap,
   prefixReferencesFromPanel,
 } from '../../../../common';
+import type { DashboardAttributes } from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
 import {
   SaveDashboardReturn,
@@ -95,7 +96,11 @@ export async function runQuickSave(this: DashboardContainer) {
     const { rawState: controlGroupSerializedState, references: extractedReferences } =
       await controlGroupApi.serializeState();
     controlGroupReferences = extractedReferences;
-    stateToSave = { ...stateToSave, controlGroupInput: controlGroupSerializedState };
+    stateToSave = {
+      ...stateToSave,
+      controlGroupInput:
+        controlGroupSerializedState as unknown as DashboardAttributes['controlGroupInput'],
+    };
   }
 
   const saveResult = await getDashboardContentManagementService().saveDashboardState({
@@ -186,7 +191,8 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
           controlGroupReferences = references;
           dashboardStateToSave = {
             ...dashboardStateToSave,
-            controlGroupInput: controlGroupSerializedState,
+            controlGroupInput:
+              controlGroupSerializedState as unknown as DashboardAttributes['controlGroupInput'],
           };
         }
 
