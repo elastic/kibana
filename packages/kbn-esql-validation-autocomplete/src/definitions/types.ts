@@ -8,6 +8,7 @@
  */
 
 import type {
+  ESQLAst,
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandOption,
@@ -184,7 +185,8 @@ export interface CommandBaseDefinition<CommandName extends string> {
     columnExists: (column: string) => boolean,
     getSuggestedVariableName: () => string,
     getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
-    getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
+    getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
+    fullTextAst?: ESQLAst
   ) => Promise<SuggestionRawDefinition[]>;
   /** @deprecated this property will disappear in the future */
   signature: {

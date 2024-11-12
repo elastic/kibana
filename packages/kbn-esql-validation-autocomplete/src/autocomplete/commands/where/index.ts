@@ -13,6 +13,7 @@ import {
   type ESQLCommand,
   type ESQLSingleAstItem,
   type ESQLFunction,
+  ESQLAst,
 } from '@kbn/esql-ast';
 import { logicalOperators } from '../../../definitions/builtin';
 import { isParameterType, type SupportedDataType } from '../../../definitions/types';
@@ -35,7 +36,8 @@ export async function suggest(
   _columnExists: (column: string) => boolean,
   _getSuggestedVariableName: () => string,
   getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
-  _getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
+  _getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
+  fullTextAst?: ESQLAst
 ): Promise<SuggestionRawDefinition[]> {
   const suggestions: SuggestionRawDefinition[] = [];
 
@@ -154,11 +156,41 @@ export async function suggest(
       break;
 
     case 'empty_expression':
+      // Don't suggest MATCH or QSTR after unsupported commands
+      const priorCommands = fullTextAst?.map((a) => a.name) ?? [];
+      const ignored = [];
+      if (priorCommands.includes('limit')) {
+        ignored.push('match');
+      }
+      if (
+        priorCommands.some((c) =>
+          [
+            'show',
+            'row',
+            'dissect',
+            'enrich',
+            'eval',
+            'grok',
+            'keep',
+            'mv_expand',
+            'rename',
+            'stats',
+            'limit',
+          ].includes(c)
+        )
+      ) {
+        ignored.push('qstr');
+      }
+
       const columnSuggestions = await getColumnsByType('any', [], {
         advanceCursor: true,
         openSuggestions: true,
       });
-      suggestions.push(...columnSuggestions, ...getFunctionSuggestions({ command: 'where' }));
+
+      suggestions.push(
+        ...columnSuggestions,
+        ...getFunctionSuggestions({ command: 'where', ignored })
+      );
 
       break;
   }
