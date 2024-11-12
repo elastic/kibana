@@ -9,6 +9,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { v4 } from 'uuid';
 import Boom from '@hapi/boom';
 
+import { MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
 import { CaseRt } from '../../../common/types/domain';
 import {
   AddObservableRequestRt,
@@ -69,6 +70,10 @@ export const addObservable = async (
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
     const currentObservables = retrievedCase.attributes.observables ?? [];
+
+    if (currentObservables.length === MAX_OBSERVABLES_PER_CASE) {
+      throw Boom.forbidden(`Max ${MAX_OBSERVABLES_PER_CASE} observables per case is allowed.`);
+    }
 
     const updatedCase = await caseService.patchCase({
       caseId: retrievedCase.id,
