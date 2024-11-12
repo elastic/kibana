@@ -23,7 +23,7 @@ import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import { RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { transformActionVariables } from '@kbn/response-ops-rule-form/src/action_variables/transforms';
+import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
 
 const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -52,10 +52,8 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('@kbn/response-ops-rule-form/src/action_variables/transforms', () => {
-  const original = jest.requireActual(
-    '@kbn/response-ops-rule-form/src/action_variables/transforms'
-  );
+jest.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', () => {
+  const original = jest.requireActual('@kbn/alerts-ui-shared/src/action_variables/transforms');
   return {
     ...original,
     transformActionVariables: jest.fn(),
