@@ -49,7 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     // Skipped due to change in QA environment for role management and spaces
     // TODO: revisit once the change is rolled out to all environments
-    describe.skip('Roles management card', () => {
+    describe('Roles management card', () => {
       it('should not be displayed by default', async () => {
         await retry.waitFor('page to be visible', async () => {
           return await testSubjects.exists('cards-navigation-page');
