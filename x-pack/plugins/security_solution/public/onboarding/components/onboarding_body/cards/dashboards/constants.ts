@@ -5,18 +5,7 @@
  * 2.0.
  */
 
-import dashboardImageSrc from './images/dashboard_step.png';
-import type { SelectorItem } from '../common/selector';
+import type { CardSelectorListItem } from '../common/card_selector_list';
+import { DASHBOARDS_CARD_ITEMS } from './dashboards_card_config';
 
-export const dashboardIntroSteps: SelectorItem[] = [
-  {
-    id: 'details',
-    title: 'Intro to Elastic Discover',
-    description: 'Quickly add and enable the rules you need with Elastic’s prebuilt rules',
-    asset: {
-      type: 'image',
-      source: dashboardImageSrc,
-      alt: 'details_image',
-    },
-  },
-];
+export const DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED: CardSelectorListItem = DASHBOARDS_CARD_ITEMS[0];

@@ -10,7 +10,9 @@ import { OnboardingCardContentPanel } from './card_content_panel';
 import { useCardContentImagePanelStyles } from './card_content_image_panel.styles';
 
 export const OnboardingCardContentImagePanel = React.memo<
-  PropsWithChildren<{ media: { type: 'video' | 'image'; source: string; alt: string } }>
+  PropsWithChildren<{
+    media: { type: 'video' | 'image'; source: string; alt: string };
+  }>
 >(({ children, media: { type, source, alt } }) => {
   const styles = useCardContentImagePanelStyles();
 

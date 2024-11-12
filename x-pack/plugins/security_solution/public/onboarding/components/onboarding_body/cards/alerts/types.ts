@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { CardSelectorListItem } from '../common/card_selector_list';
-import { RULES_CARD_ITEMS } from './rules_card_config';
-
-export const DEFAULT_RULES_CARD_ITEM_SELECTED: CardSelectorListItem = RULES_CARD_ITEMS[0];
+export enum AlertsCardItemId {
+  list = 'list',
+  timeline = 'timeline',
+  analyzer = 'analyzer',
+  sessionView = 'session_view',
+}

@@ -68,6 +68,7 @@ export type OnboardingCardComponent<TMetadata extends {} = {}> = React.Component
    * It will be `undefined` until the first checkComplete call finishes.
    */
   checkCompleteMetadata?: TMetadata;
+  isExpanded?: boolean;
 }>;
 
 export type OnboardingCardCheckComplete<TMetadata extends {} = {}> = (

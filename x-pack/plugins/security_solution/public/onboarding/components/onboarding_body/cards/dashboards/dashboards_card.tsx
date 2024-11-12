@@ -8,22 +8,30 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { useStoredSelectedDashboardsCardItemId } from '../../../../hooks/use_stored_state';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
 import { CardCallOut } from '../common/card_callout';
 import { CardLinkButton } from '../common/card_link_button';
 import * as i18n from './translations';
-import { Selector } from '../common/selector';
-import { dashboardIntroSteps } from './constants';
+import type { CardSelectorListItem } from '../common/card_selector_list';
+import { CardSelectorList } from '../common/card_selector_list';
+import { DASHBOARDS_CARD_ITEMS, DASHBOARDS_CARD_ITEMS_BY_ID } from './dashboards_card_config';
+import { DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED } from './constants';
+import { useOnboardingContext } from '../../../onboarding_context';
 
 export const DashboardsCard: OnboardingCardComponent = ({
   isCardComplete,
   setComplete,
   setExpandedCardId,
 }) => {
-  const [selectedStep, setSelectedStep] = useState(dashboardIntroSteps[0]);
-
+  const { spaceId } = useOnboardingContext();
+  const [toggleIdSelected, setSelectedRulesCardItemIdToStorage] =
+    useStoredSelectedDashboardsCardItemId(spaceId, DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED.id);
+  const [selectedCardItem, setSelectedCardItem] = useState(
+    DASHBOARDS_CARD_ITEMS_BY_ID[toggleIdSelected]
+  );
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
@@ -33,8 +41,16 @@ export const DashboardsCard: OnboardingCardComponent = ({
     setExpandedCardId(OnboardingCardId.integrations, { scroll: true });
   }, [setExpandedCardId]);
 
+  const onSelectCard = useCallback(
+    (item: CardSelectorListItem) => {
+      setSelectedCardItem(item);
+      setSelectedRulesCardItemIdToStorage(item.id);
+    },
+    [setSelectedRulesCardItemIdToStorage]
+  );
+
   return (
-    <OnboardingCardContentImagePanel media={selectedStep.asset}>
+    <OnboardingCardContentImagePanel media={selectedCardItem.asset}>
       <EuiFlexGroup
         direction="column"
         gutterSize="xl"
@@ -46,10 +62,10 @@ export const DashboardsCard: OnboardingCardComponent = ({
             {i18n.DASHBOARDS_CARD_DESCRIPTION}
           </EuiText>
           <EuiSpacer />
-          <Selector
-            items={dashboardIntroSteps}
-            onSelect={setSelectedStep}
-            selectedItem={selectedStep}
+          <CardSelectorList
+            items={DASHBOARDS_CARD_ITEMS}
+            onSelect={onSelectCard}
+            selectedItem={selectedCardItem}
           />
           {!isIntegrationsCardComplete && (
             <>

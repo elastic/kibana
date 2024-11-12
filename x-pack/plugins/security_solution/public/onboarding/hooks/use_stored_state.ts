@@ -8,6 +8,7 @@
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { OnboardingCardId } from '../constants';
 import type { IntegrationTabId } from '../components/onboarding_body/cards/integrations/types';
+import type { CardSelectorListItem } from '../components/onboarding_body/cards/common/card_selector_list';
 
 const LocalStorageKey = {
   avcBannerDismissed: 'ONBOARDING_HUB.AVC_BANNER_DISMISSED',
@@ -15,6 +16,9 @@ const LocalStorageKey = {
   completeCards: 'ONBOARDING_HUB.COMPLETE_CARDS',
   expandedCard: 'ONBOARDING_HUB.EXPANDED_CARD',
   selectedIntegrationTabId: 'ONBOARDING_HUB.SELECTED_INTEGRATION_TAB_ID',
+  selectedSelectedRulesCardItemId: 'ONBOARDING_HUB.SELECTED_RULES_CARD_ITEM_ID',
+  selectedSelectedAlertsCardItemId: 'ONBOARDING_HUB.SELECTED_ALERTS_RULES_CARD_ITEM_ID',
+  selectedSelectedDashboardsCardItemId: 'ONBOARDING_HUB.SELECTED_DASHBOARDS_CARD_ITEM_ID',
   IntegrationSearchTerm: 'ONBOARDING_HUB.INTEGRATION_SEARCH_TERM',
   IntegrationScrollTop: 'ONBOARDING_HUB.INTEGRATION_SCROLL_TOP',
 } as const;
@@ -46,6 +50,42 @@ export const useStoredExpandedCardId = (spaceId: string) =>
   useDefinedLocalStorage<OnboardingCardId | null>(
     `${LocalStorageKey.expandedCard}.${spaceId}`,
     null
+  );
+
+/**
+ * Stores the selected selectable card ID per space
+ */
+export const useStoredSelectedRulesCardItemId = (
+  spaceId: string,
+  defaultSelectedRulesCardItemId: CardSelectorListItem['id']
+) =>
+  useDefinedLocalStorage<CardSelectorListItem['id']>(
+    `${LocalStorageKey.selectedSelectedRulesCardItemId}.${spaceId}`,
+    defaultSelectedRulesCardItemId
+  );
+
+/**
+ * Stores the selected selectable card ID per space
+ */
+export const useStoredSelectedDashboardsCardItemId = (
+  spaceId: string,
+  defaultSelectedDashboardsCardItemId: CardSelectorListItem['id']
+) =>
+  useDefinedLocalStorage<CardSelectorListItem['id']>(
+    `${LocalStorageKey.selectedSelectedDashboardsCardItemId}.${spaceId}`,
+    defaultSelectedDashboardsCardItemId
+  );
+
+/**
+ * Stores the selected selectable card ID per space
+ */
+export const useStoredSelectedAlertsCardItemId = (
+  spaceId: string,
+  defaultSelectedAlertsCardItemId: CardSelectorListItem['id']
+) =>
+  useDefinedLocalStorage<CardSelectorListItem['id']>(
+    `${LocalStorageKey.selectedSelectedAlertsCardItemId}.${spaceId}`,
+    defaultSelectedAlertsCardItemId
   );
 
 /**
