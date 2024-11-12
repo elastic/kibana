@@ -21,7 +21,7 @@
       "ruleRegistry",
       "share"
     ],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": ["kibanaReact","controls"],
     "optionalPlugins": ["spaces", "cloud"],
     "extraPublicDirs": []
   }
