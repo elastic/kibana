@@ -167,6 +167,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Click Create template
       await pageObjects.indexManagement.clickNextButton();
+
+      await testSubjects.click('tab-preview');
+      // const templatePreview = await testSubjects.getVisibleText('simulateTemplatePreview');
       // todo more here
 
       await testSubjects.click('closeDetailsButtonz');
