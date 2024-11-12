@@ -12,7 +12,7 @@ import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/publi
 import type { DiscoverServices } from '@kbn/discover-plugin/public/build_services';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { CoreStart } from '@kbn/core/public';
-import type { SecuritySolutionAppWrapperFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import type { SecuritySolutionAppWrapperFeature } from '@kbn/discover-shared-plugin/public';
 import { APP_ID } from '../../../common';
 import { SecuritySolutionFlyout } from '../../flyout';
 import { StatefulEventContext } from '../../common/components/events_viewer/stateful_event_context';
