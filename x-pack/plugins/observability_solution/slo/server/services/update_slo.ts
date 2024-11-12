@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, IBasePath, Logger, IScopedClusterClient } from '@kbn/core/server';
+import { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { isEqual, pick } from 'lodash';
 import {
+  SLO_DESTINATION_INDEX_PATTERN,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+  SLO_SUMMARY_TEMP_INDEX_NAME,
   getSLOPipelineId,
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
-  SLO_DESTINATION_INDEX_PATTERN,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-  SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
 import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
@@ -27,6 +27,7 @@ import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { TransformManager } from './transform_manager';
+import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 
 export class UpdateSLO {
   constructor(
@@ -68,8 +69,9 @@ export class UpdateSLO {
 
     validateSLO(updatedSlo);
 
-    const rollbackOperations = [];
+    await assertExpectedIndicatorSourceIndexPrivileges(updatedSlo, this.esClient);
 
+    const rollbackOperations = [];
     await this.repository.update(updatedSlo);
     rollbackOperations.push(() => this.repository.update(originalSlo));
 
