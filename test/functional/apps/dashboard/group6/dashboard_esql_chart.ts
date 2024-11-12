@@ -32,6 +32,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    after(async () => {
+      await dashboard.navigateToApp();
+      await testSubjects.click('discard-unsaved-New-Dashboard');
+    });
+
     it('should add an ES|QL datatable chart when the ES|QL panel action is clicked', async () => {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
