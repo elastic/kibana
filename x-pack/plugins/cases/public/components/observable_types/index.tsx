@@ -21,6 +21,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import type { ObservableTypesConfiguration } from '../../../common/types/domain';
 import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import { ObservableTypesList } from './observable_types_list';
+import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 
 export interface ObservableTypesProps {
   observableTypes: ObservableTypesConfiguration;
@@ -67,7 +68,14 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
   return canAddCustomFields ? (
     <EuiDescribedFormGroup
       fullWidth
-      title={<h3>{i18n.TITLE}</h3>}
+      title={
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          <EuiFlexItem grow={false}>{i18n.TITLE}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ExperimentalBadge />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
       description={<p>{i18n.DESCRIPTION}</p>}
       data-test-subj="observable-types-form-group"
     >

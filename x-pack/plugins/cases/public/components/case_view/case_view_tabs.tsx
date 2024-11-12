@@ -7,7 +7,6 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
-  EuiBetaBadge,
   EuiNotificationBadge,
   EuiSpacer,
   EuiTab,
@@ -20,7 +19,6 @@ import { css } from '@emotion/react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCaseViewNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { EXPERIMENTAL_DESC, EXPERIMENTAL_LABEL } from '../header_page/translations';
 import {
   ACTIVITY_TAB,
   ALERTS_TAB,
@@ -31,29 +29,7 @@ import {
 import type { CaseUI } from '../../../common';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
-
-const ExperimentalBadge = ({
-  euiTheme,
-  'data-test-subj': testSubj,
-}: {
-  euiTheme: EuiThemeComputed<{}>;
-  'data-test-subj'?: string;
-}) => {
-  return (
-    <EuiBetaBadge
-      label={EXPERIMENTAL_LABEL}
-      size="s"
-      iconType="beaker"
-      tooltipContent={EXPERIMENTAL_DESC}
-      tooltipPosition="bottom"
-      css={css`
-        margin-left: ${euiTheme.size.xs};
-      `}
-      data-test-subj={testSubj}
-    />
-  );
-};
-ExperimentalBadge.displayName = 'ExperimentalBadge';
+import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 
 const TabTitle = ({ title }: { title: string }) => (
   <EuiTitle size="xxs">
@@ -114,7 +90,7 @@ const ObservablesBadge = ({
         {observableStatsData.total > 0 ? observableStatsData.total : 0}
       </EuiNotificationBadge>
     )}
-    <ExperimentalBadge euiTheme={euiTheme} />
+    <ExperimentalBadge compact />
   </>
 );
 
@@ -142,10 +118,7 @@ const AlertsBadge = ({
       {totalAlerts || 0}
     </EuiNotificationBadge>
     {isExperimental && (
-      <ExperimentalBadge
-        data-test-subj="case-view-alerts-table-experimental-badge"
-        euiTheme={euiTheme}
-      />
+      <ExperimentalBadge compact data-test-subj="case-view-alerts-table-experimental-badge" />
     )}
   </>
 );
@@ -219,7 +192,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       {
         id: CASE_VIEW_PAGE_TABS.SIMILAR_CASES,
         name: SIMILAR_CASES_TAB,
-        badge: <ExperimentalBadge euiTheme={euiTheme} />,
+        badge: <ExperimentalBadge compact />,
       },
     ],
     [
