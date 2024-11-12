@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { validateDuplicatedKeysInRequest, validateDuplicatedLabelsInRequest } from './validators';
+import {
+  validateDuplicatedKeysInRequest,
+  validateDuplicatedLabelsInRequest,
+  validateDuplicatedObservablesInRequest,
+} from './validators';
 
 describe('validators', () => {
   describe('validateDuplicatedKeysInRequest', () => {
@@ -111,6 +115,52 @@ describe('validators', () => {
           fieldName: 'foobar',
         })
       ).toThrowErrorMatchingInlineSnapshot(`"Invalid duplicated foobar labels in request: email"`);
+    });
+  });
+
+  describe('validateDuplicatedObservablesInRequest', () => {
+    it('returns observables in request that have duplicated labels', () => {
+      expect(() =>
+        validateDuplicatedObservablesInRequest({
+          requestFields: [
+            {
+              value: 'value',
+              typeKey: 'typeKey',
+            },
+            {
+              value: 'value',
+              typeKey: 'typeKey',
+            },
+          ],
+
+          fieldName: 'observables',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid duplicated observables in request: typeKey,value"`
+      );
+    });
+
+    it('does not throw if no fields in request have duplicated labels', () => {
+      expect(() =>
+        validateDuplicatedObservablesInRequest({
+          requestFields: [
+            {
+              value: 'value',
+              typeKey: 'typeKey',
+            },
+            {
+              value: 'value 1',
+              typeKey: 'typeKey',
+            },
+            {
+              value: 'value',
+              typeKey: 'typeKey 2',
+            },
+          ],
+
+          fieldName: 'observables',
+        })
+      ).not.toThrow();
     });
   });
 });

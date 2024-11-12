@@ -26,6 +26,7 @@ import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
+import { validateDuplicatedObservablesInRequest } from '../validators';
 
 const ensureUpdateAuthorized = async (
   authorization: PublicMethodsOf<Authorization>,
@@ -75,19 +76,26 @@ export const addObservable = async (
       throw Boom.forbidden(`Max ${MAX_OBSERVABLES_PER_CASE} observables per case is allowed.`);
     }
 
+    const updatedObservables = [
+      ...currentObservables,
+      {
+        ...paramArgs.observable,
+        id: v4(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ];
+
+    validateDuplicatedObservablesInRequest({
+      requestFields: updatedObservables,
+      fieldName: 'observables',
+    });
+
     const updatedCase = await caseService.patchCase({
       caseId: retrievedCase.id,
       originalCase: retrievedCase,
       updatedAttributes: {
-        observables: [
-          ...currentObservables,
-          {
-            ...paramArgs.observable,
-            id: v4(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-        ],
+        observables: updatedObservables,
       },
     });
 

@@ -46,23 +46,57 @@ export const validateDuplicatedLabelsInRequest = ({
   requestFields?: Array<{ label: string }>;
   fieldName: string;
 }) => {
+  const stringifyItem = (item: { label: string }) => item.label.toLowerCase();
+
   // NOTE: this prevents adding duplicates for the builtin types
-  const builtinLabels = OBSERVABLE_TYPES_BUILTIN.map((builtin) => builtin.label.toLowerCase());
+  const builtinLabels = OBSERVABLE_TYPES_BUILTIN.map(stringifyItem);
 
   const uniqueLabels = new Set<string>(builtinLabels);
   const duplicatedLabels = new Set<string>();
 
   requestFields.forEach((item) => {
-    if (uniqueLabels.has(item.label.toLowerCase())) {
-      duplicatedLabels.add(item.label.toLowerCase());
+    const stringifiedItem = stringifyItem(item);
+    if (uniqueLabels.has(stringifiedItem)) {
+      duplicatedLabels.add(stringifiedItem);
     } else {
-      uniqueLabels.add(item.label.toLowerCase());
+      uniqueLabels.add(stringifiedItem);
     }
   });
 
   if (duplicatedLabels.size > 0) {
     throw Boom.badRequest(
       `Invalid duplicated ${fieldName} labels in request: ${Array.from(duplicatedLabels.values())}`
+    );
+  }
+};
+
+/**
+ * Throws an error if the request has observable types with duplicated labels.
+ */
+export const validateDuplicatedObservablesInRequest = ({
+  requestFields = [],
+  fieldName,
+}: {
+  requestFields?: Array<{ typeKey: string; value: string }>;
+  fieldName: string;
+}) => {
+  const stringifyItem = (item: { value: string; typeKey: string }) =>
+    [item.typeKey, item.value].join();
+
+  const uniqueObservables = new Set<string>();
+  const duplicatedObservables = new Set<string>();
+
+  requestFields.forEach((item) => {
+    if (uniqueObservables.has(stringifyItem(item))) {
+      duplicatedObservables.add(stringifyItem(item));
+    } else {
+      uniqueObservables.add(stringifyItem(item));
+    }
+  });
+
+  if (duplicatedObservables.size > 0) {
+    throw Boom.badRequest(
+      `Invalid duplicated ${fieldName} in request: ${Array.from(duplicatedObservables.values())}`
     );
   }
 };
