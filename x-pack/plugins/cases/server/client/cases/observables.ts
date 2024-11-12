@@ -156,6 +156,11 @@ export const updateObservable = async (
       updatedAt: new Date().toISOString(),
     };
 
+    validateDuplicatedObservablesInRequest({
+      requestFields: updatedObservables,
+      fieldName: 'observables',
+    });
+
     const updatedCase = await caseService.patchCase({
       caseId: retrievedCase.id,
       originalCase: retrievedCase,
