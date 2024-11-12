@@ -53,7 +53,7 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
 
   const tableRowProps = useCallback(
     (theCase: CaseUI) => ({
-      'data-test-subj': `cases-table-row-${theCase.id}`,
+      'data-test-subj': `similar-cases-table-row-${theCase.id}`,
     }),
     []
   );
