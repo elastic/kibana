@@ -90,6 +90,15 @@ export const EntityStoreUtils = (
     );
   };
 
+  const enableEntityStore = async () => {
+    const res = await api.initEntityStore({ body: {} }, namespace);
+    if (res.status !== 200) {
+      log.error(`Failed to enable entity store`);
+      log.error(JSON.stringify(res.body));
+    }
+    expect(res.status).to.eql(200);
+  };
+
   const expectTransformStatus = async (
     transformId: string,
     exists: boolean,
@@ -144,5 +153,6 @@ export const EntityStoreUtils = (
     expectTransformStatus,
     expectEngineAssetsExist,
     expectEngineAssetsDoNotExist,
+    enableEntityStore,
   };
 };

@@ -42,6 +42,18 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('enablement', () => {
+      afterEach(async () => {
+        await utils.cleanEngines();
+      });
+
+      it('should enable the entity store, creating both user and host engines', async () => {
+        await utils.enableEntityStore();
+        await utils.expectEngineAssetsExist('user');
+        await utils.expectEngineAssetsExist('host');
+      });
+    });
+
     describe('get and list', () => {
       before(async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host', 'user']);
