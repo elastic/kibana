@@ -43,7 +43,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled }: EditorMenuProps) =>
     function openDashboardPanelSelectionFlyout() {
       const flyoutPanelPaddingSize: ComponentProps<
         typeof DashboardPanelSelectionListFlyout
-      >['paddingSize'] = 'l';
+      >['paddingSize'] = 'm';
 
       const mount = toMountPoint(
         React.createElement(function () {
