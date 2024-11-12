@@ -233,6 +233,6 @@ export class EntityClient {
       })
     ).then((results) => results.flat());
 
-    return mergeEntitiesList(entities);
+    return mergeEntitiesList(entities).slice(0, limit);
   }
 }
