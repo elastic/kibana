@@ -5,21 +5,21 @@
  * 2.0.
  */
 import { EuiDataGridSorting } from '@elastic/eui';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
-  type EntityColumnIds,
   entityPaginationRt,
+  type EntityColumnIds,
   type EntityPagination,
 } from '../../../common/entities';
-import { EntitiesGrid } from '../entities_grid';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
-import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
-import { InventorySummary } from './inventory_summary';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
+import { EntitiesGrid } from '../entities_grid';
+import { InventorySummary } from '../grouped_inventory/inventory_summary';
 
 const paginationDecoder = decodeOrThrow(entityPaginationRt);
 
@@ -27,9 +27,11 @@ export function UnifiedInventory() {
   const {
     services: { inventoryAPIClient },
   } = useKibana();
-  const { refreshSubject$ } = useInventorySearchBarContext();
+  const { refreshSubject$, isControlPanelsInitiated, stringifiedEsQuery } =
+    useUnifiedSearchContext();
   const { query } = useInventoryParams('/');
-  const { sortDirection, sortField, kuery, entityTypes, pagination: paginationQuery } = query;
+  const { sortDirection, sortField, pagination: paginationQuery } = query;
+
   let pagination: EntityPagination | undefined = {};
   const inventoryRoute = useInventoryRouter();
   try {
@@ -38,9 +40,7 @@ export function UnifiedInventory() {
     inventoryRoute.push('/', {
       path: {},
       query: {
-        sortField,
-        sortDirection,
-        kuery,
+        ...query,
         pagination: undefined,
       },
     });
@@ -55,24 +55,24 @@ export function UnifiedInventory() {
     refresh,
   } = useInventoryAbortableAsync(
     ({ signal }) => {
-      return inventoryAPIClient.fetch('GET /internal/inventory/entities', {
-        params: {
-          query: {
-            sortDirection,
-            sortField,
-            entityTypes: entityTypes?.length ? JSON.stringify(entityTypes) : undefined,
-            kuery,
+      if (isControlPanelsInitiated) {
+        return inventoryAPIClient.fetch('GET /internal/inventory/entities', {
+          params: {
+            query: {
+              sortDirection,
+              sortField,
+              esQuery: stringifiedEsQuery,
+            },
           },
-        },
-        signal,
-      });
+          signal,
+        });
+      }
     },
-    [entityTypes, inventoryAPIClient, kuery, sortDirection, sortField]
+    [inventoryAPIClient, sortDirection, sortField, isControlPanelsInitiated, stringifiedEsQuery]
   );
 
   useEffectOnce(() => {
     const refreshSubscription = refreshSubject$.subscribe(refresh);
-
     return () => refreshSubscription.unsubscribe();
   });
 
@@ -100,19 +100,6 @@ export function UnifiedInventory() {
     });
   }
 
-  function handleTypeFilter(type: string) {
-    const { pagination: _, ...rest } = query;
-
-    inventoryRoute.push('/', {
-      path: {},
-      query: {
-        ...rest,
-        // Override the current entity types
-        entityTypes: [type],
-      },
-    });
-  }
-
   return (
     <>
       <InventorySummary />
@@ -124,7 +111,6 @@ export function UnifiedInventory() {
         onChangePage={handlePageChange}
         onChangeSort={handleSortChange}
         pageIndex={pageIndex}
-        onFilterByType={handleTypeFilter}
       />
     </>
   );

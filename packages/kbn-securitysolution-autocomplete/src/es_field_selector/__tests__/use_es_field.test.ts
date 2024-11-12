@@ -16,7 +16,7 @@ import TestRenderer from 'react-test-renderer';
 const { act: actTestRenderer } = TestRenderer;
 
 import { fields } from '../../fields/index.mock';
-import { useField } from '../use_field';
+import { useEsField } from '../use_es_field';
 
 jest.mock('../../translations', () => ({
   BINARY_TYPE_NOT_SUPPORTED: 'Binary fields are currently unsupported',
@@ -33,7 +33,7 @@ describe('useField', () => {
 
   describe('comboOptions and selectedComboOptions', () => {
     it('should return default values', () => {
-      const { result } = renderHook(() => useField({ indexPattern, onChange: onChangeMock }));
+      const { result } = renderHook(() => useEsField({ indexPattern, onChange: onChangeMock }));
       const { isInvalid, comboOptions, selectedComboOptions, fieldWidth } = result.current;
       expect(isInvalid).toBeFalsy();
       expect(comboOptions.length).toEqual(30);
@@ -79,7 +79,7 @@ describe('useField', () => {
       };
 
       const { result } = renderHook(() =>
-        useField({ indexPattern: newIndexPattern, onChange: onChangeMock })
+        useEsField({ indexPattern: newIndexPattern, onChange: onChangeMock })
       );
       const { comboOptions, selectedComboOptions } = result.current;
       expect(comboOptions).toEqual([{ label: 'bytes' }, { label: 'ssl' }, { label: '@timestamp' }]);
@@ -124,7 +124,7 @@ describe('useField', () => {
       };
 
       const { result } = renderHook(() =>
-        useField({
+        useEsField({
           indexPattern: newIndexPattern,
           onChange: onChangeMock,
           selectedField: { name: '', type: 'keyword' },
@@ -173,7 +173,7 @@ describe('useField', () => {
       };
 
       const { result } = renderHook(() =>
-        useField({
+        useEsField({
           indexPattern: newIndexPattern,
           onChange: onChangeMock,
           selectedField: { name: ' ', type: 'keyword' },
@@ -222,7 +222,7 @@ describe('useField', () => {
       };
 
       const { result } = renderHook(() =>
-        useField({ indexPattern: newIndexPattern, onChange: onChangeMock, selectedField })
+        useEsField({ indexPattern: newIndexPattern, onChange: onChangeMock, selectedField })
       );
       const { comboOptions, selectedComboOptions } = result.current;
       expect(comboOptions).toEqual([{ label: 'bytes' }, { label: 'ssl' }, { label: '@timestamp' }]);
@@ -273,7 +273,7 @@ describe('useField', () => {
           readFromDocValues: true,
         },
       ] as unknown as DataViewFieldBase[];
-      const { result } = renderHook(() => useField({ indexPattern, onChange: onChangeMock }));
+      const { result } = renderHook(() => useEsField({ indexPattern, onChange: onChangeMock }));
       const { comboOptions, renderFields } = result.current;
       expect(comboOptions).toEqual([
         { label: 'blob' },
@@ -328,7 +328,7 @@ describe('useField', () => {
           readFromDocValues: true,
         },
       ] as unknown as DataViewFieldBase[];
-      const { result } = renderHook(() => useField({ indexPattern, onChange: onChangeMock }));
+      const { result } = renderHook(() => useEsField({ indexPattern, onChange: onChangeMock }));
       const { comboOptions, renderFields } = result.current;
       expect(comboOptions).toEqual([
         { label: 'blob' },
@@ -374,7 +374,7 @@ describe('useField', () => {
           readFromDocValues: true,
         },
       ] as unknown as DataViewFieldBase[];
-      const { result } = renderHook(() => useField({ indexPattern, onChange: onChangeMock }));
+      const { result } = renderHook(() => useEsField({ indexPattern, onChange: onChangeMock }));
       const { comboOptions, renderFields } = result.current;
       expect(comboOptions).toEqual([{ label: 'bytes' }, { label: 'ssl' }, { label: '@timestamp' }]);
       act(() => {
@@ -389,7 +389,7 @@ describe('useField', () => {
       jest.resetModules();
     });
     it('should invoke onChange with one value if one option is sent', () => {
-      const { result } = renderHook(() => useField({ indexPattern, onChange: onChangeMock }));
+      const { result } = renderHook(() => useEsField({ indexPattern, onChange: onChangeMock }));
       act(() => {
         result.current.handleValuesChange([
           {
@@ -411,7 +411,7 @@ describe('useField', () => {
       });
     });
     it('should invoke onChange with array value if more than an option', () => {
-      const { result } = renderHook(() => useField({ indexPattern, onChange: onChangeMock }));
+      const { result } = renderHook(() => useEsField({ indexPattern, onChange: onChangeMock }));
       act(() => {
         result.current.handleValuesChange([
           {
@@ -446,7 +446,7 @@ describe('useField', () => {
       });
     });
     it('should invoke onChange with custom option if one is sent', () => {
-      const { result } = renderHook(() => useField({ indexPattern, onChange: onChangeMock }));
+      const { result } = renderHook(() => useEsField({ indexPattern, onChange: onChangeMock }));
       act(() => {
         result.current.handleCreateCustomOption('madeUpField');
         expect(onChangeMock).toHaveBeenCalledWith([
@@ -462,13 +462,13 @@ describe('useField', () => {
   describe('fieldWidth', () => {
     it('should return object has width prop', () => {
       const { result } = renderHook(() =>
-        useField({ indexPattern, onChange: onChangeMock, fieldInputWidth: 100 })
+        useEsField({ indexPattern, onChange: onChangeMock, fieldInputWidth: 100 })
       );
       expect(result.current.fieldWidth).toEqual({ width: '100px' });
     });
     it('should return empty object', () => {
       const { result } = renderHook(() =>
-        useField({ indexPattern, onChange: onChangeMock, fieldInputWidth: 0 })
+        useEsField({ indexPattern, onChange: onChangeMock, fieldInputWidth: 0 })
       );
       expect(result.current.fieldWidth).toEqual({});
     });
@@ -477,7 +477,7 @@ describe('useField', () => {
   describe('isInvalid with handleTouch', () => {
     it('should return isInvalid equals true when calling with no selectedField and isRequired is true', () => {
       const { result } = renderHook(() =>
-        useField({ indexPattern, onChange: onChangeMock, isRequired: true })
+        useEsField({ indexPattern, onChange: onChangeMock, isRequired: true })
       );
 
       actTestRenderer(() => {
@@ -487,7 +487,7 @@ describe('useField', () => {
     });
     it('should return isInvalid equals false with selectedField and isRequired is true', () => {
       const { result } = renderHook(() =>
-        useField({ indexPattern, onChange: onChangeMock, isRequired: true, selectedField })
+        useEsField({ indexPattern, onChange: onChangeMock, isRequired: true, selectedField })
       );
 
       actTestRenderer(() => {
@@ -496,7 +496,7 @@ describe('useField', () => {
       expect(result.current.isInvalid).toBeFalsy();
     });
     it('should return isInvalid equals false when isRequired is false', () => {
-      const { result } = renderHook(() => useField({ indexPattern, onChange: onChangeMock }));
+      const { result } = renderHook(() => useEsField({ indexPattern, onChange: onChangeMock }));
 
       actTestRenderer(() => {
         result.current.handleTouch();

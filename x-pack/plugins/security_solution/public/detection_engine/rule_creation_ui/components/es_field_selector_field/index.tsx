@@ -7,13 +7,13 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow } from '@elastic/eui';
-import { FieldComponent } from '@kbn/securitysolution-autocomplete';
+import { EsFieldSelector } from '@kbn/securitysolution-autocomplete';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-interface AutocompleteFieldProps {
+interface EsFieldSelectorFieldProps {
   dataTestSubj: string;
-  field: FieldHook;
+  field: FieldHook<string>;
   idAria: string;
   indices: DataViewBase;
   isDisabled: boolean;
@@ -21,7 +21,7 @@ interface AutocompleteFieldProps {
   placeholder?: string;
 }
 
-export const AutocompleteField = ({
+export const EsFieldSelectorField = ({
   dataTestSubj,
   field,
   idAria,
@@ -29,35 +29,37 @@ export const AutocompleteField = ({
   isDisabled,
   fieldType,
   placeholder,
-}: AutocompleteFieldProps) => {
+}: EsFieldSelectorFieldProps) => {
+  const fieldTypeFilter = useMemo(() => [fieldType], [fieldType]);
+
   const handleFieldChange = useCallback(
     ([newField]: DataViewFieldBase[]): void => {
-      // TODO: Update onChange type in FieldComponent as newField can be undefined
       field.setValue(newField?.name ?? '');
     },
     [field]
   );
 
-  const selectedField = useMemo(() => {
-    const existingField = (field.value as string) ?? '';
-    const [newSelectedField] = indices.fields.filter(
-      ({ name }) => existingField != null && existingField === name
-    );
-    return newSelectedField;
-  }, [field.value, indices]);
+  const selectedField = useMemo(
+    () =>
+      indices.fields.find(({ name }) => field.value === name) ?? {
+        name: field.value,
+        type: fieldType,
+      },
+    [field.value, indices, fieldType]
+  );
 
-  const fieldTypeFilter = useMemo(() => [fieldType], [fieldType]);
+  const describedByIds = useMemo(() => (idAria ? [idAria] : undefined), [idAria]);
 
   return (
     <EuiFormRow
       data-test-subj={dataTestSubj}
-      describedByIds={idAria ? [idAria] : undefined}
+      describedByIds={describedByIds}
       fullWidth
       helpText={field.helpText}
       label={field.label}
       labelAppend={field.labelAppend}
     >
-      <FieldComponent
+      <EsFieldSelector
         placeholder={placeholder ?? ''}
         indexPattern={indices}
         selectedField={selectedField}
