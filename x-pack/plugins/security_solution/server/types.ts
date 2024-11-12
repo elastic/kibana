@@ -20,6 +20,7 @@ import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/s
 
 import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type { Immutable } from '../common/endpoint/types';
 import { AppClient } from './client';
@@ -53,6 +54,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
   getAuditLogger: () => AuditLogger | undefined;
+  getDataViewsService: () => DataViewsService;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
   getRiskEngineDataClient: () => RiskEngineDataClient;
