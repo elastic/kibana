@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RawRule } from '../../../types';
 import { RuleDomain } from '../../../application/rule/types';
 import { AdHocRunStatus } from '../../../../common/constants';
 
@@ -24,7 +23,7 @@ export interface AdHocRunSchedule extends Record<string, unknown> {
 //   the backfill job was scheduled. if there are updates to the rule configuration
 //   after the backfill is scheduled, they will not be reflected during the backfill run.
 type AdHocRunSORule = Pick<
-  RawRule,
+  RuleDomain,
   | 'name'
   | 'tags'
   | 'alertTypeId'

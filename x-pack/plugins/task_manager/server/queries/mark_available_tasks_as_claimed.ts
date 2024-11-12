@@ -128,7 +128,9 @@ function getSortByPriority(definitions: TaskTypeDictionary): estypes.SortCombina
         // TODO: we could do this locally as well, but they may starve
         source: `
           String taskType = doc['task.taskType'].value;
-          if (params.priority_map.containsKey(taskType)) {
+          if (doc['task.priority'].value != null) {
+            return doc['task.priority'].value;
+          } else if (params.priority_map.containsKey(taskType)) {
             return params.priority_map[taskType];
           } else {
             return ${TaskPriority.Normal};

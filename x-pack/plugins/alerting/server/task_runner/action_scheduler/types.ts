@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { IAlertsClient } from '../../alerts_client/types';
 import { Alert } from '../../alert';
 import {
@@ -53,7 +54,7 @@ export interface ActionSchedulerOptions<
   >;
   logger: Logger;
   alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
-  rule: SanitizedRule<Params>;
+  rule: Omit<SanitizedRule<Params>, 'executionStatus'>;
   taskRunnerContext: TaskRunnerContext;
   taskInstance: RuleTaskInstance;
   ruleRunMetricsStore: RuleRunMetricsStore;
@@ -64,6 +65,7 @@ export interface ActionSchedulerOptions<
   previousStartedAt: Date | null;
   actionsClient: PublicMethodsOf<ActionsClient>;
   alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
+  priority?: TaskPriority;
 }
 
 export type Executable<

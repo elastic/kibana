@@ -165,7 +165,10 @@ const getQueryByExecutionUuid = ({
     });
   }
 
+  console.log(`getQueryByExecutionUuid ${JSON.stringify(filter)}`);
+
   if (alertsFilter) {
+    console.log(`alertsFilter ${JSON.stringify(alertsFilter)}`);
     filter.push(...generateAlertsFilterDSL(alertsFilter));
   }
 

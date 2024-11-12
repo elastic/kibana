@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { FilterStateStore } from '@kbn/es-query';
 import {
   rawAdHocRunParamsSchema as rawAdHocRunParamsSchemaV1,
   rawAdHocRunParamsRuleSchema as rawAdHocRunParamsRuleSchemaV1,
@@ -45,12 +46,15 @@ const rawRuleAlertsFilterSchema = schema.object({
           }),
           $state: schema.maybe(
             schema.object({
-              store: schema.oneOf([schema.literal('appState'), schema.literal('globalState')]),
+              store: schema.oneOf([
+                schema.literal(FilterStateStore.APP_STATE), // change
+                schema.literal(FilterStateStore.GLOBAL_STATE), // change
+              ]),
             })
           ),
         })
       ),
-      dsl: schema.maybe(schema.string()),
+      dsl: schema.string(), // change
     })
   ),
   timeframe: schema.maybe(
@@ -66,7 +70,7 @@ const rawRuleAlertsFilterSchema = schema.object({
 });
 
 const rawAdHocRunParamsRuleActionSchema = schema.object({
-  uuid: schema.maybe(schema.string()),
+  uuid: schema.string(),
   group: schema.maybe(schema.string()),
   actionRef: schema.string(),
   actionTypeId: schema.string(),

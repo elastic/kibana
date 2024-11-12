@@ -20,11 +20,12 @@ import {
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/common';
-import { CancellableTask, RunResult } from '@kbn/task-manager-plugin/server/task';
+import { CancellableTask, RunResult, TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { AdHocRunStatus, adHocRunStatus } from '../../common/constants';
 import { RuleRunnerErrorStackTraceLog, RuleTaskStateAndMetrics, TaskRunnerContext } from './types';
 import { getExecutorServices } from './get_executor_services';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
+import { transformRawActionsToDomainActions } from '../application/rule/transforms';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -35,7 +36,7 @@ import {
   RuleTypeState,
 } from '../types';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
-import { AdHocRun, AdHocRunSchedule, AdHocRunSO } from '../data/ad_hoc_run/types';
+import { AdHocRun, AdHocRunSchedule } from '../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { AdHocTaskRunningHandler } from './ad_hoc_task_running_handler';
@@ -52,6 +53,8 @@ import {
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { getEsErrorMessage } from '../lib/errors';
 import { Result, isOk, asOk, asErr } from '../lib/result_type';
+import { RawAdHocRunParams } from '../saved_objects/schemas/raw_ad_hoc_run_params/latest';
+import { ActionScheduler } from './action_scheduler';
 
 interface ConstructorParams {
   context: TaskRunnerContext;
@@ -173,7 +176,7 @@ export class AdHocTaskRunner implements CancellableTask {
       return ruleRunMetricsStore.getMetrics();
     }
 
-    const { rule } = adHocRunData;
+    const { rule, apiKeyToUse } = adHocRunData;
     const ruleType = this.ruleTypeRegistry.get(rule.alertTypeId);
 
     const ruleLabel = `${ruleType.id}:${rule.id}: '${rule.name}'`;
@@ -253,6 +256,35 @@ export class AdHocTaskRunner implements CancellableTask {
       throw error;
     }
 
+    const actionScheduler = new ActionScheduler({
+      rule: {
+        ...rule,
+        muteAll: false,
+        mutedInstanceIds: [],
+        createdAt: new Date(rule.createdAt),
+        updatedAt: new Date(rule.updatedAt),
+      },
+      ruleType,
+      logger: this.logger,
+      taskRunnerContext: this.context,
+      taskInstance: this.taskInstance,
+      ruleRunMetricsStore,
+      apiKey: apiKeyToUse,
+      ruleConsumer: rule.consumer,
+      executionId: this.executionId,
+      ruleLabel,
+      previousStartedAt: null,
+      alertingEventLogger: this.alertingEventLogger,
+      actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
+      alertsClient,
+      priority: TaskPriority.Low,
+    });
+
+    await actionScheduler.run({
+      activeCurrentAlerts: alertsClient.getProcessedAlerts('activeCurrent'),
+      recoveredCurrentAlerts: alertsClient.getProcessedAlerts('recoveredCurrent'),
+    });
+
     return ruleRunMetricsStore.getMetrics();
   }
 
@@ -291,8 +323,8 @@ export class AdHocTaskRunner implements CancellableTask {
       let adHocRunData: AdHocRun;
 
       try {
-        const adHocRunSO: SavedObject<AdHocRunSO> =
-          await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<AdHocRunSO>(
+        const adHocRunSO: SavedObject<RawAdHocRunParams> =
+          await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAdHocRunParams>(
             AD_HOC_RUN_SAVED_OBJECT_TYPE,
             adHocRunParamsId,
             { namespace }
@@ -304,6 +336,15 @@ export class AdHocTaskRunner implements CancellableTask {
           rule: {
             ...adHocRunSO.attributes.rule,
             id: adHocRunSO.references[0].id,
+            params: adHocRunSO.attributes.rule.params as unknown as never,
+            actions: transformRawActionsToDomainActions({
+              ruleId: adHocRunSO.references[0].id,
+              actions: adHocRunSO.attributes.rule.actions,
+              references: adHocRunSO.references,
+              isSystemAction: (connectorId: string) =>
+                this.context.actionsPlugin.isSystemActionConnector(connectorId),
+              omitGeneratedValues: false,
+            }),
           },
         };
       } catch (err) {
