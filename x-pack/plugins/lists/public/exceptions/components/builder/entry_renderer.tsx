@@ -48,7 +48,7 @@ import {
   AutocompleteFieldMatchAnyComponent,
   AutocompleteFieldMatchComponent,
   AutocompleteFieldWildcardComponent,
-  FieldComponent,
+  EsFieldSelector,
   OperatorComponent,
 } from '@kbn/securitysolution-autocomplete';
 import {
@@ -207,7 +207,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     (isFirst: boolean): JSX.Element => {
       const filteredIndexPatterns = getFilteredIndexPatterns(indexPattern, entry);
       const comboBox = (
-        <FieldComponent
+        <EsFieldSelector
           placeholder={
             entry.nested != null
               ? i18n.EXCEPTION_FIELD_NESTED_PLACEHOLDER
