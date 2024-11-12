@@ -39391,17 +39391,20 @@ components:
       type: object
       properties:
         unit:
-          enum:
-            - s
-            - m
-            - h
-          type: string
+          $ref: >-
+            #/components/schemas/Security_Detections_API_AlertSuppressionDurationUnit
         value:
           minimum: 1
           type: integer
       required:
         - value
         - unit
+    Security_Detections_API_AlertSuppressionDurationUnit:
+      enum:
+        - s
+        - m
+        - h
+      type: string
     Security_Detections_API_AlertSuppressionGroupBy:
       items:
         type: string
