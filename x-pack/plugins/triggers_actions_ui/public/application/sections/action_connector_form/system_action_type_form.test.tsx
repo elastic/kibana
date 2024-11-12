@@ -18,10 +18,8 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('@kbn/response-ops-rule-form/src/action_variables/transforms', () => {
-  const original = jest.requireActual(
-    '@kbn/response-ops-rule-form/src/action_variables/transforms'
-  );
+jest.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', () => {
+  const original = jest.requireActual('@kbn/alerts-ui-shared/src/action_variables/transforms');
   return {
     ...original,
     transformActionVariables: jest.fn(),
