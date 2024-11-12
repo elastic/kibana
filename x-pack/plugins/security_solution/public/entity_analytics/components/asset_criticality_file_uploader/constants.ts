@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const SUPPORTED_FILE_TYPES = ['text/csv', 'text/plain', 'text/tab-separated-values'];
+export const SUPPORTED_FILE_TYPES = ['text/csv', 'text/plain', 'text/tab-separated-values', '.tsv'];
 export const SUPPORTED_FILE_EXTENSIONS = ['CSV', 'TXT', 'TSV'];
