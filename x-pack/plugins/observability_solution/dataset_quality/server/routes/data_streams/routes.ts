@@ -324,8 +324,6 @@ const checkAndLoadIntegrationRoute = createDatasetQualityServerRoute({
       dataStream,
     });
 
-    logger.info('aj-integration' + JSON.stringify(integration));
-
     return integration;
   },
 });
