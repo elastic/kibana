@@ -8,6 +8,7 @@
  */
 
 import moment from 'moment';
+import { UI_SETTINGS } from '../../../constants';
 import { TimeRange } from '../../../query';
 import { TimeBuckets } from '../buckets/lib/time_buckets';
 import { toAbsoluteDates } from './date_interval_utils';
@@ -21,8 +22,8 @@ export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) 
     }
 
     const buckets = new TimeBuckets({
-      'histogram:maxBars': getConfig('histogram:maxBars'),
-      'histogram:barTarget': getConfig(`histogram:barTarget`),
+      'histogram:maxBars': getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+      'histogram:barTarget': getConfig(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
       dateFormat: getConfig('dateFormat'),
       'dateFormat:scaled': getConfig('dateFormat:scaled'),
     });

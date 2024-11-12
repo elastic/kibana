@@ -263,9 +263,6 @@ export const termsOperation: OperationDefinition<
       },
     };
   },
-  toESQL: (column, columnId) => {
-    return undefined; // column.sourceField;
-  },
   toEsAggsFn: (
     column,
     columnId,

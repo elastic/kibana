@@ -58,7 +58,6 @@ interface Arguments {
    */
   titleForInspector?: string;
   descriptionForInspector?: string;
-  partialRows?: boolean;
   ignoreGlobalFilters?: boolean;
 }
 
@@ -142,13 +141,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'The description to show in Inspector.',
         }),
       },
-      partialRows: {
-        types: ['boolean'],
-        default: false,
-        help: i18n.translate('data.search.esql.partialRows.help', {
-          defaultMessage: 'Whether to return rows that only contain partial data',
-        }),
-      },
       ignoreGlobalFilters: {
         types: ['boolean'],
         default: false,
@@ -166,7 +158,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         titleForInspector,
         descriptionForInspector,
         ignoreGlobalFilters,
-        partialRows,
       },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
