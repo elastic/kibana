@@ -45,7 +45,7 @@ import type {
   AboutStepSeverity,
   Duration,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import { GroupByOptions } from '../../../../detections/pages/detection_engine/rules/types';
+import { AlertSuppressionDurationType } from '../../../../detections/pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { RequiredFieldIcon } from '../../../rule_management/components/rule_details/required_field_icon';
 import { ThreatEuiFlexGroup } from './threat_description';
@@ -582,7 +582,7 @@ export const buildRequiredFieldsDescription = (
 };
 
 export const buildAlertSuppressionDescription = (
-  label: string = i18n.GROUP_BY_LABEL,
+  label: string = i18n.ALERT_SUPPRESSION_LABEL,
   values: string[],
   ruleType: Type
 ): ListItems[] => {
@@ -615,11 +615,11 @@ export const buildAlertSuppressionDescription = (
 export const buildAlertSuppressionWindowDescription = (
   label: string,
   value: Duration,
-  groupByRadioSelection: GroupByOptions,
+  alertSuppressionDuration: AlertSuppressionDurationType,
   ruleType: Type
 ): ListItems[] => {
   const description =
-    groupByRadioSelection === GroupByOptions.PerTimePeriod
+    alertSuppressionDuration === AlertSuppressionDurationType.PerTimePeriod
       ? `${value.value}${value.unit}`
       : i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
 
