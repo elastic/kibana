@@ -6450,10 +6450,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-storybook-config@link:x-pack/packages/security-solution/storybook/config":
-  version "0.0.0"
-  uid ""
-
 "@kbn/security-solution-upselling@link:x-pack/packages/security-solution/upselling":
   version "0.0.0"
   uid ""

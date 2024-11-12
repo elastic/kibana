@@ -1598,8 +1598,6 @@
       "@kbn/security-solution-serverless/*": ["x-pack/plugins/security_solution_serverless/*"],
       "@kbn/security-solution-side-nav": ["x-pack/packages/security-solution/side_nav"],
       "@kbn/security-solution-side-nav/*": ["x-pack/packages/security-solution/side_nav/*"],
-      "@kbn/security-solution-storybook-config": ["x-pack/packages/security-solution/storybook/config"],
-      "@kbn/security-solution-storybook-config/*": ["x-pack/packages/security-solution/storybook/config/*"],
       "@kbn/security-solution-upselling": ["x-pack/packages/security-solution/upselling"],
       "@kbn/security-solution-upselling/*": ["x-pack/packages/security-solution/upselling/*"],
       "@kbn/security-test-endpoints-plugin": ["x-pack/test/security_functional/plugins/test_endpoints"],
