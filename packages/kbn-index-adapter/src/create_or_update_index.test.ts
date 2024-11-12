@@ -16,8 +16,7 @@ const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 esClient.indices.putMapping.mockResolvedValue({ acknowledged: true });
 esClient.indices.putSettings.mockResolvedValue({ acknowledged: true });
 
-const simulateIndexTemplateResponse = { template: { mappings: { is_managed: true } } };
-// @ts-expect-error test data type mismatch
+const simulateIndexTemplateResponse = { template: { mappings: {}, settings: {}, aliases: {} } };
 esClient.indices.simulateIndexTemplate.mockResolvedValue(simulateIndexTemplateResponse);
 
 const name = 'test_index_name';
