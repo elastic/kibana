@@ -15,6 +15,12 @@ export const registerBulkDeleteRoute = (router: IRouter) => {
   router.post(
     {
       path: '/internal/kibana/management/saved_objects/_bulk_delete',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.arrayOf(
           schema.object({
