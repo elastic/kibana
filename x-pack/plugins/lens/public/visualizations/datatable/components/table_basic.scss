@@ -1,5 +1,9 @@
 .lnsDataTableContainer {
   height: 100%;
+
+  .euiDataGrid__content {
+    background: transparent;
+  }
 }
 
 .lnsTableCell--multiline {
