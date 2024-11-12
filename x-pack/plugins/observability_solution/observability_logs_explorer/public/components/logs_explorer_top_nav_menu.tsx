@@ -21,7 +21,11 @@ import { LogsExplorerTabs } from '@kbn/discover-plugin/public';
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { filter, take } from 'rxjs';
-import { betaBadgeDescription, betaBadgeTitle } from '../../common/translations';
+import {
+  deprecationBadgeDescription,
+  deprecationBadgeGuideline,
+  deprecationBadgeTitle,
+} from '../../common/translations';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { ConnectedDiscoverLink } from './discover_link';
 import { FeedbackLink } from './feedback_link';
@@ -59,13 +63,7 @@ const ProjectTopNav = () => {
         `}
       >
         <EuiHeaderSectionItem>
-          <EuiBetaBadge
-            size="s"
-            iconType="beta"
-            label={betaBadgeTitle}
-            tooltipContent={betaBadgeDescription}
-            alignment="middle"
-          />
+          <DeprecationNoticeBadge />
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
@@ -116,15 +114,6 @@ const ClassicTopNav = () => {
             `}
           >
             <EuiHeaderSectionItem>
-              <EuiBetaBadge
-                size="s"
-                iconType="beta"
-                label={betaBadgeTitle}
-                tooltipContent={betaBadgeDescription}
-                alignment="middle"
-              />
-            </EuiHeaderSectionItem>
-            <EuiHeaderSectionItem>
               <FeedbackLink />
             </EuiHeaderSectionItem>
           </EuiHeaderSection>,
@@ -145,6 +134,9 @@ const ClassicTopNav = () => {
       <EuiHeaderSection data-test-subj="logsExplorerHeaderMenu">
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
+            <EuiHeaderSectionItem>
+              <DeprecationNoticeBadge />
+            </EuiHeaderSectionItem>
             <ConnectedDiscoverLink />
             <ConditionalVerticalRule Component={ConnectedDatasetQualityLink()} />
             <VerticalRule />
@@ -171,3 +163,19 @@ const ConditionalVerticalRule = ({ Component }: { Component: JSX.Element | null 
       {Component}
     </>
   );
+
+const DeprecationNoticeBadge = () => (
+  <EuiBetaBadge
+    label={deprecationBadgeTitle}
+    color="subdued"
+    tooltipContent={
+      <>
+        {deprecationBadgeDescription}
+        <br />
+        <br />
+        {deprecationBadgeGuideline}
+      </>
+    }
+    alignment="middle"
+  />
+);
