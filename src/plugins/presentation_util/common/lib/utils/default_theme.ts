@@ -11,5 +11,5 @@ import type { CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 
 export const defaultTheme$: Observable<CoreTheme> = new Observable((subscriber) =>
-  subscriber.next({ darkMode: false })
+  subscriber.next({ darkMode: false, name: 'amsterdam' })
 );

@@ -294,7 +294,7 @@ export const getTagcloudVisualization = ({
   },
 
   DimensionEditorComponent(props) {
-    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false, name: 'amsterdam' }).darkMode;
     if (props.groupId === TAG_GROUP_ID) {
       return (
         <TagsDimensionEditor
