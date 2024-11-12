@@ -32,9 +32,9 @@ export const initFindFieldsMetadataRoute = ({
       },
       async (_requestContext, request, response) => {
         const { attributes, fieldNames, integration, dataset } = request.query;
-
         const [_core, _startDeps, startContract] = await getStartServices();
-        const fieldsMetadataClient = startContract.getClient();
+
+        const fieldsMetadataClient = await startContract.getClient(request);
 
         try {
           const fieldsDictionary = await fieldsMetadataClient.find({
