@@ -25,7 +25,7 @@ import {
 import pRetry from 'p-retry';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { StructuredTool } from '@langchain/core/tools';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { AnalyticsServiceSetup, ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
@@ -371,6 +371,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
           })
         : undefined;
+    // Intentionally no telemetry here - this path only used to install security docs
+    // Plans to make this function private in a different PR so no user entry ever is created in this path
     this.options.logger.debug(`created: ${created?.data.hits.hits.length ?? '0'}`);
     this.options.logger.debug(() => `errors: ${JSON.stringify(errors, null, 2)}`);
 
@@ -574,10 +576,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public createKnowledgeBaseEntry = async ({
     knowledgeBaseEntry,
+    telemetry,
     global = false,
   }: {
     knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
     global?: boolean;
+    telemetry: AnalyticsServiceSetup;
   }): Promise<KnowledgeBaseEntryResponse | null> => {
     const authenticatedUser = this.options.currentUser;
 
@@ -604,6 +608,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       user: authenticatedUser,
       knowledgeBaseEntry,
       global,
+      telemetry,
     });
   };
 
