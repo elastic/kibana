@@ -97,7 +97,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .get({
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
-      description: `Get package categories`,
+      summary: `Get package categories`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
@@ -111,7 +114,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .get({
       path: EPM_API_ROUTES.LIST_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
-      description: `Get list of packages`,
+      summary: `Get packages`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
@@ -125,6 +131,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .get({
       path: EPM_API_ROUTES.INSTALLED_LIST_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      summary: `Get installed packages`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
@@ -138,7 +148,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .get({
       path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
-      description: `Get limited package list`,
+      summary: `Get a limited package list`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
@@ -152,6 +165,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .get({
       path: EPM_API_ROUTES.STATS_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      summary: `Get package stats`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
@@ -165,6 +182,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .get({
       path: EPM_API_ROUTES.INPUTS_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      summary: `Get an inputs template`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
@@ -178,6 +199,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .get({
       path: EPM_API_ROUTES.FILEPATH_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      summary: `Get a package file`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
@@ -193,6 +218,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(fleetAuthz, getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN))
           .granted,
+      summary: `Get a package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
@@ -208,6 +237,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       fleetAuthz: {
         integrations: { writePackageSettings: true },
       },
+      summary: `Update package settings`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
@@ -221,6 +254,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .post({
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN,
       fleetAuthz: INSTALL_PACKAGES_AUTHZ,
+      summary: `Install a package from the registry`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
@@ -237,6 +274,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         fleetAuthz: {
           integrations: { installPackages: true },
         },
+        summary: `Install Kibana assets for a package`,
+        options: {
+          tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        },
       })
       .addVersion(
         {
@@ -251,6 +292,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         path: EPM_API_ROUTES.DELETE_KIBANA_ASSETS_PATTERN,
         fleetAuthz: {
           integrations: { installPackages: true },
+        },
+        summary: `Delete Kibana assets for a package`,
+        options: {
+          tags: ['oas-tag:Elastic Package Manager (EPM)'],
         },
       })
       .addVersion(
@@ -267,6 +312,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
       fleetAuthz: {
         integrations: { installPackages: true, upgradePackages: true },
+      },
+      summary: `Bulk install packages`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
       },
     })
     .addVersion(
@@ -291,6 +340,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       fleetAuthz: {
         integrations: { uploadPackages: true },
       },
+      summary: `Install a package by upload`,
     })
     .addVersion(
       {
@@ -304,6 +354,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .post({
       path: EPM_API_ROUTES.CUSTOM_INTEGRATIONS_PATTERN,
       fleetAuthz: INSTALL_PACKAGES_AUTHZ,
+      summary: `Create a custom integration`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
@@ -319,6 +373,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       fleetAuthz: {
         integrations: { removePackages: true },
       },
+      summary: `Delete a package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
@@ -333,7 +391,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .get({
       path: EPM_API_ROUTES.VERIFICATION_KEY_ID,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
-      description: `Get a package signature verification key ID`,
+      summary: `Get a package signature verification key ID`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
     })
     .addVersion(
       {
@@ -347,6 +408,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .get({
       path: EPM_API_ROUTES.DATA_STREAMS_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      summary: `Get data streams`,
+      options: {
+        tags: ['oas-tag:Data streams'],
+      },
     })
     .addVersion(
       {
@@ -360,7 +425,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .post({
       path: EPM_API_ROUTES.BULK_ASSETS_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
-      description: `Get bulk assets`,
+      summary: `Get bulk assets`,
     })
     .addVersion(
       {
@@ -498,6 +563,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             },
           },
         },
+      },
+      summary: `Authorize transforms`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
       },
     })
     .addVersion(
