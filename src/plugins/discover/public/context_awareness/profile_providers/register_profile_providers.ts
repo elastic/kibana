@@ -58,7 +58,7 @@ export const registerProfileProviders = async ({
   services: DiscoverServices;
 }) => {
   const providerServices = await createProfileProviderServices(services);
-  const rootProfileProviders = await createRootProfileProviders(providerServices);
+  const rootProfileProviders = createRootProfileProviders(providerServices);
   const dataSourceProfileProviders = createDataSourceProfileProviders(providerServices);
   const documentProfileProviders = createDocumentProfileProviders(providerServices);
 
@@ -118,10 +118,10 @@ export const registerEnabledProfileProviders = <
  * @param providerServices The profile provider services
  * @returns An array of available root profile providers
  */
-const createRootProfileProviders = async (providerServices: ProfileProviderServices) => [
+const createRootProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleRootProfileProvider(),
   createExampleSolutionViewRootProfileProvider(),
-  await createSecurityRootProfileProvider(providerServices),
+  createSecurityRootProfileProvider(providerServices),
 ];
 
 /**

@@ -24,8 +24,8 @@ interface SecurityRootProfileContext {
 }
 
 export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
-  Promise<RootProfileProvider<SecurityRootProfileContext>>
-> = async (services: ProfileProviderServices) => {
+  RootProfileProvider<SecurityRootProfileContext>
+> = (services: ProfileProviderServices) => {
   const { discoverFeaturesRegistry } = services;
   const cellRendererFeature = discoverFeaturesRegistry.getById('security-solution-cell-render');
   const appWrapperFeature = discoverFeaturesRegistry.getById('security-solution-app-wrapper');
