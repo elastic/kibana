@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
@@ -13,11 +13,6 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { RulePanelKey } from '../../flyout/rule_details/right';
-import { useTourContext } from '../../common/components/guided_onboarding_tour';
-import {
-  AlertsCasesTourSteps,
-  SecurityStepId,
-} from '../../common/components/guided_onboarding_tour/tour_config';
 import { TimelineId } from '../../../common/types/timeline';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
 import { APP_ID, CASES_PATH, SecurityPageName } from '../../../common/constants';
@@ -30,6 +25,7 @@ import * as timelineMarkdownPlugin from '../../common/components/markdown_editor
 import { useFetchAlertData } from './use_fetch_alert_data';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
+import { DocumentEventTypes } from '../../common/lib/telemetry';
 
 const CaseContainerComponent: React.FC = () => {
   const { cases, telemetry } = useKibana().services;
@@ -52,7 +48,7 @@ const CaseContainerComponent: React.FC = () => {
           },
         },
       });
-      telemetry.reportDetailsFlyoutOpened({
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
         location: TimelineId.casePage,
         panel: 'right',
       });
@@ -80,16 +76,6 @@ const CaseContainerComponent: React.FC = () => {
     });
 
   const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
-  const { activeStep, endTourStep, isTourShown } = useTourContext();
-
-  const isTourActive = useMemo(
-    () => activeStep === AlertsCasesTourSteps.viewCase && isTourShown(SecurityStepId.alertsCases),
-    [activeStep, isTourShown]
-  );
-
-  useEffect(() => {
-    if (isTourActive) endTourStep(SecurityStepId.alertsCases);
-  }, [endTourStep, isTourActive]);
 
   useEffect(() => {
     dispatch(
