@@ -226,6 +226,16 @@ export class UnifiedFieldListPageObject extends FtrService {
     await this.testSubjects.missingOrFail(`fieldVisualize-${field}`);
   }
 
+  public async clickFieldListAddBreakdownField(field: string) {
+    const addBreakdownFieldTestSubj = `fieldPopoverHeader_addBreakdownField-${field}`;
+    if (!(await this.testSubjects.exists(addBreakdownFieldTestSubj))) {
+      // field has to be open
+      await this.clickFieldListItem(field);
+    }
+    await this.testSubjects.click(addBreakdownFieldTestSubj);
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   public async clickFieldListPlusFilter(field: string, value: string) {
     const plusFilterTestSubj = `plus-${field}-${value}`;
     if (!(await this.testSubjects.exists(plusFilterTestSubj))) {

@@ -64,6 +64,9 @@ export function SvlManagementPageProvider({ getService }: FtrProviderContext) {
     async assertDataUsageManagementCardExists() {
       await testSubjects.existOrFail('app-card-data_usage');
     },
+    async assertDataUsageManagementCardDoesNotExist() {
+      await testSubjects.missingOrFail('app-card-data_usage');
+    },
     async clickDataUsageManagementCard() {
       await testSubjects.click('app-card-data_usage');
     },
