@@ -13,7 +13,7 @@ import { Usage } from './type';
 export const fetcher = async (context: CollectorFetchContext) => {
   const finder = context.soClient.createPointInTimeFinder<StoredInvestigation>({
     type: SO_INVESTIGATION_TYPE,
-    perPage: 1000,
+    perPage: 10,
   });
 
   let usage: Usage['investigation'] = {
