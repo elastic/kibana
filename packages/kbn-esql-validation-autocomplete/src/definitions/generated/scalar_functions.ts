@@ -38,6 +38,7 @@ const absDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.abs', {
     defaultMessage: 'Returns the absolute value.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -97,6 +98,7 @@ const acosDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.acos', {
     defaultMessage: 'Returns the arccosine of `n` as an angle, expressed in radians.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -154,6 +156,7 @@ const asinDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns the arcsine of the input\nnumeric expression as an angle, expressed in radians.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -211,6 +214,7 @@ const atanDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns the arctangent of the input\nnumeric expression as an angle, expressed in radians.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -268,6 +272,7 @@ const atan2Definition: FunctionDefinition = {
     defaultMessage:
       'The angle between the positive x-axis and the ray from the\norigin to the point (x , y) in the Cartesian plane, expressed in radians.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -524,6 +529,9 @@ const categorizeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.categorize', {
     defaultMessage: 'Categorizes text messages.',
   }),
+  ignoreAsSuggestion: true,
+
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -561,6 +569,7 @@ const cbrtDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns the cube root of a number. The input can be any numeric value, the return value is always a double.\nCube roots of infinities are null.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -617,6 +626,7 @@ const ceilDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ceil', {
     defaultMessage: 'Round a number up to the nearest integer.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -674,6 +684,7 @@ const cidrMatchDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns true if the provided IP is contained in one of the provided CIDR blocks.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -725,6 +736,7 @@ const coalesceDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns the first of its arguments that is not null. If all arguments are null, it returns `null`.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -939,7 +951,7 @@ const coalesceDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
       minParams: 1,
     },
     {
@@ -955,7 +967,7 @@ const coalesceDefinition: FunctionDefinition = {
           optional: true,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
       minParams: 1,
     },
     {
@@ -988,6 +1000,7 @@ const concatDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.concat', {
     defaultMessage: 'Concatenates two or more strings.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1070,6 +1083,7 @@ const cosDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.cos', {
     defaultMessage: 'Returns the cosine of an angle.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1126,6 +1140,7 @@ const coshDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.cosh', {
     defaultMessage: 'Returns the hyperbolic cosine of a number.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1183,6 +1198,7 @@ const dateDiffDefinition: FunctionDefinition = {
     defaultMessage:
       'Subtracts the `startTimestamp` from the `endTimestamp` and returns the difference in multiples of `unit`.\nIf `startTimestamp` is later than the `endTimestamp`, negative values are returned.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1292,7 +1308,7 @@ const dateDiffDefinition: FunctionDefinition = {
   validate: undefined,
   examples: [
     'ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")\n| EVAL dd_ms = DATE_DIFF("microseconds", date1, date2)',
-    'ROW end_23="2023-12-31T23:59:59.999Z"::DATETIME,\n  start_24="2024-01-01T00:00:00.000Z"::DATETIME,\n    end_24="2024-12-31T23:59:59.999"::DATETIME\n| EVAL end23_to_start24=DATE_DIFF("year", end_23, start_24)\n| EVAL end23_to_end24=DATE_DIFF("year", end_23, end_24)\n| EVAL start_to_end_24=DATE_DIFF("year", start_24, end_24)',
+    'ROW end_23=TO_DATETIME("2023-12-31T23:59:59.999Z"),\n  start_24=TO_DATETIME("2024-01-01T00:00:00.000Z"),\n    end_24=TO_DATETIME("2024-12-31T23:59:59.999")\n| EVAL end23_to_start24=DATE_DIFF("year", end_23, start_24)\n| EVAL end23_to_end24=DATE_DIFF("year", end_23, end_24)\n| EVAL start_to_end_24=DATE_DIFF("year", start_24, end_24)',
   ],
 };
 
@@ -1303,6 +1319,7 @@ const dateExtractDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.date_extract', {
     defaultMessage: 'Extracts parts of a date, like year, month, day, hour.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1384,6 +1401,7 @@ const dateFormatDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.date_format', {
     defaultMessage: 'Returns a string representation of a date, in the provided format.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1433,6 +1451,7 @@ const dateParseDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns a date by parsing the second argument using the format specified in the first argument.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1509,6 +1528,7 @@ const dateTruncDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.date_trunc', {
     defaultMessage: 'Rounds down a date to the closest interval.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1559,6 +1579,7 @@ const eDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.e', {
     defaultMessage: "Returns Euler's number.",
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1580,6 +1601,7 @@ const endsWithDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns a boolean that indicates whether a keyword string ends with another string.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1656,6 +1678,7 @@ const expDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.exp', {
     defaultMessage: 'Returns the value of e raised to the power of the given number.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1712,6 +1735,7 @@ const floorDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.floor', {
     defaultMessage: 'Round a number down to the nearest integer.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1768,6 +1792,7 @@ const fromBase64Definition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.from_base64', {
     defaultMessage: 'Decode a base64 string.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1805,6 +1830,7 @@ const greatestDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns the maximum value from multiple columns. This is similar to `MV_MAX`\nexcept it is intended to run on multiple columns at once.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1832,6 +1858,22 @@ const greatestDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'boolean',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'date',
+          optional: true,
+        },
+      ],
+      returnType: 'date',
       minParams: 1,
     },
     {
@@ -1955,7 +1997,7 @@ const greatestDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
       minParams: 1,
     },
     {
@@ -1971,7 +2013,7 @@ const greatestDefinition: FunctionDefinition = {
           optional: true,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
       minParams: 1,
     },
     {
@@ -1998,12 +2040,271 @@ const greatestDefinition: FunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const hypotDefinition: FunctionDefinition = {
+  type: 'eval',
+  name: 'hypot',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.hypot', {
+    defaultMessage:
+      'Returns the hypotenuse of two numbers. The input can be any numeric values, the return value is always a double.\nHypotenuses of infinities are null.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number1',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'number2',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+  ],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedOptions: ['by'],
+  validate: undefined,
+  examples: ['ROW a = 3.0, b = 4.0\n| EVAL c = HYPOT(a, b)'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const ipPrefixDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'ip_prefix',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ip_prefix', {
     defaultMessage: 'Truncates an IP to a given prefix length.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -2043,6 +2344,7 @@ const leastDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns the minimum value from multiple columns. This is similar to `MV_MIN` except it is intended to run on multiple columns at once.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -2070,6 +2372,22 @@ const leastDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'boolean',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'date',
+          optional: true,
+        },
+      ],
+      returnType: 'date',
       minParams: 1,
     },
     {
@@ -2193,7 +2511,7 @@ const leastDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
       minParams: 1,
     },
     {
@@ -2209,7 +2527,7 @@ const leastDefinition: FunctionDefinition = {
           optional: true,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
       minParams: 1,
     },
     {
@@ -2243,6 +2561,7 @@ const leftDefinition: FunctionDefinition = {
     defaultMessage:
       "Returns the substring that extracts 'length' chars from 'string' starting from the left.",
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -2291,6 +2610,7 @@ const lengthDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.length', {
     defaultMessage: 'Returns the character length of a string.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -2328,6 +2648,7 @@ const locateDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns an integer that indicates the position of a keyword substring within another string.\nReturns `0` if the substring cannot be found.\nNote that string positions start from `1`.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -2485,6 +2806,7 @@ const logDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns the logarithm of a value to a base. The input can be any numeric value, the return value is always a double.\n\nLogs of zero, negative numbers, and base of one return `null` as well as a warning.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -2808,6 +3130,7 @@ const log10Definition: FunctionDefinition = {
     defaultMessage:
       'Returns the logarithm of a value to base 10. The input can be any numeric value, the return value is always a double.\n\nLogs of 0 and negative numbers return `null` as well as a warning.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -2887,6 +3210,7 @@ const ltrimDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ltrim', {
     defaultMessage: 'Removes leading whitespaces from a string.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -2907,7 +3231,7 @@ const ltrimDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -2919,12 +3243,93 @@ const ltrimDefinition: FunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const matchDefinition: FunctionDefinition = {
+  type: 'eval',
+  name: 'match',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.match', {
+    defaultMessage:
+      'Performs a match query on the specified field. Returns true if the provided query matches the row.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+  ],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedOptions: ['by'],
+  validate: undefined,
+  examples: [
+    'from books \n| where match(author, "Faulkner")\n| keep book_no, author \n| sort book_no \n| limit 5;',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const mvAppendDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'mv_append',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_append', {
     defaultMessage: 'Concatenates values of two multi-value fields.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -3105,7 +3510,7 @@ const mvAppendDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -3137,6 +3542,7 @@ const mvAvgDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts a multivalued field into a single valued field containing the average of all of the values.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -3194,6 +3600,7 @@ const mvConcatDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts a multivalued string expression into a single valued column containing the concatenation of all values separated by a delimiter.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -3274,6 +3681,7 @@ const mvCountDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts a multivalued expression into a single valued column containing a count of the number of values.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -3430,6 +3838,7 @@ const mvDedupeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_dedupe', {
     defaultMessage: 'Remove duplicate values from a multivalued field.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -3550,7 +3959,7 @@ const mvDedupeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -3575,8 +3984,9 @@ const mvFirstDefinition: FunctionDefinition = {
   name: 'mv_first',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_first', {
     defaultMessage:
-      "Converts a multivalued expression into a single valued column containing the\nfirst value. This is most useful when reading from a function that emits\nmultivalued columns in a known order like `SPLIT`.\n\nThe order that  multivalued fields are read from\nunderlying storage is not guaranteed. It is *frequently* ascending, but don't\nrely on that. If you need the minimum value use `MV_MIN` instead of\n`MV_FIRST`. `MV_MIN` has optimizations for sorted values so there isn't a\nperformance benefit to `MV_FIRST`.",
+      'Converts a multivalued expression into a single valued column containing the\nfirst value. This is most useful when reading from a function that emits\nmultivalued columns in a known order like `SPLIT`.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -3697,7 +4107,7 @@ const mvFirstDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -3732,8 +4142,9 @@ const mvLastDefinition: FunctionDefinition = {
   name: 'mv_last',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_last', {
     defaultMessage:
-      "Converts a multivalue expression into a single valued column containing the last\nvalue. This is most useful when reading from a function that emits multivalued\ncolumns in a known order like `SPLIT`.\n\nThe order that  multivalued fields are read from\nunderlying storage is not guaranteed. It is *frequently* ascending, but don't\nrely on that. If you need the maximum value use `MV_MAX` instead of\n`MV_LAST`. `MV_MAX` has optimizations for sorted values so there isn't a\nperformance benefit to `MV_LAST`.",
+      'Converts a multivalue expression into a single valued column containing the last\nvalue. This is most useful when reading from a function that emits multivalued\ncolumns in a known order like `SPLIT`.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -3854,7 +4265,7 @@ const mvLastDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -3891,6 +4302,7 @@ const mvMaxDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts a multivalued expression into a single valued column containing the maximum value.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -3971,7 +4383,7 @@ const mvMaxDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -4011,6 +4423,7 @@ const mvMedianDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts a multivalued field into a single valued field containing the median value.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -4074,6 +4487,7 @@ const mvMedianAbsoluteDeviationDefinition: FunctionDefinition = {
         "Converts a multivalued field into a single valued field containing the median absolute deviation.\n\nIt is calculated as the median of each data point's deviation from the median of the entire sample. That is, for a random variable `X`, the median absolute deviation is `median(|median(X) - X|)`.",
     }
   ),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -4133,6 +4547,7 @@ const mvMinDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts a multivalued expression into a single valued column containing the minimum value.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -4213,7 +4628,7 @@ const mvMinDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -4253,6 +4668,7 @@ const mvPercentileDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts a multivalued field into a single valued field containing the value at which a certain percentage of observed values occur.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -4410,6 +4826,7 @@ const mvPseriesWeightedSumDefinition: FunctionDefinition = {
         'Converts a multivalued expression into a single-valued column by multiplying every element on the input list by its corresponding term in P-Series and computing the sum.',
     }
   ),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -4442,8 +4859,9 @@ const mvSliceDefinition: FunctionDefinition = {
   name: 'mv_slice',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_slice', {
     defaultMessage:
-      'Returns a subset of the multivalued field using the start and end index values.',
+      'Returns a subset of the multivalued field using the start and end index values.\nThis is most useful when reading from a function that emits multivalued columns\nin a known order like `SPLIT` or `MV_SORT`.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -4684,7 +5102,7 @@ const mvSliceDefinition: FunctionDefinition = {
           optional: true,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -4723,6 +5141,7 @@ const mvSortDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_sort', {
     defaultMessage: 'Sorts a multivalued field in lexicographical order.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -4851,7 +5270,7 @@ const mvSortDefinition: FunctionDefinition = {
           acceptedValues: ['asc', 'desc'],
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -4884,6 +5303,7 @@ const mvSumDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts a multivalued field into a single valued field containing the sum of all of the values.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -4941,6 +5361,7 @@ const mvZipDefinition: FunctionDefinition = {
     defaultMessage:
       'Combines the values from two multivalued fields with a delimiter that joins them together.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -5179,6 +5600,7 @@ const nowDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.now', {
     defaultMessage: 'Returns current date and time.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -5199,6 +5621,7 @@ const piDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.pi', {
     defaultMessage: "Returns Pi, the ratio of a circle's circumference to its diameter.",
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -5219,6 +5642,7 @@ const powDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.pow', {
     defaultMessage: 'Returns the value of `base` raised to the power of `exponent`.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -5479,6 +5903,7 @@ const qstrDefinition: FunctionDefinition = {
     defaultMessage:
       'Performs a query string query. Returns true if the provided query string matches the row.',
   }),
+  preview: true,
   alias: undefined,
   signatures: [
     {
@@ -5518,6 +5943,7 @@ const repeatDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns a string constructed by concatenating `string` with itself the specified `number` of times.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -5554,7 +5980,7 @@ const repeatDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  examples: ['ROW a = "Hello!"\n| EVAL triple_a = REPEAT(a, 3);'],
+  examples: ['ROW a = "Hello!"\n| EVAL triple_a = REPEAT(a, 3)'],
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
@@ -5565,6 +5991,7 @@ const replaceDefinition: FunctionDefinition = {
     defaultMessage:
       'The function substitutes in the string `str` any match of the regular expression `regex`\nwith the replacement string `newStr`.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -5735,6 +6162,46 @@ const replaceDefinition: FunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const reverseDefinition: FunctionDefinition = {
+  type: 'eval',
+  name: 'reverse',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.reverse', {
+    defaultMessage: 'Returns a new string representing the input string in reverse order.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+  ],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedOptions: ['by'],
+  validate: undefined,
+  examples: [
+    'ROW message = "Some Text" | EVAL message_reversed = REVERSE(message);',
+    'ROW bending_arts = "💧🪨🔥💨" | EVAL bending_arts_reversed = REVERSE(bending_arts);',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const rightDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'right',
@@ -5742,6 +6209,7 @@ const rightDefinition: FunctionDefinition = {
     defaultMessage:
       "Return the substring that extracts 'length' chars from 'str' starting from the right.",
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -5791,6 +6259,7 @@ const roundDefinition: FunctionDefinition = {
     defaultMessage:
       'Rounds a number to the specified number of decimal places.\nDefaults to 0, which returns the nearest integer. If the\nprecision is a negative number, rounds to the number of digits left\nof the decimal point.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -5894,6 +6363,7 @@ const rtrimDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rtrim', {
     defaultMessage: 'Removes trailing whitespaces from a string.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -5914,7 +6384,7 @@ const rtrimDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -5933,6 +6403,7 @@ const signumDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns the sign of the given number.\nIt returns `-1` for negative numbers, `0` for `0` and `1` for positive numbers.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -5989,6 +6460,7 @@ const sinDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sin', {
     defaultMessage: 'Returns the sine of an angle.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -6045,6 +6517,7 @@ const sinhDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sinh', {
     defaultMessage: 'Returns the hyperbolic sine of a number.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -6101,6 +6574,7 @@ const spaceDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.space', {
     defaultMessage: 'Returns a string made of `number` spaces.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -6127,6 +6601,7 @@ const splitDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.split', {
     defaultMessage: 'Split a single valued string into multiple strings.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -6204,6 +6679,7 @@ const sqrtDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns the square root of a number. The input can be any numeric value, the return value is always a double.\nSquare roots of negative numbers and infinities are null.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -6261,6 +6737,7 @@ const stContainsDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns whether the first geometry contains the second geometry.\nThis is the inverse of the `ST_WITHIN` function.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -6400,6 +6877,7 @@ const stDisjointDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns whether the two geometries or geometry columns are disjoint.\nThis is the inverse of the `ST_INTERSECTS` function.\nIn mathematical terms: ST_Disjoint(A, B) ⇔ A ⋂ B = ∅',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -6539,6 +7017,7 @@ const stDistanceDefinition: FunctionDefinition = {
     defaultMessage:
       'Computes the distance between two points.\nFor cartesian geometries, this is the pythagorean distance in the same units as the original coordinates.\nFor geographic geometries, this is the circular distance along the great circle in meters.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -6588,6 +7067,7 @@ const stIntersectsDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns true if two geometries intersect.\nThey intersect if they have any point in common, including their interior points\n(points along lines or within polygons).\nThis is the inverse of the `ST_DISJOINT` function.\nIn mathematical terms: ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -6727,6 +7207,7 @@ const stWithinDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns whether the first geometry is within the second geometry.\nThis is the inverse of the `ST_CONTAINS` function.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -6866,6 +7347,7 @@ const stXDefinition: FunctionDefinition = {
     defaultMessage:
       'Extracts the `x` coordinate from the supplied point.\nIf the points is of type `geo_point` this is equivalent to extracting the `longitude` value.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -6905,6 +7387,7 @@ const stYDefinition: FunctionDefinition = {
     defaultMessage:
       'Extracts the `y` coordinate from the supplied point.\nIf the points is of type `geo_point` this is equivalent to extracting the `latitude` value.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -6944,6 +7427,7 @@ const startsWithDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns a boolean that indicates whether a keyword string starts with another string.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -7021,6 +7505,7 @@ const substringDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns a substring of a string, specified by a start position and an optional length.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -7081,6 +7566,7 @@ const tanDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.tan', {
     defaultMessage: 'Returns the tangent of an angle.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -7137,6 +7623,7 @@ const tanhDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.tanh', {
     defaultMessage: 'Returns the hyperbolic tangent of a number.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -7193,6 +7680,7 @@ const tauDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.tau', {
     defaultMessage: "Returns the ratio of a circle's circumference to its radius.",
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -7213,6 +7701,7 @@ const toBase64Definition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_base64', {
     defaultMessage: 'Encode a string to a base64 string.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -7250,6 +7739,7 @@ const toBooleanDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts an input value to a boolean value.\nA string value of *true* will be case-insensitive converted to the Boolean *true*.\nFor anything else, including the empty string, the function will return *false*.\nThe numerical value of *0* will be converted to *false*, anything else will be converted to *true*.',
   }),
+  preview: false,
   alias: ['to_bool'],
   signatures: [
     {
@@ -7340,6 +7830,7 @@ const toCartesianpointDefinition: FunctionDefinition = {
         'Converts an input value to a `cartesian_point` value.\nA string will only be successfully converted if it respects WKT Point format.',
     }
   ),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -7392,6 +7883,7 @@ const toCartesianshapeDefinition: FunctionDefinition = {
         'Converts an input value to a `cartesian_shape` value.\nA string will only be successfully converted if it respects WKT format.',
     }
   ),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -7450,6 +7942,7 @@ const toDateNanosDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_date_nanos', {
     defaultMessage: 'Converts an input to a nanosecond-resolution date value (aka date_nanos).',
   }),
+  preview: true,
   alias: undefined,
   signatures: [],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -7465,6 +7958,7 @@ const toDateperiodDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_dateperiod', {
     defaultMessage: 'Converts an input value into a `date_period` value.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -7514,6 +8008,7 @@ const toDatetimeDefinition: FunctionDefinition = {
     defaultMessage:
       "Converts an input value to a date value.\nA string will only be successfully converted if it's respecting the format `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`.\nTo convert dates in other formats, use `DATE_PARSE`.",
   }),
+  preview: false,
   alias: ['to_dt'],
   signatures: [
     {
@@ -7603,6 +8098,7 @@ const toDegreesDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_degrees', {
     defaultMessage: 'Converts a number in radians to degrees.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -7660,6 +8156,7 @@ const toDoubleDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts an input value to a double value. If the input parameter is of a date type,\nits value will be interpreted as milliseconds since the Unix epoch,\nconverted to double. Boolean *true* will be converted to double *1.0*, *false* to *0.0*.',
   }),
+  preview: false,
   alias: ['to_dbl'],
   signatures: [
     {
@@ -7789,6 +8286,7 @@ const toGeopointDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts an input value to a `geo_point` value.\nA string will only be successfully converted if it respects WKT Point format.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -7836,6 +8334,7 @@ const toGeoshapeDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts an input value to a `geo_shape` value.\nA string will only be successfully converted if it respects WKT format.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -7895,6 +8394,7 @@ const toIntegerDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts an input value to an integer value.\nIf the input parameter is of a date type, its value will be interpreted as milliseconds\nsince the Unix epoch, converted to integer.\nBoolean *true* will be converted to integer *1*, *false* to *0*.',
   }),
+  preview: false,
   alias: ['to_int'],
   signatures: [
     {
@@ -8001,6 +8501,7 @@ const toIpDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_ip', {
     defaultMessage: 'Converts an input string to an IP value.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -8050,6 +8551,7 @@ const toLongDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts an input value to a long value. If the input parameter is of a date type,\nits value will be interpreted as milliseconds since the Unix epoch, converted to long.\nBoolean *true* will be converted to long *1*, *false* to *0*.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -8168,6 +8670,7 @@ const toLowerDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_lower', {
     defaultMessage: 'Returns a new string representing the input string converted to lower case.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -8188,7 +8691,7 @@ const toLowerDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -8204,6 +8707,7 @@ const toRadiansDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_radians', {
     defaultMessage: 'Converts a number in degrees to radians.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -8260,6 +8764,7 @@ const toStringDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_string', {
     defaultMessage: 'Converts an input value into a string.',
   }),
+  preview: false,
   alias: ['to_str'],
   signatures: [
     {
@@ -8416,6 +8921,7 @@ const toTimedurationDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_timeduration', {
     defaultMessage: 'Converts an input value into a `time_duration` value.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -8468,6 +8974,7 @@ const toUnsignedLongDefinition: FunctionDefinition = {
         'Converts an input value to an unsigned long value. If the input parameter is of a date type,\nits value will be interpreted as milliseconds since the Unix epoch, converted to unsigned long.\nBoolean *true* will be converted to unsigned long *1*, *false* to *0*.',
     }
   ),
+  preview: false,
   alias: ['to_ul', 'to_ulong'],
   signatures: [
     {
@@ -8566,6 +9073,7 @@ const toUpperDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_upper', {
     defaultMessage: 'Returns a new string representing the input string converted to upper case.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -8586,7 +9094,7 @@ const toUpperDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -8602,6 +9110,7 @@ const toVersionDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_version', {
     defaultMessage: 'Converts an input string to a version value.',
   }),
+  preview: false,
   alias: ['to_ver'],
   signatures: [
     {
@@ -8648,6 +9157,7 @@ const trimDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.trim', {
     defaultMessage: 'Removes leading and trailing whitespaces from a string.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -8668,7 +9178,7 @@ const trimDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -8687,6 +9197,7 @@ const caseDefinition: FunctionDefinition = {
     defaultMessage:
       'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -8701,7 +9212,7 @@ const caseDefinition: FunctionDefinition = {
         },
       ],
       minParams: 2,
-      returnType: 'any',
+      returnType: 'unknown',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -8736,6 +9247,7 @@ export const scalarFunctionDefinitions = [
   floorDefinition,
   fromBase64Definition,
   greatestDefinition,
+  hypotDefinition,
   ipPrefixDefinition,
   leastDefinition,
   leftDefinition,
@@ -8744,6 +9256,7 @@ export const scalarFunctionDefinitions = [
   logDefinition,
   log10Definition,
   ltrimDefinition,
+  matchDefinition,
   mvAppendDefinition,
   mvAvgDefinition,
   mvConcatDefinition,
@@ -8767,6 +9280,7 @@ export const scalarFunctionDefinitions = [
   qstrDefinition,
   repeatDefinition,
   replaceDefinition,
+  reverseDefinition,
   rightDefinition,
   roundDefinition,
   rtrimDefinition,

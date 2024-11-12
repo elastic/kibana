@@ -18,7 +18,6 @@ import type {
   KibanaRequest,
   KibanaResponseFactory,
   ApiVersion,
-  AddVersionOpts,
   VersionedRoute,
   VersionedRouteConfig,
   IKibanaResponse,
@@ -26,9 +25,11 @@ import type {
   RouteSecurityGetter,
   RouteSecurity,
   RouteMethod,
+  VersionedRouterRoute,
+  PostValidationMetadata,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
-import type { HandlerResolutionStrategy, Method, VersionedRouterRoute } from './types';
+import type { HandlerResolutionStrategy, Method, Options } from './types';
 
 import { validate } from './validate';
 import {
@@ -38,15 +39,13 @@ import {
   readVersion,
   removeQueryVersion,
 } from './route_version_utils';
-import { injectResponseHeaders } from './inject_response_headers';
+import { getVersionHeader, injectVersionHeader } from '../util';
 import { validRouteSecurity } from '../security_route_config_validator';
 
 import { resolvers } from './handler_resolvers';
 import { prepareVersionedRouteValidation, unwrapVersionedResponseBodyValidation } from './util';
 import type { RequestLike } from './route_version_utils';
 import { Router } from '../router';
-
-type Options = AddVersionOpts<unknown, unknown, unknown>;
 
 interface InternalVersionedRouteConfig<M extends RouteMethod> extends VersionedRouteConfig<M> {
   isDev: boolean;
@@ -68,7 +67,7 @@ function extractValidationSchemaFromHandler(handler: VersionedRouterRoute['handl
 }
 
 export class CoreVersionedRoute implements VersionedRoute {
-  private readonly handlers = new Map<
+  public readonly handlers = new Map<
     ApiVersion,
     {
       fn: RequestHandler;
@@ -127,7 +126,7 @@ export class CoreVersionedRoute implements VersionedRoute {
         security: this.getSecurity,
       },
       this.requestHandler,
-      { isVersioned: true }
+      { isVersioned: true, events: false }
     );
   }
 
@@ -181,6 +180,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     }
     const req = originalReq as Mutable<KibanaRequest>;
     const version = this.getVersion(req);
+    req.apiVersion = version;
 
     if (!version) {
       return res.badRequest({
@@ -211,6 +211,12 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
     const validation = extractValidationSchemaFromHandler(handler);
+    const postValidateMetadata: PostValidationMetadata = {
+      deprecated: handler.options.options?.deprecated,
+      isInternalApiRequest: req.isInternalApiRequest,
+      isPublicAccess: this.isPublic,
+    };
+
     if (
       validation?.request &&
       Boolean(validation.request.body || validation.request.params || validation.request.query)
@@ -221,9 +227,10 @@ export class CoreVersionedRoute implements VersionedRoute {
         req.params = params;
         req.query = query;
       } catch (e) {
-        return res.badRequest({
-          body: e.message,
-        });
+        // Emit onPostValidation even if validation fails.
+
+        this.router.emitPostValidate(req, postValidateMetadata);
+        return res.badRequest({ body: e.message, headers: getVersionHeader(version) });
       }
     } else {
       // Preserve behavior of not passing through unvalidated data
@@ -231,6 +238,8 @@ export class CoreVersionedRoute implements VersionedRoute {
       req.params = {};
       req.query = {};
     }
+
+    this.router.emitPostValidate(req, postValidateMetadata);
 
     const response = await handler.fn(ctx, req, res);
 
@@ -252,12 +261,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       }
     }
 
-    return injectResponseHeaders(
-      {
-        [ELASTIC_HTTP_VERSION_HEADER]: version,
-      },
-      response
-    );
+    return injectVersionHeader(version, response);
   };
 
   private validateVersion(version: string) {
@@ -287,7 +291,6 @@ export class CoreVersionedRoute implements VersionedRoute {
   public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
     this.validateVersion(options.version);
     options = prepareVersionedRouteValidation(options);
-
     this.handlers.set(options.version, {
       fn: handler,
       options,

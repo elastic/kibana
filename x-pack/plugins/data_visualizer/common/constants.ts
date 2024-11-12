@@ -47,6 +47,9 @@ export const SUPPORTED_FIELD_TYPES = {
   NESTED: 'nested',
   STRING: 'string',
   TEXT: 'text',
+  SEMANTIC_TEXT: 'semantic_text',
+  DENSE_VECTOR: 'dense_vector',
+  SPARSE_VECTOR: 'sparse_vector',
   VERSION: 'version',
   UNKNOWN: 'unknown',
 } as const;
@@ -73,3 +76,4 @@ export const featureTitle = i18n.translate('xpack.dataVisualizer.title', {
   defaultMessage: 'Upload a file',
 });
 export const featureId = `file_data_visualizer`;
+export const SUPPORTED_FIELD_TYPES_LIST: string[] = Object.values(SUPPORTED_FIELD_TYPES);

@@ -516,6 +516,7 @@ const deleteSloInstancesRoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/_delete_instances 2023-10-31',
   options: {
     tags: ['access:slo_write'],
+    access: 'public',
   },
   params: deleteSLOInstancesParamsSchema,
   handler: async ({ context, params }) => {
@@ -532,6 +533,7 @@ const findSloDefinitionsRoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slos/_definitions 2023-10-31',
   options: {
     tags: ['access:slo_read'],
+    access: 'public',
   },
   params: findSloDefinitionsParamsSchema,
   handler: async ({ context, params, logger }) => {

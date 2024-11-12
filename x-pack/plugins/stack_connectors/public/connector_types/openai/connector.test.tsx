@@ -50,6 +50,17 @@ const azureConnector = {
     apiKey: 'thats-a-nice-looking-key',
   },
 };
+const otherOpenAiConnector = {
+  ...openAiConnector,
+  config: {
+    apiUrl: 'https://localhost/oss-llm',
+    apiProvider: OpenAiProviderType.Other,
+    defaultModel: 'local-model',
+  },
+  secrets: {
+    apiKey: 'thats-a-nice-looking-key',
+  },
+};
 
 const navigateToUrl = jest.fn();
 
@@ -91,6 +102,24 @@ describe('ConnectorFields renders', () => {
     );
     expect(getAllByTestId('azure-ai-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('azure-ai-api-keys-doc')[0]).toBeInTheDocument();
+  });
+
+  test('other open ai connector fields are rendered', async () => {
+    const { getAllByTestId } = render(
+      <ConnectorFormTestProvider connector={otherOpenAiConnector}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
+    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(
+      otherOpenAiConnector.config.apiUrl
+    );
+    expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
+    expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
+      otherOpenAiConnector.config.apiProvider
+    );
+    expect(getAllByTestId('other-ai-api-doc')[0]).toBeInTheDocument();
+    expect(getAllByTestId('other-ai-api-keys-doc')[0]).toBeInTheDocument();
   });
 
   describe('Dashboard link', () => {

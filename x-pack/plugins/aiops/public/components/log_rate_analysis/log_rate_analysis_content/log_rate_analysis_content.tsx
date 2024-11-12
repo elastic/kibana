@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
@@ -28,13 +28,16 @@ import {
   setInitialAnalysisStart,
   useAppDispatch,
   useAppSelector,
+  setGroupResults,
 } from '@kbn/aiops-log-rate-analysis/state';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 
 import { DocumentCountContent } from '../../document_count_content/document_count_content';
 import {
   LogRateAnalysisResults,
   type LogRateAnalysisResultsData,
 } from '../log_rate_analysis_results';
+import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 export const DEFAULT_SEARCH_QUERY: estypes.QueryDslQueryContainer = { match_all: {} };
 const DEFAULT_SEARCH_BAR_QUERY: estypes.QueryDslQueryContainer = {
@@ -60,8 +63,6 @@ export interface LogRateAnalysisContentProps {
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
   /** Optional callback that exposes current window parameters */
   onWindowParametersChange?: (wp?: WindowParameters, replace?: boolean) => void;
-  /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin: string;
 }
 
 export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
@@ -70,11 +71,12 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   barHighlightColorOverride,
   onAnalysisCompleted,
   onWindowParametersChange,
-  embeddingOrigin,
 }) => {
+  const { embeddingOrigin } = useAiopsAppContext();
+
   const dispatch = useAppDispatch();
 
-  const isRunning = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
+  const isRunning = useAppSelector((s) => s.stream.isRunning);
   const significantItems = useAppSelector((s) => s.logRateAnalysisResults.significantItems);
   const significantItemsGroups = useAppSelector(
     (s) => s.logRateAnalysisResults.significantItemsGroups
@@ -119,6 +121,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   const { documentCountStats } = documentStats;
 
   function clearSelectionHandler() {
+    dispatch(setGroupResults(false));
     dispatch(clearSelection());
     dispatch(clearAllRowState());
   }
@@ -203,7 +206,11 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   const changePointType = documentCountStats?.changePoint?.type;
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false}>
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize={embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD ? 'none' : 'm'}
+    >
       {showDocumentCountContent && (
         <DocumentCountContent
           barColorOverride={barColorOverride}
@@ -211,14 +218,13 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           barStyleAccessor={barStyleAccessor}
         />
       )}
-      <EuiHorizontalRule />
+      <EuiSpacer size="m" />
       {showLogRateAnalysisResults && (
         <LogRateAnalysisResults
           onReset={clearSelectionHandler}
           searchQuery={searchQuery}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
-          embeddingOrigin={embeddingOrigin}
         />
       )}
       {showNoAutoRunEmptyPrompt && (

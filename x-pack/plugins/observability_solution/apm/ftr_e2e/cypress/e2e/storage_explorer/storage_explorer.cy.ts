@@ -36,8 +36,7 @@ const mainApiRequestsToIntercept = [
 ];
 
 const mainAliasNames = mainApiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
-
-// See details: https://github.com/elastic/kibana/issues/191961
+// flaky test
 describe.skip('Storage Explorer', () => {
   before(() => {
     const { rangeFrom, rangeTo } = timeRange;

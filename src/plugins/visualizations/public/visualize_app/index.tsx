@@ -35,17 +35,15 @@ export const renderApp = (
     <KibanaRenderContextProvider {...services.core}>
       <Router history={services.history}>
         <KibanaContextProvider services={services}>
-          <services.presentationUtil.ContextProvider>
-            <TableListViewKibanaProvider
-              {...{
-                core: services.core,
-                savedObjectsTagging: services.savedObjectsTagging,
-                FormattedRelative,
-              }}
-            >
-              <VisualizeApp onAppLeave={onAppLeave} />
-            </TableListViewKibanaProvider>
-          </services.presentationUtil.ContextProvider>
+          <TableListViewKibanaProvider
+            {...{
+              core: services.core,
+              savedObjectsTagging: services.savedObjectsTagging,
+              FormattedRelative,
+            }}
+          >
+            <VisualizeApp onAppLeave={onAppLeave} />
+          </TableListViewKibanaProvider>
         </KibanaContextProvider>
       </Router>
     </KibanaRenderContextProvider>

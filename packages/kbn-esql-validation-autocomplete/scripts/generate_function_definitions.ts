@@ -52,7 +52,7 @@ const extraFunctions: FunctionDefinition[] = [
           { name: 'value', type: 'any' },
         ],
         minParams: 2,
-        returnType: 'any',
+        returnType: 'unknown',
       },
     ],
     examples: [
@@ -254,6 +254,8 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
       : aggregationSupportedCommandsAndOptions),
     description: ESFunctionDefinition.description,
     alias: aliasTable[ESFunctionDefinition.name],
+    ignoreAsSuggestion: ESFunctionDefinition.snapshot_only,
+    preview: ESFunctionDefinition.preview,
     signatures: _.uniqBy(
       ESFunctionDefinition.signatures.map((signature: any) => ({
         ...signature,
@@ -332,7 +334,8 @@ function printGeneratedFunctionsFile(
     name: '${name}',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
       removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
-    )} }),
+    )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,\n' : ''}
+    preview: ${functionDefinition.preview || 'false'},
     alias: ${alias ? `['${alias.join("', '")}']` : 'undefined'},
     signatures: ${JSON.stringify(signatures, null, 2)},
     supportedCommands: ${JSON.stringify(functionDefinition.supportedCommands)},
@@ -392,6 +395,9 @@ import { isLiteralItem } from '../../shared/helpers';`
 
 (async function main() {
   const pathToElasticsearch = process.argv[2];
+  if (!pathToElasticsearch) {
+    throw new Error('Path to Elasticsearch is required');
+  }
 
   const ESFunctionDefinitionsDirectory = join(
     pathToElasticsearch,

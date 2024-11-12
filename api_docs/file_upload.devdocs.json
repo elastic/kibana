@@ -1614,7 +1614,23 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "fileUpload",
+        "id": "def-common.TIKA_PREVIEW_CHARS",
+        "type": "number",
+        "tags": [],
+        "label": "TIKA_PREVIEW_CHARS",
+        "description": [],
+        "signature": [
+          "100000"
+        ],
+        "path": "x-pack/plugins/file_upload/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

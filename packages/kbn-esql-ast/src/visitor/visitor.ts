@@ -247,6 +247,7 @@ export class Visitor<
       ? Builder.expression.query(nodeOrCommands)
       : nodeOrCommands;
     const queryContext = new QueryVisitorContext(this.ctx, node, null);
+
     return this.visit(queryContext, input);
   }
 

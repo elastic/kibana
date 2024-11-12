@@ -11,5 +11,9 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
   describe('Dataset quality', () => {
     loadTestFile(require.resolve('./integrations'));
     loadTestFile(require.resolve('./degraded_field_analyze'));
+    loadTestFile(require.resolve('./data_stream_settings'));
+    loadTestFile(require.resolve('./data_stream_rollover'));
+    loadTestFile(require.resolve('./update_field_limit'));
+    loadTestFile(require.resolve('./data_stream_total_docs'));
   });
 }

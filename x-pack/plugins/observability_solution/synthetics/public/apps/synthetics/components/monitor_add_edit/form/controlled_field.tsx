@@ -7,7 +7,7 @@
 import React, { useCallback, useState } from 'react';
 import { EuiFormRow, EuiFormRowProps } from '@elastic/eui';
 import { useSelector } from 'react-redux';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { ControllerRenderProps, ControllerFieldState, useFormContext } from 'react-hook-form';
 import { useKibanaSpace, useIsEditFlow } from '../hooks';
 import { selectServiceLocationsState } from '../../../state';

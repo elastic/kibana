@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/investigate-app-plugin",
   "owner": "@elastic/obs-ux-management-team",
+  "group": "observability",
+  "visibility": "private",
   "plugin": {
     "id": "investigateApp",
     "server": true,
@@ -11,6 +13,7 @@
       "investigate",
       "observabilityShared",
       "lens",
+      "charts",
       "dataViews",
       "data",
       "embeddable",
@@ -25,7 +28,7 @@
     "requiredBundles": [
       "esql",
       "kibanaReact",
-      "kibanaUtils",
+      "kibanaUtils"
     ],
     "optionalPlugins": ["observabilityAIAssistant"],
     "extraPublicDirs": []

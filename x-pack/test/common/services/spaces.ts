@@ -77,6 +77,25 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
       };
     }
 
+    public async update(
+      id: string,
+      updatedSpace: Partial<SpaceCreate>,
+      { overwrite = true }: { overwrite?: boolean } = {}
+    ) {
+      log.debug(`updating space ${id}`);
+      const { data, status, statusText } = await axios.put(
+        `/api/spaces/space/${id}?overwrite=${overwrite}`,
+        updatedSpace
+      );
+
+      if (status !== 200) {
+        throw new Error(
+          `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`
+        );
+      }
+      log.debug(`updated space ${id}`);
+    }
+
     public async delete(spaceId: string) {
       log.debug(`deleting space id: ${spaceId}`);
       const { data, status, statusText } = await axios.delete(`/api/spaces/space/${spaceId}`);
@@ -87,6 +106,20 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
         );
       }
       log.debug(`deleted space id: ${spaceId}`);
+    }
+
+    public async get(id: string) {
+      log.debug(`retrieving space ${id}`);
+      const { data, status, statusText } = await axios.get<Space>(`/api/spaces/space/${id}`);
+
+      if (status !== 200) {
+        throw new Error(
+          `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`
+        );
+      }
+      log.debug(`retrieved space ${id}`);
+
+      return data;
     }
 
     public async getAll() {

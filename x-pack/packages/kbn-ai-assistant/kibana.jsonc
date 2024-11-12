@@ -1,0 +1,7 @@
+{
+  "id": "@kbn/ai-assistant",
+  "owner": "@elastic/search-kibana",
+  "type": "shared-browser",
+  "group": "platform",
+  "visibility": "shared"
+}

@@ -49,11 +49,14 @@ export const inspectMonitorAPI = async ({
 export const updateMonitorAPI = async ({
   monitor,
   id,
+  spaceId,
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
+  spaceId?: string;
   id: string;
 }): Promise<UpsertMonitorResponse> => {
   return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor, null, {
+    spaceId,
     internal: true,
     version: INITIAL_REST_VERSION,
   });

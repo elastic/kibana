@@ -12,12 +12,12 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
   EuiText,
-  EuiIconTip,
   EuiSpacer,
   EuiPageSection,
   EuiEmptyPrompt,
+  EuiCallOut,
+  EuiButton,
   EuiLink,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
@@ -40,8 +40,10 @@ import { documentationService } from '../../../services/documentation';
 import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
 import { filterDataStreams, isSelectedDataStreamHidden } from '../../../lib/data_streams';
-import { FilterListButton, Filters } from '../components';
+import { Filters } from '../components';
+import { useStateWithLocalStorage } from '../../../hooks/use_state_with_localstorage';
 
+const SHOW_PROJECT_LEVEL_RETENTION = 'showProjectLevelRetention';
 export type DataStreamFilterName = 'managed' | 'hidden';
 interface MatchParams {
   dataStreamName?: string;
@@ -58,8 +60,9 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   const decodedDataStreamName = attemptToURIDecode(dataStreamName);
 
   const {
+    config: { enableProjectLevelRetentionChecks },
     core: { getUrlForApp, executionContext },
-    plugins: { isFleetEnabled },
+    plugins: { isFleetEnabled, cloud },
   } = useAppContext();
 
   useExecutionContext(executionContext, {
@@ -80,6 +83,9 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   } = useLoadDataStreams({
     includeStats: isIncludeStatsChecked,
   });
+
+  const [projectLevelRetentionCallout, setprojectLevelRetentionCallout] =
+    useStateWithLocalStorage<boolean>(SHOW_PROJECT_LEVEL_RETENTION, true);
 
   const [filters, setFilters] = useState<Filters<DataStreamFilterName>>({
     managed: {
@@ -125,7 +131,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
     return (
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiText color="subdued">
+          <EuiText color="subdued" css={{ maxWidth: '80%' }}>
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
               defaultMessage="Data streams store time-series data across multiple indices and can be created from index templates. {learnMoreLink}"
@@ -146,38 +152,16 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           </EuiText>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                label={i18n.translate(
-                  'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel',
-                  {
-                    defaultMessage: 'Include stats',
-                  }
-                )}
-                checked={isIncludeStatsChecked}
-                onChange={(e) => setIsIncludeStatsChecked(e.target.checked)}
-                data-test-subj="includeStatsSwitch"
+        {enableProjectLevelRetentionChecks && (
+          <EuiFlexItem grow={false}>
+            <EuiLink href={cloud?.deploymentUrl} target="_blank">
+              <FormattedMessage
+                id="xpack.idxMgmt.dataStreamList.projectlevelRetention.linkText"
+                defaultMessage="Project data retention"
               />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchToolTip',
-                  {
-                    defaultMessage: 'Including stats can increase reload times',
-                  }
-                )}
-                position="top"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <FilterListButton<DataStreamFilterName> filters={filters} onChange={setFilters} />
-        </EuiFlexItem>
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   };
@@ -276,6 +260,37 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
     activateHiddenFilter(isSelectedDataStreamHidden(dataStreams!, decodedDataStreamName));
     content = (
       <EuiPageSection paddingSize="none" data-test-subj="dataStreamList">
+        {enableProjectLevelRetentionChecks && projectLevelRetentionCallout && (
+          <>
+            <EuiCallOut
+              onDismiss={() => setprojectLevelRetentionCallout(false)}
+              data-test-subj="projectLevelRetentionCallout"
+              title={i18n.translate(
+                'xpack.idxMgmt.dataStreamList.projectLevelRetentionCallout.titleText',
+                {
+                  defaultMessage:
+                    'You can now configure data stream retention settings for your entire project',
+                }
+              )}
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.dataStreamList.projectLevelRetentionCallout.descriptionText"
+                  defaultMessage="Optionally define a maximum and default retention period to manage your compliance and storage size needs."
+                />
+              </p>
+
+              <EuiButton href={cloud?.deploymentUrl} fill data-test-subj="cloudLinkButton">
+                <FormattedMessage
+                  id="xpack.idxMgmt.dataStreamList.projectLevelRetentionCallout.buttonText"
+                  defaultMessage="Get started"
+                />
+              </EuiButton>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         {renderHeader()}
         <EuiSpacer size="l" />
 
@@ -287,8 +302,11 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           }
           dataStreams={filteredDataStreams}
           reload={reload}
+          viewFilters={filters}
+          onViewFilterChange={setFilters}
           history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
+          setIncludeStats={setIsIncludeStatsChecked}
         />
       </EuiPageSection>
     );

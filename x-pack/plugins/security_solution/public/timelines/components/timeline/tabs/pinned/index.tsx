@@ -7,55 +7,37 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useCallback, memo } from 'react';
-import styled from 'styled-components';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
-import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
 } from '../../../../../flyout/document_details/shared/constants/panel_keys';
-import type { ControlColumnProps } from '../../../../../../common/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../../containers';
-import { defaultHeaders } from '../../body/column_headers/default_headers';
-import { StatefulBody } from '../../body';
-import { Footer, footerHeight } from '../../footer';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
-import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
 import type { TimelineModel } from '../../../../store/model';
 import type { State } from '../../../../../common/store';
-import { calculateTotalPages } from '../../helpers';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { ExitFullScreen } from '../../../../../common/components/exit_full_screen';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
-import {
-  FullWidthFlexGroup,
-  ScrollableFlexItem,
-  StyledEuiFlyoutBody,
-  StyledEuiFlyoutFooter,
-} from '../shared/layout';
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { NotesFlyout } from '../../properties/notes_flyout';
-
-const ExitFullScreenContainer = styled.div`
-  width: 180px;
-`;
+import { NotesEventTypes, DocumentEventTypes } from '../../../../../common/lib/telemetry';
+import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 
 interface PinnedFilter {
   bool: {
@@ -65,8 +47,6 @@ interface PinnedFilter {
 }
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
-
-const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
 const rowDetailColumn = [
   {
@@ -84,22 +64,13 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   itemsPerPage,
   itemsPerPageOptions,
   pinnedEventIds,
-  renderCellValue,
   rowRenderers,
   sort,
   eventIdToNoteIds,
 }) => {
   const { telemetry } = useKibana().services;
-  const {
-    browserFields,
-    dataViewId,
-    loading: loadingSourcerer,
-    sourcererDataView,
-    selectedPatterns,
-  } = useSourcererDataView(SourcererScopeName.timeline);
-  const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
-  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineDisabled'
+  const { dataViewId, sourcererDataView, selectedPatterns } = useSourcererDataView(
+    SourcererScopeName.timeline
   );
 
   const filterQuery = useMemo(() => {
@@ -141,7 +112,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   }, [pinnedEventIds]);
 
   const timelineQueryFields = useMemo(() => {
-    const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
+    const columnsHeader = isEmpty(columns) ? defaultUdtHeaders : columns;
     const columnFields = columnsHeader.map((c) => c.id);
 
     return [...columnFields, ...requiredFieldsForActions];
@@ -168,7 +139,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       fields: timelineQueryFields,
       limit: itemsPerPage,
       filterQuery,
-      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
       skip: filterQuery === '',
       startDate: '',
       sort: timelineQuerySortField,
@@ -176,8 +147,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     });
 
   const { openFlyout } = useExpandableFlyoutApi();
-  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesEnabled'
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
   );
 
   const {
@@ -198,7 +169,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
       const indexName = selectedPatterns.join(',');
-      if (eventId && securitySolutionNotesEnabled) {
+      if (eventId && !securitySolutionNotesDisabled) {
         openFlyout({
           right: {
             id: DocumentDetailsRightPanelKey,
@@ -220,10 +191,10 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
             },
           },
         });
-        telemetry.reportOpenNoteInExpandableFlyoutClicked({
+        telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
           location: timelineId,
         });
-        telemetry.reportDetailsFlyoutOpened({
+        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
           location: timelineId,
           panel: 'left',
         });
@@ -236,7 +207,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     },
     [
       openFlyout,
-      securitySolutionNotesEnabled,
+      securitySolutionNotesDisabled,
       selectedPatterns,
       telemetry,
       timelineId,
@@ -257,11 +228,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     onToggleShowNotes,
   });
 
-  const isQueryLoading = useMemo(
-    () => [DataLoadingState.loading, DataLoadingState.loadingMore].includes(queryLoadingState),
-    [queryLoadingState]
-  );
-
   const NotesFlyoutMemo = useMemo(() => {
     return (
       <NotesFlyout
@@ -276,92 +242,29 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     );
   }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
 
-  if (!unifiedComponentsInTimelineDisabled) {
-    return (
-      <>
-        {NotesFlyoutMemo}
-        <UnifiedTimelineBody
-          header={<></>}
-          columns={augmentedColumnHeaders}
-          rowRenderers={rowRenderers}
-          timelineId={timelineId}
-          itemsPerPage={itemsPerPage}
-          itemsPerPageOptions={itemsPerPageOptions}
-          sort={sort}
-          events={events}
-          refetch={refetch}
-          dataLoadingState={queryLoadingState}
-          totalCount={events.length}
-          onChangePage={loadPage}
-          activeTab={TimelineTabs.pinned}
-          updatedAt={refreshedAt}
-          isTextBasedQuery={false}
-          pageInfo={pageInfo}
-          leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-          trailingControlColumns={rowDetailColumn}
-        />
-      </>
-    );
-  }
-
   return (
     <>
       {NotesFlyoutMemo}
-      <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`}>
-        <ScrollableFlexItem grow={2}>
-          {timelineFullScreen && setTimelineFullScreen != null && (
-            <ExitFullScreenContainer>
-              <ExitFullScreen
-                fullScreen={timelineFullScreen}
-                setFullScreen={setTimelineFullScreen}
-              />
-            </ExitFullScreenContainer>
-          )}
-          <EventDetailsWidthProvider>
-            <StyledEuiFlyoutBody
-              data-test-subj={`${TimelineTabs.pinned}-tab-flyout-body`}
-              className="timeline-flyout-body"
-            >
-              <StatefulBody
-                activePage={pageInfo.activePage}
-                browserFields={browserFields}
-                data={events}
-                id={timelineId}
-                refetch={refetch}
-                renderCellValue={renderCellValue}
-                rowRenderers={rowRenderers}
-                sort={sort}
-                tabType={TimelineTabs.pinned}
-                totalPages={calculateTotalPages({
-                  itemsCount: totalCount,
-                  itemsPerPage,
-                })}
-                leadingControlColumns={leadingControlColumns as ControlColumnProps[]}
-                trailingControlColumns={trailingControlColumns}
-              />
-            </StyledEuiFlyoutBody>
-            <StyledEuiFlyoutFooter
-              data-test-subj={`${TimelineTabs.pinned}-tab-flyout-footer`}
-              className="timeline-flyout-footer"
-            >
-              <Footer
-                activePage={pageInfo.activePage}
-                data-test-subj="timeline-footer"
-                updatedAt={refreshedAt}
-                height={footerHeight}
-                id={timelineId}
-                isLive={false}
-                isLoading={isQueryLoading || loadingSourcerer}
-                itemsCount={events.length}
-                itemsPerPage={itemsPerPage}
-                itemsPerPageOptions={itemsPerPageOptions}
-                onChangePage={loadPage}
-                totalCount={totalCount}
-              />
-            </StyledEuiFlyoutFooter>
-          </EventDetailsWidthProvider>
-        </ScrollableFlexItem>
-      </FullWidthFlexGroup>
+      <UnifiedTimelineBody
+        header={<></>}
+        columns={augmentedColumnHeaders}
+        rowRenderers={rowRenderers}
+        timelineId={timelineId}
+        itemsPerPage={itemsPerPage}
+        itemsPerPageOptions={itemsPerPageOptions}
+        sort={sort}
+        events={events}
+        refetch={refetch}
+        dataLoadingState={queryLoadingState}
+        totalCount={totalCount}
+        onChangePage={loadPage}
+        activeTab={TimelineTabs.pinned}
+        updatedAt={refreshedAt}
+        isTextBasedQuery={false}
+        pageInfo={pageInfo}
+        leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+        trailingControlColumns={rowDetailColumn}
+      />
     </>
   );
 };

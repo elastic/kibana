@@ -20,8 +20,9 @@ import {
   useLoadUiConfig,
   useResolveRule,
 } from '../../common/hooks';
-import { getAvailableRuleTypes } from '../utils';
 import { RuleTypeRegistryContract } from '../../common';
+import { useFetchFlappingSettings } from '../../common/hooks/use_fetch_flapping_settings';
+import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../../common/constants/rule_flapping';
 import { useLoadRuleTypeAadTemplateField } from '../../common/hooks/use_load_rule_type_aad_template_fields';
 
 export interface UseLoadDependencies {
@@ -41,8 +42,6 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     http,
     toasts,
     ruleTypeRegistry,
-    consumer,
-    validConsumers,
     id,
     ruleTypeId,
     capabilities,
@@ -67,7 +66,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     data: fetchedFormData,
     isLoading: isLoadingRule,
     isInitialLoading: isInitialLoadingRule,
-  } = useResolveRule({ http, id });
+  } = useResolveRule({ http, id, cacheTime: 0 });
 
   const {
     ruleTypesState: {
@@ -82,6 +81,15 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
   });
 
   const {
+    data: flappingSettings,
+    isLoading: isLoadingFlappingSettings,
+    isInitialLoading: isInitialLoadingFlappingSettings,
+  } = useFetchFlappingSettings({
+    http,
+    enabled: IS_RULE_SPECIFIC_FLAPPING_ENABLED,
+  });
+
+  const {
     data: connectors = [],
     isLoading: isLoadingConnectors,
     isInitialLoading: isInitialLoadingConnectors,
@@ -89,6 +97,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     http,
     includeSystemActions: true,
     enabled: canReadConnectors,
+    cacheTime: 0,
   });
 
   const computedRuleTypeId = useMemo(() => {
@@ -114,28 +123,22 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     http,
     ruleTypeId: computedRuleTypeId,
     enabled: !!computedRuleTypeId && canReadConnectors,
+    cacheTime: 0,
   });
 
-  const authorizedRuleTypeItems = useMemo(() => {
-    const computedConsumer = consumer || fetchedFormData?.consumer;
-    if (!computedConsumer) {
-      return [];
+  const ruleType = useMemo(() => {
+    if (!computedRuleTypeId || !ruleTypeIndex) {
+      return null;
     }
-    return getAvailableRuleTypes({
-      consumer: computedConsumer,
-      ruleTypes: [...ruleTypeIndex.values()],
-      ruleTypeRegistry,
-      validConsumers,
-    });
-  }, [consumer, ruleTypeIndex, ruleTypeRegistry, validConsumers, fetchedFormData]);
+    return ruleTypeIndex.get(computedRuleTypeId);
+  }, [computedRuleTypeId, ruleTypeIndex]);
 
-  const [ruleType, ruleTypeModel] = useMemo(() => {
-    const item = authorizedRuleTypeItems.find(({ ruleType: rt }) => {
-      return rt.id === computedRuleTypeId;
-    });
-
-    return [item?.ruleType, item?.ruleTypeModel];
-  }, [authorizedRuleTypeItems, computedRuleTypeId]);
+  const ruleTypeModel = useMemo(() => {
+    if (!computedRuleTypeId) {
+      return null;
+    }
+    return ruleTypeRegistry.get(computedRuleTypeId);
+  }, [computedRuleTypeId, ruleTypeRegistry]);
 
   const isLoading = useMemo(() => {
     // Create Mode
@@ -144,6 +147,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
         isLoadingUiConfig ||
         isLoadingHealthCheck ||
         isLoadingRuleTypes ||
+        isLoadingFlappingSettings ||
         isLoadingConnectors ||
         isLoadingConnectorTypes ||
         isLoadingAadtemplateFields
@@ -156,6 +160,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
       isLoadingHealthCheck ||
       isLoadingRule ||
       isLoadingRuleTypes ||
+      isLoadingFlappingSettings ||
       isLoadingConnectors ||
       isLoadingConnectorTypes ||
       isLoadingAadtemplateFields
@@ -166,6 +171,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     isLoadingHealthCheck,
     isLoadingRule,
     isLoadingRuleTypes,
+    isLoadingFlappingSettings,
     isLoadingConnectors,
     isLoadingConnectorTypes,
     isLoadingAadtemplateFields,
@@ -178,6 +184,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
         isInitialLoadingUiConfig ||
         isInitialLoadingHealthCheck ||
         isInitialLoadingRuleTypes ||
+        isInitialLoadingFlappingSettings ||
         isInitialLoadingConnectors ||
         isInitialLoadingConnectorTypes ||
         isInitialLoadingAadTemplateField
@@ -190,6 +197,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
       isInitialLoadingHealthCheck ||
       isInitialLoadingRule ||
       isInitialLoadingRuleTypes ||
+      isInitialLoadingFlappingSettings ||
       isInitialLoadingConnectors ||
       isInitialLoadingConnectorTypes ||
       isInitialLoadingAadTemplateField
@@ -200,6 +208,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     isInitialLoadingHealthCheck,
     isInitialLoadingRule,
     isInitialLoadingRuleTypes,
+    isInitialLoadingFlappingSettings,
     isInitialLoadingConnectors,
     isInitialLoadingConnectorTypes,
     isInitialLoadingAadTemplateField,
@@ -210,9 +219,11 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     isInitialLoading: !!isInitialLoading,
     ruleType,
     ruleTypeModel,
+    ruleTypes: [...ruleTypeIndex.values()],
     uiConfig,
     healthCheckError,
     fetchedFormData,
+    flappingSettings,
     connectors,
     connectorTypes,
     aadTemplateFields,

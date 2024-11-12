@@ -59,6 +59,7 @@ import {
 } from './types';
 import { UsageCollector } from './usage/usage_collector';
 import { mapSourceToLogView } from './utils/map_source_to_log_view';
+import { uiSettings } from '../common/ui_settings';
 
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
@@ -210,6 +211,9 @@ export class InfraServerPlugin
     // Setup infra services
     const inventoryViews = this.inventoryViews.setup();
     const metricsExplorerViews = this.metricsExplorerViews?.setup();
+
+    // Register uiSettings config
+    core.uiSettings.register(uiSettings);
 
     // Register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);

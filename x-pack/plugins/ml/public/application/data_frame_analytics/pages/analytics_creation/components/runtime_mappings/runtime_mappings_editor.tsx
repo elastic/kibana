@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 
 import { CodeEditor } from '@kbn/code-editor';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import type { XJsonModeType } from './runtime_mappings';
 
 interface Props {
   convertToJson: (data: string) => string;
@@ -20,13 +19,11 @@ interface Props {
   setIsRuntimeMappingsEditorApplyButtonEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   advancedEditorRuntimeMappingsLastApplied: string | undefined;
   advancedRuntimeMappingsConfig: string;
-  xJsonMode: XJsonModeType;
 }
 
 export const RuntimeMappingsEditor: FC<Props> = memo(
   ({
     convertToJson,
-    xJsonMode,
     setAdvancedRuntimeMappingsConfig,
     setIsRuntimeMappingsEditorApplyButtonEnabled,
     advancedEditorRuntimeMappingsLastApplied,

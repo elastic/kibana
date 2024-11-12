@@ -25,7 +25,7 @@ import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Reference } from '@kbn/content-management-utils';
-import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -69,12 +69,8 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { DASHBOARD_CONTAINER_TYPE, DashboardApi, DashboardLocatorParams } from '../..';
-import {
-  DashboardAttributes,
-  DashboardContainerInput,
-  DashboardPanelMap,
-  DashboardPanelState,
-} from '../../../common';
+import type { DashboardAttributes } from '../../../server/content_management';
+import { DashboardContainerInput, DashboardPanelMap, DashboardPanelState } from '../../../common';
 import {
   getReferencesForControls,
   getReferencesForPanelId,
@@ -112,11 +108,11 @@ import {
 } from './create/controls/dashboard_control_group_integration';
 import { initializeDashboard } from './create/create_dashboard';
 import {
-  DashboardCreationOptions,
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
 import { InitialComponentState, getDashboardApi } from '../../dashboard_api/get_dashboard_api';
+import type { DashboardCreationOptions } from '../..';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -314,6 +310,7 @@ export class DashboardContainer
             isEmbeddedExternally: false,
             lastSavedInput: initialInput,
             lastSavedId: undefined,
+            fullScreenMode: false,
             managed: false,
           },
       (id: string) => this.untilEmbeddableLoaded(id)
@@ -886,15 +883,19 @@ export class DashboardContainer
   public getSerializedStateForControlGroup = () => {
     return {
       rawState: this.controlGroupInput
-        ? (this.controlGroupInput as ControlGroupSerializedState)
-        : ({
-            controlStyle: 'oneLine',
+        ? this.controlGroupInput
+        : {
+            labelPosition: 'oneLine',
             chainingSystem: 'HIERARCHICAL',
-            showApplySelections: false,
-            panelsJSON: '{}',
-            ignoreParentSettingsJSON:
-              '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
-          } as ControlGroupSerializedState),
+            autoApplySelections: true,
+            controls: [],
+            ignoreParentSettings: {
+              ignoreFilters: false,
+              ignoreQuery: false,
+              ignoreTimerange: false,
+              ignoreValidations: false,
+            },
+          },
       references: getReferencesForControls(this.savedObjectReferences),
     };
   };

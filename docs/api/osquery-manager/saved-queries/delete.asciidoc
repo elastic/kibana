@@ -4,6 +4,12 @@
 <titleabbrev>Delete saved query</titleabbrev>
 ++++
 
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-kibana}/group/endpoint-security-osquery-api[Osquery APIs].
+--
+
 experimental[] Delete saved queries.
 
 WARNING: Once you delete a saved query, _it cannot be recovered_.

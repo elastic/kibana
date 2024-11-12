@@ -20,6 +20,7 @@ export {
   prettifyQuery,
   isQueryWrappedByPipes,
   retrieveMetadataColumns,
+  getQueryColumnsFromESQLQuery,
 } from './utils/query_parsing_helpers';
 export { appendToESQLQuery, appendWhereClauseToESQLQuery } from './utils/append_to_query';
 export {
@@ -30,3 +31,8 @@ export {
   getStartEndParams,
   hasStartEndParams,
 } from './utils/run_query';
+export {
+  isESQLColumnSortable,
+  isESQLColumnGroupable,
+  isESQLFieldGroupable,
+} from './utils/esql_fields_utils';

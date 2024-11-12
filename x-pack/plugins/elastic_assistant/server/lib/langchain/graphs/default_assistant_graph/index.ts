@@ -13,6 +13,7 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
@@ -28,7 +29,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   actionsClient,
   alertsIndexPattern,
   assistantTools = [],
-  bedrockChatEnabled,
   connectorId,
   conversationId,
   dataClients,
@@ -36,6 +36,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   inference,
   langChainMessages,
   llmType,
+  isOssModel,
   logger: parentLogger,
   isStream = false,
   onLlmResponse,
@@ -44,12 +45,14 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   request,
   size,
   systemPrompt,
+  telemetry,
+  telemetryParams,
   traceOptions,
   responseLanguage = 'English',
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
-  const isOpenAI = llmType === 'openai';
-  const llmClass = getLlmClass(llmType, bedrockChatEnabled);
+  const isOpenAI = llmType === 'openai' && !isOssModel;
+  const llmClass = getLlmClass(llmType);
 
   /**
    * Creates a new instance of llmClass.
@@ -103,15 +106,15 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     isEnabledKnowledgeBase,
     kbDataClient: dataClients?.kbDataClient,
     logger,
-    modelExists: isEnabledKnowledgeBase,
     onNewReplacements,
     replacements,
     request,
     size,
+    telemetry,
   };
 
   const tools: StructuredTool[] = assistantTools.flatMap(
-    (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance() }) ?? []
+    (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance(), isOssModel }) ?? []
   );
 
   // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
@@ -132,7 +135,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         prompt: formatPrompt(systemPrompts.openai, systemPrompt),
         streamRunnable: isStream,
       })
-    : llmType && ['bedrock', 'gemini'].includes(llmType) && bedrockChatEnabled
+    : llmType && ['bedrock', 'gemini'].includes(llmType)
     ? await createToolCallingAgent({
         llm: createLlmInstance(),
         tools,
@@ -142,7 +145,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
             : formatPrompt(systemPrompts.gemini, systemPrompt),
         streamRunnable: isStream,
       })
-    : await createStructuredChatAgent({
+    : // used with OSS models
+      await createStructuredChatAgent({
         llm: createLlmInstance(),
         tools,
         prompt: formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
@@ -150,7 +154,17 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       });
 
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
-
+  const telemetryTracer = telemetryParams
+    ? new TelemetryTracer(
+        {
+          elasticTools: assistantTools.map(({ name }) => name),
+          totalTools: tools.length,
+          telemetry,
+          telemetryParams,
+        },
+        logger
+      )
+    : undefined;
   const assistantGraph = getDefaultAssistantGraph({
     agentRunnable,
     dataClients,
@@ -161,11 +175,11 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     replacements,
   });
   const inputs: GraphInputs = {
-    bedrockChatEnabled,
     responseLanguage,
     conversationId,
     llmType,
     isStream,
+    isOssModel,
     input: latestMessage[0]?.content as string,
   };
 
@@ -177,6 +191,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       logger,
       onLlmResponse,
       request,
+      telemetryTracer,
       traceOptions,
     });
   }
@@ -186,6 +201,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     assistantGraph,
     inputs,
     onLlmResponse,
+    telemetryTracer,
     traceOptions,
   });
 

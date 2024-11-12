@@ -7,51 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { rawRuleSchema as rawRuleSchemaV1 } from './v1';
+export * from './v1';
 
-const outcome = schema.oneOf([
-  schema.literal('succeeded'),
-  schema.literal('warning'),
-  schema.literal('failed'),
-]);
-
-const rawRuleMonitoringSchema = schema.object({
-  run: schema.object({
-    history: schema.arrayOf(
-      schema.object({
-        success: schema.boolean(),
-        timestamp: schema.number(),
-        duration: schema.maybe(schema.number()),
-        outcome: schema.maybe(outcome),
-      })
-    ),
-    calculated_metrics: schema.object({
-      p50: schema.maybe(schema.number()),
-      p95: schema.maybe(schema.number()),
-      p99: schema.maybe(schema.number()),
-      success_ratio: schema.number(),
-    }),
-    last_run: schema.object({
-      timestamp: schema.string(),
-      metrics: schema.object({
-        duration: schema.maybe(schema.number()),
-        total_search_duration_ms: schema.maybe(schema.nullable(schema.number())),
-        total_indexing_duration_ms: schema.maybe(schema.nullable(schema.number())),
-        total_alerts_detected: schema.maybe(schema.nullable(schema.number())),
-        total_alerts_created: schema.maybe(schema.nullable(schema.number())),
-        gap_duration_s: schema.maybe(schema.nullable(schema.number())),
-        gap_range: schema.maybe(
-          schema.nullable(
-            schema.object({
-              gte: schema.string(),
-              lte: schema.string(),
-            })
-          )
-        ),
-      }),
-    }),
-  }),
+export const flappingSchema = schema.object({
+  lookBackWindow: schema.number(),
+  statusChangeThreshold: schema.number(),
 });
 
 export const rawRuleSchema = rawRuleSchemaV1.extends({
-  monitoring: rawRuleMonitoringSchema,
+  flapping: schema.maybe(schema.nullable(flappingSchema)),
 });

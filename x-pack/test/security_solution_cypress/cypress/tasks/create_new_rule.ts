@@ -557,7 +557,7 @@ export const fillRuleActionFilters = (alertsFilter: AlertsFilter) => {
     .type(`{selectall}${alertsFilter.timeframe.timezone}{enter}`);
 };
 
-export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProps) => {
+export const fillDefineThresholdRule = (rule: ThresholdRuleCreateProps) => {
   const thresholdField = 0;
   const threshold = 1;
 
@@ -578,7 +578,11 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
       cy.wrap(inputs[threshold]).clear();
       cy.wrap(inputs[threshold]).type(`${rule.threshold.value}`);
     });
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+};
+
+export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProps) => {
+  fillDefineThresholdRule(rule);
+  continueFromDefineStep();
 };
 
 export const fillDefineEqlRule = (rule: EqlRuleCreateProps) => {
@@ -880,7 +884,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
         return alertCount >= alertCountThreshold;
       });
     },
-    { interval: 500, timeout: 12000 }
+    { interval: 500, timeout: 30000 }
   );
   waitForAlerts();
 };
@@ -908,6 +912,7 @@ export const enablesAndPopulatesThresholdSuppression = (
   // enables suppression for threshold rule
   cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('not.be.checked');
   cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).click();
+  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('be.checked');
 
   setAlertSuppressionDuration(interval, timeUnit);
 
@@ -978,7 +983,7 @@ export const interceptEsqlQueryFieldsRequest = (
       }
     });
   } else {
-    cy.intercept('POST', '/internal/bsearch?*', (req) => {
+    cy.intercept('POST', '/internal/search?*', (req) => {
       if (req.body?.batch?.[0]?.request?.params?.query?.includes?.(esqlQuery)) {
         req.alias = alias;
       }

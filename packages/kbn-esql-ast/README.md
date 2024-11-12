@@ -12,6 +12,7 @@ Contents of this package:
 - [`walker` &mdash; Contains the ES|QL AST `Walker` utility](./src/walker/README.md).
 - [`visitor` &mdash; Contains the ES|QL AST `Visitor` utility](./src/visitor/README.md).
 - [`pretty_print` &mdash; Contains code for formatting AST to text](./src/pretty_print/README.md).
+- [`mutate` &mdash; Contains code for traversing and mutating the AST.](./src/mutate/README.md).
 
 
 ## Demo

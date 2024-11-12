@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
+import type { SuperTest } from 'supertest';
+
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import { getAggregatedSpaceData, getTestScenariosForSpace } from '../lib/space_test_utils';
+import expect from '@kbn/expect';
+
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
-import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import { getAggregatedSpaceData, getTestScenariosForSpace } from '../lib/space_test_utils';
+import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface DeleteTest {
   statusCode: number;

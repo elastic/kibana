@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 /**
  * AIOPS_PLUGIN_ID is used as a unique identifier for the aiops plugin
  */
@@ -16,9 +18,26 @@ export const AIOPS_API_ENDPOINT = {
   CATEGORIZATION_FIELD_VALIDATION: '/internal/aiops/categorization_field_validation',
 } as const;
 
-export const AIOPS_TELEMETRY_ID = {
-  AIOPS_DEFAULT_SOURCE: 'ml_aiops_labs',
-  AIOPS_ANALYSIS_RUN_ORIGIN: 'aiops-analysis-run-origin',
+/**
+ * Used for telemetry purposes to track the origin of the analysis run.
+ */
+export const AIOPS_ANALYSIS_RUN_ORIGIN = 'aiops-analysis-run-origin';
+
+export const AIOPS_EMBEDDABLE_ORIGIN = {
+  CASES: 'cases',
+  DASHBOARD: 'dashboard',
+  DEFAULT: 'embeddable',
+  DISCOVER: 'discover',
+  ML_AIOPS_LABS: 'ml_aiops_labs',
 } as const;
 
-export const EMBEDDABLE_ORIGIN = 'embeddable';
+export const AIOPS_EMBEDDABLE_GROUPING = [
+  {
+    id: 'logs-aiops',
+    getDisplayName: () =>
+      i18n.translate('xpack.aiops.embedabble.groupingDisplayName', {
+        defaultMessage: 'Logs AIOps',
+      }),
+    getIconType: () => 'machineLearningApp',
+  },
+];

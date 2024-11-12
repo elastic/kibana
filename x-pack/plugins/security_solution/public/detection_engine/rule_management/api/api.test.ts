@@ -854,9 +854,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          query: expect.objectContaining({
-            filter: 'alert.id:"alert:id1" or alert.id:"alert:id2"',
-          }),
+          body: '{"filter":"alert.id:\\"alert:id1\\" or alert.id:\\"alert:id2\\"","fields":"[\\"muteAll\\",\\"activeSnoozes\\",\\"isSnoozedUntil\\",\\"snoozeSchedule\\"]","per_page":2}',
         })
       );
     });
@@ -867,9 +865,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          query: expect.objectContaining({
-            per_page: 2,
-          }),
+          body: '{"filter":"alert.id:\\"alert:id1\\" or alert.id:\\"alert:id2\\"","fields":"[\\"muteAll\\",\\"activeSnoozes\\",\\"isSnoozedUntil\\",\\"snoozeSchedule\\"]","per_page":2}',
         })
       );
     });
@@ -880,14 +876,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          query: expect.objectContaining({
-            fields: JSON.stringify([
-              'muteAll',
-              'activeSnoozes',
-              'isSnoozedUntil',
-              'snoozeSchedule',
-            ]),
-          }),
+          body: '{"filter":"alert.id:\\"alert:id1\\" or alert.id:\\"alert:id2\\"","fields":"[\\"muteAll\\",\\"activeSnoozes\\",\\"isSnoozedUntil\\",\\"snoozeSchedule\\"]","per_page":2}',
         })
       );
     });

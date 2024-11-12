@@ -28,6 +28,10 @@ export {
   prettifyQuery,
   isQueryWrappedByPipes,
   retrieveMetadataColumns,
+  getQueryColumnsFromESQLQuery,
+  isESQLColumnSortable,
+  isESQLColumnGroupable,
+  isESQLFieldGroupable,
   TextBasedLanguages,
 } from './src';
 

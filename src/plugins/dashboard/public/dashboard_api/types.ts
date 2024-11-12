@@ -16,6 +16,7 @@ import {
   TracksOverlays,
 } from '@kbn/presentation-containers';
 import {
+  EmbeddableAppContext,
   HasAppContext,
   HasType,
   PublishesDataViews,
@@ -29,10 +30,49 @@ import {
 } from '@kbn/presentation-publishing';
 import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { DefaultEmbeddableApi, ErrorEmbeddable, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import {
+  DefaultEmbeddableApi,
+  EmbeddablePackageState,
+  ErrorEmbeddable,
+  IEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+import { Observable } from 'rxjs';
+import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
-import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
+import {
+  LoadDashboardReturn,
+  SaveDashboardReturn,
+  SavedDashboardInput,
+} from '../services/dashboard_content_management_service/types';
 import { DashboardStateFromSettingsFlyout, UnsavedPanelState } from '../dashboard_container/types';
+
+export interface DashboardCreationOptions {
+  getInitialInput?: () => Partial<SavedDashboardInput>;
+
+  getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
+
+  useSearchSessionsIntegration?: boolean;
+  searchSessionSettings?: {
+    sessionIdToRestore?: string;
+    sessionIdUrlChangeObservable?: Observable<string | undefined>;
+    getSearchSessionIdFromURL: () => string | undefined;
+    removeSessionIdFromUrl: () => void;
+    createSessionRestorationDataProvider: (dashboardApi: DashboardApi) => SearchSessionInfoProvider;
+  };
+
+  useSessionStorageIntegration?: boolean;
+
+  useUnifiedSearchIntegration?: boolean;
+  unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
+
+  validateLoadedSavedObject?: (result: LoadDashboardReturn) => 'valid' | 'invalid' | 'redirected';
+
+  fullScreenMode?: boolean;
+  isEmbeddedExternally?: boolean;
+
+  getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
+}
 
 export type DashboardApi = CanExpandPanels &
   HasAppContext &

@@ -69,6 +69,8 @@ import { MlTableServiceProvider } from './common_table_service';
 import { MachineLearningFieldStatsFlyoutProvider } from './field_stats_flyout';
 import { MachineLearningDataDriftProvider } from './data_drift';
 import { TrainedModelsFlyoutProvider } from './add_trained_models_flyout';
+import { MachineLearningMemoryUsageProvider } from './memory_usage';
+
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
   const commonUI = MachineLearningCommonUIProvider(context);
@@ -134,6 +136,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, commonUI);
   const jobWizardCategorization = MachineLearningJobWizardCategorizationProvider(
     context,
+    commonUI,
     commonFieldStatsFlyout
   );
   const jobWizardRecognizer = MachineLearningJobWizardRecognizerProvider(context, commonUI);
@@ -143,13 +146,15 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     customUrls,
     commonFieldStatsFlyout
   );
-  const jobWizardGeo = MachineLearningJobWizardGeoProvider(context);
+  const jobWizardGeo = MachineLearningJobWizardGeoProvider(context, commonUI);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(
     context,
+    commonUI,
     commonFieldStatsFlyout
   );
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(
     context,
+    commonUI,
     commonFieldStatsFlyout
   );
 
@@ -175,7 +180,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const deployDFAModelFlyout = DeployDFAModelFlyoutProvider(context, commonUI);
   const mlNodesPanel = MlNodesPanelProvider(context);
   const notifications = NotificationsProvider(context, commonUI, tableService);
-
+  const memoryUsage = MachineLearningMemoryUsageProvider(context);
   const cases = MachineLearningCasesProvider(context, swimLane, anomalyCharts);
 
   return {
@@ -241,5 +246,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     trainedModelsFlyout,
     deployDFAModelFlyout,
     trainedModelsTable,
+    memoryUsage,
   };
 }

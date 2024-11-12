@@ -57,6 +57,10 @@ const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
   'updated_by',
   'created_at',
   'created_by',
+  /*
+   * Another technical property that is used for logic under the hood the user doesn't need to be aware of
+   */
+  'rule_source',
 ];
 
 const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>

@@ -45,18 +45,35 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
   };
 };
 
+/**
+ * This should remain part of the logger prefix so that we can notify/track
+ * when we see this logged for observability purposes.
+ */
+export const INTERNAL_API_RESTRICTED_LOGGER_NAME = 'kbn-internal-api-restricted';
 export const createRestrictInternalRoutesPostAuthHandler = (
-  config: HttpConfig
+  config: HttpConfig,
+  log: Logger
 ): OnPostAuthHandler => {
   const isRestrictionEnabled = config.restrictInternalApis;
+  log = log.get('server', `${INTERNAL_API_RESTRICTED_LOGGER_NAME}`);
 
   return (request, response, toolkit) => {
     const isInternalRoute = request.route.options.access === 'internal';
-    if (isRestrictionEnabled && isInternalRoute && !request.isInternalApiRequest) {
-      // throw 400
-      return response.badRequest({
-        body: `uri [${request.url.pathname}] with method [${request.route.method}] exists but is not available with the current configuration`,
-      });
+    if (isInternalRoute && !request.isInternalApiRequest) {
+      if (!isRestrictionEnabled) {
+        // warn if the restriction is not enforced
+        log.warn(
+          `Access to uri [${request.url.pathname}] with method [${request.route.method}] is deprecated`
+        );
+      } else {
+        log.error(
+          `Access to uri [${request.url.pathname}] with method [${request.route.method}] is not available with the current configuration`
+        );
+        // throw 400
+        return response.badRequest({
+          body: `uri [${request.url.pathname}] with method [${request.route.method}] exists but is not available with the current configuration`,
+        });
+      }
     }
     return toolkit.next();
   };

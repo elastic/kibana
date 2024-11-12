@@ -17,4 +17,5 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/plugins/canvas/{canvas_plugin_src,common,i18n,public,server,shareable_runtime}/**/*.{js,ts,tsx}',
   ],
+  setupFiles: ['<rootDir>/x-pack/plugins/canvas/jest_setup.ts'],
 };

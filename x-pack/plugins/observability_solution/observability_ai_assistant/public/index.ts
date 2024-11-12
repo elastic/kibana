@@ -19,6 +19,7 @@ import type {
   RenderFunction,
   DiscoveredDataset,
 } from './types';
+import elasticAiAssistantImg from './assets/elastic_ai_assistant.png';
 
 export type {
   ObservabilityAIAssistantPublicSetup,
@@ -100,6 +101,8 @@ export {
   aiAssistantSearchConnectorIndexPattern,
   aiAssistantPreferredAIAssistantType,
 } from '../common/ui_settings/settings_keys';
+
+export const elasticAiAssistantImage = elasticAiAssistantImg;
 
 export const plugin: PluginInitializer<
   ObservabilityAIAssistantPublicSetup,

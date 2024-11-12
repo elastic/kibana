@@ -42,6 +42,7 @@ export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedIn
 
   return (
     <EuiComboBox
+      singleSelection={false}
       options={options}
       selectedOptions={selection}
       onChange={onChange}

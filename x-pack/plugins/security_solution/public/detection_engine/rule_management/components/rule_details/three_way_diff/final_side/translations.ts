@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const UPGRADED_VERSION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradedVersion',
+export const FINAL_UPDATE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.finalUpdate',
   {
-    defaultMessage: 'Upgraded version',
+    defaultMessage: 'Final update',
   }
 );

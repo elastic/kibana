@@ -15,6 +15,15 @@
   overflow: visible !important; // Override EUI form control
   display: flex;
   flex: 1 1 100%;
+
+  &--withSuggestionVisible .kbnQueryBar__textarea {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  >.euiFormControlLayoutIcons {
+    max-height: $euiFormControlHeight;
+  }
 }
 
 .kbnQueryBar__textarea {
@@ -43,11 +52,8 @@
     overflow-x: auto;
     overflow-y: auto;
     white-space: normal;
-  }
-
-  &.kbnQueryBar__textarea--isSuggestionsVisible {
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
+    max-height: calc(35vh - 100px);
+    min-height: $euiFormControlHeight;
   }
 
   ~.euiFormControlLayoutIcons {

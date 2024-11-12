@@ -19,10 +19,6 @@ spec:
       description: 'Testing Kibana against upcoming versions of Chrome'
     spec:
       env:
-        # This is what will switch the FTRs pipeline to use Chrome Beta
-        USE_CHROME_BETA: 'true'
-        # Unit-tests don't depend on Chrome's versions, integration tests , so we don't need to run those
-        LIMIT_CONFIG_TYPE: 'functional'
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
 
@@ -30,8 +26,7 @@ spec:
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/scripts/pipelines/pull_request/pipeline.sh
-      skip_intermediate_builds: true
+      pipeline_file: .buildkite/pipelines/chrome_forward_testing.yml
       provider_settings:
         prefix_pull_request_fork_branch_names: false
         skip_pull_request_builds_for_existing_commits: true
@@ -51,3 +46,5 @@ spec:
           cronline: 0 12 * * *
           message: Daily Chrome Forward Testing
           branch: main
+      tags:
+        - kibana

@@ -118,7 +118,6 @@ describe('createCounterFetcher', () => {
         dailyEvents,
       })
     );
-    // @ts-expect-error incomplete mock implementation
     const { dailyEvents } = await fetch({ soClient: soClientMock });
     expect(dailyEvents).toHaveLength(5);
     const intersectingEntry = dailyEvents.find(

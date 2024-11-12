@@ -328,6 +328,7 @@ export function ccrRoute(server: MonitoringCore) {
           );
           const follows = remoteCluster ? `${leaderIndex} on ${remoteCluster}` : leaderIndex;
 
+          // @ts-expect-error `shards.error` type mismatch (error: string | undefined vs. error: { error: string | undefined })
           const shards: CcrShard[] = get(bucket, 'by_shard_id.buckets').map(
             (shardBucket: CcrShardBucket) => buildShardStats({ bucket, fullStats, shardBucket })
           );

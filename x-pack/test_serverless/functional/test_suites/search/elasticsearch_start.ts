@@ -26,18 +26,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await esDeleteAllIndices(['search-*', 'test-*']);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/194673
-  describe.skip('Elasticsearch Start [Onboarding Empty State]', function () {
+  describe('Elasticsearch Start [Onboarding Empty State]', function () {
     describe('developer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginWithRole('developer');
-        await pageObjects.svlApiKeys.deleteAPIKeys();
       });
       after(async () => {
         await deleteAllTestIndices();
       });
       beforeEach(async () => {
         await deleteAllTestIndices();
+        await pageObjects.svlApiKeys.deleteAPIKeys();
         await svlSearchNavigation.navigateToElasticsearchStartPage();
       });
 
@@ -75,6 +74,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
         await es.indices.create({ index: 'test-my-index-001' });
         await es.indices.create({ index: 'test-my-index-002' });
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
+      });
+      it('should redirect to indices list if single index exist on page load', async () => {
+        await svlSearchNavigation.navigateToGettingStartedPage();
+        await es.indices.create({ index: 'test-my-index-001' });
+        await svlSearchNavigation.navigateToElasticsearchStartPage(true);
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
       });
 
@@ -152,40 +157,52 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchElasticsearchStartPage.expectO11yTrialLink();
       });
 
-      describe('viewer', function () {
-        before(async () => {
-          await pageObjects.svlCommonPage.loginAsViewer();
-          await deleteAllTestIndices();
-        });
-        beforeEach(async () => {
-          await svlSearchNavigation.navigateToElasticsearchStartPage();
-        });
-        after(async () => {
-          await deleteAllTestIndices();
-        });
+      it('should have close button', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectCloseCreateIndexButtonExists();
+        await pageObjects.svlSearchElasticsearchStartPage.clickCloseCreateIndexButton();
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
+      });
+      it('should have skip button', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectSkipButtonExists();
+        await pageObjects.svlSearchElasticsearchStartPage.clickSkipButton();
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
+      });
+    });
+    describe('viewer', function () {
+      before(async () => {
+        await pageObjects.svlCommonPage.loginAsViewer();
+        await deleteAllTestIndices();
+      });
+      beforeEach(async () => {
+        await svlSearchNavigation.navigateToElasticsearchStartPage();
+      });
+      after(async () => {
+        await deleteAllTestIndices();
+      });
 
-        it('should default to code view when lacking create index permissions', async () => {
-          await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-          await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexCodeView();
-          await pageObjects.svlSearchElasticsearchStartPage.clickUIViewButton();
-          await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexUIView();
-          await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeDisabled();
-        });
+      it('should default to code view when lacking create index permissions', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexCodeView();
+        await pageObjects.svlSearchElasticsearchStartPage.clickUIViewButton();
+        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexUIView();
+        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeDisabled();
+      });
 
-        it('should not create an API key if the user only has viewer permissions', async () => {
-          await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-          await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
-          await pageObjects.svlSearchElasticsearchStartPage.expectAPIKeyFormNotAvailable();
-          const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromSessionStorage();
-          expect(apiKey).to.be(null);
-        });
+      it('should not create an API key if the user only has viewer permissions', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
+        await pageObjects.svlSearchElasticsearchStartPage.expectAPIKeyFormNotAvailable();
+        const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromSessionStorage();
+        expect(apiKey).to.be(null);
+      });
 
-        it('should redirect to index details when index is created via API', async () => {
-          await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-          await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexCodeView();
-          await es.indices.create({ index: 'test-my-api-index' });
-          await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
-        });
+      it('should redirect to index details when index is created via API', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexCodeView();
+        await es.indices.create({ index: 'test-my-api-index' });
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
       });
     });
   });

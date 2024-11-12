@@ -120,6 +120,7 @@ describe('searchAfterAndBulkCreate', () => {
       alertTimestampOverride: undefined,
       ruleExecutionLogger,
       publicBaseUrl: 'http://testkibanabaseurl.com',
+      intendedTimestamp: undefined,
     });
   });
 

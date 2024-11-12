@@ -8,6 +8,7 @@ import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
@@ -66,6 +67,7 @@ export interface InvestigateAppStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   uiActions: UiActionsStart;
   security: SecurityPluginStart;
+  charts: ChartsPluginStart;
 }
 
 export interface InvestigateAppPublicSetup {}

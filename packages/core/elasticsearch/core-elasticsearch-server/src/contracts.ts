@@ -81,7 +81,7 @@ export interface ElasticsearchServiceSetup {
   setUnauthorizedErrorHandler: (handler: UnauthorizedErrorHandler) => void;
 
   /**
-   * @deprecated
+   * @deprecated Can be removed when https://github.com/elastic/kibana/issues/119862 is done.
    */
   legacy: {
     /**

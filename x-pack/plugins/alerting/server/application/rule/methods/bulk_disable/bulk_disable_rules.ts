@@ -33,7 +33,6 @@ import type {
   BulkDisableRulesResult,
   BulkDisableRulesRequestBody,
 } from './types';
-import type { RuleAttributes } from '../../../../data/rule/types';
 import { validateBulkDisableRulesBody } from './validation';
 import { ruleDomainSchema } from '../../schemas';
 import type { RulesClientContext } from '../../../../rules_client/types';
@@ -96,7 +95,7 @@ export const bulkDisableRules = async <Params extends RuleParams>(
     // when we are doing the bulk disable and this should fix itself
     const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
     const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
-      attributes as RuleAttributes,
+      attributes as RawRule,
       {
         id,
         logger: context.logger,
@@ -139,17 +138,15 @@ const bulkDisableRulesWithOCC = async (
       type: 'rules',
     },
     () =>
-      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
-        {
-          filter,
-          type: RULE_SAVED_OBJECT_TYPE,
-          perPage: 100,
-          ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
-        }
-      )
+      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
+        filter,
+        type: RULE_SAVED_OBJECT_TYPE,
+        perPage: 100,
+        ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
+      })
   );
 
-  const rulesToDisable: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
+  const rulesToDisable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
   const username = await context.getUserName();
@@ -204,7 +201,7 @@ const bulkDisableRulesWithOCC = async (
               // TODO (http-versioning) Remove casts when updateMeta has been converted
               attributes: {
                 ...updatedAttributes,
-              } as RuleAttributes,
+              } as RawRule,
               ...(migratedActions.hasLegacyActions
                 ? { references: migratedActions.resultedReferences }
                 : {}),
@@ -252,9 +249,7 @@ const bulkDisableRulesWithOCC = async (
     () =>
       bulkDisableRulesSo({
         savedObjectsClient: context.unsecuredSavedObjectsClient,
-        bulkDisableRuleAttributes: rulesToDisable as Array<
-          SavedObjectsBulkCreateObject<RuleAttributes>
-        >,
+        bulkDisableRuleAttributes: rulesToDisable as Array<SavedObjectsBulkCreateObject<RawRule>>,
         savedObjectsBulkCreateOptions: { overwrite: true },
       })
   );
@@ -262,7 +257,7 @@ const bulkDisableRulesWithOCC = async (
   const taskIdsToDisable: string[] = [];
   const taskIdsToDelete: string[] = [];
   const taskIdsToClearState: string[] = [];
-  const disabledRules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
+  const disabledRules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
 
   result.saved_objects.forEach((rule) => {
     if (rule.error === undefined) {
@@ -294,8 +289,7 @@ const bulkDisableRulesWithOCC = async (
 
   return {
     errors,
-    // TODO: delete the casting when we do versioning of bulk disable api
-    rules: disabledRules as Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
+    rules: disabledRules,
     accListSpecificForBulkOperation: [taskIdsToDisable, taskIdsToDelete, taskIdsToClearState],
   };
 };

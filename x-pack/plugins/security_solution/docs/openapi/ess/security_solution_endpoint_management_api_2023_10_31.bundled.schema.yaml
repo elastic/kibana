@@ -438,6 +438,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/metadata/transforms:
     get:
+      deprecated: true
       operationId: GetEndpointMetadataTransform
       responses:
         '200':
@@ -545,6 +546,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/suggestions/{suggestion_type}:
     post:
+      deprecated: true
       operationId: GetEndpointSuggestions
       parameters:
         - in: path

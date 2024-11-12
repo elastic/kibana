@@ -42,12 +42,11 @@ import {
   ActionsClientChatVertexAI,
   ActionsClientGeminiChatModel,
   ActionsClientLlm,
-  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
-
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
-import { AttackDiscoveryDataClient } from './ai_assistant_data_clients/attack_discovery';
+import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
@@ -231,8 +230,7 @@ export type AssistantToolLlm =
   | ActionsClientBedrockChatModel
   | ActionsClientChatOpenAI
   | ActionsClientGeminiChatModel
-  | ActionsClientChatVertexAI
-  | ActionsClientSimpleChatModel;
+  | ActionsClientChatVertexAI;
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
@@ -244,8 +242,8 @@ export interface AssistantToolParams {
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
   llm?: ActionsClientLlm | AssistantToolLlm;
+  isOssModel?: boolean;
   logger: Logger;
-  modelExists: boolean;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements?: Replacements;
   request: KibanaRequest<
@@ -254,4 +252,5 @@ export interface AssistantToolParams {
     ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
   >;
   size?: number;
+  telemetry?: AnalyticsServiceSetup;
 }

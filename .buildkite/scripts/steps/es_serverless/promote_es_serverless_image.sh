@@ -69,3 +69,14 @@ cat << EOT | buildkite-agent annotate --style "success"
   <br/>Kibana commit: <a href="https://github.com/elastic/kibana/commit/$BUILDKITE_COMMIT">$BUILDKITE_COMMIT</a>
   <br/>Elasticsearch commit: <a href="https://github.com/elastic/elasticsearch/commit/$ELASTIC_COMMIT_HASH">$ELASTIC_COMMIT_HASH</a>
 EOT
+
+cat << EOF | buildkite-agent pipeline upload
+steps:
+  - label: "Builds Kibana VM images for cache update"
+    trigger: kibana-vm-images
+    async: true
+    build:
+      env:
+        IMAGES_CONFIG: "kibana/images.yml"
+        RETRY: "1"
+EOF

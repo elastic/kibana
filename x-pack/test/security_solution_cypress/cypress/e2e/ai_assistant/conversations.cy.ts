@@ -19,10 +19,10 @@ import {
   createNewChat,
   selectConversation,
   assertMessageSent,
+  assertConversationTitle,
   typeAndSendMessage,
   assertErrorResponse,
   selectRule,
-  assertErrorToastShown,
   updateConversationTitle,
 } from '../../tasks/assistant';
 import { deleteConversations } from '../../tasks/api_calls/assistant';
@@ -145,25 +145,16 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       assertConnectorSelected(bedrockConnectorAPIPayload.name);
       assertMessageSent('goodbye');
     });
-    // This test is flakey due to the issue linked below and will be skipped until it is fixed
-    it.skip('Only allows one conversation called "New chat" at a time', () => {
+    it('Correctly creates and titles new conversations, and allows title updates', () => {
       visitGetStartedPage();
       openAssistant();
       createNewChat();
       assertNewConversation(false, 'New chat');
       assertConnectorSelected(azureConnectorAPIPayload.name);
       typeAndSendMessage('hello');
-      // TODO fix bug with new chat and error message
-      // https://github.com/elastic/kibana/issues/191025
-      // assertMessageSent('hello');
-      assertErrorResponse();
-      selectConversation('Welcome');
-      createNewChat();
-      assertErrorToastShown('Error creating conversation with title New chat');
-      selectConversation('New chat');
-      updateConversationTitle('My other chat');
-      createNewChat();
-      assertNewConversation(false, 'New chat');
+      assertMessageSent('hello');
+      assertConversationTitle('Unexpected API Error:  - Connection error.');
+      updateConversationTitle('Something else');
     });
   });
 });

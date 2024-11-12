@@ -23,5 +23,6 @@
     "@kbn/saved-search-plugin",
     "@kbn/data-views-plugin",
     "@kbn/ml-is-populated-object",
+    "@kbn/aiops-common",
   ]
 }

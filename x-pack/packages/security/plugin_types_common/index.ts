@@ -18,6 +18,8 @@ export type {
   RoleRemoteIndexPrivilege,
   RoleRemoteClusterPrivilege,
   FeaturesPrivileges,
+  RawKibanaFeaturePrivileges,
+  RawKibanaPrivileges,
 } from './src/authorization';
 export type { SecurityLicense, SecurityLicenseFeatures, LoginLayout } from './src/licensing';
 export type {

@@ -52,6 +52,7 @@ export class FieldsMetadataPlugin
 
     return {
       registerIntegrationFieldsExtractor: fieldsMetadata.registerIntegrationFieldsExtractor,
+      registerIntegrationListExtractor: fieldsMetadata.registerIntegrationListExtractor,
     };
   }
 

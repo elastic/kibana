@@ -18,13 +18,15 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiPanel,
+  EuiHorizontalRule,
+  EuiFlexGrid,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { HostOverview } from '../../../../overview/components/host_overview';
@@ -51,6 +53,9 @@ import {
   HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID,
   HOST_DETAILS_RELATED_USERS_LINK_TEST_ID,
   HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID,
+  HOST_DETAILS_ALERT_COUNT_TEST_ID,
+  HOST_DETAILS_MISCONFIGURATIONS_TEST_ID,
+  HOST_DETAILS_VULNERABILITIES_TEST_ID,
 } from './test_ids';
 import {
   USER_NAME_FIELD_NAME,
@@ -63,6 +68,10 @@ import { PreviewLink } from '../../../shared/components/preview_link';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
+import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
+import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
+import { AlertCountInsight } from '../../shared/components/alert_count_insight';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -126,7 +135,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         banner: HOST_PREVIEW_BANNER,
       },
     });
-    telemetry.reportDetailsFlyoutOpened({
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: scopeId,
       panel: 'preview',
     });
@@ -337,6 +346,30 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
           )}
         </AnomalyTableProvider>
         <EuiSpacer size="s" />
+
+        <EuiHorizontalRule margin="s" />
+        <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
+          <AlertCountInsight
+            fieldName={'host.name'}
+            name={hostName}
+            direction="column"
+            data-test-subj={HOST_DETAILS_ALERT_COUNT_TEST_ID}
+          />
+          <MisconfigurationsInsight
+            fieldName={'host.name'}
+            name={hostName}
+            direction="column"
+            data-test-subj={HOST_DETAILS_MISCONFIGURATIONS_TEST_ID}
+            telemetrySuffix={'host-details'}
+          />
+          <VulnerabilitiesInsight
+            hostName={hostName}
+            direction="column"
+            data-test-subj={HOST_DETAILS_VULNERABILITIES_TEST_ID}
+            telemetrySuffix={'host-details'}
+          />
+        </EuiFlexGrid>
+        <EuiSpacer size="l" />
         <EuiPanel hasBorder={true}>
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>

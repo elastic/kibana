@@ -13,10 +13,10 @@ import { DELETE_NOTE_BUTTON_TEST_ID } from './test_ids';
 import type { State } from '../../common/store';
 import type { Note } from '../../../common/api/timeline';
 import {
-  deleteNotes,
   ReqStatus,
   selectDeleteNotesError,
   selectDeleteNotesStatus,
+  userSelectedNotesForDeletion,
 } from '../store/notes.slice';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 
@@ -42,7 +42,8 @@ export interface DeleteNoteButtonIconProps {
 }
 
 /**
- * Renders a button to delete a note
+ * Renders a button to delete a note.
+ * This button works in combination with the DeleteConfirmModal.
  */
 export const DeleteNoteButtonIcon = memo(({ note, index }: DeleteNoteButtonIconProps) => {
   const dispatch = useDispatch();
@@ -54,8 +55,8 @@ export const DeleteNoteButtonIcon = memo(({ note, index }: DeleteNoteButtonIconP
 
   const deleteNoteFc = useCallback(
     (noteId: string) => {
+      dispatch(userSelectedNotesForDeletion(noteId));
       setDeletingNoteId(noteId);
-      dispatch(deleteNotes({ ids: [noteId] }));
     },
     [dispatch]
   );

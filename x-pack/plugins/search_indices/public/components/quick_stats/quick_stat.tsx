@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiTitle,
   EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -69,7 +70,7 @@ export const QuickStat: React.FC<BaseQuickStatProps> = ({
           marginRight: euiTheme.size.s,
         },
         '.euiAccordion__triggerWrapper': {
-          background: euiTheme.colors.ghost,
+          background: euiTheme.colors.emptyShade,
         },
         '.euiAccordion__children': {
           borderTop: euiTheme.border.thin,
@@ -83,12 +84,14 @@ export const QuickStat: React.FC<BaseQuickStatProps> = ({
               <EuiIcon type={icon} color={iconColor} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText>
+              <EuiTitle size="xxs">
                 <h4>{title}</h4>
-              </EuiText>
+              </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText color="subdued">{secondaryTitle}</EuiText>
+              <EuiText size="s" color="subdued">
+                {secondaryTitle}
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

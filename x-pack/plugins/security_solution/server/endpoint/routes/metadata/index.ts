@@ -23,6 +23,7 @@ import type { SecuritySolutionPluginRouter } from '../../../types';
 import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
+  METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
   METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
@@ -53,7 +54,12 @@ export function registerEndpointRoutes(
     .get({
       access: 'public',
       path: HOST_METADATA_LIST_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -93,11 +99,41 @@ export function registerEndpointRoutes(
     .get({
       access: 'public',
       path: METADATA_TRANSFORMS_STATUS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
+      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
+      deprecated: true,
     })
     .addVersion(
       {
         version: '2023-10-31',
+        validate: false,
+      },
+      withEndpointAuthz(
+        { all: ['canReadSecuritySolution'] },
+        logger,
+        getMetadataTransformStatsHandler(endpointAppContext, logger)
+      )
+    );
+
+  router.versioned
+    .get({
+      access: 'internal',
+      path: METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
+    })
+    .addVersion(
+      {
+        version: '1',
         validate: false,
       },
       withEndpointAuthz(

@@ -14,6 +14,8 @@ import {
   Datatable,
   ExpressionValueRender,
   ExpressionValueBoxed,
+  DefaultInspectorAdapters,
+  ExecutionContext,
 } from '@kbn/expressions-plugin/common';
 import {
   PARTITION_LABELS_VALUE,
@@ -66,28 +68,32 @@ export type PieVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof PIE_VIS_EXPRESSION_NAME,
   Datatable,
   PieVisConfig,
-  ExpressionValueRender<PartitionChartProps>
+  ExpressionValueRender<PartitionChartProps>,
+  ExecutionContext<DefaultInspectorAdapters>
 >;
 
 export type TreemapVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof TREEMAP_VIS_EXPRESSION_NAME,
   Datatable,
   TreemapVisConfig,
-  ExpressionValueRender<PartitionChartProps>
+  ExpressionValueRender<PartitionChartProps>,
+  ExecutionContext<DefaultInspectorAdapters>
 >;
 
 export type MosaicVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof MOSAIC_VIS_EXPRESSION_NAME,
   Datatable,
   MosaicVisConfig,
-  ExpressionValueRender<PartitionChartProps>
+  ExpressionValueRender<PartitionChartProps>,
+  ExecutionContext<DefaultInspectorAdapters>
 >;
 
 export type WaffleVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof WAFFLE_VIS_EXPRESSION_NAME,
   Datatable,
   WaffleVisConfig,
-  ExpressionValueRender<PartitionChartProps>
+  ExpressionValueRender<PartitionChartProps>,
+  ExecutionContext<DefaultInspectorAdapters>
 >;
 
 export enum ChartTypes {

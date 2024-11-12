@@ -7,10 +7,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { fieldSupportsBreakdown } from '@kbn/unified-histogram-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { fieldSupportsBreakdown } from '@kbn/field-utils';
 import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
 import { useCreateDataView } from './use_create_dataview';
 import { useKibanaContextForPlugin } from '../utils';
@@ -194,16 +194,20 @@ export const useDegradedDocsChart = () => {
 
   const extraActions: Action[] = [getOpenInLensAction, getOpenInLogsExplorerAction];
 
-  return {
-    attributes,
-    dataView,
-    breakdown: {
+  const breakdown = useMemo(() => {
+    return {
       dataViewField: breakdownDataViewField,
       fieldSupportsBreakdown: breakdownDataViewField
         ? fieldSupportsBreakdown(breakdownDataViewField)
         : true,
       onChange: handleBreakdownFieldChange,
-    },
+    };
+  }, [breakdownDataViewField, handleBreakdownFieldChange]);
+
+  return {
+    attributes,
+    dataView,
+    breakdown,
     extraActions,
     isChartLoading,
     onChartLoading: handleChartLoading,

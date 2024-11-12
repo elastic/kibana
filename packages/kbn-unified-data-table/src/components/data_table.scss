@@ -40,14 +40,6 @@
     background: transparent;
   }
 
-  .euiDataGridHeaderCell {
-    align-items: start;
-
-    .euiPopover[class*='euiDataGridHeaderCell__popover'] {
-      align-self: center;
-    }
-  }
-
   .euiDataGrid--bordersHorizontal .euiDataGridHeader {
     border-top: none;
   }
@@ -83,7 +75,6 @@
   }
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='colorIndicator'] .euiDataGridRowCell__content {
     height: 100%;
-    padding: 0;
     border-bottom: 0;
   }
 
@@ -99,6 +90,20 @@
   .euiDataGridRowCell__content--lineCountHeight,
   .euiDataGridHeaderCell__content {
     white-space: pre-wrap;
+  }
+}
+
+// Custom styles for data grid header cell.
+// It can also be inside a portal (outside of `unifiedDataTable__inner`) when dragged.
+.unifiedDataTable__headerCell {
+  align-items: start;
+
+  .euiDataGridHeaderCell__draggableIcon {
+    padding-block: calc($euiSizeXS / 2); // to align with a token height
+  }
+
+  .euiDataGridHeaderCell__button {
+    margin-block: -$euiSizeXS; // to override Eui value for Density "Expanded"
   }
 }
 
