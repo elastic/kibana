@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiLink, EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
+import { useBoolean } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 const POPOVER_WIDTH = 320;
 
 /**
  * Icon and popover that gives hint to users how suppression for missing fields work
  */
-const SuppressionInfoIconComponent = () => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+export function SuppressionInfoIcon(): JSX.Element {
+  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
   const { docLinks } = useKibana().services;
-
-  const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
-  const closePopover = () => setIsPopoverOpen(false);
 
   const button = (
     <EuiButtonIcon
       iconType="questionInCircle"
-      onClick={onButtonClick}
+      onClick={togglePopover}
       aria-label="Open help popover"
     />
   );
@@ -59,8 +56,4 @@ const SuppressionInfoIconComponent = () => {
       </EuiText>
     </EuiPopover>
   );
-};
-
-export const SuppressionInfoIcon = React.memo(SuppressionInfoIconComponent);
-
-SuppressionInfoIcon.displayName = 'SuppressionInfoIcon';
+}
