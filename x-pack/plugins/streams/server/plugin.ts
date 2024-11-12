@@ -8,7 +8,6 @@
 import {
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   KibanaRequest,
   Logger,
   Plugin,
@@ -58,16 +57,6 @@ export class StreamsPlugin
       config: this.config,
       logger: this.logger,
     } as StreamsServer;
-
-    plugins.features.registerKibanaFeature({
-      id: 'streams',
-      name: 'Streams',
-      order: 1500,
-      app: ['streams', 'kibana'],
-      catalogue: ['streams', 'observability'],
-      category: DEFAULT_APP_CATEGORIES.observability,
-      privileges: null,
-    });
 
     registerRoutes<RouteDependencies>({
       repository: StreamsRouteRepository,
