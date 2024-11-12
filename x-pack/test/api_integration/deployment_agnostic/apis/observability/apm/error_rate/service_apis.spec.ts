@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { mean, meanBy, sumBy } from 'lodash';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
@@ -12,12 +13,16 @@ import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+const GO_PROD_LIST_RATE = 75;
+const GO_PROD_LIST_ERROR_RATE = 25;
+const GO_PROD_ID_RATE = 50;
+const GO_PROD_ID_ERROR_RATE = 50;
+
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -151,13 +156,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let errorRateMetricValues: Awaited<ReturnType<typeof getErrorRateValues>>;
   let errorTransactionValues: Awaited<ReturnType<typeof getErrorRateValues>>;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177321
-  registry.when('Services APIs', { config: 'basic', archives: [] }, () => {
+  describe('Services APIs', () => {
     describe('when data is loaded ', () => {
-      const GO_PROD_LIST_RATE = 75;
-      const GO_PROD_LIST_ERROR_RATE = 25;
-      const GO_PROD_ID_RATE = 50;
-      const GO_PROD_ID_ERROR_RATE = 50;
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       before(async () => {
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
@@ -165,6 +167,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const transactionNameProductList = 'GET /api/product/list';
         const transactionNameProductId = 'GET /api/product/:id';
+
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
         await apmSynthtraceEsClient.index([
           timerange(start, end)
