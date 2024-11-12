@@ -1423,10 +1423,77 @@ x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
 x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor tests migration
 
 # Core
-/test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
-/test/plugin_functional/plugins/session_notifications @elastic/kibana-core
+/x-pack/test/functional/page_objects/navigational_search.ts @elastic/kibana-core
+/x-pack/test/stack_functional_integration/apps/savedobjects_upgrade_testing @elastic/kibana-core
+/x-pack/test/functional/page_objects/status_page.ts @elastic/kibana-core
+/x-pack/test/functional/page_objects/share_saved_objects_to_space_page.ts @elastic/kibana-core
+/x-pack/test/functional/page_objects/banners_page.ts @elastic/kibana-core
+/x-pack/test/common/lib/test_data_loader.ts @elastic/kibana-core
+/x-pack/test/api_integration/services/usage_api.ts @elastic/kibana-core
+/x-pack/test/api_integration/apis/kibana @elastic/kibana-core
+/test/api_integration/fixtures/import.ndjson @elastic/kibana-core
+/x-pack/test/plugin_api_integration @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/146704
+/x-pack/test/localization/ @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/146704
+/test/ui_capabilities/newsfeed_err @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/66562
+/test/server_integration/services/types.d.ts @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/81140
+/test/server_integration/http @elastic/kibana-core
+/test/scripts/run_multiple_kibana_nodes.sh @elastic/kibana-core
+/test/plugin_functional/test_suites/application_links @elastic/kibana-core
+/test/interpreter_functional/test_suites/run_pipeline @elastic/kibana-core
+/test/functional/services/usage_collection.ts @elastic/kibana-core
+/test/functional/services/saved_objects_finder.ts @elastic/kibana-core
+/test/api_integration/fixtures/import_managed* @elastic/kibana-core
+/test/functional/services/apps_menu.ts @elastic/kibana-core
+/x-pack/test/functional/apps/status_page @elastic/kibana-core
+/x-pack/test/cloud_integration @elastic/kibana-core
 /x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
-/x-pack/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
+/test/server_integration/plugins/status_plugin_* @elastic/kibana-core
+/x-pack/test/functional_cors @elastic/kibana-core
+/x-pack/test/stack_functional_integration/apps/telemetry @elastic/kibana-core
+/test/plugin_functional/test_suites/telemetry @elastic/kibana-core
+/test/plugin_functional/test_suites/usage_collection @elastic/kibana-core
+/test/plugin_functional/test_suites/saved_objects* @elastic/kibana-core
+/test/plugin_functional/test_suites/core* @elastic/kibana-core
+/test/plugin_functional/plugins/telemetry @elastic/kibana-core
+/test/plugin_functional/plugins/session_notifications @elastic/kibana-core
+/test/plugin_functional/plugins/kbn_top_nav/ @elastic/kibana-core
+/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
+/test/plugin_functional/plugins/app_link_test @elastic/kibana-core
+/x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
+/test/plugin_functional/plugins/saved_object* @elastic/kibana-core
+/test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
+/test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
+/x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management @elastic/kibana-core
+/x-pack/test/functional_embedded @elastic/kibana-core
+/test/plugin_functional/plugins/core* @elastic/kibana-core
+/test/node_roles_functional @elastic/kibana-core
+/test/functional/page_objects/newsfeed_page.ts @elastic/kibana-core # assigned per https://github.com/elastic/kibana/pull/160210
+/test/functional/page_objects/home_page.ts @elastic/kibana-core
+/test/functional/fixtures/es_archiver/deprecations_service @elastic/kibana-core
+/test/health_gateway/**/* @elastic/kibana-core
+/test/api_integration/apis/saved_objects* @elastic/kibana-core
+/test/functional/apps/home @elastic/kibana-core
+/test/health_gateway @elastic/kibana-core
+/test/node_roles_functional @elastic/kibana-core
+/test/plugin_functional/plugins/app_link_test @elastic/kibana-core
+/test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
+/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
+/test/functional/firefox/home.config.ts @elastic/kibana-core
+/test/functional/apps/status_page/*.ts @elastic/kibana-core
+/test/functional/apps/home @elastic/kibana-core
+/test/functional/apps/bundles @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/64367
+/test/examples/hello_world @elastic/kibana-core
+/test/examples/routing/index.ts @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/69581
+/test/common/plugins/newsfeed @elastic/kibana-core
+/test/common/configure_http2.ts @elastic/kibana-core
+/test/api_integration/apis/ui_counters @elastic/kibana-core
+/test/api_integration/apis/telemetry/**/*.[j|t]s @elastic/kibana-core
+/test/api_integration/apis/status @elastic/kibana-core
+/test/api_integration/apis/stats @elastic/kibana-core # Assigned per: https://github.com/elastic/kibana/pull/20577
+/test/api_integration/apis/saved_objects* @elastic/kibana-core
+/test/api_integration/apis/home/*.ts @elastic/kibana-core
+/test/api_integration/apis/core/*.ts @elastic/kibana-core
+/test/accessibility/apps/home.ts @elastic/kibana-core
 /x-pack/test/functional/apps/saved_objects_management @elastic/kibana-core
 /x-pack/test/usage_collection @elastic/kibana-core
 /x-pack/test/licensing_plugin @elastic/kibana-core
