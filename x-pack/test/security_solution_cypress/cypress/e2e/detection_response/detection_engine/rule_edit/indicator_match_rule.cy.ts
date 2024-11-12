@@ -15,7 +15,8 @@ import {
 } from '../../../../screens/rule_details';
 
 import {
-  ALERT_SUPPRESSION_DURATION_INPUT,
+  ALERT_SUPPRESSION_DURATION_UNIT_INPUT,
+  ALERT_SUPPRESSION_DURATION_VALUE_INPUT,
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
 } from '../../../../screens/create_new_rule';
@@ -112,12 +113,10 @@ describe(
         goToRuleEditSettings();
 
         // check saved suppression settings
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
-          .eq(0)
+        cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT)
           .should('be.enabled')
           .should('have.value', 360);
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
-          .eq(1)
+        cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT)
           .should('be.enabled')
           .should('have.value', 's');
 
