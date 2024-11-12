@@ -41,7 +41,7 @@ export const deprecationBadgeGuideline = i18n.translate(
   'xpack.observabilityLogsExplorer.deprecationBadgeGuideline',
   {
     defaultMessage:
-      'If you still need access to Logs Stream, you can temporarily re-enable it in Advanced Settings.',
+      'You can temporarily access Logs Stream by re-enabling it in Advanced Settings.',
   }
 );
 
