@@ -12,14 +12,6 @@ import moment from 'moment';
 
 export const AI_ASSISTANT_KB_INFERENCE_ID = 'ai_assistant_kb_inference';
 
-export interface CreateInferenceEndpointResponse {
-  inference_id: string;
-  task_type: string;
-  service: string;
-  service_settings: { num_allocations: number; num_threads: number; model_id: string };
-  chunking_settings: { strategy: string; max_chunk_size: number; sentence_overlap: number };
-}
-
 export async function createInferenceEndpoint({
   esClient,
   logger,

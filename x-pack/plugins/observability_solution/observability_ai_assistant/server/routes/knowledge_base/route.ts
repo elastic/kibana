@@ -10,15 +10,13 @@ import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import {
+  InferenceInferenceEndpointInfo,
   MlDeploymentAllocationState,
   MlDeploymentState,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import {
-  CreateInferenceEndpointResponse,
-  InferenceEndpointResponse,
-} from '../../service/inference_endpoint';
+import { InferenceEndpointResponse } from '../../service/inference_endpoint';
 import { Instruction, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
@@ -63,7 +61,7 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
       idleSocket: moment.duration(20, 'minutes').asMilliseconds(),
     },
   },
-  handler: async (resources): Promise<CreateInferenceEndpointResponse> => {
+  handler: async (resources): Promise<InferenceInferenceEndpointInfo> => {
     const client = await resources.service.getClient({ request: resources.request });
 
     if (!client) {
