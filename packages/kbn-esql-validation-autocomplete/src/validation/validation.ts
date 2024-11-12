@@ -80,7 +80,11 @@ import {
 } from './resources';
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
 import { getParamAtPosition } from '../shared/helpers';
-import { METADATA_FIELDS } from '../shared/constants';
+import {
+  METADATA_FIELDS,
+  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
+  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
+} from '../shared/constants';
 import { compareTypesWithLiterals } from '../shared/esql_types';
 
 const NO_MESSAGE: ESQLMessage[] = [];
@@ -325,14 +329,14 @@ function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
 function validateIfHasUnsupportedCommandPrior(
   fn: ESQLFunction,
   parentAst: ESQLCommand[] = [],
-  unsupportedCommands: string[],
+  unsupportedCommands: Set<string>,
   currentCommandIndex?: number
 ) {
   if (currentCommandIndex === undefined) {
     return NO_MESSAGE;
   }
   const unsupportedCommandsPrior = parentAst.filter(
-    (cmd, idx) => idx <= currentCommandIndex && unsupportedCommands.includes(cmd.name)
+    (cmd, idx) => idx <= currentCommandIndex && unsupportedCommands.has(cmd.name)
   );
 
   if (unsupportedCommandsPrior.length > 0) {
@@ -370,7 +374,12 @@ const validateMatchFunction: FunctionValidator = ({
         }),
       ];
     }
-    return validateIfHasUnsupportedCommandPrior(fn, parentAst, ['limit'], currentCommandIndex);
+    return validateIfHasUnsupportedCommandPrior(
+      fn,
+      parentAst,
+      UNSUPPORTED_COMMANDS_BEFORE_MATCH,
+      currentCommandIndex
+    );
   }
   return NO_MESSAGE;
 };
@@ -400,19 +409,7 @@ const validateQSTRFunction: FunctionValidator = ({
     return validateIfHasUnsupportedCommandPrior(
       fn,
       parentAst,
-      [
-        'show',
-        'row',
-        'dissect',
-        'enrich',
-        'eval',
-        'grok',
-        'keep',
-        'mv_expand',
-        'rename',
-        'stats',
-        'limit',
-      ],
+      UNSUPPORTED_COMMANDS_BEFORE_QSTR,
       currentCommandIndex
     );
   }

@@ -28,6 +28,10 @@ import {
 import { getOverlapRange, getSuggestionsToRightOfOperatorExpression } from '../../helper';
 import { getPosition } from './util';
 import { pipeCompleteItem } from '../../complete_items';
+import {
+  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
+  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
+} from '../../../shared/constants';
 
 export async function suggest(
   innerText: string,
@@ -159,26 +163,10 @@ export async function suggest(
       // Don't suggest MATCH or QSTR after unsupported commands
       const priorCommands = fullTextAst?.map((a) => a.name) ?? [];
       const ignored = [];
-      if (priorCommands.includes('limit')) {
+      if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_MATCH.has(c))) {
         ignored.push('match');
       }
-      if (
-        priorCommands.some((c) =>
-          [
-            'show',
-            'row',
-            'dissect',
-            'enrich',
-            'eval',
-            'grok',
-            'keep',
-            'mv_expand',
-            'rename',
-            'stats',
-            'limit',
-          ].includes(c)
-        )
-      ) {
+      if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_QSTR.has(c))) {
         ignored.push('qstr');
       }
 
