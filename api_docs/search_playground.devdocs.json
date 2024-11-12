@@ -4,7 +4,20 @@
     "classes": [],
     "functions": [],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-public.PlaygroundPageMode",
+        "type": "Enum",
+        "tags": [],
+        "label": "PlaygroundPageMode",
+        "description": [],
+        "path": "x-pack/plugins/search_playground/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [],
     "objects": [],
     "setup": {
