@@ -1480,6 +1480,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 
 # Kibana Platform Security
 # security
+/x-pack/test/functional/es_archives/rule_exceptions @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/199797#discussion_r1838166357
 /x-pack/test_serverless/functional/test_suites/observability/role_management @elastic/kibana-security
 /x-pack/test/functional/config_security_basic.ts @elastic/kibana-security
 /x-pack/test/functional/page_objects/user_profile_page.ts @elastic/kibana-security
