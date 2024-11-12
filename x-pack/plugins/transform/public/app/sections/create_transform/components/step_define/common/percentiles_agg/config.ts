@@ -18,7 +18,9 @@ function validatePercentsInput(config: Partial<PercentilesAggConfig>): Validatio
   const allValues = [...(config.percents ?? [])];
   // Combine existing percents with pending input for validation
   if (config.pendingPercentileInput) {
-    const pendingValue = Number(config.pendingPercentileInput);
+    // Replace comma with dot before converting to number
+    const normalizedInput = config.pendingPercentileInput.replace(',', '.');
+    const pendingValue = Number(normalizedInput);
     allValues.push(pendingValue);
   }
 

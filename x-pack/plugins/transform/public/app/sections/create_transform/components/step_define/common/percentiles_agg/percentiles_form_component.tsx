@@ -41,7 +41,7 @@ export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent']
     isCreatingOption.current = true;
 
     const newOption = {
-      label: inputValue,
+      label: Number(inputValue.replace(',', '.')).toString(),
     };
     const updatedOptions = [...selectedOptions, newOption];
     setSelectedOptions(updatedOptions);
