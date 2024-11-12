@@ -22,7 +22,7 @@ const pageConfigurations = {
     dismissalStorageKey: 'log_stream_deprecation_callout_dismissed',
     message: i18n.translate('xpack.infra.logsDeprecationCallout.stream.exploreWithDiscover', {
       defaultMessage:
-        'Discover now brings together the functionality of both Logs Stream and Logs Explorer, which are set to be deprecated. It makes viewing and inspecting your logs easier with more features, better performance, and more intuitive navigation. We recommend switching to Discover, as it will replace Logs Stream in a future version.',
+        'Logs Stream and Logs Explorer are set to be deprecated. Switch to Discover which now includes their functionality plus more features, better performance, and more intuitive navigation. ',
     }),
   },
   settings: {
