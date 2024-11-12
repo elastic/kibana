@@ -7,10 +7,12 @@
 
 import createContainer from 'constate';
 import { useSelector } from '@xstate/react';
+import { countBy } from 'lodash';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { useDatasetQualityTable } from '.';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { filterInactiveDatasets } from '../utils';
+import { QualityIndicators } from '../../common/types';
 
 const useSummaryPanel = () => {
   const { service } = useDatasetQualityContext();
@@ -23,9 +25,10 @@ const useSummaryPanel = () => {
     Datasets Quality
   */
 
-  const datasetsQuality = {
-    percentages: filteredItems.map((item) => item.degradedDocs.percentage),
-  };
+  const datasetsQuality = countBy(filteredItems.map((item) => item.quality)) as Record<
+    QualityIndicators,
+    number
+  >;
 
   const isDatasetsQualityLoading = useSelector(service, (state) =>
     state.matches('stats.degradedDocs.fetching')

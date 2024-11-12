@@ -60,6 +60,10 @@ export interface WithDegradedDocs {
   degradedDocStats: DataStreamDocsStat[];
 }
 
+export interface WithFailedDocs {
+  failedDocStats: DataStreamDocsStat[];
+}
+
 export interface WithNonAggregatableDatasets {
   nonAggregatableDatasets: string[];
 }
@@ -76,6 +80,7 @@ export type DefaultDatasetQualityControllerState = WithTableOptions &
   WithDataStreamStats &
   WithTotalDocs &
   WithDegradedDocs &
+  WithFailedDocs &
   WithDatasets &
   WithFilters &
   WithNonAggregatableDatasets &

@@ -22,6 +22,7 @@ import {
 
 type DatasetQualityESSearchParams = ESSearchRequest & {
   size: number;
+  failure_store?: 'only';
 };
 
 export type DatasetQualityESClient = ReturnType<typeof createDatasetQualityESClient>;

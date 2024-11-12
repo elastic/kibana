@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_DEGRADED_DOCS } from '../../common/constants';
+import { DEFAULT_QUALITY_DOC_STATS } from '../../common/constants';
 import { DataStreamDocsStat } from '../../common/api_types';
 import { DataStreamStatType } from '../../common/data_streams_stats/types';
 import { mapPercentageToQuality } from '../../common/utils';
@@ -13,9 +13,11 @@ import { Integration } from '../../common/data_streams_stats/integration';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { DictionaryType } from '../state_machines/dataset_quality_controller/src/types';
 import { flattenStats } from './flatten_stats';
+
 export function generateDatasets(
   dataStreamStats: DataStreamStatType[] = [],
   degradedDocStats: DataStreamDocsStat[] = [],
+  failedDocStats: DataStreamDocsStat[] = [],
   integrations: Integration[],
   totalDocsStats: DictionaryType<DataStreamDocsStat>
 ): DataStreamStat[] {
@@ -71,12 +73,40 @@ export function generateDatasets(
     {}
   );
 
+  const failedMap: Record<
+    DataStreamDocsStat['dataset'],
+    {
+      percentage: number;
+      count: DataStreamDocsStat['count'];
+    }
+  > = failedDocStats.reduce(
+    (failedMapAcc, { dataset, count }) =>
+      Object.assign(failedMapAcc, {
+        [dataset]: {
+          count,
+          percentage: DataStreamStat.calculatePercentage({
+            totalDocs: totalDocsMap[dataset] ? totalDocsMap[dataset] + count : 0,
+            count,
+          }),
+        },
+      }),
+    {}
+  );
+
   if (!dataStreamStats.length) {
-    // We want to pick up all datasets even when they don't have degraded docs
-    const dataStreams = [...new Set([...Object.keys(totalDocsMap), ...Object.keys(degradedMap)])];
+    // We want to pick up all datasets even when they don't have degraded docs or failed docs
+    const dataStreams = [
+      ...new Set([
+        ...Object.keys(totalDocsMap),
+        ...Object.keys(degradedMap),
+        ...Object.keys(failedMap),
+      ]),
+    ];
     return dataStreams.map((dataset) =>
-      DataStreamStat.fromDegradedDocStat({
-        degradedDocStat: { dataset, ...(degradedMap[dataset] || DEFAULT_DEGRADED_DOCS) },
+      DataStreamStat.fromQualityStats({
+        datasetName: dataset,
+        degradedDocStat: degradedMap[dataset] || DEFAULT_QUALITY_DOC_STATS,
+        failedDocStat: failedMap[dataset] || DEFAULT_QUALITY_DOC_STATS,
         datasetIntegrationMap,
         totalDocs: totalDocsMap[dataset] ?? 0,
       })
@@ -85,6 +115,10 @@ export function generateDatasets(
 
   return dataStreamStats?.map((dataStream) => {
     const dataset = DataStreamStat.create(dataStream);
+    const qualityStats = [
+      (degradedMap[dataset.rawName] || dataset.degradedDocs).percentage,
+      (failedMap[dataset.rawName] || dataset.failedDocs).percentage,
+    ];
 
     return {
       ...dataset,
@@ -93,10 +127,9 @@ export function generateDatasets(
         datasetIntegrationMap[dataset.name]?.integration ??
         integrationsMap[dataStream.integration ?? ''],
       degradedDocs: degradedMap[dataset.rawName] || dataset.degradedDocs,
+      failedDocs: failedMap[dataset.rawName] || dataset.failedDocs,
       docsInTimeRange: totalDocsMap[dataset.rawName] ?? 0,
-      quality: mapPercentageToQuality(
-        (degradedMap[dataset.rawName] || dataset.degradedDocs).percentage
-      ),
+      quality: mapPercentageToQuality(qualityStats),
     };
   });
 }

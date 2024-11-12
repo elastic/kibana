@@ -84,5 +84,11 @@ describe('dataset_name', () => {
         extractIndexNameFromBackingIndex('.ds-metrics-apm.app.adservice-default-2024.04.29-000001')
       ).toEqual('metrics-apm.app.adservice-default');
     });
+
+    it('returns the correct index name if backing index is a failure store index', () => {
+      expect(
+        extractIndexNameFromBackingIndex('.fs-logs-elastic_agent-default-2024.11.11-000001')
+      ).toEqual('logs-elastic_agent-default');
+    });
   });
 });

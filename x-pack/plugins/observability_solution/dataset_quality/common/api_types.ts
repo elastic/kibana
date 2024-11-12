@@ -56,6 +56,12 @@ export const getDataStreamDegradedDocsResponseRt = rt.type({
 
 export type DataStreamDegradedDocsResponse = rt.TypeOf<typeof getDataStreamDegradedDocsResponseRt>;
 
+export const getDataStreamFailedDocsResponseRt = rt.type({
+  failedDocs: rt.array(dataStreamDocsStatRt),
+});
+
+export type DataStreamFailedDocsResponse = rt.TypeOf<typeof getDataStreamFailedDocsResponseRt>;
+
 export const integrationDashboardRT = rt.type({
   id: rt.string,
   title: rt.string,

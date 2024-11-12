@@ -38,6 +38,7 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
   },
   dataStreamStats: [],
   degradedDocStats: [],
+  failedDocStats: [],
   totalDocsStats: DEFAULT_DICTIONARY_TYPE,
   filters: {
     inactive: true,

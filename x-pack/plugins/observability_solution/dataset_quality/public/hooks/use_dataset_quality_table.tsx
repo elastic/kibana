@@ -25,6 +25,7 @@ const sortingOverrides: Partial<{
 }> = {
   ['title']: 'name',
   ['size']: DataStreamStat.calculateFilteredSize,
+  ['quality']: (item) => Math.max(item.degradedDocs.percentage, item.failedDocs.percentage),
 };
 
 export const useDatasetQualityTable = () => {

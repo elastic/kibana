@@ -9,6 +9,7 @@ import { HttpStart } from '@kbn/core/public';
 import {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
+  GetDataStreamsFailedDocsStatsQuery,
   GetDataStreamsStatsQuery,
   GetDataStreamsTotalDocsQuery,
   GetNonAggregatableDataStreamsParams,
@@ -30,6 +31,9 @@ export interface IDataStreamsStatsClient {
   getDataStreamsStats(params?: GetDataStreamsStatsQuery): Promise<DataStreamStatServiceResponse>;
   getDataStreamsDegradedStats(
     params?: GetDataStreamsDegradedDocsStatsQuery
+  ): Promise<DataStreamDocsStat[]>;
+  getDataStreamsFailedStats(
+    params?: GetDataStreamsFailedDocsStatsQuery
   ): Promise<DataStreamDocsStat[]>;
   getDataStreamsTotalDocs(params: GetDataStreamsTotalDocsQuery): Promise<DataStreamDocsStat[]>;
   getIntegrations(): Promise<Integration[]>;
