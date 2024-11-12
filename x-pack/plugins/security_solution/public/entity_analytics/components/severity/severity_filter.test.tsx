@@ -24,7 +24,7 @@ jest.mock('../../../common/lib/kibana', () => {
 
 describe('SeverityFilter', () => {
   beforeEach(() => {
-    mockedTelemetry.reportEntityRiskFiltered.mockClear();
+    mockedTelemetry.reportEvent.mockClear();
   });
 
   it('sends telemetry when selecting a classification', () => {
@@ -38,7 +38,7 @@ describe('SeverityFilter', () => {
 
     fireEvent.click(getByTestId('risk-filter-item-Unknown'));
 
-    expect(mockedTelemetry.reportEntityRiskFiltered).toHaveBeenCalledTimes(1);
+    expect(mockedTelemetry.reportEvent).toHaveBeenCalledTimes(1);
   });
 
   it('does not send telemetry when deselecting a classification', () => {
@@ -61,6 +61,6 @@ describe('SeverityFilter', () => {
     fireEvent.click(getByTestId('risk-filter-popoverButton'));
 
     fireEvent.click(getByTestId('risk-filter-item-Unknown'));
-    expect(mockedTelemetry.reportEntityRiskFiltered).toHaveBeenCalledTimes(0);
+    expect(mockedTelemetry.reportEvent).toHaveBeenCalledTimes(0);
   });
 });
