@@ -848,7 +848,7 @@ export const getSavedObjectTypes = (
             },
           ],
         },
-      }
+      },
     },
     [PACKAGES_SAVED_OBJECT_TYPE]: {
       name: PACKAGES_SAVED_OBJECT_TYPE,
