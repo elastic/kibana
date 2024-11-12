@@ -27,6 +27,5 @@
     "@kbn/zod",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/licensing-plugin",
-    "@kbn/features-plugin"
   ]
 }
