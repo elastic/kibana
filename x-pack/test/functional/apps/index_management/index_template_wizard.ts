@@ -168,11 +168,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Click Create template
       await pageObjects.indexManagement.clickNextButton();
 
-      await testSubjects.click('tab-preview');
-      // const templatePreview = await testSubjects.getVisibleText('simulateTemplatePreview');
-      // todo more here
+      // Click preview tab, we know its the last one
+      const tabs = await testSubjects.findAll('tab');
+      tabs[tabs.length - 1].click();
+      const templatePreview = await testSubjects.getVisibleText('simulateTemplatePreview');
+      expect(templatePreview).to.not.contain('error');
 
-      await testSubjects.click('closeDetailsButtonz');
+      await testSubjects.click('closeDetailsButton');
     });
 
     describe('Mappings step', () => {
