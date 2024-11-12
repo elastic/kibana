@@ -14,6 +14,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ALERT_RISK_SCORE,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type {
   AssetCriticalityRecord,
@@ -219,6 +220,8 @@ export const calculateRiskScores = async ({
   weights,
   alertSampleSizePerShard = 10_000,
   excludeAlertStatuses = [],
+  excludeAlertTags = [],
+  includeClosedAlerts = false,
 }: {
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
@@ -228,6 +231,10 @@ export const calculateRiskScores = async ({
     const now = new Date().toISOString();
     const scriptedMetricPainless = await getPainlessScripts();
     const filter = [filterFromRange(range), { exists: { field: ALERT_RISK_SCORE } }];
+    // Add a check if includeClosedAlerts is true then excludeAlertStatuses should not have closed status
+    // if (excludeAlertStatuses.includes('closed') && includeClosedAlerts) {
+    //   excludeAlertStatuses = excludeAlertStatuses.filter((status) => status !== 'closed');
+    // }
     if (excludeAlertStatuses.length > 0) {
       filter.push({
         bool: { must_not: { terms: { [ALERT_WORKFLOW_STATUS]: excludeAlertStatuses } } },
@@ -235,6 +242,24 @@ export const calculateRiskScores = async ({
     }
     if (!isEmpty(userFilter)) {
       filter.push(userFilter as QueryDslQueryContainer);
+    }
+    if (includeClosedAlerts) {
+      filter.push({
+        bool: {
+          filter: [
+            {
+              terms: {
+                [ALERT_WORKFLOW_STATUS]: [], // Assuming [] is the array of terms you want to match
+              },
+            },
+          ],
+        },
+      });
+    }
+    if (excludeAlertTags.length > 0) {
+      filter.push({
+        bool: { must_not: { terms: { [ALERT_WORKFLOW_TAGS]: excludeAlertTags } } },
+      });
     }
     const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];
     const request = {

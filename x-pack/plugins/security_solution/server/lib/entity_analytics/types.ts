@@ -74,6 +74,7 @@ export interface RiskEngineConfiguration {
   alertSampleSizePerShard?: number;
   excludeAlertStatuses?: string[];
   excludeAlertTags?: string[];
+  includeClosedAlerts?: boolean;
 }
 
 export interface CalculateScoresParams {
@@ -88,6 +89,8 @@ export interface CalculateScoresParams {
   weights?: RiskScoreWeights;
   alertSampleSizePerShard?: number;
   excludeAlertStatuses?: string[];
+  excludeAlertTags?: string[];
+  includeClosedAlerts?: boolean;
 }
 
 export interface CalculateAndPersistScoresParams {
@@ -103,4 +106,7 @@ export interface CalculateAndPersistScoresParams {
   alertSampleSizePerShard?: number;
   returnScores?: boolean;
   refresh?: 'wait_for';
+  excludeAlertStatuses?: string[];
+  excludeAlertTags?: string[];
+  includeClosedAlerts?: boolean;
 }

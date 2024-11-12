@@ -38,9 +38,7 @@ components:
         enabled:
           type: boolean
         filter:
-          type: object
-          additionalProperties: false
-          properties: {}
+          type: object 
         identifierType:
           type: string
         interval:
@@ -73,6 +71,8 @@ components:
               - 'Duplicate'
               - 'False Positive'
               - 'Futher investigation required'
+        includeClosedAlerts:
+          type: boolean
     
     ConfigureRiskEngineResponse:
       type: object

@@ -52,6 +52,8 @@ export const riskEngineInitRoute = (
           const riskEngineDataClient = securitySolution.getRiskEngineDataClient();
           const riskScoreDataClient = securitySolution.getRiskScoreDataClient();
           const spaceId = securitySolution.getSpaceId();
+          const range = { start: 'now-30m', end: 'now' };
+          const includeClosedAlerts = false;
 
           try {
             if (!taskManager) {
@@ -65,6 +67,8 @@ export const riskEngineInitRoute = (
               taskManager,
               namespace: spaceId,
               riskScoreDataClient,
+              range,
+              includeClosedAlerts,
             });
 
             const result: InitRiskEngineResult = {

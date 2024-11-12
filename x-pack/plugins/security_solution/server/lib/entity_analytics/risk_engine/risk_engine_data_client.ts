@@ -9,7 +9,7 @@ import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@k
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics';
-import type { InitRiskEngineResult } from '../../../../common/entity_analytics/risk_engine';
+import type { InitRiskEngineResult, Range } from '../../../../common/entity_analytics/risk_engine';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { removeLegacyTransforms, getLegacyTransforms } from '../utils/transforms';
 import {
@@ -29,6 +29,8 @@ interface InitOpts {
   namespace: string;
   taskManager: TaskManagerStartContract;
   riskScoreDataClient: RiskScoreDataClient;
+  range: Range;
+  includeClosedAlerts: boolean;
 }
 
 interface TearDownParams {
@@ -48,7 +50,13 @@ interface RiskEngineDataClientOpts {
 export class RiskEngineDataClient {
   constructor(private readonly options: RiskEngineDataClientOpts) {}
 
-  public async init({ namespace, taskManager, riskScoreDataClient }: InitOpts) {
+  public async init({
+    namespace,
+    taskManager,
+    riskScoreDataClient,
+    range,
+    includeClosedAlerts,
+  }: InitOpts) {
     const result: InitRiskEngineResult = {
       legacyRiskEngineDisabled: false,
       riskEngineResourcesInstalled: false,

@@ -20,7 +20,7 @@ export type ConfigureRiskEngineRequest = z.infer<typeof ConfigureRiskEngineReque
 export const ConfigureRiskEngineRequest = z.object({
   dataViewId: z.string().optional(),
   enabled: z.boolean().optional(),
-  filter: z.object({}).strict().optional(),
+  filter: z.object({}).optional(),
   identifierType: z.string().optional(),
   interval: z.string().optional(),
   pageSize: z.number().int().optional(),
@@ -37,6 +37,7 @@ export const ConfigureRiskEngineRequest = z.object({
   excludeAlertTags: z
     .array(z.enum(['Duplicate', 'False Positive', 'Futher investigation required']))
     .optional(),
+  includeClosedAlerts: z.boolean().optional(),
 });
 
 export type ConfigureRiskEngineResponse = z.infer<typeof ConfigureRiskEngineResponse>;

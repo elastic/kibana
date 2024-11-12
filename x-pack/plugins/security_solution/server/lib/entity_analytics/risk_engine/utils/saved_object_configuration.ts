@@ -55,6 +55,7 @@ export const updateSavedObjectAttribute = async ({
     };
     excludeAlertStatuses?: Array<'open' | 'closed' | 'in-progress' | 'acknowledged'>;
     excludeAlertTags?: Array<'Duplicate' | 'False Positive' | 'Futher investigation required'>;
+    includeClosedAlerts?: boolean;
   };
 }) => {
   const savedObjectConfiguration = await getConfigurationSavedObject({
