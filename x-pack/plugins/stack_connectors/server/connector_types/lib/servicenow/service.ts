@@ -8,6 +8,7 @@
 import { AxiosResponse } from 'axios';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { isEmpty } from 'lodash';
 import {
   ExternalService,
   ExternalServiceParamsCreate,
@@ -300,13 +301,17 @@ export const createExternalService: ServiceFactory = ({
         throw new Error('No correlationId or incidentId found.');
       }
 
+      console.log('incidentId: ', incidentId);
+
       if (incidentId) {
         incidentToBeClosed = await getIncident(incidentId);
       } else if (correlationId) {
         incidentToBeClosed = await getIncidentByCorrelationId(correlationId);
       }
 
-      if (incidentToBeClosed === null) {
+      console.log('incidentToBeClosed', incidentToBeClosed);
+
+      if (incidentToBeClosed === null || isEmpty(incidentToBeClosed)) {
         logger.warn(
           `[ServiceNow][CloseIncident] No incident found with correlation_id: ${correlationId} or incidentId: ${incidentId}.`
         );
