@@ -2313,7 +2313,10 @@ describe('TaskClaiming', () => {
         },
       });
 
-      expect(taskManagerLogger.warn).not.toHaveBeenCalled();
+      expect(taskManagerLogger.warn).not.toHaveBeenCalledWith(
+        'Background task node "test" has no assigned partitions, claiming against all partitions',
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
 
       fakeTimer.tick(500);
 
@@ -2382,7 +2385,10 @@ describe('TaskClaiming', () => {
         },
       });
 
-      expect(taskManagerLogger.warn).not.toHaveBeenCalled();
+      expect(taskManagerLogger.warn).not.toHaveBeenCalledWith(
+        'Background task node "test" has no assigned partitions, claiming against all partitions',
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
       expect(taskManagerLogger.info).toHaveBeenCalledWith(
         `Background task node "${taskPartitioner.getPodName()}" now claiming with assigned partitions`,
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
