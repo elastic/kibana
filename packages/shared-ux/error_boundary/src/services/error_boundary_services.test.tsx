@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import userEvent from '@testing-library/user-event';
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -23,6 +24,7 @@ describe('<KibanaErrorBoundaryProvider>', () => {
   });
 
   it('creates a context of services for KibanaErrorBoundary', async () => {
+    const user = userEvent.setup();
     const reportEventSpy = jest.spyOn(analytics!, 'reportEvent');
 
     const { findByTestId } = render(
@@ -32,7 +34,8 @@ describe('<KibanaErrorBoundaryProvider>', () => {
         </KibanaErrorBoundary>
       </KibanaErrorBoundaryProvider>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+
+    await user.click(await findByTestId('clickForErrorBtn'));
 
     expect(reportEventSpy).toBeCalledWith('fatal-error-react', {
       component_name: 'BadComponent',
@@ -43,6 +46,7 @@ describe('<KibanaErrorBoundaryProvider>', () => {
   });
 
   it('uses higher-level context if available', async () => {
+    const user = userEvent.setup();
     const reportEventSpy1 = jest.spyOn(analytics!, 'reportEvent');
 
     const analytics2 = analyticsServiceMock.createAnalyticsServiceStart();
@@ -60,7 +64,8 @@ describe('<KibanaErrorBoundaryProvider>', () => {
         </KibanaErrorBoundary>
       </KibanaErrorBoundaryProvider>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+
+    await user.click(await findByTestId('clickForErrorBtn'));
 
     expect(reportEventSpy2).not.toBeCalled();
     expect(reportEventSpy1).toBeCalledWith('fatal-error-react', {

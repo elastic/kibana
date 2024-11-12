@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import { render } from '@testing-library/react';
 import {
   EXPANDABLE_PANEL_HEADER_LEFT_SECTION_TEST_ID,
@@ -133,7 +134,8 @@ describe('<ExpandablePanel />', () => {
       expect(queryByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(TEST_ID))).not.toBeInTheDocument();
     });
 
-    it('click toggle button should expand the panel', () => {
+    it('click toggle button should expand the panel', async () => {
+      const user = userEvent.setup();
       const { getByTestId } = render(
         <ThemeProvider theme={mockTheme}>
           <ExpandablePanel {...expandableDefaultProps}>{children}</ExpandablePanel>
@@ -142,7 +144,7 @@ describe('<ExpandablePanel />', () => {
 
       const toggle = getByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(TEST_ID));
       expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'arrowRight');
-      toggle.click();
+      await user.click(toggle);
 
       expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(TEST_ID))).toHaveTextContent(
         'test content'
@@ -182,7 +184,8 @@ describe('<ExpandablePanel />', () => {
       expect(getByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(TEST_ID))).toBeInTheDocument();
     });
 
-    it('click toggle button should collapse the panel', () => {
+    it('click toggle button should collapse the panel', async () => {
+      const user = userEvent.setup();
       const { getByTestId, queryByTestId } = render(
         <ThemeProvider theme={mockTheme}>
           <ExpandablePanel {...expandedDefaultProps}>{children}</ExpandablePanel>
@@ -193,7 +196,7 @@ describe('<ExpandablePanel />', () => {
       expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'arrowDown');
       expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(TEST_ID))).toBeInTheDocument();
 
-      toggle.click();
+      await user.click(toggle);
       expect(toggle.firstChild).toHaveAttribute('data-euiicon-type', 'arrowRight');
       expect(queryByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(TEST_ID))).not.toBeInTheDocument();
     });

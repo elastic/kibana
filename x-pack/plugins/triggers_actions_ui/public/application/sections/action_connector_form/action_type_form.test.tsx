@@ -19,7 +19,7 @@ import {
 import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
 import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, waitFor, screen } from '@testing-library/react';
+import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import { RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -376,7 +376,9 @@ describe('action_type_form', () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
     wrapper.find('[data-test-subj="action-group-error-icon"]').first().simulate('mouseOver');
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').last().text()).toBe('Action contains errors.');
     // Clearing all mocks will also reset fake timers.
@@ -428,10 +430,10 @@ describe('action_type_form', () => {
     expect(summaryOrPerRuleSelect).toBeTruthy();
 
     const button = wrapper.getByText('For each alert');
-    button.click();
-    await act(async () => {
-      wrapper.getByText('Summary of alerts').click();
-    });
+
+    fireEvent.click(button);
+
+    fireEvent.click(wrapper.getByText('Summary of alerts'));
 
     expect(mockTransformActionVariables.mock.calls).toEqual([
       [
@@ -512,9 +514,8 @@ describe('action_type_form', () => {
 
     expect(wrapper.getByTestId('mustacheAutocompleteSwitch')).toBeTruthy();
 
-    await act(async () => {
-      wrapper.getByTestId('mustacheAutocompleteSwitch').click();
-    });
+    fireEvent.click(wrapper.getByTestId('mustacheAutocompleteSwitch'));
+
     expect(setActionParamsProperty).toHaveBeenCalledWith('dedupKey', '', 1);
   });
 
@@ -557,7 +558,8 @@ describe('action_type_form', () => {
         </IntlProvider>
       );
 
-      wrapper.getByTestId('notifyWhenSelect').click();
+      fireEvent.click(wrapper.getByTestId('notifyWhenSelect'));
+
       await act(async () => {
         expect(wrapper.queryByText('On status changes')).not.toBeTruthy();
         expect(wrapper.queryByText('On check intervals')).not.toBeTruthy();
@@ -610,7 +612,8 @@ describe('action_type_form', () => {
         </IntlProvider>
       );
 
-      wrapper.getByTestId('notifyWhenSelect').click();
+      fireEvent.click(wrapper.getByTestId('notifyWhenSelect'));
+
       await act(async () => {
         expect(wrapper.queryByText('On status changes')).not.toBeTruthy();
         expect(wrapper.queryByText('On check intervals')).not.toBeTruthy();

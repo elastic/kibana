@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import userEvent from '@testing-library/user-event';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
@@ -153,14 +154,15 @@ describe('EventsQueryTabBody', () => {
     );
   });
 
-  it('renders the matrix histogram stacked by alerts default value', () => {
+  it('renders the matrix histogram stacked by alerts default value', async () => {
+    const user = userEvent.setup();
     const result = render(
       <TestProviders>
         <EventsQueryTabBody {...commonProps} />
       </TestProviders>
     );
 
-    result.getByTestId('showExternalAlertsCheckbox').click();
+    await user.click(result.getByTestId('showExternalAlertsCheckbox'));
 
     expect(result.getByTestId('header-section-supplements').querySelector('select')?.value).toEqual(
       'event.module'

@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import { render } from '@testing-library/react';
 
 import { SettingsMenu } from './settings_menu';
@@ -41,7 +42,8 @@ describe('SettingsMenu', () => {
   });
 
   describe('push vs overlay', () => {
-    it('should render the flyout type button group', () => {
+    it('should render the flyout type button group', async () => {
+      const user = userEvent.setup();
       const flyoutCustomProps = {
         hideSettings: false,
         pushVsOverlay: {
@@ -56,7 +58,7 @@ describe('SettingsMenu', () => {
         </TestProvider>
       );
 
-      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+      await user.click(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID));
 
       expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_TITLE_TEST_ID)).toBeInTheDocument();
       expect(
@@ -65,7 +67,8 @@ describe('SettingsMenu', () => {
       expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID)).toBeInTheDocument();
     });
 
-    it('should have the type selected if option is enabled', () => {
+    it('should have the type selected if option is enabled', async () => {
+      const user = userEvent.setup();
       const state = {
         panels: initialPanelsState,
         ui: {
@@ -87,7 +90,7 @@ describe('SettingsMenu', () => {
         </TestProvider>
       );
 
-      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+      await user.click(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID));
 
       expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID)).toHaveClass(
         'euiButtonGroupButton-isSelected'
@@ -97,7 +100,8 @@ describe('SettingsMenu', () => {
       );
     });
 
-    it('should select correct the flyout type', () => {
+    it('should select correct the flyout type', async () => {
+      const user = userEvent.setup();
       const flyoutCustomProps = {
         hideSettings: false,
         pushVsOverlay: {
@@ -114,8 +118,8 @@ describe('SettingsMenu', () => {
 
       expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
 
-      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
-      getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID).click();
+      await user.click(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID));
+      await user.click(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID));
 
       expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(
         JSON.stringify({ [PUSH_VS_OVERLAY_LOCAL_STORAGE]: 'push' })
@@ -128,7 +132,8 @@ describe('SettingsMenu', () => {
       );
     });
 
-    it('should render the the flyout type button group disabled', () => {
+    it('should render the the flyout type button group disabled', async () => {
+      const user = userEvent.setup();
       const flyoutCustomProps = {
         hideSettings: false,
         pushVsOverlay: {
@@ -145,7 +150,7 @@ describe('SettingsMenu', () => {
 
       expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
 
-      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+      await user.click(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID));
       expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID)).toHaveAttribute(
         'disabled'
       );
@@ -164,7 +169,8 @@ describe('SettingsMenu', () => {
       expect(localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE)).toEqual(null);
     });
 
-    it('should not render the information icon if the tooltip is empty', () => {
+    it('should not render the information icon if the tooltip is empty', async () => {
+      const user = userEvent.setup();
       const flyoutCustomProps = {
         hideSettings: false,
         pushVsOverlay: {
@@ -179,7 +185,7 @@ describe('SettingsMenu', () => {
         </TestProvider>
       );
 
-      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+      await user.click(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID));
 
       expect(
         queryByTestId(SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID)
@@ -188,7 +194,8 @@ describe('SettingsMenu', () => {
   });
 
   describe('resize', () => {
-    it('should render the flyout resize button', () => {
+    it('should render the flyout resize button', async () => {
+      const user = userEvent.setup();
       const flyoutCustomProps = {
         hideSettings: false,
         resize: {
@@ -202,7 +209,7 @@ describe('SettingsMenu', () => {
         </TestProvider>
       );
 
-      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+      await user.click(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID));
 
       expect(getByTestId(SETTINGS_MENU_FLYOUT_RESIZE_TITLE_TEST_ID)).toBeInTheDocument();
       expect(
@@ -211,7 +218,8 @@ describe('SettingsMenu', () => {
       expect(getByTestId(SETTINGS_MENU_FLYOUT_RESIZE_BUTTON_TEST_ID)).toBeInTheDocument();
     });
 
-    it('should reset correctly when clicked', () => {
+    it('should reset correctly when clicked', async () => {
+      const user = userEvent.setup();
       const flyoutCustomProps = {
         hideSettings: false,
         resize: {
@@ -235,8 +243,8 @@ describe('SettingsMenu', () => {
         </TestProvider>
       );
 
-      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
-      getByTestId(SETTINGS_MENU_FLYOUT_RESIZE_BUTTON_TEST_ID).click();
+      await user.click(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID));
+      await user.click(getByTestId(SETTINGS_MENU_FLYOUT_RESIZE_BUTTON_TEST_ID));
 
       const expandableFlyout = localStorage.getItem(EXPANDABLE_FLYOUT_LOCAL_STORAGE);
       expect(expandableFlyout).not.toBe(null);
@@ -246,7 +254,8 @@ describe('SettingsMenu', () => {
       expect(expandableFlyout).not.toHaveProperty(USER_SECTION_WIDTHS_LOCAL_STORAGE);
     });
 
-    it('should render the the flyout resize button disabled', () => {
+    it('should render the the flyout resize button disabled', async () => {
+      const user = userEvent.setup();
       const flyoutCustomProps = {
         hideSettings: false,
         resize: {
@@ -261,12 +270,13 @@ describe('SettingsMenu', () => {
         </TestProvider>
       );
 
-      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+      await user.click(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID));
       expect(getByTestId(SETTINGS_MENU_FLYOUT_RESIZE_BUTTON_TEST_ID)).toHaveAttribute('disabled');
       expect(getByTestId(SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID)).toBeInTheDocument();
     });
 
-    it('should not render the information icon if the tooltip is empty', () => {
+    it('should not render the information icon if the tooltip is empty', async () => {
+      const user = userEvent.setup();
       const flyoutCustomProps = {
         hideSettings: false,
         resize: {
@@ -281,7 +291,7 @@ describe('SettingsMenu', () => {
         </TestProvider>
       );
 
-      getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+      await user.click(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID));
       expect(
         queryByTestId(SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID)
       ).not.toBeInTheDocument();

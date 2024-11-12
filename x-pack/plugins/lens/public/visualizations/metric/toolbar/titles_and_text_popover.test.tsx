@@ -75,7 +75,7 @@ describe('TitlesAndTextPopover', () => {
       breakdownByAccessor: undefined,
     });
     const labelOptionsButton = screen.getByTestId('lnsTextOptionsButton');
-    labelOptionsButton.click();
+    fireEvent.click(labelOptionsButton);
 
     const newSubtitle = 'new subtitle hey';
     const subtitleField = screen.getByDisplayValue('subtitle');
@@ -109,7 +109,7 @@ describe('TitlesAndTextPopover', () => {
   it('should set titlesTextAlign', async () => {
     renderToolbarOptions({ ...fullState });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
-    textOptionsButton.click();
+    fireEvent.click(textOptionsButton);
 
     const titlesAlignBtnGroup = new EuiButtonGroupTestHarness('lens-titles-alignment-btn');
 
@@ -127,7 +127,7 @@ describe('TitlesAndTextPopover', () => {
   it('should set valuesTextAlign', async () => {
     renderToolbarOptions({ ...fullState });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
-    textOptionsButton.click();
+    fireEvent.click(textOptionsButton);
 
     const valueAlignBtnGroup = new EuiButtonGroupTestHarness('lens-values-alignment-btn');
 
@@ -145,7 +145,7 @@ describe('TitlesAndTextPopover', () => {
   it('should set valueFontMode', async () => {
     renderToolbarOptions({ ...fullState });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
-    textOptionsButton.click();
+    fireEvent.click(textOptionsButton);
 
     const modeBtnGroup = new EuiButtonGroupTestHarness('lens-value-font-mode-btn');
 
@@ -160,7 +160,7 @@ describe('TitlesAndTextPopover', () => {
   it('should set iconAlign', async () => {
     renderToolbarOptions({ ...fullState, icon: 'sortUp' });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
-    textOptionsButton.click();
+    fireEvent.click(textOptionsButton);
 
     const iconAlignBtnGroup = new EuiButtonGroupTestHarness('lens-icon-alignment-btn');
 
@@ -175,7 +175,7 @@ describe('TitlesAndTextPopover', () => {
   it.each([undefined, 'empty'])('should hide iconAlign option when icon is %j', async (icon) => {
     renderToolbarOptions({ ...fullState, icon });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
-    textOptionsButton.click();
+    fireEvent.click(textOptionsButton);
 
     expect(screen.queryByTestId('lens-icon-alignment-btn')).not.toBeInTheDocument();
   });

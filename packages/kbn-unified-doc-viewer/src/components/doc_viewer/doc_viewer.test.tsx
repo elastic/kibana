@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
+import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -78,7 +79,8 @@ describe('<DocViewer />', () => {
     expect(errorMsgComponent.text()).toMatch(new RegExp(`${errorMsg}`));
   });
 
-  test('should save active tab to local storage', () => {
+  test('should save active tab to local storage', async () => {
+    const user = userEvent.setup();
     const registry = new DocViewsRegistry();
     registry.add({ id: 'test1', order: 10, title: 'Render function', render: jest.fn() });
     registry.add({ id: 'test2', order: 20, title: 'Render function', render: jest.fn() });
@@ -88,13 +90,13 @@ describe('<DocViewer />', () => {
     expect(screen.getByTestId('docViewerTab-test1').getAttribute('aria-selected')).toBe('true');
     expect(screen.getByTestId('docViewerTab-test2').getAttribute('aria-selected')).toBe('false');
 
-    screen.getByTestId('docViewerTab-test2').click();
+    await user.click(screen.getByTestId('docViewerTab-test2'));
 
     expect(screen.getByTestId('docViewerTab-test1').getAttribute('aria-selected')).toBe('false');
     expect(screen.getByTestId('docViewerTab-test2').getAttribute('aria-selected')).toBe('true');
     expect(mockSetLocalStorage).toHaveBeenCalledWith('kbn_doc_viewer_tab_test2');
 
-    screen.getByTestId('docViewerTab-test1').click();
+    await user.click(screen.getByTestId('docViewerTab-test1'));
 
     expect(screen.getByTestId('docViewerTab-test1').getAttribute('aria-selected')).toBe('true');
     expect(screen.getByTestId('docViewerTab-test2').getAttribute('aria-selected')).toBe('false');

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID, ASSIGNEES_APPLY_PANEL_TEST_ID } from './test_ids';
 import { AssigneesApplyPanel } from './assignees_apply_panel';
@@ -75,9 +75,9 @@ describe('<AssigneesApplyPanel />', () => {
     });
 
     expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeDisabled();
-    getByText(mockUserProfiles[1].user.full_name).click();
+    fireEvent.click(getByText(mockUserProfiles[1].user.full_name));
     expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).not.toBeDisabled();
-    getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID).click();
+    fireEvent.click(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
 
     expect(mockedOnApply).toHaveBeenCalledWith({
       add: ['user-id-2'],

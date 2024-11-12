@@ -155,8 +155,10 @@ describe('Saved query management list component', () => {
 
   it('should render the saved queries on the selectable component', async () => {
     render(wrapSavedQueriesListComponentInContext(props));
-    expect(await screen.findAllByRole('option')).toHaveLength(1);
-    expect(screen.getByRole('option', { name: 'Test' })).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryAllByRole('option')).toHaveLength(1));
+    expect(
+      screen.getByRole('option', { name: (content) => content.startsWith('Test') })
+    ).toBeInTheDocument();
   });
 
   it('should display the total and selected count', async () => {
@@ -173,7 +175,9 @@ describe('Saved query management list component', () => {
     render(wrapSavedQueriesListComponentInContext(newProps));
     expect(await screen.findByText('6 queries')).toBeInTheDocument();
     expect(screen.queryByText('6 queries | 1 selected')).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole('option', { name: 'Test 0' }));
+    await userEvent.click(
+      screen.getByRole('option', { name: (content) => content.startsWith('Test 0') })
+    );
     expect(screen.queryByText('6 queries')).not.toBeInTheDocument();
     expect(screen.getByText('6 queries | 1 selected')).toBeInTheDocument();
   });
@@ -213,7 +217,9 @@ describe('Saved query management list component', () => {
     render(wrapSavedQueriesListComponentInContext(newProps));
     expect(await screen.findByLabelText('Load query')).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Delete query' })).toBeDisabled();
-    await userEvent.click(screen.getByRole('option', { name: 'Test' }));
+    await userEvent.click(
+      screen.getByRole('option', { name: (content) => content.startsWith('Test') })
+    );
     expect(screen.getByLabelText('Load query')).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Delete query' })).toBeEnabled();
     await userEvent.click(screen.getByLabelText('Load query'));
@@ -240,7 +246,9 @@ describe('Saved query management list component', () => {
 
   it('should render the modal on delete', async () => {
     render(wrapSavedQueriesListComponentInContext(props));
-    await userEvent.click(await screen.findByRole('option', { name: 'Test' }));
+    await userEvent.click(
+      await screen.findByRole('option', { name: (content) => content.startsWith('Test') })
+    );
     await userEvent.click(screen.getByRole('button', { name: 'Delete query' }));
     expect(screen.getByRole('heading', { name: 'Delete "Test"?' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
@@ -261,7 +269,9 @@ describe('Saved query management list component', () => {
       },
     };
     render(wrapSavedQueriesListComponentInContext(newProps));
-    await userEvent.click(await screen.findByRole('option', { name: 'Test' }));
+    await userEvent.click(
+      await screen.findByRole('option', { name: (content) => content.startsWith('Test') })
+    );
     await userEvent.click(screen.getByRole('button', { name: 'Delete query' }));
     expect(screen.getByRole('heading', { name: 'Delete "Test"?' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
@@ -378,9 +388,18 @@ describe('Saved query management list component', () => {
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
     });
-    expect(screen.getByRole('option', { name: 'Test 0', checked: false })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('option', { name: 'Test 0' }));
-    expect(screen.getByRole('option', { name: 'Test 0', checked: true })).toBeInTheDocument();
+    expect(
+      screen.getByRole('option', {
+        name: (content) => content.startsWith('Test 0'),
+        checked: false,
+      })
+    ).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole('option', { name: (content) => content.startsWith('Test 0') })
+    );
+    expect(
+      screen.getByRole('option', { name: (content) => content.startsWith('Test 0'), checked: true })
+    ).toBeInTheDocument();
     findSavedQueriesSpy.mockResolvedValue({
       total: 6,
       queries: generateSavedQueries(1),
@@ -397,7 +416,9 @@ describe('Saved query management list component', () => {
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
     });
-    expect(screen.getByRole('option', { name: 'Test 0', checked: true })).toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { name: (content) => content.startsWith('Test 0'), checked: true })
+    ).toBeInTheDocument();
   });
 
   it('should allow providing a search term', async () => {

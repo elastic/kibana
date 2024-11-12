@@ -12,6 +12,7 @@ import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assist
 import { useBreadcrumbs, TagsList } from '@kbn/observability-shared-plugin/public';
 import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
+import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
 import { Chance } from 'chance';
 import React, { Fragment } from 'react';
@@ -175,6 +176,7 @@ describe('Alert details', () => {
   });
 
   it('should show Metadata tab', async () => {
+    const user = userEvent.setup();
     useFetchAlertDetailMock.mockReturnValue([false, alertDetail]);
 
     const alertDetails = renderComponent();
@@ -184,7 +186,7 @@ describe('Alert details', () => {
     expect(alertDetails.queryByTestId('alertDetailsTabbedContent')?.textContent).toContain(
       'Metadata'
     );
-    alertDetails.getByText('Metadata').click();
+    await user.click(alertDetails.getByText('Metadata'));
     expect(alertDetails.queryByTestId('metadataTabPanel')).toBeTruthy();
     expect(alertDetails.queryByTestId('metadataTabPanel')?.textContent).toContain(
       'kibana.alert.status'

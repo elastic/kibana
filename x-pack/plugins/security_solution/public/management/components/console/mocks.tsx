@@ -88,16 +88,16 @@ export const getConsoleSelectorsAndActionMock = (
 
   const openHelpPanel: ConsoleSelectorsAndActionsMock['openHelpPanel'] = () => {
     if (!isHelpPanelOpen()) {
-      renderResult.getByTestId(`${dataTestSubj}-header-helpButton`).click();
+      fireEvent.click(renderResult.getByTestId(`${dataTestSubj}-header-helpButton`));
     }
   };
   const closeHelpPanel: ConsoleSelectorsAndActionsMock['closeHelpPanel'] = () => {
     if (isHelpPanelOpen()) {
-      renderResult.getByTestId(`${dataTestSubj}-sidePanel-headerCloseButton`).click();
+      fireEvent.click(renderResult.getByTestId(`${dataTestSubj}-sidePanel-headerCloseButton`));
     }
   };
   const submitCommand: ConsoleSelectorsAndActionsMock['submitCommand'] = () => {
-    renderResult.getByTestId(`${dataTestSubj}-inputTextSubmitButton`).click();
+    fireEvent.click(renderResult.getByTestId(`${dataTestSubj}-inputTextSubmitButton`));
   };
   const enterCommand: ConsoleSelectorsAndActionsMock['enterCommand'] = async (
     cmd,

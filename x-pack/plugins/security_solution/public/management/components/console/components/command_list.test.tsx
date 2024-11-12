@@ -6,6 +6,7 @@
  */
 
 import type { ConsoleTestSetup, HelpSidePanelSelectorsAndActions } from '../mocks';
+import userEvent from '@testing-library/user-event';
 import {
   getCommandListMock,
   getConsoleTestSetup,
@@ -119,9 +120,10 @@ describe('When rendering the command list (help output)', () => {
       expect(renderResult.getByTestId('test-commandList-group1-cmd1-addToInput')).toBeDisabled();
     });
 
-    it('should add command to console input when [+] button is clicked', () => {
+    it('should add command to console input when [+] button is clicked', async () => {
+      const user = userEvent.setup();
       renderAndOpenHelpPanel();
-      renderResult.getByTestId('test-commandList-group1-cmd6-addToInput').click();
+      await user.click(renderResult.getByTestId('test-commandList-group1-cmd6-addToInput'));
       expect(consoleSelectors.getInputText()).toEqual('cmd6 --foo ');
     });
 
