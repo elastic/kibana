@@ -5,30 +5,36 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useAppContext } from '../../../../app_context';
 import { useForm, Form } from '../../shared_imports';
 import { GenericObject, MappingsConfiguration } from '../../types';
 import { MapperSizePluginId } from '../../constants';
 import { useDispatch } from '../../mappings_state_context';
 import { DynamicMappingSection } from './dynamic_mapping_section';
-import { SourceFieldSection } from './source_field_section';
+import {
+  SourceFieldSection,
+  STORED_SOURCE_OPTION,
+  SYNTHETIC_SOURCE_OPTION,
+  DISABLED_SOURCE_OPTION,
+} from './source_field_section';
 import { MetaFieldSection } from './meta_field_section';
 import { RoutingSection } from './routing_section';
 import { MapperSizePluginSection } from './mapper_size_plugin_section';
 import { SubobjectsSection } from './subobjects_section';
 import { configurationFormSchema } from './configuration_form_schema';
+import { IndexMode } from '../../../../../../common/types/data_streams';
 
 interface Props {
   value?: MappingsConfiguration;
   /** List of plugins installed in the cluster nodes */
   esNodesPlugins: string[];
+  indexMode?: IndexMode;
 }
 
-const formSerializer = (formData: GenericObject, sourceFieldMode?: string) => {
+const formSerializer = (formData: GenericObject) => {
   const { dynamicMapping, sourceField, metaField, _routing, _size, subobjects } = formData;
 
   const dynamic = dynamicMapping?.enabled
@@ -37,12 +43,21 @@ const formSerializer = (formData: GenericObject, sourceFieldMode?: string) => {
     ? 'strict'
     : dynamicMapping?.enabled;
 
+  const _source =
+    sourceField?.option === SYNTHETIC_SOURCE_OPTION
+      ? { mode: SYNTHETIC_SOURCE_OPTION }
+      : sourceField?.option === DISABLED_SOURCE_OPTION
+      ? { enabled: false }
+      : sourceField?.includes || sourceField?.excludes
+      ? { includes: sourceField?.includes, excludes: sourceField?.excludes }
+      : undefined;
+
   const serialized = {
     dynamic,
     numeric_detection: dynamicMapping?.numeric_detection,
     date_detection: dynamicMapping?.date_detection,
     dynamic_date_formats: dynamicMapping?.dynamic_date_formats,
-    _source: sourceFieldMode ? { mode: sourceFieldMode } : sourceField,
+    _source,
     _meta: metaField,
     _routing,
     _size,
@@ -60,8 +75,9 @@ const formDeserializer = (formData: GenericObject) => {
     date_detection,
     dynamic_date_formats,
     /* eslint-enable @typescript-eslint/naming-convention */
-    _source: { enabled, includes, excludes } = {} as {
+    _source: { enabled, mode, includes, excludes } = {} as {
       enabled?: boolean;
+      mode?: string;
       includes?: string[];
       excludes?: string[];
     },
@@ -81,7 +97,7 @@ const formDeserializer = (formData: GenericObject) => {
       dynamic_date_formats,
     },
     sourceField: {
-      enabled,
+      option: mode ?? (enabled === false ? 'disabled' : 'stored'),
       includes,
       excludes,
     },
@@ -92,21 +108,16 @@ const formDeserializer = (formData: GenericObject) => {
   };
 };
 
-export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) => {
+export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode }: Props) => {
   const {
     config: { enableMappingsSourceFieldSection },
   } = useAppContext();
 
   const isMounted = useRef(false);
 
-  const serializerCallback = useCallback(
-    (formData: FormData) => formSerializer(formData, value?._source?.mode),
-    [value?._source?.mode]
-  );
-
   const { form } = useForm({
-    schema: configurationFormSchema,
-    serializer: serializerCallback,
+    schema: configurationFormSchema(indexMode),
+    serializer: formSerializer,
     deserializer: formDeserializer,
     defaultValue: value,
     id: 'configurationForm',
@@ -165,7 +176,7 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
       <EuiSpacer size="xl" />
       <MetaFieldSection />
       <EuiSpacer size="xl" />
-      {enableMappingsSourceFieldSection && !value?._source?.mode && (
+      {enableMappingsSourceFieldSection && (
         <>
           <SourceFieldSection /> <EuiSpacer size="xl" />
         </>

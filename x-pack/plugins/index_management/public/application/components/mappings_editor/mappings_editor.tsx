@@ -9,6 +9,7 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
+import { IndexMode } from '../../../../common/types/data_streams';
 import {
   DocumentFields,
   RuntimeFieldsList,
@@ -52,10 +53,11 @@ export interface Props {
   docLinks: DocLinksStart;
   /** List of plugins installed in the cluster nodes */
   esNodesPlugins: string[];
+  indexMode?: IndexMode;
 }
 
 export const MappingsEditor = React.memo(
-  ({ onChange, value, docLinks, indexSettings, esNodesPlugins }: Props) => {
+  ({ onChange, value, docLinks, indexSettings, esNodesPlugins, indexMode }: Props) => {
     const { parsedDefaultValue, multipleMappingsDeclared } = useMemo<MappingsEditorParsedMetadata>(
       () => parseMappings(value),
       [value]
@@ -148,6 +150,7 @@ export const MappingsEditor = React.memo(
         <ConfigurationForm
           value={state.configuration.defaultValue}
           esNodesPlugins={esNodesPlugins}
+          indexMode={indexMode}
         />
       ),
     };

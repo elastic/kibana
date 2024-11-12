@@ -14,6 +14,8 @@ import { EuiLink, EuiCode } from '@elastic/eui';
 import { documentationService } from '../../../../services/documentation';
 import { FormSchema, FIELD_TYPES, fieldValidators } from '../../shared_imports';
 import { ComboBoxOption } from '../../types';
+import { STORED_SOURCE_OPTION, SYNTHETIC_SOURCE_OPTION } from './source_field_section';
+import { IndexMode } from "@kbn/index-management-plugin/common/types/data_streams";
 
 const { isJsonField } = fieldValidators;
 
@@ -30,7 +32,7 @@ const fieldPathComboBoxConfig = {
   deserializer: (values: string[]): ComboBoxOption[] => values.map((value) => ({ label: value })),
 };
 
-export const configurationFormSchema: FormSchema = {
+export const configurationFormSchema = (indexMode?: IndexMode): FormSchema => ({
   metaField: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.metaFieldEditorLabel', {
       defaultMessage: '_meta field data',
@@ -75,12 +77,12 @@ export const configurationFormSchema: FormSchema = {
     },
   },
   sourceField: {
-    enabled: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.sourceFieldLabel', {
-        defaultMessage: 'Enable _source field',
-      }),
-      type: FIELD_TYPES.TOGGLE,
-      defaultValue: true,
+    option: {
+      type: FIELD_TYPES.SUPER_SELECT,
+      defaultValue:
+        indexMode === 'logsdb' || indexMode === 'time_series'
+          ? SYNTHETIC_SOURCE_OPTION
+          : STORED_SOURCE_OPTION,
     },
     includes: {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.includeSourceFieldsLabel', {
@@ -192,4 +194,4 @@ export const configurationFormSchema: FormSchema = {
     }),
     defaultValue: true,
   },
-};
+});

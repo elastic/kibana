@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { SourceFieldSection } from './source_field_section';
-export * from './constants';
+export const STORED_SOURCE_OPTION = 'stored';
+export const DISABLED_SOURCE_OPTION = 'disabled';
+export const SYNTHETIC_SOURCE_OPTION = 'synthetic';
