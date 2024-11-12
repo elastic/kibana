@@ -9,7 +9,7 @@
 
 import { ActionVariables, RuleType } from '@kbn/triggers-actions-ui-types';
 import { transformActionVariables } from './transforms';
-import { ALERTING_FEATURE_ID } from '../constants';
+import { ALERTING_FEATURE_ID } from '../rule_form';
 
 beforeEach(() => jest.resetAllMocks());
 

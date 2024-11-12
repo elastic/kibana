@@ -92,7 +92,7 @@ jest.mock('../validation/validate_params_for_warnings', () => ({
   validateParamsForWarnings: jest.fn(),
 }));
 
-jest.mock('../action_variables/get_available_action_variables', () => ({
+jest.mock('@kbn/alerts-ui-shared/src/action_variables/get_available_action_variables', () => ({
   getAvailableActionVariables: jest.fn(),
 }));
 
@@ -148,7 +148,7 @@ const { validateParamsForWarnings } = jest.requireMock(
 );
 
 const { getAvailableActionVariables } = jest.requireMock(
-  '../action_variables/get_available_action_variables'
+  '@kbn/alerts-ui-shared/src/action_variables/get_available_action_variables'
 );
 
 const mockConnectors = [getConnector('1', { id: 'action-1' })];

@@ -36,13 +36,16 @@ import {
   RuleActionParam,
   RuleActionParams,
 } from '@kbn/alerting-types';
-import { ActionConnector, checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
+import {
+  ActionConnector,
+  checkActionFormActionTypeEnabled,
+  getAvailableActionVariables,
+} from '@kbn/alerts-ui-shared';
 import { isEmpty, some } from 'lodash';
 import { css } from '@emotion/react';
 import { SavedObjectAttribute } from '@kbn/core/types';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
 import { RuleFormParamsErrors } from '../common/types';
-import { getAvailableActionVariables } from '../action_variables';
 import { validateAction, validateParamsForWarnings } from '../validation';
 
 import { RuleActionsSettings } from './rule_actions_settings';

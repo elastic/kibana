@@ -45,12 +45,11 @@ import {
 } from '@kbn/alerting-plugin/common/parse_duration';
 import type { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
 import {
-  transformActionVariables,
   RuleActionsNotifyWhen,
   RuleActionsAlertsFilter,
   RuleActionsAlertsFilterTimeframe,
 } from '@kbn/response-ops-rule-form';
-import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
+import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
 import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';

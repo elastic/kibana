@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { isEmpty, some } from 'lodash';
 import {
   EuiAccordion,
   EuiBadge,
@@ -24,20 +21,23 @@ import {
   useEuiBackgroundColor,
   useEuiTheme,
 } from '@elastic/eui';
-import { RuleActionParam, RuleSystemAction } from '@kbn/alerting-types';
-import { SavedObjectAttribute } from '@kbn/core/types';
 import { css } from '@emotion/react';
-import { useRuleFormDispatch, useRuleFormState } from '../hooks';
+import { RuleActionParam, RuleSystemAction } from '@kbn/alerting-types';
+import { getAvailableActionVariables } from '@kbn/alerts-ui-shared';
+import { SavedObjectAttribute } from '@kbn/core/types';
+import { i18n } from '@kbn/i18n';
+import { isEmpty, some } from 'lodash';
+import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { RuleFormParamsErrors } from '../common';
+import { useRuleFormDispatch, useRuleFormState } from '../hooks';
 import {
   ACTION_ERROR_TOOLTIP,
   ACTION_WARNING_TITLE,
   TECH_PREVIEW_DESCRIPTION,
   TECH_PREVIEW_LABEL,
 } from '../translations';
-import { RuleActionsMessage } from './rule_actions_message';
 import { validateParamsForWarnings } from '../validation';
-import { getAvailableActionVariables } from '../action_variables';
+import { RuleActionsMessage } from './rule_actions_message';
 
 interface RuleActionsSystemActionsItemProps {
   action: RuleSystemAction;

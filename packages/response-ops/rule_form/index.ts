@@ -16,7 +16,6 @@ export * from './src/utils';
 export * from './src/types';
 export * from './src/constants';
 export * from './src/rule_type_modal';
-export * from './src/action_variables';
 
 export {
   fetchUiConfig,
@@ -28,5 +27,3 @@ export {
   transformUpdateRuleBody,
   resolveRule,
 } from './src/common/apis';
-
-export { getAvailableActionVariables } from './src/action_variables/get_available_action_variables';
