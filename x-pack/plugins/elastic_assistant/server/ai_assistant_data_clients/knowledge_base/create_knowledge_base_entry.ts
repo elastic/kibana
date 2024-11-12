@@ -48,12 +48,12 @@ export const createKnowledgeBaseEntry = async ({
 }: CreateKnowledgeBaseEntryParams): Promise<KnowledgeBaseEntryResponse | null> => {
   const createdAt = new Date().toISOString();
   const body = transformToCreateSchema({
-        createdAt,
-        spaceId,
-        user,
-        entry: knowledgeBaseEntry as unknown as KnowledgeBaseEntryCreateProps,
-        global,
-      });
+    createdAt,
+    spaceId,
+    user,
+    entry: knowledgeBaseEntry as unknown as KnowledgeBaseEntryCreateProps,
+    global,
+  });
   const telemetryPayload = {
     entryType: body.type,
     required: body.required ?? false,
