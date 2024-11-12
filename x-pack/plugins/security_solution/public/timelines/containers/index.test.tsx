@@ -6,8 +6,7 @@
  */
 
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import type { TimelineArgs, UseTimelineEventsProps } from '.';
 import { initSortDefault, useTimelineEvents } from '.';
 import { SecurityPageName } from '../../../common/constants';
@@ -136,14 +135,11 @@ describe('useTimelineEvents', () => {
   };
 
   test('init', async () => {
-    const { result } = renderHook<UseTimelineEventsProps, [DataLoadingState, TimelineArgs]>(
-      (args) => useTimelineEvents(args),
-      {
-        initialProps: { ...props },
-      }
-    );
+    const { result } = renderHook((args) => useTimelineEvents(args), {
+      initialProps: props,
+    });
 
-    expect(result.all[0]).toEqual([
+    expect(result.current).toEqual([
       DataLoadingState.loaded,
       {
         events: [],
@@ -163,10 +159,10 @@ describe('useTimelineEvents', () => {
 
   test('happy path query', async () => {
     const { result, rerender } = renderHook<
-      UseTimelineEventsProps,
-      [DataLoadingState, TimelineArgs]
+      [DataLoadingState, TimelineArgs],
+      UseTimelineEventsProps
     >((args) => useTimelineEvents(args), {
-      initialProps: { ...props },
+      initialProps: props,
     });
 
     // useEffect on params request
@@ -193,10 +189,10 @@ describe('useTimelineEvents', () => {
 
   test('Mock cache for active timeline when switching page', async () => {
     const { result, rerender } = renderHook<
-      UseTimelineEventsProps,
-      [DataLoadingState, TimelineArgs]
+      [DataLoadingState, TimelineArgs],
+      UseTimelineEventsProps
     >((args) => useTimelineEvents(args), {
-      initialProps: { ...props },
+      initialProps: props,
     });
 
     // useEffect on params request
@@ -234,8 +230,8 @@ describe('useTimelineEvents', () => {
 
   test('Correlation pagination is calling search strategy when switching page', async () => {
     const { result, rerender } = renderHook<
-      UseTimelineEventsProps,
-      [DataLoadingState, TimelineArgs]
+      [DataLoadingState, TimelineArgs],
+      UseTimelineEventsProps
     >((args) => useTimelineEvents(args), {
       initialProps: {
         ...props,
@@ -275,12 +271,9 @@ describe('useTimelineEvents', () => {
   });
 
   test('should query again when a new field is added', async () => {
-    const { rerender } = renderHook<UseTimelineEventsProps, [DataLoadingState, TimelineArgs]>(
-      (args) => useTimelineEvents(args),
-      {
-        initialProps: { ...props },
-      }
-    );
+    const { rerender } = renderHook((args) => useTimelineEvents(args), {
+      initialProps: props,
+    });
 
     // useEffect on params request
     await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -302,12 +295,9 @@ describe('useTimelineEvents', () => {
   });
 
   test('should not query again when a field is removed', async () => {
-    const { rerender } = renderHook<UseTimelineEventsProps, [DataLoadingState, TimelineArgs]>(
-      (args) => useTimelineEvents(args),
-      {
-        initialProps: { ...props },
-      }
-    );
+    const { rerender } = renderHook((args) => useTimelineEvents(args), {
+      initialProps: props,
+    });
 
     // useEffect on params request
     await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -323,12 +313,9 @@ describe('useTimelineEvents', () => {
     await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(0));
   });
   test('should not query again when a removed field is added back', async () => {
-    const { rerender } = renderHook<UseTimelineEventsProps, [DataLoadingState, TimelineArgs]>(
-      (args) => useTimelineEvents(args),
-      {
-        initialProps: { ...props },
-      }
-    );
+    const { rerender } = renderHook((args) => useTimelineEvents(args), {
+      initialProps: props,
+    });
 
     // useEffect on params request
     await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -356,12 +343,9 @@ describe('useTimelineEvents', () => {
 
   describe('Fetch Notes', () => {
     test('should call onLoad for notes when events are fetched', async () => {
-      renderHook<UseTimelineEventsProps, [DataLoadingState, TimelineArgs]>(
-        (args) => useTimelineEvents(args),
-        {
-          initialProps: { ...props },
-        }
-      );
+      renderHook((args) => useTimelineEvents(args), {
+        initialProps: props,
+      });
 
       await waitFor(() => {
         expect(mockSearch).toHaveBeenCalledTimes(1);

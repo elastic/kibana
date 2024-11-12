@@ -5,39 +5,36 @@
  * 2.0.
  */
 
-import { renderHook, type RenderHookResult } from '@testing-library/react-hooks';
-import React, { ReactNode } from 'react';
-import { waitFor, act } from '@testing-library/react';
+import React from 'react';
+import { waitFor, act, renderHook, type RenderHookResult } from '@testing-library/react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { delay } from '../utils/test_helpers';
-import { FetcherResult, useFetcher, isPending, FETCH_STATUS } from './use_fetcher';
+import { useFetcher, isPending, FETCH_STATUS } from './use_fetcher';
 
 // Wrap the hook with a provider so it can useKibana
 const KibanaReactContext = createKibanaReactContext({
   notifications: { toasts: { add: () => {}, danger: () => {} } },
 } as unknown as Partial<CoreStart>);
 
-interface WrapperProps {
-  children?: ReactNode;
-  callback: () => Promise<string>;
-  args: string[];
-}
-function wrapper({ children }: WrapperProps) {
+function wrapper({ children }: React.PropsWithChildren) {
   return <KibanaReactContext.Provider>{children}</KibanaReactContext.Provider>;
 }
 
 describe('useFetcher', () => {
   describe('when resolving after 500ms', () => {
-    let hook: RenderHookResult<
-      WrapperProps,
-      FetcherResult<string> & {
-        refetch: () => void;
-      }
-    >;
+    let hook: RenderHookResult<ReturnType<typeof useFetcher>, Parameters<typeof useFetcher>>;
+
+    beforeAll(() => {
+      jest.useFakeTimers({ legacyFakeTimers: true });
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
 
     beforeEach(() => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      // jest.useFakeTimers({ legacyFakeTimers: true });
       async function fn() {
         await delay(500);
         return 'response from hook';
@@ -45,7 +42,7 @@ describe('useFetcher', () => {
       hook = renderHook(() => useFetcher(() => fn(), []), { wrapper });
     });
 
-    it('should have loading spinner initally', async () => {
+    it('should have loading spinner initally', () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
@@ -54,7 +51,7 @@ describe('useFetcher', () => {
       });
     });
 
-    it('should still show loading spinner after 100ms', async () => {
+    it('should still show loading spinner after 100ms', () => {
       act(() => {
         jest.advanceTimersByTime(100);
       });
@@ -84,15 +81,18 @@ describe('useFetcher', () => {
   });
 
   describe('when throwing after 500ms', () => {
-    let hook: RenderHookResult<
-      WrapperProps,
-      FetcherResult<string> & {
-        refetch: () => void;
-      }
-    >;
+    let hook: RenderHookResult<ReturnType<typeof useFetcher>, Parameters<typeof useFetcher>>;
+
+    beforeAll(() => {
+      jest.useFakeTimers({ legacyFakeTimers: true });
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
 
     beforeEach(() => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+      // jest.useFakeTimers({ legacyFakeTimers: true });
       async function fn(): Promise<string> {
         await delay(500);
         throw new Error('Something went wrong');
@@ -100,7 +100,7 @@ describe('useFetcher', () => {
       hook = renderHook(() => useFetcher(() => fn(), []), { wrapper });
     });
 
-    it('should have loading spinner initially', async () => {
+    it('should have loading spinner initially', () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
@@ -109,7 +109,7 @@ describe('useFetcher', () => {
       });
     });
 
-    it('should still show loading spinner after 100ms', async () => {
+    it('should still show loading spinner after 100ms', () => {
       act(() => {
         jest.advanceTimersByTime(100);
       });
@@ -127,7 +127,6 @@ describe('useFetcher', () => {
         jest.advanceTimersByTime(1000);
       });
 
-      // @ts-ignore
       await waitFor(() => expect(hook.result.current.status).toBe('failure'));
 
       expect(hook.result.current).toEqual({
@@ -140,8 +139,16 @@ describe('useFetcher', () => {
   });
 
   describe('when a hook already has data', () => {
-    it('should show "first response" while loading "second response"', async () => {
+    beforeAll(() => {
       jest.useFakeTimers({ legacyFakeTimers: true });
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    it('should show "first response" while loading "second response"', async () => {
+      // jest.useFakeTimers({ legacyFakeTimers: true });
 
       const hook = renderHook(
         /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -161,7 +168,6 @@ describe('useFetcher', () => {
         status: 'loading',
       });
 
-      // @ts-ignore
       await waitFor(() => expect(hook.result.current.status).toBe('success'));
 
       // assert: first response has loaded and should be rendered

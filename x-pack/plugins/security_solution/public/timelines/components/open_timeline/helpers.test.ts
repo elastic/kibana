@@ -6,8 +6,7 @@
  */
 
 import { cloneDeep, getOr, omit } from 'lodash/fp';
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import { mockTimelineResults, mockGetOneTimelineResult } from '../../../common/mock';
 import { timelineDefaults } from '../../store/defaults';

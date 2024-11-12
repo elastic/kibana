@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook, act } from '@testing-library/react';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { SessionStorageType } from './use_markdown_session_storage';
 import { useMarkdownSessionStorage } from './use_markdown_session_storage';
 
 describe('useMarkdownSessionStorage', () => {
@@ -66,7 +64,7 @@ describe('useMarkdownSessionStorage', () => {
   });
 
   it('should update the session value with field value when it is first render', async () => {
-    renderHook<SessionStorageType, { hasConflicts: boolean }>(
+    renderHook(
       (props) => {
         return useMarkdownSessionStorage(props);
       },
@@ -86,7 +84,7 @@ describe('useMarkdownSessionStorage', () => {
 
   it('should set session storage when field has value and session key is not created yet', async () => {
     const specialCharsValue = '!{tooltip[Hello again](This is tooltip!)}';
-    const { result } = renderHook<SessionStorageType, { hasConflicts: boolean }>(
+    const { result } = renderHook(
       (props) => {
         return useMarkdownSessionStorage(props);
       },
@@ -108,7 +106,7 @@ describe('useMarkdownSessionStorage', () => {
   });
 
   it('should update session value ', async () => {
-    const { result, rerender } = renderHook<SessionStorageType, { hasConflicts: boolean }>(
+    const { result, rerender } = renderHook(
       (props) => {
         return useMarkdownSessionStorage(props);
       },
@@ -134,7 +132,7 @@ describe('useMarkdownSessionStorage', () => {
   });
 
   it('should return has conflict true', async () => {
-    const { result, rerender } = renderHook<SessionStorageType, { hasConflicts: boolean }>(
+    const { result, rerender } = renderHook(
       (props) => {
         return useMarkdownSessionStorage(props);
       },
@@ -158,7 +156,7 @@ describe('useMarkdownSessionStorage', () => {
     });
 
     it('should set field value if session already exists and it is a first render', async () => {
-      const { result } = renderHook<SessionStorageType, { hasConflicts: boolean }>(
+      const { result } = renderHook(
         (props) => {
           return useMarkdownSessionStorage(props);
         },
@@ -182,7 +180,7 @@ describe('useMarkdownSessionStorage', () => {
     });
 
     it('should update existing session key if field value changed', async () => {
-      const { rerender, result } = renderHook<SessionStorageType, { hasConflicts: boolean }>(
+      const { rerender, result } = renderHook(
         (props) => {
           return useMarkdownSessionStorage(props);
         },

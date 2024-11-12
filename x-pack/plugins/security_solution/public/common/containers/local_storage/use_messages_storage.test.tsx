@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../lib/kibana';
-import type { UseMessagesStorage } from './use_messages_storage';
 import { useMessagesStorage } from './use_messages_storage';
 
 jest.mock('../../lib/kibana');
@@ -19,7 +17,7 @@ describe('useLocalStorage', () => {
   });
 
   it('should return an empty array when there is no messages', async () => {
-    const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+    const { result } = renderHook(() => useMessagesStorage());
     await waitFor(() => new Promise((resolve) => resolve(null)));
     const { getMessages } = result.current;
     act(() => {
@@ -28,7 +26,7 @@ describe('useLocalStorage', () => {
   });
 
   it('should add a message', async () => {
-    const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+    const { result } = renderHook(() => useMessagesStorage());
     await waitFor(() => new Promise((resolve) => resolve(null)));
     const { getMessages, addMessage } = result.current;
     act(() => {
@@ -38,7 +36,7 @@ describe('useLocalStorage', () => {
   });
 
   it('should add multiple messages', async () => {
-    const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+    const { result } = renderHook(() => useMessagesStorage());
     await waitFor(() => new Promise((resolve) => resolve(null)));
     const { getMessages, addMessage } = result.current;
 
@@ -50,7 +48,7 @@ describe('useLocalStorage', () => {
   });
 
   it('should remove a message', async () => {
-    const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+    const { result } = renderHook(() => useMessagesStorage());
     await waitFor(() => new Promise((resolve) => resolve(null)));
     const { getMessages, addMessage, removeMessage } = result.current;
 
@@ -63,7 +61,7 @@ describe('useLocalStorage', () => {
   });
 
   it('should return presence of a message', async () => {
-    const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+    const { result } = renderHook(() => useMessagesStorage());
     await waitFor(() => new Promise((resolve) => resolve(null)));
     const { hasMessage, addMessage, removeMessage } = result.current;
     await act(async () => {
@@ -76,7 +74,7 @@ describe('useLocalStorage', () => {
   });
 
   it('should clear all messages', async () => {
-    const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+    const { result } = renderHook(() => useMessagesStorage());
     await waitFor(() => new Promise((resolve) => resolve(null)));
     const { getMessages, addMessage, clearAllMessages } = result.current;
     await act(async () => {

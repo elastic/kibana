@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { kibanaStartMock } from '../utils/kibana_react.mock';
 import { useFetchAlertData } from './use_fetch_alert_data';
 
@@ -41,11 +40,9 @@ describe('useFetchAlertData', () => {
   });
 
   it('initially is not loading and does not have data', async () => {
-    const { result } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
-      useFetchAlertData(testIds)
-    );
+    const { result } = renderHook(() => useFetchAlertData(testIds));
 
-    expect(result.all[0]).toEqual([false, {}]);
+    expect(result.current).toEqual([false, {}]);
   });
 
   it('returns no data when an error occurs', async () => {
@@ -53,17 +50,13 @@ describe('useFetchAlertData', () => {
       throw new Error('an http error');
     });
 
-    const { result } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
-      useFetchAlertData(testIds)
-    );
+    const { result } = renderHook(() => useFetchAlertData(testIds));
 
     await waitFor(() => expect(result.current).toEqual([false, {}]));
   });
 
   it('retrieves the alert data', async () => {
-    const { result } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
-      useFetchAlertData(testIds)
-    );
+    const { result } = renderHook(() => useFetchAlertData(testIds));
 
     await waitFor(() =>
       expect(result.current).toEqual([
@@ -74,9 +67,7 @@ describe('useFetchAlertData', () => {
   });
 
   it('does not populate the results when the request is canceled', async () => {
-    const { result, unmount } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
-      useFetchAlertData(testIds)
-    );
+    const { result, unmount } = renderHook(() => useFetchAlertData(testIds));
 
     act(() => {
       unmount();

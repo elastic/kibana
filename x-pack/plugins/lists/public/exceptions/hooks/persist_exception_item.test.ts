@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { PersistHookProps } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ReturnPersistExceptionItem,
-  usePersistExceptionItem,
-} from '@kbn/securitysolution-list-hooks';
+import { usePersistExceptionItem } from '@kbn/securitysolution-list-hooks';
 import * as api from '@kbn/securitysolution-list-api/src/api';
 
 import { ENTRIES_WITH_IDS } from '../../../common/constants.mock';
@@ -44,7 +39,7 @@ describe('usePersistExceptionItem', () => {
   });
 
   test('initializes hook', async () => {
-    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+    const { result } = renderHook(() =>
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
     );
 
@@ -52,7 +47,7 @@ describe('usePersistExceptionItem', () => {
   });
 
   test('"isLoading" is "true" when exception item is being saved', async () => {
-    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+    const { result } = renderHook(() =>
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
     );
 
@@ -73,7 +68,7 @@ describe('usePersistExceptionItem', () => {
   });
 
   test('"isSaved" is "true" when exception item saved successfully', async () => {
-    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+    const { result } = renderHook(() =>
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
     );
 
@@ -87,7 +82,7 @@ describe('usePersistExceptionItem', () => {
   });
 
   test('it invokes "updateExceptionListItem" when payload has "id"', async () => {
-    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+    const { result } = renderHook(() =>
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
     );
 
@@ -113,7 +108,7 @@ describe('usePersistExceptionItem', () => {
   });
 
   test('it invokes "addExceptionListItem" when payload does not have "id"', async () => {
-    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+    const { result } = renderHook(() =>
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
     );
 
@@ -143,7 +138,7 @@ describe('usePersistExceptionItem', () => {
 
     addExceptionListItemSpy.mockRejectedValue(error);
 
-    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+    const { result } = renderHook(() =>
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
     );
 

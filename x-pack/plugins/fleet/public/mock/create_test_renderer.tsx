@@ -8,10 +8,8 @@
 import type { History } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { memo } from 'react';
-import type { RenderOptions, RenderResult } from '@testing-library/react';
-import { render as reactRender, act, waitFor } from '@testing-library/react';
-import { renderHook, type WrapperComponent } from '@testing-library/react-hooks';
-import type { RenderHookResult } from '@testing-library/react-hooks';
+import type { RenderOptions, RenderResult, RenderHookResult } from '@testing-library/react';
+import { render as reactRender, act, waitFor, renderHook } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -52,10 +50,10 @@ export interface TestRenderer {
   AppWrapper: React.FC<any>;
   HookWrapper: React.FC<any>;
   render: UiRender;
-  renderHook: <TProps, TResult>(
+  renderHook: <TResult, TProps>(
     callback: (props: TProps) => TResult,
-    wrapper?: WrapperComponent<any>
-  ) => RenderHookResult<TProps, TResult>;
+    wrapper?: React.FC<React.PropsWithChildren>
+  ) => RenderHookResult<TResult, TProps>;
   setHeaderActionMenu: Function;
   waitFor: typeof waitFor;
 }
@@ -125,9 +123,11 @@ export const createFleetTestRendererMock = (): TestRenderer => {
     HookWrapper,
     renderHook: (
       callback,
-      ExtraWrapper: WrapperComponent<any> = memo(({ children }) => <>{children}</>)
+      ExtraWrapper: React.FC<React.PropsWithChildren<unknown>> = memo(({ children }) => (
+        <>{children}</>
+      ))
     ) => {
-      const wrapper: WrapperComponent<any> = ({ children }) => (
+      const wrapper: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => (
         <testRendererMocks.HookWrapper>
           <ExtraWrapper>{children}</ExtraWrapper>
         </testRendererMocks.HookWrapper>
@@ -210,9 +210,11 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
     },
     renderHook: (
       callback,
-      ExtraWrapper: WrapperComponent<any> = memo(({ children }) => <>{children}</>)
+      ExtraWrapper: React.FC<React.PropsWithChildren<unknown>> = memo(({ children }) => (
+        <>{children}</>
+      ))
     ) => {
-      const wrapper: WrapperComponent<any> = ({ children }) => (
+      const wrapper: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => (
         <testRendererMocks.HookWrapper>
           <ExtraWrapper>{children}</ExtraWrapper>
         </testRendererMocks.HookWrapper>

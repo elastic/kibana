@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { ALERT_STATUS, ValidFeatureId } from '@kbn/rule-data-utils';
 
 import { useAlertsCount } from './use_alerts_count';

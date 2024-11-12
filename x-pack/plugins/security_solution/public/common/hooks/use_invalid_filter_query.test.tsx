@@ -10,8 +10,7 @@
 // but is simply documenting the current behavior.
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { render, renderHook } from '@testing-library/react';
 import type { Store } from 'redux';
 
 import { createMockStore, kibanaMock, mockGlobalState, TestProviders } from '../mock';

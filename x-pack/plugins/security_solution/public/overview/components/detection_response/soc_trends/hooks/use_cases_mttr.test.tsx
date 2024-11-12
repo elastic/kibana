@@ -8,8 +8,7 @@
 import React from 'react';
 import type { UseCasesMttr } from './use_cases_mttr';
 import { useCasesMttr } from './use_cases_mttr';
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { useKibana as useKibanaMock } from '../../../../../common/lib/kibana/__mocks__';
 import * as i18n from '../translations';

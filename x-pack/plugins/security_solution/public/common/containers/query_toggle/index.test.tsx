@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { RenderResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor, act, cleanup } from '@testing-library/react';
+import type { RenderHookResult } from '@testing-library/react';
+import { waitFor, act, cleanup, renderHook } from '@testing-library/react';
 import type { QueryToggle } from '.';
 import { useQueryToggle } from '.';
 import type { RouteSpyState } from '../../utils/route/types';
@@ -27,7 +26,7 @@ jest.mock('../../utils/route/use_route_spy', () => ({
 }));
 
 describe('useQueryToggle', () => {
-  let result: RenderResult<QueryToggle>;
+  let result: RenderHookResult<QueryToggle, unknown>['result'];
 
   const mockSet = jest.fn();
   beforeAll(() => {

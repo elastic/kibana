@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { allSeriesKey, reportTypeKey, UrlStorageContextProvider } from './use_series_storage';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useLensAttributes } from './use_lens_attributes';
 import { ReportTypes } from '../configurations/constants';
 import { mockDataView } from '../rtl_helpers';
@@ -68,7 +68,7 @@ describe('useExpViewTimeRange', function () {
 
   const lensAttributesSpy = jest.spyOn(lensAttributes, 'LensAttributes');
 
-  function Wrapper({ children }: { children: JSX.Element }) {
+  function Wrapper({ children }: React.PropsWithChildren) {
     return (
       <ExploratoryViewContextProvider
         reportTypes={reportTypesList}
@@ -78,7 +78,9 @@ describe('useExpViewTimeRange', function () {
         theme$={themeServiceMock.createTheme$()}
         {...coreMock.createStart()}
       >
-        <UrlStorageContextProvider storage={storage}>{children}</UrlStorageContextProvider>
+        <UrlStorageContextProvider storage={storage}>
+          {React.createElement(React.Fragment, {}, children)}
+        </UrlStorageContextProvider>
       </ExploratoryViewContextProvider>
     );
   }

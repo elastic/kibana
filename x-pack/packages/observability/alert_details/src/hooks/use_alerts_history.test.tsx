@@ -8,13 +8,8 @@ import React from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
-import {
-  type UseAlertsHistory,
-  useAlertsHistory,
-  type Props as useAlertsHistoryProps,
-} from './use_alerts_history';
+import { waitFor, renderHook } from '@testing-library/react';
+import { useAlertsHistory } from './use_alerts_history';
 
 const queryClient = new QueryClient({
   logger: {
@@ -41,7 +36,7 @@ describe('useAlertsHistory', () => {
 
   it('returns no data with error when http client is not provided', async () => {
     const http = undefined;
-    const { result } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+    const { result } = renderHook(
       () =>
         useAlertsHistory({
           http,
@@ -64,7 +59,7 @@ describe('useAlertsHistory', () => {
         throw new Error('ES error');
       }),
     } as unknown as HttpSetup;
-    const { result } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+    const { result } = renderHook(
       () =>
         useAlertsHistory({
           http,
@@ -125,7 +120,7 @@ describe('useAlertsHistory', () => {
         },
       }),
     } as unknown as HttpSetup;
-    const { result } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+    const { result } = renderHook(
       () =>
         useAlertsHistory({
           http,
@@ -163,7 +158,7 @@ describe('useAlertsHistory', () => {
       }),
     } as unknown as HttpSetup;
 
-    const { result } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+    const { result } = renderHook(
       () =>
         useAlertsHistory({
           http,
@@ -209,7 +204,7 @@ describe('useAlertsHistory', () => {
       }),
     } as unknown as HttpSetup;
 
-    const { result } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+    const { result } = renderHook(
       () =>
         useAlertsHistory({
           http,

@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import type { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
@@ -39,10 +38,10 @@ describe('useRecentlyViewedMonitors', () => {
   });
 
   it('returns expected result', () => {
-    const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
+    const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
         <WrappedHelper url="/monitor/1" path={MONITOR_ROUTE}>
-          {children}
+          {React.createElement(React.Fragment, null, children)}
         </WrappedHelper>
       );
     };
@@ -88,10 +87,10 @@ describe('useRecentlyViewedMonitors', () => {
       monitors: [fetchedMonitor],
     });
 
-    const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
+    const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
         <WrappedHelper url="/monitor/1" path={MONITOR_ROUTE}>
-          {children}
+          {React.createElement(React.Fragment, null, children)}
         </WrappedHelper>
       );
     };

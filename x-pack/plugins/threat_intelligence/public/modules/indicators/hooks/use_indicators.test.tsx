@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
-import { useIndicators, UseIndicatorsParams, UseIndicatorsValue } from './use_indicators';
+import { act, waitFor, renderHook } from '@testing-library/react';
+import { useIndicators, UseIndicatorsParams } from './use_indicators';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { createFetchIndicators } from '../services/fetch_indicators';
 import { mockTimeRange } from '../../../mocks/mock_indicators_filters_context';
@@ -24,7 +23,7 @@ const useIndicatorsParams: UseIndicatorsParams = {
 const indicatorsQueryResult = { indicators: [], total: 0 };
 
 const renderUseIndicators = (initialProps = useIndicatorsParams) =>
-  renderHook<UseIndicatorsParams, UseIndicatorsValue>((props) => useIndicators(props), {
+  renderHook(useIndicators, {
     initialProps,
     wrapper: TestProvidersComponent,
   });

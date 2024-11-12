@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 import {
   acknowledgedAlertsVisualizationId,

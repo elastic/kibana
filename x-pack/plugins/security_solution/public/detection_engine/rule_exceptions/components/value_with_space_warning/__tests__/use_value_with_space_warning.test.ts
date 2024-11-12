@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useValueWithSpaceWarning } from '../use_value_with_space_warning';
 
 describe('useValueWithSpaceWarning', () => {

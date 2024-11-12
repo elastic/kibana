@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import type {
   ExceptionListSchema,
   UseExceptionListsProps,
@@ -33,7 +32,7 @@ describe('useExceptionLists', () => {
   });
 
   test('initializes hook', async () => {
-    const { result } = renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
+    const { result } = renderHook<ReturnExceptionLists, UseExceptionListsProps>(() =>
       useExceptionLists({
         errorMessage: 'Uh oh',
         filterOptions: {},
@@ -64,7 +63,7 @@ describe('useExceptionLists', () => {
   });
 
   test('fetches exception lists', async () => {
-    const { result } = renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
+    const { result } = renderHook(() =>
       useExceptionLists({
         errorMessage: 'Uh oh',
         filterOptions: {},
@@ -101,7 +100,7 @@ describe('useExceptionLists', () => {
   test('does not fetch specific list id if it is added to the hideLists array', async () => {
     const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
 
-    renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
+    renderHook(() =>
       useExceptionLists({
         errorMessage: 'Uh oh',
         filterOptions: {},
@@ -133,7 +132,7 @@ describe('useExceptionLists', () => {
   test('applies filters to query', async () => {
     const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
 
-    renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
+    renderHook(() =>
       useExceptionLists({
         errorMessage: 'Uh oh',
         filterOptions: {
@@ -170,7 +169,7 @@ describe('useExceptionLists', () => {
 
   test('fetches a new exception list and its items when props change', async () => {
     const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
-    const { rerender } = renderHook<UseExceptionListsProps, ReturnExceptionLists>(
+    const { rerender } = renderHook<ReturnExceptionLists, UseExceptionListsProps>(
       ({ errorMessage, filterOptions, http, initialPagination, namespaceTypes, notifications }) =>
         useExceptionLists({
           errorMessage,
@@ -190,7 +189,7 @@ describe('useExceptionLists', () => {
             perPage: 20,
             total: 0,
           },
-          namespaceTypes: ['single'],
+          namespaceTypes: ['single' as const],
           notifications: mockKibanaNotificationsService,
         },
       }
@@ -207,7 +206,7 @@ describe('useExceptionLists', () => {
         perPage: 20,
         total: 0,
       },
-      namespaceTypes: ['single', 'agnostic'],
+      namespaceTypes: ['single' as const, 'agnostic' as const],
       notifications: mockKibanaNotificationsService,
     });
 
@@ -216,7 +215,7 @@ describe('useExceptionLists', () => {
 
   test('fetches list when refreshExceptionList callback invoked', async () => {
     const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
-    const { result } = renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
+    const { result } = renderHook<ReturnExceptionLists, UseExceptionListsProps>(() =>
       useExceptionLists({
         errorMessage: 'Uh oh',
         filterOptions: {},
@@ -247,7 +246,7 @@ describe('useExceptionLists', () => {
     const spyOnfetchExceptionLists = jest
       .spyOn(api, 'fetchExceptionLists')
       .mockRejectedValue(mockError);
-    renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
+    renderHook(() =>
       useExceptionLists({
         errorMessage: 'Uh oh',
         filterOptions: {},

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
 import { act, waitFor } from '@testing-library/react';
 
 import type { TestRenderer } from '../../../../../../../mock';
@@ -71,8 +71,8 @@ describe('useOnSubmit', () => {
 
   let testRenderer: TestRenderer;
   let renderResult: RenderHookResult<
-    Parameters<typeof useOnSubmit>,
-    ReturnType<typeof useOnSubmit>
+    ReturnType<typeof useOnSubmit>,
+    Parameters<typeof useOnSubmit>
   >;
   const render = async ({ isUpdate } = { isUpdate: false }) => {
     renderResult = testRenderer.renderHook(() =>

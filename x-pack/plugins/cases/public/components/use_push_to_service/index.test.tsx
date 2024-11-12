@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 
-import type { ReturnUsePushToService, UsePushToService } from '.';
 import { usePushToService } from '.';
 import { noPushCasesPermissions, readCasesPermissions, TestProviders } from '../../common/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
@@ -68,10 +66,7 @@ describe('usePushToService', () => {
   });
 
   it('calls pushCaseToExternalService with correct arguments', async () => {
-    const { result } = renderHook<
-      React.PropsWithChildren<UsePushToService>,
-      ReturnUsePushToService
-    >(() => usePushToService(defaultArgs), {
+    const { result } = renderHook(() => usePushToService(defaultArgs), {
       wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
     });
 
@@ -94,10 +89,7 @@ describe('usePushToService', () => {
       },
     }));
 
-    const { result } = renderHook<
-      React.PropsWithChildren<UsePushToService>,
-      ReturnUsePushToService
-    >(() => usePushToService(defaultArgs), {
+    const { result } = renderHook(() => usePushToService(defaultArgs), {
       wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
     });
 
@@ -116,10 +108,7 @@ describe('usePushToService', () => {
       },
     }));
 
-    const { result } = renderHook<
-      React.PropsWithChildren<UsePushToService>,
-      ReturnUsePushToService
-    >(() => usePushToService(defaultArgs), {
+    const { result } = renderHook(() => usePushToService(defaultArgs), {
       wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
     });
 
@@ -130,10 +119,7 @@ describe('usePushToService', () => {
   });
 
   it('Displays message when user has select none as connector', async () => {
-    const { result } = renderHook<
-      React.PropsWithChildren<UsePushToService>,
-      ReturnUsePushToService
-    >(
+    const { result } = renderHook(
       () =>
         usePushToService({
           ...defaultArgs,
@@ -156,10 +142,7 @@ describe('usePushToService', () => {
   });
 
   it('Displays message when connector is deleted', async () => {
-    const { result } = renderHook<
-      React.PropsWithChildren<UsePushToService>,
-      ReturnUsePushToService
-    >(
+    const { result } = renderHook(
       () =>
         usePushToService({
           ...defaultArgs,
@@ -183,10 +166,7 @@ describe('usePushToService', () => {
   });
 
   it('should not call pushCaseToExternalService when the selected connector is none', async () => {
-    const { result } = renderHook<
-      React.PropsWithChildren<UsePushToService>,
-      ReturnUsePushToService
-    >(
+    const { result } = renderHook(
       () =>
         usePushToService({
           ...defaultArgs,
@@ -210,10 +190,7 @@ describe('usePushToService', () => {
   });
 
   it('refresh case view page after push', async () => {
-    const { result } = renderHook<
-      React.PropsWithChildren<UsePushToService>,
-      ReturnUsePushToService
-    >(() => usePushToService(defaultArgs), {
+    const { result } = renderHook(() => usePushToService(defaultArgs), {
       wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
     });
 
@@ -228,10 +205,7 @@ describe('usePushToService', () => {
 
   describe('user does not have write or push permissions', () => {
     it('returns correct information about push permissions', async () => {
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(() => usePushToService(defaultArgs), {
+      const { result } = renderHook(() => usePushToService(defaultArgs), {
         wrapper: ({ children }) => (
           <TestProviders permissions={noPushCasesPermissions()}> {children}</TestProviders>
         ),
@@ -249,10 +223,7 @@ describe('usePushToService', () => {
         },
       }));
 
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(() => usePushToService(defaultArgs), {
+      const { result } = renderHook(() => usePushToService(defaultArgs), {
         wrapper: ({ children }) => (
           <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
         ),
@@ -271,10 +242,7 @@ describe('usePushToService', () => {
         },
       }));
 
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(() => usePushToService(defaultArgs), {
+      const { result } = renderHook(() => usePushToService(defaultArgs), {
         wrapper: ({ children }) => (
           <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
         ),
@@ -285,10 +253,7 @@ describe('usePushToService', () => {
     });
 
     it('does not display a message when user does not have any connector configured', async () => {
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(
+      const { result } = renderHook(
         () =>
           usePushToService({
             ...defaultArgs,
@@ -311,10 +276,7 @@ describe('usePushToService', () => {
     });
 
     it('does not display a message when user does have a connector but is configured to none', async () => {
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(
+      const { result } = renderHook(
         () =>
           usePushToService({
             ...defaultArgs,
@@ -337,10 +299,7 @@ describe('usePushToService', () => {
     });
 
     it('does not display a message when connector is deleted', async () => {
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(
+      const { result } = renderHook(
         () =>
           usePushToService({
             ...defaultArgs,
@@ -364,10 +323,7 @@ describe('usePushToService', () => {
     });
 
     it('does not display a message when case is closed', async () => {
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(
+      const { result } = renderHook(
         () =>
           usePushToService({
             ...defaultArgs,
@@ -387,10 +343,7 @@ describe('usePushToService', () => {
 
   describe('returned values', () => {
     it('initial', async () => {
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(() => usePushToService(defaultArgs), {
+      const { result } = renderHook(() => usePushToService(defaultArgs), {
         wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
       });
 
@@ -409,10 +362,7 @@ describe('usePushToService', () => {
     it('isLoading is true when usePostPushToService is loading', async () => {
       usePostPushToServiceMock.mockReturnValue({ ...mockPostPush, isLoading: true });
 
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(() => usePushToService(defaultArgs), {
+      const { result } = renderHook(() => usePushToService(defaultArgs), {
         wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
       });
 
@@ -425,10 +375,7 @@ describe('usePushToService', () => {
         data: actionLicense,
       });
 
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(() => usePushToService(defaultArgs), {
+      const { result } = renderHook(() => usePushToService(defaultArgs), {
         wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
       });
 
@@ -436,21 +383,18 @@ describe('usePushToService', () => {
     });
 
     it('hasErrorMessages=true if there are error messages', async () => {
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(() => usePushToService({ ...defaultArgs, isValidConnector: false }), {
-        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-      });
+      const { result } = renderHook(
+        () => usePushToService({ ...defaultArgs, isValidConnector: false }),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
 
       expect(result.current.hasErrorMessages).toBe(true);
     });
 
     it('needsToBePushed=true if the connector needs to be pushed', async () => {
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(
+      const { result } = renderHook(
         () =>
           usePushToService({
             ...defaultArgs,
@@ -474,10 +418,7 @@ describe('usePushToService', () => {
     });
 
     it('needsToBePushed=false if the connector does not exist', async () => {
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(
+      const { result } = renderHook(
         () =>
           usePushToService({
             ...defaultArgs,
@@ -498,10 +439,7 @@ describe('usePushToService', () => {
     });
 
     it('hasBeenPushed=false if the connector has been pushed', async () => {
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(
+      const { result } = renderHook(
         () =>
           usePushToService({
             ...defaultArgs,
@@ -525,10 +463,7 @@ describe('usePushToService', () => {
     });
 
     it('hasBeenPushed=false if the connector does not exist', async () => {
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(
+      const { result } = renderHook(
         () =>
           usePushToService({
             ...defaultArgs,
@@ -554,10 +489,7 @@ describe('usePushToService', () => {
         data: actionLicense,
       });
 
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(() => usePushToService(defaultArgs), {
+      const { result } = renderHook(() => usePushToService(defaultArgs), {
         wrapper: ({ children }) => (
           <TestProviders permissions={noPushCasesPermissions()}> {children}</TestProviders>
         ),
@@ -575,10 +507,7 @@ describe('usePushToService', () => {
         },
       }));
 
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(() => usePushToService(defaultArgs), {
+      const { result } = renderHook(() => usePushToService(defaultArgs), {
         wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
       });
 
@@ -591,10 +520,7 @@ describe('usePushToService', () => {
         data: undefined,
       }));
 
-      const { result } = renderHook<
-        React.PropsWithChildren<UsePushToService>,
-        ReturnUsePushToService
-      >(() => usePushToService(defaultArgs), {
+      const { result } = renderHook(() => usePushToService(defaultArgs), {
         wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
       });
 

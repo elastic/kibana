@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useDataView } from './use_data_view';
 
 const adhocDataView = {
@@ -39,7 +38,7 @@ const mockServices = {
 
 const render = async ({ dataViewId }: { dataViewId: string }) => {
   const hookResult = renderHook(() => useDataView({ index: dataViewId }), {
-    wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+    wrapper: ({ children }: React.PropsWithChildren) => (
       <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
     ),
   });

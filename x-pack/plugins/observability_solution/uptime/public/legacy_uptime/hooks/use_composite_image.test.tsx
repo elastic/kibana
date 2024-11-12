@@ -6,8 +6,7 @@
  */
 
 import * as redux from 'react-redux';
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { ScreenshotRefImageData, ScreenshotBlockCache } from '../../../common/runtime_types';
 import { shouldCompose, useCompositeImage } from './use_composite_image';
 import * as compose from '../lib/helper/compose_screenshot_images';

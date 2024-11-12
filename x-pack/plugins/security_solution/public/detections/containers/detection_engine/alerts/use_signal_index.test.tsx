@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PropsWithChildren } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor, act, renderHook } from '@testing-library/react';
 import { TestProvidersWithPrivileges } from '../../../../common/mock';
-import type { ReturnSignalIndex } from './use_signal_index';
 import { useSignalIndex } from './use_signal_index';
 import * as api from './api';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
@@ -36,9 +33,9 @@ describe('useSignalIndex', () => {
       wrapper: TestProvidersWithPrivileges,
     });
 
-    expect(result.all[0]).toEqual({
+    expect(result.current).toEqual({
       createDeSignalIndex: null,
-      loading: true,
+      loading: false,
       signalIndexExists: null,
       signalIndexName: null,
       signalIndexMappingOutdated: null,
@@ -46,12 +43,9 @@ describe('useSignalIndex', () => {
   });
 
   test('fetch alerts info', async () => {
-    const { result } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
-      () => useSignalIndex(),
-      {
-        wrapper: TestProvidersWithPrivileges,
-      }
-    );
+    const { result } = renderHook(() => useSignalIndex(), {
+      wrapper: TestProvidersWithPrivileges,
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -66,12 +60,9 @@ describe('useSignalIndex', () => {
   });
 
   test('make sure that createSignalIndex is giving back the signal info', async () => {
-    const { result } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
-      () => useSignalIndex(),
-      {
-        wrapper: TestProvidersWithPrivileges,
-      }
-    );
+    const { result } = renderHook(() => useSignalIndex(), {
+      wrapper: TestProvidersWithPrivileges,
+    });
     await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
 
     await act(async () => {
@@ -92,12 +83,9 @@ describe('useSignalIndex', () => {
   test('make sure that createSignalIndex have been called when trying to create signal index', async () => {
     const spyOnCreateSignalIndex = jest.spyOn(api, 'createSignalIndex');
 
-    const { result } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
-      () => useSignalIndex(),
-      {
-        wrapper: TestProvidersWithPrivileges,
-      }
-    );
+    const { result } = renderHook(() => useSignalIndex(), {
+      wrapper: TestProvidersWithPrivileges,
+    });
     await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
 
     await act(async () => {
@@ -112,12 +100,9 @@ describe('useSignalIndex', () => {
     spyOnCreateSignalIndex.mockImplementation(() => {
       throw new Error('Something went wrong, let see what happen');
     });
-    const { result } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
-      () => useSignalIndex(),
-      {
-        wrapper: TestProvidersWithPrivileges,
-      }
-    );
+    const { result } = renderHook(() => useSignalIndex(), {
+      wrapper: TestProvidersWithPrivileges,
+    });
 
     await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
 
@@ -141,12 +126,9 @@ describe('useSignalIndex', () => {
     spyOnGetSignalIndex.mockImplementation(() => {
       throw new Error('Something went wrong, let see what happen');
     });
-    const { result } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
-      () => useSignalIndex(),
-      {
-        wrapper: TestProvidersWithPrivileges,
-      }
-    );
+    const { result } = renderHook(() => useSignalIndex(), {
+      wrapper: TestProvidersWithPrivileges,
+    });
 
     await waitFor(() => expect(result.current.createDeSignalIndex).toBeDefined());
 
@@ -172,12 +154,9 @@ describe('useSignalIndex', () => {
       .mockReturnValue('mock-signal-index-from-sourcerer');
     jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(false);
 
-    const { result } = renderHook<PropsWithChildren<{}>, ReturnSignalIndex>(
-      () => useSignalIndex(),
-      {
-        wrapper: TestProvidersWithPrivileges,
-      }
-    );
+    const { result } = renderHook(() => useSignalIndex(), {
+      wrapper: TestProvidersWithPrivileges,
+    });
 
     await waitFor(() => {
       expect(spyOnGetSignalIndex).not.toHaveBeenCalled();

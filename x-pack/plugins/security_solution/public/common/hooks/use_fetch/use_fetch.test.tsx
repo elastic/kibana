@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import type { RequestName } from './request_names';
-import type { OptionsParam, RequestFnParam, Result } from './use_fetch';
+import type { OptionsParam } from './use_fetch';
 import { useFetch } from './use_fetch';
 
 export const mockEndTracking = jest.fn();
@@ -29,14 +28,10 @@ type Parameters = typeof parameters;
 const response = 'someData';
 const mockFetchFn = jest.fn(async (_: Parameters) => response);
 
-type UseFetchParams = [RequestName, RequestFnParam<Parameters, string>, OptionsParam<Parameters>];
-
 const abortController = new AbortController();
 
 const renderUseFetch = (options?: OptionsParam<Parameters>) =>
-  renderHook<UseFetchParams, Result<Parameters, string, unknown>>(() =>
-    useFetch(requestName, mockFetchFn, options)
-  );
+  renderHook(() => useFetch(requestName, mockFetchFn, options));
 
 describe('useFetch', () => {
   beforeEach(() => {

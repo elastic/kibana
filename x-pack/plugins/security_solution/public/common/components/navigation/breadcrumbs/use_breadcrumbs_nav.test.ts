@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { GetSecuritySolutionUrl } from '../../link_to';
 import { SecurityPageName } from '../../../../../common/constants';

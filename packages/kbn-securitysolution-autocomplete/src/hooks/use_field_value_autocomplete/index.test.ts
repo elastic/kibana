@@ -7,15 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-import {
-  UseFieldValueAutocompleteProps,
-  UseFieldValueAutocompleteReturn,
-  useFieldValueAutocomplete,
-} from '.';
+import { UseFieldValueAutocompleteReturn, useFieldValueAutocomplete } from '.';
 import { getField } from '../../fields/index.mock';
 import { autocompleteStartMock } from '../../autocomplete/index.mock';
 import { DataViewFieldBase } from '@kbn/es-query';
@@ -47,37 +42,35 @@ describe('use_field_value_autocomplete', () => {
   });
 
   test('initializes hook', async () => {
-    const { result } = renderHook<UseFieldValueAutocompleteProps, UseFieldValueAutocompleteReturn>(
-      () =>
-        useFieldValueAutocomplete({
-          autocompleteService: {
-            ...autocompleteStartMock,
-            getValueSuggestions: getValueSuggestionsMock,
-          },
-          fieldValue: '',
-          indexPattern: undefined,
-          operatorType: OperatorTypeEnum.MATCH,
-          query: '',
-          selectedField: undefined,
-        })
+    const { result } = renderHook(() =>
+      useFieldValueAutocomplete({
+        autocompleteService: {
+          ...autocompleteStartMock,
+          getValueSuggestions: getValueSuggestionsMock,
+        },
+        fieldValue: '',
+        indexPattern: undefined,
+        operatorType: OperatorTypeEnum.MATCH,
+        query: '',
+        selectedField: undefined,
+      })
     );
     await waitFor(() => expect(result.current).toEqual([false, true, [], result.current[3]]));
   });
 
   test('does not call autocomplete service if "operatorType" is "exists"', async () => {
-    const { result } = renderHook<UseFieldValueAutocompleteProps, UseFieldValueAutocompleteReturn>(
-      () =>
-        useFieldValueAutocomplete({
-          autocompleteService: {
-            ...autocompleteStartMock,
-            getValueSuggestions: getValueSuggestionsMock,
-          },
-          fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
-          operatorType: OperatorTypeEnum.EXISTS,
-          query: '',
-          selectedField: getField('machine.os'),
-        })
+    const { result } = renderHook(() =>
+      useFieldValueAutocomplete({
+        autocompleteService: {
+          ...autocompleteStartMock,
+          getValueSuggestions: getValueSuggestionsMock,
+        },
+        fieldValue: '',
+        indexPattern: stubIndexPatternWithFields,
+        operatorType: OperatorTypeEnum.EXISTS,
+        query: '',
+        selectedField: getField('machine.os'),
+      })
     );
 
     await waitFor(() => {
@@ -89,19 +82,18 @@ describe('use_field_value_autocomplete', () => {
   });
 
   test('does not call autocomplete service if "selectedField" is undefined', async () => {
-    const { result } = renderHook<UseFieldValueAutocompleteProps, UseFieldValueAutocompleteReturn>(
-      () =>
-        useFieldValueAutocomplete({
-          autocompleteService: {
-            ...autocompleteStartMock,
-            getValueSuggestions: getValueSuggestionsMock,
-          },
-          fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
-          operatorType: OperatorTypeEnum.EXISTS,
-          query: '',
-          selectedField: undefined,
-        })
+    const { result } = renderHook(() =>
+      useFieldValueAutocomplete({
+        autocompleteService: {
+          ...autocompleteStartMock,
+          getValueSuggestions: getValueSuggestionsMock,
+        },
+        fieldValue: '',
+        indexPattern: stubIndexPatternWithFields,
+        operatorType: OperatorTypeEnum.EXISTS,
+        query: '',
+        selectedField: undefined,
+      })
     );
 
     await waitFor(() => {
@@ -113,19 +105,18 @@ describe('use_field_value_autocomplete', () => {
   });
 
   test('does not call autocomplete service if "indexPattern" is undefined', async () => {
-    const { result } = renderHook<UseFieldValueAutocompleteProps, UseFieldValueAutocompleteReturn>(
-      () =>
-        useFieldValueAutocomplete({
-          autocompleteService: {
-            ...autocompleteStartMock,
-            getValueSuggestions: getValueSuggestionsMock,
-          },
-          fieldValue: '',
-          indexPattern: undefined,
-          operatorType: OperatorTypeEnum.EXISTS,
-          query: '',
-          selectedField: getField('machine.os'),
-        })
+    const { result } = renderHook(() =>
+      useFieldValueAutocomplete({
+        autocompleteService: {
+          ...autocompleteStartMock,
+          getValueSuggestions: getValueSuggestionsMock,
+        },
+        fieldValue: '',
+        indexPattern: undefined,
+        operatorType: OperatorTypeEnum.EXISTS,
+        query: '',
+        selectedField: getField('machine.os'),
+      })
     );
 
     await waitFor(() => {
@@ -145,7 +136,7 @@ describe('use_field_value_autocomplete', () => {
     }
 
     const { signal } = new AbortController();
-    renderHook<UseFieldValueAutocompleteProps, UseFieldValueAutocompleteReturn>(() =>
+    renderHook(() =>
       useFieldValueAutocomplete({
         autocompleteService: {
           ...autocompleteStartMock,
@@ -184,19 +175,18 @@ describe('use_field_value_autocomplete', () => {
   });
 
   test('returns "isSuggestingValues" of false if field type is boolean', async () => {
-    const { result } = renderHook<UseFieldValueAutocompleteProps, UseFieldValueAutocompleteReturn>(
-      () =>
-        useFieldValueAutocomplete({
-          autocompleteService: {
-            ...autocompleteStartMock,
-            getValueSuggestions: getValueSuggestionsMock,
-          },
-          fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
-          operatorType: OperatorTypeEnum.MATCH,
-          query: '',
-          selectedField: getField('ssl'),
-        })
+    const { result } = renderHook(() =>
+      useFieldValueAutocomplete({
+        autocompleteService: {
+          ...autocompleteStartMock,
+          getValueSuggestions: getValueSuggestionsMock,
+        },
+        fieldValue: '',
+        indexPattern: stubIndexPatternWithFields,
+        operatorType: OperatorTypeEnum.MATCH,
+        query: '',
+        selectedField: getField('ssl'),
+      })
     );
 
     await waitFor(() => {
@@ -210,19 +200,18 @@ describe('use_field_value_autocomplete', () => {
   test('returns "isSuggestingValues" of false to note that autocomplete service is not in use if no autocomplete suggestions available', async () => {
     const suggestionsMock = jest.fn().mockResolvedValue([]);
 
-    const { result } = renderHook<UseFieldValueAutocompleteProps, UseFieldValueAutocompleteReturn>(
-      () =>
-        useFieldValueAutocomplete({
-          autocompleteService: {
-            ...autocompleteStartMock,
-            getValueSuggestions: suggestionsMock,
-          },
-          fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
-          operatorType: OperatorTypeEnum.MATCH,
-          query: '',
-          selectedField: getField('bytes'),
-        })
+    const { result } = renderHook(() =>
+      useFieldValueAutocomplete({
+        autocompleteService: {
+          ...autocompleteStartMock,
+          getValueSuggestions: suggestionsMock,
+        },
+        fieldValue: '',
+        indexPattern: stubIndexPatternWithFields,
+        operatorType: OperatorTypeEnum.MATCH,
+        query: '',
+        selectedField: getField('bytes'),
+      })
     );
 
     await waitFor(() => {
@@ -235,19 +224,18 @@ describe('use_field_value_autocomplete', () => {
 
   test('returns suggestions', async () => {
     const { signal } = new AbortController();
-    const { result } = renderHook<UseFieldValueAutocompleteProps, UseFieldValueAutocompleteReturn>(
-      () =>
-        useFieldValueAutocomplete({
-          autocompleteService: {
-            ...autocompleteStartMock,
-            getValueSuggestions: getValueSuggestionsMock,
-          },
-          fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
-          operatorType: OperatorTypeEnum.MATCH,
-          query: '',
-          selectedField: getField('@tags'),
-        })
+    const { result } = renderHook(() =>
+      useFieldValueAutocomplete({
+        autocompleteService: {
+          ...autocompleteStartMock,
+          getValueSuggestions: getValueSuggestionsMock,
+        },
+        fieldValue: '',
+        indexPattern: stubIndexPatternWithFields,
+        operatorType: OperatorTypeEnum.MATCH,
+        query: '',
+        selectedField: getField('@tags'),
+      })
     );
 
     await waitFor(() => {
@@ -270,19 +258,18 @@ describe('use_field_value_autocomplete', () => {
   });
 
   test('returns new suggestions on subsequent calls', async () => {
-    const { result } = renderHook<UseFieldValueAutocompleteProps, UseFieldValueAutocompleteReturn>(
-      () =>
-        useFieldValueAutocomplete({
-          autocompleteService: {
-            ...autocompleteStartMock,
-            getValueSuggestions: getValueSuggestionsMock,
-          },
-          fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
-          operatorType: OperatorTypeEnum.MATCH,
-          query: '',
-          selectedField: getField('@tags'),
-        })
+    const { result } = renderHook(() =>
+      useFieldValueAutocomplete({
+        autocompleteService: {
+          ...autocompleteStartMock,
+          getValueSuggestions: getValueSuggestionsMock,
+        },
+        fieldValue: '',
+        indexPattern: stubIndexPatternWithFields,
+        operatorType: OperatorTypeEnum.MATCH,
+        query: '',
+        selectedField: getField('@tags'),
+      })
     );
 
     await waitFor(() => expect(result.current[3]).not.toBeNull());

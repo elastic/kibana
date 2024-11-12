@@ -8,8 +8,7 @@
 import React from 'react';
 import type { UseCriticalAlerts } from './use_critical_alerts';
 import { useCriticalAlerts } from './use_critical_alerts';
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import * as i18n from '../translations';
 import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
@@ -71,7 +70,7 @@ describe('useCriticalAlerts', () => {
       wrapper: wrapperContainer,
     });
 
-    expect(result.all[0]).toEqual({
+    expect(result.current).toEqual({
       stat: '-',
       isLoading: true,
       percentage: {

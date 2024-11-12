@@ -131,7 +131,7 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
   return <TourContext.Provider value={context}>{children}</TourContext.Provider>;
 };
 
-export const TourContextProvider = ({ children }: { children: ReactChild }) => {
+export const TourContextProvider = ({ children }: React.PropsWithChildren) => {
   const { pathname } = useLocation();
 
   const ContextProvider = useMemo(
@@ -139,7 +139,11 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
     [pathname]
   );
 
-  return <ContextProvider value={initialState}>{children}</ContextProvider>;
+  return (
+    <ContextProvider value={initialState}>
+      {React.createElement(React.Fragment, null, children)}
+    </ContextProvider>
+  );
 };
 
 export const useTourContext = (): TourContextValue => {

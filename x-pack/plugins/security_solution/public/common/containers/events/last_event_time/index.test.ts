@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
-import type { UseTimelineLastEventTimeArgs } from '.';
 import { useTimelineLastEventTime } from '.';
 import { LastEventIndexKey } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../lib/kibana';
@@ -59,7 +57,7 @@ describe('useTimelineLastEventTime', () => {
   });
 
   it('should init', async () => {
-    const { result } = renderHook<string, [boolean, UseTimelineLastEventTimeArgs]>(() =>
+    const { result } = renderHook(() =>
       useTimelineLastEventTime({
         indexKey: LastEventIndexKey.hostDetails,
         details: {},
@@ -74,7 +72,7 @@ describe('useTimelineLastEventTime', () => {
   });
 
   it('should call search strategy', async () => {
-    renderHook<string, [boolean, UseTimelineLastEventTimeArgs]>(() =>
+    renderHook(() =>
       useTimelineLastEventTime({
         indexKey: LastEventIndexKey.hostDetails,
         details: {},
@@ -96,7 +94,7 @@ describe('useTimelineLastEventTime', () => {
       lastSeen: '1 minute ago',
     });
 
-    const { result } = renderHook<string, [boolean, UseTimelineLastEventTimeArgs]>(() =>
+    const { result } = renderHook(() =>
       useTimelineLastEventTime({
         indexKey: LastEventIndexKey.hostDetails,
         details: {},

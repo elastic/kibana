@@ -9,8 +9,7 @@ import type { IndexFieldSearch } from './use_data_view';
 import { useDataView } from './use_data_view';
 import { mocksSource } from './mock';
 import { mockGlobalState, TestProviders } from '../../mock';
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../lib/kibana';
 
 const mockDispatch = jest.fn();
@@ -84,10 +83,7 @@ describe('source/index.tsx', () => {
       });
     });
     it('sets field data for data view', async () => {
-      const { result } = renderHook<
-        React.PropsWithChildren<{}>,
-        { indexFieldsSearch: IndexFieldSearch }
-      >(() => useDataView(), {
+      const { result } = renderHook(() => useDataView(), {
         wrapper: TestProviders,
       });
 
@@ -108,10 +104,7 @@ describe('source/index.tsx', () => {
     it('should reuse the result for dataView info when cleanCache not passed', async () => {
       let indexFieldsSearch: IndexFieldSearch;
 
-      const { result } = renderHook<
-        React.PropsWithChildren<{}>,
-        { indexFieldsSearch: IndexFieldSearch }
-      >(() => useDataView(), {
+      const { result } = renderHook(() => useDataView(), {
         wrapper: TestProviders,
       });
 
@@ -139,10 +132,7 @@ describe('source/index.tsx', () => {
 
     it('should not reuse the result for dataView info when cleanCache passed', async () => {
       let indexFieldsSearch: IndexFieldSearch;
-      const { result } = renderHook<
-        React.PropsWithChildren<{}>,
-        { indexFieldsSearch: IndexFieldSearch }
-      >(() => useDataView(), {
+      const { result } = renderHook(() => useDataView(), {
         wrapper: TestProviders,
       });
       await waitFor(() => new Promise((resolve) => resolve(null)));

@@ -9,18 +9,21 @@ import type { ReactPortal } from 'react';
 import React from 'react';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
-import type { RenderOptions, RenderResult } from '@testing-library/react';
-import { render as reactRender, waitFor } from '@testing-library/react';
+import type {
+  RenderOptions,
+  RenderResult,
+  RenderHookResult,
+  RenderHookOptions,
+} from '@testing-library/react';
+import {
+  render as reactRender,
+  waitFor,
+  renderHook as reactRenderHook,
+} from '@testing-library/react';
 import type { Action, Reducer, Store } from 'redux';
 import { QueryClient } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
-import type { RenderHookOptions, RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook as reactRenderHook } from '@testing-library/react-hooks';
-import type {
-  ReactHooksRenderer,
-  WrapperComponent,
-} from '@testing-library/react-hooks/src/types/react';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
 import type { DeepReadonly } from 'utility-types';
@@ -101,17 +104,16 @@ export type WaitForReactHookState =
     >
   | false;
 
-type HookRendererFunction<TProps, TResult> = (props: TProps) => TResult;
+type HookRendererFunction<TResult, TProps> = (props: TProps) => TResult;
 
 /**
  * A utility renderer for hooks that return React Query results
  */
 export type ReactQueryHookRenderer<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  TProps = any,
+  TProps = unknown,
   TResult extends UseBaseQueryResult = UseBaseQueryResult
 > = (
-  hookFn: HookRendererFunction<TProps, TResult>,
+  hookFn: HookRendererFunction<TResult, TProps>,
   /**
    * If defined (default is `isSuccess`), the renderer will wait for the given react
    * query response state value to be true
@@ -150,7 +152,10 @@ export interface AppContextTestRender {
   /**
    * Renders a hook within a mocked security solution app context
    */
-  renderHook: ReactHooksRenderer['renderHook'];
+  renderHook: <TResult, TProps>(
+    hookFn: HookRendererFunction<TResult, TProps>,
+    options?: RenderHookOptions<TProps>
+  ) => RenderHookResult<TResult, TProps>;
 
   /**
    * Waits the return value of the callback provided to is truthy
@@ -310,12 +315,12 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     });
   };
 
-  const renderHook: ReactHooksRenderer['renderHook'] = <TProps, TResult>(
-    hookFn: HookRendererFunction<TProps, TResult>,
+  const renderHook = <TResult, TProps>(
+    hookFn: HookRendererFunction<TResult, TProps>,
     options: RenderHookOptions<TProps> = {}
-  ): RenderHookResult<TProps, TResult> => {
-    return reactRenderHook<TProps, TResult>(hookFn, {
-      wrapper: AppWrapper as WrapperComponent<TProps>,
+  ) => {
+    return reactRenderHook<TResult, TProps>(hookFn, {
+      wrapper: AppWrapper as React.FC<React.PropsWithChildren>,
       ...options,
     });
   };
@@ -324,14 +329,14 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     TProps,
     TResult extends UseBaseQueryResult = UseBaseQueryResult
   >(
-    hookFn: HookRendererFunction<TProps, TResult>,
+    hookFn: HookRendererFunction<TResult, TProps>,
     /**
      * If defined (default is `isSuccess`), the renderer will wait for the given react query to be truthy
      */
     waitForHook: WaitForReactHookState = 'isSuccess',
     options: RenderHookOptions<TProps> = {}
   ) => {
-    const { result: hookResult } = renderHook<TProps, TResult>(hookFn, options);
+    const { result: hookResult } = renderHook<TResult, TProps>(hookFn, options);
 
     if (waitForHook) {
       await waitFor(() => expect(hookResult.current[waitForHook]).toBe(true));

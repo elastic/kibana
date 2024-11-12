@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, renderHook } from '@testing-library/react';
 
 import { useGrouping } from './use_grouping';
 

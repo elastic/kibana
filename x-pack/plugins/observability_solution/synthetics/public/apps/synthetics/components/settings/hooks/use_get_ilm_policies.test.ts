@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useGetIlmPolicies } from './use_get_ilm_policies';
 import * as hookPolicyAPI from './api';
 

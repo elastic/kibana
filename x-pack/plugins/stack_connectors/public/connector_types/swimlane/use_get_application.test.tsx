@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
 import { getApplication } from './api';
-import { useGetApplication, UseGetApplication } from './use_get_application';
+import { useGetApplication } from './use_get_application';
 
 jest.mock('./api');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -44,7 +43,7 @@ describe('useGetApplication', () => {
   });
 
   it('init', async () => {
-    const { result } = renderHook<string, UseGetApplication>(() =>
+    const { result } = renderHook(() =>
       useGetApplication({
         toastNotifications: services.notifications.toasts,
       })
@@ -57,7 +56,7 @@ describe('useGetApplication', () => {
   });
 
   it('calls getApplication with correct arguments', async () => {
-    const { result } = renderHook<string, UseGetApplication>(() =>
+    const { result } = renderHook(() =>
       useGetApplication({
         toastNotifications: services.notifications.toasts,
       })
@@ -84,7 +83,7 @@ describe('useGetApplication', () => {
   });
 
   it('get application', async () => {
-    const { result } = renderHook<string, UseGetApplication>(() =>
+    const { result } = renderHook(() =>
       useGetApplication({
         toastNotifications: services.notifications.toasts,
       })
@@ -107,7 +106,7 @@ describe('useGetApplication', () => {
   });
 
   it('set isLoading to true when getting the application', async () => {
-    const { result } = renderHook<string, UseGetApplication>(() =>
+    const { result } = renderHook(() =>
       useGetApplication({
         toastNotifications: services.notifications.toasts,
       })
@@ -131,7 +130,7 @@ describe('useGetApplication', () => {
       throw new Error('Something went wrong');
     });
 
-    const { result } = renderHook<string, UseGetApplication>(() =>
+    const { result } = renderHook(() =>
       useGetApplication({
         toastNotifications: services.notifications.toasts,
       })
@@ -159,7 +158,7 @@ describe('useGetApplication', () => {
   it('it displays an error when the response does not contain the correct fields', async () => {
     getApplicationMock.mockResolvedValue({});
 
-    const { result } = renderHook<string, UseGetApplication>(() =>
+    const { result } = renderHook(() =>
       useGetApplication({
         toastNotifications: services.notifications.toasts,
       })

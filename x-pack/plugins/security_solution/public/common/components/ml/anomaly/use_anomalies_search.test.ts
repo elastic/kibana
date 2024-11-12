@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
 
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
 import { useAggregatedAnomaliesByJob, AnomalyEntity } from './use_anomalies_search';
 

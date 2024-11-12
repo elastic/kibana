@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
+
+import { renderHook, act } from '@testing-library/react';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StorageContextProvider, useStorage } from '@kbn/ml-local-storage';

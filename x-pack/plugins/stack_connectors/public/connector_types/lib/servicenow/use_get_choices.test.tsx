@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useGetChoices, UseGetChoices, UseGetChoicesProps } from './use_get_choices';
+import { useGetChoices } from './use_get_choices';
 import { getChoices } from './api';
 
 jest.mock('./api');
@@ -70,7 +69,7 @@ describe('useGetChoices', () => {
   const fields = ['priority'];
 
   it('init', async () => {
-    const { result } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+    const { result } = renderHook(() =>
       useGetChoices({
         http: services.http,
         actionConnector,
@@ -89,7 +88,7 @@ describe('useGetChoices', () => {
   });
 
   it('returns an empty array when connector is not presented', async () => {
-    const { result } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+    const { result } = renderHook(() =>
       useGetChoices({
         http: services.http,
         actionConnector: undefined,
@@ -106,7 +105,7 @@ describe('useGetChoices', () => {
   });
 
   it('it calls onSuccess', async () => {
-    renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+    renderHook(() =>
       useGetChoices({
         http: services.http,
         actionConnector,
@@ -125,7 +124,7 @@ describe('useGetChoices', () => {
       serviceMessage: 'An error occurred',
     });
 
-    renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+    renderHook(() =>
       useGetChoices({
         http: services.http,
         actionConnector,
@@ -148,7 +147,7 @@ describe('useGetChoices', () => {
       throw new Error('An error occurred');
     });
 
-    renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+    renderHook(() =>
       useGetChoices({
         http: services.http,
         actionConnector,
@@ -172,7 +171,7 @@ describe('useGetChoices', () => {
       data: {},
     });
 
-    const { result } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+    const { result } = renderHook(() =>
       useGetChoices({
         http: services.http,
         actionConnector: undefined,

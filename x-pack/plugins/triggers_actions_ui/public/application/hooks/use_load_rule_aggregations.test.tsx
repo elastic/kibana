@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useLoadRuleAggregationsQuery as useLoadRuleAggregations } from './use_load_rule_aggregations_query';
 import { RuleStatus } from '../../types';
 import { useKibana } from '../../common/lib/kibana';

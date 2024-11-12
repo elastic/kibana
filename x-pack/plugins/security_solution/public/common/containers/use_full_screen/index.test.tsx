@@ -7,18 +7,17 @@
 
 import React, { useEffect } from 'react';
 import { TestProviders } from '../../mock';
-import type { RenderResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor, act, cleanup } from '@testing-library/react';
+import type { RenderHookResult } from '@testing-library/react';
+import { waitFor, act, cleanup, renderHook } from '@testing-library/react';
 import type { GlobalFullScreen } from '.';
 import { useGlobalFullScreen } from '.';
 
 describe('useFullScreen', () => {
   describe('with no data-grid present in the dom', () => {
-    let result: RenderResult<GlobalFullScreen>;
+    let result: RenderHookResult<GlobalFullScreen, unknown>['result'];
 
     test('Default values with no data grid in the dom', async () => {
-      const WrapperContainer = ({ children }: React.PropsWithChildren<{}>) => (
+      const WrapperContainer = ({ children }: React.PropsWithChildren) => (
         <div className="euiDataGrid--fullScreen">
           <TestProviders>{children}</TestProviders>
         </div>
@@ -38,7 +37,7 @@ describe('useFullScreen', () => {
   });
 
   describe('with a mock full screen data-grid in the dom', () => {
-    let result: RenderResult<GlobalFullScreen>;
+    let result: RenderHookResult<GlobalFullScreen, unknown>['result'];
 
     afterEach(() => {
       cleanup();
@@ -66,7 +65,7 @@ describe('useFullScreen', () => {
       expect(document.querySelector('.euiDataGrid__restrictBody')).toBeTruthy();
     });
     test('setting globalFullScreen to false should remove the chrome removal class and data grid remains open and full screen', async () => {
-      const WrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+      const WrapperContainer: React.FC<React.PropsWithChildren> = ({ children }) => {
         useEffect(() => {
           document.body.classList.add('euiDataGrid__restrictBody');
         }, []);

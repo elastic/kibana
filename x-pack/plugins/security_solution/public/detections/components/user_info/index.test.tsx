@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useUserInfo, ManageUserInfo } from '.';
 import type { Capabilities } from '@kbn/core/public';
 
@@ -59,7 +58,6 @@ describe('useUserInfo', () => {
       signalIndexName: null,
       signalIndexMappingOutdated: null,
     });
-    expect(result.error).toBeUndefined();
   });
 
   it('calls createSignalIndex if signal index template is outdated', async () => {
@@ -68,7 +66,7 @@ describe('useUserInfo', () => {
       name: 'mock-signal-index',
       index_mapping_outdated: true,
     });
-    const wrapper = ({ children }: { children: JSX.Element }) => (
+    const wrapper = ({ children }: React.PropsWithChildren) => (
       <TestProviders>
         <UserPrivilegesProvider
           kibanaCapabilities={{ siem: { show: true, crud: true } } as unknown as Capabilities}

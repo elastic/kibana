@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { kibanaStartMock } from '../utils/kibana_react.mock';
 import * as pluginContext from './use_plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '..';
 import { PluginContextValue } from '../context/plugin_context/plugin_context';
-import { AlertData, useFetchAlertDetail } from './use_fetch_alert_detail';
+import { useFetchAlertDetail } from './use_fetch_alert_detail';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -64,12 +63,10 @@ describe('useFetchAlertDetail', () => {
     jest.clearAllMocks();
   });
 
-  it('initially is not loading and does not have data', async () => {
-    const { result } = renderHook<string, [boolean, AlertData | null]>(() =>
-      useFetchAlertDetail(id)
-    );
+  it('initially is not loading and does not have data', () => {
+    const { result } = renderHook(() => useFetchAlertDetail(id));
 
-    expect(result.all[0]).toEqual([false, null]);
+    expect(result.current).toEqual([false, null]);
   });
 
   it('returns no data when an error occurs', async () => {
@@ -77,17 +74,13 @@ describe('useFetchAlertDetail', () => {
       throw new Error('an http error');
     });
 
-    const { result } = renderHook<string, [boolean, AlertData | null]>(() =>
-      useFetchAlertDetail('123')
-    );
+    const { result } = renderHook(() => useFetchAlertDetail('123'));
 
     await waitFor(() => expect(result.current).toEqual([false, null]));
   });
 
   it('retrieves the alert data', async () => {
-    const { result } = renderHook<string, [boolean, AlertData | null]>(() =>
-      useFetchAlertDetail(id)
-    );
+    const { result } = renderHook(() => useFetchAlertDetail(id));
 
     await waitFor(() => {
       expect(result.current[0]).toEqual(false);
@@ -171,9 +164,7 @@ describe('useFetchAlertDetail', () => {
   });
 
   it('does not populate the results when the request is canceled', async () => {
-    const { result, unmount } = renderHook<string, [boolean, AlertData | null]>(() =>
-      useFetchAlertDetail('123')
-    );
+    const { result, unmount } = renderHook(() => useFetchAlertDetail('123'));
 
     act(() => {
       unmount();

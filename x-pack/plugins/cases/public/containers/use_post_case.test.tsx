@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import * as api from './api';
 import { ConnectorTypes } from '../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';

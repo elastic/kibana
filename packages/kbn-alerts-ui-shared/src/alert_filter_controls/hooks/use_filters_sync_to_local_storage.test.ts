@@ -8,8 +8,7 @@
  */
 
 import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor, act, renderHook } from '@testing-library/react';
 import { useControlGroupSyncToLocalStorage } from './use_control_group_sync_to_local_storage';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 

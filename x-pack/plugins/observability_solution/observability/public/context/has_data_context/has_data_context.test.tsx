@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { registerDataHandler, unregisterDataHandler } from './data_handler';
@@ -22,7 +21,7 @@ const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 
 const core = coreMock.createStart();
 
-function wrapper({ children }: { children: React.ReactElement }) {
+function wrapper({ children }: React.PropsWithChildren) {
   const history = createMemoryHistory();
   return (
     <KibanaContextProvider services={{ ...core }}>

@@ -6,8 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { useCaseViewNavigation } from './use_case_view_navigation';

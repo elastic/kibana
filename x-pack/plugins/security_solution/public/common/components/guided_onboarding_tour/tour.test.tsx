@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor, act, renderHook } from '@testing-library/react';
 import { of } from 'rxjs';
 import { siemGuideId } from '../../../../common/guided_onboarding/siem_guide_config';
 import { TourContextProvider, useTourContext } from './tour';

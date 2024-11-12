@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEntitiesListQuery } from './use_entities_list_query';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
@@ -31,17 +31,14 @@ describe('useEntitiesListQuery', () => {
 
     fetchEntitiesListMock.mockResolvedValueOnce({ data: 'test data' });
 
-    const { result, waitFor } = renderHook(
-      () => useEntitiesListQuery({ ...searchParams, skip: false }),
-      {
-        wrapper: TestWrapper,
-      }
-    );
+    const { result } = renderHook(() => useEntitiesListQuery({ ...searchParams, skip: false }), {
+      wrapper: TestWrapper,
+    });
 
-    await waitFor(() => result.current.isSuccess);
-
-    expect(fetchEntitiesListMock).toHaveBeenCalledWith({ params: searchParams });
-    expect(result.current.data).toEqual({ data: 'test data' });
+    await waitFor(() => {
+      expect(fetchEntitiesListMock).toHaveBeenCalledWith({ params: searchParams });
+      expect(result.current.data).toEqual({ data: 'test data' });
+    });
   });
 
   it('should not call fetchEntitiesList if skip is true', async () => {

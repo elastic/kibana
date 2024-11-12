@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, waitFor } from '@testing-library/react';
-import { renderHook, type WrapperComponent } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject, first, lastValueFrom, of } from 'rxjs';
 
@@ -36,7 +35,7 @@ const security = {
 
 const { http, notifications } = core;
 
-const wrapper: WrapperComponent<React.PropsWithChildren<{}>> = ({ children }) => (
+const wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
   <UserProfilesKibanaProvider
     core={core}
     security={security}

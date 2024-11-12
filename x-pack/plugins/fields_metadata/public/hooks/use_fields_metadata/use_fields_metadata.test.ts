@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import { createUseFieldsMetadataHook, UseFieldsMetadataParams } from './use_fields_metadata';
 import { FindFieldsMetadataResponsePayload } from '../../../common/latest';

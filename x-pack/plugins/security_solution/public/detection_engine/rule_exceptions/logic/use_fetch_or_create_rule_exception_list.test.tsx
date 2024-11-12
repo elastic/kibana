@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import type { RenderHookResult } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import * as rulesApi from '../../rule_management/api/api';
@@ -41,8 +40,8 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   let render: (
     listType?: UseFetchOrCreateRuleExceptionListProps['exceptionListType']
   ) => RenderHookResult<
-    UseFetchOrCreateRuleExceptionListProps,
-    ReturnUseFetchOrCreateRuleExceptionList
+    ReturnUseFetchOrCreateRuleExceptionList,
+    UseFetchOrCreateRuleExceptionListProps
   >;
   const onError = jest.fn();
   const onSuccess = jest.fn();
@@ -95,15 +94,14 @@ describe('useFetchOrCreateRuleExceptionList', () => {
       .mockResolvedValue(detectionExceptionList);
 
     render = (listType = detectionListType) =>
-      renderHook<UseFetchOrCreateRuleExceptionListProps, ReturnUseFetchOrCreateRuleExceptionList>(
-        () =>
-          useFetchOrCreateRuleExceptionList({
-            http: mockKibanaHttpService,
-            ruleId,
-            exceptionListType: listType,
-            onError,
-            onSuccess,
-          })
+      renderHook(() =>
+        useFetchOrCreateRuleExceptionList({
+          http: mockKibanaHttpService,
+          ruleId,
+          exceptionListType: listType,
+          onError,
+          onSuccess,
+        })
       );
   });
 

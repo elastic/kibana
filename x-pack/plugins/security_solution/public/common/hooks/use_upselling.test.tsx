@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { SecurityPageName } from '../../../common';
@@ -36,6 +36,8 @@ const RenderWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
 
 describe('use_upselling', () => {
   test('useUpsellingComponent returns sections', () => {
+    const getSectionsValueSpy = jest.spyOn(mockUpselling, 'getSectionsValue');
+
     mockUpselling.setSections({
       entity_analytics_panel: TestComponent,
     });
@@ -44,7 +46,7 @@ describe('use_upselling', () => {
       wrapper: RenderWrapper,
     });
     expect(result.current).toBe(TestComponent);
-    expect(result.all.length).toBe(1); // assert that it should not cause unnecessary re-renders
+    expect(getSectionsValueSpy).toHaveBeenCalledTimes(1); // assert that it should not cause unnecessary re-renders
   });
 
   test('useUpsellingPage returns pages', () => {
@@ -59,6 +61,8 @@ describe('use_upselling', () => {
   });
 
   test('useUpsellingMessage returns messages', () => {
+    const getMessagesValueSpy = jest.spyOn(mockUpselling, 'getMessagesValue');
+
     const testMessage = 'test message';
     mockUpselling.setMessages({
       investigation_guide: testMessage,
@@ -68,7 +72,7 @@ describe('use_upselling', () => {
       wrapper: RenderWrapper,
     });
     expect(result.current).toBe(testMessage);
-    expect(result.all.length).toBe(1); // assert that it should not cause unnecessary re-renders
+    expect(getMessagesValueSpy).toHaveBeenCalledTimes(1); // assert that it should not cause unnecessary re-renders
   });
 
   test('useUpsellingMessage returns undefined when upsellingMessageId not found', () => {

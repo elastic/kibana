@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 
 import { mockCasesResult, parsedCasesItems } from './mock_data';
 import { useCaseItems } from './use_case_items';
@@ -53,7 +52,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 });
 
 const renderUseCaseItems = (overrides: Partial<UseCaseItemsProps> = {}) =>
-  renderHook<UseCaseItems, ReturnType<UseCaseItems>>(() =>
+  renderHook<ReturnType<UseCaseItems>, UseCaseItems>(() =>
     useCaseItems({ skip: false, ...overrides })
   );
 

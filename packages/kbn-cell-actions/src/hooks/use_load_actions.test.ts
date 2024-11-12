@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import React from 'react';
+import { waitFor, renderHook, act, screen } from '@testing-library/react';
 import { makeAction, makeActionContext } from '../mocks/helpers';
 import { useBulkLoadActions, useLoadActions, useLoadActionsFn } from './use_load_actions';
 
@@ -17,6 +17,20 @@ const mockGetActions = jest.fn();
 jest.mock('../context/cell_actions_context', () => ({
   useCellActionsContext: () => ({ getActions: mockGetActions }),
 }));
+
+class ErrorCatcher extends React.Component<React.PropsWithChildren> {
+  state: { error: Error | null } = { error: null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  render() {
+    return this.state.error
+      ? React.createElement('div', { 'data-test-subj': 'leaf-error' }, this.state.error.toString())
+      : this.props.children;
+  }
+}
 
 describe('loadActions hooks', () => {
   const actionContext = makeActionContext();
@@ -48,8 +62,12 @@ describe('loadActions hooks', () => {
 
       const { result } = renderHook(useLoadActions, {
         initialProps: actionContext,
+        wrapper: ErrorCatcher, // Error prints any received error to the screen
       });
-      await waitFor(() => expect(result.error?.message).toEqual(message));
+
+      expect(result.current.loading).toEqual(true);
+
+      await waitFor(() => expect(screen.getByTestId('leaf-error')).toBeInTheDocument());
     });
 
     it('filters out disabled actions', async () => {
@@ -95,15 +113,16 @@ describe('loadActions hooks', () => {
       const message = 'some division by 0';
       mockGetActions.mockRejectedValueOnce(new Error(message));
 
-      const { result } = renderHook(useLoadActionsFn);
+      const { result } = renderHook(useLoadActionsFn, {
+        wrapper: ErrorCatcher, // Error prints any received error to the screen
+      });
       const [_, loadActions] = result.current;
-
-      expect(result.error).toBeUndefined();
 
       act(() => {
         loadActions(actionContext);
       });
-      await waitFor(() => expect(result.error?.message).toEqual(message));
+
+      await waitFor(() => expect(screen.getByTestId('leaf-error')).toBeInTheDocument());
     });
 
     it('filters out disabled actions types', async () => {
@@ -153,8 +172,12 @@ describe('loadActions hooks', () => {
 
       const { result } = renderHook(useBulkLoadActions, {
         initialProps: actionContexts,
+        wrapper: ErrorCatcher, // Error prints any received error to the screen
       });
-      await waitFor(() => expect(result.error?.message).toEqual(message));
+
+      expect(result.current.loading).toEqual(true);
+
+      await waitFor(() => expect(screen.getByTestId('leaf-error')).toBeInTheDocument());
     });
 
     it('filters out disabled actions types', async () => {

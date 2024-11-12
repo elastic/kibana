@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useLoadConnectors } from './use_load_connectors';
 import { useLLMsModels } from './use_llms_models';
 import { LLMs } from '../types';

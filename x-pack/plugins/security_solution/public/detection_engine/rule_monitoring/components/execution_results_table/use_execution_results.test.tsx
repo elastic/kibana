@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { cleanup, waitFor } from '@testing-library/react';
+import { cleanup, waitFor, renderHook } from '@testing-library/react';
 
 import { useExecutionResults } from './use_execution_results';
 import { useToasts } from '../../../../common/lib/kibana';

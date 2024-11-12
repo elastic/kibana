@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act, type RenderHookResult } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook, act, type RenderHookResult } from '@testing-library/react';
 import { useCompletedCards } from './use_completed_cards';
 import type { OnboardingGroupConfig } from '../../../types';
 import type { OnboardingCardId } from '../../../constants';
@@ -106,8 +105,8 @@ describe('useCompletedCards Hook', () => {
 
   describe('when checkComplete functions are rejected', () => {
     let renderResult: RenderHookResult<
-      OnboardingGroupConfig[],
-      ReturnType<typeof useCompletedCards>
+      ReturnType<typeof useCompletedCards>,
+      OnboardingGroupConfig[]
     >;
     beforeEach(async () => {
       mockUseKibana.mockReturnValue({
@@ -153,8 +152,8 @@ describe('useCompletedCards Hook', () => {
 
   describe('when checkComplete functions are resolved', () => {
     let renderResult: RenderHookResult<
-      OnboardingGroupConfig[],
-      ReturnType<typeof useCompletedCards>
+      ReturnType<typeof useCompletedCards>,
+      OnboardingGroupConfig[]
     >;
     beforeEach(async () => {
       renderResult = renderHook(useCompletedCards, { initialProps: mockCardsGroupConfig });

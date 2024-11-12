@@ -25,7 +25,7 @@ import type { AppContextTestRender } from '../../../../mock/endpoint';
 import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../../mock/endpoint';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../../common/endpoint/constants';
 import { endpointMetadataHttpMocks } from '../../../../../management/pages/endpoint_hosts/mocks';
-import type { RenderHookResult } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
 import { waitFor, act } from '@testing-library/react';
 import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { HostStatus } from '../../../../../../common/endpoint/types';
@@ -62,17 +62,14 @@ describe('use responder action data hooks', () => {
 
   describe('useWithResponderActionDataFromAlert() hook', () => {
     let renderHook: () => RenderHookResult<
-      UseWithResponderActionDataFromAlertProps,
-      ResponderActionData
+      ResponderActionData,
+      UseWithResponderActionDataFromAlertProps
     >;
     let alertDetailItemData: TimelineEventsDetailsItem[];
 
     beforeEach(() => {
       renderHook = () => {
-        return appContextMock.renderHook<
-          UseWithResponderActionDataFromAlertProps,
-          ResponderActionData
-        >(() =>
+        return appContextMock.renderHook(() =>
           useWithResponderActionDataFromAlert({
             eventData: alertDetailItemData,
             onClick: onClickMock,
@@ -238,7 +235,7 @@ describe('use responder action data hooks', () => {
 
   describe('useResponderActionData() hook', () => {
     let hookProps: UseResponderActionDataProps;
-    let renderHook: () => RenderHookResult<UseResponderActionDataProps, ResponderActionData>;
+    let renderHook: () => RenderHookResult<ResponderActionData, UseResponderActionDataProps>;
 
     beforeEach(() => {
       endpointMetadataHttpMocks(appContextMock.coreStart.http);
@@ -248,9 +245,7 @@ describe('use responder action data hooks', () => {
         onClick: onClickMock,
       };
       renderHook = () => {
-        return appContextMock.renderHook<UseResponderActionDataProps, ResponderActionData>(() =>
-          useResponderActionData(hookProps)
-        );
+        return appContextMock.renderHook(() => useResponderActionData(hookProps));
       };
     });
 

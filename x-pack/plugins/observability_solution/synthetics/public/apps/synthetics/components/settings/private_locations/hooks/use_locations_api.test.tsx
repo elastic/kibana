@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { createElement } from 'react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { WrappedHelper } from '../../../../utils/testing';
 import { getServiceLocations } from '../../../../state/service_locations';
 import { setAddingNewPrivateLocation } from '../../../../state/private_locations';
@@ -25,7 +25,7 @@ describe('usePrivateLocationsAPI', () => {
 
   it('returns expected results', () => {
     const { result } = renderHook(() => usePrivateLocationsAPI(), {
-      wrapper: WrappedHelper,
+      wrapper: ({ children }) => createElement(WrappedHelper, null, children),
     });
 
     expect(result.current).toEqual(
@@ -44,7 +44,7 @@ describe('usePrivateLocationsAPI', () => {
   ]);
   it('returns expected results after data', async () => {
     const { result } = renderHook(() => usePrivateLocationsAPI(), {
-      wrapper: WrappedHelper,
+      wrapper: ({ children }) => createElement(WrappedHelper, null, children),
     });
 
     expect(result.current).toEqual(
@@ -66,7 +66,7 @@ describe('usePrivateLocationsAPI', () => {
 
   it('adds location on submit', async () => {
     const { result } = renderHook(() => usePrivateLocationsAPI(), {
-      wrapper: WrappedHelper,
+      wrapper: ({ children }) => createElement(WrappedHelper, null, children),
     });
 
     await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -98,7 +98,7 @@ describe('usePrivateLocationsAPI', () => {
 
   it('deletes location on delete', async () => {
     const { result } = renderHook(() => usePrivateLocationsAPI(), {
-      wrapper: WrappedHelper,
+      wrapper: ({ children }) => createElement(WrappedHelper, null, children),
     });
 
     await waitFor(() => new Promise((resolve) => resolve(null)));

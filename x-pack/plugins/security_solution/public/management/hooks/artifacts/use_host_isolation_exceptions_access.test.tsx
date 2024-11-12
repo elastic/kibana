@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useHostIsolationExceptionsAccess } from './use_host_isolation_exceptions_access';
 import { checkArtifactHasData } from '../../services/exceptions_list/check_artifact_has_data';
 
@@ -29,7 +29,7 @@ describe('useHostIsolationExceptionsAccess', () => {
   };
 
   test('should set access to true if canAccessHostIsolationExceptions is true', async () => {
-    const { result, waitFor } = setupHook(true, false);
+    const { result } = setupHook(true, false);
 
     await waitFor(() => expect(result.current.hasAccessToHostIsolationExceptions).toBe(true));
   });
@@ -37,7 +37,7 @@ describe('useHostIsolationExceptionsAccess', () => {
   test('should check for artifact data if canReadHostIsolationExceptions is true and canAccessHostIsolationExceptions is false', async () => {
     mockArtifactHasData();
 
-    const { result, waitFor } = setupHook(false, true);
+    const { result } = setupHook(false, true);
 
     await waitFor(() => {
       expect(checkArtifactHasData).toHaveBeenCalledWith(mockApiClient());
@@ -48,7 +48,7 @@ describe('useHostIsolationExceptionsAccess', () => {
   test('should set access to false if canReadHostIsolationExceptions is true but no artifact data exists', async () => {
     mockArtifactHasData(false);
 
-    const { result, waitFor } = setupHook(false, true);
+    const { result } = setupHook(false, true);
 
     await waitFor(() => {
       expect(checkArtifactHasData).toHaveBeenCalledWith(mockApiClient());
@@ -57,14 +57,14 @@ describe('useHostIsolationExceptionsAccess', () => {
   });
 
   test('should set access to false if neither canAccessHostIsolationExceptions nor canReadHostIsolationExceptions is true', async () => {
-    const { result, waitFor } = setupHook(false, false);
+    const { result } = setupHook(false, false);
     await waitFor(() => {
       expect(result.current.hasAccessToHostIsolationExceptions).toBe(false);
     });
   });
 
   test('should not call checkArtifactHasData if canAccessHostIsolationExceptions is true', async () => {
-    const { result, waitFor } = setupHook(true, true);
+    const { result } = setupHook(true, true);
 
     await waitFor(() => {
       expect(checkArtifactHasData).not.toHaveBeenCalled();
@@ -73,7 +73,7 @@ describe('useHostIsolationExceptionsAccess', () => {
   });
 
   test('should set loading state correctly while checking access', async () => {
-    const { result, waitFor } = setupHook(false, true);
+    const { result } = setupHook(false, true);
 
     expect(result.current.isHostIsolationExceptionsAccessLoading).toBe(true);
 

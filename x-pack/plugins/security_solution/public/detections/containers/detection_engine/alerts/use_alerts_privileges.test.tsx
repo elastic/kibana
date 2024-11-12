@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import produce from 'immer';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type { Privilege } from './types';
-import type { UseAlertsPrivelegesReturn } from './use_alerts_privileges';
 import { useAlertsPrivileges } from './use_alerts_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 
@@ -91,7 +89,7 @@ describe('useAlertsPrivileges', () => {
   });
 
   test('init', async () => {
-    const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
+    const { result } = renderHook(() => useAlertsPrivileges());
     await waitFor(() =>
       expect(result.current).toEqual({
         hasEncryptionKey: null,
@@ -113,7 +111,7 @@ describe('useAlertsPrivileges', () => {
       draft.detectionEnginePrivileges.error = new Error('Something went wrong');
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
-    const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
+    const { result } = renderHook(() => useAlertsPrivileges());
     await waitFor(() =>
       expect(result.current).toEqual({
         hasEncryptionKey: false,
@@ -139,7 +137,7 @@ describe('useAlertsPrivileges', () => {
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
-    const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
+    const { result } = renderHook(() => useAlertsPrivileges());
     await waitFor(() =>
       expect(result.current).toEqual({
         hasEncryptionKey: true,
@@ -162,7 +160,7 @@ describe('useAlertsPrivileges', () => {
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
-    const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
+    const { result } = renderHook(() => useAlertsPrivileges());
     await waitFor(() =>
       expect(result.current).toEqual({
         hasEncryptionKey: true,
@@ -186,7 +184,7 @@ describe('useAlertsPrivileges', () => {
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
-    const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
+    const { result } = renderHook(() => useAlertsPrivileges());
     await waitFor(() =>
       expect(result.current).toEqual({
         hasEncryptionKey: true,
@@ -210,7 +208,7 @@ describe('useAlertsPrivileges', () => {
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
-    const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
+    const { result } = renderHook(() => useAlertsPrivileges());
     await waitFor(() =>
       expect(result.current).toEqual({
         hasEncryptionKey: true,

@@ -9,8 +9,7 @@
 
 import { DataViewFieldBase } from '@kbn/es-query';
 import { ReactElement } from 'react';
-import { act } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 
 import { fields } from '../../fields/index.mock';
 import { useEsField } from '../use_es_field';

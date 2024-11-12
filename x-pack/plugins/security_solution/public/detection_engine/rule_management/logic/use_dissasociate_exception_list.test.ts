@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 
 import * as api from '../api/api';
 import { getRulesSchemaMock } from '../../../../common/api/detection_engine/model/rule_schema/mocks';
-import type {
-  ReturnUseDisassociateExceptionList,
-  UseDisassociateExceptionListProps,
-} from './use_disassociate_exception_list';
 import { useDisassociateExceptionList } from './use_disassociate_exception_list';
 
 const mockKibanaHttpService = coreMock.createStart().http;
@@ -34,10 +29,7 @@ describe('useDisassociateExceptionList', () => {
 
   test('initializes hook', async () => {
     await act(async () => {
-      const { result } = renderHook<
-        UseDisassociateExceptionListProps,
-        ReturnUseDisassociateExceptionList
-      >(() =>
+      const { result } = renderHook(() =>
         useDisassociateExceptionList({
           http: mockKibanaHttpService,
           ruleRuleId: 'rule_id',

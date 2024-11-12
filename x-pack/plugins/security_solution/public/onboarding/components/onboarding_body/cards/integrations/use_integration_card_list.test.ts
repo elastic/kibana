@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+
+import { renderHook } from '@testing-library/react';
 import { useIntegrationCardList } from './use_integration_card_list';
 import { trackOnboardingLinkClick } from '../../../../common/lib/telemetry';
 

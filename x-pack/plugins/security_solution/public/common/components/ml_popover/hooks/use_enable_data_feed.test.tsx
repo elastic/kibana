@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useEnableDataFeed } from './use_enable_data_feed';
 import { TestProviders } from '../../../mock';
 

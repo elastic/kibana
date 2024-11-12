@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import { useUserActionsPagination } from './use_user_actions_pagination';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
