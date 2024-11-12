@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -49,12 +49,15 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType 
     euiBorderWidthThick,
   } = theme;
 
-  const cssOverrideBase = {
-    height: euiSizeM,
-    width: euiSizeM,
-    backgroundColor: euiColorGhost,
-    display: 'inline-block',
-  };
+  const cssOverrideBase = useMemo(
+    () => ({
+      height: euiSizeM,
+      width: euiSizeM,
+      backgroundColor: euiColorGhost,
+      display: 'inline-block',
+    }),
+    [euiSizeM, euiColorGhost]
+  );
 
   return (
     <EuiFlexGroup alignItems="center" data-test-subj="mlPageDataFrameAnalyticsMapLegend">
