@@ -12,10 +12,16 @@ import {
   FIELD_TYPES,
   UseField,
   useFormContext,
+  useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { JsonFieldWrapper, MustacheTextFieldWrapper } from '@kbn/triggers-actions-ui-plugin/public';
-import { containsCommentsOrEmpty, containsTitleAndDesc, isUrlButCanBeEmpty } from '../validator';
+import {
+  containsCommentsOrEmpty,
+  containsTitleAndDesc,
+  isCreateCommentEmpty,
+  isUrlButCanBeEmpty,
+} from '../validator';
 import { casesVars, commentVars, urlVars } from '../action_variables';
 import { HTTP_VERBS } from '../webhook_connectors';
 import { styles } from './update.styles';
@@ -29,6 +35,9 @@ interface Props {
 
 export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
   const { getFieldDefaultValue } = useFormContext();
+  const [{ createCommentUrl, createCommentJson }] = useFormData({
+    watch: ['config.createCommentUrl', 'config.createCommentJson'],
+  });
 
   const hasCommentDefaultValue =
     !!getFieldDefaultValue<boolean | undefined>('config.createCommentUrl') ||
@@ -186,6 +195,13 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
                       {
                         validator: isUrlButCanBeEmpty(i18n.CREATE_COMMENT_URL_REQUIRED),
                       },
+                      {
+                        validator: isCreateCommentEmpty(
+                          'Required field',
+                          createCommentUrl,
+                          createCommentJson
+                        ),
+                      },
                     ],
                     helpText: i18n.CREATE_COMMENT_URL_HELP,
                   }}
@@ -213,6 +229,13 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
                     validations: [
                       {
                         validator: containsCommentsOrEmpty(i18n.CREATE_COMMENT_MESSAGE),
+                      },
+                      {
+                        validator: isCreateCommentEmpty(
+                          'Required field',
+                          createCommentUrl,
+                          createCommentJson
+                        ),
                       },
                     ],
                   }}
