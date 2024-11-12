@@ -18,7 +18,7 @@ describe('useGraphPreview', () => {
   it(`should return false when missing actor`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
       if (field === 'kibana.alert.original_event.id') {
-        return field;
+        return 'eventId';
       }
       return mockFieldData[field];
     };
@@ -35,7 +35,12 @@ describe('useGraphPreview', () => {
       },
     });
 
-    expect(hookResult.result.current.isAuditLog).toEqual(false);
+    const { isAuditLog, timestamp, eventIds, actorIds, action } = hookResult.result.current;
+    expect(isAuditLog).toEqual(false);
+    expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
+    expect(eventIds).toEqual(['eventId']);
+    expect(actorIds).toEqual([]);
+    expect(action).toEqual(['action']);
   });
 
   it(`should return false when missing event.action`, () => {
@@ -57,7 +62,12 @@ describe('useGraphPreview', () => {
       },
     });
 
-    expect(hookResult.result.current.isAuditLog).toEqual(false);
+    const { isAuditLog, timestamp, eventIds, actorIds, action } = hookResult.result.current;
+    expect(isAuditLog).toEqual(false);
+    expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
+    expect(eventIds).toEqual(['eventId']);
+    expect(actorIds).toEqual(['actorId']);
+    expect(action).toEqual(undefined);
   });
 
   it(`should return false when missing original_event.id`, () => {
@@ -80,7 +90,12 @@ describe('useGraphPreview', () => {
       },
     });
 
-    expect(hookResult.result.current.isAuditLog).toEqual(false);
+    const { isAuditLog, timestamp, eventIds, actorIds, action } = hookResult.result.current;
+    expect(isAuditLog).toEqual(false);
+    expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
+    expect(eventIds).toEqual([]);
+    expect(actorIds).toEqual(['actorId']);
+    expect(action).toEqual(['action']);
   });
 
   it(`should return false when timestamp is missing`, () => {
@@ -108,7 +123,12 @@ describe('useGraphPreview', () => {
       },
     });
 
-    expect(hookResult.result.current.isAuditLog).toEqual(false);
+    const { isAuditLog, timestamp, eventIds, actorIds, action } = hookResult.result.current;
+    expect(isAuditLog).toEqual(false);
+    expect(timestamp).toEqual(null);
+    expect(eventIds).toEqual(['eventId']);
+    expect(actorIds).toEqual(['actorId']);
+    expect(action).toEqual(['action']);
   });
 
   it(`should return true when alert is has graph preview`, () => {
@@ -134,7 +154,12 @@ describe('useGraphPreview', () => {
       },
     });
 
-    expect(hookResult.result.current.isAuditLog).toEqual(true);
+    const { isAuditLog, timestamp, eventIds, actorIds, action } = hookResult.result.current;
+    expect(isAuditLog).toEqual(true);
+    expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
+    expect(eventIds).toEqual(['eventId']);
+    expect(actorIds).toEqual(['actorId']);
+    expect(action).toEqual(['action']);
   });
 
   it(`should return true when alert is has graph preview with multiple values`, () => {
@@ -160,6 +185,11 @@ describe('useGraphPreview', () => {
       },
     });
 
-    expect(hookResult.result.current.isAuditLog).toEqual(true);
+    const { isAuditLog, timestamp, eventIds, actorIds, action } = hookResult.result.current;
+    expect(isAuditLog).toEqual(true);
+    expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
+    expect(eventIds).toEqual(['id1', 'id2']);
+    expect(actorIds).toEqual(['actorId1', 'actorId2']);
+    expect(action).toEqual(['action1', 'action2']);
   });
 });

@@ -43,7 +43,7 @@ export interface UseGraphPreviewResult {
   /**
    * Action associated with the event
    */
-  action: string | undefined;
+  action?: string[];
 
   /**
    * Boolean indicating if the event is an audit log (contains event ids, actor ids and action)
@@ -64,9 +64,9 @@ export const useGraphPreview = ({
   const eventIds = originalEventId ? getFieldArray(originalEventId) : getFieldArray(eventId);
 
   const actorIds = getFieldArray(getFieldsData('actor.entity.id'));
-  const action = get(['event', 'action'], ecsData);
+  const action: string[] | undefined = get(['event', 'action'], ecsData);
   const isAuditLog =
-    Boolean(timestamp) && actorIds.length > 0 && action?.length > 0 && eventIds.length > 0;
+    Boolean(timestamp) && actorIds.length > 0 && Boolean(action?.length) && eventIds.length > 0;
 
   return { timestamp, eventIds, actorIds, action, isAuditLog };
 };
