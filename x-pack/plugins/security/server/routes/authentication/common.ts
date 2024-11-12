@@ -7,7 +7,6 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { getDocLinks } from '@kbn/doc-links';
 import { i18n } from '@kbn/i18n';
 import { parseNextURL } from '@kbn/std';
 
@@ -24,8 +23,6 @@ import {
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
-
-const docLinks = getDocLinks();
 
 /**
  * Defines routes that are common to various authentication mechanisms.
