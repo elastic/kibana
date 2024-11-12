@@ -36,6 +36,7 @@ import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/com
 import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
 import { getSystemMessageFromInstructions } from '@kbn/observability-ai-assistant-plugin/server/service/util/get_system_message_from_instructions';
 import { AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/execute_connector';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 
@@ -199,7 +200,7 @@ If available, include the link of the conversation at the end of your answer.`
     (connector) => connector.actionTypeId === '.slack'
   ).length;
 
-  if (hasSlackConnector) {
+  if (hasSlackConnector && functionClient.hasFunction(EXECUTE_CONNECTOR_FUNCTION_NAME)) {
     const slackConnectorInstruction: AdHocInstruction = {
       instruction_type: 'application_instruction',
       text: dedent(
