@@ -23,6 +23,7 @@ import * as i18n from './translations';
 import { usePostObservable } from '../../containers/use_post_observables';
 import { ObservableForm } from './observable_form';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import { useCasesFeatures } from '../../common/use_cases_features';
 
 export interface AddObservableProps {
   caseData: CaseUI;
@@ -34,6 +35,7 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { isLoading, mutateAsync: postObservables } = usePostObservable(caseData.id);
   const refreshCaseViewPage = useRefreshCaseViewPage();
+  const { isObservablesEnabled } = useCasesFeatures();
 
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);
@@ -56,7 +58,17 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
 
   return permissions.create && permissions.update ? (
     <EuiFlexItem grow={false}>
-      <EuiButton data-test-subj="cases-observables-add" iconType="plusInCircle" onClick={showModal}>
+      <EuiButton
+        disabled={!isObservablesEnabled}
+        title={
+          isObservablesEnabled
+            ? undefined
+            : 'In order to assign observables to cases, you must be subscribed to an Elastic Platinum license'
+        }
+        data-test-subj="cases-observables-add"
+        iconType="plusInCircle"
+        onClick={showModal}
+      >
         {i18n.ADD_OBSERVABLE}
       </EuiButton>
       {isModalVisible && (

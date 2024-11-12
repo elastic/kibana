@@ -7,6 +7,8 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { v4 } from 'uuid';
+import Boom from '@hapi/boom';
+
 import { CaseRt } from '../../../common/types/domain';
 import {
   AddObservableRequestRt,
@@ -22,6 +24,7 @@ import type { Authorization } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { flattenCaseSavedObject } from '../../common/utils';
+import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 
 const ensureUpdateAuthorized = async (
   authorization: PublicMethodsOf<Authorization>,
@@ -45,10 +48,20 @@ export const addObservable = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService },
+    services: { caseService, licensingService },
     logger,
     authorization,
   } = clientArgs;
+
+  const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+  if (!hasPlatinumLicenseOrGreater) {
+    throw Boom.forbidden(
+      'In order to assign observables to cases, you must be subscribed to an Elastic Platinum license'
+    );
+  }
+
+  licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
   try {
     const paramArgs = decodeWithExcessOrThrow(AddObservableRequestRt)(params);

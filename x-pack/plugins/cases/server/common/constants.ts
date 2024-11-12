@@ -40,6 +40,11 @@ export const EXTERNAL_REFERENCE_REF_NAME = 'externalReferenceId';
  */
 export const LICENSING_CASE_ASSIGNMENT_FEATURE = 'Cases user assignment';
 
+/**
+ * The name of the licensing feature to notify for cases feature usage with the licensing plugin
+ */
+export const LICENSING_CASE_OBSERVABLES_FEATURE = 'Cases observable assignment';
+
 export const SEVERITY_EXTERNAL_TO_ESMODEL: Record<CaseSeverity, CasePersistedSeverity> = {
   [CaseSeverity.LOW]: CasePersistedSeverity.LOW,
   [CaseSeverity.MEDIUM]: CasePersistedSeverity.MEDIUM,
