@@ -73,11 +73,10 @@ EmptyObservablesTable.displayName = 'EmptyObservablesTable';
 
 export interface ObservablesTableProps {
   caseData: CaseUI;
-  items: Observable[];
   isLoading: boolean;
 }
 
-export const ObservablesTable = ({ caseData, items, isLoading }: ObservablesTableProps) => {
+export const ObservablesTable = ({ caseData, isLoading }: ObservablesTableProps) => {
   const filesTableRowProps = useCallback(
     (observable: Observable) => ({
       'data-test-subj': `cases-observables-table-row-${observable.id}`,
@@ -100,18 +99,18 @@ export const ObservablesTable = ({ caseData, items, isLoading }: ObservablesTabl
     </>
   ) : (
     <>
-      {items.length > 0 && (
+      {caseData.observables.length > 0 && (
         <>
           <EuiSpacer size="xl" />
           <EuiText size="xs" color="subdued" data-test-subj="cases-observables-table-results-count">
-            {i18n.SHOWING_OBSERVABLES(items.length)}
+            {i18n.SHOWING_OBSERVABLES(caseData.observables.length)}
           </EuiText>
         </>
       )}
       <EuiSpacer size="s" />
       <EuiBasicTable
         tableCaption={i18n.OBSERVABLES_TABLE}
-        items={items}
+        items={caseData.observables}
         rowHeader="name"
         columns={columns}
         data-test-subj="cases-observables-table"

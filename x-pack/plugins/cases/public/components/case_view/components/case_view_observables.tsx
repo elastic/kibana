@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
@@ -22,7 +22,14 @@ interface CaseViewObservablesProps {
 }
 
 export const CaseViewObservables = ({ caseData, isLoading }: CaseViewObservablesProps) => {
-  const caseObservables = useCaseObservables(caseData);
+  const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData);
+
+  const caseDataWithFilteredObservables: CaseUI = useMemo(() => {
+    return {
+      ...caseData,
+      observables,
+    };
+  }, [caseData, observables]);
 
   return (
     <EuiFlexGroup>
@@ -31,7 +38,10 @@ export const CaseViewObservables = ({ caseData, isLoading }: CaseViewObservables
         <EuiFlexGroup>
           <EuiFlexItem>
             <ObservablesUtilityBar caseData={caseData} />
-            <ObservablesTable caseData={caseData} isLoading={isLoading} items={caseObservables} />
+            <ObservablesTable
+              caseData={caseDataWithFilteredObservables}
+              isLoading={isLoading || isLoadingObservables}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

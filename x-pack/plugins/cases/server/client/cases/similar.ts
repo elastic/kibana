@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
 import type { CasesSimilarResponse, SimilarCasesSearchRequest } from '../../../common/types/api';
 import { SimilarCasesSearchRequestRt, CasesSimilarResponseRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
@@ -27,7 +28,8 @@ export const similar = async (
   clientArgs: CasesClientArgs
 ): Promise<CasesSimilarResponse> => {
   const {
-    services: { caseService },
+    unsecuredSavedObjectsClient,
+    services: { caseService, caseConfigureService },
     logger,
     authorization,
   } = clientArgs;
@@ -35,6 +37,17 @@ export const similar = async (
   try {
     const paramArgs = decodeWithExcessOrThrow(SimilarCasesSearchRequestRt)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
+
+    const config = await caseConfigureService.find({
+      unsecuredSavedObjectsClient,
+    });
+
+    const availableObservableTypesSet = new Set(
+      [
+        ...config.saved_objects.flatMap(({ attributes }) => attributes.observableTypes),
+        ...OBSERVABLE_TYPES_BUILTIN,
+      ].map(({ key }) => key)
+    );
 
     if (!retrievedCase.attributes.observables.length) {
       return {
@@ -50,6 +63,11 @@ export const similar = async (
 
     const similarCasesFilter = buildObservablesFieldsFilter(
       retrievedCase.attributes.observables.reduce((observableMap, observable) => {
+        // NOTE: skip non-existent observable types
+        if (!availableObservableTypesSet.has(observable.typeKey)) {
+          return observableMap;
+        }
+
         if (!observableMap[observable.typeKey]) {
           observableMap[observable.typeKey] = [];
         }

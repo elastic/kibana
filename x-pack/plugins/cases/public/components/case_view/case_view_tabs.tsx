@@ -164,14 +164,12 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
   const { features } = useCasesContext();
   const { navigateToCaseView } = useCaseViewNavigation();
   const { euiTheme } = useEuiTheme();
-  const { data: fileStatsData, isLoading } = useGetCaseFileStats({
+  const { data: fileStatsData, isLoading: isLoadingFiles } = useGetCaseFileStats({
     caseId: caseData.id,
   });
-  const caseObservables = useCaseObservables(caseData);
-  const observableStatsData = useMemo(
-    () => ({ total: caseObservables.length }),
-    [caseObservables.length]
-  );
+  const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData);
+
+  const observableStatsData = useMemo(() => ({ total: observables.length }), [observables.length]);
   const { data: similarCasesData, isFetching: isLoadingSimilarCases } = useGetSimilarCases({
     caseData,
     pageSize: 0,
@@ -205,7 +203,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         name: FILES_TAB,
         badge: (
           <FilesBadge
-            isLoading={isLoading}
+            isLoading={isLoadingFiles}
             fileStatsData={fileStatsData}
             activeTab={activeTab}
             euiTheme={euiTheme}
@@ -217,7 +215,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         name: OBSERVABLES_TAB,
         badge: (
           <ObservablesBadge
-            isLoading={isLoading}
+            isLoading={isLoadingObservables}
             observableStatsData={observableStatsData}
             activeTab={activeTab}
             euiTheme={euiTheme}
@@ -243,8 +241,9 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       caseData.totalAlerts,
       activeTab,
       euiTheme,
-      isLoading,
+      isLoadingFiles,
       fileStatsData,
+      isLoadingObservables,
       observableStatsData,
       similarCasesData?.total,
       isLoadingSimilarCases,

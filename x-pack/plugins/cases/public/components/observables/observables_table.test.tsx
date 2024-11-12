@@ -14,7 +14,6 @@ describe('ObservablesTable', () => {
   let appMock: AppMockRenderer;
   const props: ObservablesTableProps = {
     caseData: mockCase,
-    items: [],
     isLoading: false,
   };
 
