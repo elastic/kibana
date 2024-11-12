@@ -11,10 +11,6 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import type { IPivotAggsConfigPercentiles, ValidationResultErrorType } from './types';
 
-interface PercentOption {
-  label: string;
-}
-
 const ERROR_MESSAGES: Record<ValidationResultErrorType, string> = {
   INVALID_FORMAT: i18n.translate('xpack.transform.agg.popoverForm.invalidFormatError', {
     defaultMessage: 'Enter a comma-separated list of percentile',
@@ -40,7 +36,7 @@ export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent']
   const handleCreateOption = (inputValue: string) => {
     if (!isValid) return false;
 
-    const newOption: PercentOption = {
+    const newOption = {
       label: inputValue,
     };
     const updatedOptions = [...selectedOptions, newOption];
@@ -61,7 +57,7 @@ export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent']
     });
   };
 
-  const getErrorMessage = (): string | undefined => {
+  const getErrorMessage = () => {
     if (!isValid && errorMessageType) {
       return ERROR_MESSAGES[errorMessageType];
     }
