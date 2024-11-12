@@ -11,8 +11,6 @@ export const CaseObservableBaseRt = rt.strict({
   typeKey: rt.string,
   value: rt.string,
   description: rt.union([rt.string, rt.undefined]),
-  isIoc: rt.boolean,
-  hasBeenSighted: rt.boolean,
 });
 
 export const CaseObservableRt = rt.intersection([

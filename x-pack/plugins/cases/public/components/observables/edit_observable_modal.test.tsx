@@ -35,8 +35,6 @@ describe('EditObservableModal', () => {
       value: '',
       typeKey: '67ac7899-2cc0-4ce5-80d3-0f4a2d2af33e',
       id: '84279197-3746-47fb-ba4d-c7946a7feb88',
-      isIoc: false,
-      hasBeenSighted: false,
       createdAt: '2024-10-01',
       updatedAt: '2024-10-01',
       description: '',

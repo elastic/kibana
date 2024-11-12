@@ -14,8 +14,6 @@ describe('CaseObservableRt', () => {
       id: undefined,
       typeKey: 'ef528526-2af9-4345-9b78-046512c5bbd6',
       value: 'email@example.com',
-      isIoc: false,
-      hasBeenSighted: false,
       createdAt: '2024-10-01',
       updatedAt: '2024-10-01',
     };

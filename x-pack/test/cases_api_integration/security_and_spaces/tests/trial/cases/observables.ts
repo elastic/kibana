@@ -36,8 +36,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(postedCase.observables).to.eql([]);
 
         const newObservableData = {
-          isIoc: false,
-          hasBeenSighted: false,
           value: 'test',
           typeKey: '0ad4bf8e-575f-49ad-87ea-8bcafd5173e4',
           description: '',
@@ -64,8 +62,6 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
 
         const newObservableData = {
-          isIoc: false,
-          hasBeenSighted: false,
           value: 'value',
           typeKey: '0ad4bf8e-575f-49ad-87ea-8bcafd5173e4',
           description: '',
@@ -111,8 +107,6 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
 
         const newObservableData = {
-          isIoc: false,
-          hasBeenSighted: false,
           value: '{"foo": "bar"}',
           typeKey: '0ad4bf8e-575f-49ad-87ea-8bcafd5173e4',
           description: '',
@@ -156,8 +150,6 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
 
         const newObservableData = {
-          isIoc: false,
-          hasBeenSighted: false,
           value: 'test',
           typeKey: '0ad4bf8e-575f-49ad-87ea-8bcafd5173e4',
           description: '',
@@ -189,8 +181,6 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
 
         const newObservableData = {
-          isIoc: false,
-          hasBeenSighted: false,
           value: 'test',
           typeKey: '0ad4bf8e-575f-49ad-87ea-8bcafd5173e4',
           description: '',

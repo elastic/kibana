@@ -25,8 +25,6 @@ describe('similar', () => {
             typeKey: 'e47bb0d9-665a-43ea-a9aa-4d07c728e666',
             createdAt: '2024-11-07',
             updatedAt: '2024-11-07',
-            isIoc: false,
-            hasBeenSighted: false,
             description: '',
           },
         ],

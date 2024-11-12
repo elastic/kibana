@@ -11,7 +11,6 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { EuiButton, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
 import {
-  CheckBoxField,
   TextAreaField,
   SelectField,
   TextField,
@@ -44,12 +43,6 @@ const fieldsConfig = {
   description: {
     label: 'Description',
   },
-  isIoc: {
-    label: 'IOC',
-  },
-  hasBeenSighted: {
-    label: 'Has been sighted',
-  },
 };
 
 export const ObservableFormFields = memo(() => {
@@ -77,12 +70,6 @@ export const ObservableFormFields = memo(() => {
         component={TextField}
       />
       <UseField path="description" config={fieldsConfig.description} component={TextAreaField} />
-      <UseField path="isIoc" config={fieldsConfig.isIoc} component={CheckBoxField} />
-      <UseField
-        path="hasBeenSighted"
-        config={fieldsConfig.hasBeenSighted}
-        component={CheckBoxField}
-      />
     </>
   );
 });
@@ -106,8 +93,6 @@ export const ObservableForm: FC<ObservableFormProps> = ({
       typeKey: '',
       value: '',
       description: '',
-      isIoc: false,
-      hasBeenSighted: false,
     },
     options: { stripEmptyFields: false },
   });

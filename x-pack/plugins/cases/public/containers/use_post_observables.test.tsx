@@ -22,8 +22,6 @@ const observableMock: AddObservableRequest = {
   observable: {
     typeKey: '80a3cc9b-500a-45fa-909a-b4f78751726c',
     value: 'test_value',
-    isIoc: false,
-    hasBeenSighted: false,
     description: '',
   },
 };

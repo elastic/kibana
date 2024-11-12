@@ -597,8 +597,6 @@ describe('case transforms', () => {
           observables: [
             {
               id: '27318f00-334b-44b1-b29c-0cfaefbeeb8a',
-              isIoc: false,
-              hasBeenSighted: false,
               value: 'test',
               typeKey: 'c661b01e-24f5-44aa-a172-d5d219cd1bd4',
               createdAt: '2024-11-07',
@@ -616,9 +614,7 @@ describe('case transforms', () => {
           Object {
             "createdAt": "2024-11-07",
             "description": "",
-            "hasBeenSighted": false,
             "id": "27318f00-334b-44b1-b29c-0cfaefbeeb8a",
-            "isIoc": false,
             "typeKey": "c661b01e-24f5-44aa-a172-d5d219cd1bd4",
             "updatedAt": "2024-11-07",
             "value": "test",
