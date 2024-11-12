@@ -22,7 +22,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { buildEntityAlertsQuery } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { DocumentDetailsRightPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
+import { DocumentDetailsPreviewPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
@@ -30,6 +30,7 @@ import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_eng
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { SeverityBadge } from '../../../common/components/severity_badge';
+import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
 
 interface CspAlertsField {
   _id: string[];
@@ -128,26 +129,25 @@ export const AlertsDetailsTable = memo(
       }
     };
 
-    const { openFlyout } = useExpandableFlyoutApi();
+    const { openPreviewPanel } = useExpandableFlyoutApi();
 
     const handleOnEventAlertDetailPanelOpened = useCallback(
       (eventId: string, indexName: string, tableId: string) => {
-        openFlyout({
-          right: {
-            id: DocumentDetailsRightPanelKey,
-            path: { tab: 'overview' },
-            params: {
-              id: eventId,
-              indexName,
-              scopeId: tableId,
-            },
+        openPreviewPanel({
+          id: DocumentDetailsPreviewPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+            isPreviewMode: true,
+            banner: ALERT_PREVIEW_BANNER,
           },
         });
       },
-      [openFlyout]
+      [openPreviewPanel]
     );
 
-    const tableId = fieldName === 'host.name' ? TableId.hostsPageEvents : TableId.usersPageEvents;
+    const tableId = TableId.alertsOnRuleDetailsPage;
 
     const columns: Array<EuiBasicTableColumn<AlertsDetailsFields>> = [
       {
