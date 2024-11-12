@@ -170,7 +170,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Click preview tab, we know its the last one
       const tabs = await testSubjects.findAll('tab');
-      tabs[tabs.length - 1].click();
+      await tabs[tabs.length - 1].click();
       const templatePreview = await testSubjects.getVisibleText('simulateTemplatePreview');
       expect(templatePreview).to.not.contain('error');
 
