@@ -844,7 +844,7 @@
           "\nInterface for features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantKnowledgeBaseByDefault: boolean; readonly assistantModelEvaluation: boolean; }"
+          "{ readonly assistantModelEvaluation: boolean; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -2574,7 +2574,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "{ assistantKnowledgeBaseByDefault: boolean; assistantModelEvaluation: boolean; }"
+          "{ assistantModelEvaluation: boolean; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
@@ -4522,7 +4522,7 @@
           "\nDefault features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantKnowledgeBaseByDefault: false; readonly assistantModelEvaluation: false; }"
+          "{ readonly assistantModelEvaluation: false; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -4987,7 +4987,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ assistantKnowledgeBaseByDefault: Zod.ZodBoolean; assistantModelEvaluation: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantKnowledgeBaseByDefault: boolean; assistantModelEvaluation: boolean; }, { assistantKnowledgeBaseByDefault: boolean; assistantModelEvaluation: boolean; }>"
+          "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; }, { assistantModelEvaluation: boolean; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
