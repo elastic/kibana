@@ -138,6 +138,7 @@ describe('useAgentless', () => {
 describe('useSetupTechnology', () => {
   const setNewAgentPolicy = jest.fn();
   const updateAgentPoliciesMock = jest.fn();
+  const updatePackagePolicyMock = jest.fn();
   const setSelectedPolicyTabMock = jest.fn();
   const newAgentPolicyMock = {
     name: 'mock_new_agent_policy',
@@ -220,6 +221,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -250,6 +252,7 @@ describe('useSetupTechnology', () => {
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packageInfo: packageInfoMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -289,6 +292,7 @@ describe('useSetupTechnology', () => {
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packageInfo: agentlessOnlyPackageInfoMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -303,6 +307,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -334,6 +339,7 @@ describe('useSetupTechnology', () => {
         packagePolicy: packagePolicyMock,
         isEditPage: true,
         agentPolicies: [{ id: 'agentless-policy-id', supports_agentless: true } as any],
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -361,6 +367,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -400,6 +407,7 @@ describe('useSetupTechnology', () => {
       updateAgentPolicies: updateAgentPoliciesMock,
       setSelectedPolicyTab: setSelectedPolicyTabMock,
       packagePolicy: packagePolicyMock,
+      updatePackagePolicy: updatePackagePolicyMock,
     };
 
     const { result, rerender } = renderHook((props = initialProps) => useSetupTechnology(props), {
@@ -428,6 +436,7 @@ describe('useSetupTechnology', () => {
         ...packagePolicyMock,
         name: 'endpoint-2',
       },
+      updatePackagePolicy: updatePackagePolicyMock,
     });
 
     await waitFor(() => {
@@ -454,6 +463,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -480,6 +490,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -495,6 +506,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -522,6 +534,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -557,6 +570,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -577,6 +591,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -602,6 +617,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -652,6 +668,7 @@ describe('useSetupTechnology', () => {
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -696,6 +713,7 @@ describe('useSetupTechnology', () => {
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -745,6 +763,7 @@ describe('useSetupTechnology', () => {
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -790,6 +809,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -836,6 +856,7 @@ describe('useSetupTechnology', () => {
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 

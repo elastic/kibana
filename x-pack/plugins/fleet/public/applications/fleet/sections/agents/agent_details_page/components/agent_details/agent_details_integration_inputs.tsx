@@ -66,7 +66,7 @@ const StyledEuiTreeView = styled(EuiTreeView)`
 export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
   agent: Agent;
   packagePolicy: PackagePolicy;
-  linkToLogs: boolean;
+  linkToLogs?: boolean;
   'data-test-subj'?: string;
 }> = memo(({ agent, packagePolicy, linkToLogs = true, 'data-test-subj': dataTestSubj }) => {
   const { getHref } = useLink();
