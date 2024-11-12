@@ -2,13 +2,17 @@
 [[search-ai-assistant]]
 == AI Assistant
 
-
 [TIP]
 ====
 Don't confuse AI Assistant with <<playground,Playground>>! Use Playground to chat with your data, test and tweak different {es} queries in the Playground UI, and download the code to integrate into your own RAG application.
 
 Use AI Assistant to get help with Elasticsearch and Kibana tasks directly in the UI.
 ====
+
+.Observability use cases
+****
+Refer to the {observability-guide}/obs-ai-assistant.html[Observability documentation] for more information on how to use AI Assistant in Observability contexts.
+****
 
 *AI Assistant for Observability and Search* uses generative AI to help you with a variety of tasks related to Elasticsearch and Kibana, including:
 
@@ -96,7 +100,7 @@ Each object should conform to the following format:
 
 [discrete]
 [[observability-ai-assistant-add-data-to-kb]]
-==== Use {es} ingestion tools to add data
+==== Use Search connectors
 
 // Will be updated to mention reindex option for arbitrary indices
 // Need to consolidate docs with obs team first
