@@ -35,9 +35,18 @@ interface Props {
 
 export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
   const { getFieldDefaultValue } = useFormContext();
-  const [{ createCommentUrl, createCommentJson }] = useFormData({
+  // const [{ createCommentUrl, createCommentJson }] = useFormData({
+  //   watch: ['config.createCommentUrl', 'config.createCommentJson'],
+  // });
+
+  const [{ config }] = useFormData({
     watch: ['config.createCommentUrl', 'config.createCommentJson'],
   });
+
+  const createCommentUrl = config && config.createCommentUrl ? config.createCommentUrl : undefined;
+
+  const createCommentJson =
+    config && config.createCommentJson ? config.createCommentJson : undefined;
 
   const hasCommentDefaultValue =
     !!getFieldDefaultValue<boolean | undefined>('config.createCommentUrl') ||
