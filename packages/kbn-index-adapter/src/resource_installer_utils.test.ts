@@ -24,7 +24,6 @@ describe('getIndexTemplate', () => {
     expect(indexTemplate).toEqual({
       name: defaultParams.name,
       body: {
-        data_stream: { hidden: true },
         index_patterns: defaultParams.indexPatterns,
         composed_of: defaultParams.componentTemplateRefs,
         template: {
@@ -57,8 +56,17 @@ describe('getIndexTemplate', () => {
     });
   });
 
+  it('should create data stream index template with given parameters and defaults', () => {
+    const indexTemplate = getIndexTemplate({ ...defaultParams, isDataStream: true });
+    expect(indexTemplate.body).toEqual(
+      expect.objectContaining({
+        data_stream: { hidden: true },
+      })
+    );
+  });
+
   it('should create not hidden index template', () => {
-    const { body } = getIndexTemplate({ ...defaultParams, hidden: false });
+    const { body } = getIndexTemplate({ ...defaultParams, isDataStream: true, hidden: false });
     expect(body?.data_stream?.hidden).toEqual(false);
     expect(body?.template?.settings?.hidden).toEqual(false);
   });
