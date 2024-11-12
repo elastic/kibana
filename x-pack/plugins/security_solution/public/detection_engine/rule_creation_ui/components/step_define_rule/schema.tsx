@@ -42,15 +42,12 @@ import {
   THREAT_MATCH_EMPTIES,
   EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
 } from './translations';
-import { getQueryRequiredMessage } from './utils';
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
-import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
-import { indexPatternValidatorFactory } from '../../validators/index_pattern_validator_factory';
 import { queryRequiredValidatorFactory } from '../../validators/query_required_validator_factory';
 import { kueryValidatorFactory } from '../../validators/kuery_validator_factory';
 
