@@ -126,7 +126,8 @@ export function getTemplate({
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
       : []),
-    ...(appContextService.getConfig()?.eventIngestedEnabled
+    ...(!appContextService.getConfig()?.agentIdVerificationEnabled &&
+    appContextService.getConfig()?.eventIngestedEnabled
       ? [FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME]
       : []),
   ];
