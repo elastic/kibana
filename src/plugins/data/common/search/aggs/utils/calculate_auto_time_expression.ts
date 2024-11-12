@@ -14,7 +14,7 @@ import { toAbsoluteDates } from './date_interval_utils';
 import { autoInterval } from '../buckets/_interval_options';
 
 export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) {
-  return function calculateAutoTimeExpression(range: TimeRange, description: bool = false) {
+  return function calculateAutoTimeExpression(range: TimeRange, description: boolean = false) {
     const dates = toAbsoluteDates(range);
     if (!dates) {
       return;

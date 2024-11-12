@@ -8,18 +8,10 @@
 import { IndexPattern } from '../../types';
 import { getESQLForLayer } from './to_esql';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DateHistogramIndexPatternColumn } from '../..';
 
 describe('to_esql', () => {
   const { uiSettings } = createCoreSetupMock();
-
-  const data = {
-    search: {
-      aggs: {
-        calculateAutoTimeExpression: jest.fn().mockReturnValue('3h'),
-      },
-    },
-  } as unknown as DataPublicPluginStart;
 
   const layer = {
     indexPatternId: 'myIndexPattern',
@@ -67,8 +59,7 @@ describe('to_esql', () => {
         fromDate: '2021-01-01T00:00:00.000Z',
         toDate: '2021-01-01T23:59:59.999Z',
       },
-      new Date(),
-      data
+      new Date()
     );
 
     expect(esql?.esql).toEqual(
@@ -88,7 +79,7 @@ describe('to_esql', () => {
             dataType: 'date',
             isBucketed: true,
             params: { includeEmptyRows: true },
-          },
+          } as DateHistogramIndexPatternColumn,
         ],
         [
           '2',
@@ -108,8 +99,7 @@ describe('to_esql', () => {
         fromDate: '2021-01-01T00:00:00.000Z',
         toDate: '2021-01-01T23:59:59.999Z',
       },
-      new Date(),
-      data
+      new Date()
     );
 
     expect(esql?.esql).toEqual(undefined);

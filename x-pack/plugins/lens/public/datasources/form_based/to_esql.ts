@@ -7,6 +7,7 @@
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { ValueFormatConfig } from './operations/definitions/column_types';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { DateRange } from '../../../common/types';
 import { GenericIndexPatternColumn } from './form_based';
@@ -31,7 +32,7 @@ export function getESQLForLayer(
   nowInstant: Date
 ) {
   // esql mode variables
-  let partialRows = true;
+  const partialRows = true;
 
   let esql = `FROM ${indexPattern.title} | `;
   esql += `WHERE ${indexPattern.timeFieldName} >= ?_tstart AND ${indexPattern.timeFieldName} <= ?_tend | `;
@@ -63,7 +64,7 @@ export function getESQLForLayer(
         : `bucket_${index}_${aggId}`;
 
       const format =
-        col.sourceField && indexPattern.fieldFormatMap
+        'sourceField' in col && indexPattern.fieldFormatMap
           ? indexPattern.fieldFormatMap[col.sourceField]
           : undefined;
 
@@ -71,7 +72,7 @@ export function getESQLForLayer(
         {
           ...col,
           id: colId,
-          params: format,
+          params: { format: format as unknown as ValueFormatConfig },
           label: col.customLabel
             ? col.label
             : operationDefinitionMap[col.operationType].getDefaultLabel(
@@ -150,7 +151,7 @@ export function getESQLForLayer(
       if (!def.toESQL) return undefined;
 
       const format =
-        col.sourceField && indexPattern.fieldFormatMap
+        'sourceField' in col && indexPattern.fieldFormatMap
           ? indexPattern.fieldFormatMap[col.sourceField]
           : undefined;
 
@@ -158,7 +159,7 @@ export function getESQLForLayer(
         {
           ...col,
           id: colId,
-          params: format,
+          params: { format: format as unknown as ValueFormatConfig },
           label: col.customLabel
             ? col.label
             : operationDefinitionMap[col.operationType].getDefaultLabel(
@@ -179,7 +180,7 @@ export function getESQLForLayer(
           (indexPattern.timeFieldName === indexPattern.getFieldByName(column.sourceField)?.name ||
             !column.params?.ignoreTimeRange)
         ) {
-          partialRows = false;
+          return undefined;
         }
       }
 
