@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { SecuritySolutionCellRenderFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import { SecuritySolutionCellRenderFeature } from '@kbn/discover-shared-plugin/public';
 import { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 
 export const createCellRendererAccessor = async (

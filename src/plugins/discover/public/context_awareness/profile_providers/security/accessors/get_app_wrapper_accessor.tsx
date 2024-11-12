@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SecuritySolutionAppWrapperFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import { SecuritySolutionAppWrapperFeature } from '@kbn/discover-shared-plugin/public';
 
 export const createAppWrapperAccessor = async (
   appWrapperFeature?: SecuritySolutionAppWrapperFeature

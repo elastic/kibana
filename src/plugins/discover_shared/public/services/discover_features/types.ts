@@ -8,7 +8,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { PropsWithChildren, ReactElement } from 'react';
+import type { FunctionComponent, PropsWithChildren, ReactElement } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { FeaturesRegistry } from '../../../common';
 
@@ -36,7 +36,7 @@ export interface ObservabilityLogsAIAssistantFeature {
 export interface SecuritySolutionCellRenderFeature {
   id: 'security-solution-cell-render';
   getRender: () => Promise<
-    (fieldName: string) => ((props: DataGridCellValueElementProps) => ReactElement) | undefined
+    (fieldName: string) => FunctionComponent<DataGridCellValueElementProps> | undefined
   >;
 }
 
@@ -57,14 +57,14 @@ export interface SecuritySolutionReduxStoreInitFeature {
   get: () => Promise<unknown>;
 }
 
-type SecuritySolutionFeatures =
+type SecuritySolutionFeature =
   | SecuritySolutionCellRenderFeature
   | SecuritySolutionAppWrapperFeature
   | SecuritySolutionReduxStoreInitFeature;
 /** ****************************************************************************************/
 
 // This should be a union of all the available client features.
-export type DiscoverFeature = ObservabilityLogsAIAssistantFeature | SecuritySolutionFeatures;
+export type DiscoverFeature = ObservabilityLogsAIAssistantFeature | SecuritySolutionFeature;
 
 /**
  * Service types
