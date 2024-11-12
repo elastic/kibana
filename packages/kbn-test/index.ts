@@ -14,7 +14,6 @@ export { startServersCli, startServers } from './src/functional_tests/start_serv
 
 // @internal
 export { runTestsCli, runTests } from './src/functional_tests/run_tests';
-export { SamlSessionManager, type SamlSessionManagerOptions, type HostOptions } from './src/auth';
 export {
   runElasticsearch,
   runKibanaServer,
@@ -26,6 +25,12 @@ export {
 } from './src/functional_tests/lib';
 
 export { initLogsDir } from './src/functional_tests/lib';
+export {
+  SamlSessionManager,
+  type SamlSessionManagerOptions,
+  type HostOptions,
+  type GetCookieOptions,
+} from './src/auth';
 
 export type {
   CreateTestEsClusterOptions,
@@ -41,7 +46,8 @@ export {
   createRemoteEsClientForFtrConfig,
 } from './src/es';
 
-export { kbnTestConfig, UrlParts } from './kbn_test_config';
+export { kbnTestConfig } from './kbn_test_config';
+export type { UrlParts } from './kbn_test_config';
 
 export {
   kibanaServerTestUser,

@@ -38,6 +38,7 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
         field={field}
         closePopover={mockClose}
         onAddFieldToWorkspace={jest.fn()}
+        onAddBreakdownField={jest.fn()}
         onAddFilter={jest.fn()}
         onEditField={jest.fn()}
         onDeleteField={jest.fn()}
@@ -45,6 +46,9 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
     );
 
     expect(wrapper.text()).toBe(fieldName);
+    expect(
+      wrapper.find(`[data-test-subj="fieldPopoverHeader_addBreakdownField-${fieldName}"]`).exists()
+    ).toBeTruthy();
     expect(
       wrapper.find(`[data-test-subj="fieldPopoverHeader_addField-${fieldName}"]`).exists()
     ).toBeTruthy();
@@ -57,7 +61,29 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
     expect(
       wrapper.find(`[data-test-subj="fieldPopoverHeader_deleteField-${fieldName}"]`).exists()
     ).toBeTruthy();
-    expect(wrapper.find(EuiButtonIcon)).toHaveLength(4);
+    expect(wrapper.find(EuiButtonIcon)).toHaveLength(5);
+  });
+
+  it('should correctly handle add-breakdown-field action', async () => {
+    const mockClose = jest.fn();
+    const mockAddBreakdownField = jest.fn();
+    const fieldName = 'extension';
+    const field = dataView.fields.find((f) => f.name === fieldName)!;
+    const wrapper = mountWithIntl(
+      <FieldPopoverHeader
+        field={field}
+        closePopover={mockClose}
+        onAddBreakdownField={mockAddBreakdownField}
+      />
+    );
+
+    wrapper
+      .find(`[data-test-subj="fieldPopoverHeader_addBreakdownField-${fieldName}"]`)
+      .first()
+      .simulate('click');
+
+    expect(mockClose).toHaveBeenCalled();
+    expect(mockAddBreakdownField).toHaveBeenCalledWith(field);
   });
 
   it('should correctly handle add-field action', async () => {
