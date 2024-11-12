@@ -1721,12 +1721,12 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@^8.15.0":
-  version "8.15.0"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.15.0.tgz#cb29b3ae33203c545d435cf3dc4b557c8b4961d5"
-  integrity sha512-mG90EMdTDoT6GFSdqpUAhWK9LGuiJo6tOWqs0Usd/t15mPQDj7ZqHXfCBqNkASZpwPZpbAYVjd57S6nbUBINCg==
+"@elastic/elasticsearch@^8.15.1":
+  version "8.15.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.15.1.tgz#ca294ba11ed1514bf87d4a2e253b11f6cefd8552"
+  integrity sha512-L3YzSaxrasMMGtcxnktiUDjS5f177L0zpHsBH+jL0LgPhdMk9xN/VKrAaYzvri86IlV5IbveA0ANV6o/BDUmhQ==
   dependencies:
-    "@elastic/transport" "^8.7.0"
+    "@elastic/transport" "^8.8.1"
     tslib "^2.4.0"
 
 "@elastic/ems-client@8.5.3":
@@ -1748,10 +1748,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@97.3.0":
-  version "97.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-97.3.0.tgz#3961e39a6a8ac38e1af999baf0e96de8e1671943"
-  integrity sha512-Ic9DXHlh9yVumYypoLSM+plM0xBjSPc8PPRT4z5bHXLXZrLuSEVoqfix3co5yl4+ibLwfxNPCZFflbFiMl2apA==
+"@elastic/eui@97.3.1":
+  version "97.3.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-97.3.1.tgz#b0f07c603042bd359544b41829507e65f4fa3cd2"
+  integrity sha512-zJs3aaO6qjTdxJM2mPahcqaC6FfaC34yTc3qpQq7+Cbhw2xGrwx8bAfIzhttLU87mwgr59Sqv9Ojvwk8c3js7A==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -1906,10 +1906,10 @@
     undici "^5.28.3"
     yaml "^2.2.2"
 
-"@elastic/transport@^8.3.1", "@elastic/transport@^8.7.0":
-  version "8.7.0"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.7.0.tgz#006987fc5583f61c266e0b1003371e82efc7a6b5"
-  integrity sha512-IqXT7a8DZPJtqP2qmX1I2QKmxYyN27kvSW4g6pInESE1SuGwZDp2FxHJ6W2kwmYOJwQdAt+2aWwzXO5jHo9l4A==
+"@elastic/transport@^8.3.1", "@elastic/transport@^8.8.1":
+  version "8.8.1"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.8.1.tgz#d64244907bccdad5626c860b492faeef12194b1f"
+  integrity sha512-4RQIiChwNIx3B0O+2JdmTq/Qobj6+1g2RQnSv1gt4V2SVfAYjGwOKu0ZMKEHQOXYNG6+j/Chero2G9k3/wXLEw==
   dependencies:
     "@opentelemetry/api" "1.x"
     debug "^4.3.4"
@@ -8483,12 +8483,12 @@
     require-from-string "^2.0.2"
     uri-js-replace "^1.0.1"
 
-"@redocly/cli@^1.25.10":
-  version "1.25.10"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.25.10.tgz#647e33e4171d74a4f879304ba87366ac650ed83d"
-  integrity sha512-zoRMvSYOLzurcb3be5HLLlc5dLGICyHY8mueCbdE2DmLbFERhJJ5iiABKvNRJSr03AR6X569f4mraBJpAsGJnQ==
+"@redocly/cli@^1.25.11":
+  version "1.25.11"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.25.11.tgz#8ec17a6535aebfd166e8cab8ffcc9d768af1b014"
+  integrity sha512-dttBsmLnnbTlJCTa+s7Sy+qtXDq692n7Ru3nUUIHp9XdCbhXIHWhpc8uAl+GmR4MGbVe8ohATl3J+zX3aFy82A==
   dependencies:
-    "@redocly/openapi-core" "1.25.10"
+    "@redocly/openapi-core" "1.25.11"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -8513,10 +8513,10 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.16.0.tgz#4b7700a5cb6e04bc6d6fdb94b871c9e260a1fba6"
   integrity sha512-t9jnODbUcuANRSl/K4L9nb12V+U5acIHnVSl26NWrtSdDZVtoqUXk2yGFPZzohYf62cCfEQUT8ouJ3bhPfpnJg==
 
-"@redocly/openapi-core@1.25.10", "@redocly/openapi-core@^1.4.0":
-  version "1.25.10"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.25.10.tgz#6ca3f1ad1b826e3680f91752abf11aa40856f6b8"
-  integrity sha512-wcGnSonJZvjpPaJJs+qh0ADYy0aCbaNhCXhJVES9RlknMc7V9nbqLQ67lkwaXhpp/fskm9GJWL/U9Xyiuclbqw==
+"@redocly/openapi-core@1.25.11", "@redocly/openapi-core@^1.4.0":
+  version "1.25.11"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.25.11.tgz#93f168284986da6809363b001e9aa7c2104c2fc0"
+  integrity sha512-bH+a8izQz4fnKROKoX3bEU8sQ9rjvEIZOqU6qTmxlhOJ0NsKa5e+LmU18SV0oFeg5YhWQhhEDihXkvKJ1wMMNQ==
   dependencies:
     "@redocly/ajv" "^8.11.2"
     "@redocly/config" "^0.16.0"

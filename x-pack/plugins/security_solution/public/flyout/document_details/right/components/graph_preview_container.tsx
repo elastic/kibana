@@ -32,7 +32,6 @@ export const GraphPreviewContainer: React.FC = () => {
   const graphFetchQuery = useFetchGraphData({
     req: {
       query: {
-        actorIds: [],
         eventIds,
         start: DEFAULT_FROM,
         end: DEFAULT_TO,
