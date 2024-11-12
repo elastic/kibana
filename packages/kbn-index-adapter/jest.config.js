@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DataStreamAdapter } from './src/data_stream_adapter';
-export { DataStreamSpacesAdapter } from './src/data_stream_spaces_adapter';
-
-export { retryTransientEsErrors, ecsFieldMap } from '@kbn/index-adapter';
-export type {
-  SetComponentTemplateParams,
-  SetIndexTemplateParams,
-  InstallParams,
-  EcsFieldMap,
-} from '@kbn/index-adapter';
-
-export * from '@kbn/index-adapter/src/field_maps/types';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-index-adapter'],
+};

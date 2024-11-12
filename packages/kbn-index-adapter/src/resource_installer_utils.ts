@@ -19,7 +19,7 @@ import type {
 import type { FieldMap } from './field_maps/types';
 import { mappingFromFieldMap } from './field_maps/mapping_from_field_map';
 
-interface GetComponentTemplateOpts {
+export interface GetComponentTemplateOpts {
   name: string;
   fieldMap: FieldMap;
   settings?: IndicesIndexSettings;
@@ -47,7 +47,7 @@ export const getComponentTemplate = ({
   },
 });
 
-interface GetIndexTemplateOpts {
+export interface GetIndexTemplateOpts {
   name: string;
   indexPatterns: string[];
   kibanaVersion: string;
@@ -56,6 +56,7 @@ interface GetIndexTemplateOpts {
   namespace?: string;
   template?: IndicesPutIndexTemplateIndexTemplateMapping;
   hidden?: boolean;
+  isDataStream?: boolean;
 }
 
 export const getIndexTemplate = ({
@@ -67,6 +68,7 @@ export const getIndexTemplate = ({
   namespace = 'default',
   template = {},
   hidden = true,
+  isDataStream = false,
 }: GetIndexTemplateOpts): IndicesPutIndexTemplateRequest => {
   const indexMetadata: Metadata = {
     kibana: {
@@ -79,7 +81,7 @@ export const getIndexTemplate = ({
   return {
     name,
     body: {
-      data_stream: { hidden },
+      ...(isDataStream && { data_stream: { hidden } }),
       index_patterns: indexPatterns,
       composed_of: componentTemplateRefs,
       template: {

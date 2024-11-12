@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
+import type { IndexName } from '@elastic/elasticsearch/lib/api/types';
 import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import { retryTransientEsErrors } from '@kbn/index-adapter';
+import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 interface UpdateIndexMappingsOpts {
   logger: Logger;
@@ -88,7 +88,7 @@ const updateMapping = async ({ logger, esClient, indexName }: UpdateIndexOpts) =
 /**
  * Updates the data stream mapping and total field limit setting
  */
-const updateDataStreamMappings = async ({
+const updateIndexMappings = async ({
   logger,
   esClient,
   totalFieldsLimit,
@@ -107,39 +107,38 @@ const updateDataStreamMappings = async ({
   );
 };
 
-export interface CreateOrUpdateDataStreamParams {
+export interface CreateOrUpdateIndexParams {
   name: string;
   logger: Logger;
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
 }
 
-export async function createOrUpdateDataStream({
+export async function createOrUpdateIndex({
   logger,
   esClient,
   name,
   totalFieldsLimit,
-}: CreateOrUpdateDataStreamParams): Promise<void> {
-  logger.info(`Creating data stream - ${name}`);
+}: CreateOrUpdateIndexParams): Promise<void> {
+  logger.info(`Creating index - ${name}`);
 
-  // check if data stream exists
-  let dataStreamExists = false;
+  // check if index exists
+  let indexExists = false;
   try {
-    const response = await retryTransientEsErrors(
-      () => esClient.indices.getDataStream({ name, expand_wildcards: 'all' }),
+    indexExists = await retryTransientEsErrors(
+      () => esClient.indices.exists({ index: name, expand_wildcards: 'all' }),
       { logger }
     );
-    dataStreamExists = response.data_streams.length > 0;
   } catch (error) {
     if (error?.statusCode !== 404) {
-      logger.error(`Error fetching data stream for ${name} - ${error.message}`);
+      logger.error(`Error fetching index for ${name} - ${error.message}`);
       throw error;
     }
   }
 
-  // if a data stream exists, update the underlying mapping
-  if (dataStreamExists) {
-    await updateDataStreamMappings({
+  // if a index exists, update the underlying mapping
+  if (indexExists) {
+    await updateIndexMappings({
       logger,
       esClient,
       indexNames: [name],
@@ -147,95 +146,92 @@ export async function createOrUpdateDataStream({
     });
   } else {
     try {
-      await retryTransientEsErrors(() => esClient.indices.createDataStream({ name }), { logger });
+      await retryTransientEsErrors(() => esClient.indices.create({ index: name }), { logger });
     } catch (error) {
       if (error?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
-        logger.error(`Error creating data stream ${name} - ${error.message}`);
+        logger.error(`Error creating index ${name} - ${error.message}`);
         throw error;
       }
     }
   }
 }
 
-export interface CreateDataStreamParams {
+export interface CreateIndexParams {
   name: string;
   logger: Logger;
   esClient: ElasticsearchClient;
 }
 
-export async function createDataStream({
-  logger,
-  esClient,
-  name,
-}: CreateDataStreamParams): Promise<void> {
-  logger.debug(`Checking data stream exists - ${name}`);
+export async function createIndex({ logger, esClient, name }: CreateIndexParams): Promise<void> {
+  logger.debug(`Checking existence of index - ${name}`);
 
-  // check if data stream exists
-  let dataStreamExists = false;
+  // check if index exists
+  let indexExists = false;
   try {
-    const response = await retryTransientEsErrors(
-      () => esClient.indices.getDataStream({ name, expand_wildcards: 'all' }),
-      { logger }
+    indexExists = await retryTransientEsErrors(
+      () => esClient.indices.exists({ index: name, expand_wildcards: 'all' }),
+      {
+        logger,
+      }
     );
-    dataStreamExists = response.data_streams.length > 0;
   } catch (error) {
     if (error?.statusCode !== 404) {
-      logger.error(`Error fetching data stream for ${name} - ${error.message}`);
+      logger.error(`Error fetching index for ${name} - ${error.message}`);
       throw error;
     }
   }
 
-  // return if data stream already created
-  if (dataStreamExists) {
+  // return if index already created
+  if (indexExists) {
     return;
   }
-  logger.info(`Installing data stream - ${name}`);
 
+  logger.info(`Creating index - ${name}`);
   try {
-    await retryTransientEsErrors(() => esClient.indices.createDataStream({ name }), { logger });
+    await retryTransientEsErrors(() => esClient.indices.create({ index: name }), { logger });
   } catch (error) {
     if (error?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
-      logger.error(`Error creating data stream ${name} - ${error.message}`);
+      logger.error(`Error creating index ${name} - ${error.message}`);
       throw error;
     }
   }
 }
 
-export interface CreateOrUpdateSpacesDataStreamParams {
+export interface CreateOrUpdateSpacesIndexParams {
   name: string;
   logger: Logger;
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
 }
 
-export async function updateDataStreams({
+export async function updateIndices({
   logger,
   esClient,
   name,
   totalFieldsLimit,
-}: CreateOrUpdateSpacesDataStreamParams): Promise<void> {
-  logger.info(`Updating data streams - ${name}`);
+}: CreateOrUpdateSpacesIndexParams): Promise<void> {
+  logger.info(`Updating indices - ${name}`);
 
   // check if data stream exists
-  let dataStreams: IndicesDataStream[] = [];
+  let indices: IndexName[] = [];
   try {
     const response = await retryTransientEsErrors(
-      () => esClient.indices.getDataStream({ name, expand_wildcards: 'all' }),
+      () => esClient.indices.get({ index: name, expand_wildcards: 'all' }),
       { logger }
     );
-    dataStreams = response.data_streams;
+    indices = Object.keys(response);
   } catch (error) {
     if (error?.statusCode !== 404) {
-      logger.error(`Error fetching data stream for ${name} - ${error.message}`);
+      logger.error(`Error fetching indices for ${name} - ${error.message}`);
       throw error;
     }
   }
-  if (dataStreams.length > 0) {
-    await updateDataStreamMappings({
+  if (indices.length > 0) {
+    await updateIndexMappings({
       logger,
       esClient,
       totalFieldsLimit,
-      indexNames: dataStreams.map((dataStream) => dataStream.name),
+      indexNames: indices,
     });
   }
 }
