@@ -119,6 +119,7 @@ export const isReturnType = (str: string | FunctionParameterType): str is Functi
 
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval';
+  preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;
   alias?: string[];
