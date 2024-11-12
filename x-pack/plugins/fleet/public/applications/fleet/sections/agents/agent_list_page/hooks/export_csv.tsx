@@ -43,7 +43,7 @@ export function useExportCSV(
   }, []);
 
   // TODO pass columns from Agent list UI
-  // TODO how to set readable column names?
+  // TODO set readable column names
   const columns = [
     { field: 'agent.id' },
     { field: 'status' },
