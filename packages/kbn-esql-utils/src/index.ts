@@ -31,5 +31,10 @@ export {
   getStartEndParams,
   hasStartEndParams,
 } from './utils/run_query';
-export { isESQLColumnSortable, isESQLColumnGroupable } from './utils/esql_fields_utils';
+export {
+  isESQLColumnSortable,
+  isESQLColumnGroupable,
+  isESQLFieldGroupable,
+} from './utils/esql_fields_utils';
 export { sanitazeESQLInput } from './utils/sanitaze_input';
+

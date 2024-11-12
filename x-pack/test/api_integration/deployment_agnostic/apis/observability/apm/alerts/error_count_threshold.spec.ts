@@ -10,29 +10,30 @@ import { errorCountActionVariables } from '@kbn/apm-plugin/server/routes/alerts/
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { RoleCredentials, SupertestWithRoleScopeType } from '../../../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  createApmRule,
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
   ApmAlertFields,
-  createIndexConnector,
   getIndexAction,
-} from './helpers/alerting_api_helper';
-import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
-import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
-import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
-import { waitForActiveRule } from './helpers/wait_for_active_rule';
+  APM_ACTION_VARIABLE_INDEX,
+  APM_ALERTS_INDEX,
+} from './helpers/alerting_helper';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const supertest = getService('supertest');
-  const es = getService('es');
-  const logger = getService('log');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
+  const alertingApi = getService('alertingApi');
+  const samlAuth = getService('samlAuth');
 
-  registry.when('error count threshold alert', { config: 'basic', archives: [] }, () => {
+  describe('error count threshold alert', () => {
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
+    let roleAuthc: RoleCredentials;
+
     const javaErrorMessage = 'a java error';
     const phpErrorMessage = 'a php error';
 
@@ -50,7 +51,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ],
     };
 
-    before(() => {
+    before(async () => {
+      supertestViewerWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'viewer',
+        {
+          withInternalHeaders: true,
+          useCookieHeader: true,
+        }
+      );
+
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -95,13 +106,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ];
         });
 
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+
       return Promise.all([
         apmSynthtraceEsClient.index(events),
         apmSynthtraceEsClient.index(phpEvents),
       ]);
     });
 
-    after(() => apmSynthtraceEsClient.clean());
+    after(async () => {
+      await apmSynthtraceEsClient.clean();
+      await supertestViewerWithCookieCredentials.destroy();
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
 
     describe('create rule without kql filter', () => {
       let ruleId: string;
@@ -109,31 +126,58 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let actionId: string;
 
       before(async () => {
-        actionId = await createIndexConnector({ supertest, name: 'Transation error count' });
+        actionId = await alertingApi.createIndexConnector({
+          name: 'Transation error count',
+          indexName: APM_ACTION_VARIABLE_INDEX,
+          roleAuthc,
+        });
+
         const indexAction = getIndexAction({
           actionId,
           actionVariables: errorCountActionVariables,
         });
-        const createdRule = await createApmRule({
-          supertest,
+
+        const createdRule = await alertingApi.createRule({
           ruleTypeId: ApmRuleType.ErrorCount,
           name: 'Apm error count without kql query',
+          consumer: 'apm',
+          schedule: {
+            interval: '1m',
+          },
+          tags: ['apm'],
           params: {
             ...ruleParams,
           },
           actions: [indexAction],
+          roleAuthc,
         });
 
         ruleId = createdRule.id;
-        alerts = await waitForAlertsForRule({ es, ruleId, minimumAlertCount: 2 });
+        alerts = (
+          await alertingApi.waitForDocumentInIndex({
+            indexName: APM_ALERTS_INDEX,
+            ruleId,
+            docCountTarget: 2,
+          })
+        ).hits.hits.map((hit) => hit._source) as ApmAlertFields[];
       });
 
-      after(async () => {
-        await cleanupRuleAndAlertState({ es, supertest, logger });
-      });
+      after(() =>
+        alertingApi.cleanUpAlerts({
+          roleAuthc,
+          ruleId,
+          alertIndexName: APM_ALERTS_INDEX,
+          connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+          consumer: 'apm',
+        })
+      );
 
       it('checks if rule is active', async () => {
-        const ruleStatus = await waitForActiveRule({ ruleId, supertest });
+        const ruleStatus = await alertingApi.waitForRuleStatus({
+          ruleId,
+          roleAuthc,
+          expectedStatus: 'active',
+        });
         expect(ruleStatus).to.be('active');
       });
 
@@ -141,7 +185,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let results: Array<Record<string, string>>;
 
         before(async () => {
-          results = await waitForIndexConnectorResults({ es, minCount: 2 });
+          await alertingApi.waitForRuleStatus({
+            ruleId,
+            roleAuthc,
+            expectedStatus: 'active',
+          });
+
+          results = (
+            await alertingApi.waitForDocumentInIndex({
+              indexName: APM_ACTION_VARIABLE_INDEX,
+              docCountTarget: 2,
+            })
+          ).hits.hits.map((hit) => hit._source) as Array<Record<string, string>>;
         });
 
         it('produces a index action document for each service', async () => {
@@ -149,6 +204,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             'opbeans-java',
             'opbeans-php',
           ]);
+        });
+
+        it('checks if rule is active', async () => {
+          const ruleStatus = await alertingApi.waitForRuleStatus({
+            ruleId,
+            roleAuthc,
+            expectedStatus: 'active',
+          });
+          expect(ruleStatus).to.be('active');
         });
 
         it('has the right keys', async () => {
@@ -170,7 +234,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('has the right values', () => {
           const phpEntry = results.find((result) => result.serviceName === 'opbeans-php')!;
-          expect(omit(phpEntry, 'alertDetailsUrl')).to.eql({
+          expect(omit(phpEntry, 'alertDetailsUrl', 'viewInAppUrl')).to.eql({
             environment: 'production',
             interval: '1 hr',
             reason:
@@ -181,9 +245,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             errorGroupingName: 'a php error',
             threshold: '1',
             triggerValue: '30',
-            viewInAppUrl:
-              'http://mockedPublicBaseUrl/app/apm/services/opbeans-php/errors?environment=production',
           });
+
+          const url = new URL(phpEntry.viewInAppUrl);
+
+          expect(url.pathname).to.equal('/app/apm/services/opbeans-php/errors');
+          expect(url.searchParams.get('environment')).to.equal('production');
         });
       });
 
@@ -255,30 +322,48 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let ruleId: string;
 
       before(async () => {
-        const createdRule = await createApmRule({
-          supertest,
+        const createdRule = await alertingApi.createRule({
           ruleTypeId: ApmRuleType.ErrorCount,
           name: 'Apm error count with kql query',
+          consumer: 'apm',
+          schedule: {
+            interval: '1m',
+          },
+          tags: ['apm'],
           params: {
+            ...ruleParams,
             searchConfiguration: {
               query: {
                 query: 'service.name: opbeans-php',
                 language: 'kuery',
               },
             },
-            ...ruleParams,
           },
           actions: [],
+          roleAuthc,
         });
+
         ruleId = createdRule.id;
       });
 
-      after(async () => {
-        await cleanupRuleAndAlertState({ es, supertest, logger });
-      });
+      after(() =>
+        alertingApi.cleanUpAlerts({
+          roleAuthc,
+          ruleId,
+          alertIndexName: APM_ALERTS_INDEX,
+          connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+          consumer: 'apm',
+        })
+      );
 
       it('produces one alert for the opbeans-php service', async () => {
-        const alerts = await waitForAlertsForRule({ es, ruleId });
+        const alerts = (
+          await alertingApi.waitForDocumentInIndex({
+            indexName: APM_ALERTS_INDEX,
+            ruleId,
+          })
+        ).hits.hits.map((hit) => hit._source) as ApmAlertFields[];
+
         expect(alerts[0]['kibana.alert.reason']).to.be(
           'Error count is 30 in the last 1 hr for service: opbeans-php, env: production, name: tx-php, error key: 000000000000000000000a php error, error name: a php error. Alert when > 1.'
         );
