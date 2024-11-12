@@ -357,7 +357,7 @@ export function RuleConditionChart({
     };
 
     const firstMetricAggMap = aggMap && metrics.length > 0 ? aggMap[metrics[0].name] : undefined;
-    const firstMetricAggType = metrics.length > 0 ? metrics[0].aggType : undefined;
+    const convertToMaxOperation = ['counter_rate', 'last_value', 'percentile'];
 
     const orderParams: TopValuesOrderParams = firstMetricAggMap
       ? {
@@ -366,24 +366,12 @@ export function RuleConditionChart({
           orderAgg: {
             label: firstMetricAggMap.operationWithField,
             dataType: 'number',
-            operationType:
-              firstMetricAggMap.operation === 'counter_rate' ||
-              firstMetricAggMap.operation === 'last_value'
-                ? 'max'
-                : firstMetricAggMap.operation,
+            operationType: convertToMaxOperation.includes(firstMetricAggMap.operation)
+              ? 'max'
+              : firstMetricAggMap.operation,
             sourceField: firstMetricAggMap.sourceField,
             isBucketed: false,
             scale: 'ratio',
-            params:
-              firstMetricAggType === 'p99'
-                ? {
-                    percentile: 99,
-                  }
-                : firstMetricAggType === 'p95'
-                ? {
-                    percentile: 95,
-                  }
-                : undefined,
           },
         }
       : undefined;
