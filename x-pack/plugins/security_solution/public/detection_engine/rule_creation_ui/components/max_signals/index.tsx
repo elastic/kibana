@@ -8,11 +8,15 @@
 import React, { useMemo, useCallback } from 'react';
 import type { EuiFieldNumberProps } from '@elastic/eui';
 import { EuiTextColor, EuiFormRow, EuiFieldNumber, EuiIcon } from '@elastic/eui';
-import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  getFieldValidityAndErrorMessage,
+  type FieldHook,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { css } from '@emotion/css';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
+import { MIN_VALUE } from '../../validators/max_signals_validator_factory';
 
 interface MaxSignalsFieldProps {
   dataTestSubj: string;
@@ -35,12 +39,7 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
   const { alerting } = useKibana().services;
   const maxAlertsPerRun = alerting.getMaxAlertsPerRun();
 
-  const [isInvalid, error] = useMemo(() => {
-    if (typeof value === 'number' && !isNaN(value) && value <= 0) {
-      return [true, i18n.GREATER_THAN_ERROR];
-    }
-    return [false];
-  }, [value]);
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   const hasWarning = useMemo(
     () => typeof value === 'number' && !isNaN(value) && value > maxAlertsPerRun,
@@ -67,6 +66,8 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
     return textToRender;
   }, [hasWarning, maxAlertsPerRun]);
 
+  const describedByIds = useMemo(() => (idAria ? [idAria] : undefined), [idAria]);
+
   return (
     <EuiFormRow
       css={css`
@@ -74,13 +75,13 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
           width: ${MAX_SIGNALS_FIELD_WIDTH}px;
         }
       `}
-      describedByIds={idAria ? [idAria] : undefined}
+      describedByIds={describedByIds}
       fullWidth
       helpText={helpText}
       label={field.label}
       labelAppend={field.labelAppend}
       isInvalid={isInvalid}
-      error={error}
+      error={errorMessage}
     >
       <EuiFieldNumber
         isInvalid={isInvalid}
@@ -91,6 +92,7 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
         data-test-subj={dataTestSubj}
         disabled={isDisabled}
         append={hasWarning ? <EuiIcon size="s" type="warning" color="warning" /> : undefined}
+        min={MIN_VALUE}
       />
     </EuiFormRow>
   );

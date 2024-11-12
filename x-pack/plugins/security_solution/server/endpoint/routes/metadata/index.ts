@@ -54,7 +54,12 @@ export function registerEndpointRoutes(
     .get({
       access: 'public',
       path: HOST_METADATA_LIST_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -99,7 +104,12 @@ export function registerEndpointRoutes(
     .get({
       access: 'public',
       path: METADATA_TRANSFORMS_STATUS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
       // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
       deprecated: true,
     })
@@ -119,7 +129,12 @@ export function registerEndpointRoutes(
     .get({
       access: 'internal',
       path: METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
