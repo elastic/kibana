@@ -56,7 +56,7 @@ export const drop = (dropTarget: JQuery<HTMLElement>) => {
     .wait(300);
 };
 
-const getUserValue = (taskName: string, role: string = 'admin') => {
+const getUserValue = (taskName: 'getFullname' | 'getUsername', role: string = 'admin') => {
   if (Cypress.env('IS_SERVERLESS')) {
     return cy.task(taskName, role);
   } else {

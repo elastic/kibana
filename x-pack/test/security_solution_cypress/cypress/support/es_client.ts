@@ -20,6 +20,10 @@ export const esClient = (
     password: config.env.ELASTICSEARCH_PASSWORD,
   };
 
+  /*
+  system_indices_superuser is a user created for testing purposes (an operator one) that does not have restrictions,
+  that user is the one used on ESS and stateless environments to access internal indexes directly and does not exist on MKI environments. 
+  */
   const authOverride = isServerless ? (isCloudServerless ? user : systemIndicesSuperuser) : user;
 
   const client = createEsClient({
