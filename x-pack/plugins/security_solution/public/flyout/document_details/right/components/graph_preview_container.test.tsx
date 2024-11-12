@@ -14,14 +14,13 @@ import { GraphPreviewContainer } from './graph_preview_container';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
 import { useGraphPreview } from '../hooks/use_graph_preview';
 import { useFetchGraphData } from '../hooks/use_fetch_graph_data';
-
 import {
   EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '@kbn/security-solution-common';
+} from '../../../shared/components/test_ids';
 
 jest.mock('../hooks/use_graph_preview');
 jest.mock('../hooks/use_fetch_graph_data', () => ({

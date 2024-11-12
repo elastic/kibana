@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const routeMethods = ['get', 'put', 'delete', 'post'];
+const routeMethods = ['get', 'put', 'delete', 'post', 'patch'];
 const ACCESS_TAG_PREFIX = 'access:';
 
 const isStringLiteral = (el) => el.type === 'Literal' && typeof el.value === 'string';
