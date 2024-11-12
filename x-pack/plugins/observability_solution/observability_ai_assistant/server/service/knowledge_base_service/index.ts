@@ -20,6 +20,7 @@ import {
 import { getAccessQuery } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
 import {
+  AI_ASSISTANT_KB_INFERENCE_ID,
   createInferenceEndpoint,
   deleteInferenceEndpoint,
   getInferenceEndpoint,
@@ -463,9 +464,11 @@ export class KnowledgeBaseService {
       return { ready: false, enabled, errorMessage };
     }
 
-    const elserModelStats = modelStats.trained_model_stats[0];
-    const deploymentState = elserModelStats.deployment_stats?.state;
-    const allocationState = elserModelStats.deployment_stats?.allocation_status.state;
+    const elserModelStats = modelStats.trained_model_stats.find(
+      (stats) => stats.deployment_stats?.deployment_id === AI_ASSISTANT_KB_INFERENCE_ID
+    );
+    const deploymentState = elserModelStats?.deployment_stats?.state;
+    const allocationState = elserModelStats?.deployment_stats?.allocation_status.state;
     const ready = deploymentState === 'started' && allocationState === 'fully_allocated';
 
     this.dependencies.logger.debug(

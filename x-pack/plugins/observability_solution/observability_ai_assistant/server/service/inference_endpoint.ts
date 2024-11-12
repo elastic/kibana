@@ -33,17 +33,23 @@ export async function createInferenceEndpoint({
 }) {
   try {
     logger.debug(`Creating inference endpoint "${AI_ASSISTANT_KB_INFERENCE_ID}"`);
-    return await esClient.asCurrentUser.transport.request<CreateInferenceEndpointResponse>(
+
+    return await esClient.asCurrentUser.inference.put(
       {
-        method: 'PUT',
-        path: `_inference/sparse_embedding/${AI_ASSISTANT_KB_INFERENCE_ID}`,
-        body: {
+        inference_id: AI_ASSISTANT_KB_INFERENCE_ID,
+        task_type: 'sparse_embedding',
+        inference_config: {
           service: 'elasticsearch',
           service_settings: {
             model_id: modelId,
-            num_allocations: 1,
+            adaptive_allocations: {
+              enabled: true,
+              min_number_of_allocations: 0,
+              max_number_of_allocations: 8,
+            },
             num_threads: 1,
           },
+          task_settings: {},
         },
       },
       {
@@ -68,12 +74,9 @@ export async function deleteInferenceEndpoint({
   logger: Logger;
 }) {
   try {
-    const response = await esClient.asCurrentUser.transport.request({
-      method: 'DELETE',
-      path: `_inference/sparse_embedding/${AI_ASSISTANT_KB_INFERENCE_ID}`,
-      querystring: {
-        force: true, // Deletes the endpoint regardless if it’s used in an inference pipeline or a in a semantic_text field.
-      },
+    const response = await esClient.asCurrentUser.inference.delete({
+      inference_id: AI_ASSISTANT_KB_INFERENCE_ID,
+      force: true,
     });
 
     return response;
@@ -104,9 +107,8 @@ export async function getInferenceEndpoint({
   logger: Logger;
 }) {
   try {
-    const response = await esClient.asInternalUser.transport.request<InferenceEndpointResponse>({
-      method: 'GET',
-      path: `_inference/sparse_embedding/${AI_ASSISTANT_KB_INFERENCE_ID}`,
+    const response = await esClient.asInternalUser.inference.get({
+      inference_id: AI_ASSISTANT_KB_INFERENCE_ID,
     });
 
     if (response.endpoints.length > 0) {

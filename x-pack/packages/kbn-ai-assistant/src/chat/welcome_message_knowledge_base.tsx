@@ -151,7 +151,10 @@ export function WelcomeMessageKnowledgeBase({
                   panelPaddingSize="none"
                   closePopover={handleClosePopover}
                 >
-                  <WelcomeMessageKnowledgeBaseSetupErrorPanel onRetryInstall={handleRetryInstall} />
+                  <WelcomeMessageKnowledgeBaseSetupErrorPanel
+                    knowledgeBase={knowledgeBase}
+                    onRetryInstall={handleRetryInstall}
+                  />
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>

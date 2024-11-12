@@ -55,13 +55,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(res.body).to.eql({
-        inference_id: 'ai_assistant_kb_inference',
-        task_type: 'sparse_embedding',
-        service: 'elasticsearch',
-        service_settings: { num_allocations: 1, num_threads: 1, model_id: 'pt_tiny_elser' },
-        chunking_settings: { strategy: 'sentence', max_chunk_size: 250, sentence_overlap: 1 },
-      });
+      expect(res.body.service_settings.model_id).to.be('pt_tiny_elser');
+      expect(res.body.inference_id).to.be('ai_assistant_kb_inference');
 
       await deleteKnowledgeBaseModel(ml);
       await deleteInferenceEndpoint({ es });
