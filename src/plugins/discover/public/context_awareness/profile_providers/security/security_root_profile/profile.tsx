@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { FunctionComponent, PropsWithChildren, useMemo } from 'react';
 import { CustomCellRenderer, DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { RootProfileProvider, SolutionType } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
 import { SecurityProfileProviderFactory } from '../types';
 import { createCellRendererAccessor } from '../accessors/get_cell_renderer_accessor';
-import { createAppWrapperAccessor } from '../accessors/get_app_wrapper_accessor';
+import { createAppWrapperAccessor } from '../accessors/create_app_wrapper_accessor';
 
 interface SecurityRootProfileContext {
   store?: unknown;
-  appWrapper?: (props: { children?: React.ReactNode }) => JSX.Element;
+  appWrapper?: FunctionComponent<PropsWithChildren<{}>>;
   getCellRenderer?: (
     fieldName: string
   ) => FunctionComponent<DataGridCellValueElementProps> | undefined;

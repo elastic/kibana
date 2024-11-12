@@ -8,7 +8,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { FunctionComponent, PropsWithChildren, ReactElement } from 'react';
+import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { FeaturesRegistry } from '../../../common';
 
@@ -40,14 +40,14 @@ export interface SecuritySolutionCellRenderFeature {
   >;
 }
 
-interface SecuritySolutionAppWrapperFeatureArgs {
+export interface SecuritySolutionAppWrapperFeatureArgs {
   store: unknown;
 }
 
 export interface SecuritySolutionAppWrapperFeature {
   id: 'security-solution-app-wrapper';
   getWrapper: () => Promise<
-    (args: SecuritySolutionAppWrapperFeatureArgs) => (props: PropsWithChildren<{}>) => ReactElement
+    (args: SecuritySolutionAppWrapperFeatureArgs) => FunctionComponent<PropsWithChildren<{}>>
   >;
 }
 
@@ -57,7 +57,7 @@ export interface SecuritySolutionReduxStoreInitFeature {
   get: () => Promise<unknown>;
 }
 
-type SecuritySolutionFeature =
+export type SecuritySolutionFeature =
   | SecuritySolutionCellRenderFeature
   | SecuritySolutionAppWrapperFeature
   | SecuritySolutionReduxStoreInitFeature;
