@@ -12,6 +12,23 @@ import { DateHistogramIndexPatternColumn } from '../..';
 
 describe('to_esql', () => {
   const { uiSettings } = createCoreSetupMock();
+  uiSettings.get.mockImplementation((key: string) => {
+    if (key === 'dateFormat') {
+      return 'MMM D, YYYY @ HH:mm:ss.SSS';
+    }
+    if (key === 'dateFormat:scaled') {
+      return [[]];
+    }
+    if (key === 'dateFormat:tz') {
+      return 'Browser';
+    }
+    if (key === 'histogram:barTarget') {
+      return 50;
+    }
+    if (key === 'histogram:maxBars') {
+      return 100;
+    }
+  });
 
   const layer = {
     indexPatternId: 'myIndexPattern',
@@ -39,6 +56,7 @@ describe('to_esql', () => {
             label: 'Date histogram',
             dataType: 'date',
             isBucketed: true,
+            interval: 'auto',
           },
         ],
         [
@@ -63,7 +81,7 @@ describe('to_esql', () => {
     );
 
     expect(esql?.esql).toEqual(
-      'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(order_date, 3h) | SORT order_date ASC'
+      'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(`order_date`, 30 minutes) | SORT order_date ASC'
     );
   });
 
