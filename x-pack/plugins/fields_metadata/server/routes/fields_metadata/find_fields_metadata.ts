@@ -27,7 +27,8 @@ export const initFindFieldsMetadataRoute = ({
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason:
+              'This route is opted out from authorization to keep available the access to static fields metadata such as ECS fields. For other sources (fleet integrations), appropriate checks are performed at the API level.',
           },
         },
         validate: {
