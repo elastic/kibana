@@ -11,27 +11,24 @@ import { transactionDurationActionVariables } from '@kbn/apm-plugin/server/route
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { RoleCredentials, SupertestWithRoleScopeType } from '../../../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  createApmRule,
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
   ApmAlertFields,
-  createIndexConnector,
   getIndexAction,
-} from './helpers/alerting_api_helper';
-import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
-import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
-import { waitForActiveRule } from './helpers/wait_for_active_rule';
-import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
+  APM_ACTION_VARIABLE_INDEX,
+  APM_ALERTS_INDEX,
+} from './helpers/alerting_helper';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const supertest = getService('supertest');
-  const es = getService('es');
-  const logger = getService('log');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
+  const alertingApi = getService('alertingApi');
+  const samlAuth = getService('samlAuth');
 
   const ruleParams = {
     threshold: 3000,
@@ -44,8 +41,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
   };
 
-  registry.when('transaction duration alert', { config: 'basic', archives: [] }, () => {
-    before(() => {
+  describe('transaction duration alert', () => {
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
+    let roleAuthc: RoleCredentials;
+
+    before(async () => {
+      supertestViewerWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'viewer',
+        {
+          withInternalHeaders: true,
+          useCookieHeader: true,
+        }
+      );
+
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -68,11 +79,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .success(),
           ];
         });
+
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
       return apmSynthtraceEsClient.index(events);
     });
 
     after(async () => {
       await apmSynthtraceEsClient.clean();
+      await supertestViewerWithCookieCredentials.destroy();
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('create rule for opbeans-java without kql filter', () => {
@@ -81,31 +96,55 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let alerts: ApmAlertFields[];
 
       before(async () => {
-        actionId = await createIndexConnector({ supertest, name: 'Transation duration' });
+        actionId = await alertingApi.createIndexConnector({
+          name: 'Transation duration',
+          indexName: APM_ACTION_VARIABLE_INDEX,
+          roleAuthc,
+        });
         const indexAction = getIndexAction({
           actionId,
           actionVariables: transactionDurationActionVariables,
         });
 
-        const createdRule = await createApmRule({
-          supertest,
+        const createdRule = await alertingApi.createRule({
           ruleTypeId: ApmRuleType.TransactionDuration,
           name: 'Apm transaction duration without kql filter',
+          consumer: 'apm',
+          schedule: {
+            interval: '1m',
+          },
+          tags: ['apm'],
           params: {
             ...ruleParams,
           },
           actions: [indexAction],
+          roleAuthc,
         });
         ruleId = createdRule.id;
-        alerts = await waitForAlertsForRule({ es, ruleId });
+        alerts = (
+          await alertingApi.waitForDocumentInIndex({
+            indexName: APM_ALERTS_INDEX,
+            ruleId,
+          })
+        ).hits.hits.map((hit) => hit._source) as ApmAlertFields[];
       });
 
-      after(async () => {
-        await cleanupRuleAndAlertState({ es, supertest, logger });
-      });
+      after(() =>
+        alertingApi.cleanUpAlerts({
+          roleAuthc,
+          ruleId,
+          alertIndexName: APM_ALERTS_INDEX,
+          connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+          consumer: 'apm',
+        })
+      );
 
       it('checks if rule is active', async () => {
-        const ruleStatus = await waitForActiveRule({ ruleId, supertest });
+        const ruleStatus = await alertingApi.waitForRuleStatus({
+          ruleId,
+          roleAuthc,
+          expectedStatus: 'active',
+        });
         expect(ruleStatus).to.be('active');
       });
 
@@ -113,7 +152,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let results: Array<Record<string, string>>;
 
         before(async () => {
-          results = await waitForIndexConnectorResults({ es });
+          results = results = (
+            await alertingApi.waitForDocumentInIndex({
+              indexName: APM_ACTION_VARIABLE_INDEX,
+            })
+          ).hits.hits.map((hit) => hit._source) as Array<Record<string, string>>;
         });
 
         it('populates the action connector index with every action variable', async () => {
@@ -133,7 +176,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('populates the document with the correct values', async () => {
-          expect(omit(results[0], 'alertDetailsUrl')).to.eql({
+          expect(omit(results[0], 'alertDetailsUrl', 'viewInAppUrl')).to.eql({
             environment: 'production',
             interval: '5 mins',
             reason:
@@ -143,9 +186,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             transactionName: 'tx-java',
             threshold: '3000',
             triggerValue: '5,000 ms',
-            viewInAppUrl:
-              'http://mockedPublicBaseUrl/app/apm/services/opbeans-java?transactionType=request&environment=production',
           });
+
+          const url = new URL(results[0].viewInAppUrl);
+
+          expect(url.pathname).to.equal('/app/apm/services/opbeans-java');
+          expect(url.searchParams.get('transactionType')).to.equal('request');
+          expect(url.searchParams.get('environment')).to.equal('production');
         });
       });
 
@@ -192,10 +239,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let alerts: ApmAlertFields[];
 
       beforeEach(async () => {
-        const createdRule = await createApmRule({
-          supertest,
+        const createdRule = await alertingApi.createRule({
           ruleTypeId: ApmRuleType.TransactionDuration,
           name: 'Apm transaction duration with kql filter',
+          consumer: 'apm',
+          schedule: {
+            interval: '1m',
+          },
+          tags: ['apm'],
           params: {
             searchConfiguration: {
               query: {
@@ -207,17 +258,33 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ...ruleParams,
           },
           actions: [],
+          roleAuthc,
         });
         ruleId = createdRule.id;
-        alerts = await waitForAlertsForRule({ es, ruleId });
+        alerts = (
+          await alertingApi.waitForDocumentInIndex({
+            indexName: APM_ALERTS_INDEX,
+            ruleId,
+          })
+        ).hits.hits.map((hit) => hit._source) as ApmAlertFields[];
       });
 
-      afterEach(async () => {
-        await cleanupRuleAndAlertState({ es, supertest, logger });
-      });
+      afterEach(() =>
+        alertingApi.cleanUpAlerts({
+          roleAuthc,
+          ruleId,
+          alertIndexName: APM_ALERTS_INDEX,
+          connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+          consumer: 'apm',
+        })
+      );
 
       it('checks if rule is active', async () => {
-        const ruleStatus = await waitForActiveRule({ ruleId, supertest });
+        const ruleStatus = await alertingApi.waitForRuleStatus({
+          ruleId,
+          roleAuthc,
+          expectedStatus: 'active',
+        });
         expect(ruleStatus).to.be('active');
       });
 
