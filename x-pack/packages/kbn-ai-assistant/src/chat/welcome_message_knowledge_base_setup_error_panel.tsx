@@ -76,9 +76,9 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
                   <EuiIcon type="alert" color="subdued" />{' '}
                   <FormattedMessage
                     id="xpack.aiAssistant.welcomeMessage.modelIsNotStartedLabel"
-                    defaultMessage="Deployment state of {modelName} is {deploymentState}"
+                    defaultMessage="Deployment state of {modelId} is {deploymentState}"
                     values={{
-                      modelName: <EuiCode>{modelId}</EuiCode>,
+                      modelId: <EuiCode>{modelId}</EuiCode>,
                       deploymentState: <EuiCode>{deploymentState}</EuiCode>,
                     }}
                   />
@@ -90,9 +90,9 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
                   <EuiIcon type="alert" color="subdued" />{' '}
                   <FormattedMessage
                     id="xpack.aiAssistant.welcomeMessage.modelIsNotFullyAllocatedLabel"
-                    defaultMessage="Allocation state of {modelName} is {allocationState}"
+                    defaultMessage="Allocation state of {modelId} is {allocationState}"
                     values={{
-                      modelName: <EuiCode>{modelId}</EuiCode>,
+                      modelId: <EuiCode>{modelId}</EuiCode>,
                       allocationState: <EuiCode>{allocationState}</EuiCode>,
                     }}
                   />
@@ -110,9 +110,9 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
           <FormattedMessage
             id="xpack.aiAssistant.welcomeMessage.div.checkTrainedModelsToLabel"
             defaultMessage="
-                {retryInstallingLink} or check {trainedModelsLink} to ensure {modelName} is deployed and running."
+                {retryInstallingLink} or check {trainedModelsLink} to ensure {modelId} is deployed and running."
             values={{
-              modelName: modelId,
+              modelId,
               retryInstallingLink: (
                 <EuiLink
                   data-test-subj="observabilityAiAssistantWelcomeMessageKnowledgeBaseSetupErrorPanelRetryInstallingLink"
