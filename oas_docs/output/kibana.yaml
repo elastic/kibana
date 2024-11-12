@@ -55,7 +55,7 @@ info:
     ## Documentation source and versions
 
 
-    This documentation is derived from the `main` branch of the
+    This documentation is derived from the `8.x` branch of the
     [kibana](https://github.com/elastic/kibana) repository.
 
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0
