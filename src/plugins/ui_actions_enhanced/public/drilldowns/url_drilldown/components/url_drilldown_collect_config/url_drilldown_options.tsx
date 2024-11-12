@@ -28,31 +28,34 @@ export const UrlDrilldownOptionsComponent = ({
 }: UrlDrilldownOptionsProps) => {
   return (
     <>
-      <EuiFormRow hasChildLabel={false}>
-        <EuiSwitch
-          id="openInNewTab"
-          name="openInNewTab"
-          label={txtUrlTemplateOpenInNewTab}
-          checked={options.openInNewTab}
-          onChange={() => onOptionChange({ openInNewTab: !options.openInNewTab })}
-          data-test-subj="urlDrilldownOpenInNewTab"
-        />
-      </EuiFormRow>
-      <EuiFormRow hasChildLabel={false} fullWidth>
-        <EuiSwitch
-          id="encodeUrl"
-          name="encodeUrl"
-          label={
-            <>
-              {txtUrlTemplateEncodeUrl}
-              <EuiSpacer size={'s'} />
-              <EuiTextColor color="subdued">{txtUrlTemplateEncodeDescription}</EuiTextColor>
-            </>
-          }
-          checked={options.encodeUrl}
-          onChange={() => onOptionChange({ encodeUrl: !options.encodeUrl })}
-          data-test-subj="urlDrilldownEncodeUrl"
-        />
+      <EuiFormRow>
+        <div>
+          <EuiSwitch
+            compressed
+            id="openInNewTab"
+            name="openInNewTab"
+            label={txtUrlTemplateOpenInNewTab}
+            checked={options.openInNewTab}
+            onChange={() => onOptionChange({ openInNewTab: !options.openInNewTab })}
+            data-test-subj="urlDrilldownOpenInNewTab"
+          />
+          <EuiSpacer size="s" />
+          <EuiSwitch
+            compressed
+            id="encodeUrl"
+            name="encodeUrl"
+            label={
+              <>
+                {txtUrlTemplateEncodeUrl}
+                <EuiSpacer size={'s'} />
+                <EuiTextColor color="subdued">{txtUrlTemplateEncodeDescription}</EuiTextColor>
+              </>
+            }
+            checked={options.encodeUrl}
+            onChange={() => onOptionChange({ encodeUrl: !options.encodeUrl })}
+            data-test-subj="urlDrilldownEncodeUrl"
+          />
+        </div>
       </EuiFormRow>
     </>
   );
