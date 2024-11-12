@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { intersection } from 'lodash';
 import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
 import type { CasesSimilarResponse, SimilarCasesSearchRequest } from '../../../common/types/api';
 import { SimilarCasesSearchRequestRt, CasesSimilarResponseRt } from '../../../common/types/api';
@@ -16,6 +17,37 @@ import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { Operations } from '../../authorization';
 import { buildObservablesFieldsFilter } from '../utils';
 import { combineFilterWithAuthorizationFilter } from '../../authorization/utils';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
+
+interface Similarity {
+  typeKey: string;
+  value: string;
+}
+
+const getSimilarities = (
+  a: CaseSavedObjectTransformed,
+  b: CaseSavedObjectTransformed,
+  availableObservableTypes: Set<string>
+): Similarity[] => {
+  const stringify = (observable: { typeKey: string; value: string }) =>
+    [observable.typeKey, observable.value].join(',');
+
+  const setA = new Set(a.attributes.observables.map(stringify));
+  const setB = new Set(b.attributes.observables.map(stringify));
+
+  const intersectingObservables: string[] = intersection([...setA], [...setB]);
+
+  return intersectingObservables
+    .map((item) => {
+      const [typeKey, value] = item.split(',');
+
+      return {
+        typeKey,
+        value,
+      };
+    })
+    .filter((observable) => availableObservableTypes.has(observable.typeKey));
+};
 
 /**
  * Retrieves cases similar to a given Case
@@ -100,7 +132,10 @@ export const similar = async (
     );
 
     const res = {
-      cases: cases.saved_objects.map((so) => flattenCaseSavedObject({ savedObject: so })),
+      cases: cases.saved_objects.map((so) => ({
+        ...flattenCaseSavedObject({ savedObject: so }),
+        similarities: getSimilarities(retrievedCase, so, availableObservableTypesSet),
+      })),
       page: cases.page,
       per_page: cases.per_page,
       total: cases.total,

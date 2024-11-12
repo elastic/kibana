@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import type { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable, useEuiTheme } from '@elastic/eui';
 
-import type { CasesSimilarResponseUI, CaseUI } from '../../../common/ui/types';
+import type { CasesSimilarResponseUI, SimilarCaseUI } from '../../../common/ui/types';
 
 import * as i18n from './translations';
 import { useSimilarCasesColumns } from './use_similar_cases_columns';
@@ -20,8 +20,8 @@ interface SimilarCasesTableProps {
   data: CasesSimilarResponseUI;
   isCasesLoading: boolean;
   tableRef?: MutableRefObject<EuiBasicTable | null>;
-  tableRowProps: EuiBasicTableProps<CaseUI>['rowProps'];
-  onChange: EuiBasicTableProps<CaseUI>['onChange'];
+  tableRowProps: EuiBasicTableProps<SimilarCaseUI>['rowProps'];
+  onChange: EuiBasicTableProps<SimilarCaseUI>['onChange'];
   pagination: Pagination;
 }
 

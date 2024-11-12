@@ -394,8 +394,18 @@ export const CasesFindResponseRt = rt.intersection([
   CasesStatusResponseRt,
 ]);
 
+export const SimilarityRt = rt.strict({
+  typeKey: rt.string,
+  value: rt.string,
+});
+
+export const SimilarCaseRt = rt.intersection([
+  CaseRt,
+  rt.strict({ similarities: rt.array(SimilarityRt) }),
+]);
+
 export const CasesSimilarResponseRt = rt.strict({
-  cases: rt.array(CaseRt),
+  cases: rt.array(SimilarCaseRt),
   page: rt.number,
   per_page: rt.number,
   total: rt.number,

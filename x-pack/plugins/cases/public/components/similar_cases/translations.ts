@@ -15,10 +15,14 @@ export {
   CLOSED as STATUS_CLOSED,
 } from '@kbn/cases-components/src/status/translations';
 
-export const NO_CASES = i18n.translate('xpack.cases.caseTable.noCases.title', {
+export const NO_CASES = i18n.translate('xpack.cases.similarCaseTable.noCases.title', {
   defaultMessage: 'No cases to display',
 });
 
-export const NO_CASES_BODY = i18n.translate('xpack.cases.caseTable.noCases.readonly.body', {
+export const NO_CASES_BODY = i18n.translate('xpack.cases.similarCaseTable.noCases.readonly.body', {
   defaultMessage: 'Edit your filter settings.',
+});
+
+export const SIMILARITY_REASON = i18n.translate('xpack.cases.similarCaseTable.similarities.title', {
+  defaultMessage: 'Similar observable values',
 });

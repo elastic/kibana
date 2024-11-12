@@ -110,9 +110,8 @@ export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
 export type CaseConnectors = SnakeToCamelCase<GetCaseConnectorsResponse>;
 export type CaseUsers = GetCaseUsersResponse;
 export type CaseUICustomField = CaseUI['customFields'][number];
-export type CasesSimilarResponseUI = Omit<SnakeToCamelCase<CasesSimilarResponse>, 'cases'> & {
-  cases: CasesUI;
-};
+export type CasesSimilarResponseUI = SnakeToCamelCase<CasesSimilarResponse>;
+export type SimilarCaseUI = Omit<SnakeToCamelCase<CasesSimilarResponseUI['cases'][0]>, 'comments'>;
 
 export interface ResolvedCase {
   case: CaseUI;

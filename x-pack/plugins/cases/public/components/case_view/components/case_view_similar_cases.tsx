@@ -8,8 +8,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import { useGetSimilarCases } from '../../../containers/use_get_similar_cases';
-import { initialData } from '../../../containers/use_get_cases';
+import { useGetSimilarCases, initialData } from '../../../containers/use_get_similar_cases';
 import type { CaseUI } from '../../../../common/ui/types';
 
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';

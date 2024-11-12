@@ -16,18 +16,19 @@ import { EuiBadgeGroup, EuiBadge, EuiHealth, EuiToolTip, RIGHT_ALIGNMENT } from 
 import { Status } from '@kbn/cases-components/src/status/status';
 
 import { CaseSeverity } from '../../../common/types/domain';
-import type { CaseUI } from '../../../common/ui/types';
+import type { CaseUI, SimilarCaseUI } from '../../../common/ui/types';
 import { getEmptyCellValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsLink } from '../links';
 import { TruncatedText } from '../truncated_text';
 import { severities } from '../severity/config';
 import { useCasesColumnsConfiguration } from '../all_cases/use_cases_columns_configuration';
+import * as i18n from './translations';
 
-type CasesColumns =
-  | EuiTableActionsColumnType<CaseUI>
-  | EuiTableComputedColumnType<CaseUI>
-  | EuiTableFieldDataColumnType<CaseUI>;
+type SimilarCasesColumns =
+  | EuiTableActionsColumnType<SimilarCaseUI>
+  | EuiTableComputedColumnType<SimilarCaseUI>
+  | EuiTableFieldDataColumnType<SimilarCaseUI>;
 
 const LINE_CLAMP = 3;
 const getLineClampedCss = css`
@@ -42,20 +43,22 @@ const getLineClampedCss = css`
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyCellValue();
 
-export interface UseCasesColumnsReturnValue {
-  columns: CasesColumns[];
+const SIMILARITIES_FIELD = 'similarities' as const;
+
+export interface UseSimilarCasesColumnsReturnValue {
+  columns: SimilarCasesColumns[];
   rowHeader: string;
 }
 
-export const useSimilarCasesColumns = (): UseCasesColumnsReturnValue => {
+export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(false);
-  const columns: CasesColumns[] = useMemo(
+  const columns: SimilarCasesColumns[] = useMemo(
     () => [
       {
         field: casesColumnsConfig.title.field,
         name: casesColumnsConfig.title.name,
         sortable: true,
-        render: (title: string, theCase: CaseUI) => {
+        render: (title: string, theCase: SimilarCaseUI) => {
           if (theCase.id != null && theCase.title != null) {
             const caseDetailsLinkComponent = (
               <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
@@ -64,6 +67,18 @@ export const useSimilarCasesColumns = (): UseCasesColumnsReturnValue => {
             );
 
             return caseDetailsLinkComponent;
+          }
+          return getEmptyCellValue();
+        },
+        width: '20%',
+      },
+      {
+        field: SIMILARITIES_FIELD,
+        name: i18n.SIMILARITY_REASON,
+        sortable: true,
+        render: (similarities: SimilarCaseUI['similarities'], theCase: SimilarCaseUI) => {
+          if (theCase.id != null && theCase.title != null) {
+            return similarities.map((similarity) => similarity.value);
           }
           return getEmptyCellValue();
         },
@@ -132,16 +147,6 @@ export const useSimilarCasesColumns = (): UseCasesColumnsReturnValue => {
             ? renderStringField(`${totalAlerts}`, `similar-cases-table-column-alertsCount`)
             : getEmptyCellValue(),
         width: '80px',
-      },
-      {
-        field: casesColumnsConfig.totalComment.field,
-        name: casesColumnsConfig.totalComment.name,
-        align: RIGHT_ALIGNMENT,
-        render: (totalComment: CaseUI['totalComment']) =>
-          totalComment != null
-            ? renderStringField(`${totalComment}`, `similar-cases-table-column-commentCount`)
-            : getEmptyCellValue(),
-        width: '90px',
       },
       {
         field: casesColumnsConfig.category.field,
