@@ -17,12 +17,19 @@ type SearchRequest = ESSearchRequest & {
   size: number | boolean;
 };
 
-type EsqlQueryColumnarRequest = EsqlQueryRequest & { columnar: true };
-type EsqlQueryRowBasedRequest = EsqlQueryRequest & { columnar?: false };
-export type InferESQLResponseOf<
-  TDocument = unknown,
-  TSearchRequest extends EsqlQueryRequest = EsqlQueryRequest
-> = TSearchRequest['columnar'] extends true ? ESQLSearchResponse : TDocument[];
+type EsqlQueryParameters = EsqlQueryRequest & { parseOutput?: boolean };
+type EsqlOutputParameters = Omit<EsqlQueryRequest, 'format' | 'columnar'> & {
+  parseOutput?: true;
+  format?: 'json';
+  columnar?: false;
+};
+
+type EsqlParameters = EsqlOutputParameters | EsqlQueryParameters;
+
+export type InferEsqlResponseOf<
+  TOutput = unknown,
+  TParameters extends EsqlParameters = EsqlParameters
+> = TParameters extends EsqlOutputParameters ? TOutput[] : ESQLSearchResponse;
 
 /**
  * An Elasticsearch Client with a fully typed `search` method and built-in
@@ -33,14 +40,14 @@ export interface ObservabilityElasticsearchClient {
     operationName: string,
     parameters: TSearchRequest
   ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>>;
-  esql<TDocument = unknown, TSearchRequest extends EsqlQueryRequest = EsqlQueryColumnarRequest>(
+  esql<TOutput = unknown, TQueryParams extends EsqlOutputParameters = EsqlOutputParameters>(
     operationName: string,
-    parameters: TSearchRequest
-  ): Promise<InferESQLResponseOf<TDocument, TSearchRequest>>;
-  esql<TDocument = unknown, TSearchRequest extends EsqlQueryRequest = EsqlQueryRowBasedRequest>(
+    parameters: TQueryParams
+  ): Promise<InferEsqlResponseOf<TOutput, TQueryParams>>;
+  esql<TOutput = unknown, TQueryParams extends EsqlQueryParameters = EsqlQueryParameters>(
     operationName: string,
-    parameters: TSearchRequest
-  ): Promise<InferESQLResponseOf<TDocument, TSearchRequest>>;
+    parameters: TQueryParams
+  ): Promise<InferEsqlResponseOf<TOutput, TQueryParams>>;
   client: ElasticsearchClient;
 }
 
@@ -55,14 +62,14 @@ export function createObservabilityEsClient({
 }): ObservabilityElasticsearchClient {
   return {
     client,
-    esql<TDocument = unknown, TSearchRequest extends EsqlQueryRequest = EsqlQueryRequest>(
+    esql<TOutput = unknown, TSearchRequest extends EsqlParameters = EsqlParameters>(
       operationName: string,
-      parameters: EsqlQueryRequest
+      { parseOutput = true, format = 'json', columnar = false, ...parameters }: TSearchRequest
     ) {
       logger.trace(() => `Request (${operationName}):\n${JSON.stringify(parameters, null, 2)}`);
       return withSpan({ name: operationName, labels: { plugin } }, () => {
         return client.esql.query(
-          { ...parameters },
+          { ...parameters, format, columnar },
           {
             querystring: {
               drop_null_columns: true,
@@ -71,12 +78,12 @@ export function createObservabilityEsClient({
         );
       })
         .then((response) => {
-          const esqlResponse = response as unknown as ESQLSearchResponse;
           logger.trace(() => `Response (${operationName}):\n${JSON.stringify(response, null, 2)}`);
 
-          return (
-            parameters.columnar ? esqlResponse : esqlResultToPlainObjects(esqlResponse)
-          ) as InferESQLResponseOf<TDocument, TSearchRequest>;
+          const esqlResponse = response as unknown as ESQLSearchResponse;
+
+          const shouldParseOutput = parseOutput && !columnar && format === 'json';
+          return shouldParseOutput ? esqlResultToPlainObjects<TOutput>(esqlResponse) : esqlResponse;
         })
         .catch((error) => {
           throw error;
