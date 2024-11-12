@@ -86,7 +86,9 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   const globalStyles = globalStylesProp === false ? false : undefined;
 
   return (
-    <EuiProvider {...{ cache, modify, colorMode, globalStyles, utilityClasses: globalStyles, theme }}>
+    <EuiProvider
+      {...{ cache, modify, colorMode, globalStyles, utilityClasses: globalStyles, theme }}
+    >
       {children}
     </EuiProvider>
   );

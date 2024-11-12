@@ -212,7 +212,7 @@ export class RenderingService {
       darkMode = getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
     }
 
-    let themeName = getSettingValue<string>('theme:name', settings, parseThemeNameValue);
+    const themeName = getSettingValue<string>('theme:name', settings, parseThemeNameValue);
 
     const themeStylesheetPaths = (mode: boolean) =>
       getThemeStylesheetPaths({

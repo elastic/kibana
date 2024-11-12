@@ -84,7 +84,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     }
 
     const themeTag = getThemeTag({
-      name: (!themeName || themeName === 'amsterdam') ? 'v8' : themeName,
+      name: !themeName || themeName === 'amsterdam' ? 'v8' : themeName,
       darkMode,
     });
     const bundlesHref = getBundlesHref(baseHref);
