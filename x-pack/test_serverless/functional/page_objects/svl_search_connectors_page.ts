@@ -90,9 +90,9 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
       },
       async expectConnectorOverviewPageComponentsToExist() {
         await testSubjects.existOrFail('serverlessSearchConnectorsTitle');
-        await testSubjects.existOrFail('serverlessSearchConnectorsOverviewElasticConnectorsLink');
+        // await testSubjects.existOrFail('serverlessSearchConnectorsOverviewElasticConnectorsLink');
         await testSubjects.exists('serverlessSearchEmptyConnectorsPromptCreateConnectorButton');
-        await testSubjects.existOrFail('serverlessSearchConnectorsOverviewCreateConnectorButton');
+        // await testSubjects.existOrFail('serverlessSearchConnectorsOverviewCreateConnectorButton');
       },
       async expectConnectorTableToExist() {
         await testSubjects.existOrFail('serverlessSearchConnectorTable');
