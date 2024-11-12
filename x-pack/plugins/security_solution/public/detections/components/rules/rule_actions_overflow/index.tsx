@@ -34,6 +34,7 @@ import {
 import { useDownloadExportedRules } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_download_exported_rules';
 import * as i18nActions from '../../../pages/detection_engine/rules/translations';
 import * as i18n from './translations';
+import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   &.euiButtonIcon {
@@ -161,7 +162,7 @@ const RuleActionsOverflowComponent = ({
                 startTransaction({ name: SINGLE_RULE_ACTIONS.MANUAL_RULE_RUN });
                 closePopover();
                 const modalManualRuleRunConfirmationResult = await showManualRuleRunConfirmation();
-                telemetry.reportManualRuleRunOpenModal({
+                telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunOpenModal, {
                   type: 'single',
                 });
                 if (modalManualRuleRunConfirmationResult === null) {
