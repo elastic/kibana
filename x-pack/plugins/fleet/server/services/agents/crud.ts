@@ -14,8 +14,6 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { SortDirection } from '@kbn/data-plugin/common';
-
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
@@ -257,7 +255,7 @@ export async function getAgentsByKuery(
 
   const runtimeFields = await buildAgentStatusRuntimeField(soClient);
 
-  const sort = getSortConfig(sortField, sortOrder as SortDirection);
+  const sort = getSortConfig(sortField, sortOrder);
 
   const statusSummary: Record<AgentStatus, number> = {
     online: 0,

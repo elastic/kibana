@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { SearchSourceFields } from '@kbn/data-plugin/common';
+import type { EsQuerySortValue, SearchSourceFields } from '@kbn/data-plugin/common';
 import { DataView, SortDirection } from '@kbn/data-plugin/common';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -79,7 +79,7 @@ export function useExportCSV(
   const sortField = getSortFieldForAPI(sortOptions?.field ?? 'enrolled_at');
   const sortOrder = (sortOptions?.direction as SortDirection) ?? SortDirection.desc;
 
-  const sort = getSortConfig(sortField, sortOrder);
+  const sort = getSortConfig(sortField, sortOrder) as EsQuerySortValue[];
 
   const searchSource: SearchSourceFields = {
     type: 'search',
