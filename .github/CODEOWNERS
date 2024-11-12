@@ -840,7 +840,6 @@ x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-t
 x-pack/packages/security-solution/features @elastic/security-threat-hunting-explore
 x-pack/packages/security-solution/navigation @elastic/security-threat-hunting-explore
 x-pack/packages/security-solution/side_nav @elastic/security-threat-hunting-explore
-x-pack/packages/security-solution/storybook/config @elastic/security-threat-hunting-explore
 x-pack/packages/security-solution/upselling @elastic/security-threat-hunting-explore
 x-pack/packages/security/api_key_management @elastic/kibana-security
 x-pack/packages/security/authorization_core @elastic/kibana-security
