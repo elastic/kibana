@@ -14,11 +14,12 @@ import { EuiSpacer, EuiLink, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elas
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Connector, ConnectorStatus } from '@kbn/search-connectors';
-
-import { ConnectorConfigurationComponent } from '@kbn/search-connectors/components/configuration/connector_configuration';
-
-import { ConnectorDefinition } from '@kbn/search-connectors-plugin/common/types';
+import {
+  Connector,
+  ConnectorConfigurationComponent,
+  ConnectorDefinition,
+  ConnectorStatus,
+} from '@kbn/search-connectors';
 
 import { Status } from '../../../../../../../common/types/api';
 
