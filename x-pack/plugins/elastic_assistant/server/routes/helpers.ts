@@ -30,6 +30,7 @@ import { ActionsClient } from '@kbn/actions-plugin/server';
 import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { FindResponse } from '../ai_assistant_data_clients/find';
 import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
@@ -46,7 +47,6 @@ import { executeAction, StaticResponse } from '../lib/executor';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import { callAssistantGraph } from '../lib/langchain/graphs/default_assistant_graph';
 
@@ -399,6 +399,7 @@ export const langChainExecute = async ({
     kbDataClient,
   };
 
+  const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
   // Shared executor params
   const executorParams: AgentExecutorParams<boolean> = {
     abortSignal,
@@ -422,6 +423,14 @@ export const langChainExecute = async ({
     responseLanguage,
     size: request.body.size,
     systemPrompt,
+    telemetry,
+    telemetryParams: {
+      actionTypeId,
+      model: request.body.model,
+      assistantStreamingEnabled: isStream,
+      isEnabledKnowledgeBase: isKnowledgeBaseInstalled,
+      eventType: INVOKE_ASSISTANT_SUCCESS_EVENT.eventType,
+    },
     traceOptions: {
       projectName: request.body.langSmithProject,
       tracers: getLangSmithTracer({
@@ -436,14 +445,6 @@ export const langChainExecute = async ({
     executorParams
   );
 
-  const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
-
-  telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-    actionTypeId,
-    model: request.body.model,
-    assistantStreamingEnabled: isStream,
-    isEnabledKnowledgeBase: isKnowledgeBaseInstalled,
-  });
   return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
 };
 
