@@ -14,6 +14,7 @@ export { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_disco
 
 // Knowledge Base
 export { deleteKnowledgeBaseRoute } from './knowledge_base/delete_knowledge_base';
+export { getKnowledgeBaseIndicesRoute } from './knowledge_base/get_knowledge_base_indices';
 export { getKnowledgeBaseStatusRoute } from './knowledge_base/get_knowledge_base_status';
 export { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
 

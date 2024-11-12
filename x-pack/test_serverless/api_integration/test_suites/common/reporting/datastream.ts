@@ -36,7 +36,9 @@ export default function ({ getService }: FtrProviderContext) {
     const generatedReports = new Set<string>();
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
+      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin', {
+        forceNewSession: true,
+      });
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
 
       await esArchiver.load(archives.ecommerce.data);

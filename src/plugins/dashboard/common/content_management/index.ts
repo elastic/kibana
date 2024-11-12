@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LATEST_VERSION, CONTENT_ID } from './constants';
+export {
+  LATEST_VERSION,
+  CONTENT_ID,
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DEFAULT_PANEL_HEIGHT,
+  DEFAULT_PANEL_WIDTH,
+  DEFAULT_DASHBOARD_OPTIONS,
+} from './constants';
 
 export type { DashboardContentType } from './types';
-
-export type {
-  GridData,
-  DashboardItem,
-  DashboardCrudTypes,
-  DashboardAttributes,
-  SavedDashboardPanel,
-} from './latest';

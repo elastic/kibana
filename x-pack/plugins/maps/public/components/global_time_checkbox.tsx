@@ -34,7 +34,7 @@ export function GlobalTimeCheckbox({
       });
 
   return (
-    <EuiFormRow display="columnCompressedSwitch">
+    <EuiFormRow display="columnCompressed">
       <EuiToolTip position="top" content={tooltipMessage}>
         <EuiSwitch
           label={label}
