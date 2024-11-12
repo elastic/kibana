@@ -17,7 +17,6 @@
       "usageCollection",
       "licensing",
       "taskManager",
-      "features"
     ],
     "optionalPlugins": [
       "cloud",

@@ -16,7 +16,6 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -36,7 +35,6 @@ export interface ElasticsearchAccessorOptions {
 export interface StreamsPluginSetupDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
-  features: FeaturesPluginSetup;
 }
 
 export interface StreamsPluginStartDependencies {
