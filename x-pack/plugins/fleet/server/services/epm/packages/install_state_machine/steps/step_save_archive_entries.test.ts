@@ -80,7 +80,7 @@ const packageInstallContext = {
     owner: { github: 'elastic/fleet' },
   } as any,
   paths: ['some/path/1', 'some/path/2'],
-  assetsMap: assetsMap,
+  assetsMap,
   archiveIterator: createArchiveIteratorFromMap(assetsMap),
 };
 const getMockInstalledPackageSo = (
