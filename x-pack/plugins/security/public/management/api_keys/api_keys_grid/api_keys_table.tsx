@@ -393,6 +393,7 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
             onFilterChange({ ...filters, type: filters.type === 'rest' ? undefined : 'rest' });
           }}
           withNext={types.includes('cross_cluster') || types.includes('managed')}
+          data-test-subj="personalFilterButton"
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.restTitle"
@@ -412,6 +413,7 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
             });
           }}
           withNext={types.includes('managed')}
+          data-test-subj="crossClusterFilterButton"
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.crossClusterLabel"
@@ -430,6 +432,7 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
               type: filters.type === 'managed' ? undefined : 'managed',
             });
           }}
+          data-test-subj="managedFilterButton"
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.managedTitle"
@@ -463,6 +466,7 @@ export const ExpiredFilterButton: FunctionComponent<CustomComponentProps> = ({
           }
         }}
         withNext={true}
+        data-test-subj="activeFilterButton"
       >
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.activeFilter"
@@ -478,6 +482,7 @@ export const ExpiredFilterButton: FunctionComponent<CustomComponentProps> = ({
             onFilterChange({ ...filters, expired: true });
           }
         }}
+        data-test-subj="expiredFilterButton"
       >
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.expiredFilter"

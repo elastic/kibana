@@ -419,5 +419,87 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
     });
+
+    describe.only('querying API keys', function () {
+      before(async () => {
+        await clearAllApiKeys(es, log);
+        await security.testUser.setRoles(['kibana_admin', 'test_api_keys']);
+
+        await es.transport.request({
+          method: 'POST',
+          path: '/_security/cross_cluster/api_key',
+          body: {
+            name: 'test_cross_cluster',
+            expiration: '1d',
+            access: {
+              search: [
+                {
+                  names: ['*'],
+                },
+              ],
+              replication: [
+                {
+                  names: ['*'],
+                },
+              ],
+            },
+          },
+        });
+
+        await es.security.createApiKey({
+          name: 'my api key',
+          expiration: '1d',
+          role_descriptors: {
+            role_1: {},
+          },
+          metadata: {
+            managed: true,
+          },
+        });
+
+        await es.security.createApiKey({
+          name: 'Alerting: Managed',
+          expiration: '1d',
+          role_descriptors: {
+            role_1: {},
+          },
+        });
+
+        await es.security.createApiKey({
+          name: 'test_api_key',
+          expiration: '1s',
+          role_descriptors: {
+            role_1: {},
+          },
+        });
+
+        await pageObjects.common.navigateToApp('apiKeys');
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
+        // await clearAllApiKeys(es, log);
+      });
+
+      it('active/expired filter buttons work as expected', async () => {
+        await pageObjects.apiKeys.clickExpiryFilters('active');
+        await ensureApiKeysExist(['my api key', 'Alerting: Managed', 'test_cross_cluster']);
+        expect(await pageObjects.apiKeys.doesApiKeyExist('test_api_key')).to.be(false);
+
+        await pageObjects.apiKeys.clickExpiryFilters('expired');
+        await ensureApiKeysExist(['test_api_key']);
+        expect(await pageObjects.apiKeys.doesApiKeyExist('my api key')).to.be(false);
+      });
+
+      it.only('api key type filter buttons work as expected', async () => {
+        await pageObjects.apiKeys.clickTypeFilters('personal');
+        await ensureApiKeysExist(['test_api_key']);
+        expect(await pageObjects.apiKeys.doesApiKeyExist('test_api_key')).to.be(false);
+
+        await pageObjects.apiKeys.clickExpiryFilters('expired');
+        await ensureApiKeysExist(['test_api_key']);
+        expect(await pageObjects.apiKeys.doesApiKeyExist('my api key')).to.be(false);
+      });
+    });
   });
 };
