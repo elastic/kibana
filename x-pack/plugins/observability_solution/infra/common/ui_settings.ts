@@ -26,7 +26,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     deprecation: {
       message: i18n.translate('xpack.infra.enableLogsStreamDeprecationWarning', {
         defaultMessage:
-          'Logs Stream is deprecated and this setting is and will be removed in Kibana 9.0.',
+          'Logs Stream is deprecated, and this setting will be removed in Kibana 9.0.',
       }),
       docLinksKey: 'generalSettings',
     },
