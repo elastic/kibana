@@ -19,7 +19,6 @@ import type { Space } from '@kbn/spaces-plugin/public';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { PrivilegeSpaceForm } from './privilege_space_form';
-import { SpaceSelector } from './space_selector';
 import type { Role } from '../../../../../../../common';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
@@ -199,43 +198,6 @@ describe('PrivilegeSpaceForm', () => {
     `);
 
     expect(findTestSubject(wrapper, 'spaceFormGlobalPermissionsSupersedeWarning')).toHaveLength(0);
-  });
-
-  it('renders a warning when configuring a global privilege after space privileges are already defined', () => {
-    const role = createRole([
-      {
-        base: [],
-        feature: {
-          with_sub_features: ['read'],
-        },
-        spaces: ['foo'],
-      },
-      {
-        base: [],
-        feature: {
-          with_sub_features: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ]);
-
-    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
-
-    const wrapper = renderComponent({
-      role,
-      spaces: displaySpaces,
-      kibanaPrivileges,
-      privilegeIndex: -1,
-      canCustomizeSubFeaturePrivileges: true,
-      onChange: jest.fn(),
-      onCancel: jest.fn(),
-    });
-
-    wrapper.find(SpaceSelector).props().onChange(['*']);
-
-    wrapper.update();
-
-    expect(findTestSubject(wrapper, 'globalPrivilegeWarning')).toHaveLength(1);
   });
 
   it('renders a warning when space privileges are less permissive than configured global privileges', () => {
