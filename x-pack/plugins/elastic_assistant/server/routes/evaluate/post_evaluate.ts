@@ -282,6 +282,7 @@ export const postEvaluateRoute = (
                 inference,
                 connectorId: connector.id,
                 size,
+                telemetry: ctx.elasticAssistant.telemetry,
               };
 
               const tools: StructuredTool[] = assistantTools.flatMap(
