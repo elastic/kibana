@@ -38,7 +38,10 @@ import { getInternalRoutes } from './routes/api/get_internal_routes';
 import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import { UserProfileService } from './services';
-import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
+import {
+  LICENSING_CASE_ASSIGNMENT_FEATURE,
+  LICENSING_CASE_OBSERVABLES_FEATURE,
+} from './common/constants';
 import { registerInternalAttachments } from './internal_attachments';
 import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
@@ -136,6 +139,7 @@ export class CasePlugin
     });
 
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
+    plugins.licensing.featureUsage.register(LICENSING_CASE_OBSERVABLES_FEATURE, 'platinum');
 
     const getCasesClient = async (request: KibanaRequest): Promise<CasesClient> => {
       const [coreStart] = await core.getStartServices();
