@@ -25,15 +25,6 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const fleetAndAgents = getService('fleetAndAgents');
 
-  function indexUsingApiKey(body: any, apiKey: string): Promise<{ body: Record<string, unknown> }> {
-    const supertestWithoutAuth = getService('esSupertestWithoutAuth');
-    return supertestWithoutAuth
-      .post(`/${TEST_INDEX}/_doc`)
-      .set('Authorization', `ApiKey ${apiKey}`)
-      .send(body)
-      .expect(201);
-  }
-
   describe('fleet_event_ingested_pipeline', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
