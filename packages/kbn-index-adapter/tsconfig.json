@@ -10,7 +10,9 @@
   "include": ["**/*.ts"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/index-adapter",
+    "@kbn/std",
+    "@kbn/safer-lodash-set",
+    "@kbn/logging-mocks",
   ],
   "exclude": [
     "target/**/*"
