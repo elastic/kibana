@@ -71,6 +71,7 @@ export class ServerlessSearchPlugin
           name: 'default:all-data',
           title: '*,-.*',
           id: 'default_all_data_id',
+          timeFieldName: '@timestamp',
         });
       }
     }
