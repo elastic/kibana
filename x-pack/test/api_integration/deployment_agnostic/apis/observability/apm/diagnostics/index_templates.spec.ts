@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { getApmIndexTemplateNames } from '@kbn/apm-plugin/server/routes/diagnostics/helpers/get_apm_index_template_names';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -19,27 +18,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  describe.skip('Diagnostics: Index Templates', () => {
-    describe('When there is no data', () => {
-      before(async () => {
-        // delete APM index templates
-        await es.indices.deleteIndexTemplate({
-          name: Object.values(getApmIndexTemplateNames()).flat(),
-        });
-      });
-
-      it('verifies that none of the default APM index templates exists`', async () => {
-        const { status, body } = await apmApiClient.adminUser({
-          endpoint: 'GET /internal/apm/diagnostics',
-        });
-        expect(status).to.be(200);
-        const noApmIndexTemplateExists = body.apmIndexTemplates.every(
-          ({ exists }) => exists === false
-        );
-        expect(noApmIndexTemplateExists).to.eql(true);
-      });
-    });
-
+  describe('Diagnostics: Index Templates', () => {
     describe('When data is ingested', () => {
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 

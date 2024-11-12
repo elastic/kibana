@@ -8,40 +8,17 @@
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { getApmIndexTemplateNames } from '@kbn/apm-plugin/server/routes/diagnostics/helpers/get_apm_index_template_names';
+import { uniq } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
-  const es = getService('es');
   const synthtrace = getService('synthtrace');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  describe.skip('Diagnostics: Index pattern settings', () => {
-    describe('When there is no data', () => {
-      before(async () => {
-        // delete all APM index templates
-        await es.indices.deleteIndexTemplate({
-          name: Object.values(getApmIndexTemplateNames()).flat(),
-        });
-      });
-
-      it('returns the built-in (non-APM) index templates`', async () => {
-        const { status, body } = await apmApiClient.adminUser({
-          endpoint: 'GET /internal/apm/diagnostics',
-        });
-        expect(status).to.be(200);
-
-        const templateNames = body.indexTemplatesByIndexPattern.flatMap(({ indexTemplates }) => {
-          return indexTemplates?.map(({ templateName }) => templateName);
-        });
-
-        expect(templateNames).to.eql(['logs', 'metrics']);
-      });
-    });
-
+  describe('Diagnostics: Index pattern settings', () => {
     describe('When data is ingested', () => {
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
@@ -76,32 +53,49 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
         expect(status).to.be(200);
 
-        const templateNames = body.indexTemplatesByIndexPattern.flatMap(({ indexTemplates }) => {
-          return indexTemplates?.map(({ templateName }) => templateName);
-        });
+        const templateNames = uniq(
+          body.indexTemplatesByIndexPattern.flatMap(({ indexTemplates }) => {
+            return indexTemplates?.map(({ templateName }) => templateName);
+          })
+        );
 
         expect(templateNames).to.eql([
-          'logs-apm.error',
-          'logs-apm.app',
+          'logs-apm.error@template',
+          'logs-apm.app@template',
+          'logs-otel@template',
           'logs',
-          'metrics-apm.service_transaction.60m',
-          'metrics-apm.service_destination.10m',
-          'metrics-apm.transaction.1m',
-          'metrics-apm.service_destination.1m',
-          'metrics-apm.service_transaction.10m',
-          'metrics-apm.service_transaction.1m',
-          'metrics-apm.transaction.60m',
-          'metrics-apm.service_destination.60m',
-          'metrics-apm.service_summary.1m',
-          'metrics-apm.transaction.10m',
-          'metrics-apm.internal',
-          'metrics-apm.service_summary.10m',
-          'metrics-apm.service_summary.60m',
-          'metrics-apm.app',
+          'metrics-apm.service_transaction.1m@template',
+          'metrics-apm.transaction.10m@template',
+          'metrics-apm.service_summary.10m@template',
+          'metrics-apm.internal@template',
+          'metrics-apm.service_destination.1m@template',
+          'metrics-apm.service_summary.60m@template',
+          'metrics-apm.service_summary.1m@template',
+          'metrics-apm.transaction.1m@template',
+          'metrics-apm.service_destination.60m@template',
+          'metrics-apm.service_transaction.60m@template',
+          'metrics-apm.service_destination.10m@template',
+          'metrics-apm.service_transaction.10m@template',
+          'metrics-apm.transaction.60m@template',
+          'metrics-apm.app@template',
+          'metrics-otel@template',
           'metrics',
-          'traces-apm',
-          'traces-apm.rum',
-          'traces-apm.sampled',
+          'metrics-service_transaction.10m.otel@template',
+          'metrics-transaction.10m.otel@template',
+          'metrics-service_summary.1m.otel@template',
+          'metrics-service_transaction.60m.otel@template',
+          'metrics-service_summary.60m.otel@template',
+          'metrics-service_destination.1m@template',
+          'metrics-service_destination.10m@template',
+          'metrics-service_summary.10m.otel@template',
+          'metrics-transaction.1m.otel@template',
+          'metrics-transaction.60m.otel@template',
+          'metrics-service_transaction.1m.otel@template',
+          'metrics-service_destination.60m@template',
+          'traces-apm.rum@template',
+          'traces-apm@template',
+          'traces-apm.sampled@template',
+          'traces-otel@template',
         ]);
       });
     });
