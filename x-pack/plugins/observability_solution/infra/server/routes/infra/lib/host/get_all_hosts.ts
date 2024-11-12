@@ -54,8 +54,11 @@ export const getAllHosts = async ({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [...termsQuery(HOST_NAME_FIELD, ...hostNames), ...rangeQuery(from, to)],
-          should: [...documentsFilter],
+          filter: [
+            ...termsQuery(HOST_NAME_FIELD, ...hostNames),
+            ...rangeQuery(from, to),
+            ...documentsFilter,
+          ],
         },
       },
       aggs: {

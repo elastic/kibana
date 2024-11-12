@@ -32,6 +32,7 @@ export async function checkPrivileges({
   ]);
 
   const { hasAllRequested } = await checkPrivilegesFn({
+    kibana: [security.authz.actions.app.get('apm:read')],
     elasticsearch: {
       cluster: [],
       index: mapValues(apmIndices, () => ['read']),
