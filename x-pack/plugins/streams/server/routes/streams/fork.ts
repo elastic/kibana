@@ -22,9 +22,14 @@ export const forkStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{id}/_fork 2023-10-31',
   options: {
     access: 'public',
+    availability: {
+      stability: 'experimental',
+    },
     security: {
       authz: {
-        requiredPrivileges: ['streams_write'],
+        enabled: false,
+        reason:
+          'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
       },
     },
   },

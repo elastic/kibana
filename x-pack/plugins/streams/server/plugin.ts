@@ -66,28 +66,7 @@ export class StreamsPlugin
       app: ['streams', 'kibana'],
       catalogue: ['streams', 'observability'],
       category: DEFAULT_APP_CATEGORIES.observability,
-      privileges: {
-        all: {
-          app: ['streams', 'kibana'],
-          catalogue: ['streams', 'observability'],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: ['read', 'write'],
-          api: ['streams_write', 'streams_read'],
-        },
-        read: {
-          app: ['streams', 'kibana'],
-          catalogue: ['streams', 'observability'],
-          api: ['streams_read'],
-          ui: ['read'],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-        },
-      },
+      privileges: null,
     });
 
     registerRoutes<RouteDependencies>({

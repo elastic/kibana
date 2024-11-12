@@ -31,9 +31,14 @@ export const editStreamRoute = createServerRoute({
   endpoint: 'PUT /api/streams/{id} 2023-10-31',
   options: {
     access: 'public',
+    availability: {
+      stability: 'experimental',
+    },
     security: {
       authz: {
-        requiredPrivileges: ['streams_write'],
+        enabled: false,
+        reason:
+          'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
       },
     },
   },

@@ -14,9 +14,14 @@ export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{id} 2023-10-31',
   options: {
     access: 'public',
+    availability: {
+      stability: 'experimental',
+    },
     security: {
       authz: {
-        requiredPrivileges: ['streams_read'],
+        enabled: false,
+        reason:
+          'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
       },
     },
   },
