@@ -355,7 +355,7 @@ src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 x-pack/plugins/data_quality @elastic/obs-ux-logs-team
 test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
-packages/kbn-data-stream-adapter @elastic/security-threat-hunting-explore
+packages/kbn-data-stream-adapter @elastic/security-threat-hunting
 x-pack/plugins/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 src/plugins/data_view_editor @elastic/kibana-data-discovery
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
@@ -474,7 +474,7 @@ src/plugins/field_formats @elastic/kibana-data-discovery
 packages/kbn-field-types @elastic/kibana-data-discovery
 packages/kbn-field-utils @elastic/kibana-data-discovery
 x-pack/plugins/fields_metadata @elastic/obs-ux-logs-team
-x-pack/plugins/file_upload @elastic/kibana-gis @elastic/ml-ui
+x-pack/plugins/file_upload @elastic/kibana-presentation @elastic/ml-ui
 examples/files_example @elastic/appex-sharedux
 src/plugins/files_management @elastic/appex-sharedux
 src/plugins/files @elastic/appex-sharedux
@@ -520,6 +520,7 @@ x-pack/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
 src/plugins/image_embeddable @elastic/appex-sharedux
 packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-import-resolver @elastic/kibana-operations
+packages/kbn-index-adapter @elastic/security-threat-hunting
 x-pack/plugins/index_lifecycle_management @elastic/kibana-management
 x-pack/plugins/index_management @elastic/kibana-management
 x-pack/packages/index-management/index_management_shared_types @elastic/kibana-management
@@ -601,8 +602,8 @@ test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mapbox-gl @elastic/kibana-gis
 x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
-src/plugins/maps_ems @elastic/kibana-gis
-x-pack/plugins/maps @elastic/kibana-gis
+src/plugins/maps_ems @elastic/kibana-presentation
+x-pack/plugins/maps @elastic/kibana-presentation
 x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
 x-pack/plugins/observability_solution/metrics_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 x-pack/packages/ml/agg_utils @elastic/ml-ui
