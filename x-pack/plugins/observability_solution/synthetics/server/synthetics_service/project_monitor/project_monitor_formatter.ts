@@ -282,7 +282,6 @@ export class ProjectMonitorFormatter {
           return {
             ...monitor.attributes,
             updated_at: monitor.updated_at,
-            id: monitor.id,
           };
         })
       );
