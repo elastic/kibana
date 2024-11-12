@@ -1479,6 +1479,27 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 #CC# /x-pack/plugins/translations/ @elastic/kibana-localization @elastic/kibana-core
 
 # Kibana Platform Security
+# security
+/ @elastic/kibana-security
+/x-pack/test_serverless/functional/test_suites/observability/role_management @elastic/kibana-security
+/x-pack/test/functional/config_security_basic.ts @elastic/kibana-security
+/x-pack/test/functional/page_objects/user_profile_page.ts @elastic/kibana-security
+/x-pack/test/functional/page_objects/space_selector_page.ts @elastic/kibana-security
+/x-pack/test/functional/page_objects/security_page.ts @elastic/kibana-security
+/x-pack/test/functional/page_objects/role_mappings_page.ts @elastic/kibana-security
+/x-pack/test/functional/page_objects/copy_saved_objects_to_space_page.ts @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/39002
+/x-pack/test/functional/page_objects/api_keys_page.ts @elastic/kibana-security
+/x-pack/test/functional/page_objects/account_settings_page.ts @elastic/kibana-security
+/x-pack/test/functional/apps/user_profiles @elastic/kibana-security
+/x-pack/test/common/services/spaces.ts @elastic/kibana-security
+/x-pack/test/api_integration/config_security_*.ts @elastic/kibana-security
+/x-pack/test/functional/apps/api_keys @elastic/kibana-security
+/x-pack/test/ftr_apis @elastic/kibana-security
+/test/server_integration/services/supertest.js @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
+/test/server_integration/http/ssl @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
+/test/server_integration/config.base.js @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
+/test/server_integration/__fixtures__ @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
+/x-pack/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
 /.github/workflows/codeql-stats.yml @elastic/kibana-security
