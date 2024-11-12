@@ -42,16 +42,20 @@ import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_conne
 
 const CONNECTOR_PRIVILEGES = ['api:observabilityAIAssistant', 'app:observabilityAIAssistant'];
 
-export const SlackConnectorParamsSchema = schema.object({
-  id: schema.string({ minLength: 1 }),
-  params: schema.object({
-    message: schema.string({ minLength: 1 }),
-  }),
-});
-
 const connectorParamsSchemas: Record<string, CompatibleJSONSchema> = {
+  '.slack': {
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      params: {
+        type: 'object',
+        properties: {
+          message: { type: 'string' },
+        },
+      },
+    },
+  },
   '.slack_api': convertSchemaToOpenApi(SlackApiParamsSchema),
-  '.slack': convertSchemaToOpenApi(SlackConnectorParamsSchema),
   '.email': convertSchemaToOpenApi(EmailParamsSchema),
   '.webhook': convertSchemaToOpenApi(WebhookParamsSchema),
   '.jira': convertSchemaToOpenApi(JiraParamsSchema),
