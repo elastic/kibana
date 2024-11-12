@@ -82,6 +82,8 @@ export const renderApp = (
     ml,
   } = plugins;
 
+  console.log(config, data, esConfig);
+
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
   externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
 
@@ -119,6 +121,7 @@ export const renderApp = (
     history,
     indexMappingComponent,
     isSidebarEnabled,
+    kibanaVersion,
     lens,
     ml,
     navigateToUrl,

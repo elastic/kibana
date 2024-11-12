@@ -34,6 +34,8 @@ import { GetApiKeyByIdLogic } from '../../api/api_key/get_api_key_by_id_api_logi
 
 import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
 
+import { KibanaLogic } from '../../../shared/kibana';
+
 import { ConnectorLinked } from './components/connector_linked';
 import { DockerInstructionsStep } from './components/docker_instructions_step';
 import { GenerateConfigButton } from './components/generate_config_button';
@@ -48,6 +50,7 @@ export const ConnectorDeployment: React.FC = () => {
   const [selectedDeploymentMethod, setSelectedDeploymentMethod] = useState<'docker' | 'source'>(
     'docker'
   );
+  const { kibanaVersion } = useValues(KibanaLogic);
   const { generatedData, isGenerateLoading } = useValues(DeploymentLogic);
   const { index, isLoading, connector, connectorId } = useValues(ConnectorViewLogic);
   const { fetchConnector } = useActions(ConnectorViewLogic);
@@ -199,6 +202,7 @@ export const ConnectorDeployment: React.FC = () => {
                           serviceType={connector.service_type ?? ''}
                           isWaitingForConnector={isWaitingForConnector}
                           apiKeyData={apiKey}
+                          connectorVersion={kibanaVersion ?? ''}
                         />
                       )}
                     </>

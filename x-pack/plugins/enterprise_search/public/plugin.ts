@@ -297,6 +297,8 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
+        console.log('Ent search content plugin data\n\n\n');
+        console.log(pluginData);
 
         const { renderApp } = await import('./applications');
         const { EnterpriseSearchContent } = await import(
