@@ -49,6 +49,13 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType 
     euiBorderWidthThick,
   } = theme;
 
+  const cssOverrideBase = {
+    height: euiSizeM,
+    width: euiSizeM,
+    backgroundColor: euiColorGhost,
+    display: 'inline-block',
+  };
+
   return (
     <EuiFlexGroup alignItems="center" data-test-subj="mlPageDataFrameAnalyticsMapLegend">
       <EuiFlexItem grow={false}>
@@ -57,12 +64,10 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType 
             <span
               data-test-subj="mlJobMapLegend__sourceNode"
               css={{
-                height: `${euiSizeM}`,
-                width: `${euiSizeM}`,
-                backgroundColor: `${euiColorWarning}`,
-                border: `${euiBorderThin}`,
-                borderRadius: `${euiBorderRadius}`,
-                display: 'inline-block',
+                ...cssOverrideBase,
+                backgroundColor: euiColorWarning,
+                border: euiBorderThin,
+                borderRadius: euiBorderRadius,
               }}
             />
           </EuiFlexItem>
@@ -82,12 +87,9 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType 
             <span
               data-test-subj="mlJobMapLegend__indexPattern"
               css={{
-                height: `${euiSizeM}`,
-                width: `${euiSizeM}`,
-                backgroundColor: `${euiColorGhost}`,
+                ...cssOverrideBase,
                 border: `${euiBorderWidthThick} solid ${theme.euiColorVis2}`,
                 transform: 'rotate(45deg)',
-                display: 'inline-block',
               }}
             />
           </EuiFlexItem>
@@ -107,12 +109,9 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType 
             <span
               data-test-subj="mlJobMapLegend__ingestPipeline"
               css={{
-                height: `${euiSizeM}`,
-                width: `${euiSizeM}`,
-                backgroundColor: `${euiColorGhost}`,
+                ...cssOverrideBase,
                 border: `${euiBorderWidthThick} solid ${theme.euiColorVis7}`,
-                borderRadius: `${euiBorderRadiusSmall}`,
-                display: 'inline-block',
+                borderRadius: euiBorderRadiusSmall,
               }}
             />
           </EuiFlexItem>
@@ -132,11 +131,8 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType 
             <span
               data-test-subj="mlJobMapLegend__transform"
               css={{
-                height: `${euiSizeM}`,
-                width: `${euiSizeM}`,
-                backgroundColor: `${euiColorGhost}`,
+                ...cssOverrideBase,
                 border: `${euiBorderWidthThick} solid ${theme.euiColorVis1}`,
-                display: 'inline-block',
               }}
             />
           </EuiFlexItem>
@@ -178,12 +174,9 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType 
               <span
                 data-test-subj="mlJobMapLegend__analyticsMissing"
                 css={{
-                  height: `${euiSizeM}`,
-                  width: `${euiSizeM}`,
-                  backgroundColor: `${euiColorGhost}`,
+                  ...cssOverrideBase,
                   border: `${euiBorderWidthThick} solid ${theme.euiColorFullShade}`,
                   borderRadius: '50%',
-                  display: 'inline-block',
                 }}
               />
             </EuiFlexItem>
@@ -204,12 +197,9 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType 
             <span
               data-test-subj="mlJobMapLegend__analytics"
               css={{
-                height: `${euiSizeM}`,
-                width: `${euiSizeM}`,
-                backgroundColor: `${euiColorGhost}`,
+                ...cssOverrideBase,
                 border: `${euiBorderWidthThick} solid ${theme.euiColorVis0}`,
                 borderRadius: '50%',
-                display: 'inline-block',
               }}
             />
           </EuiFlexItem>

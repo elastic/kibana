@@ -42,7 +42,7 @@ export const OverallDetails: FC<{
 }> = ({ overallDetails }) => (
   <EuiFlexGroup alignItems="center" wrap data-test-subj={overallDetails.dataTestSubj}>
     {overallDetails.items.map((item) => {
-      const key = `${item.title}`;
+      const key = item.title;
       if (item.title === 'badge') {
         return (
           <EuiFlexItem grow={false} key={key}>
