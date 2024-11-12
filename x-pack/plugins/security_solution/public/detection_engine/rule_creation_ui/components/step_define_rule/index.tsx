@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
 
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
@@ -79,7 +79,6 @@ import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
-import { defaultCustomQuery } from '../../../../detections/pages/detection_engine/rules/utils';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
@@ -95,6 +94,7 @@ import {
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit/esql_query_edit';
+import { usePersistentQuery } from './use_persistent_query';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -193,8 +193,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const isMlSuppressionIncomplete =
     isMlRule(ruleType) && machineLearningJobId?.length > 0 && !allJobsStarted;
 
-  const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
-
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
 
   const isThresholdRule = getIsThresholdRule(ruleType);
@@ -278,94 +276,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setThreatIndexModified(!isEqual(threatIndex, threatIndicesConfig));
   }, [threatIndex, threatIndicesConfig]);
 
-  /**
-   * When the user changes rule type to or from "threat_match" this will modify the
-   * default "Custom query" string to either:
-   *   * from '' to '*:*' if the type is switched to "threat_match"
-   *   * from '*:*' back to '' if the type is switched back from "threat_match" to another one
-   */
-  useEffect(() => {
-    const { queryBar: currentQuery } = getFields();
-    if (currentQuery == null) {
-      return;
-    }
-
-    // NOTE: Below this code does two things that are worth commenting.
-
-    // 1. If the user enters some text in the "Custom query" form field, we want
-    // to keep it even if the user switched to another rule type. So we want to
-    // be able to figure out if the field has been modified.
-    // - The forms library provides properties (isPristine, isModified, isDirty)
-    //   for that but they can't be used in our case: their values can be reset
-    //   if you go to step 2 and then back to step 1 or the form is reset in another way.
-    // - That's why we compare the actual value of the field with default ones.
-    //   NOTE: It's important to do a deep object comparison by value.
-    //   Don't do it by reference because the forms lib can change it internally.
-
-    // 2. We call currentQuery.reset() in both cases to not trigger validation errors
-    // as the user has not entered data into those areas yet.
-
-    // If the user switched rule type to "threat_match" from any other one,
-    // but hasn't changed the custom query used for normal rules (''),
-    // we reset the custom query to the default used for "threat_match" rules ('*:*').
-    if (isThreatMatchRule(ruleType) && !isThreatMatchRule(previousRuleType)) {
-      if (isEqual(currentQuery.value, defaultCustomQuery.forNormalRules)) {
-        currentQuery.reset({
-          defaultValue: defaultCustomQuery.forThreatMatchRules,
-        });
-        return;
-      }
-    }
-
-    // If the user switched rule type from "threat_match" to any other one,
-    // but hasn't changed the custom query used for "threat_match" rules ('*:*'),
-    // we reset the custom query to another default value ('').
-    if (!isThreatMatchRule(ruleType) && isThreatMatchRule(previousRuleType)) {
-      if (isEqual(currentQuery.value, defaultCustomQuery.forThreatMatchRules)) {
-        currentQuery.reset({
-          defaultValue: defaultCustomQuery.forNormalRules,
-        });
-      }
-    }
-  }, [ruleType, previousRuleType, getFields]);
-
-  /**
-   * ensures when user switches between rule types, written ES|QL query is not getting lost
-   * additional work is required in this code area, as currently switching to EQL will result in query lose
-   * https://github.com/elastic/kibana/issues/166933
-   */
-  useEffect(() => {
-    const { queryBar: currentQuery } = getFields();
-    if (currentQuery == null) {
-      return;
-    }
-
-    const currentQueryValue = currentQuery.value as DefineStepRule['queryBar'];
-
-    // sets ES|QL query to a default value or earlier added one, when switching to ES|QL rule type
-    if (isEsqlRule(ruleType)) {
-      if (previousRuleType && !isEsqlRule(previousRuleType)) {
-        currentQuery.reset({
-          defaultValue: esqlQueryRef.current ?? defaultCustomQuery.forEsqlRules,
-        });
-      }
-      // otherwise reset it to default values of other rule types
-    } else if (isEsqlRule(previousRuleType)) {
-      // sets ES|QL query value to reference, so it can be used when user switch back from one rule type to another
-      if (currentQueryValue?.query?.language === 'esql') {
-        esqlQueryRef.current = currentQueryValue;
-      }
-
-      const defaultValue = isThreatMatchRule(ruleType)
-        ? defaultCustomQuery.forThreatMatchRules
-        : defaultCustomQuery.forNormalRules;
-
-      currentQuery.reset({
-        defaultValue,
-      });
-    }
-  }, [ruleType, previousRuleType, getFields]);
-
+  usePersistentQuery({ form });
   usePersistentAlertSuppressionState({ form });
 
   // if saved query failed to load:
@@ -724,7 +635,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 </>
               ) : isEsqlRule(ruleType) ? (
                 <EsqlQueryEdit
-                  key="QueryBarDefineRule"
                   path="queryBar"
                   fieldsToValidateOnChange={ALERT_SUPPRESSION_FIELDS_FIELD_NAME}
                   required

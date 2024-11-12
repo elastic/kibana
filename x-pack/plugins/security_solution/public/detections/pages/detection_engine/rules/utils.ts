@@ -125,24 +125,3 @@ export const getStepScheduleDefaultValue = (ruleType: Type | undefined): Schedul
     from: isThreatMatchRule(ruleType) ? THREAT_MATCH_FROM : DEFAULT_FROM,
   };
 };
-
-/**
- * This default query will be used for threat query/indicator matches
- * as the default when the user swaps to using it by changing their
- * rule type from any rule type to the "threatMatchRule" type. Only
- * difference is that "*:*" is used instead of '' for its query.
- */
-const threatQueryBarDefaultValue: DefineStepRule['queryBar'] = {
-  ...stepDefineDefaultValue.queryBar,
-  query: { ...stepDefineDefaultValue.queryBar.query, query: '*:*' },
-};
-
-export const defaultCustomQuery = {
-  forNormalRules: stepDefineDefaultValue.queryBar,
-  forThreatMatchRules: threatQueryBarDefaultValue,
-  forEsqlRules: {
-    query: { query: '', language: 'esql' },
-    filters: [],
-    saved_id: null,
-  },
-};
