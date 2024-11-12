@@ -60,7 +60,7 @@ export function useFetchActiveAlerts({
       try {
         const response = await http.post<FindApiResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
           body: JSON.stringify({
-            ruleTypeIds: SLO_RULE_TYPE_IDS,
+            rule_type_ids: SLO_RULE_TYPE_IDS,
             consumers: [AlertConsumers.SLO, AlertConsumers.OBSERVABILITY, AlertConsumers.ALERTS],
             size: 0,
             query: {
