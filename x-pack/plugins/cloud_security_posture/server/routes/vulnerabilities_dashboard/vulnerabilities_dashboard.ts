@@ -20,8 +20,10 @@ export const defineGetVulnerabilitiesDashboardRoute = (router: CspRouter): void 
     {
       path: VULNERABILITIES_DASHBOARD_ROUTE_PATH,
       validate: false,
-      options: {
-        tags: ['access:cloud-security-posture-read'],
+      security: {
+        authz: {
+          requiredPrivileges: ['cloud-security-posture-read'],
+        },
       },
     },
     async (context, request, response) => {
