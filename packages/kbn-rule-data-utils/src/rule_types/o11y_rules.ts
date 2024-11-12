@@ -70,8 +70,8 @@ export const UPTIME_RULE_TYPE_IDS = [
  */
 
 export enum InfraRuleType {
-  MetricThreshold = 'metrics.alert.threshold',
-  InventoryThreshold = 'metrics.alert.inventory.threshold',
+  MetricThreshold = METRIC_THRESHOLD_ALERT_TYPE_ID,
+  InventoryThreshold = METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
 }
 
 export const INFRA_RULE_TYPE_IDS = Object.values(InfraRuleType);
