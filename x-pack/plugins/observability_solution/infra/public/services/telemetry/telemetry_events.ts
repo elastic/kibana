@@ -264,6 +264,98 @@ const addMetricsCalloutDismissed: InfraTelemetryEvent = {
   },
 };
 
+const anomalyDetectionSetup: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.ANOMALY_DETECTION_SETUP,
+  schema: {
+    job_type: {
+      type: 'text',
+      _meta: {
+        description: 'Type of job for the anomaly detection',
+      },
+    },
+    configured_fields: {
+      properties: {
+        start_date: {
+          type: 'text',
+          _meta: {
+            description: 'Start date for the anomaly detection job',
+          },
+        },
+        partition_field: {
+          type: 'text',
+          _meta: {
+            description: 'Partition field for the anomaly detection job',
+            optional: true,
+          },
+        },
+        filter_field: {
+          type: 'text',
+          _meta: {
+            description: 'Filter field for the anomaly detection job',
+            optional: true,
+          },
+        },
+      },
+    },
+  },
+};
+
+const anomalyDetectionDateFieldChange: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.ANOMALY_DETECTION_DATE_FIELD_CHANGE,
+  schema: {
+    job_type: {
+      type: 'text',
+      _meta: {
+        description: 'Type of job for the anomaly detection',
+      },
+    },
+    start_date: {
+      type: 'text',
+      _meta: {
+        description: 'Start date for the anomaly detection job',
+      },
+    },
+  },
+};
+
+const anomalyDetectionPartitionFieldChange: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.ANOMALY_DETECTION_PARTITION_FIELD_CHANGE,
+  schema: {
+    job_type: {
+      type: 'text',
+      _meta: {
+        description: 'Type of job for the anomaly detection',
+      },
+    },
+    partition_field: {
+      type: 'text',
+      _meta: {
+        description: 'Partition field for the anomaly detection job',
+        optional: true,
+      },
+    },
+  },
+};
+
+const anomalyDetectionFilterFieldChange: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.ANOMALY_DETECTION_FILTER_FIELD_CHANGE,
+  schema: {
+    job_type: {
+      type: 'text',
+      _meta: {
+        description: 'Type of job for the anomaly detection',
+      },
+    },
+    filter_field: {
+      type: 'text',
+      _meta: {
+        description: 'Filter field for the anomaly detection job',
+        optional: true,
+      },
+    },
+  },
+};
+
 export const infraTelemetryEvents = [
   assetDetailsFlyoutViewed,
   assetDetailsPageViewed,
@@ -277,4 +369,8 @@ export const infraTelemetryEvents = [
   addMetricsCalloutTryItClicked,
   addMetricsCalloutLearnMoreClicked,
   addMetricsCalloutDismissed,
+  anomalyDetectionSetup,
+  anomalyDetectionDateFieldChange,
+  anomalyDetectionPartitionFieldChange,
+  anomalyDetectionFilterFieldChange,
 ];

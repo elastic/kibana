@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { AuthenticatedUser, IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
+import { AnalyticsServiceSetup, IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -20,6 +20,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 
+import { CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT } from '../../../lib/telemetry/event_based_telemetry';
 import { performChecks } from '../../helpers';
 import { KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE } from '../../../../common/constants';
 import {
@@ -62,7 +63,8 @@ const buildBulkResponse = (
     created = [],
     deleted = [],
     skipped = [],
-  }: KnowledgeBaseEntryBulkCrudActionResults & { errors: BulkOperationError[] }
+  }: KnowledgeBaseEntryBulkCrudActionResults & { errors: BulkOperationError[] },
+  telemetry: AnalyticsServiceSetup
 ): IKibanaResponse<KnowledgeBaseEntryBulkCrudActionResponse> => {
   const numSucceeded = updated.length + created.length + deleted.length;
   const numSkipped = skipped.length;
@@ -82,6 +84,16 @@ const buildBulkResponse = (
     skipped,
   };
 
+  if (created.length) {
+    created.forEach((entry) => {
+      telemetry.reportEvent(CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT.eventType, {
+        entryType: entry.type,
+        required: 'required' in entry ? entry.required ?? false : false,
+        sharing: entry.users.length ? 'private' : 'global',
+        ...(entry.type === 'document' ? { source: entry.source } : {}),
+      });
+    });
+  }
   if (numFailed > 0) {
     return response.custom<KnowledgeBaseEntryBulkCrudActionResponse>({
       headers: { 'content-type': 'application/json' },
@@ -143,15 +155,13 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
 
           // Perform license, authenticated user and FF checks
           const checkResponse = performChecks({
-            authenticatedUser: true,
             capability: 'assistantKnowledgeBaseByDefault',
             context: ctx,
-            license: true,
             request,
             response,
           });
-          if (checkResponse) {
-            return checkResponse;
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
 
           logger.debug(
@@ -181,8 +191,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             v2KnowledgeBaseEnabled: true,
           });
           const spaceId = ctx.elasticAssistant.getSpaceId();
-          // Authenticated user null check completed in `performChecks()` above
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser() as AuthenticatedUser;
+          const authenticatedUser = checkResponse.currentUser;
           const userFilter = getKBUserFilter(authenticatedUser);
           const manageGlobalKnowledgeBaseAIAssistant =
             kbDataClient?.options.manageGlobalKnowledgeBaseAIAssistant;
@@ -292,14 +301,18 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
                 })
               : undefined;
 
-          return buildBulkResponse(response, {
-            // @ts-ignore-next-line TS2322
-            updated: transformESToKnowledgeBase(docsUpdated),
-            created: created?.data ? transformESSearchToKnowledgeBaseEntry(created?.data) : [],
-            deleted: docsDeleted ?? [],
-            skipped: [],
-            errors,
-          });
+          return buildBulkResponse(
+            response,
+            {
+              // @ts-ignore-next-line TS2322
+              updated: transformESToKnowledgeBase(docsUpdated),
+              created: created?.data ? transformESSearchToKnowledgeBaseEntry(created?.data) : [],
+              deleted: docsDeleted ?? [],
+              skipped: [],
+              errors,
+            },
+            ctx.elasticAssistant.telemetry
+          );
         } catch (err) {
           const error = transformError(err);
           return assistantResponse.error({

@@ -10,20 +10,17 @@
  * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
  * This way plugins can do targeted imports to reduce the final code bundle
  */
+
+import type { EuiDataGridColumn } from '@elastic/eui';
 import { ALERT_DURATION, ALERT_REASON, ALERT_STATUS, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { EuiDataGridColumn } from '@elastic/eui';
-import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 /**
  * columns implements a subset of `EuiDataGrid`'s `EuiDataGridColumn` interface,
  * plus additional TGrid column properties
  */
-export const columns: Array<
-  Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
-> = [
+export const columns: EuiDataGridColumn[] = [
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
       'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.statusColumnDescription',
       {
@@ -34,7 +31,6 @@ export const columns: Array<
     initialWidth: 110,
   },
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
       'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.durationColumnDescription',
       {
@@ -45,7 +41,6 @@ export const columns: Array<
     initialWidth: 116,
   },
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
       'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.sloColumnDescription',
       {
@@ -56,7 +51,6 @@ export const columns: Array<
     initialWidth: 110,
   },
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
       'xpack.observability.slo.sloAlertsEmbeddable.alertsTGrid.reasonColumnDescription',
       {
@@ -64,6 +58,5 @@ export const columns: Array<
       }
     ),
     id: ALERT_REASON,
-    linkField: '*',
   },
 ];

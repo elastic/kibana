@@ -109,6 +109,15 @@ export function PromptEditorNaturalLanguage({
     }
   }, [handleResizeTextArea, prompt]);
 
+  useEffect(() => {
+    // Attach the event listener to the window to catch mouseup outside the browser window
+    window.addEventListener('mouseup', handleResizeTextArea);
+
+    return () => {
+      window.removeEventListener('mouseup', handleResizeTextArea);
+    };
+  }, [handleResizeTextArea]);
+
   return (
     <EuiInputPopover
       display="flex"

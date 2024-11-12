@@ -78,15 +78,19 @@ export class EngineDescriptorClient {
     return attributes;
   }
 
-  async update(entityType: EntityType, status: EngineStatus) {
+  async update(entityType: EntityType, engine: Partial<EngineDescriptor>) {
     const id = this.getSavedObjectId(entityType);
     const { attributes } = await this.deps.soClient.update<EngineDescriptor>(
       entityEngineDescriptorTypeName,
       id,
-      { status },
+      engine,
       { refresh: 'wait_for' }
     );
     return attributes;
+  }
+
+  async updateStatus(entityType: EntityType, status: EngineStatus) {
+    return this.update(entityType, { status });
   }
 
   async find(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {
