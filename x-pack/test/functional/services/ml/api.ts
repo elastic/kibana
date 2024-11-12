@@ -1285,9 +1285,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async getAllAnnotations() {
       log.debug('Fetching all annotations ...');
 
-      const body = await es.search<Annotation>({
-        index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
-      });
+      if (
+        (await es.indices.exists({
+          index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+          allow_no_indices: false,
+        })) === false
+      ) {
+        return [];
+      }
+
+      const body = await es.search<Annotation>({ index: ML_ANNOTATIONS_INDEX_ALIAS_READ });
       expect(body).to.not.be(undefined);
       expect(body).to.have.property('hits');
       log.debug('> All annotations fetched.');
