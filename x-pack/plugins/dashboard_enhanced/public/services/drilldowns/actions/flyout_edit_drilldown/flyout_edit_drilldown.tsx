@@ -74,7 +74,7 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable) || getInheritedViewMode(embeddable) !== 'edit') return false;
-    return (embeddable.dynamicActionsState$.getValue()?.dynamicActions.events ?? []).length > 0;
+    return (embeddable.dynamicActionsState$.getValue()?.dynamicActions?.events ?? []).length > 0;
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
