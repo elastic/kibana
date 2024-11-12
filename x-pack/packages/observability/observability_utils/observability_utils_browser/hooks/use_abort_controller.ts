@@ -18,6 +18,9 @@ export function useAbortController() {
 
   return {
     signal: controller.signal,
+    abort: () => {
+      controller.abort();
+    },
     refresh: () => {
       setController(() => new AbortController());
     },

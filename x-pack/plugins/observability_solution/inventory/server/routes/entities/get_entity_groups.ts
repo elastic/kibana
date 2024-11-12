@@ -6,8 +6,8 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
-import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { esqlResultToPlainObjects } from '@kbn/observability-utils-server/es/esql_result_to_plain_objects';
 import {
   ENTITIES_LATEST_ALIAS,
   type EntityGroup,
