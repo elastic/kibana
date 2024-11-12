@@ -52,6 +52,34 @@ export const DashboardDrilldownOptionsComponent = ({
             onChange={() => onOptionChange({ openInNewTab: !options.openInNewTab })}
             data-test-subj="dashboardDrillDownOptions--openInNewTab--checkbox"
           />
+          <EuiSpacer size="s" />
+          <EuiSwitch
+            compressed
+            name="overflowTextWrap"
+            label={dashboardDrilldownConfigStrings.component.getOverflowTextWrap()}
+            checked={options.overflowTextWrap}
+            onChange={() =>
+              onOptionChange({
+                overflowTextWrap: !options.overflowTextWrap,
+                overflowEllipsis: !options.overflowEllipsis,
+              })
+            }
+            data-test-subj="dashboardDrillDownOptions--overflowTextWrap--checkbox"
+          />
+          <EuiSpacer size="s" />
+          <EuiSwitch
+            compressed
+            name="overflowEllipsis"
+            label={dashboardDrilldownConfigStrings.component.getOverflowEllipsis()}
+            checked={options.overflowEllipsis}
+            onChange={() =>
+              onOptionChange({
+                overflowEllipsis: !options.overflowEllipsis,
+                overflowTextWrap: !options.overflowTextWrap,
+              })
+            }
+            data-test-subj="dashboardDrillDownOptions--overflowEllipsis--checkbox"
+          />
         </div>
       </EuiFormRow>
     </>

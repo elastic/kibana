@@ -12,10 +12,14 @@ export type DashboardDrilldownOptions = {
   useCurrentFilters: boolean;
   useCurrentDateRange: boolean;
   openInNewTab: boolean;
+  overflowTextWrap: boolean;
+  overflowEllipsis: boolean;
 };
 
 export const DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS: DashboardDrilldownOptions = {
   openInNewTab: false,
   useCurrentDateRange: true,
   useCurrentFilters: true,
+  overflowEllipsis: false,
+  overflowTextWrap: true,
 };

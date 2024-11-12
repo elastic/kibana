@@ -18,6 +18,8 @@ export type UrlDrilldownConfig = {
 export type UrlDrilldownOptions = {
   openInNewTab: boolean;
   encodeUrl: boolean;
+  overflowTextWrap: boolean;
+  overflowEllipsis: boolean;
 };
 
 /**

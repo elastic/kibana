@@ -12,4 +12,6 @@ import { UrlDrilldownOptions } from './types';
 export const DEFAULT_URL_DRILLDOWN_OPTIONS: UrlDrilldownOptions = {
   encodeUrl: true,
   openInNewTab: true,
+  overflowTextWrap: true,
+  overflowEllipsis: false,
 };

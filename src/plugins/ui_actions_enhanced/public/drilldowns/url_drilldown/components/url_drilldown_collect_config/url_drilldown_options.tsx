@@ -14,6 +14,10 @@ import {
   txtUrlTemplateEncodeDescription,
   txtUrlTemplateEncodeUrl,
   txtUrlTemplateOpenInNewTab,
+  txtUrlTemplateOverflowEllipsis,
+  txtUrlTemplateOverflowEllipsisDescription,
+  txtUrlTemplateOverflowTextWrap,
+  txtUrlTemplateOverflowTextWrapDescription,
 } from './i18n';
 import { UrlDrilldownOptions } from '../../types';
 
@@ -54,6 +58,52 @@ export const UrlDrilldownOptionsComponent = ({
             checked={options.encodeUrl}
             onChange={() => onOptionChange({ encodeUrl: !options.encodeUrl })}
             data-test-subj="urlDrilldownEncodeUrl"
+          />
+          <EuiSpacer size="s" />
+          <EuiSwitch
+            compressed
+            id="overflowTextWrap"
+            name="overflowTextWrap"
+            label={
+              <>
+                {txtUrlTemplateOverflowTextWrap}
+                <EuiSpacer size={'s'} />
+                <EuiTextColor color="subdued">
+                  {txtUrlTemplateOverflowTextWrapDescription}
+                </EuiTextColor>
+              </>
+            }
+            checked={options.overflowTextWrap}
+            onChange={() =>
+              onOptionChange({
+                overflowTextWrap: !options.overflowTextWrap,
+                overflowEllipsis: !options.overflowEllipsis,
+              })
+            }
+            data-test-subj="urlDrilldownOverflowTextWrap"
+          />
+          <EuiSpacer size="s" />
+          <EuiSwitch
+            compressed
+            id="overflowEllipsis"
+            name="overflowEllipsis"
+            label={
+              <>
+                {txtUrlTemplateOverflowEllipsis}
+                <EuiSpacer size={'s'} />
+                <EuiTextColor color="subdued">
+                  {txtUrlTemplateOverflowEllipsisDescription}
+                </EuiTextColor>
+              </>
+            }
+            checked={options.overflowEllipsis}
+            onChange={() =>
+              onOptionChange({
+                overflowEllipsis: !options.overflowEllipsis,
+                overflowTextWrap: !options.overflowTextWrap,
+              })
+            }
+            data-test-subj="urlDrilldownOverflowEllipsis"
           />
         </div>
       </EuiFormRow>
