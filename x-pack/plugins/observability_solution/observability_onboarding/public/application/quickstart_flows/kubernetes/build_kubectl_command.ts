@@ -22,9 +22,10 @@ export function buildKubectlCommand({
   elasticAgentVersion,
 }: Params) {
   const escapedElasticsearchUrl = elasticsearchUrl.replace(/\//g, '\\/');
+  const versionTag = elasticAgentVersion.split('+')[0];
 
   return `
-    kubectl kustomize ${KUSTOMIZE_TEMPLATE_URL}\\?ref\\=v${elasticAgentVersion}
+    kubectl kustomize ${KUSTOMIZE_TEMPLATE_URL}\\?ref\\=v${versionTag}
       | sed -e 's/JUFQSV9LRVkl/${encodedApiKey}/g'
             -e "s/%ES_HOST%/${escapedElasticsearchUrl}/g"
             -e "s/%ONBOARDING_ID%/${onboardingId}/g"
