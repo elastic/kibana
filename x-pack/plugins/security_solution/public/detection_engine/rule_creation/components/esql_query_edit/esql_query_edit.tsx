@@ -1,0 +1,76 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo, useMemo } from 'react';
+import type { DataViewBase } from '@kbn/es-query';
+import type { FieldConfig } from '../../../../shared_imports';
+import { UseField } from '../../../../shared_imports';
+import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar';
+import { QueryBarDefineRule } from '../../../rule_creation_ui/components/query_bar';
+import { queryRequiredValidatorFactory } from '../../../rule_creation_ui/validators/query_required_validator_factory';
+import { debounceAsync } from '../../../rule_creation_ui/validators/debounce_async';
+import { esqlQueryValidatorFactory } from '../../../rule_creation_ui/validators/esql_query_validator_factory';
+import { EsqlInfoIcon } from './esql_info_icon';
+import * as i18n from './translations';
+
+interface EsqlQueryEditProps {
+  path: string;
+  dataView: DataViewBase;
+  required?: boolean;
+  loading?: boolean;
+  disabled?: boolean;
+  onValidityChange?: (arg: boolean) => void;
+}
+
+export const EsqlQueryEdit = memo(function EsqlQueryEdit({
+  path,
+  dataView,
+  required = false,
+  loading = false,
+  disabled = false,
+  onValidityChange,
+}: EsqlQueryEditProps): JSX.Element {
+  const componentProps = useMemo(
+    () => ({
+      isDisabled: disabled,
+      isLoading: loading,
+      indexPattern: dataView,
+      idAria: 'ruleEsqlQueryBar',
+      dataTestSubj: 'ruleEsqlQueryBar',
+      onValidityChange,
+    }),
+    [dataView, loading, disabled, onValidityChange]
+  );
+  const fieldConfig: FieldConfig<FieldValueQueryBar> = useMemo(
+    () => ({
+      label: i18n.ESQL_QUERY,
+      labelAppend: <EsqlInfoIcon />,
+      validations: [
+        ...(required
+          ? [
+              {
+                validator: queryRequiredValidatorFactory('esql'),
+              },
+            ]
+          : []),
+        {
+          validator: debounceAsync(esqlQueryValidatorFactory(), 300),
+        },
+      ],
+    }),
+    [required]
+  );
+
+  return (
+    <UseField
+      path={path}
+      component={QueryBarDefineRule}
+      componentProps={componentProps}
+      config={fieldConfig}
+    />
+  );
+});

@@ -24,7 +24,6 @@ import { isEqual } from 'lodash';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { useQueryClient } from '@tanstack/react-query';
 
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
@@ -48,7 +47,6 @@ import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { ThresholdInput } from '../threshold_input';
-import { EsqlInfoIcon } from '../../../rule_creation/components/esql_info_icon';
 import {
   Field,
   Form,
@@ -96,6 +94,7 @@ import {
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
+import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit/esql_query_edit';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -173,8 +172,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   threatIndicesConfig,
   thresholdFields,
 }) => {
-  const queryClient = useQueryClient();
-
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
@@ -621,46 +618,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     handleResetIndices,
   ]);
 
-  const queryBarProps = useMemo(
-    () =>
-      ({
-        idAria: 'detectionEngineStepDefineRuleQueryBar',
-        indexPattern,
-        isDisabled: isLoading,
-        isLoading,
-        dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
-        onValidityChange: setIsQueryBarValid,
-      } as QueryBarDefineRuleProps),
-    [indexPattern, isLoading, setIsQueryBarValid]
-  );
-
-  const esqlQueryBarConfig = useMemo(
-    () => ({
-      ...schema.queryBar,
-      label: i18n.ESQL_QUERY,
-      labelAppend: <EsqlInfoIcon />,
-    }),
-    []
-  );
-
-  const EsqlQueryBarMemo = useMemo(
-    () => (
-      <UseField
-        key="QueryBarDefineRule"
-        path="queryBar"
-        config={esqlQueryBarConfig}
-        component={QueryBarDefineRule}
-        validationData={{ queryClient }}
-        componentProps={{
-          ...queryBarProps,
-          dataTestSubj: 'detectionEngineStepDefineRuleEsqlQueryBar',
-          idAria: 'detectionEngineStepDefineRuleEsqlQueryBar',
-        }}
-      />
-    ),
-    [queryBarProps, esqlQueryBarConfig, queryClient]
-  );
-
   const QueryBarMemo = useMemo(
     () => (
       <UseField
@@ -766,7 +723,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   />
                 </>
               ) : isEsqlRule(ruleType) ? (
-                EsqlQueryBarMemo
+                <EsqlQueryEdit
+                  key="QueryBarDefineRule"
+                  path="queryBar"
+                  required
+                  dataView={indexPattern}
+                  disabled={isLoading}
+                  loading={isLoading}
+                  onValidityChange={setIsQueryBarValid}
+                />
               ) : (
                 QueryBarMemo
               )}

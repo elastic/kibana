@@ -23,10 +23,10 @@ import {
   schema as aboutRuleSchema,
   threatMatchAboutSchema,
 } from '../components/step_about_rule/schema';
+import { ESQL_ERROR_CODES } from '../validators/esql_query_validator_factory';
 import { schema as scheduleRuleSchema } from '../components/step_schedule_rule/schema';
 import { getSchema as getActionsRuleSchema } from '../../rule_creation/components/step_rule_actions/get_schema';
 import { useFetchIndex } from '../../../common/containers/source';
-import { ERROR_CODES as ESQL_ERROR_CODES } from '../../rule_creation/logic/esql_validator';
 import { EQL_ERROR_CODES } from '../../../common/hooks/eql/api';
 import * as i18n from './translations';
 

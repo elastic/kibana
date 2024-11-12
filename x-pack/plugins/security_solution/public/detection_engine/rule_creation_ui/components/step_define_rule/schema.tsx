@@ -31,6 +31,7 @@ import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { esqlValidator } from '../../../rule_creation/logic/esql_validator';
+import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
 import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
 import { indexPatternValidatorFactory } from '../../validators/index_pattern_validator_factory';
 import { alertSuppressionFieldsValidatorFactory } from '../../validators/alert_suppression_fields_validator_factory';
@@ -133,9 +134,6 @@ export const schema: FormSchema<DefineStepRule> = {
       },
       {
         validator: kueryValidatorFactory(),
-      },
-      {
-        validator: debounceAsync(esqlValidator, 300),
       },
     ],
   },

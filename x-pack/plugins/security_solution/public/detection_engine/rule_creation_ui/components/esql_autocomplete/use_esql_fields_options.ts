@@ -14,7 +14,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { getEsqlQueryConfig } from '../../../rule_creation/logic/get_esql_query_config';
-import type { FieldType } from '../../../rule_creation/logic/esql_validator';
+
+type FieldType = 'string';
 
 export const esqlToOptions = (
   columns: { error: unknown } | DatatableColumn[] | undefined | null,
