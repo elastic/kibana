@@ -194,7 +194,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         type: 'error',
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.unsupportedFunctionforCommandOption',
+          'kbn-esql-validation-autocomplete.esql.validation.fnUnsupportedAfterCommand',
           {
             defaultMessage: '[{function}] function cannot be used after {command}',
             values: {
