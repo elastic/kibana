@@ -40,7 +40,6 @@ interface Props {
   pageIndex: number;
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
-  onFilterByType: (entityType: string) => void;
 }
 
 const PAGE_SIZE = 20;
@@ -53,7 +52,6 @@ export function EntitiesGrid({
   pageIndex,
   onChangePage,
   onChangeSort,
-  onFilterByType,
 }: Props) {
   const { getDiscoverRedirectUrl } = useDiscoverRedirect();
 
@@ -98,14 +96,7 @@ export function EntitiesGrid({
           return entity?.alertsCount ? <AlertsBadge entity={entity} /> : null;
 
         case ENTITY_TYPE:
-          return (
-            <BadgeFilterWithPopover
-              field={ENTITY_TYPE}
-              value={entityType}
-              label={entityType}
-              onFilter={() => onFilterByType(entityType)}
-            />
-          );
+          return <BadgeFilterWithPopover field={ENTITY_TYPE} value={entityType} />;
         case ENTITY_LAST_SEEN:
           return (
             <FormattedMessage
@@ -147,7 +138,7 @@ export function EntitiesGrid({
           return entity[columnId as EntityColumnIds] || '';
       }
     },
-    [entities, getDiscoverRedirectUrl, onFilterByType]
+    [entities, getDiscoverRedirectUrl]
   );
 
   if (loading) {

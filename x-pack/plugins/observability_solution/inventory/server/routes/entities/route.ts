@@ -47,8 +47,8 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
         sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
       }),
       t.partial({
+        esQuery: jsonRt.pipe(t.UnknownRecord),
         entityTypes: jsonRt.pipe(t.array(t.string)),
-        kuery: t.string,
       }),
     ]),
   }),
@@ -69,7 +69,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
       plugin: `@kbn/${INVENTORY_APP_ID}-plugin`,
     });
 
-    const { sortDirection, sortField, entityTypes, kuery } = params.query;
+    const { sortDirection, sortField, esQuery, entityTypes } = params.query;
 
     const [alertsClient, latestEntities] = await Promise.all([
       createAlertsClient({ plugins, request }),
@@ -77,8 +77,8 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
         inventoryEsClient,
         sortDirection,
         sortField,
+        esQuery,
         entityTypes,
-        kuery,
       }),
     ]);
 
@@ -87,7 +87,6 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
     const alerts = await getLatestEntitiesAlerts({
       identityFieldsPerEntityType,
       alertsClient,
-      kuery,
     });
 
     const joined = joinByKey(
@@ -114,8 +113,7 @@ export const groupEntitiesByRoute = createInventoryServerRoute({
     t.type({ path: t.type({ field: t.literal(ENTITY_TYPE) }) }),
     t.partial({
       query: t.partial({
-        kuery: t.string,
-        entityTypes: jsonRt.pipe(t.array(t.string)),
+        esQuery: jsonRt.pipe(t.UnknownRecord),
       }),
     }),
   ]),
@@ -131,13 +129,12 @@ export const groupEntitiesByRoute = createInventoryServerRoute({
     });
 
     const { field } = params.path;
-    const { kuery, entityTypes } = params.query ?? {};
+    const { esQuery } = params.query ?? {};
 
     const groups = await getEntityGroupsBy({
       inventoryEsClient,
       field,
-      kuery,
-      entityTypes,
+      esQuery,
     });
 
     const entitiesCount = groups.reduce((acc, group) => acc + group.count, 0);
