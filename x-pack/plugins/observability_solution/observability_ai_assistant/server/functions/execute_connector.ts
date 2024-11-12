@@ -8,13 +8,15 @@
 import { FunctionRegistrationParameters } from '.';
 import { FunctionVisibility } from '../../common';
 
+export const EXECUTE_CONNECTOR_FUNCTION_NAME = 'execute_connector';
+
 export function registerExecuteConnectorFunction({
   functions,
   resources,
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
-      name: 'execute_connector',
+      name: EXECUTE_CONNECTOR_FUNCTION_NAME,
       description: 'Use this function when user explicitly asks to call a kibana connector.',
       visibility: FunctionVisibility.AssistantOnly,
       parameters: {
