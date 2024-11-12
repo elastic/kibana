@@ -68,7 +68,15 @@ export class FeatureFlagsService {
         if (this.isProviderReadyPromise) {
           throw new Error('A provider has already been set. This API cannot be called twice.');
         }
+        const transaction = apm.startTransaction('set-provider', 'feature-flags');
         this.isProviderReadyPromise = OpenFeature.setProviderAndWait(provider);
+        this.isProviderReadyPromise
+          .then(() => transaction?.end())
+          .catch((err) => {
+            this.logger.error(err);
+            apm.captureError(err);
+            transaction?.end();
+          });
       },
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
     };
