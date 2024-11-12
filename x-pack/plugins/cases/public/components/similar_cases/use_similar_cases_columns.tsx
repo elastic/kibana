@@ -78,7 +78,7 @@ export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
         sortable: true,
         render: (similarities: SimilarCaseUI['similarities'], theCase: SimilarCaseUI) => {
           if (theCase.id != null && theCase.title != null) {
-            return similarities.map((similarity) => similarity.value);
+            return similarities.map((similarity) => similarity.value).join(', ');
           }
           return getEmptyCellValue();
         },
