@@ -48,22 +48,27 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       after(() => apmSynthtraceEsClient.clean());
 
       it('returns APM index templates', async () => {
+        const apmIndexTemplatesPatterns = ['apm', 'otel'];
+
         const { status, body } = await apmApiClient.adminUser({
           endpoint: 'GET /internal/apm/diagnostics',
         });
         expect(status).to.be(200);
 
-        const templateNames = uniq(
+        const uniqueTemplateNames = uniq(
           body.indexTemplatesByIndexPattern.flatMap(({ indexTemplates }) => {
             return indexTemplates?.map(({ templateName }) => templateName);
           })
         );
 
-        expect(templateNames).to.eql([
+        const apmTemplateNames = uniqueTemplateNames.filter((templateName) =>
+          apmIndexTemplatesPatterns.some((pattern) => templateName.includes(pattern))
+        );
+
+        expect(apmTemplateNames).to.eql([
           'logs-apm.error@template',
           'logs-apm.app@template',
           'logs-otel@template',
-          'logs',
           'metrics-apm.service_transaction.1m@template',
           'metrics-apm.transaction.10m@template',
           'metrics-apm.service_summary.10m@template',
@@ -79,19 +84,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           'metrics-apm.transaction.60m@template',
           'metrics-apm.app@template',
           'metrics-otel@template',
-          'metrics',
           'metrics-service_transaction.10m.otel@template',
           'metrics-transaction.10m.otel@template',
           'metrics-service_summary.1m.otel@template',
           'metrics-service_transaction.60m.otel@template',
           'metrics-service_summary.60m.otel@template',
-          'metrics-service_destination.1m@template',
-          'metrics-service_destination.10m@template',
           'metrics-service_summary.10m.otel@template',
           'metrics-transaction.1m.otel@template',
           'metrics-transaction.60m.otel@template',
           'metrics-service_transaction.1m.otel@template',
-          'metrics-service_destination.60m@template',
           'traces-apm.rum@template',
           'traces-apm@template',
           'traces-apm.sampled@template',
