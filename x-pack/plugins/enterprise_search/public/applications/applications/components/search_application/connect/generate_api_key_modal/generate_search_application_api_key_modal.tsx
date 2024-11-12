@@ -27,6 +27,7 @@ import {
   EuiSpacer,
   EuiFormLabel,
   EuiCodeBlock,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -45,6 +46,7 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
 > = ({ onClose, searchApplicationName }) => {
   const { keyName, apiKey, isLoading, isSuccess } = useValues(GenerateApiKeyModalLogic);
   const { setKeyName } = useActions(GenerateApiKeyModalLogic);
+  const modalTitleId = useGeneratedHtmlId();
   const { makeRequest } = useActions(GenerateSearchApplicationApiKeyLogic);
 
   useEffect(() => {
@@ -52,9 +54,9 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
   }, [searchApplicationName]);
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate(
             'xpack.enterpriseSearch.searchApplication.searchApplication.api.generateApiKeyModal.title',
             {
