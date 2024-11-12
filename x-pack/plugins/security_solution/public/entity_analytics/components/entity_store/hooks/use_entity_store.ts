@@ -17,6 +17,7 @@ import type {
 } from '../../../../../common/api/entity_analytics';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
 import { ENTITY_STORE_ENGINE_STATUS, useEntityEngineStatus } from './use_entity_engine_status';
+import { EntityEventTypes } from '../../../../common/lib/telemetry';
 
 const ENTITY_STORE_ENABLEMENT_INIT = 'ENTITY_STORE_ENABLEMENT_INIT';
 
@@ -49,7 +50,7 @@ export const useEntityStoreEnablement = () => {
   });
 
   const enable = useCallback(() => {
-    telemetry?.reportEntityStoreInit({
+    telemetry?.reportEvent(EntityEventTypes.EntityStoreDashboardInitButtonClicked, {
       timestamp: new Date().toISOString(),
     });
     return initialize().then(() => setPolling(true));
@@ -76,7 +77,7 @@ export const useInitEntityEngineMutation = (options?: UseMutationOptions<{}>) =>
   const { initEntityStore } = useEntityStoreRoutes();
   return useMutation<InitEntityEngineResponse[]>(
     () => {
-      telemetry?.reportEntityStoreEnablement({
+      telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
         timestamp: new Date().toISOString(),
         action: 'start',
       });
@@ -106,7 +107,7 @@ export const useStopEntityEngineMutation = (options?: UseMutationOptions<{}>) =>
   const { stopEntityStore } = useEntityStoreRoutes();
   return useMutation<StopEntityEngineResponse[]>(
     () => {
-      telemetry?.reportEntityStoreEnablement({
+      telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
         timestamp: new Date().toISOString(),
         action: 'stop',
       });
