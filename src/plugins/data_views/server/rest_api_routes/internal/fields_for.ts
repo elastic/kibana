@@ -225,7 +225,7 @@ export const registerFieldForWildcard = (
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization provided by Elasticsearch',
         },
       },
       validate,
@@ -238,7 +238,7 @@ export const registerFieldForWildcard = (
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization provided by Elasticsearch',
         },
       },
       validate,
@@ -251,7 +251,7 @@ export const registerFieldForWildcard = (
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason: 'Authorization provided by Elasticsearch',
         },
       },
       validate: { request: { query: querySchema }, response: validate.response },

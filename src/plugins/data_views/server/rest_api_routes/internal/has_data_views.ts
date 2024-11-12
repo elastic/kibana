@@ -48,7 +48,7 @@ export const registerHasDataViewsRoute = (router: IRouter): void => {
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: 'Authorization provided by saved objects client',
           },
         },
         validate: {

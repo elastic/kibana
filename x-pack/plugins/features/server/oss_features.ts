@@ -401,6 +401,7 @@ export const buildOSSFeatures = ({
             read: [],
           },
           ui: ['save'],
+          api: ['indexPatterns:manage', 'indexPatterns:read'],
         },
         read: {
           app: ['kibana'],
@@ -413,6 +414,7 @@ export const buildOSSFeatures = ({
             read: ['index-pattern'],
           },
           ui: [],
+          api: ['indexPatterns:read'],
         },
       },
     },

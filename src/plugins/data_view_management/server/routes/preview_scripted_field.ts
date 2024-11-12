@@ -16,8 +16,7 @@ export function registerPreviewScriptedFieldRoute(router: IRouter): void {
       path: '/internal/index-pattern-management/preview_scripted_field',
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
+          requiredPrivileges: ['indexPatterns:manage'],
         },
       },
       validate: {

@@ -133,8 +133,7 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string, descri
         version: INITIAL_REST_VERSION,
         security: {
           authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
+            requiredPrivileges: ['indexPatterns:manage'],
           },
         },
         validate: {
