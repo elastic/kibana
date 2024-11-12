@@ -39391,8 +39391,7 @@ components:
       type: object
       properties:
         unit:
-          $ref: >-
-            #/components/schemas/Security_Detections_API_AlertSuppressionDurationUnit
+          $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionDurationUnit'
         value:
           minimum: 1
           type: integer
