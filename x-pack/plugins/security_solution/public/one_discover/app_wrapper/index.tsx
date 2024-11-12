@@ -8,8 +8,7 @@ import React, { useMemo } from 'react';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
-import type { DiscoverServices } from '@kbn/discover-plugin/public/build_services';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { CoreStart } from '@kbn/core/public';
 import type { SecuritySolutionAppWrapperFeature } from '@kbn/discover-shared-plugin/public';
@@ -40,8 +39,6 @@ export const createSecuritySolutionDiscoverAppWrapperGetter = ({
     ReturnType<SecuritySolutionAppWrapperFeature['getWrapper']>
   > = ({ store }) => {
     return function SecuritySolutionDiscoverAppWrapper({ children }) {
-      const discoverServices = useKibana().services as DiscoverServices;
-
       const CasesContext = useMemo(() => plugins.cases.ui.getCasesContext(), []);
 
       const userCasesPermissions = useMemo(() => plugins.cases.helpers.canUseCases([APP_ID]), []);
