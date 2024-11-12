@@ -216,7 +216,7 @@ export const TemplateDetailsContent = ({
                 }}
                 isSelected={tab.id === activeTab}
                 key={tab.id}
-                data-test-subj={`tab-${tab.id}`}
+                data-test-subj="tab"
               >
                 {tab.name}
               </EuiTab>
