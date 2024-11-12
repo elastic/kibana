@@ -15,6 +15,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { errors } from '@elastic/elasticsearch';
 
 import {
+  FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
   FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
   STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
 } from '../../../../constants/fleet_es_assets';
@@ -25,7 +26,6 @@ import type { RegistryDataStream } from '../../../../types';
 import { processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
 import {
-  FLEET_COMPONENT_TEMPLATES,
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
   STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
@@ -38,10 +38,6 @@ import {
   generateTemplateIndexPattern,
   updateCurrentWriteIndices,
 } from './template';
-
-const FLEET_COMPONENT_TEMPLATES_NAMES = FLEET_COMPONENT_TEMPLATES.map(
-  (componentTemplate) => componentTemplate.name
-);
 
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({
@@ -91,7 +87,8 @@ describe('EPM template', () => {
       STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
       ...composedOfTemplates,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
-      ...FLEET_COMPONENT_TEMPLATES_NAMES,
+      FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+      FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
     ]);
   });
 
@@ -111,7 +108,8 @@ describe('EPM template', () => {
       'metrics@tsdb-settings',
       ...composedOfTemplates,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
-      ...FLEET_COMPONENT_TEMPLATES_NAMES,
+      FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+      FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
     ]);
   });
 
@@ -185,7 +183,8 @@ describe('EPM template', () => {
       STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
       STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
-      ...FLEET_COMPONENT_TEMPLATES_NAMES,
+      FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+      FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
     ]);
   });
 
