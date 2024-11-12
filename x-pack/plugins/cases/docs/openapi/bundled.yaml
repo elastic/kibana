@@ -1224,25 +1224,9 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data: null
-          schema:
-            title: Add case file request properties
-            required:
-              - file
-            description: Defines the file that will be attached to the case. Optional parameters will be generated automatically from the file metadata if not defined.
-            type: object
-            properties:
-              file:
-                description: The file being attached to the case.
-                type: string
-                format: binary
-              filename:
-                description: The name of file being attached to the case. **This should not include the file extension.**
-                type: string
-              mimeType:
-                description: The MIME type of the file being attached to the case.
-                type: string
-                example: image/jpeg
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/add_case_file_request'
       responses:
         '200':
           description: Indicates a successful call.
@@ -3382,6 +3366,24 @@ components:
             - settings
             - severity
           example: create_case
+    add_case_file_request:
+      title: Add case file request properties
+      required:
+        - file
+      description: Defines the file that will be attached to the case. Optional parameters will be generated automatically from the file metadata if not defined.
+      type: object
+      properties:
+        file:
+          description: The file being attached to the case.
+          type: string
+          format: binary
+        filename:
+          description: The name of file being attached to the case. **This should not include the file extension.**
+          type: string
+        mimeType:
+          description: The MIME type of the file being attached to the case.
+          type: string
+          example: image/jpeg
   examples:
     create_case_request:
       summary: Create a security case that uses a Jira connector.

@@ -18,8 +18,8 @@ post:
     required: true
     content:
       multipart/form-data:
-      schema:
-        $ref: '../components/schemas/add_case_file_request.yaml'
+        schema:
+          $ref: '../components/schemas/add_case_file_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.

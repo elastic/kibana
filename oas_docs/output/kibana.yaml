@@ -7316,6 +7316,44 @@ paths:
       summary: Push a case to an external service
       tags:
         - cases
+  /api/cases/{caseId}/files:
+    post:
+      description: >
+        Attach a file to a case. You must have `all` privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the case you're updating. The request must include:
+            - The `Content-Type: multipart/form-data` HTTP header.
+            - A link to the file that is being uploaded.
+      operationId: addCaseFileDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_case_id'
+      requestBody:
+        content:
+          multipart/form-data; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: '#/components/schemas/Cases_add_case_file_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                addCaseFileResponse:
+                  $ref: '#/components/examples/Cases_add_comment_response'
+              schema:
+                $ref: '#/components/schemas/Cases_case_response_properties'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Cases_4xx_response'
+          description: Authorization information is missing or invalid.
+      summary: Attach a file to a case
+      tags:
+        - cases
   /api/cases/{caseId}/user_actions:
     get:
       deprecated: true
@@ -44669,6 +44707,28 @@ components:
         - $ref: '#/components/schemas/Cases_add_alert_comment_request_properties'
         - $ref: '#/components/schemas/Cases_add_user_comment_request_properties'
       title: Add case comment request
+    Cases_add_case_file_request:
+      description: >-
+        Defines the file that will be attached to the case. Optional parameters
+        will be generated automatically from the file metadata if not defined.
+      type: object
+      properties:
+        file:
+          description: The file being attached to the case.
+          format: binary
+          type: string
+        filename:
+          description: >-
+            The name of file being attached to the case. **This should not
+            include the file extension.**
+          type: string
+        mimeType:
+          description: The MIME type of the file being attached to the case.
+          example: image/jpeg
+          type: string
+      required:
+        - file
+      title: Add case file request properties
     Cases_add_user_comment_request_properties:
       description: Defines properties for case comment requests when type is user.
       properties:
