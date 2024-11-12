@@ -55,7 +55,11 @@ describe('<GraphPreviewContainer />', () => {
       data: { nodes: [], edges: [] },
     });
 
+    const timestamp = new Date().toISOString();
+
     (useGraphPreview as jest.Mock).mockReturnValue({
+      timestamp,
+      eventIds: [],
       isAuditLog: true,
     });
 
@@ -78,9 +82,23 @@ describe('<GraphPreviewContainer />', () => {
     expect(
       getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).toBeInTheDocument();
+    expect(mockUseFetchGraphData).toHaveBeenCalled();
+    expect(mockUseFetchGraphData.mock.calls[0][0]).toEqual({
+      req: {
+        query: {
+          eventIds: [],
+          start: `${timestamp}||-30m`,
+          end: `${timestamp}||+30m`,
+        },
+      },
+      options: {
+        enabled: true,
+        refetchOnWindowFocus: false,
+      },
+    });
   });
 
-  it('should render error message and text in header', () => {
+  it('should not render when graph data is not available', () => {
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
@@ -91,10 +109,10 @@ describe('<GraphPreviewContainer />', () => {
       isAuditLog: false,
     });
 
-    const { getByTestId } = renderGraphPreview();
+    const { queryByTestId } = renderGraphPreview();
 
     expect(
-      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
+      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
   });
 });
