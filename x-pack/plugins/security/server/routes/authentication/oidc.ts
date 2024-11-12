@@ -43,8 +43,7 @@ export function defineOIDCRoutes({
           excludeFromOAS: true,
           ...(isDeprecated && {
             deprecated: {
-              documentationUrl:
-                'https://elastic.co/guide/en/elasticsearch/reference/current/oidc-guide.html',
+              documentationUrl: 'https://elastic.co', // ToDo: Update with docLink to upgrade note
               severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.oidcImplicitRouteMessage', {
                 defaultMessage:
@@ -141,8 +140,7 @@ export function defineOIDCRoutes({
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
           ...(isDeprecated && {
             deprecated: {
-              documentationUrl:
-                'https://elastic.co/guide/en/elasticsearch/reference/current/oidc-guide.html',
+              documentationUrl: 'https://elastic.co', // ToDo: Update with docLink to upgrade note
               severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.oidcCallbackRouteMessage', {
                 defaultMessage:
@@ -248,8 +246,7 @@ export function defineOIDCRoutes({
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
           ...(isDeprecated && {
             deprecated: {
-              documentationUrl:
-                'https://elastic.co/guide/en/elasticsearch/reference/current/oidc-guide.html',
+              documentationUrl: 'https://elastic.co', // ToDo: Update with docLink to upgrade note
               severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.oidcInitiateRouteMessage', {
                 defaultMessage:

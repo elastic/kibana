@@ -52,8 +52,7 @@ export function defineSAMLRoutes({
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
           ...(isDeprecated && {
             deprecated: {
-              documentationUrl:
-                'https://elastic.co/guide/en/elasticsearch/reference/current/saml-guide-stack.html',
+              documentationUrl: 'https://elastic.co', // ToDo: Update with doc link to upgrade note
               severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.samlPostRouteMessage', {
                 defaultMessage:

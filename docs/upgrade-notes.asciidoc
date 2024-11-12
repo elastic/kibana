@@ -50,6 +50,32 @@ For Elastic Security release information, refer to {security-guide}/release-note
 ==== Kibana APIs
 
 [discrete]
+[[breaking-199656]]
+.Removed all security v1 endpoints (9.0.0)
+[%collapsible]
+====
+*Details* +
+All `v1` Kibana security HTTP endpoints have been removed.
+
+`GET /api/security/v1/logout` has been replaced by `GET /api/security/logout`
+`GET /api/security/v1/oidc/implicit` has been replaced by `GET /api/security/oidc/implicit`
+`GET /api/security/v1/oidc` has been replaced by GET `/api/security/oidc/callback`
+`POST /api/security/v1/oidc` has been replaced by POST `/api/security/oidc/initiate_login`
+`POST /api/security/v1/saml` has been replaced by POST `/api/security/saml/callback`
+`GET /api/security/v1/me` has been removed with no replacement.
+
+For more information, refer to {kibana-pull}199656[#199656].
+
+*Impact* + 
+Any HTTP API calls to the `v1` Kibana security endpoints will fail with a 404 status code starting from version 9.0.0.
+Third party OIDC and SAML identity providers configured with `v1` endpoints will no longer work.
+
+*Action* +
+Update any OIDC and SAML identity providers to reference the corresponding replacement endpoint listed above.
+Remove references to the `/api/security/v1/me` endpoint from any automations, applications, tooling, and scripts.
+====
+
+[discrete]
 [[breaking-193792]]
 .Access to all internal APIs is blocked (9.0.0)
 [%collapsible]

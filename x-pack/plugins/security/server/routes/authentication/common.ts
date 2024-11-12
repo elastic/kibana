@@ -64,7 +64,7 @@ export function defineCommonRoutes({
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
           ...(isDeprecated && {
             deprecated: {
-              documentationUrl: docLinks.security.logout,
+              documentationUrl: 'https://elastic.co', // ToDo: Update with docLink to upgrade note
               severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.logoutRouteMessage', {
                 defaultMessage:
@@ -132,7 +132,7 @@ export function defineCommonRoutes({
           access: isDeprecated ? 'public' : 'internal',
           ...(isDeprecated && {
             deprecated: {
-              documentationUrl: 'https://elastic.co/', // ToDo
+              documentationUrl: 'https://elastic.co', // ToDo: Update with docLink to upgrade note
               severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.meRouteMessage', {
                 defaultMessage:
