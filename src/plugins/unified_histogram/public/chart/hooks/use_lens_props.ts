@@ -46,7 +46,7 @@ export const useLensProps = ({
     };
   }, [visContext, getTimeRange, onLoad, request?.searchSessionId]);
 
-  const [lensPropsContext, setLensPropsContext] = useState(buildLensProps());
+  const [lensPropsContext, setLensPropsContext] = useState(() => buildLensProps());
   const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));
 
   useEffect(() => {
