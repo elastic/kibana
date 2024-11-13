@@ -5,11 +5,18 @@
  * 2.0.
  */
 
+import type {
+  EsqlQueryRequest,
+  FieldCapsRequest,
+  FieldCapsResponse,
+  MsearchRequest,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
+import { withSpan } from '@kbn/apm-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse, ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { withSpan } from '@kbn/apm-utils';
-import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
-import { esqlResultToPlainObjects } from '../utils/esql_result_to_plain_objects';
+import { Required } from 'utility-types';
+import { esqlResultToPlainObjects } from '../esql_result_to_plain_objects';
 
 type SearchRequest = ESSearchRequest & {
   index: string | string[];
@@ -39,7 +46,17 @@ export interface ObservabilityElasticsearchClient {
   search<TDocument = unknown, TSearchRequest extends SearchRequest = SearchRequest>(
     operationName: string,
     parameters: TSearchRequest
-  ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>>;
+  ): Promise<InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>>;
+  msearch<TDocument = unknown>(
+    operationName: string,
+    parameters: MsearchRequest
+  ): Promise<{
+    responses: Array<SearchResponse<TDocument>>;
+  }>;
+  fieldCaps(
+    operationName: string,
+    request: Required<FieldCapsRequest, 'index_filter' | 'fields' | 'index'>
+  ): Promise<FieldCapsResponse>;
   esql<TOutput = unknown, TQueryParams extends EsqlOutputParameters = EsqlOutputParameters>(
     operationName: string,
     parameters: TQueryParams
@@ -60,8 +77,38 @@ export function createObservabilityEsClient({
   logger: Logger;
   plugin: string;
 }): ObservabilityElasticsearchClient {
+  // wraps the ES calls in a named APM span for better analysis
+  // (otherwise it would just eg be a _search span)
+  const callWithLogger = <T>(
+    operationName: string,
+    request: Record<string, any>,
+    callback: () => Promise<T>
+  ) => {
+    logger.debug(() => `Request (${operationName}):\n${JSON.stringify(request)}`);
+    return withSpan(
+      {
+        name: operationName,
+        labels: {
+          plugin,
+        },
+      },
+      callback,
+      logger
+    ).then((response) => {
+      logger.trace(() => `Response (${operationName}):\n${JSON.stringify(response, null, 2)}`);
+      return response;
+    });
+  };
+
   return {
     client,
+    fieldCaps(operationName, parameters) {
+      return callWithLogger(operationName, parameters, () => {
+        return client.fieldCaps({
+          ...parameters,
+        });
+      });
+    },
     esql<TOutput = unknown, TSearchRequest extends EsqlParameters = EsqlParameters>(
       operationName: string,
       { parseOutput = true, format = 'json', columnar = false, ...parameters }: TSearchRequest
@@ -93,24 +140,17 @@ export function createObservabilityEsClient({
       operationName: string,
       parameters: SearchRequest
     ) {
-      logger.trace(() => `Request (${operationName}):\n${JSON.stringify(parameters, null, 2)}`);
-      // wraps the search operation in a named APM span for better analysis
-      // (otherwise it would just be a _search span)
-      return withSpan(
-        {
-          name: operationName,
-          labels: {
-            plugin,
-          },
-        },
-        () => {
-          return client.search<TDocument>(parameters) as unknown as Promise<
-            InferSearchResponseOf<TDocument, TSearchRequest>
-          >;
-        }
-      ).then((response) => {
-        logger.trace(() => `Response (${operationName}):\n${JSON.stringify(response, null, 2)}`);
-        return response;
+      return callWithLogger(operationName, parameters, () => {
+        return client.search<TDocument>(parameters) as unknown as Promise<
+          InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>
+        >;
+      });
+    },
+    msearch<TDocument = unknown>(operationName: string, parameters: MsearchRequest) {
+      return callWithLogger(operationName, parameters, () => {
+        return client.msearch<TDocument>(parameters) as unknown as Promise<{
+          responses: Array<SearchResponse<TDocument>>;
+        }>;
       });
     },
   };
