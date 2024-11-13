@@ -168,7 +168,7 @@ export const AlertsDetailsTable = memo(
           <EuiText size="s">{field['kibana.alert.rule.name'][0]}</EuiText>
         ),
         name: i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.misconfigurations.table.resultColumnName',
+          'xpack.securitySolution.flyout.left.insights.alerts.table.ruleNameColumnName',
           {
             defaultMessage: 'Rule',
           }
@@ -186,7 +186,7 @@ export const AlertsDetailsTable = memo(
           </EuiText>
         ),
         name: i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.misconfigurations.table.resultColumnName',
+          'xpack.securitySolution.flyout.left.insights.alerts.table.severityColumnName',
           {
             defaultMessage: 'Severity',
           }
@@ -199,7 +199,7 @@ export const AlertsDetailsTable = memo(
           <EuiText size="s">{field['kibana.alert.reason'][0]}</EuiText>
         ),
         name: i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.misconfigurations.table.ruleColumnName',
+          'xpack.securitySolution.flyout.left.insights.alerts.table.reasonColumnName',
           {
             defaultMessage: 'Reason',
           }
