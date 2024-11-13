@@ -7,18 +7,16 @@
 
 import { createRuleMigrationClient } from '../rules/__mocks__/mocks';
 
-const createClient = () => ({ rules: createRuleMigrationClient() });
-
 export const mockSetup = jest.fn().mockResolvedValue(undefined);
-export const mockCreateClient = jest.fn().mockReturnValue(createClient());
+export const mockCreateClient = jest.fn().mockReturnValue(createRuleMigrationClient());
 export const mockStop = jest.fn();
 
 export const siemMigrationsServiceMock = {
   create: () =>
     jest.fn().mockImplementation(() => ({
       setup: mockSetup,
-      createClient: mockCreateClient,
+      createRulesClient: mockCreateClient,
       stop: mockStop,
     })),
-  createClient: () => createClient(),
+  createRulesClient: () => createRuleMigrationClient(),
 };
