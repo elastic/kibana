@@ -30,11 +30,10 @@ import { ConnectorStatus } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
+import { KibanaLogic } from '../../../shared/kibana';
 import { GetApiKeyByIdLogic } from '../../api/api_key/get_api_key_by_id_api_logic';
 
 import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
-
-import { KibanaLogic } from '../../../shared/kibana';
 
 import { ConnectorLinked } from './components/connector_linked';
 import { DockerInstructionsStep } from './components/docker_instructions_step';
