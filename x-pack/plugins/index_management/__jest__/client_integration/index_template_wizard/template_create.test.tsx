@@ -444,6 +444,55 @@ describe('<TemplateCreate />', () => {
     });
   });
 
+  describe('logistics (step 1)', () => {
+    beforeEach(async () => {
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
+
+      const { actions } = testBed;
+    });
+
+    it('setting index pattern to logs-*-* should set the index mode to logsdb', async () => {
+      const { component, actions } = testBed;
+      // Logistics
+      await actions.completeStepOne({ name: 'my_logs_template', indexPatterns: ['logs-*-*'] });
+      // Component templates
+      await actions.completeStepTwo();
+      // Index settings
+      await actions.completeStepThree('{}');
+      // Mappings
+      await actions.completeStepFour();
+      // Aliases
+      await actions.completeStepFive();
+
+      await act(async () => {
+        actions.clickNextButton();
+      });
+      component.update();
+
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/index_templates`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'my_logs_template',
+            indexPatterns: ['logs-*-*'],
+            allowAutoCreate: 'NO_OVERWRITE',
+            indexMode: 'logsdb',
+            dataStream: {},
+            _kbnMeta: {
+              type: 'default',
+              hasDatastream: false,
+              isLegacy: false,
+            },
+            template: {},
+          }),
+        })
+      );
+    });
+  });
+
   describe('review (step 6)', () => {
     beforeEach(async () => {
       await act(async () => {
