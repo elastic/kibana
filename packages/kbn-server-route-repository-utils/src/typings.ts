@@ -64,8 +64,8 @@ export interface ServerRouteCreateOptions {
 type RouteMethodOf<TEndpoint extends string> = TEndpoint extends `${infer TRouteMethod} ${string}`
   ? Lowercase<TRouteMethod> extends RouteMethod
     ? Lowercase<TRouteMethod>
-    : RouteMethod
-  : RouteMethod;
+    : never
+  : never;
 
 type IsPublicEndpoint<
   TEndpoint extends string,
