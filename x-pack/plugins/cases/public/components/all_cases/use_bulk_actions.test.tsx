@@ -559,32 +559,37 @@ describe('useBulkActions', () => {
 
     it('shows the correct actions with reopen permissions', async () => {
       appMockRender = createAppMockRenderer({ permissions: onlyReopenCasesPermission() });
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCaseClosed] }),
         {
           wrapper: appMockRender.AppWrapper,
         }
       );
 
-      const modals = result.current.modals;
-      const panels = result.current.panels;
-
-      const res = appMockRender.render(
+      const { modals, flyouts, panels } = result.current;
+      const renderResult = appMockRender.render(
         <>
           <EuiContextMenu initialPanelId={0} panels={panels} />
           {modals}
+          {flyouts}
         </>
       );
 
-      await waitForHook(() => {
-        expect(res.queryByTestId('case-bulk-action-status')).toBeInTheDocument();
-        res.queryByTestId('case-bulk-action-status')?.click();
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('case-bulk-action-status')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('case-bulk-action-severity')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('bulk-actions-separator')).not.toBeInTheDocument();
+        expect(renderResult.queryByTestId('case-bulk-action-delete')).not.toBeInTheDocument();
       });
 
-      await waitForHook(() => {
-        expect(res.queryByTestId('cases-bulk-action-status-open')).not.toBeDisabled();
-        expect(res.queryByTestId('cases-bulk-action-status-in-progress')).not.toBeDisabled();
-        expect(res.queryByTestId('cases-bulk-action-status-closed')).toBeDisabled();
+      userEvent.click(renderResult.getByTestId('case-bulk-action-status'));
+
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('cases-bulk-action-status-open')).not.toBeDisabled();
+        expect(
+          renderResult.queryByTestId('cases-bulk-action-status-in-progress')
+        ).not.toBeDisabled();
+        expect(renderResult.queryByTestId('cases-bulk-action-status-closed')).not.toBeDisabled();
       });
     });
   });

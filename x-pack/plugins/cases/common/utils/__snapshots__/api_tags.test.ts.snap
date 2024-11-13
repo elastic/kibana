@@ -10,7 +10,6 @@ Object {
   ],
   "createComment": Array [
     "casesFilesCasesCreate",
-    "casesCreateComment",
   ],
   "delete": Array [
     "casesFilesCasesDelete",
@@ -34,7 +33,6 @@ Object {
   ],
   "createComment": Array [
     "observabilityFilesCasesCreate",
-    "casesCreateComment",
   ],
   "delete": Array [
     "observabilityFilesCasesDelete",
@@ -58,7 +56,6 @@ Object {
   ],
   "createComment": Array [
     "securitySolutionFilesCasesCreate",
-    "casesCreateComment",
   ],
   "delete": Array [
     "securitySolutionFilesCasesDelete",

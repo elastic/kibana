@@ -145,7 +145,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
       mainPanelItems.push(deleteAction.getAction([theCase]));
     }
 
-    if (statusAction.canUpdateStatus) {
+    if (statusAction.canUpdateStatus || !shouldDisableStatus) {
       panelsToBuild.push({
         id: 1,
         title: i18n.STATUS,
