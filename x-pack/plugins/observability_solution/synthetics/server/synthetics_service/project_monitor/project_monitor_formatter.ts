@@ -47,14 +47,12 @@ type FailedError = Array<{ id?: string; reason: string; details: string; payload
 
 export interface ExistingMonitor {
   [ConfigKey.JOURNEY_ID]: string;
-  [ConfigKey.MONITOR_QUERY_ID]: string;
   [ConfigKey.CONFIG_ID]: string;
   [ConfigKey.REVISION]: number;
   [ConfigKey.MONITOR_TYPE]: string;
 }
 
 export interface PreviousMonitorForUpdate extends ExistingMonitor {
-  id: string;
   updated_at?: string;
 }
 
@@ -414,10 +412,11 @@ export class ProjectMonitorFormatter {
       const monitorsToUpdate: MonitorConfigUpdate[] = [];
 
       decryptedPreviousMonitors.forEach((decryptedPreviousMonitor) => {
-        const monitor = monitors.find((m) => m.previousMonitor.id === decryptedPreviousMonitor.id);
+        const monitor = monitors.find(
+          (m) => m.previousMonitor[ConfigKey.CONFIG_ID] === decryptedPreviousMonitor.id
+        );
         if (monitor) {
           const normalizedMonitor = monitor?.monitor;
-          const previousMonitor = monitor?.previousMonitor;
           const {
             attributes: { [ConfigKey.REVISION]: _, ...normalizedPrevMonitorAttr },
           } = normalizeSecrets(decryptedPreviousMonitor);
@@ -425,11 +424,10 @@ export class ProjectMonitorFormatter {
           const monitorWithRevision = formatSecrets({
             ...normalizedPrevMonitorAttr,
             ...normalizedMonitor,
-            revision: (previousMonitor[ConfigKey.REVISION] || 0) + 1,
+            revision: (decryptedPreviousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
           });
           monitorsToUpdate.push({
             normalizedMonitor,
-            previousMonitor,
             monitorWithRevision,
             decryptedPreviousMonitor,
           });

@@ -6,7 +6,6 @@
  */
 import { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { PreviousMonitorForUpdate } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
 import { RouteContext } from '../../types';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { FailedPolicyUpdate } from '../../../synthetics_service/private_location/synthetics_private_location';
@@ -29,7 +28,6 @@ import {
 export interface MonitorConfigUpdate {
   normalizedMonitor: SyntheticsMonitor;
   monitorWithRevision: SyntheticsMonitorWithSecretsAttributes;
-  previousMonitor: PreviousMonitorForUpdate;
   decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
 }
 
@@ -41,14 +39,14 @@ const updateConfigSavedObjects = async ({
   monitorsToUpdate: MonitorConfigUpdate[];
 }) => {
   return await routeContext.savedObjectsClient.bulkUpdate<MonitorFields>(
-    monitorsToUpdate.map(({ previousMonitor, monitorWithRevision }) => ({
+    monitorsToUpdate.map(({ monitorWithRevision, decryptedPreviousMonitor }) => ({
       type: syntheticsMonitorType,
-      id: previousMonitor.id,
+      id: decryptedPreviousMonitor.id,
       attributes: {
         ...monitorWithRevision,
-        [ConfigKey.CONFIG_ID]: previousMonitor.id,
+        [ConfigKey.CONFIG_ID]: decryptedPreviousMonitor.id,
         [ConfigKey.MONITOR_QUERY_ID]:
-          monitorWithRevision[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
+          monitorWithRevision[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
       },
     }))
   );
@@ -68,15 +66,14 @@ async function syncUpdatedMonitors({
   const { syntheticsMonitorClient } = routeContext;
 
   return await syntheticsMonitorClient.editMonitors(
-    monitorsToUpdate.map(({ normalizedMonitor, previousMonitor, decryptedPreviousMonitor }) => ({
+    monitorsToUpdate.map(({ normalizedMonitor, decryptedPreviousMonitor }) => ({
       monitor: {
         ...(normalizedMonitor as MonitorFields),
-        [ConfigKey.CONFIG_ID]: previousMonitor.id,
+        [ConfigKey.CONFIG_ID]: decryptedPreviousMonitor.id,
         [ConfigKey.MONITOR_QUERY_ID]:
-          normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
+          normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
       },
-      id: previousMonitor.id,
-      previousMonitor,
+      id: decryptedPreviousMonitor.id,
       decryptedPreviousMonitor,
     })),
     privateLocations,
@@ -105,9 +102,9 @@ export const syncEditedMonitorBulk = async ({
 
     const { failedPolicyUpdates, publicSyncErrors } = editSyncResponse;
 
-    monitorsToUpdate.forEach(({ normalizedMonitor, previousMonitor }) => {
+    monitorsToUpdate.forEach(({ normalizedMonitor, decryptedPreviousMonitor }) => {
       const editedMonitorSavedObject = editedMonitorSavedObjects?.saved_objects.find(
-        (obj) => obj.id === previousMonitor.id
+        (obj) => obj.id === decryptedPreviousMonitor.id
       );
 
       sendTelemetryEvents(
@@ -115,7 +112,7 @@ export const syncEditedMonitorBulk = async ({
         server.telemetry,
         formatTelemetryUpdateEvent(
           editedMonitorSavedObject as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>,
-          previousMonitor.updated_at,
+          decryptedPreviousMonitor.updated_at,
           server.stackVersion,
           Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
           publicSyncErrors
@@ -151,9 +148,9 @@ export const rollbackCompletely = async ({
   const { savedObjectsClient, server } = routeContext;
   try {
     await savedObjectsClient.bulkUpdate<MonitorFields>(
-      monitorsToUpdate.map(({ previousMonitor, decryptedPreviousMonitor }) => ({
+      monitorsToUpdate.map(({ decryptedPreviousMonitor }) => ({
         type: syntheticsMonitorType,
-        id: previousMonitor.id,
+        id: decryptedPreviousMonitor.id,
         attributes: decryptedPreviousMonitor.attributes,
       }))
     );
@@ -168,7 +165,6 @@ export const rollbackFailedUpdates = async ({
   monitorsToUpdate,
 }: {
   monitorsToUpdate: Array<{
-    previousMonitor: PreviousMonitorForUpdate;
     decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
   }>;
   routeContext: RouteContext;
@@ -195,12 +191,12 @@ export const rollbackFailedUpdates = async ({
     });
 
     const monitorsToRevert = monitorsToUpdate
-      .filter(({ previousMonitor }) => {
-        return failedConfigs[previousMonitor.id];
+      .filter(({ decryptedPreviousMonitor }) => {
+        return failedConfigs[decryptedPreviousMonitor.id];
       })
-      .map(({ previousMonitor, decryptedPreviousMonitor }) => ({
+      .map(({ decryptedPreviousMonitor }) => ({
         type: syntheticsMonitorType,
-        id: previousMonitor.id,
+        id: decryptedPreviousMonitor.id,
         attributes: decryptedPreviousMonitor.attributes,
       }));
 
