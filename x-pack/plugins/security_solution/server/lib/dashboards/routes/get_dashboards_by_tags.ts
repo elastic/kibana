@@ -7,7 +7,7 @@
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { INTERNAL_DASHBOARDS_URL } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
@@ -36,7 +36,7 @@ export const getDashboardsByTagsRoute = (router: SecuritySolutionPluginRouter, l
         const { tagIds } = request.body;
 
         try {
-          const dashboardsResponse = await savedObjectsClient.find<DashboardAttributes>({
+          const dashboardsResponse = await savedObjectsClient.find<DashboardSavedObjectAttributes>({
             type: 'dashboard',
             hasReference: tagIds.map((id) => ({ id, type: 'tag' })),
           });

@@ -12,14 +12,15 @@ import type { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
   id: SecurityPageName.notes,
-  title: NOTES,
   path: NOTES_PATH,
+  title: NOTES,
+  description: i18n.translate('xpack.securitySolution.appLinks.notesDescription', {
+    defaultMessage:
+      'Oversee, revise, and revisit the notes attached to alerts, events and Timelines.',
+  }),
   capabilities: [`${SERVER_APP_ID}.show`],
-  globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.notes', {
-      defaultMessage: 'Notes',
-    }),
-  ],
-  links: [],
+  landingIcon: 'filebeatApp',
+  skipUrlState: true,
+  hideTimeline: true,
   hideWhenExperimentalKey: 'securitySolutionNotesDisabled',
 };

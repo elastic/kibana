@@ -25,14 +25,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const { common, discover, dashboard, header, timePicker, unifiedFieldList } = getPageObjects([
-    'common',
-    'discover',
-    'dashboard',
-    'header',
-    'timePicker',
-    'unifiedFieldList',
-  ]);
+  const dataViews = getService('dataViews');
+  const { common, discover, dashboard, header, timePicker, unifiedFieldList, unifiedSearch } =
+    getPageObjects([
+      'common',
+      'discover',
+      'dashboard',
+      'header',
+      'timePicker',
+      'unifiedFieldList',
+      'unifiedSearch',
+    ]);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -88,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
         expect(await testSubjects.exists('addFilter')).to.be(false);
-        expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(true);
+        expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(false);
         // when Lens suggests a table, we render an ESQL based histogram
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
         expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
@@ -304,6 +307,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
+      });
+
+      it('should show available data views after switching to classic mode', async () => {
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await browser.refresh();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedSearch.switchToDataViewMode();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        const availableDataViews = await unifiedSearch.getDataViewList(
+          'discover-dataView-switch-link'
+        );
+        expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+        await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });
 
@@ -818,6 +839,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(prevList).to.eql([]);
 
         await discover.loadSavedSearch('esql view with breakdown');
+        await header.waitUntilLoadingHasFinished();
+        const list = await discover.getHistogramLegendList();
+        expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
+      });
+
+      it('should choose breakdown field when selected from field stats', async () => {
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const testQuery = 'from logstash-*';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await unifiedFieldList.clickFieldListAddBreakdownField('extension');
         await header.waitUntilLoadingHasFinished();
         const list = await discover.getHistogramLegendList();
         expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
