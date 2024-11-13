@@ -23,9 +23,10 @@ import { productDocInstallStatusSavedObjectType } from './saved_objects';
 import { PackageInstaller } from './services/package_installer';
 import { InferenceEndpointManager } from './services/inference_endpoint';
 import { ProductDocInstallClient } from './services/doc_install_status';
+import { DocumentationManager } from './services/doc_manager';
 import { SearchService } from './services/search';
 import { registerRoutes } from './routes';
-import { registerTaskDefinitions, scheduleEnsureUpToDateTask } from './tasks';
+import { registerTaskDefinitions } from './tasks';
 
 export class ProductDocBasePlugin
   implements
@@ -98,27 +99,32 @@ export class ProductDocBasePlugin
       logger: this.logger.get('search-service'),
     });
 
+    const documentationManager = new DocumentationManager({
+      logger: this.logger.get('doc-manager'),
+      docInstallClient: productDocClient,
+      licensing,
+      taskManager,
+    });
+
     this.internalServices = {
       logger: this.logger,
       packageInstaller,
       installClient: productDocClient,
+      documentationManager,
       licensing,
       taskManager,
     };
 
-    const tasksLogger = this.logger.get('tasks');
-    scheduleEnsureUpToDateTask({ taskManager, logger: tasksLogger }).catch((err) => {
-      tasksLogger.error(`Error checking if product documentation is up to date: ${err.message}`);
+    documentationManager.update().catch((err) => {
+      this.logger.error(`Error scheduling product documentation update task: ${err.message}`);
     });
 
     return {
-      isInstalled: async () => {
-        // can probably be improved. But is a boolean good enough then
-        const installStatus = await productDocClient.getInstallationStatus();
-        const installed = Object.values(installStatus).some(
-          (status) => status.status === 'installed'
-        );
-        return installed;
+      management: {
+        install: documentationManager.install.bind(documentationManager),
+        update: documentationManager.update.bind(documentationManager),
+        uninstall: documentationManager.uninstall.bind(documentationManager),
+        getStatus: documentationManager.getStatus.bind(documentationManager),
       },
       search: searchService.search.bind(searchService),
     };

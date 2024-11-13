@@ -41,7 +41,8 @@ export class LlmTasksPlugin
     const { inference, productDocBase } = startDependencies;
     return {
       retrieveDocumentationAvailable: async () => {
-        return await startDependencies.productDocBase.isInstalled();
+        const docBaseStatus = await startDependencies.productDocBase.management.getStatus();
+        return docBaseStatus.status === 'installed';
       },
       retrieveDocumentation: (options) => {
         return retrieveDocumentation({

@@ -8,6 +8,24 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
+export const getTaskStatus = async ({
+  taskManager,
+  taskId,
+}: {
+  taskManager: TaskManagerStartContract;
+  taskId: string;
+}) => {
+  try {
+    const taskInstance = await taskManager.get(taskId);
+    return taskInstance.status;
+  } catch (e) {
+    if (isTaskCurrentlyRunningError(e)) {
+      return 'not_scheduled' as const;
+    }
+    throw e;
+  }
+};
+
 export const isTaskCurrentlyRunningError = (err: Error): boolean => {
   return err.message?.includes('currently running');
 };

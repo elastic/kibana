@@ -14,6 +14,7 @@ import type {
 import type { SearchApi } from './services/search';
 import type { ProductDocInstallClient } from './services/doc_install_status';
 import type { PackageInstaller } from './services/package_installer';
+import type { DocumentationManager, DocumentationManagerAPI } from './services/doc_manager';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -30,13 +31,14 @@ export interface ProductDocBaseSetupContract {}
 
 export interface ProductDocBaseStartContract {
   search: SearchApi;
-  isInstalled: () => Promise<boolean>;
+  management: DocumentationManagerAPI;
 }
 
 export interface InternalServices {
   logger: Logger;
   installClient: ProductDocInstallClient;
   packageInstaller: PackageInstaller;
+  documentationManager: DocumentationManager;
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
 }

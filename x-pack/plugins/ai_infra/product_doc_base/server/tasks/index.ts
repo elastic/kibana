@@ -23,7 +23,7 @@ export const registerTaskDefinitions = ({
   registerUninstallAllTaskDefinition({ getServices, taskManager });
 };
 
-export { scheduleEnsureUpToDateTask } from './ensure_up_to_date';
-export { scheduleInstallAllTask } from './install_all';
-export { scheduleUninstallAllTask } from './uninstall_all';
-export { waitUntilTaskCompleted } from './utils';
+export { scheduleEnsureUpToDateTask, ENSURE_DOC_UP_TO_DATE_TASK_ID } from './ensure_up_to_date';
+export { scheduleInstallAllTask, INSTALL_ALL_TASK_ID } from './install_all';
+export { scheduleUninstallAllTask, UNINSTALL_ALL_TASK_ID } from './uninstall_all';
+export { waitUntilTaskCompleted, getTaskStatus } from './utils';

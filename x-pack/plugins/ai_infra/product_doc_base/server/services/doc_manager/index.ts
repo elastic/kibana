@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export { downloadToDisk } from './download';
-export { openZipArchive, type ZipArchive } from './zip_archive';
-export { loadManifestFile, loadMappingFile } from './archive_accessors';
+export { DocumentationManager } from './doc_manager';
+export type {
+  DocumentationManagerAPI,
+  DocUninstallOptions,
+  DocInstallOptions,
+  DocUpdateOptions,
+  DocGetStatusResponse,
+} from './types';

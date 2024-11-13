@@ -14,10 +14,7 @@ import {
   PerformInstallResponse,
   UninstallResponse,
 } from '../../common/http_api/installation';
-import { InstallationStatus } from '../../common/install_status';
 import type { InternalServices } from '../types';
-import { checkLicense } from '../services/package_installer';
-import { scheduleInstallAllTask, scheduleUninstallAllTask, waitUntilTaskCompleted } from '../tasks';
 
 export const registerInstallationRoutes = ({
   router,
@@ -40,9 +37,9 @@ export const registerInstallationRoutes = ({
       },
     },
     async (ctx, req, res) => {
-      const { installClient } = getServices();
+      const { installClient, documentationManager } = getServices();
       const installStatus = await installClient.getInstallationStatus();
-      const overallStatus = getOverallStatus(Object.values(installStatus).map((v) => v.status));
+      const { status: overallStatus } = await documentationManager.getStatus();
 
       return res.ok<InstallationStatusResponse>({
         body: {
@@ -68,17 +65,12 @@ export const registerInstallationRoutes = ({
       },
     },
     async (ctx, req, res) => {
-      const { licensing, taskManager, logger } = getServices();
+      const { documentationManager } = getServices();
 
-      const license = await licensing.getLicense();
-      if (!checkLicense(license)) {
-        return res.badRequest({
-          body: 'Elastic documentation requires an enterprise license',
-        });
-      }
-
-      const taskId = await scheduleInstallAllTask({ taskManager, logger });
-      await waitUntilTaskCompleted({ taskId, taskManager, timeout: 10 * 60 });
+      await documentationManager.install({
+        force: false,
+        wait: true,
+      });
 
       return res.ok<PerformInstallResponse>({
         body: {
@@ -102,10 +94,9 @@ export const registerInstallationRoutes = ({
       },
     },
     async (ctx, req, res) => {
-      const { taskManager, logger } = getServices();
+      const { documentationManager } = getServices();
 
-      const taskId = await scheduleUninstallAllTask({ taskManager, logger });
-      await waitUntilTaskCompleted({ taskId, taskManager, timeout: 10 * 60 * 1000 });
+      await documentationManager.uninstall({ wait: true });
 
       return res.ok<UninstallResponse>({
         body: {
@@ -115,14 +106,3 @@ export const registerInstallationRoutes = ({
     }
   );
 };
-
-const getOverallStatus = (statuses: InstallationStatus[]): InstallationStatus => {
-  for (const status of statusOrder) {
-    if (statuses.includes(status)) {
-      return status;
-    }
-  }
-  return 'installed';
-};
-
-const statusOrder: InstallationStatus[] = ['error', 'installing', 'uninstalled', 'installed'];
