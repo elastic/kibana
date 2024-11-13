@@ -21,7 +21,7 @@ import {
 } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
-const allowedUrlSchemes = ['http://', 'https://'];
+const allowedUrlSchemes = ['http://', 'https://', 'mailto:'];
 
 const URL_TYPES = [
   {
