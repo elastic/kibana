@@ -12,7 +12,7 @@ import path from 'path';
 import { paths } from '../../../../common/locators/paths';
 import { useSpace } from '../../../hooks/use_space';
 import { BurnRateRuleParams } from '../../../typings';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 import {
   createRemoteSloDeleteUrl,
   createRemoteSloEditUrl,

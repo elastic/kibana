@@ -16,7 +16,7 @@ import DateMath from '@kbn/datemath';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useMemo, useState } from 'react';
 import { BurnRates } from '../../../../components/slo/burn_rate/burn_rates';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { useBurnRateOptions } from '../../hooks/use_burn_rate_options';
 import { TimeBounds } from '../../types';
 import { EventsChartPanel } from '../events_chart_panel';
