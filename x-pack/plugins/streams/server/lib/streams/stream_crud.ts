@@ -99,8 +99,6 @@ export async function listStreams({
   const response = await scopedClusterClient.asInternalUser.search<StreamDefinition>({
     index: STREAMS_INDEX,
     size: 10000,
-    fields: ['id'],
-    _source: false,
     sort: [{ id: 'asc' }],
   });
   const definitions = response.hits.hits.map((hit) => hit._source!);

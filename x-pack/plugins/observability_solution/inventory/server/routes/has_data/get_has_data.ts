@@ -24,7 +24,7 @@ export async function getHasData({
       | LIMIT 1`,
     });
 
-    const totalCount = esqlResults[0]._count;
+    const totalCount = esqlResults.objects[0]._count;
 
     return { hasData: totalCount > 0 };
   } catch (e) {

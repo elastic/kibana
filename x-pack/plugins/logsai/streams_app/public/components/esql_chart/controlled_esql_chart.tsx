@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { getTimeZone } from '@kbn/observability-utils-browser/utils/ui_settings/get_timezone';
 import { css } from '@emotion/css';
 import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import { ESQLSearchResponse } from '@kbn/es-types';
+import type { EsqlQueryResponse } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { useKibana } from '../../hooks/use_kibana';
 import { LoadingPanel } from '../loading_panel';
@@ -52,7 +52,7 @@ export function ControlledEsqlChart<T extends string>({
   height,
 }: {
   id: string;
-  result: AbortableAsyncState<ESQLSearchResponse>;
+  result: AbortableAsyncState<EsqlQueryResponse>;
   metricNames: T[];
   chartType?: 'area' | 'bar' | 'line';
   height: number;

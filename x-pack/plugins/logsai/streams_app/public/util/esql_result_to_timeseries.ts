@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { orderBy } from 'lodash';
 import type { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { EsqlQueryResponse } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { orderBy } from 'lodash';
 
 interface Timeseries<T extends string> {
   id: string;
@@ -19,7 +19,7 @@ export function esqlResultToTimeseries<T extends string>({
   result,
   metricNames,
 }: {
-  result: AbortableAsyncState<ESQLSearchResponse>;
+  result: AbortableAsyncState<EsqlQueryResponse>;
   metricNames: T[];
 }): Array<Timeseries<T>> {
   const columns = result.value?.columns;

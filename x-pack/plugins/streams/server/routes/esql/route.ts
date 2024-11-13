@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { ESQLSearchResponse } from '@kbn/es-types';
-import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
-import { kqlQuery } from '@kbn/observability-utils-common/es/queries/kql_query';
 import { excludeFrozenQuery } from '@kbn/observability-utils-common/es/queries/exclude_frozen_query';
+import { kqlQuery } from '@kbn/observability-utils-common/es/queries/kql_query';
 import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
+import {
+  EsqlQueryResponse,
+  createObservabilityEsClient,
+} from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { z } from '@kbn/zod';
 import { isNumber } from 'lodash';
 import { createServerRoute } from '../create_server_route';
@@ -26,7 +28,7 @@ export const executeEsqlRoute = createServerRoute({
       end: z.number().optional(),
     }),
   }),
-  handler: async ({ params, request, logger, getScopedClients }): Promise<ESQLSearchResponse> => {
+  handler: async ({ params, request, logger, getScopedClients }): Promise<EsqlQueryResponse> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const observabilityEsClient = createObservabilityEsClient({
       client: scopedClusterClient.asCurrentUser,
@@ -38,22 +40,25 @@ export const executeEsqlRoute = createServerRoute({
       body: { operationName, query, filter, kuery, start, end },
     } = params;
 
-    const response = await observabilityEsClient.esql(operationName, {
-      parseOutput: false,
-      query,
-      filter: {
-        bool: {
-          filter: [
-            filter || { match_all: {} },
-            ...kqlQuery(kuery),
-            ...excludeFrozenQuery(),
-            ...(isNumber(start) && isNumber(end) ? rangeQuery(start, end) : []),
-          ],
+    const response = await observabilityEsClient.esql(
+      operationName,
+      {
+        query,
+        filter: {
+          bool: {
+            filter: [
+              filter || { match_all: {} },
+              ...kqlQuery(kuery),
+              ...excludeFrozenQuery(),
+              ...(isNumber(start) && isNumber(end) ? rangeQuery(start, end) : []),
+            ],
+          },
         },
       },
-    });
+      { asPlainObjects: false }
+    );
 
-    return response as any;
+    return response;
   },
 });
 
