@@ -23,6 +23,7 @@ import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
@@ -46,6 +47,12 @@ export const requestMock = {
   create: httpServerMock.createKibanaRequest,
 };
 
+export const getGetKnowledgeBaseIndicesRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
+  });
+
 export const getGetKnowledgeBaseStatusRequest = (resource?: string) =>
   requestMock.create({
     method: 'get',
@@ -56,13 +63,6 @@ export const getGetKnowledgeBaseStatusRequest = (resource?: string) =>
 export const getPostKnowledgeBaseRequest = (resource?: string) =>
   requestMock.create({
     method: 'post',
-    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
-    query: { resource },
-  });
-
-export const getDeleteKnowledgeBaseRequest = (resource?: string) =>
-  requestMock.create({
-    method: 'delete',
     path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
     query: { resource },
   });

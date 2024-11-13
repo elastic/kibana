@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 
 import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
 
@@ -24,7 +24,7 @@ export function ConnectionStatus({ isConnected, mode }) {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiBadge
+        <EuiHealth
           color={isConnected ? 'success' : 'danger'}
           data-test-subj="remoteClusterConnectionStatusMessage"
         >
@@ -35,7 +35,7 @@ export function ConnectionStatus({ isConnected, mode }) {
             : i18n.translate('xpack.remoteClusters.connectedStatus.notConnectedAriaLabel', {
                 defaultMessage: 'Not connected',
               })}
-        </EuiBadge>
+        </EuiHealth>
       </EuiFlexItem>
 
       {!isConnected && mode === SNIFF_MODE && (

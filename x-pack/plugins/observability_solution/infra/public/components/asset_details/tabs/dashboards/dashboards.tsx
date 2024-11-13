@@ -24,7 +24,7 @@ import {
   DashboardRenderer,
 } from '@kbn/dashboard-plugin/public';
 
-import type { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
+import type { DashboardSearchOut } from '@kbn/dashboard-plugin/server/content_management';
 import type { SerializableRecord } from '@kbn/utility-types';
 import {
   ASSET_DETAILS_FLYOUT_LOCATOR_ID,
@@ -93,7 +93,7 @@ export function Dashboards() {
   }, [asset.type, currentDashboard, telemetry, trackingEventProperties]);
 
   useEffect(() => {
-    const allAvailableDashboardsMap = new Map<string, DashboardItem>();
+    const allAvailableDashboardsMap = new Map<string, DashboardSearchOut['hits'][number]>();
     allAvailableDashboards.forEach((availableDashboard) => {
       allAvailableDashboardsMap.set(availableDashboard.id, availableDashboard);
     });
@@ -137,7 +137,6 @@ export function Dashboards() {
     });
     return Promise.resolve<DashboardCreationOptions>({
       getInitialInput,
-      useControlGroupIntegration: true,
     });
   }, [dateRange.from, dateRange.to]);
 

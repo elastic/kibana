@@ -42,13 +42,12 @@ test('ErrorEmbeddable renders an embeddable with markdown message', async () => 
       <span
         class="emotion-EuiExternalLinkIcon"
         data-euiicon-type="popout"
-      >
-        External link
-      </span>
+        role="presentation"
+      />
       <span
         class="emotion-euiScreenReaderOnly"
       >
-        (opens in a new tab or window)
+        (external, opens in a new tab or window)
       </span>
     </a>
   `);

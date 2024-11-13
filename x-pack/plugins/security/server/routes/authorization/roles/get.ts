@@ -17,6 +17,7 @@ export function defineGetRolesRoutes({
   router,
   authz,
   getFeatures,
+  subFeaturePrivilegeIterator,
   logger,
 }: RouteDefinitionParams) {
   router.versioned
@@ -31,9 +32,37 @@ export function defineGetRolesRoutes({
     .addVersion(
       {
         version: API_VERSIONS.roles.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: `This route delegates authorization to Core's scoped ES cluster client`,
+          },
+        },
         validate: {
           request: {
-            params: schema.object({ name: schema.string({ minLength: 1 }) }),
+            params: schema.object({
+              name: schema.string({
+                minLength: 1,
+                meta: { description: 'The role name.' },
+              }),
+            }),
+            query: schema.maybe(
+              schema.object({
+                replaceDeprecatedPrivileges: schema.maybe(
+                  schema.boolean({
+                    meta: {
+                      description:
+                        'If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.',
+                    },
+                  })
+                ),
+              })
+            ),
+          },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+            },
           },
         },
       },
@@ -52,14 +81,17 @@ export function defineGetRolesRoutes({
 
           if (elasticsearchRole) {
             return response.ok({
-              body: transformElasticsearchRoleToRole(
+              body: transformElasticsearchRoleToRole({
                 features,
+                subFeaturePrivilegeIterator,
                 // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
                 elasticsearchRole,
-                request.params.name,
-                authz.applicationName,
-                logger
-              ),
+                name: request.params.name,
+                application: authz.applicationName,
+                logger,
+                replaceDeprecatedKibanaPrivileges:
+                  request.query?.replaceDeprecatedPrivileges ?? false,
+              }),
             });
           }
 

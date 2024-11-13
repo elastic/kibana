@@ -85,14 +85,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               type: 'application',
               name: 'discover',
               url: '/app/discover',
-              child: {
-                name: 'discover',
-                url: '/app/discover',
-                type: 'application',
-                page: 'app',
-                id: 'new',
-                description: 'fetch documents',
-              },
+              page: 'app',
+              id: 'new',
+              description: 'fetch documents',
             }),
           });
         });
@@ -105,20 +100,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               type: 'application',
               name: 'discover',
               url: '/app/discover',
+              page: 'app',
+              id: 'new',
+              description: 'fetch chart data and total hits',
               child: {
-                name: 'discover',
-                url: '/app/discover',
-                type: 'application',
-                page: 'app',
-                id: 'new',
-                description: 'fetch chart data and total hits',
-                child: {
-                  type: 'lens',
-                  name: 'lnsXY',
-                  id: 'unifiedHistogramLensComponent',
-                  description: 'Edit visualization',
-                  url: '/app/lens#/edit_by_value',
-                },
+                type: 'lens',
+                name: 'lnsXY',
+                id: 'unifiedHistogramLensComponent',
+                description: 'Edit visualization',
+                url: '/app/lens#/edit_by_value',
               },
             }),
           });
@@ -185,9 +175,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
             await logContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-              predicate: checkHttpRequestId(
-                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsXY:086ac2e9-dd16-4b45-92b8-1e43ff7e3f65'
-              ),
+              predicate: checkHttpRequestId('lens:lnsXY:086ac2e9-dd16-4b45-92b8-1e43ff7e3f65'),
             });
           });
 
@@ -195,23 +183,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await logContains({
               description: 'execution context propagates to Kibana logs',
               predicate: checkExecutionContextEntry({
-                type: 'application',
+                type: 'dashboard',
                 name: 'dashboards',
                 url: '/app/dashboards',
+                page: 'app',
+                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+                description: '[Flights] Global Flight Dashboard',
                 child: {
-                  name: 'dashboards',
-                  url: '/app/dashboards',
-                  type: 'dashboard',
-                  page: 'app',
-                  id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                  description: '[Flights] Global Flight Dashboard',
-                  child: {
-                    type: 'lens',
-                    name: 'lnsXY',
-                    id: '086ac2e9-dd16-4b45-92b8-1e43ff7e3f65',
-                    description: '[Flights] Flight count',
-                    url: '/app/lens#/edit_by_value',
-                  },
+                  type: 'lens',
+                  name: 'lnsXY',
+                  id: '086ac2e9-dd16-4b45-92b8-1e43ff7e3f65',
+                  description: '[Flights] Flight count',
+                  url: '/app/lens#/edit_by_value',
                 },
               }),
             });
@@ -222,9 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
             await logContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-              predicate: checkHttpRequestId(
-                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsMetric:b766e3b8-4544-46ed-99e6-9ecc4847e2a2'
-              ),
+              predicate: checkHttpRequestId('lens:lnsMetric:b766e3b8-4544-46ed-99e6-9ecc4847e2a2'),
             });
           });
 
@@ -232,23 +213,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await logContains({
               description: 'execution context propagates to Kibana logs',
               predicate: checkExecutionContextEntry({
+                type: 'dashboard',
                 name: 'dashboards',
                 url: '/app/dashboards',
-                type: 'application',
+                page: 'app',
+                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+                description: '[Flights] Global Flight Dashboard',
                 child: {
-                  name: 'dashboards',
-                  url: '/app/dashboards',
-                  type: 'dashboard',
-                  page: 'app',
-                  id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                  description: '[Flights] Global Flight Dashboard',
-                  child: {
-                    type: 'lens',
-                    name: 'lnsMetric',
-                    id: 'b766e3b8-4544-46ed-99e6-9ecc4847e2a2',
-                    description: '',
-                    url: '/app/lens#/edit_by_value',
-                  },
+                  type: 'lens',
+                  name: 'lnsMetric',
+                  id: 'b766e3b8-4544-46ed-99e6-9ecc4847e2a2',
+                  description: '',
+                  url: '/app/lens#/edit_by_value',
                 },
               }),
             });
@@ -260,7 +236,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await logContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
               predicate: checkHttpRequestId(
-                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsDatatable:fb86b32f-fb7a-45cf-9511-f366fef51bbd'
+                'lens:lnsDatatable:fb86b32f-fb7a-45cf-9511-f366fef51bbd'
               ),
             });
           });
@@ -269,23 +245,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await logContains({
               description: 'execution context propagates to Kibana logs',
               predicate: checkExecutionContextEntry({
+                type: 'dashboard',
                 name: 'dashboards',
                 url: '/app/dashboards',
-                type: 'application',
+                page: 'app',
+                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+                description: '[Flights] Global Flight Dashboard',
                 child: {
-                  name: 'dashboards',
-                  url: '/app/dashboards',
-                  type: 'dashboard',
-                  page: 'app',
-                  id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                  description: '[Flights] Global Flight Dashboard',
-                  child: {
-                    type: 'lens',
-                    name: 'lnsDatatable',
-                    id: 'fb86b32f-fb7a-45cf-9511-f366fef51bbd',
-                    description: 'Cities by delay, cancellation',
-                    url: '/app/lens#/edit_by_value',
-                  },
+                  type: 'lens',
+                  name: 'lnsDatatable',
+                  id: 'fb86b32f-fb7a-45cf-9511-f366fef51bbd',
+                  description: 'Cities by delay, cancellation',
+                  url: '/app/lens#/edit_by_value',
                 },
               }),
             });
@@ -296,9 +267,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
             await logContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-              predicate: checkHttpRequestId(
-                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsPie:5d53db36-2d5a-4adc-af7b-cec4c1a294e0'
-              ),
+              predicate: checkHttpRequestId('lens:lnsPie:5d53db36-2d5a-4adc-af7b-cec4c1a294e0'),
             });
           });
 
@@ -306,23 +275,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await logContains({
               description: 'execution context propagates to Kibana logs',
               predicate: checkExecutionContextEntry({
+                type: 'dashboard',
                 name: 'dashboards',
                 url: '/app/dashboards',
-                type: 'application',
+                page: 'app',
+                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+                description: '[Flights] Global Flight Dashboard',
                 child: {
-                  name: 'dashboards',
-                  url: '/app/dashboards',
-                  type: 'dashboard',
-                  page: 'app',
-                  id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                  description: '[Flights] Global Flight Dashboard',
-                  child: {
-                    type: 'lens',
-                    name: 'lnsPie',
-                    id: '5d53db36-2d5a-4adc-af7b-cec4c1a294e0',
-                    description: '[Flights] Delay Type',
-                    url: '/app/lens#/edit_by_value',
-                  },
+                  type: 'lens',
+                  name: 'lnsPie',
+                  id: '5d53db36-2d5a-4adc-af7b-cec4c1a294e0',
+                  description: '[Flights] Delay Type',
+                  url: '/app/lens#/edit_by_value',
                 },
               }),
             });
@@ -334,9 +298,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
           await logContains({
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: checkHttpRequestId(
-              'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;search:discover:571aaf70-4c88-11e8-b3d7-01146121b73d'
-            ),
+            predicate: checkHttpRequestId('search:discover:571aaf70-4c88-11e8-b3d7-01146121b73d'),
           });
         });
 
@@ -344,23 +306,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await logContains({
             description: 'execution context propagates to Kibana logs',
             predicate: checkExecutionContextEntry({
-              type: 'application',
+              type: 'dashboard',
               name: 'dashboards',
               url: '/app/dashboards',
+              page: 'app',
+              id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+              description: '[Flights] Global Flight Dashboard',
               child: {
-                type: 'dashboard',
-                name: 'dashboards',
-                url: '/app/dashboards',
-                page: 'app',
-                id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-                description: '[Flights] Global Flight Dashboard',
-                child: {
-                  type: 'search',
-                  name: 'discover',
-                  id: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-                  description: '[Flights] Flight Log',
-                  url: '/app/discover#/view/571aaf70-4c88-11e8-b3d7-01146121b73d',
-                },
+                type: 'search',
+                name: 'discover',
+                id: '571aaf70-4c88-11e8-b3d7-01146121b73d',
+                description: '[Flights] Flight Log',
+                url: '/app/discover#/view/571aaf70-4c88-11e8-b3d7-01146121b73d',
               },
             }),
           });

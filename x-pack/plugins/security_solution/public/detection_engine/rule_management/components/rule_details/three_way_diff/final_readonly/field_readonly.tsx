@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import { DiffableCommonFields } from '../../../../../../../common/api/detection_engine';
 import type {
-  DiffableRule,
   DiffableCustomQueryFields,
   DiffableSavedQueryFields,
   DiffableEqlFields,
@@ -28,13 +27,15 @@ import { ThresholdRuleFieldReadOnly } from './threshold_rule_field_readonly';
 import { MachineLearningRuleFieldReadOnly } from './machine_learning_rule_field_readonly';
 import { NewTermsRuleFieldReadOnly } from './new_terms_rule_field_readonly';
 import { CommonRuleFieldReadOnly } from './common_rule_field_readonly';
+import { useDiffableRuleContext } from '../diffable_rule_context';
 
 interface FieldReadOnlyProps {
   fieldName: string;
-  finalDiffableRule: DiffableRule;
 }
 
-export function FieldReadOnly({ fieldName, finalDiffableRule }: FieldReadOnlyProps) {
+export function FieldReadOnly({ fieldName }: FieldReadOnlyProps) {
+  const { finalDiffableRule } = useDiffableRuleContext();
+
   const { data: commonField } = useMemo(
     () => DiffableCommonFields.keyof().safeParse(fieldName),
     [fieldName]

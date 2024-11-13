@@ -66,6 +66,7 @@ export interface CustomFieldMetadata {
   isEcsCompliant: false;
   isInSameFamily: false;
 }
+
 export interface EcsBasedFieldMetadata extends EcsFieldMetadata {
   hasEcsMetadata: true;
   indexFieldName: string;
@@ -75,14 +76,33 @@ export interface EcsBasedFieldMetadata extends EcsFieldMetadata {
   isInSameFamily: boolean;
 }
 
-export type EnrichedFieldMetadata = EcsBasedFieldMetadata | CustomFieldMetadata;
+export interface IncompatibleFieldMetadata extends EcsBasedFieldMetadata {
+  isInSameFamily: false;
+  isEcsCompliant: false;
+}
+
+export interface SameFamilyFieldMetadata extends EcsBasedFieldMetadata {
+  isEcsCompliant: false;
+  isInSameFamily: true;
+}
+
+export interface EcsCompliantFieldMetadata extends EcsBasedFieldMetadata {
+  isEcsCompliant: true;
+  isInSameFamily: false;
+}
+
+export type EnrichedFieldMetadata =
+  | EcsCompliantFieldMetadata
+  | CustomFieldMetadata
+  | IncompatibleFieldMetadata
+  | SameFamilyFieldMetadata;
 
 export interface PartitionedFieldMetadata {
   all: EnrichedFieldMetadata[];
   custom: CustomFieldMetadata[];
-  ecsCompliant: EcsBasedFieldMetadata[];
-  incompatible: EcsBasedFieldMetadata[];
-  sameFamily: EcsBasedFieldMetadata[];
+  ecsCompliant: EcsCompliantFieldMetadata[];
+  incompatible: IncompatibleFieldMetadata[];
+  sameFamily: SameFamilyFieldMetadata[];
 }
 
 export interface UnallowedValueRequestItem {
@@ -287,3 +307,43 @@ export interface IndexSummaryTableItem {
   sizeInBytes: number | undefined;
   checkedAt: number | undefined;
 }
+
+export interface StorageResultBase {
+  batchId: string;
+  indexName: string;
+  indexPattern: string;
+  isCheckAll: boolean;
+  checkedAt: number;
+  docsCount: number;
+  totalFieldCount: number;
+  ecsFieldCount: number;
+  customFieldCount: number;
+  incompatibleFieldCount: number;
+  sameFamilyFieldCount: number;
+  sameFamilyFields: string[];
+  unallowedMappingFields: string[];
+  unallowedValueFields: string[];
+  sizeInBytes: number;
+  ilmPhase?: IlmPhase;
+  markdownComments: string[];
+  ecsVersion: string;
+  indexId: string;
+  error: string | null;
+}
+
+export interface StorageResult extends StorageResultBase {
+  incompatibleFieldMappingItems: IncompatibleFieldMappingItem[];
+  incompatibleFieldValueItems: IncompatibleFieldValueItem[];
+  sameFamilyFieldItems: SameFamilyFieldItem[];
+}
+
+export interface HistoricalResultBase {
+  '@timestamp': number;
+  checkedBy: string;
+}
+
+export interface LegacyHistoricalResult extends StorageResultBase, HistoricalResultBase {}
+
+export interface NonLegacyHistoricalResult extends StorageResult, HistoricalResultBase {}
+
+export type HistoricalResult = LegacyHistoricalResult | NonLegacyHistoricalResult;

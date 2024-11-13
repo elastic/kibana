@@ -1,8 +1,6 @@
 # Generate console definitions
 This package is a script to generate definitions used in Console to display autocomplete suggestions. 
 The definitions files are generated from the Elasticsearch specification [repo](https://github.com/elastic/elasticsearch-specification).
-This script is 
-a new implementation of an old `kbn-spec-to-console` package: The old script used [JSON specs](https://github.com/elastic/elasticsearch/tree/main/rest-api-spec) in the Elasticsearch repo as the source.
 
 ## Instructions
 1. Checkout the Elasticsearch specification [repo](https://github.com/elastic/elasticsearch-specification).

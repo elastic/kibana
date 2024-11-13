@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { type GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { GetInvestigationResponse, InvestigationItem, Item } from '@kbn/investigation-shared';
 import { isEqual } from 'lodash';
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
@@ -15,6 +16,7 @@ import { useAddInvestigationNote } from '../../../hooks/use_add_investigation_no
 import { useDeleteInvestigationItem } from '../../../hooks/use_delete_investigation_item';
 import { useDeleteInvestigationNote } from '../../../hooks/use_delete_investigation_note';
 import { useFetchInvestigation } from '../../../hooks/use_fetch_investigation';
+import { useFetchAlert } from '../../../hooks/use_fetch_alert';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useUpdateInvestigation } from '../../../hooks/use_update_investigation';
 import { useUpdateInvestigationNote } from '../../../hooks/use_update_investigation_note';
@@ -26,6 +28,7 @@ export type RenderedInvestigationItem = InvestigationItem & {
 
 interface InvestigationContextProps {
   investigation?: GetInvestigationResponse;
+  alert?: EcsFieldsResponse;
   renderableItems: RenderedInvestigationItem[];
   globalParams: GlobalWidgetParameters;
   updateInvestigationParams: (params: GlobalWidgetParameters) => Promise<void>;
@@ -81,6 +84,7 @@ export function InvestigationProvider({
     id: initialInvestigation.id,
     initialInvestigation,
   });
+  const { data: alert } = useFetchAlert({ investigation });
 
   const cache = useRef<
     Record<string, { globalParams: GlobalWidgetParameters; item: RenderedInvestigationItem }>
@@ -211,6 +215,7 @@ export function InvestigationProvider({
         renderableItems,
         updateInvestigationParams,
         investigation,
+        alert: alert ?? undefined,
         globalParams,
         addItem,
         deleteItem,

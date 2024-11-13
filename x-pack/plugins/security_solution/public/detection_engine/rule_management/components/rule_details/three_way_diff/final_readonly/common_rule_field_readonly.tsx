@@ -19,11 +19,9 @@ import { NameReadOnly } from './fields/name/name';
 import { TagsReadOnly } from './fields/tags/tags';
 import { DescriptionReadOnly } from './fields/description/description';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { AuthorReadOnly } from './fields/author/author';
 import { BuildingBlockReadOnly } from './fields/building_block/building_block';
 import { InvestigationFieldsReadOnly } from './fields/investigation_fields/investigation_fields';
 import { FalsePositivesReadOnly } from './fields/false_positives/false_positives';
-import { LicenseReadOnly } from './fields/license/license';
 import { MaxSignalsReadOnly } from './fields/max_signals/max_signals';
 import { NoteReadOnly } from './fields/note/note';
 import { RuleScheduleReadOnly } from './fields/rule_schedule/rule_schedule';
@@ -46,23 +44,16 @@ export function CommonRuleFieldReadOnly({
   finalDiffableRule,
 }: CommonRuleFieldReadOnlyProps) {
   switch (fieldName) {
-    case 'author':
-      return <AuthorReadOnly author={finalDiffableRule.author} />;
     case 'building_block':
-      return <BuildingBlockReadOnly />;
+      return <BuildingBlockReadOnly buildingBlock={finalDiffableRule.building_block} />;
     case 'description':
       return <DescriptionReadOnly description={finalDiffableRule.description} />;
-    case 'exceptions_list':
-      /* Exceptions are not used in prebuilt rules */
-      return null;
     case 'investigation_fields':
       return (
         <InvestigationFieldsReadOnly investigationFields={finalDiffableRule.investigation_fields} />
       );
     case 'false_positives':
       return <FalsePositivesReadOnly falsePositives={finalDiffableRule.false_positives} />;
-    case 'license':
-      return <LicenseReadOnly license={finalDiffableRule.license} />;
     case 'max_signals':
       return <MaxSignalsReadOnly maxSignals={finalDiffableRule.max_signals} />;
     case 'name':

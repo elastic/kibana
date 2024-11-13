@@ -16,10 +16,12 @@ import { ConnectionDetails } from './connection_details_panel';
 import { ConnectorIndexnamePanel } from './connector_index_name_panel';
 
 interface ConnectorConfigurationPanels {
+  canManageConnectors: boolean;
   connector: Connector;
 }
 
 export const ConnectorConfigurationPanels: React.FC<ConnectorConfigurationPanels> = ({
+  canManageConnectors,
   connector,
 }) => {
   const { data, isLoading, isSuccess, mutate, reset } = useEditConnectorConfiguration(connector.id);
@@ -37,6 +39,7 @@ export const ConnectorConfigurationPanels: React.FC<ConnectorConfigurationPanels
     <>
       <EuiPanel hasBorder>
         <ConnectorConfigurationComponent
+          isDisabled={!canManageConnectors}
           connector={connector}
           hasPlatinumLicense={false}
           isLoading={isLoading}
@@ -46,7 +49,7 @@ export const ConnectorConfigurationPanels: React.FC<ConnectorConfigurationPanels
       </EuiPanel>
       <EuiSpacer />
       <EuiPanel hasBorder>
-        <ConnectorIndexnamePanel connector={connector} />
+        <ConnectorIndexnamePanel canManageConnectors={canManageConnectors} connector={connector} />
       </EuiPanel>
       <EuiSpacer />
       <ConnectionDetails

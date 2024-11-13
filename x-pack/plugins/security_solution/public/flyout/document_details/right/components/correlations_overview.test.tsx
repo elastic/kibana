@@ -22,7 +22,8 @@ import {
   CORRELATIONS_RELATED_CASES_TEST_ID,
   CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
   CORRELATIONS_TEST_ID,
-  SUMMARY_ROW_VALUE_TEST_ID,
+  SUMMARY_ROW_BUTTON_TEST_ID,
+  SUMMARY_ROW_TEXT_TEST_ID,
 } from './test_ids';
 import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
@@ -39,7 +40,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '@kbn/security-solution-common';
+} from '../../../shared/components/test_ids';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import { AlertsCasesTourSteps } from '../../../../common/components/guided_onboarding_tour/tour_config';
 
@@ -58,17 +59,32 @@ const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(CORRELATIO
 const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(CORRELATIONS_TEST_ID);
 const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(CORRELATIONS_TEST_ID);
 
-const SUPPRESSED_ALERTS_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
-const RELATED_ALERTS_BY_ANCESTRY_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(
+const SUPPRESSED_ALERTS_TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(
+  CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID
+);
+const SUPPRESSED_ALERTS_VALUE_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(
+  CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID
+);
+const RELATED_ALERTS_BY_ANCESTRY_TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(
   CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID
 );
-const RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(
+const RELATED_ALERTS_BY_ANCESTRY_VALUE_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(
+  CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID
+);
+const RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(
   CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID
 );
-const RELATED_ALERTS_BY_SESSION_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(
+const RELATED_ALERTS_BY_SAME_SOURCE_EVENT_VALUE_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(
+  CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID
+);
+const RELATED_ALERTS_BY_SESSION_TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(
   CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID
 );
-const RELATED_CASES_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(CORRELATIONS_RELATED_CASES_TEST_ID);
+const RELATED_ALERTS_BY_SESSION_VALUE_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(
+  CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID
+);
+const RELATED_CASES_TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(CORRELATIONS_RELATED_CASES_TEST_ID);
+const RELATED_CASES_VALUE_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(CORRELATIONS_RELATED_CASES_TEST_ID);
 
 const panelContextValue = {
   eventId: 'event id',
@@ -111,7 +127,7 @@ describe('<CorrelationsOverview />', () => {
     jest.mocked(useTourContext).mockReturnValue({
       hidden: false,
       setAllTourStepsHidden: jest.fn(),
-      activeStep: AlertsCasesTourSteps.viewCase,
+      activeStep: AlertsCasesTourSteps.submitCase,
       endTourStep: jest.fn(),
       incrementStep: jest.fn(),
       isTourShown: jest.fn(),
@@ -193,11 +209,16 @@ describe('<CorrelationsOverview />', () => {
     });
 
     const { getByTestId, queryByText } = render(renderCorrelationsOverview(panelContextValue));
-    expect(getByTestId(RELATED_ALERTS_BY_ANCESTRY_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RELATED_ALERTS_BY_SESSION_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RELATED_CASES_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(SUPPRESSED_ALERTS_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RELATED_ALERTS_BY_ANCESTRY_TEXT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RELATED_ALERTS_BY_ANCESTRY_VALUE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEXT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_VALUE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RELATED_ALERTS_BY_SESSION_TEXT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RELATED_ALERTS_BY_SESSION_VALUE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RELATED_CASES_TEXT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RELATED_CASES_VALUE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(SUPPRESSED_ALERTS_TEXT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(SUPPRESSED_ALERTS_VALUE_TEST_ID)).toBeInTheDocument();
     expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
   });
 
@@ -215,11 +236,18 @@ describe('<CorrelationsOverview />', () => {
     jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 
     const { getByText, queryByTestId } = render(renderCorrelationsOverview(panelContextValue));
-    expect(queryByTestId(RELATED_ALERTS_BY_ANCESTRY_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(RELATED_ALERTS_BY_SESSION_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(RELATED_CASES_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(SUPPRESSED_ALERTS_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(RELATED_ALERTS_BY_ANCESTRY_TEXT_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(RELATED_ALERTS_BY_ANCESTRY_VALUE_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEXT_TEST_ID)).not.toBeInTheDocument();
+    expect(
+      queryByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_VALUE_TEST_ID)
+    ).not.toBeInTheDocument();
+    expect(queryByTestId(RELATED_ALERTS_BY_SESSION_TEXT_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(RELATED_ALERTS_BY_SESSION_VALUE_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(RELATED_CASES_TEXT_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(RELATED_CASES_VALUE_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(SUPPRESSED_ALERTS_TEXT_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(SUPPRESSED_ALERTS_VALUE_TEST_ID)).not.toBeInTheDocument();
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
   });
 

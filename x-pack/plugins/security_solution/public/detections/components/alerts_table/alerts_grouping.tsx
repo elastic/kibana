@@ -25,7 +25,7 @@ import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { renderGroupPanel, getStats } from './grouping_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
-import { track } from '../../../common/lib/telemetry';
+import { AlertsEventTypes, track } from '../../../common/lib/telemetry';
 
 export interface AlertsTableComponentProps {
   currentAlertStatusFilterValue?: Status[];
@@ -67,7 +67,9 @@ const useStorage = (storage: Storage, tableId: string) =>
 const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
   const dispatch = useDispatch();
 
-  const { indexPattern, selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView, selectedPatterns } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
 
   const {
     services: { storage, telemetry },
@@ -78,14 +80,18 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
   const { onGroupChange, onGroupToggle } = useMemo(
     () => ({
       onGroupChange: ({ groupByField, tableId }: { groupByField: string; tableId: string }) => {
-        telemetry.reportAlertsGroupingChanged({ groupByField, tableId });
+        telemetry.reportEvent(AlertsEventTypes.AlertsGroupingChanged, { groupByField, tableId });
       },
       onGroupToggle: (param: {
         isOpen: boolean;
         groupName?: string | undefined;
         groupNumber: number;
         groupingId: string;
-      }) => telemetry.reportAlertsGroupingToggled({ ...param, tableId: param.groupingId }),
+      }) =>
+        telemetry.reportEvent(AlertsEventTypes.AlertsGroupingToggled, {
+          ...param,
+          tableId: param.groupingId,
+        }),
     }),
     [telemetry]
   );
@@ -102,6 +108,8 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [dispatch, props.tableId]
   );
 
+  const fields = useMemo(() => Object.values(sourcererDataView.fields || {}), [sourcererDataView]);
+
   const { getGrouping, selectedGroups, setSelectedGroups } = useGrouping({
     componentProps: {
       groupPanelRenderer: renderGroupPanel,
@@ -110,7 +118,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       unit: defaultUnit,
     },
     defaultGroupingOptions: getDefaultGroupingOptions(props.tableId),
-    fields: indexPattern.fields,
+    fields,
     groupingId: props.tableId,
     maxGroupingLevels: MAX_GROUPING_LEVELS,
     onGroupChange,

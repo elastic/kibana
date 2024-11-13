@@ -73,8 +73,7 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
           };
           return;
         }
-
-        panelRef.scrollIntoView({ block: 'center' });
+        panelRef.scrollIntoView({ block: 'start' });
       });
     },
     scrollToTop: () => {

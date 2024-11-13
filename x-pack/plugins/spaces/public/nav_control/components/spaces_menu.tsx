@@ -43,6 +43,7 @@ interface Props {
   spaces: Space[];
   serverBasePath: string;
   toggleSpaceSelector: () => void;
+  onClickManageSpaceBtn: () => void;
   intl: InjectedIntl;
   capabilities: Capabilities;
   navigateToApp: ApplicationStart['navigateToApp'];
@@ -116,7 +117,7 @@ class SpacesMenuUI extends Component<Props> {
               <EuiPopoverTitle paddingSize="s">
                 {search ||
                   i18n.translate('xpack.spaces.navControl.spacesMenu.selectSpacesTitle', {
-                    defaultMessage: 'Your spaces',
+                    defaultMessage: 'Spaces',
                   })}
               </EuiPopoverTitle>
               {list}
@@ -218,7 +219,7 @@ class SpacesMenuUI extends Component<Props> {
         key="manageSpacesButton"
         className="spcMenu__manageButton"
         size="s"
-        onClick={this.props.toggleSpaceSelector}
+        onClick={this.props.onClickManageSpaceBtn}
         capabilities={this.props.capabilities}
         navigateToApp={this.props.navigateToApp}
       />

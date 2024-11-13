@@ -7,6 +7,7 @@
 
 import { appContextService } from '..';
 import type { FleetConfigType } from '../../config';
+export { isOnlyAgentlessIntegration } from '../../../common/services/agentless_policy_helper';
 
 export const isAgentlessApiEnabled = () => {
   const cloudSetup = appContextService.getCloud();
@@ -14,7 +15,7 @@ export const isAgentlessApiEnabled = () => {
   return Boolean(isHosted && appContextService.getConfig()?.agentless?.enabled);
 };
 export const isDefaultAgentlessPolicyEnabled = () => {
-  const cloudSetup = appContextService.getCloud();
+  const cloudSetup = appContextService.getCloud && appContextService.getCloud();
   return Boolean(
     cloudSetup?.isServerlessEnabled && appContextService.getExperimentalFeatures().agentless
   );
@@ -44,16 +45,9 @@ export const prependAgentlessApiBasePathToEndpoint = (
   agentlessConfig: FleetConfigType['agentless'],
   endpoint: AgentlessApiEndpoints
 ) => {
-  const cloudSetup = appContextService.getCloud();
+  const cloudSetup = appContextService.getCloud && appContextService.getCloud();
   const endpointPrefix = cloudSetup?.isServerlessEnabled
     ? AGENTLESS_SERVERLESS_API_BASE_PATH
     : AGENTLESS_ESS_API_BASE_PATH;
   return `${agentlessConfig.api.url}${endpointPrefix}${endpoint}`;
-};
-
-export const getDeletionEndpointPath = (
-  agentlessConfig: FleetConfigType['agentless'],
-  endpoint: AgentlessApiEndpoints
-) => {
-  return `${agentlessConfig.api.url}${AGENTLESS_ESS_API_BASE_PATH}${endpoint}`;
 };

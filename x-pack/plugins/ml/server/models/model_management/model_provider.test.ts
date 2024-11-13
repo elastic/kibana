@@ -89,6 +89,8 @@ describe('modelsProvider', () => {
         {
           config: { input: { field_names: ['text_field'] } },
           description: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
+          disclaimer:
+            'This E5 model, as defined, hosted, integrated and used in conjunction with our other Elastic Software is covered by our standard warranty.',
           model_id: '.multilingual-e5-small',
           default: true,
           supported: true,
@@ -103,6 +105,8 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           description:
             'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
+          disclaimer:
+            'This E5 model, as defined, hosted, integrated and used in conjunction with our other Elastic Software is covered by our standard warranty.',
           model_id: '.multilingual-e5-small_linux-x86_64',
           os: 'Linux',
           recommended: true,
@@ -175,6 +179,8 @@ describe('modelsProvider', () => {
         {
           config: { input: { field_names: ['text_field'] } },
           description: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
+          disclaimer:
+            'This E5 model, as defined, hosted, integrated and used in conjunction with our other Elastic Software is covered by our standard warranty.',
           model_id: '.multilingual-e5-small',
           recommended: true,
           supported: true,
@@ -189,6 +195,8 @@ describe('modelsProvider', () => {
           config: { input: { field_names: ['text_field'] } },
           description:
             'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
+          disclaimer:
+            'This E5 model, as defined, hosted, integrated and used in conjunction with our other Elastic Software is covered by our standard warranty.',
           model_id: '.multilingual-e5-small_linux-x86_64',
           os: 'Linux',
           supported: false,

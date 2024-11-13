@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { KibanaPrivilege } from './kibana_privilege';
-import { KibanaPrivileges, isGlobalPrivilegeDefinition } from './kibana_privileges';
 import type { RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
+
 import { createRawKibanaPrivileges, kibanaFeatures } from './__fixtures__';
+import { KibanaPrivilege } from './kibana_privilege';
+import { isGlobalPrivilegeDefinition, KibanaPrivileges } from './kibana_privileges';
 
 describe('kibana_privilege', () => {
   describe('isGlobalPrivilegeDefinition', () => {

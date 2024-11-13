@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.body).to.be.an('array');
 
-        expect(resp.body.length).to.be(56);
+        expect(resp.body.length).to.be(21);
 
         // Test for sample data card
         expect(resp.body.findIndex((c: { id: string }) => c.id === 'sample_data_all')).to.be.above(
@@ -44,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.body).to.be.an('array');
 
-        expect(resp.body.length).to.be(108); // the beats
+        expect(resp.body.length).to.be(107); // the beats
       });
     });
   });

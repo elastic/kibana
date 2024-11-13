@@ -12,19 +12,43 @@ import type { EntityManagerPublicPluginStart } from '@kbn/entityManager-plugin/p
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { LocatorPublic, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
+import { action } from '@storybook/addon-actions';
 import type { InventoryKibanaContext } from '../public/hooks/use_kibana';
-import type { ITelemetryClient } from '../public/services/telemetry/types';
+import { ITelemetryClient } from '../public/services/telemetry/types';
 
 export function getMockInventoryContext(): InventoryKibanaContext {
   const coreStart = coreMock.createStart();
 
   return {
     ...coreStart,
-    entityManager: {} as unknown as EntityManagerPublicPluginStart,
+    entityManager: {
+      entityClient: {
+        asKqlFilter: jest.fn(),
+        getIdentityFieldsValue() {
+          return 'entity_id';
+        },
+      },
+    } as unknown as EntityManagerPublicPluginStart,
     observabilityShared: {} as unknown as ObservabilitySharedPluginStart,
     inference: {} as unknown as InferencePublicStart,
-    share: {} as unknown as SharePluginStart,
+    share: {
+      url: {
+        locators: {
+          get: (_id: string) =>
+            ({
+              navigate: async () => {
+                return Promise.resolve();
+              },
+              getRedirectUrl: (args: any) => {
+                action('share.url.locators.getRedirectUrl')(args);
+              },
+            } as unknown as LocatorPublic<any>),
+        },
+      },
+    } as unknown as SharePluginStart,
     telemetry: {} as unknown as ITelemetryClient,
     unifiedSearch: {} as unknown as UnifiedSearchPublicPluginStart,
     dataViews: {} as unknown as DataViewsPublicPluginStart,
@@ -32,6 +56,19 @@ export function getMockInventoryContext(): InventoryKibanaContext {
     inventoryAPIClient: {
       fetch: jest.fn(),
       stream: jest.fn(),
+    },
+    http: {
+      basePath: {
+        prepend: (_path: string) => {
+          return '';
+        },
+      },
+    } as unknown as HttpStart,
+    spaces: {} as unknown as SpacesPluginStart,
+    kibanaEnvironment: {
+      isCloudEnv: false,
+      isServerlessEnv: false,
+      kibanaVersion: '9.0.0',
     },
   };
 }

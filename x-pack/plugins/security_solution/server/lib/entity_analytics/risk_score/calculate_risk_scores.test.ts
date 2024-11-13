@@ -12,6 +12,8 @@ import { assetCriticalityServiceMock } from '../asset_criticality/asset_critical
 import { calculateRiskScores } from './calculate_risk_scores';
 import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
 
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+
 describe('calculateRiskScores()', () => {
   let params: Parameters<typeof calculateRiskScores>[0];
   let esClient: ElasticsearchClient;
@@ -143,6 +145,41 @@ describe('calculateRiskScores()', () => {
               }),
             }),
           })
+        );
+      });
+    });
+
+    describe('excludeAlertStatuses', () => {
+      it('should not add the filter when excludeAlertStatuses is empty', async () => {
+        params = { ...params, excludeAlertStatuses: [] };
+        await calculateRiskScores(params);
+        expect(
+          (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
+        ).toEqual(
+          expect.not.arrayContaining([
+            {
+              bool: {
+                must_not: { terms: { [ALERT_WORKFLOW_STATUS]: params.excludeAlertStatuses } },
+              },
+            },
+          ])
+        );
+      });
+
+      it('should add the filter when excludeAlertStatuses is not empty', async () => {
+        esClient.search as jest.Mock;
+        params = { ...params, excludeAlertStatuses: ['closed'] };
+        await calculateRiskScores(params);
+        expect(
+          (esClient.search as jest.Mock).mock.calls[0][0].query.function_score.query.bool.filter
+        ).toEqual(
+          expect.arrayContaining([
+            {
+              bool: {
+                must_not: { terms: { [ALERT_WORKFLOW_STATUS]: params.excludeAlertStatuses } },
+              },
+            },
+          ])
         );
       });
     });

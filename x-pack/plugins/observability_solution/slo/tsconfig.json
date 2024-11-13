@@ -17,7 +17,6 @@
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
     "@kbn/core",
-    "@kbn/translations-plugin",
     "@kbn/rule-data-utils",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/observability-plugin",
@@ -96,6 +95,8 @@
     "@kbn/core-application-browser",
     "@kbn/core-theme-browser",
     "@kbn/ebt-tools",
-    "@kbn/observability-alerting-rule-utils"
+    "@kbn/observability-alerting-rule-utils",
+    "@kbn/server-route-repository-client",
+    "@kbn/server-route-repository-utils"
   ]
 }

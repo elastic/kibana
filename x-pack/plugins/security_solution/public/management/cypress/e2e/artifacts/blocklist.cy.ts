@@ -41,7 +41,7 @@ const {
 describe(
   'Blocklist',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'], // @skipInServerlessMKI until kibana is rebuilt after merge
+    tags: ['@ess', '@serverless', '@serverlessQA'],
   },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;

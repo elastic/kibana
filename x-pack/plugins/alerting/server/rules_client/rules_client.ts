@@ -57,14 +57,12 @@ import { bulkEnableRules, BulkEnableRulesParams } from '../application/rule/meth
 import { enableRule } from '../application/rule/methods/enable_rule/enable_rule';
 import { updateRuleApiKey } from '../application/rule/methods/update_api_key/update_rule_api_key';
 import { disableRule } from '../application/rule/methods/disable/disable_rule';
-import { clearExpiredSnoozes } from './methods/clear_expired_snoozes';
 import { muteInstance } from '../application/rule/methods/mute_alert/mute_instance';
-import { muteAll } from './methods/mute_all';
-import { unmuteAll } from './methods/unmute_all';
+import { unmuteAll } from '../application/rule/methods/unmute_all';
+import { muteAll } from '../application/rule/methods/mute_all';
 import { unmuteInstance } from '../application/rule/methods/unmute_alert/unmute_instance';
 import { runSoon } from './methods/run_soon';
-import { listRuleTypes } from './methods/list_rule_types';
-import { getAlertFromRaw, GetAlertFromRawParams } from './lib/get_alert_from_raw';
+import { listRuleTypes } from '../application/rule/methods/rule_types/rule_types';
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
 import {
   bulkUntrackAlerts,
@@ -84,7 +82,7 @@ export type ConstructorOptions = Omit<
   'fieldsToExcludeFromPublicApi' | 'minimumScheduleIntervalInMs'
 >;
 
-const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
+export const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
   'monitoring',
   'mapped_params',
   'snoozeSchedule',
@@ -174,11 +172,6 @@ export class RulesClient {
   public snooze = (options: SnoozeRuleOptions) => snoozeRule(this.context, options);
   public unsnooze = (options: UnsnoozeParams) => unsnoozeRule(this.context, options);
 
-  public clearExpiredSnoozes = (options: {
-    rule: Pick<SanitizedRule<RuleTypeParams>, 'id' | 'snoozeSchedule'>;
-    version?: string;
-  }) => clearExpiredSnoozes(this.context, options);
-
   public muteAll = (options: { id: string }) => muteAll(this.context, options);
   public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);
   public muteInstance = (options: MuteAlertParams) => muteInstance(this.context, options);
@@ -214,17 +207,4 @@ export class RulesClient {
   public getTags = (params: RuleTagsParams) => getRuleTags(this.context, params);
 
   public getScheduleFrequency = () => getScheduleFrequency(this.context);
-
-  public getAlertFromRaw = (params: GetAlertFromRawParams) =>
-    getAlertFromRaw(
-      this.context,
-      params.id,
-      params.ruleTypeId,
-      params.rawRule,
-      params.references,
-      params.includeLegacyId,
-      params.excludeFromPublicApi,
-      params.includeSnoozeData,
-      params.omitGeneratedValues
-    );
 }

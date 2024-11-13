@@ -69,7 +69,7 @@ export class Join extends Component<Props, State> {
     this._isMounted = false;
   }
 
-  async _loadRightFields(indexPatternId: string) {
+  async _loadRightFields(indexPatternId?: string) {
     if (!indexPatternId) {
       return;
     }

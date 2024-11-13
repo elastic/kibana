@@ -230,7 +230,7 @@ export class MobileDevice extends Entity<ApmFields> {
       spanSubtype: 'http',
       'http.request.method': httpMethod,
       'url.original': httpUrl,
-      'transaction.type': 'mobile',
+      'processor.event': 'span',
     };
 
     if (this.networkConnection) {
@@ -262,7 +262,6 @@ export class MobileDevice extends Entity<ApmFields> {
       'error.type': 'crash',
       'error.id': generateLongIdWithSeed(message),
       'error.exception': [{ message, ...{ type: 'crash' } }],
-      'error.grouping_name': groupingName || message,
     });
   }
 }

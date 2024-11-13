@@ -20,15 +20,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  assistantBedrockChat:
-                    type: boolean
-                  assistantKnowledgeBaseByDefault:
-                    type: boolean
                   assistantModelEvaluation:
                     type: boolean
                 required:
-                  - assistantBedrockChat
-                  - assistantKnowledgeBaseByDefault
                   - assistantModelEvaluation
         '400':
           description: Generic Error

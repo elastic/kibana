@@ -45,10 +45,10 @@ exports[`ExceptionListHeader should render edit modal 1`] = `
           class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
         />
         <div
-          class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+          class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row-euiPageHeaderContent__top"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
+            class="euiFlexItem emotion-euiFlexItem-grow-2-euiPageHeaderContent__leftSideItems"
           >
             <h1
               class="euiTitle emotion-euiTitle-l"
@@ -146,71 +146,67 @@ exports[`ExceptionListHeader should render edit modal 1`] = `
             </div>
           </div>
           <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
           >
             <div
-              class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
+              class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
             >
               <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
+                data-test-subj="RightSideMenuItemsContainer"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
-                  data-test-subj="RightSideMenuItemsContainer"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                  <span
+                    class="emotion-EuiTextColor"
+                    data-test-subj="noLinkedRules"
+                  >
+                    Linked to 0 rules
+                  </span>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <button
+                    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                    data-test-subj="RightSideMenuItemsLinkRulesButton"
+                    type="button"
                   >
                     <span
-                      class="emotion-EuiTextColor"
-                      data-test-subj="noLinkedRules"
-                    >
-                      Linked to 0 rules
-                    </span>
-                  </div>
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-grow-1"
-                  >
-                    <button
-                      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-                      data-test-subj="RightSideMenuItemsLinkRulesButton"
-                      type="button"
+                      class="emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="emotion-euiButtonDisplayContent"
+                        class="eui-textTruncate"
                       >
-                        <span
-                          class="eui-textTruncate"
-                        >
-                          Link rules
-                        </span>
+                        Link rules
                       </span>
-                    </button>
-                  </div>
+                    </span>
+                  </button>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
                   <div
-                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                   >
                     <div
-                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                      class="euiPopover emotion-euiPopover-inline-block"
+                      data-test-subj="RightSideMenuItemsMenuActionsItems"
                     >
-                      <div
-                        class="euiPopover emotion-euiPopover-inline-block"
-                        data-test-subj="RightSideMenuItemsMenuActionsItems"
+                      <button
+                        aria-label="Header menu Button Icon"
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                        data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
+                        type="button"
                       >
-                        <button
-                          aria-label="Header menu Button Icon"
-                          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                          data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
-                          type="button"
-                        >
-                          <span
-                            aria-hidden="true"
-                            class="euiButtonIcon__icon"
-                            color="inherit"
-                            data-euiicon-type="boxesHorizontal"
-                          />
-                        </button>
-                      </div>
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="boxesHorizontal"
+                        />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -269,10 +265,10 @@ exports[`ExceptionListHeader should render the List Header with name, default de
           class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
         />
         <div
-          class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+          class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row-euiPageHeaderContent__top"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
+            class="euiFlexItem emotion-euiFlexItem-grow-2-euiPageHeaderContent__leftSideItems"
           >
             <h1
               class="euiTitle emotion-euiTitle-l"
@@ -370,71 +366,67 @@ exports[`ExceptionListHeader should render the List Header with name, default de
             </div>
           </div>
           <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
           >
             <div
-              class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
+              class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
             >
               <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
+                data-test-subj="RightSideMenuItemsContainer"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
-                  data-test-subj="RightSideMenuItemsContainer"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                  <span
+                    class="emotion-EuiTextColor"
+                    data-test-subj="noLinkedRules"
+                  >
+                    Linked to 0 rules
+                  </span>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <button
+                    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                    data-test-subj="RightSideMenuItemsLinkRulesButton"
+                    type="button"
                   >
                     <span
-                      class="emotion-EuiTextColor"
-                      data-test-subj="noLinkedRules"
-                    >
-                      Linked to 0 rules
-                    </span>
-                  </div>
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-grow-1"
-                  >
-                    <button
-                      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-                      data-test-subj="RightSideMenuItemsLinkRulesButton"
-                      type="button"
+                      class="emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="emotion-euiButtonDisplayContent"
+                        class="eui-textTruncate"
                       >
-                        <span
-                          class="eui-textTruncate"
-                        >
-                          Link rules
-                        </span>
+                        Link rules
                       </span>
-                    </button>
-                  </div>
+                    </span>
+                  </button>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
                   <div
-                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                   >
                     <div
-                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                      class="euiPopover emotion-euiPopover-inline-block"
+                      data-test-subj="RightSideMenuItemsMenuActionsItems"
                     >
-                      <div
-                        class="euiPopover emotion-euiPopover-inline-block"
-                        data-test-subj="RightSideMenuItemsMenuActionsItems"
+                      <button
+                        aria-label="Header menu Button Icon"
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                        data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
+                        type="button"
                       >
-                        <button
-                          aria-label="Header menu Button Icon"
-                          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                          data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
-                          type="button"
-                        >
-                          <span
-                            aria-hidden="true"
-                            class="euiButtonIcon__icon"
-                            color="inherit"
-                            data-euiicon-type="boxesHorizontal"
-                          />
-                        </button>
-                      </div>
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="boxesHorizontal"
+                        />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -493,10 +485,10 @@ exports[`ExceptionListHeader should render the List Header with name, default de
           class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
         />
         <div
-          class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+          class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row-euiPageHeaderContent__top"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
+            class="euiFlexItem emotion-euiFlexItem-grow-2-euiPageHeaderContent__leftSideItems"
           >
             <h1
               class="euiTitle emotion-euiTitle-l"
@@ -566,72 +558,68 @@ exports[`ExceptionListHeader should render the List Header with name, default de
             </div>
           </div>
           <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
           >
             <div
-              class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
+              class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
             >
               <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
+                data-test-subj="RightSideMenuItemsContainer"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
-                  data-test-subj="RightSideMenuItemsContainer"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                  <span
+                    class="emotion-EuiTextColor"
+                    data-test-subj="noLinkedRules"
+                  >
+                    Linked to 0 rules
+                  </span>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <button
+                    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                    data-test-subj="RightSideMenuItemsLinkRulesButton"
+                    type="button"
                   >
                     <span
-                      class="emotion-EuiTextColor"
-                      data-test-subj="noLinkedRules"
-                    >
-                      Linked to 0 rules
-                    </span>
-                  </div>
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-grow-1"
-                  >
-                    <button
-                      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-                      data-test-subj="RightSideMenuItemsLinkRulesButton"
-                      type="button"
+                      class="emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="emotion-euiButtonDisplayContent"
+                        class="eui-textTruncate"
                       >
-                        <span
-                          class="eui-textTruncate"
-                        >
-                          Link rules
-                        </span>
+                        Link rules
                       </span>
-                    </button>
-                  </div>
+                    </span>
+                  </button>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
                   <div
-                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                   >
                     <div
-                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                      class="euiPopover emotion-euiPopover-inline-block"
+                      data-test-subj="RightSideMenuItemsMenuActionsItems"
                     >
-                      <div
-                        class="euiPopover emotion-euiPopover-inline-block"
-                        data-test-subj="RightSideMenuItemsMenuActionsItems"
+                      <button
+                        aria-label="Header menu Button Icon"
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
+                        data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
+                        disabled=""
+                        type="button"
                       >
-                        <button
-                          aria-label="Header menu Button Icon"
-                          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
-                          data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
-                          disabled=""
-                          type="button"
-                        >
-                          <span
-                            aria-hidden="true"
-                            class="euiButtonIcon__icon"
-                            color="inherit"
-                            data-euiicon-type="boxesHorizontal"
-                          />
-                        </button>
-                      </div>
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="boxesHorizontal"
+                        />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -690,10 +678,10 @@ exports[`ExceptionListHeader should render the List Header with name, default de
           class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
         />
         <div
-          class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+          class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row-euiPageHeaderContent__top"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
+            class="euiFlexItem emotion-euiFlexItem-grow-2-euiPageHeaderContent__leftSideItems"
           >
             <h1
               class="euiTitle emotion-euiTitle-l"
@@ -763,52 +751,48 @@ exports[`ExceptionListHeader should render the List Header with name, default de
             </div>
           </div>
           <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
           >
             <div
-              class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
+              class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
             >
               <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
+                data-test-subj="RightSideMenuItemsContainer"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
-                  data-test-subj="RightSideMenuItemsContainer"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <span
+                    class="emotion-EuiTextColor"
+                    data-test-subj="noLinkedRules"
+                  >
+                    Linked to 0 rules
+                  </span>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <div
-                    class="euiFlexItem emotion-euiFlexItem-grow-1"
-                  >
-                    <span
-                      class="emotion-EuiTextColor"
-                      data-test-subj="noLinkedRules"
-                    >
-                      Linked to 0 rules
-                    </span>
-                  </div>
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                   >
                     <div
-                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                      class="euiPopover emotion-euiPopover-inline-block"
+                      data-test-subj="RightSideMenuItemsMenuActionsItems"
                     >
-                      <div
-                        class="euiPopover emotion-euiPopover-inline-block"
-                        data-test-subj="RightSideMenuItemsMenuActionsItems"
+                      <button
+                        aria-label="Header menu Button Icon"
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                        data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
+                        type="button"
                       >
-                        <button
-                          aria-label="Header menu Button Icon"
-                          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                          data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
-                          type="button"
-                        >
-                          <span
-                            aria-hidden="true"
-                            class="euiButtonIcon__icon"
-                            color="inherit"
-                            data-euiicon-type="boxesHorizontal"
-                          />
-                        </button>
-                      </div>
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="boxesHorizontal"
+                        />
+                      </button>
                     </div>
                   </div>
                 </div>

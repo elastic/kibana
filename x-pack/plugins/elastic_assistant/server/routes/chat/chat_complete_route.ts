@@ -25,11 +25,13 @@ import { buildResponse } from '../../lib/build_response';
 import {
   appendAssistantMessageToConversation,
   createConversationWithUserInput,
+  getIsKnowledgeBaseInstalled,
   langChainExecute,
   performChecks,
 } from '../helpers';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import { isOpenSourceModel } from '../utils';
 
 export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
   return `CONTEXT:\n"""\n${context}\n"""`;
@@ -62,22 +64,20 @@ export const chatCompleteRoute = (
         const assistantResponse = buildResponse(response);
         let telemetry;
         let actionTypeId;
+        const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+        const logger: Logger = ctx.elasticAssistant.logger;
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const logger: Logger = ctx.elasticAssistant.logger;
           telemetry = ctx.elasticAssistant.telemetry;
           const inference = ctx.elasticAssistant.inference;
 
           // Perform license and authenticated user checks
           const checkResponse = performChecks({
-            authenticatedUser: true,
             context: ctx,
-            license: true,
             request,
             response,
           });
-          if (checkResponse) {
-            return checkResponse;
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
 
           const conversationsDataClient =
@@ -99,7 +99,9 @@ export const chatCompleteRoute = (
           const actions = ctx.elasticAssistant.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const connectors = await actionsClient.getBulk({ ids: [connectorId] });
-          actionTypeId = connectors.length > 0 ? connectors[0].actionTypeId : '.gen-ai';
+          const connector = connectors.length > 0 ? connectors[0] : undefined;
+          actionTypeId = connector?.actionTypeId ?? '.gen-ai';
+          const isOssModel = isOpenSourceModel(connector);
 
           // replacements
           const anonymizationFieldsRes =
@@ -192,6 +194,7 @@ export const chatCompleteRoute = (
             actionsClient,
             actionTypeId,
             connectorId,
+            isOssModel,
             conversationId: conversationId ?? newConversation?.id,
             context: ctx,
             getElser,
@@ -217,13 +220,16 @@ export const chatCompleteRoute = (
           });
         } catch (err) {
           const error = transformError(err as Error);
+          const kbDataClient =
+            (await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
+          const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
+
           telemetry?.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: actionTypeId ?? '',
             model: request.body.model,
             errorMessage: error.message,
-            // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
-            // tracked here: https://github.com/elastic/security-team/issues/7363
             assistantStreamingEnabled: request.body.isStream ?? false,
+            isEnabledKnowledgeBase: isKnowledgeBaseInstalled,
           });
           return assistantResponse.error({
             body: error.message,

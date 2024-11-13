@@ -53,7 +53,7 @@ export const createGridCell = (
     } = columnConfig.columns[colIndex] ?? {};
     const filterOnClick = oneClickFilter && handleFilterClick;
     const content = formatters[columnId]?.convert(rawRowValue, filterOnClick ? 'text' : 'html');
-    const currentAlignment = alignments && alignments[columnId];
+    const currentAlignment = alignments?.get(columnId);
 
     useEffect(() => {
       let colorSet = false;

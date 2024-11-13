@@ -53,6 +53,7 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     viewInAppRelativeUrl: ruleDomain.viewInAppRelativeUrl,
     alertDelay: ruleDomain.alertDelay,
     legacyId: ruleDomain.legacyId,
+    flapping: ruleDomain.flapping,
   };
 
   if (isPublic) {

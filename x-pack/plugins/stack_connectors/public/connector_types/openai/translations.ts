@@ -47,6 +47,10 @@ export const AZURE_AI = i18n.translate('xpack.stackConnectors.components.genAi.a
   defaultMessage: 'Azure OpenAI',
 });
 
+export const OTHER_OPENAI = i18n.translate('xpack.stackConnectors.components.genAi.otherAi', {
+  defaultMessage: 'Other (OpenAI Compatible Service)',
+});
+
 export const DOCUMENTATION = i18n.translate(
   'xpack.stackConnectors.components.genAi.documentation',
   {

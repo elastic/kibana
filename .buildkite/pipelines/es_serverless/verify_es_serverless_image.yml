@@ -31,13 +31,13 @@ steps:
           provider: gcp
           machineType: n2-standard-2
 
-      - label: "Build Kibana Distribution and Plugins"
+      - label: "Build Kibana Distribution"
         command: .buildkite/scripts/steps/build_kibana.sh
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
           provider: gcp
-          machineType: n2-standard-16
+          machineType: n2-standard-8
         key: build
         if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
         depends_on: pre-build
@@ -54,7 +54,7 @@ steps:
         env:
           FTR_CONFIGS_SCRIPT: "TEST_ES_SERVERLESS_IMAGE=$ES_SERVERLESS_IMAGE .buildkite/scripts/steps/test/ftr_configs.sh"
           JEST_INTEGRATION_SCRIPT: "TEST_ES_SERVERLESS_IMAGE=$ES_SERVERLESS_IMAGE .buildkite/scripts/steps/test/jest_integration.sh"
-          FTR_CONFIG_PATTERNS: "**/test_serverless/**,**/test/security_solution_api_integration/**/serverless.config.ts"
+          FTR_CONFIG_PATTERNS: "**/test_serverless/**,**/test/security_solution_api_integration/**/serverless.config.ts,x-pack/test/api_integration/deployment_agnostic/configs/serverless/**"
           FTR_EXTRA_ARGS: "$FTR_EXTRA_ARGS"
           LIMIT_CONFIG_TYPE: "functional,integration"
         retry:
@@ -206,8 +206,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          localSsds: 1
-          localSsdInterface: nvme
           machineType: n2-standard-4
         depends_on: build
         timeout_in_minutes: 60
@@ -218,7 +216,7 @@ steps:
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
-        label: "Serverless Osquery Cypress Tests"
+        label: "Osquery Cypress Tests on Serverless"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004

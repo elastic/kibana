@@ -61,6 +61,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
   const isNotMobile = useIsWithinMinBreakpoint('s');
   const isIconVisible = isNotMobile && !isSideNavCollapsed && !!children && children.length > 0;
   const isActive = isActiveFromUrl(item.path, activeNodes);
+  const hasLandingPage = Boolean(href);
 
   const itemClassNames = classNames(
     'sideNavItem',
@@ -73,30 +74,36 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     [`nav-item-id-${id}`]: id,
     [`nav-item-isActive`]: isActive,
   });
+
   const buttonDataTestSubj = classNames(`panelOpener`, `panelOpener-${path}`, {
     [`panelOpener-id-${id}`]: id,
     [`panelOpener-deepLinkId-${deepLink?.id}`]: !!deepLink,
   });
 
+  const togglePanel = useCallback(() => {
+    if (selectedNode?.id === item.id) {
+      closePanel();
+    } else {
+      openPanel(item);
+    }
+  }, [selectedNode?.id, item, closePanel, openPanel]);
+
   const onLinkClick = useCallback(
     (e: React.MouseEvent) => {
       if (!href) {
+        togglePanel();
         return;
       }
       e.preventDefault();
       navigateToUrl(href);
       closePanel();
     },
-    [closePanel, href, navigateToUrl]
+    [closePanel, href, navigateToUrl, togglePanel]
   );
 
   const onIconClick = useCallback(() => {
-    if (selectedNode?.id === item.id) {
-      closePanel();
-    } else {
-      openPanel(item);
-    }
-  }, [openPanel, closePanel, item, selectedNode]);
+    togglePanel();
+  }, [togglePanel]);
 
   const isExpanded = selectedNode?.path === path;
 
@@ -123,7 +130,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
             size="s"
             color="text"
             onClick={onIconClick}
-            iconType="spaces"
+            iconType={hasLandingPage ? 'spaces' : 'arrowRight'}
             iconSize="m"
             aria-label={i18n.translate('sharedUXPackages.chrome.sideNavigation.togglePanel', {
               defaultMessage: 'Toggle "{title}" panel navigation',

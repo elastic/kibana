@@ -6,12 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ruleParamsSchemaWithDefaultValue } from '@kbn/response-ops-rule-params';
 import { validateDuration } from '../../../validation';
 import {
   notifyWhenSchema,
   alertDelaySchema,
   actionRequestSchema,
   systemActionRequestSchema,
+  flappingSchema,
 } from '../../../schemas';
 
 export const updateRuleDataSchema = schema.object(
@@ -22,11 +24,12 @@ export const updateRuleDataSchema = schema.object(
       interval: schema.string({ validate: validateDuration }),
     }),
     throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDuration }))),
-    params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
+    params: ruleParamsSchemaWithDefaultValue,
     actions: schema.arrayOf(actionRequestSchema, { defaultValue: [] }),
     systemActions: schema.maybe(schema.arrayOf(systemActionRequestSchema, { defaultValue: [] })),
     notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
     alertDelay: schema.maybe(alertDelaySchema),
+    flapping: schema.maybe(schema.nullable(flappingSchema)),
   },
   { unknowns: 'allow' }
 );

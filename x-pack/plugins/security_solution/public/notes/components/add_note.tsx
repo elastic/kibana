@@ -25,8 +25,10 @@ import {
   ReqStatus,
   selectCreateNoteError,
   selectCreateNoteStatus,
+  userClosedCreateErrorToast,
 } from '../store/notes.slice';
 import { MarkdownEditor } from '../../common/components/markdown_editor';
+import { NotesEventTypes } from '../../common/lib/telemetry';
 
 export const MARKDOWN_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.notes.addNote.markdownAriaLabel',
@@ -61,6 +63,10 @@ export interface AddNewNoteProps {
    * Children to render between the markdown and the add note button
    */
   children?: React.ReactNode;
+  /*
+   * Callback to execute when a new note is added
+   */
+  onNoteAdd?: () => void;
 }
 
 /**
@@ -68,7 +74,7 @@ export interface AddNewNoteProps {
  * The checkbox is automatically checked if the flyout is opened from a timeline and that timeline is saved. It is disabled if the flyout is NOT opened from a timeline.
  */
 export const AddNote = memo(
-  ({ eventId, timelineId, disableButton = false, children }: AddNewNoteProps) => {
+  ({ eventId, timelineId, disableButton = false, children, onNoteAdd }: AddNewNoteProps) => {
     const { telemetry } = useKibana().services;
     const dispatch = useDispatch();
     const { addError: addErrorToast } = useAppToasts();
@@ -83,25 +89,33 @@ export const AddNote = memo(
         createNote({
           note: {
             timelineId: timelineId || '',
-            eventId,
+            eventId: eventId || '',
             note: editorValue,
           },
         })
       );
-      telemetry.reportAddNoteFromExpandableFlyoutClicked({
+      if (onNoteAdd) {
+        onNoteAdd();
+      }
+      telemetry.reportEvent(NotesEventTypes.AddNoteFromExpandableFlyoutClicked, {
         isRelatedToATimeline: timelineId != null,
       });
       setEditorValue('');
-    }, [dispatch, editorValue, eventId, telemetry, timelineId]);
+    }, [dispatch, editorValue, eventId, telemetry, timelineId, onNoteAdd]);
+
+    const resetError = useCallback(() => {
+      dispatch(userClosedCreateErrorToast());
+    }, [dispatch]);
 
     // show a toast if the create note call fails
     useEffect(() => {
       if (createStatus === ReqStatus.Failed && createError) {
-        addErrorToast(null, {
+        addErrorToast(createError, {
           title: CREATE_NOTE_ERROR,
         });
+        resetError();
       }
-    }, [addErrorToast, createError, createStatus]);
+    }, [addErrorToast, createError, createStatus, resetError]);
 
     const buttonDisabled = useMemo(
       () => disableButton || editorValue.trim().length === 0 || isMarkdownInvalid,

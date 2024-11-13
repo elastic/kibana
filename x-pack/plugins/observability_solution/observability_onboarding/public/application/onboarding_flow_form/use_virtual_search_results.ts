@@ -20,10 +20,12 @@ export function useVirtualSearchResults(): CustomCard[] {
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const history = useHistory();
+  const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
   const { href: firehoseUrl } = reactRouterNavigate(history, `/firehose/${location.search}`);
   const getUrlForApp = application?.getUrlForApp;
   const firehoseQuickstartCard: CustomCard = {
     id: 'firehose-quick-start',
+    name: 'firehose-quick-start',
     type: 'virtual',
     title: i18n.translate('xpack.observability_onboarding.packageList.uploadFileTitle', {
       defaultMessage: 'AWS Firehose',
@@ -35,7 +37,6 @@ export function useVirtualSearchResults(): CustomCard[] {
         defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).',
       }
     ),
-    name: 'firehose-quick-start',
     categories: [],
     icons: [
       {
@@ -46,7 +47,7 @@ export function useVirtualSearchResults(): CustomCard[] {
     url: firehoseUrl,
     version: '',
     integration: '',
-    isCollectionCard: false,
+    isQuickstart: true,
   };
 
   return [
@@ -75,6 +76,23 @@ export function useVirtualSearchResults(): CustomCard[] {
       version: '',
       integration: '',
       isCollectionCard: false,
+    },
+    {
+      id: 'custom-logs',
+      type: 'virtual',
+      title: 'Stream log files',
+      description: 'Stream any logs into Elastic in a simple way and explore their data',
+      name: 'custom-logs-virtual',
+      categories: ['observability'],
+      icons: [
+        {
+          type: 'eui',
+          src: 'filebeatApp',
+        },
+      ],
+      url: customLogsUrl,
+      version: '',
+      integration: '',
     },
     /**
      * The new Firehose card should only be visible on Cloud

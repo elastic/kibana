@@ -31,10 +31,10 @@
               },
               ") => Promise<",
               {
-                "pluginId": "@kbn/security-authorization-core",
-                "scope": "server",
-                "docId": "kibKbnSecurityAuthorizationCorePluginApi",
-                "section": "def-server.RawKibanaPrivileges",
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RawKibanaPrivileges",
                 "text": "RawKibanaPrivileges"
               },
               ">"
@@ -1018,14 +1018,6 @@
                 "path": "x-pack/plugins/security_solution/public/common/components/user_profiles/use_get_current_user_profile.tsx"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/assistant/overlay.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/assistant/stack_management/management_settings.tsx"
-              },
-              {
                 "plugin": "cases",
                 "path": "x-pack/plugins/cases/public/containers/user_profiles/api.test.ts"
               },
@@ -1323,6 +1315,18 @@
           }
         ],
         "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.SecurityLicense",
+        "type": "Type",
+        "tags": [],
+        "label": "SecurityLicense",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_public/src/license/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

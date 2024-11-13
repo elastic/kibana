@@ -12,7 +12,7 @@ import type { RouteDefinitionParams } from '..';
  */
 export function defineOverwrittenSessionRoutes({ httpResources }: RouteDefinitionParams) {
   httpResources.register(
-    { path: '/security/overwritten_session', validate: false },
+    { path: '/security/overwritten_session', validate: false, options: { excludeFromOAS: true } },
     (context, req, res) => res.renderCoreApp()
   );
 }

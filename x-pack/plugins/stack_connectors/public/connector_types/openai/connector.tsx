@@ -24,6 +24,8 @@ import * as i18n from './translations';
 import {
   azureAiConfig,
   azureAiSecrets,
+  otherOpenAiConfig,
+  otherOpenAiSecrets,
   openAiConfig,
   openAiSecrets,
   providerOptions,
@@ -61,7 +63,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
             'data-test-subj': 'config.apiProvider-select',
             options: providerOptions,
             fullWidth: true,
-            hasNoInitialSelection: true,
+            hasNoInitialSelection: false,
             disabled: readOnly,
             readOnly,
           },
@@ -83,6 +85,14 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           readOnly={readOnly}
           configFormSchema={azureAiConfig}
           secretsFormSchema={azureAiSecrets}
+        />
+      )}
+      {config != null && config.apiProvider === OpenAiProviderType.Other && (
+        <SimpleConnectorForm
+          isEdit={isEdit}
+          readOnly={readOnly}
+          configFormSchema={otherOpenAiConfig}
+          secretsFormSchema={otherOpenAiSecrets}
         />
       )}
       {isEdit && (

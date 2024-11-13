@@ -48,22 +48,21 @@ export class SynthtraceEsClient<TFields extends Fields> {
   }
 
   async clean() {
-    this.logger.info(
-      `Cleaning data streams "${this.dataStreams.join(',')}" and indices "${this.indices.join(
-        ','
-      )}"`
-    );
+    this.logger.info(`Cleaning data streams: "${this.dataStreams.join(',')}"`);
 
     const resolvedIndices = this.indices.length
       ? (
           await this.client.indices.resolveIndex({
             name: this.indices.join(','),
             expand_wildcards: ['open', 'hidden'],
-            // @ts-expect-error ignore_unavailable is not in the type definition, but it is accepted by es
             ignore_unavailable: true,
           })
         ).indices.map((index: { name: string }) => index.name)
       : [];
+
+    if (resolvedIndices.length) {
+      this.logger.info(`Cleaning indices: "${resolvedIndices.join(',')}"`);
+    }
 
     await Promise.all([
       ...(this.dataStreams.length

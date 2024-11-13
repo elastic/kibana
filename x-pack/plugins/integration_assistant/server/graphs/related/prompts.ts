@@ -27,7 +27,7 @@ Here are some context for you to reference for your task, read it carefully as y
 
 For each pipeline result you find matching values that would fit any of the related fields perform the follow steps:
 1. Identify which related field the value would fit in.
-2. Create a new processor object with the field value set to the correct related.field, and the value_field set to the full path of the field that contains the value which we want to append.
+2. Create a new processor object with the field value set to the correct related.field, and the value_field set to the full path of the field that contains the value which we want to append, if that path can be encoded as a string of dict key accesses.
 3. Always check if the related.ip, related.hash, related.user and related.host fields are common in the ecs context above.
 4. The value_field argument in your response consist of only one value.
 
@@ -35,6 +35,7 @@ You ALWAYS follow these guidelines when writing your response:
 <guidelines>
 - The \`message\` field may not be part of related fields.
 - You can use as many processor objects as needed to map all relevant pipeline result fields to any of the ECS related fields.
+- You can access nested dictionaries with the field.another_field syntax, but it's not possible to access elements of an array; skip them instead.
 - If no relevant fields or values are found that could be mapped confidently to any of the related fields, then respond with an empty array [] as valid JSON enclosed with 3 backticks (\`).
 - Do not respond with anything except the array of processors as a valid JSON objects enclosed with 3 backticks (\`), see example response below.
 </guidelines>
@@ -82,6 +83,7 @@ You ALWAYS follow these guidelines when writing your response:
 <guidelines>
 - The \`message\` field may not be part of related fields.
 - Never use "split" in template values, only use the field name inside the triple brackets. If the error mentions "Improperly closed variable in query-template" then check each "value" field for any special characters and remove them.
+- You can access nested dictionaries with the field.another_field syntax, but it's not possible to access elements of an array. Never use brackets in the field name, never try to access array elements.
 - If solving an error means removing the last processor in the list, then return an empty array [] as valid JSON enclosed with 3 backticks (\`).
 - Do not respond with anything except the complete updated array of processors as a valid JSON object enclosed with 3 backticks (\`), see example response below.
 </guidelines>
@@ -123,7 +125,7 @@ Please review the pipeline results and the array of current processors above, an
 
 For each pipeline result you find matching values that would fit any of the related fields perform the follow steps:
 1. Identify which related field the value would fit in.
-2. Create a new processor object with the field value set to the correct related.field, and the value_field set to the full path of the field that contains the value which we want to append.
+2. Create a new processor object with the field value set to the correct related.field, and the value_field set to the full path of the field that contains the value which we want to append. You can access fields inside nested dictionaries with the field.another_field syntax, but it's not possible to access elements of an array, so skip a field if it's path contains an array.
 3. If previous errors above is not empty, do not add any processors that would cause any of the same errors again, if you are unsure, then remove the processor from the list.
 4. If no updates are needed, then respond with the initially provided current processors.
 

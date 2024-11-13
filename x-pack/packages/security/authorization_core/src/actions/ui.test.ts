@@ -32,3 +32,15 @@ describe('#get', () => {
     expect(uiActions.get('foo', 'fooCapability', 'subFoo')).toBe('ui:foo/fooCapability/subFoo');
   });
 });
+
+test('#isValid', () => {
+  const uiActions = new UIActions();
+  expect(uiActions.isValid('ui:alpha')).toBe(true);
+  expect(uiActions.isValid('ui:beta')).toBe(true);
+
+  expect(uiActions.isValid('api:alpha')).toBe(false);
+  expect(uiActions.isValid('api:beta')).toBe(false);
+
+  expect(uiActions.isValid('ui_alpha')).toBe(false);
+  expect(uiActions.isValid('ui_beta')).toBe(false);
+});

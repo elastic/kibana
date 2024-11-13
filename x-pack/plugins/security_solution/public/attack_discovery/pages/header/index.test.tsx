@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -31,9 +32,11 @@ describe('Header', () => {
           connectorsAreConfigured={true}
           isDisabledActions={false}
           isLoading={false}
+          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
           onCancel={jest.fn()}
           onGenerate={jest.fn()}
           onConnectorIdSelected={jest.fn()}
+          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
         />
       </TestProviders>
     );
@@ -54,9 +57,11 @@ describe('Header', () => {
           connectorsAreConfigured={connectorsAreConfigured}
           isDisabledActions={false}
           isLoading={false}
+          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
           onCancel={jest.fn()}
           onGenerate={jest.fn()}
           onConnectorIdSelected={jest.fn()}
+          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
         />
       </TestProviders>
     );
@@ -77,9 +82,11 @@ describe('Header', () => {
           connectorsAreConfigured={true}
           isDisabledActions={false}
           isLoading={false}
+          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
           onCancel={jest.fn()}
           onConnectorIdSelected={jest.fn()}
           onGenerate={onGenerate}
+          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
         />
       </TestProviders>
     );
@@ -102,9 +109,11 @@ describe('Header', () => {
           connectorsAreConfigured={true}
           isDisabledActions={false}
           isLoading={isLoading}
+          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
           onCancel={jest.fn()}
           onConnectorIdSelected={jest.fn()}
           onGenerate={jest.fn()}
+          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
         />
       </TestProviders>
     );
@@ -126,9 +135,11 @@ describe('Header', () => {
           connectorsAreConfigured={true}
           isDisabledActions={false}
           isLoading={isLoading}
+          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
           onCancel={onCancel}
           onConnectorIdSelected={jest.fn()}
           onGenerate={jest.fn()}
+          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
         />
       </TestProviders>
     );
@@ -150,9 +161,11 @@ describe('Header', () => {
           connectorsAreConfigured={true}
           isDisabledActions={false}
           isLoading={false}
+          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
           onCancel={jest.fn()}
           onConnectorIdSelected={jest.fn()}
           onGenerate={jest.fn()}
+          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
         />
       </TestProviders>
     );

@@ -11,12 +11,10 @@ import type { AssetCriticalityGetPrivilegesResponse } from '../../../../../commo
 import {
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
   APP_ID,
-  ENABLE_ASSET_CRITICALITY_SETTING,
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { getUserAssetCriticalityPrivileges } from '../get_user_asset_criticality_privileges';
-import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
@@ -30,8 +28,10 @@ export const assetCriticalityInternalPrivilegesRoute = (
     .get({
       access: 'internal',
       path: ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(
@@ -46,8 +46,6 @@ export const assetCriticalityInternalPrivilegesRoute = (
       ): Promise<IKibanaResponse<AssetCriticalityGetPrivilegesResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
-
           await checkAndInitAssetCriticalityResources(context, logger);
 
           const [_, { security }] = await getStartServices();

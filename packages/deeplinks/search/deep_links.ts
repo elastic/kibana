@@ -20,6 +20,13 @@ import {
   SERVERLESS_ES_SEARCH_PLAYGROUND_ID,
   SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID,
   SEARCH_HOMEPAGE,
+  SEARCH_INDICES_START,
+  SEARCH_INDICES,
+  SEARCH_INDICES_CREATE_INDEX,
+  SEARCH_ELASTICSEARCH,
+  SEARCH_VECTOR_SEARCH,
+  SEARCH_SEMANTIC_SEARCH,
+  SEARCH_AI_SEARCH,
 } from './constants';
 
 export type EnterpriseSearchApp = typeof ENTERPRISE_SEARCH_APP_ID;
@@ -34,6 +41,12 @@ export type ConnectorsId = typeof SERVERLESS_ES_CONNECTORS_ID;
 export type SearchPlaygroundId = typeof SERVERLESS_ES_SEARCH_PLAYGROUND_ID;
 export type SearchInferenceEndpointsId = typeof SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID;
 export type SearchHomepage = typeof SEARCH_HOMEPAGE;
+export type SearchStart = typeof SEARCH_INDICES_START;
+export type SearchIndices = typeof SEARCH_INDICES;
+export type SearchElasticsearch = typeof SEARCH_ELASTICSEARCH;
+export type SearchVectorSearch = typeof SEARCH_VECTOR_SEARCH;
+export type SearchSemanticSearch = typeof SEARCH_SEMANTIC_SEARCH;
+export type SearchAISearch = typeof SEARCH_AI_SEARCH;
 
 export type ContentLinkId = 'searchIndices' | 'connectors' | 'webCrawlers';
 
@@ -42,6 +55,8 @@ export type ApplicationsLinkId = 'searchApplications' | 'playground';
 export type AppsearchLinkId = 'engines';
 
 export type RelevanceLinkId = 'inferenceEndpoints';
+
+export type SearchIndicesLinkId = typeof SEARCH_INDICES_CREATE_INDEX;
 
 export type DeepLinkId =
   | EnterpriseSearchApp
@@ -59,4 +74,11 @@ export type DeepLinkId =
   | `${EnterpriseSearchContentApp}:${ContentLinkId}`
   | `${EnterpriseSearchApplicationsApp}:${ApplicationsLinkId}`
   | `${EnterpriseSearchAppsearchApp}:${AppsearchLinkId}`
-  | `${EnterpriseSearchRelevanceApp}:${RelevanceLinkId}`;
+  | `${EnterpriseSearchRelevanceApp}:${RelevanceLinkId}`
+  | SearchStart
+  | SearchIndices
+  | SearchElasticsearch
+  | SearchVectorSearch
+  | SearchSemanticSearch
+  | SearchAISearch
+  | `${SearchIndices}:${SearchIndicesLinkId}`;

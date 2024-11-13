@@ -15,9 +15,10 @@ jest.mock('./use_load_connectors', () => ({
 }));
 
 const mockConnectors = [
-  { id: 'connectorId1', title: 'OpenAI Connector', type: LLMs.openai },
-  { id: 'connectorId2', title: 'OpenAI Azure Connector', type: LLMs.openai_azure },
-  { id: 'connectorId2', title: 'Bedrock Connector', type: LLMs.bedrock },
+  { id: 'connectorId1', name: 'OpenAI Connector', type: LLMs.openai },
+  { id: 'connectorId2', name: 'OpenAI Azure Connector', type: LLMs.openai_azure },
+  { id: 'connectorId2', name: 'Bedrock Connector', type: LLMs.bedrock },
+  { id: 'connectorId3', name: 'OpenAI OSS Model Connector', type: LLMs.openai_other },
 ];
 const mockUseLoadConnectors = (data: any) => {
   (useLoadConnectors as jest.Mock).mockReturnValue({ data });
@@ -36,19 +37,7 @@ describe('useLLMsModels Hook', () => {
     expect(result.current).toEqual([
       {
         connectorId: 'connectorId1',
-        connectorName: undefined,
-        connectorType: LLMs.openai,
-        disabled: false,
-        icon: expect.any(Function),
-        id: 'connectorId1OpenAI GPT-3.5 Turbo ',
-        name: 'OpenAI GPT-3.5 Turbo ',
-        showConnectorName: false,
-        value: 'gpt-3.5-turbo',
-        promptTokenLimit: 16385,
-      },
-      {
-        connectorId: 'connectorId1',
-        connectorName: undefined,
+        connectorName: 'OpenAI Connector',
         connectorType: LLMs.openai,
         disabled: false,
         icon: expect.any(Function),
@@ -60,7 +49,7 @@ describe('useLLMsModels Hook', () => {
       },
       {
         connectorId: 'connectorId1',
-        connectorName: undefined,
+        connectorName: 'OpenAI Connector',
         connectorType: LLMs.openai,
         disabled: false,
         icon: expect.any(Function),
@@ -71,20 +60,32 @@ describe('useLLMsModels Hook', () => {
         promptTokenLimit: 128000,
       },
       {
+        connectorId: 'connectorId1',
+        connectorName: 'OpenAI Connector',
+        connectorType: LLMs.openai,
+        disabled: false,
+        icon: expect.any(Function),
+        id: 'connectorId1OpenAI GPT-3.5 Turbo ',
+        name: 'OpenAI GPT-3.5 Turbo ',
+        showConnectorName: false,
+        value: 'gpt-3.5-turbo',
+        promptTokenLimit: 16385,
+      },
+      {
         connectorId: 'connectorId2',
-        connectorName: undefined,
+        connectorName: 'OpenAI Azure Connector',
         connectorType: LLMs.openai_azure,
         disabled: false,
         icon: expect.any(Function),
-        id: 'connectorId2Azure OpenAI ',
-        name: 'Azure OpenAI ',
+        id: 'connectorId2OpenAI Azure Connector (Azure OpenAI)',
+        name: 'OpenAI Azure Connector (Azure OpenAI)',
         showConnectorName: false,
         value: undefined,
         promptTokenLimit: undefined,
       },
       {
         connectorId: 'connectorId2',
-        connectorName: undefined,
+        connectorName: 'Bedrock Connector',
         connectorType: LLMs.bedrock,
         disabled: false,
         icon: expect.any(Function),
@@ -96,7 +97,7 @@ describe('useLLMsModels Hook', () => {
       },
       {
         connectorId: 'connectorId2',
-        connectorName: undefined,
+        connectorName: 'Bedrock Connector',
         connectorType: LLMs.bedrock,
         disabled: false,
         icon: expect.any(Function),
@@ -105,6 +106,18 @@ describe('useLLMsModels Hook', () => {
         showConnectorName: false,
         value: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
         promptTokenLimit: 200000,
+      },
+      {
+        connectorId: 'connectorId3',
+        connectorName: 'OpenAI OSS Model Connector',
+        connectorType: LLMs.openai_other,
+        disabled: false,
+        icon: expect.any(Function),
+        id: 'connectorId3OpenAI OSS Model Connector (OpenAI Compatible Service)',
+        name: 'OpenAI OSS Model Connector (OpenAI Compatible Service)',
+        showConnectorName: false,
+        value: undefined,
+        promptTokenLimit: undefined,
       },
     ]);
   });

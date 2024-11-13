@@ -12,12 +12,13 @@ import type {
   RuleCreateProps,
   RulePreviewResponse,
 } from '../../../../../common/api/detection_engine';
-
+import { useKibana } from '../../../../common/lib/kibana';
 import { previewRule } from '../../../rule_management/api/api';
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
 import * as i18n from './translations';
+import { PreviewRuleEventTypes } from '../../../../common/lib/telemetry';
 
 const emptyPreviewRule: RulePreviewResponse = {
   previewId: undefined,
@@ -37,6 +38,7 @@ export const usePreviewRule = ({
   const [isLoading, setIsLoading] = useState(false);
   const { addError } = useAppToasts();
   const { invocationCount, interval, from } = usePreviewInvocationCount({ timeframeOptions });
+  const { telemetry } = useKibana().services;
 
   const timeframeEnd = useMemo(
     () => timeframeOptions.timeframeEnd.toISOString(),
@@ -57,6 +59,10 @@ export const usePreviewRule = ({
     const createPreviewId = async () => {
       if (rule != null) {
         try {
+          telemetry.reportEvent(PreviewRuleEventTypes.PreviewRule, {
+            loggedRequestsEnabled: enableLoggedRequests ?? false,
+            ruleType: rule.type,
+          });
           setIsLoading(true);
           const previewRuleResponse = await previewRule({
             rule: {
@@ -90,7 +96,16 @@ export const usePreviewRule = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, addError, invocationCount, from, interval, timeframeEnd, enableLoggedRequests]);
+  }, [
+    rule,
+    addError,
+    invocationCount,
+    from,
+    interval,
+    timeframeEnd,
+    enableLoggedRequests,
+    telemetry,
+  ]);
 
   return { isLoading, response, rule, setRule };
 };

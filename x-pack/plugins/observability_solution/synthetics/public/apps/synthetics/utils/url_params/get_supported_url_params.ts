@@ -34,6 +34,7 @@ export interface SyntheticsUrlParams {
   groupOrderBy?: MonitorOverviewState['groupBy']['order'];
   packagePolicyId?: string;
   cloneId?: string;
+  spaceId?: string;
 }
 
 const { ABSOLUTE_DATE_RANGE_START, ABSOLUTE_DATE_RANGE_END, SEARCH, FILTERS, STATUS_FILTER } =
@@ -89,6 +90,7 @@ export const getSupportedUrlParams = (params: {
     groupBy,
     groupOrderBy,
     packagePolicyId,
+    spaceId,
   } = filteredParams;
 
   return {
@@ -120,6 +122,7 @@ export const getSupportedUrlParams = (params: {
     schedules: parseFilters(schedules),
     locationId: locationId || undefined,
     cloneId: filteredParams.cloneId,
+    spaceId: spaceId || undefined,
   };
 };
 

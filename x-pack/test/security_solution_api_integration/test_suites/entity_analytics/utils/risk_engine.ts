@@ -331,6 +331,40 @@ export const waitForRiskEngineTaskToBeGone = async ({
   );
 };
 
+export const waitForSavedObjectToBeGone = async ({
+  log,
+  kibanaServer,
+}: {
+  log: ToolingLog;
+  kibanaServer: KbnClient;
+}): Promise<void> => {
+  await waitFor(
+    async () => {
+      const savedObject = await getRiskEngineConfigSO({ kibanaServer });
+      return savedObject == null;
+    },
+    'waitForSavedObjectToBeGone',
+    log
+  );
+};
+
+export const waitForRiskScoresToBeGone = async ({
+  es,
+  log,
+}: {
+  es: Client;
+  log: ToolingLog;
+}): Promise<void> => {
+  await waitFor(
+    async () => {
+      const riskScoreIndicesEmpty = await areRiskScoreIndicesEmpty({ es, log });
+      return riskScoreIndicesEmpty;
+    },
+    'waitForRiskScoreIndicesToBeEmpty',
+    log
+  );
+};
+
 export const getRiskEngineConfigSO = async ({ kibanaServer }: { kibanaServer: KbnClient }) => {
   const soResponse = await kibanaServer.savedObjects.find({
     type: riskEngineConfigurationTypeName,

@@ -186,7 +186,6 @@ export const getDestinationMap = ({
         },
         size: destinationsBySpanId.size,
         fields: asMutableArray([SERVICE_NAME, SERVICE_ENVIRONMENT, AGENT_NAME, PARENT_ID] as const),
-        _source: false,
       },
     });
 

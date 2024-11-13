@@ -29,7 +29,7 @@ export const DatafeedPreview: FC<{
   const {
     jobs: { datafeedPreview },
   } = useMlApi();
-  // the ace editor requires a fixed height
+  // the editor requires a fixed height
   const editorHeight = useMemo(
     () => `${window.innerHeight - 230 - heightOffset}px`,
     [heightOffset]

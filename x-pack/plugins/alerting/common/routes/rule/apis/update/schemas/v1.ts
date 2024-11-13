@@ -6,9 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ruleParamsSchemaWithDefaultValueV1 } from '@kbn/response-ops-rule-params';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
 import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
+import { flappingSchemaV1 } from '../../../common';
 
 export const actionFrequencySchema = schema.object({
   summary: schema.boolean({
@@ -151,13 +153,11 @@ export const updateBodySchema = schema.object({
       })
     )
   ),
-  params: schema.recordOf(schema.string(), schema.any(), {
-    defaultValue: {},
-    meta: { description: 'The parameters for the rule.' },
-  }),
+  params: ruleParamsSchemaWithDefaultValueV1,
   actions: schema.arrayOf(actionSchema, { defaultValue: [] }),
   notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
   alert_delay: schema.maybe(alertDelaySchemaV1),
+  flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
 });
 
 export const updateParamsSchema = schema.object({

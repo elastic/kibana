@@ -23,7 +23,7 @@
     {
       "key": "cypress/security_serverless_explore",
       "name": "[Serverless] Security Solution Explore - Cypress"
-    },   
+    },
     {
       "key": "cypress/security_solution_rule_management",
       "name": "Security Solution Rule Management - Cypress"
@@ -87,6 +87,18 @@
     {
       "key": "cypress/apm_cypress",
       "name": "APM - Cypress"
+    },
+    {
+      "key": "cypress/inventory_cypress",
+      "name": "Inventory - Cypress"
+    },
+    {
+      "key": "cypress/cloud_security_posture",
+      "name": "Cloud Security Posture - Cypress"
+    },
+    {
+      "key": "cypress/cloud_security_posture_serverless",
+      "name": "[Serverless] Cloud Security Posture - Cypress"
     }
   ]
 }

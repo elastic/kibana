@@ -10,7 +10,8 @@ import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
 import { combineLatest, debounceTime, skipWhile, startWith, switchMap } from 'rxjs';
-import { DashboardContainer, DashboardCreationOptions } from '../..';
+import { DashboardContainer } from '../..';
+import { DashboardCreationOptions } from '../../..';
 import { DashboardContainerInput } from '../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
 import {

@@ -46,8 +46,6 @@ export default function ({ getService }: FtrProviderContext) {
     let icmpProjectMonitors: ProjectMonitorsRequest;
 
     let testPolicyId = '';
-    const testPolicyName = 'Fleet test server policy' + Date.now();
-
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
       return {
         ...request,
@@ -87,9 +85,8 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       await testPrivateLocations.installSyntheticsPackage();
 
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
-      testPolicyId = apiResponse.body.item.id;
-      await testPrivateLocations.setTestLocations([testPolicyId]);
+      const loc = await testPrivateLocations.addPrivateLocation();
+      testPolicyId = loc.id;
       await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
@@ -1814,7 +1811,10 @@ export default function ({ getService }: FtrProviderContext) {
           projectMonitors.monitors.map((monitor) => {
             return supertest
               .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-              .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}` })
+              .query({
+                filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}`,
+                internal: true,
+              })
               .set('kbn-xsrf', 'true')
               .expect(200);
           })

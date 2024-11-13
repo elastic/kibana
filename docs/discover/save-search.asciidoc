@@ -43,7 +43,7 @@ used for the saved search is also automatically selected.
 [float]
 === Add search results to a dashboard
 
-. Open the main menu, and then click *Dashboard*.
+. Go to *Dashboards*.
 . Open or create the dashboard, then click *Edit*.
 . Click *Add from library*.
 . From the *Types* dropdown, select *Saved search*.

@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export type QueryLanguageType = 'lucene' | 'kuery';
 
@@ -41,5 +41,5 @@ export interface AlertsSearchBarProps {
   http: HttpStart;
   toasts: ToastsStart;
   unifiedSearchBar: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
-  dataViewsService: DataViewsContract;
+  dataService: DataPublicPluginStart;
 }

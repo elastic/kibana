@@ -192,7 +192,7 @@ export async function deleteEnrollmentApiKeyForAgentPolicyId(
     const { items } = await listEnrollmentApiKeys(esClient, {
       page: page++,
       perPage: 100,
-      kuery: `policy_id:${agentPolicyId}`,
+      kuery: `policy_id:"${agentPolicyId}"`,
     });
 
     if (items.length === 0) {

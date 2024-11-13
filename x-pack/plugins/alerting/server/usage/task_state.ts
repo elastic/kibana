@@ -14,6 +14,112 @@ import { schema, TypeOf } from '@kbn/config-schema';
  * As you add a new schema version, don't forget to change latestTaskStateSchema variable to reference the latest schema.
  * For example, changing stateSchemaByVersion[1].schema to stateSchemaByVersion[2].schema.
  */
+
+const stateSchemaV1 = schema.object({
+  has_errors: schema.boolean(),
+  error_messages: schema.maybe(schema.arrayOf(schema.any())),
+  runs: schema.number(),
+  count_total: schema.number(),
+  count_by_type: schema.recordOf(schema.string(), schema.number()),
+  throttle_time: schema.object({
+    min: schema.string(),
+    avg: schema.string(),
+    max: schema.string(),
+  }),
+  schedule_time: schema.object({
+    min: schema.string(),
+    avg: schema.string(),
+    max: schema.string(),
+  }),
+  throttle_time_number_s: schema.object({
+    min: schema.number(),
+    avg: schema.number(),
+    max: schema.number(),
+  }),
+  schedule_time_number_s: schema.object({
+    min: schema.number(),
+    avg: schema.number(),
+    max: schema.number(),
+  }),
+  connectors_per_alert: schema.object({
+    min: schema.number(),
+    avg: schema.number(),
+    max: schema.number(),
+  }),
+  count_active_by_type: schema.recordOf(schema.string(), schema.number()),
+  count_active_total: schema.number(),
+  count_disabled_total: schema.number(),
+  count_rules_by_execution_status: schema.object({
+    success: schema.number(),
+    error: schema.number(),
+    warning: schema.number(),
+  }),
+  count_rules_with_tags: schema.number(),
+  count_rules_by_notify_when: schema.object({
+    on_action_group_change: schema.number(),
+    on_active_alert: schema.number(),
+    on_throttle_interval: schema.number(),
+  }),
+  count_rules_snoozed: schema.number(),
+  count_rules_muted: schema.number(),
+  count_rules_with_muted_alerts: schema.number(),
+  count_connector_types_by_consumers: schema.recordOf(
+    schema.string(),
+    schema.recordOf(schema.string(), schema.number())
+  ),
+  count_rules_namespaces: schema.number(),
+  count_rules_executions_per_day: schema.number(),
+  count_rules_executions_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
+  count_rules_executions_failured_per_day: schema.number(),
+  count_rules_executions_failured_by_reason_per_day: schema.recordOf(
+    schema.string(),
+    schema.number()
+  ),
+  count_rules_executions_failured_by_reason_by_type_per_day: schema.recordOf(
+    schema.string(),
+    schema.recordOf(schema.string(), schema.number())
+  ),
+  count_rules_by_execution_status_per_day: schema.recordOf(schema.string(), schema.number()),
+  count_rules_executions_timeouts_per_day: schema.number(),
+  count_rules_executions_timeouts_by_type_per_day: schema.recordOf(
+    schema.string(),
+    schema.number()
+  ),
+  count_failed_and_unrecognized_rule_tasks_per_day: schema.number(),
+  count_failed_and_unrecognized_rule_tasks_by_status_per_day: schema.recordOf(
+    schema.string(),
+    schema.number()
+  ),
+  count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: schema.recordOf(
+    schema.string(),
+    schema.recordOf(schema.string(), schema.number())
+  ),
+  avg_execution_time_per_day: schema.number(),
+  avg_execution_time_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
+  avg_es_search_duration_per_day: schema.number(),
+  avg_es_search_duration_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
+  avg_total_search_duration_per_day: schema.number(),
+  avg_total_search_duration_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
+  percentile_num_generated_actions_per_day: schema.recordOf(schema.string(), schema.number()),
+  percentile_num_generated_actions_by_type_per_day: schema.recordOf(
+    schema.string(),
+    schema.recordOf(schema.string(), schema.number())
+  ),
+  percentile_num_alerts_per_day: schema.recordOf(schema.string(), schema.number()),
+  percentile_num_alerts_by_type_per_day: schema.recordOf(
+    schema.string(),
+    schema.recordOf(schema.string(), schema.number())
+  ),
+});
+
+const stateSchemaV2 = stateSchemaV1.extends({
+  count_mw_total: schema.number(),
+  count_mw_with_repeat_toggle_on: schema.number(),
+  count_mw_with_filter_alert_toggle_on: schema.number(),
+  count_alerts_total: schema.number(),
+  count_alerts_by_rule_type: schema.recordOf(schema.string(), schema.number()),
+});
+
 export const stateSchemaByVersion = {
   1: {
     // A task that was created < 8.10 will go through this "up" migration
@@ -99,111 +205,22 @@ export const stateSchemaByVersion = {
       percentile_num_alerts_per_day: state.percentile_num_alerts_per_day || {},
       percentile_num_alerts_by_type_per_day: state.percentile_num_alerts_by_type_per_day || {},
     }),
-    schema: schema.object({
-      has_errors: schema.boolean(),
-      error_messages: schema.maybe(schema.arrayOf(schema.any())),
-      runs: schema.number(),
-      count_total: schema.number(),
-      count_by_type: schema.recordOf(schema.string(), schema.number()),
-      throttle_time: schema.object({
-        min: schema.string(),
-        avg: schema.string(),
-        max: schema.string(),
-      }),
-      schedule_time: schema.object({
-        min: schema.string(),
-        avg: schema.string(),
-        max: schema.string(),
-      }),
-      throttle_time_number_s: schema.object({
-        min: schema.number(),
-        avg: schema.number(),
-        max: schema.number(),
-      }),
-      schedule_time_number_s: schema.object({
-        min: schema.number(),
-        avg: schema.number(),
-        max: schema.number(),
-      }),
-      connectors_per_alert: schema.object({
-        min: schema.number(),
-        avg: schema.number(),
-        max: schema.number(),
-      }),
-      count_active_by_type: schema.recordOf(schema.string(), schema.number()),
-      count_active_total: schema.number(),
-      count_disabled_total: schema.number(),
-      count_rules_by_execution_status: schema.object({
-        success: schema.number(),
-        error: schema.number(),
-        warning: schema.number(),
-      }),
-      count_rules_with_tags: schema.number(),
-      count_rules_by_notify_when: schema.object({
-        on_action_group_change: schema.number(),
-        on_active_alert: schema.number(),
-        on_throttle_interval: schema.number(),
-      }),
-      count_rules_snoozed: schema.number(),
-      count_rules_muted: schema.number(),
-      count_mw_total: schema.number(),
-      count_mw_with_repeat_toggle_on: schema.number(),
-      count_mw_with_filter_alert_toggle_on: schema.number(),
-      count_rules_with_muted_alerts: schema.number(),
-      count_connector_types_by_consumers: schema.recordOf(
-        schema.string(),
-        schema.recordOf(schema.string(), schema.number())
-      ),
-      count_rules_namespaces: schema.number(),
-      count_rules_executions_per_day: schema.number(),
-      count_rules_executions_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-      count_rules_executions_failured_per_day: schema.number(),
-      count_rules_executions_failured_by_reason_per_day: schema.recordOf(
-        schema.string(),
-        schema.number()
-      ),
-      count_rules_executions_failured_by_reason_by_type_per_day: schema.recordOf(
-        schema.string(),
-        schema.recordOf(schema.string(), schema.number())
-      ),
-      count_rules_by_execution_status_per_day: schema.recordOf(schema.string(), schema.number()),
-      count_rules_executions_timeouts_per_day: schema.number(),
-      count_rules_executions_timeouts_by_type_per_day: schema.recordOf(
-        schema.string(),
-        schema.number()
-      ),
-      count_failed_and_unrecognized_rule_tasks_per_day: schema.number(),
-      count_failed_and_unrecognized_rule_tasks_by_status_per_day: schema.recordOf(
-        schema.string(),
-        schema.number()
-      ),
-      count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: schema.recordOf(
-        schema.string(),
-        schema.recordOf(schema.string(), schema.number())
-      ),
-      avg_execution_time_per_day: schema.number(),
-      avg_execution_time_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-      avg_es_search_duration_per_day: schema.number(),
-      avg_es_search_duration_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-      avg_total_search_duration_per_day: schema.number(),
-      avg_total_search_duration_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-      percentile_num_generated_actions_per_day: schema.recordOf(schema.string(), schema.number()),
-      percentile_num_generated_actions_by_type_per_day: schema.recordOf(
-        schema.string(),
-        schema.recordOf(schema.string(), schema.number())
-      ),
-      percentile_num_alerts_per_day: schema.recordOf(schema.string(), schema.number()),
-      percentile_num_alerts_by_type_per_day: schema.recordOf(
-        schema.string(),
-        schema.recordOf(schema.string(), schema.number())
-      ),
-      count_alerts_total: schema.number(),
-      count_alerts_by_rule_type: schema.recordOf(schema.string(), schema.number()),
+    schema: stateSchemaV1,
+  },
+  2: {
+    up: (state: Record<string, unknown>) => ({
+      ...stateSchemaByVersion[1].up(state),
+      count_mw_total: state.count_mw_total || 0,
+      count_mw_with_repeat_toggle_on: state.count_mw_with_repeat_toggle_on || 0,
+      count_mw_with_filter_alert_toggle_on: state.count_mw_with_filter_alert_toggle_on || 0,
+      count_alerts_total: state.count_alerts_total || 0,
+      count_alerts_by_rule_type: state.count_alerts_by_rule_type || {},
     }),
+    schema: stateSchemaV2,
   },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[1].schema;
+const latestTaskStateSchema = stateSchemaByVersion[2].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
