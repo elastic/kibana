@@ -19,8 +19,8 @@ GeoJSON is the most commonly used and flexible option.
 Follow these instructions to upload a GeoJSON data file, or try the
 <<indexing-geojson-data-tutorial, end-to-end integrated example>>.
 
-. Open the main menu, click *Maps*, and then click *Add layer*.
-. Click *Uploaded GeoJSON*.
+. Go to *Maps*, and select *Add layer*.
+. Select *Uploaded GeoJSON*.
 +
 [role="screenshot"]
 image::maps/images/fu_gs_select_source_file_upload.png[]

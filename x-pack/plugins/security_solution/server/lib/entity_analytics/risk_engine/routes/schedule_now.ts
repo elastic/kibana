@@ -27,8 +27,10 @@ export const riskEngineScheduleNowRoute = (
     .post({
       access: 'public',
       path: RISK_ENGINE_SCHEDULE_NOW_URL,
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(
