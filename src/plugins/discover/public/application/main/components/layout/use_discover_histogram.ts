@@ -45,6 +45,10 @@ import type { DiscoverAppState } from '../../state_management/discover_app_state
 import { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import {
+  getDebouncedHistogramProps,
+  clearDebouncedHistogramProps,
+} from './get_debounced_histogram_props';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
@@ -381,7 +385,13 @@ export const useDiscoverHistogram = ({
     [stateContainer]
   );
 
-  return {
+  useEffect(() => {
+    return () => {
+      clearDebouncedHistogramProps();
+    };
+  }, []);
+
+  return getDebouncedHistogramProps({
     ref,
     getCreationOptions,
     services,
@@ -402,7 +412,7 @@ export const useDiscoverHistogram = ({
         ? savedSearchState?.visContext
         : undefined,
     onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
-  };
+  });
 };
 
 // Use pairwise to diff the previous and current state (starting with undefined to ensure
