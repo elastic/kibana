@@ -38,8 +38,7 @@ export const registerAlertsRoute = (
         version: '1',
         security: {
           authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
+            requiredPrivileges: ['securitySolution'],
           },
         },
         validate: {
