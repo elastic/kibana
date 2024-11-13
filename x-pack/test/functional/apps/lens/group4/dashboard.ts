@@ -61,7 +61,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.filterEmbeddableNames('Artistpreviouslyknownaslens');
       await find.clickByButtonText('Artistpreviouslyknownaslens');
       await dashboardAddPanel.closeAddPanel();
-      await lens.goToTimeRange();
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
     });
 
@@ -72,7 +71,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
-      await lens.goToTimeRange();
       await retry.try(async () => {
         await clickInChart(30, 5); // hardcoded position of bar, depends heavy on data and charts implementation
         await testSubjects.existOrFail('applyFiltersPopoverButton', { timeout: 2500 });
@@ -98,7 +96,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
-      await lens.goToTimeRange();
       await retry.try(async () => {
         // show the tooltip actions
         await rightClickInChart(30, 5); // hardcoded position of bar, depends heavy on data and charts implementation
@@ -122,7 +119,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
-      await lens.goToTimeRange();
       await dashboard.saveDashboard('lnsDrilldown');
 
       await panelActions.expectMissingPanelAction(
@@ -139,7 +135,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.clickByButtonText('lnsPieVis');
       await dashboardAddPanel.closeAddPanel();
 
-      await lens.goToTimeRange();
       await clickInChart(5, 5); // hardcoded position of the slice, depends heavy on data and charts implementation
 
       await lens.assertExactText(
@@ -189,7 +184,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickCreateNewLink();
       await header.waitUntilLoadingHasFinished();
-      await lens.goToTimeRange();
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
@@ -251,7 +245,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardAddPanel.clickCreateNewLink();
       await header.waitUntilLoadingHasFinished();
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -282,7 +275,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
-      await lens.goToTimeRange();
       // type an invalid search query, hit refresh
       await queryBar.setQuery('this is > not valid');
       await queryBar.submitQuery();
