@@ -9,6 +9,7 @@ import path from 'path';
 import { Worker } from 'worker_threads';
 import { CelValidationWorkerOutOfMemoryError } from './errors';
 import { ValidateCelRequest, ValidateCelResponse, ValidateCelResponseType } from './worker';
+import { PackageInfo } from '@kbn/config';
 
 export class CelValidator {
   private worker?: Worker;
@@ -40,7 +41,9 @@ export class CelValidator {
    */
   protected workerMaxYoungHeapSizeMb: number | undefined = undefined;
 
-  constructor(dist: boolean) {
+  constructor(
+    { dist }: PackageInfo,
+  ) { // Read dist from PackageInfo
     // running in dist: `worker.ts` becomes `worker.js`
     // running in source: `worker_src_harness.ts` needs to be wrapped in JS and have a ts-node environment initialized.
     this.workerModulePath = path.resolve(
@@ -69,6 +72,7 @@ export class CelValidator {
   public async validate(inputProgram: string): Promise<string> {
     if (this.worker) throw new Error('CEL validation already in progress..!');
 
+    console.log("Main thread start: ", process.memoryUsage());
     console.log(`Creating worker for validating CEL program`);
 
     try {
@@ -111,6 +115,7 @@ export class CelValidator {
       });
     } finally {
       await this.cleanupWorker(); // Cleanup worker after validation and on errors
+      console.log("Main thread end: ", process.memoryUsage());
     }
   }
 }

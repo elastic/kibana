@@ -13,9 +13,8 @@ import { parentPort, isMainThread } from 'worker_threads';
 declare global {
   export function formatCelProgram(input: string): { Format: string; Err?: string };
   export function stopFormatCelProgram(): void;
+  var process: NodeJS.Process;
 }
-
-let myParentPort: MessagePort;
 
 export interface ValidateCelRequest {
   data: { inputProgram: string };
@@ -57,13 +56,14 @@ export type ValidateCelResponse =
   | ValidateCelErrorResponse;
 
 if (!isMainThread) {
+  console.log("Initializing worker", process.memoryUsage());
   if (parentPort) {
     parentPort.on('message', execute);
   }
 }
 
 async function execute({ data: { inputProgram } }: ValidateCelRequest) {
-  console.log('Calling ValidateCel in Worker');
+  console.log('Calling ValidateCel in Worker', process.memoryUsage());
   const wasmPath = path.join(__dirname, 'wasm');
   const file = fs.readFileSync(path.join(wasmPath, 'celformat.wasm'));
   // @ts-expect-error
@@ -73,39 +73,45 @@ async function execute({ data: { inputProgram } }: ValidateCelRequest) {
     const result = await WebAssembly.instantiate(file, goWasm.importObject);
     const wasm = result.instance;
     goWasm.run(wasm);
+    console.log("WASM loaded",  process.memoryUsage());
     value = global.formatCelProgram(inputProgram);
-
-    if (value === undefined) {
-      const errorResponse: ValidateCelResponse = {
-        type: ValidateCelResponseType.Error,
-        error: 'Failed to format CEL Program',
-      };
-      if (parentPort) {
-        parentPort.postMessage(errorResponse);
-      }
-    }
-
-    if (value.Err) {
-      const errorResponse: ValidateCelResponse = {
-        type: ValidateCelResponseType.Error,
-        error: value.Err,
-      };
-      if (parentPort) {
-        parentPort.postMessage(errorResponse);
-      }
-    } else {
-      const successResponse: ValidateCelResponse = {
-        type: ValidateCelResponseType.Data,
-        data: {
-          formattedProgram: value.Format,
-        },
-      };
-      console.log('Worker: Posting message back to main script');
-      if (parentPort) {
-        parentPort.postMessage(successResponse);
-      }
-    }
+    console.log("Validation in WASM executed: ", process.memoryUsage());
+    
   } finally {
+    console.log("Stopping WASM", process.memoryUsage());
     global.stopFormatCelProgram();
+    console.log("Stopped WASM", process.memoryUsage());
+  }
+
+  if (value === undefined) {
+    const errorResponse: ValidateCelResponse = {
+      type: ValidateCelResponseType.Error,
+      error: 'Failed to format CEL Program',
+    };
+    if (parentPort) {
+      parentPort.postMessage(errorResponse);
+    }
+  }
+
+  if (value.Err) {
+    const errorResponse: ValidateCelResponse = {
+      type: ValidateCelResponseType.Error,
+      error: value.Err,
+    };
+    if (parentPort) {
+      parentPort.postMessage(errorResponse);
+    }
+  } else {
+    const successResponse: ValidateCelResponse = {
+      type: ValidateCelResponseType.Data,
+      data: {
+        formattedProgram: value.Format,
+      },
+    };
+    console.log('Worker: Posting message back to main script');
+    console.log("Done with validation", process.memoryUsage());
+    if (parentPort) {
+      parentPort.postMessage(successResponse);
+    }
   }
 }

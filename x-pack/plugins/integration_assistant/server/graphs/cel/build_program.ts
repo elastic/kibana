@@ -27,9 +27,8 @@ export async function handleBuildProgram({
     ex_answer: EX_ANSWER_PROGRAM,
   });
 
-  const validator = new CelValidator(false);
+  const validator = new CelValidator(state.packageInfo);
   const validated = await validator.validate(program.trim());
-  console.log(validated);
   return {
     currentProgram: validated.trim(),
     lastExecutedChain: 'buildCelProgram',

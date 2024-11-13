@@ -13,6 +13,7 @@ import {
 } from '@kbn/langchain/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { ESProcessorItem, SamplesFormat } from '../common';
+import { PackageInfo } from '@kbn/config';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
@@ -77,7 +78,7 @@ export interface CelInputState {
   stateSettings: object;
   redactVars: string[];
   results: object;
-  packageInfo: object;
+  packageInfo: PackageInfo;
 }
 
 export interface EcsMappingState {
