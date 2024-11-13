@@ -29,7 +29,9 @@ export const getTrimmedQuery = (queryString: string) => {
 
 const sortDates = (date1?: string, date2?: string) => {
   if (!date1 || !date2) return 0;
-  return date1 < date2 ? 1 : date1 > date2 ? -1 : 0;
+  const dateA = new Date(date1).toISOString();
+  const dateB = new Date(date2).toISOString();
+  return dateA < dateB ? 1 : dateA > dateB ? -1 : 0;
 };
 
 export const getHistoryItems = (sortDirection: 'desc' | 'asc'): QueryHistoryItem[] => {
