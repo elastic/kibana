@@ -13,6 +13,7 @@ import type OpenAI from 'openai';
 import { Subject } from 'rxjs';
 import { EventEmitter, PassThrough, type Readable } from 'stream';
 import { finished } from 'stream/promises';
+import type { InferenceClient } from '@kbn/inference-plugin/server';
 import { ObservabilityAIAssistantClient } from '.';
 import { MessageRole, type Message } from '../../../common';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
@@ -94,6 +95,10 @@ describe('Observability AI Assistant client', () => {
   const actionsClientMock: DeeplyMockedKeys<ActionsClient> = {
     execute: jest.fn(),
     get: jest.fn(),
+  } as any;
+
+  const inferenceClientMock: DeeplyMockedKeys<InferenceClient> = {
+    chatComplete: jest.fn(),
   } as any;
 
   const uiSettingsClientMock: DeeplyMockedKeys<IUiSettingsClient> = {
@@ -187,6 +192,7 @@ describe('Observability AI Assistant client', () => {
         asInternalUser: internalUserEsClientMock,
         asCurrentUser: currentUserEsClientMock,
       },
+      inferenceClient: inferenceClientMock,
       knowledgeBaseService: knowledgeBaseServiceMock,
       logger: loggerMock,
       namespace: 'default',

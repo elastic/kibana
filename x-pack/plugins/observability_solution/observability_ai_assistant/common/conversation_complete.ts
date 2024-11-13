@@ -10,6 +10,7 @@ import { TokenCount as TokenCountType, type Message } from './types';
 
 export enum StreamingChatResponseEventType {
   ChatCompletionChunk = 'chatCompletionChunk',
+  ChatCompletionMessage = 'chatCompletionMessage',
   ConversationCreate = 'conversationCreate',
   ConversationUpdate = 'conversationUpdate',
   MessageAdd = 'messageAdd',
@@ -25,19 +26,26 @@ type StreamingChatResponseEventBase<
   type: TEventType;
 } & TData;
 
-export type ChatCompletionChunkEvent = StreamingChatResponseEventBase<
-  StreamingChatResponseEventType.ChatCompletionChunk,
-  {
-    id: string;
-    message: {
-      content?: string;
-      function_call?: {
-        name?: string;
-        arguments?: string;
+type BaseChatCompletionEvent<TType extends StreamingChatResponseEventType> =
+  StreamingChatResponseEventBase<
+    TType,
+    {
+      id: string;
+      message: {
+        content?: string;
+        function_call?: {
+          name?: string;
+          arguments?: string;
+        };
       };
-    };
-  }
->;
+    }
+  >;
+
+export type ChatCompletionChunkEvent =
+  BaseChatCompletionEvent<StreamingChatResponseEventType.ChatCompletionChunk>;
+
+export type ChatCompletionMessageEvent =
+  BaseChatCompletionEvent<StreamingChatResponseEventType.ChatCompletionMessage>;
 
 export type ConversationCreateEvent = StreamingChatResponseEventBase<
   StreamingChatResponseEventType.ConversationCreate,
@@ -100,6 +108,7 @@ export type TokenCountEvent = StreamingChatResponseEventBase<
 
 export type StreamingChatResponseEvent =
   | ChatCompletionChunkEvent
+  | ChatCompletionMessageEvent
   | ConversationCreateEvent
   | ConversationUpdateEvent
   | MessageAddEvent
@@ -112,7 +121,7 @@ export type StreamingChatResponseEventWithoutError = Exclude<
   ChatCompletionErrorEvent
 >;
 
-export type ChatEvent = ChatCompletionChunkEvent | TokenCountEvent;
+export type ChatEvent = ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent;
 export type MessageOrChatEvent = ChatEvent | MessageAddEvent;
 
 export enum ChatCompletionErrorCode {

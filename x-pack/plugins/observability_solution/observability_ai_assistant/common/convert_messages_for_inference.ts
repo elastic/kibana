@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   AssistantMessage,
   Message as InferenceMessage,
   MessageRole as InferenceMessageRole,
 } from '@kbn/inference-common';
 import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
+import { Message, MessageRole } from '.';
 
 export function convertMessagesForInference(messages: Message[]): InferenceMessage[] {
   const inferenceMessages: InferenceMessage[] = [];

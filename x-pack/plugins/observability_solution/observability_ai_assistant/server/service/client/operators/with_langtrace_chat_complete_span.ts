@@ -86,13 +86,15 @@ export function withLangtraceChatCompleteSpan<T extends ChatEvent>({
           return;
         }
 
-        span.setAttributes({
-          'llm.token.counts': JSON.stringify({
-            input_tokens: value.tokens.prompt,
-            output_tokens: value.tokens.completion,
-            total_tokens: value.tokens.total,
-          }),
-        });
+        if (value.type === StreamingChatResponseEventType.TokenCount) {
+          span.setAttributes({
+            'llm.token.counts': JSON.stringify({
+              input_tokens: value.tokens.prompt,
+              output_tokens: value.tokens.completion,
+              total_tokens: value.tokens.total,
+            }),
+          });
+        }
       })
     );
 

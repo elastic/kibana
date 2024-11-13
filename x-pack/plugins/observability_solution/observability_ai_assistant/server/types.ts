@@ -23,6 +23,7 @@ import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ObservabilityAIAssistantService } from './service';
 
 export interface ObservabilityAIAssistantServerSetup {
@@ -62,4 +63,5 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   cloud?: CloudStart;
   serverless?: ServerlessPluginStart;
   alerting: AlertingServerStart;
+  inference: InferenceServerStart;
 }
