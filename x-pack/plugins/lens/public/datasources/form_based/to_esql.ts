@@ -7,6 +7,7 @@
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { getUserTimeZone } from '@kbn/data-plugin/common';
 import { ValueFormatConfig } from './operations/definitions/column_types';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { DateRange } from '../../../common/types';
@@ -33,6 +34,9 @@ export function getESQLForLayer(
 ) {
   // esql mode variables
   const partialRows = true;
+
+  const timeZone = getUserTimeZone((key) => uiSettings.get(key), true);
+  if (timeZone !== 'UTC') return;
 
   let esql = `FROM ${indexPattern.title} | `;
   esql += `WHERE ${indexPattern.timeFieldName} >= ?_tstart AND ${indexPattern.timeFieldName} <= ?_tend | `;
