@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from './use_kibana';
 
 export function useSpace() {
   const { spaces } = useKibana().services;
