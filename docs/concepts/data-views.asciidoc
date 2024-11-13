@@ -168,7 +168,7 @@ and field popularity data. Deleting a {data-source} does not remove any indices 
 
 WARNING: Deleting a {data-source} breaks all visualizations, saved searches, and other saved objects that reference the data view.
 
-. Open the main menu, and then click *Stack Management > Data Views*.
+. Go to the **Data Views** management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 
 . Find the {data-source} that you want to delete, and then
 click image:management/index-patterns/images/delete.png[Delete icon] in the *Actions* column.

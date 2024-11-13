@@ -416,7 +416,7 @@ export async function getSimpleExamples(
         values: getFieldValues(simpleExamplesResult.hits.hits, field, dataView),
         field,
         count: DEFAULT_SIMPLE_EXAMPLES_SIZE,
-        isTextBased: false,
+        isEsqlQuery: false,
       },
       formatter
     );
