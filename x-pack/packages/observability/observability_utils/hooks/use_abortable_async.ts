@@ -54,7 +54,9 @@ export function useAbortableAsync<T>(
           })
           .catch((err) => {
             setValue(undefined);
-            setError(err);
+            if (!controller.signal.aborted) {
+              setError(err);
+            }
           })
           .finally(() => setLoading(false));
       } else {

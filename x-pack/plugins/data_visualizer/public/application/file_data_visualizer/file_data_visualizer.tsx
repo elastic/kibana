@@ -44,7 +44,6 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks, resultLinks 
       <KibanaContextProvider services={{ ...services }}>
         <CloudContext>
           <FileDataVisualizerView
-            dataViewsContract={data.dataViews}
             dataStart={data}
             http={coreStart.http}
             fileUpload={fileUpload}

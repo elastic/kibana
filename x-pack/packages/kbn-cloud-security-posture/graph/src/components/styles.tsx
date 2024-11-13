@@ -18,20 +18,27 @@ import {
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 
-const IconContainer = styled.div`
+interface EuiColorProps {
+  color: keyof ReturnType<typeof useEuiTheme>['euiTheme']['colors'];
+  background: _EuiBackgroundColor;
+}
+
+type IconContainerProps = EuiColorProps;
+
+const IconContainer = styled.div<IconContainerProps>`
   position: relative;
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  color: ${(props) => {
+  color: ${({ color }) => {
     const { euiTheme } = useEuiTheme();
-    return euiTheme.colors[props.color as keyof typeof euiTheme.colors] as string;
+    return euiTheme.colors[color];
   }};
-  background-color: ${(props) => useEuiBackgroundColor(props.color as _EuiBackgroundColor)};
+  background-color: ${({ background }) => useEuiBackgroundColor(background)};
   border: 1px solid
-    ${(props) => {
+    ${({ color }) => {
       const { euiTheme } = useEuiTheme();
-      return euiTheme.colors[props.color as keyof typeof euiTheme.colors] as string;
+      return euiTheme.colors[color];
     }};
   margin-right: 8px;
 `;
@@ -43,9 +50,11 @@ const StyleEuiIcon = styled(EuiIcon)`
   transform: translate(-50%, -50%);
 `;
 
-const RoundedEuiIcon: React.FC<EuiIconProps> = ({ ...rest }) => (
-  <IconContainer color={rest.color}>
-    <StyleEuiIcon {...rest} />
+type RoundedEuiIconProps = EuiIconProps & EuiColorProps;
+
+const RoundedEuiIcon: React.FC<RoundedEuiIconProps> = ({ color, background, ...rest }) => (
+  <IconContainer color={color} background={background}>
+    <StyleEuiIcon color={color} {...rest} />
   </IconContainer>
 );
 
@@ -57,7 +66,7 @@ export const ExpandPopoverListItem: React.FC<
     <EuiListGroupItem
       icon={
         props.iconType ? (
-          <RoundedEuiIcon color="primary" type={props.iconType} size="s" />
+          <RoundedEuiIcon color="primary" background="primary" type={props.iconType} size="s" />
         ) : undefined
       }
       label={

@@ -7,14 +7,15 @@
 
 import React, { type PropsWithChildren } from 'react';
 import type { CommonProps, EuiWrappingPopoverProps } from '@elastic/eui';
-import { EuiWrappingPopover } from '@elastic/eui';
+import { EuiWrappingPopover, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export interface GraphPopoverProps
   extends PropsWithChildren,
     CommonProps,
     Pick<
       EuiWrappingPopoverProps,
-      'anchorPosition' | 'panelClassName' | 'panelPaddingSize' | 'panelStyle' | 'panelProps'
+      'anchorPosition' | 'panelClassName' | 'panelPaddingSize' | 'panelStyle'
     > {
   isOpen: boolean;
   anchorElement: HTMLElement | null;
@@ -28,6 +29,8 @@ export const GraphPopover: React.FC<GraphPopoverProps> = ({
   children,
   ...rest
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   if (!anchorElement) {
     return null;
   }
@@ -35,6 +38,28 @@ export const GraphPopover: React.FC<GraphPopoverProps> = ({
   return (
     <EuiWrappingPopover
       {...rest}
+      panelProps={{
+        css: css`
+          .euiPopover__arrow[data-popover-arrow='left']:before {
+            border-inline-start-color: ${euiTheme.colors?.body};
+          }
+
+          .euiPopover__arrow[data-popover-arrow='right']:before {
+            border-inline-end-color: ${euiTheme.colors?.body};
+          }
+
+          .euiPopover__arrow[data-popover-arrow='bottom']:before {
+            border-block-end-color: ${euiTheme.colors?.body};
+          }
+
+          .euiPopover__arrow[data-popover-arrow='top']:before {
+            border-block-start-color: ${euiTheme.colors?.body};
+          }
+
+          background-color: ${euiTheme.colors?.body};
+        `,
+      }}
+      color={euiTheme.colors?.body}
       isOpen={isOpen}
       closePopover={closePopover}
       button={anchorElement}
@@ -44,7 +69,7 @@ export const GraphPopover: React.FC<GraphPopoverProps> = ({
         disabled: false,
         crossFrame: true,
         noIsolation: false,
-        returnFocus: (el) => {
+        returnFocus: (_el) => {
           anchorElement.focus();
           return false;
         },

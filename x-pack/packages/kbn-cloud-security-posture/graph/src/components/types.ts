@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type {
   EntityNodeDataModel,
   GroupNodeDataModel,
@@ -48,7 +49,9 @@ export interface GroupNodeViewModel
 export interface LabelNodeViewModel
   extends Record<string, unknown>,
     LabelNodeDataModel,
-    BaseNodeDataViewModel {}
+    BaseNodeDataViewModel {
+  expandButtonClick?: ExpandButtonClickCallback;
+}
 
 export type NodeViewModel = EntityNodeViewModel | GroupNodeViewModel | LabelNodeViewModel;
 
