@@ -21,6 +21,8 @@ export enum SUB_ACTION {
   INVOKE_STREAM = 'invokeStream',
   DASHBOARD = 'getDashboard',
   TEST = 'test',
+  CONVERSE = 'converse',
+  CONVERSE_STREAM = 'converseStream',
 }
 
 export const DEFAULT_TIMEOUT_MS = 120000;

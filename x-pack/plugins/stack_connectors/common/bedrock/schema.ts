@@ -26,6 +26,7 @@ export const RunActionParamsSchema = schema.object({
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
   raw: schema.maybe(schema.boolean()),
+  apiType: schema.maybe(schema.string()),
 });
 
 export const BedrockMessageSchema = schema.object(
@@ -148,3 +149,49 @@ export const DashboardActionParamsSchema = schema.object({
 export const DashboardActionResponseSchema = schema.object({
   available: schema.boolean(),
 });
+
+export const ConverseActionParamsSchema = schema.object({
+  modelId: schema.maybe(schema.string()),
+  messages: schema.arrayOf(
+    schema.object({
+      role: schema.string(),
+      content: schema.any(),
+    })
+  ),
+  system: schema.arrayOf(
+    schema.object({
+      text: schema.string(),
+    })
+  ),
+  inferenceConfig: schema.object({
+    temperature: schema.maybe(schema.number()),
+    maxTokens: schema.maybe(schema.number()),
+    stopSequences: schema.maybe(schema.arrayOf(schema.string())),
+    topP: schema.maybe(schema.number()),
+  }),
+  toolConfig: schema.object({
+    tools: schema.arrayOf(
+      schema.object({
+        toolSpec: schema.object({
+          name: schema.string(),
+          description: schema.string(),
+          inputSchema: schema.object({
+            json: schema.object({
+              type: schema.string(),
+              properties: schema.object({}, { unknowns: 'allow' }),
+              required: schema.maybe(schema.arrayOf(schema.string())),
+              additionalProperties: schema.boolean(),
+              $schema: schema.maybe(schema.string()),
+            }),
+          }),
+        }),
+      })
+    ),
+    toolChoice: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  }),
+  additionalModelRequestFields: schema.maybe(schema.any()),
+  additionalModelResponseFieldPaths: schema.maybe(schema.any()),
+  guardrailConfig: schema.maybe(schema.any()),
+});
+
+export const ConverseActionResponseSchema = schema.object({}, { unknowns: 'allow' });

@@ -11,6 +11,7 @@ import { BaseChatModelParams } from '@langchain/core/language_models/chat_models
 import { Logger } from '@kbn/logging';
 import { Readable } from 'stream';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { ActionsClientChatBedrockConverse } from './chat_bedrock_converse/chat_bedrock_converse';
 
 export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-3-5-sonnet-20240620-v1:0';
 export const DEFAULT_BEDROCK_REGION = 'us-east-1';
@@ -24,8 +25,8 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   model?: string;
   maxTokens?: number;
 }
-
-export class ActionsClientBedrockChatModel extends _BedrockChat {
+export const ActionsClientBedrockChatModel = ActionsClientChatBedrockConverse;
+export class ActionsClientBedrockChatModeld extends _BedrockChat {
   constructor({ actionsClient, connectorId, logger, ...params }: CustomChatModelInput) {
     super({
       ...params,

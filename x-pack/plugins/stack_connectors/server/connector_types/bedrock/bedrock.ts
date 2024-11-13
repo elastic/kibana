@@ -21,8 +21,9 @@ import {
   StreamingResponseSchema,
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
+  ConverseActionParamsSchema,
 } from '../../../common/bedrock/schema';
-import type {
+import {
   Config,
   Secrets,
   RunActionParams,
@@ -34,6 +35,8 @@ import type {
   RunApiLatestResponse,
   BedrockMessage,
   BedrockToolChoice,
+  ConverseActionParams,
+  ConverseActionResponse,
 } from '../../../common/bedrock/types';
 import {
   SUB_ACTION,
@@ -95,13 +98,25 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     this.registerSubAction({
       name: SUB_ACTION.INVOKE_STREAM,
       method: 'invokeStream',
-      schema: InvokeAIActionParamsSchema,
+      schema: InvokeAIRawActionParamsSchema,
     });
 
     this.registerSubAction({
       name: SUB_ACTION.INVOKE_AI_RAW,
       method: 'invokeAIRaw',
       schema: InvokeAIRawActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.CONVERSE,
+      method: 'converse',
+      schema: ConverseActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.CONVERSE_STREAM,
+      method: 'converseStream',
+      schema: ConverseActionParamsSchema,
     });
   }
 
@@ -224,12 +239,12 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
   public async runApi(
-    { body, model: reqModel, signal, timeout, raw }: RunActionParams,
+    { body, model: reqModel, signal, timeout, raw, apiType = 'invoke' }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse | InvokeAIRawActionResponse> {
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
-    const path = `/model/${currentModel}/invoke`;
+    const path = `/model/${currentModel}/${apiType}`;
     const signed = this.signRequest(body, path, false);
     const requestArgs = {
       ...signed,
@@ -269,11 +284,17 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
   private async streamApi(
-    { body, model: reqModel, signal, timeout }: RunActionParams,
+    {
+      body,
+      model: reqModel,
+      signal,
+      timeout,
+      apiType = 'invoke-with-response-stream',
+    }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<StreamingResponse> {
     // set model on per request basis
-    const path = `/model/${reqModel ?? this.model}/invoke-with-response-stream`;
+    const path = `/model/${reqModel ?? this.model}/${apiType}`;
     const signed = this.signRequest(body, path, true);
 
     const response = await this.request(
@@ -312,7 +333,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       timeout,
       tools,
       toolChoice,
-    }: InvokeAIActionParams | InvokeAIRawActionParams,
+    }: InvokeAIRawActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<IncomingMessage> {
     const res = (await this.streamApi(
@@ -409,6 +430,37 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       },
       connectorUsageCollector
     );
+    return res;
+  }
+
+  // Converse APIs
+
+  public async converse(
+    input: ConverseActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<ConverseActionResponse> {
+    const res = await this.runApi(
+      {
+        body: JSON.stringify(input),
+        raw: true,
+        apiType: 'converse',
+      },
+      connectorUsageCollector
+    );
+    return res;
+  }
+  public async converseStream(
+    input: ConverseActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<ConverseActionResponse> {
+    const res = await this.streamApi(
+      {
+        body: JSON.stringify(input),
+        apiType: 'converse-stream',
+      },
+      connectorUsageCollector
+    );
+    console.log('converseStream', res);
     return res;
   }
 }
