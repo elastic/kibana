@@ -8,15 +8,14 @@
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177385
-  registry.when('Historical data ', { config: 'basic', archives: [] }, () => {
+  describe('Historical data ', () => {
     describe('when there is not data', () => {
       it('returns hasData=false', async () => {
         const response = await apmApiClient.readUser({ endpoint: `GET /internal/apm/has_data` });
@@ -26,7 +25,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('when there is data', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+
         const start = moment().subtract(30, 'minutes').valueOf();
         const end = moment().valueOf();
 
