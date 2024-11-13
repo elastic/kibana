@@ -27,7 +27,11 @@ import { getLifecycleValue } from '../../../../../lib/data_streams';
 import { TemplateDeserialized } from '../../../../../../../common';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../../constants';
 import { useIlmLocator } from '../../../../../services/use_ilm_locator';
-import { allowAutoCreateRadioIds } from '../../../../../../../common/constants';
+import {
+  allowAutoCreateRadioIds,
+  STANDARD_INDEX_MODE,
+} from '../../../../../../../common/constants';
+import { indexModeLabels } from '../../../../../lib/index_mode_labels';
 
 interface Props {
   templateDetails: TemplateDeserialized;
@@ -230,7 +234,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                 defaultMessage="Index mode"
               />
             </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>{''}</EuiDescriptionListDescription>
+            <EuiDescriptionListDescription>
+              {indexModeLabels[template?.settings?.index?.mode ?? STANDARD_INDEX_MODE]}
+            </EuiDescriptionListDescription>
 
             {/* Allow auto create */}
             {isLegacy !== true &&
