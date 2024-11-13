@@ -1391,10 +1391,6 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/kibana.jsonc @elastic/appex-qa
 /x-pack/test/functional_with_es_ssl/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/test/stack_functional_integration/apps @elastic/appex-qa
-/x-pack/test/plugin_api_perf/README.md @elastic/appex-qa
-/x-pack/test/plugin_api_perf/config.js @elastic/appex-qa
-/x-pack/test/plugin_api_perf/ftr_provider_context.d.ts @elastic/appex-qa
-/x-pack/test/plugin_api_perf/services.ts @elastic/appex-qa
 /x-pack/test/plugin_functional/config.ts @elastic/appex-qa
 /x-pack/test/plugin_functional/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/test/plugin_functional/page_objects.ts @elastic/appex-qa
