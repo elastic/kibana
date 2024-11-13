@@ -47,6 +47,7 @@ export const mockKibanaValues = {
   indexMappingComponent: null,
   isCloud: false,
   isSidebarEnabled: true,
+  kibanaVersion: null,
   lens: {
     EmbeddableComponent: jest.fn(),
     stateHelperApi: jest.fn().mockResolvedValue({
