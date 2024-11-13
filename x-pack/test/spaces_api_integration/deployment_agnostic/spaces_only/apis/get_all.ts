@@ -5,21 +5,12 @@
  * 2.0.
  */
 
-import type { SuperTest } from 'supertest';
+import { SPACES } from '../../../common/lib/spaces';
+import { getAllTestSuiteFactory } from '../../../common/suites/get_all.agnostic';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
-import { SPACES } from '../../common/lib/spaces';
-import { getAllTestSuiteFactory } from '../../common/suites/get_all';
-
-// eslint-disable-next-line import/no-default-export
-export default function getAllSpacesTestSuite({ getService }: FtrProviderContext) {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-
-  const { getAllTest, createExpectResults } = getAllTestSuiteFactory(
-    esArchiver,
-    supertestWithoutAuth as unknown as SuperTest<any>
-  );
+export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProviderContext) {
+  const { getAllTest, createExpectResults } = getAllTestSuiteFactory(context);
 
   describe('get all', () => {
     [

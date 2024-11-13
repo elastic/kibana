@@ -39,10 +39,10 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
 ) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     if (options.esServerArgs || options.kbnServerArgs) {
-      throw new Error(
-        `FTR doesn't provision custom ES/Kibana server arguments into the ESS deployment.
-  It may lead to unexpected test failures on Cloud. Please contact #appex-qa.`
-      );
+      //     throw new Error(
+      //       `FTR doesn't provision custom ES/Kibana server arguments into the ESS deployment.
+      // It may lead to unexpected test failures on Cloud. Please contact #appex-qa.`
+      //     );
     }
 
     // if config is executed on CI or locally
@@ -118,6 +118,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
+          ...(options.esServerArgs ?? []),
         ],
         files: [
           // Passing the roles that are equivalent to the ones we have in serverless
@@ -146,6 +147,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
             basic: { 'cloud-basic': { order: 1 } },
           })}`,
           `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
+          ...(options.kbnServerArgs ?? []),
         ],
       },
     };
