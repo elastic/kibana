@@ -20,6 +20,7 @@ import {
   EuiFormRow,
   EuiLink,
   EuiLoadingSpinner,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -347,12 +348,14 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                 { defaultMessage: 'Select roles' }
               )}
               labelAppend={
-                <EuiLink href={getUrlForApp('management', { deepLinkId: 'roles' })}>
-                  {i18n.translate(
-                    'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabelAnchor',
-                    { defaultMessage: 'Manage roles' }
-                  )}
-                </EuiLink>
+                <EuiText size="xs">
+                  <EuiLink href={getUrlForApp('management', { deepLinkId: 'roles' })}>
+                    {i18n.translate(
+                      'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabelAnchor',
+                      { defaultMessage: 'Manage roles' }
+                    )}
+                  </EuiLink>
+                </EuiText>
               }
               helpText={i18n.translate(
                 'xpack.spaces.management.spaceDetails.roles.selectRolesHelp',
