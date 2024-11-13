@@ -9,8 +9,9 @@ import { STREAMS_INDEX } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 
 export const getStreamsStatusRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/_status',
+  endpoint: 'GET /api/streams/_status',
   options: {
+    access: 'internal',
     security: {
       authz: {
         requiredPrivileges: ['streams_read'],

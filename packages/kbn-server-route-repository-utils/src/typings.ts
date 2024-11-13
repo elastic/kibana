@@ -8,7 +8,7 @@
  */
 
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
-import type { IKibanaResponse } from '@kbn/core-http-server';
+import type { IKibanaResponse, RouteAccess } from '@kbn/core-http-server';
 import type {
   KibanaRequest,
   KibanaResponseFactory,
@@ -56,17 +56,35 @@ export interface RouteState {
 }
 
 export type ServerRouteHandlerResources = Record<string, any>;
-export type ServerRouteCreateOptions = Record<string, any>;
 
-type ValidateEndpoint<TEndpoint extends string> = string extends TEndpoint
+export interface ServerRouteCreateOptions {
+  [x: string]: any;
+}
+
+type RouteMethodOf<TEndpoint extends string> = TEndpoint extends `${infer TRouteMethod} ${string}`
+  ? TRouteMethod extends RouteMethod
+    ? TRouteMethod
+    : RouteMethod
+  : RouteMethod;
+
+type IsPublicEndpoint<
+  TEndpoint extends string,
+  TRouteAccess extends RouteAccess | undefined
+> = TRouteAccess extends 'public'
   ? true
-  : TEndpoint extends `${string} ${string} ${string}`
+  : TRouteAccess extends 'internal'
+  ? false
+  : TEndpoint extends `${string} /api${string}`
   ? true
-  : TEndpoint extends `${string} ${infer TPathname}`
-  ? TPathname extends `/internal/${string}`
-    ? true
-    : false
   : false;
+
+type IsVersionSpecified<TEndpoint extends string> =
+  TEndpoint extends `${string} ${string} ${string}` ? true : false;
+
+type ValidateEndpoint<
+  TEndpoint extends string,
+  TRouteAccess extends RouteAccess | undefined
+> = IsPublicEndpoint<TEndpoint, TRouteAccess> extends true ? IsVersionSpecified<TEndpoint> : true;
 
 type IsAny<T> = 1 | 0 extends (T extends never ? 1 : 0) ? true : false;
 
@@ -131,12 +149,16 @@ export type CreateServerRouteFactory<
 > = <
   TEndpoint extends string,
   TReturnType extends ServerRouteHandlerReturnType,
-  TRouteParamsRT extends RouteParamsRT | undefined = undefined
+  TRouteParamsRT extends RouteParamsRT | undefined = undefined,
+  TRouteAccess extends RouteAccess | undefined = undefined
 >(
   options: {
-    endpoint: ValidateEndpoint<TEndpoint> extends true ? TEndpoint : never;
+    endpoint: ValidateEndpoint<TEndpoint, TRouteAccess> extends true ? TEndpoint : never;
     handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
     params?: TRouteParamsRT;
+    options?: RouteConfigOptions<RouteMethodOf<TEndpoint>> & {
+      access?: TRouteAccess;
+    };
   } & TRouteCreateOptions
 ) => Record<
   TEndpoint,
@@ -154,16 +176,15 @@ export type ServerRoute<
   TRouteParamsRT extends RouteParamsRT | undefined,
   TRouteHandlerResources extends ServerRouteHandlerResources,
   TReturnType extends ServerRouteHandlerReturnType,
-  TRouteCreateOptions extends ServerRouteCreateOptions
-> = {
+  TRouteCreateOptions extends ServerRouteCreateOptions | undefined
+> = TRouteCreateOptions & {
   endpoint: TEndpoint;
   handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
-} & TRouteCreateOptions &
-  (TRouteParamsRT extends RouteParamsRT ? { params: TRouteParamsRT } : {});
+} & (TRouteParamsRT extends RouteParamsRT ? { params: TRouteParamsRT } : {});
 
 export type ServerRouteRepository = Record<
   string,
-  ServerRoute<string, RouteParamsRT | undefined, any, any, Record<string, any>>
+  ServerRoute<string, RouteParamsRT | undefined, any, any, ServerRouteCreateOptions | undefined>
 >;
 
 type ClientRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
@@ -229,7 +250,7 @@ export type ClientRequestParamsOf<
   infer TRouteParamsRT,
   any,
   any,
-  ServerRouteCreateOptions
+  ServerRouteCreateOptions | undefined
 >
   ? TRouteParamsRT extends RouteParamsRT
     ? ClientRequestParamsOfType<TRouteParamsRT>
@@ -249,13 +270,17 @@ export interface RouteRepositoryClient<
   fetch<TEndpoint extends Extract<keyof TServerRouteRepository, string>>(
     endpoint: TEndpoint,
     ...args: MaybeOptionalArgs<
-      ClientRequestParamsOf<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions
+      ClientRequestParamsOf<TServerRouteRepository, TEndpoint> &
+        TAdditionalClientOptions &
+        HttpFetchOptions
     >
   ): Promise<ReturnOf<TServerRouteRepository, TEndpoint>>;
   stream<TEndpoint extends Extract<keyof TServerRouteRepository, string>>(
     endpoint: TEndpoint,
     ...args: MaybeOptionalArgs<
-      ClientRequestParamsOf<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions
+      ClientRequestParamsOf<TServerRouteRepository, TEndpoint> &
+        TAdditionalClientOptions &
+        HttpFetchOptions
     >
   ): ReturnOf<TServerRouteRepository, TEndpoint> extends Observable<infer TReturnType>
     ? TReturnType extends ServerSentEvent

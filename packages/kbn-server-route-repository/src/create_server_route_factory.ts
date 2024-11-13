@@ -8,7 +8,6 @@
  */
 
 import type {
-  DefaultRouteCreateOptions,
   DefaultRouteHandlerResources,
   ServerRouteCreateOptions,
   ServerRouteHandlerResources,
@@ -17,7 +16,7 @@ import type { CreateServerRouteFactory } from '@kbn/server-route-repository-util
 
 export function createServerRouteFactory<
   TRouteHandlerResources extends ServerRouteHandlerResources = DefaultRouteHandlerResources,
-  TRouteCreateOptions extends ServerRouteCreateOptions = DefaultRouteCreateOptions
+  TRouteCreateOptions extends ServerRouteCreateOptions = {}
 >(): CreateServerRouteFactory<TRouteHandlerResources, TRouteCreateOptions> {
   return (route) => ({ [route.endpoint]: route } as any);
 }

@@ -10,11 +10,12 @@ import { notFound, internal } from '@hapi/boom';
 import { createServerRoute } from '../create_server_route';
 import { DefinitionNotFound } from '../../lib/streams/errors';
 import { readAncestors, readStream } from '../../lib/streams/stream_crud';
+import { StreamDefinition } from '../../../common';
 
 export const readStreamRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{id} 2023-10-31',
+  endpoint: 'GET /api/streams/{id}',
   options: {
-    access: 'public',
+    access: 'internal',
     security: {
       authz: {
         requiredPrivileges: ['streams_read'],
@@ -24,7 +25,17 @@ export const readStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ id: z.string() }),
   }),
-  handler: async ({ response, params, request, logger, getScopedClients }) => {
+  handler: async ({
+    response,
+    params,
+    request,
+    logger,
+    getScopedClients,
+  }): Promise<
+    StreamDefinition & {
+      inheritedFields: Array<StreamDefinition['fields'][number] & { from: string }>;
+    }
+  > => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
       const streamEntity = await readStream({
@@ -44,7 +55,7 @@ export const readStreamRoute = createServerRoute({
         ),
       };
 
-      return response.ok({ body });
+      return body;
     } catch (e) {
       if (e instanceof DefinitionNotFound) {
         throw notFound(e);

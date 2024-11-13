@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
+import { badRequest, internal, notFound } from '@hapi/boom';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
@@ -28,9 +29,9 @@ import { getParentId } from '../../lib/streams/helpers/hierarchy';
 import { MalformedChildren } from '../../lib/streams/errors/malformed_children';
 
 export const editStreamRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{id} 2023-10-31',
+  endpoint: 'PUT /api/streams/{id}',
   options: {
-    access: 'public',
+    access: 'internal',
     security: {
       authz: {
         requiredPrivileges: ['streams_write'],
@@ -94,10 +95,10 @@ export const editStreamRoute = createServerRoute({
         });
       }
 
-      return response.ok({ body: { acknowledged: true } });
+      return { acknowledged: true };
     } catch (e) {
       if (e instanceof IndexTemplateNotFound || e instanceof DefinitionNotFound) {
-        return response.notFound({ body: e });
+        throw notFound(e);
       }
 
       if (
@@ -105,10 +106,10 @@ export const editStreamRoute = createServerRoute({
         e instanceof ForkConditionMissing ||
         e instanceof MalformedStreamId
       ) {
-        return response.customError({ body: e, statusCode: 400 });
+        throw badRequest(e);
       }
 
-      return response.customError({ body: e, statusCode: 500 });
+      throw internal(e);
     }
   },
 });

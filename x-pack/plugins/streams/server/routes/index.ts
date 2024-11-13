@@ -7,6 +7,7 @@
 
 import { esqlRoutes } from './esql/route';
 import { deleteStreamRoute } from './streams/delete';
+import { disableStreamsRoute } from './streams/disable';
 import { editStreamRoute } from './streams/edit';
 import { enableStreamsRoute } from './streams/enable';
 import { forkStreamsRoute } from './streams/fork';
@@ -25,6 +26,7 @@ export const StreamsRouteRepository = {
   ...listStreamsRoute,
   ...streamsStatusRoutes,
   ...esqlRoutes,
+  ...disableStreamsRoute,
 };
 
 export type StreamsRouteRepository = typeof StreamsRouteRepository;

@@ -13,9 +13,9 @@ import { listStreams } from '../../lib/streams/stream_crud';
 import { StreamDefinition } from '../../../common';
 
 export const listStreamsRoute = createServerRoute({
-  endpoint: 'GET /api/streams 2023-10-31',
+  endpoint: 'GET /api/streams',
   options: {
-    access: 'public',
+    access: 'internal',
     security: {
       authz: {
         requiredPrivileges: ['streams_read'],
@@ -40,7 +40,7 @@ export const listStreamsRoute = createServerRoute({
         throw notFound(e);
       }
 
-      throw internal(e, 500);
+      throw internal(e);
     }
   },
 });

@@ -9,7 +9,6 @@ import type {
   CoreSetup,
   CustomRequestHandlerContext,
   CoreStart,
-  RouteConfigOptions,
   IScopedClusterClient,
   IUiSettingsClient,
   SavedObjectsClientContract,
@@ -60,9 +59,8 @@ export interface APMRouteCreateOptions {
       | 'oas-tag:APM agent keys'
       | 'oas-tag:APM annotations'
     >;
-    body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
     disableTelemetry?: boolean;
-  } & RouteConfigOptions<any>;
+  };
 }
 
 export type TelemetryUsageCounter = ReturnType<UsageCollectionSetup['createUsageCounter']>;

@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import { badRequest, internal } from '@hapi/boom';
+import { z } from '@kbn/zod';
+import { STREAMS_INDEX } from '../../../common/constants';
 import { SecurityException } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
-import { syncStream } from '../../lib/streams/stream_crud';
-import { rootStreamDefinition } from '../../lib/streams/root_stream_definition';
-import { createStreamsIndex } from '../../lib/streams/internal_stream_mapping';
 
-export const enableStreamsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/_enable',
+export const disableStreamsRoute = createServerRoute({
+  endpoint: 'POST /api/streams/_disable',
   params: z.object({}),
   options: {
     access: 'internal',
@@ -32,12 +30,12 @@ export const enableStreamsRoute = createServerRoute({
   }): Promise<{ acknowledged: true }> => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
-      await createStreamsIndex(scopedClusterClient);
-      await syncStream({
-        scopedClusterClient,
-        definition: rootStreamDefinition,
-        logger,
+
+      await scopedClusterClient.asInternalUser.indices.delete({
+        index: STREAMS_INDEX,
+        allow_no_indices: true,
       });
+
       return { acknowledged: true };
     } catch (e) {
       if (e instanceof SecurityException) {
