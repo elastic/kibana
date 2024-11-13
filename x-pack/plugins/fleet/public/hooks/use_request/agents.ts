@@ -354,7 +354,7 @@ export function sendGetAgentsAvailableVersions() {
 export function sendGetAgentStatusRuntimeField() {
   return sendRequest<string>({
     method: 'get',
-    path: '/api/fleet/agents/status_runtime_field',
-    version: API_VERSIONS.public.v1,
+    path: '/internal/fleet/agents/status_runtime_field',
+    version: API_VERSIONS.internal.v1,
   });
 }

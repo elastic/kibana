@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function removeSOAttributes(kuery: string) {
+export function removeSOAttributes(kuery: string): string {
   return kuery.replace(/attributes\./g, '').replace(/fleet-agents\./g, '');
 }
 

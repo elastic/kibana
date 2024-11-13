@@ -27,7 +27,8 @@ import { getSortFieldForAPI } from './use_fetch_agents_data';
 
 export function useExportCSV(
   agents: Agent[] | string,
-  sortOptions?: { field?: string; direction?: string }
+  sortOptions?: { field?: string; direction?: string },
+  enableExportCSV?: boolean
 ) {
   const startServices = useStartServices();
   const { notifications, http, uiSettings } = startServices;
@@ -39,8 +40,11 @@ export function useExportCSV(
       const resp = await sendGetAgentStatusRuntimeField();
       if (resp.data) setRuntimeFields(resp.data);
     };
+    if (!enableExportCSV) {
+      return;
+    }
     getRuntimeFields();
-  }, []);
+  }, [enableExportCSV]);
 
   // TODO pass columns from Agent list UI
   // TODO set readable column names

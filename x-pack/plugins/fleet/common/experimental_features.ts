@@ -28,6 +28,7 @@ const _allowedExperimentalValues = {
   useSpaceAwareness: false,
   enableReusableIntegrationPolicies: true,
   asyncDeployPolicies: true,
+  enableExportCSV: false,
 };
 
 /**

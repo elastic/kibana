@@ -102,12 +102,16 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       : nAgentsInTable - totalManagedAgentIds?.length;
 
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
-  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
+  const { diagnosticFileUploadEnabled, enableExportCSV } = ExperimentalFeaturesService.get();
 
-  const { generateReportingJobCSV } = useExportCSV(agents, {
-    field: sortField,
-    direction: sortOrder,
-  });
+  const { generateReportingJobCSV } = useExportCSV(
+    agents,
+    {
+      field: sortField,
+      direction: sortOrder,
+    },
+    enableExportCSV
+  );
 
   const menuItems = [
     {
@@ -228,23 +232,27 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         setIsUnenrollModalOpen(true);
       },
     },
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.exportAgents"
-          data-test-subj="bulkAgentExportBtn"
-          defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      icon: <EuiIcon type="exportAction" size="m" />,
-      onClick: () => {
-        closeMenu();
-        generateReportingJobCSV();
-      },
-    },
+    ...(enableExportCSV
+      ? [
+          {
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentBulkActions.exportAgents"
+                data-test-subj="bulkAgentExportBtn"
+                defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
+                values={{
+                  agentCount,
+                }}
+              />
+            ),
+            icon: <EuiIcon type="exportAction" size="m" />,
+            onClick: () => {
+              closeMenu();
+              generateReportingJobCSV();
+            },
+          },
+        ]
+      : []),
   ];
 
   const panels = [
