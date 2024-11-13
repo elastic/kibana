@@ -83,6 +83,8 @@ function DocumentationContent({
                           label={i18n.translate('languageDocumentation.technicalPreviewLabel', {
                             defaultMessage: 'Technical Preview',
                           })}
+                          size="s"
+                          color="subdued"
                           tooltipContent={i18n.translate(
                             'languageDocumentation.technicalPreviewTooltip',
                             {
