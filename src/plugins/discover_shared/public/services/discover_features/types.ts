@@ -35,7 +35,7 @@ export interface ObservabilityCreateSLOFeature {
   createSLOFlyout: (props: {
     onClose: () => void;
     initialValues: Record<string, unknown>;
-  }) => JSX.Element;
+  }) => React.ReactNode;
 }
 
 // This should be a union of all the available client features.
