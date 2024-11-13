@@ -1036,6 +1036,8 @@
       "@kbn/import-locator/*": ["packages/kbn-import-locator/*"],
       "@kbn/import-resolver": ["packages/kbn-import-resolver"],
       "@kbn/import-resolver/*": ["packages/kbn-import-resolver/*"],
+      "@kbn/index-adapter": ["packages/kbn-index-adapter"],
+      "@kbn/index-adapter/*": ["packages/kbn-index-adapter/*"],
       "@kbn/index-lifecycle-management-common-shared": ["x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared"],
       "@kbn/index-lifecycle-management-common-shared/*": ["x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/*"],
       "@kbn/index-lifecycle-management-plugin": ["x-pack/plugins/index_lifecycle_management"],

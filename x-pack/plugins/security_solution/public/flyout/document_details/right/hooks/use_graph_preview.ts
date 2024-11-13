@@ -8,7 +8,7 @@
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { get } from 'lodash/fp';
 import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
-import { getFieldArray } from '../../shared/utils';
+import { getField, getFieldArray } from '../../shared/utils';
 
 export interface UseGraphPreviewParams {
   /**
@@ -26,6 +26,11 @@ export interface UseGraphPreviewParams {
  */
 export interface UseGraphPreviewResult {
   /**
+   * The timestamp of the event
+   */
+  timestamp: string | null;
+
+  /**
    * Array of event IDs associated with the alert
    */
   eventIds: string[];
@@ -38,7 +43,7 @@ export interface UseGraphPreviewResult {
   /**
    * Action associated with the event
    */
-  action: string | undefined;
+  action?: string[];
 
   /**
    * Boolean indicating if the event is an audit log (contains event ids, actor ids and action)
@@ -53,13 +58,15 @@ export const useGraphPreview = ({
   getFieldsData,
   ecsData,
 }: UseGraphPreviewParams): UseGraphPreviewResult => {
+  const timestamp = getField(getFieldsData('@timestamp'));
   const originalEventId = getFieldsData('kibana.alert.original_event.id');
   const eventId = getFieldsData('event.id');
   const eventIds = originalEventId ? getFieldArray(originalEventId) : getFieldArray(eventId);
 
   const actorIds = getFieldArray(getFieldsData('actor.entity.id'));
-  const action = get(['event', 'action'], ecsData);
-  const isAuditLog = actorIds.length > 0 && action?.length > 0 && eventIds.length > 0;
+  const action: string[] | undefined = get(['event', 'action'], ecsData);
+  const isAuditLog =
+    Boolean(timestamp) && actorIds.length > 0 && Boolean(action?.length) && eventIds.length > 0;
 
-  return { eventIds, actorIds, action, isAuditLog };
+  return { timestamp, eventIds, actorIds, action, isAuditLog };
 };

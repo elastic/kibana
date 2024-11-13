@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
         expect(await testSubjects.exists('addFilter')).to.be(false);
-        expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(true);
+        expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(false);
         // when Lens suggests a table, we render an ESQL based histogram
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
         expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
@@ -830,6 +830,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(prevList).to.eql([]);
 
         await discover.loadSavedSearch('esql view with breakdown');
+        await header.waitUntilLoadingHasFinished();
+        const list = await discover.getHistogramLegendList();
+        expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
+      });
+
+      it('should choose breakdown field when selected from field stats', async () => {
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const testQuery = 'from logstash-*';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await unifiedFieldList.clickFieldListAddBreakdownField('extension');
         await header.waitUntilLoadingHasFinished();
         const list = await discover.getHistogramLegendList();
         expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
