@@ -20957,42 +20957,6 @@ paths:
       summary: Initiate agent setup
       tags:
         - Elastic Agents
-  /api/fleet/agents/status_runtime_field:
-    get:
-      operationId: get-fleet-agents-status-runtime-field
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: string
-        '400':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                additionalProperties: false
-                description: Generic Error
-                type: object
-                properties:
-                  error:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                required:
-                  - message
-      summary: ''
-      tags: []
   /api/fleet/agents/tags:
     get:
       operationId: get-fleet-agents-tags
