@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment';
 import 'moment-timezone';
 const QUERY_HISTORY_ITEM_KEY = 'QUERY_HISTORY_ITEM_KEY';
 export const dateFormat = 'MMM. D, YY HH:mm:ss';
@@ -19,9 +18,7 @@ export const dateFormat = 'MMM. D, YY HH:mm:ss';
 export interface QueryHistoryItem {
   status?: 'success' | 'error' | 'warning';
   queryString: string;
-  startDateMilliseconds?: number;
   timeRan?: string;
-  timeZone?: string;
 }
 
 export const MAX_HISTORY_QUERIES_NUMBER = 20;
@@ -30,12 +27,9 @@ export const getTrimmedQuery = (queryString: string) => {
   return queryString.replaceAll('\n', '').trim().replace(/\s\s+/g, ' ');
 };
 
-export const getMomentTimeZone = (timeZone?: string) => {
-  return !timeZone || timeZone === 'Browser' ? moment.tz.guess() : timeZone;
-};
-
-const sortDates = (date1?: number, date2?: number) => {
-  return moment(date1)?.valueOf() - moment(date2)?.valueOf();
+const sortDates = (date1?: string, date2?: string) => {
+  if (!date1 || !date2) return 0;
+  return date1 < date2 ? -1 : date1 > date2 ? 1 : 0;
 };
 
 export const getHistoryItems = (sortDirection: 'desc' | 'asc'): QueryHistoryItem[] => {
@@ -43,8 +37,8 @@ export const getHistoryItems = (sortDirection: 'desc' | 'asc'): QueryHistoryItem
   const historyItems: QueryHistoryItem[] = JSON.parse(localStorageString);
   const sortedByDate = historyItems.sort((a, b) => {
     return sortDirection === 'desc'
-      ? sortDates(b.startDateMilliseconds, a.startDateMilliseconds)
-      : sortDates(a.startDateMilliseconds, b.startDateMilliseconds);
+      ? sortDates(b.timeRan, a.timeRan)
+      : sortDates(a.timeRan, b.timeRan);
   });
   return sortedByDate;
 };
@@ -71,11 +65,9 @@ export const addQueriesToCache = (
   const trimmedQueryString = getTrimmedQuery(item.queryString);
 
   if (item.queryString) {
-    const tz = getMomentTimeZone(item.timeZone);
     cachedQueries.set(trimmedQueryString, {
       ...item,
-      timeRan: moment().tz(tz).format(dateFormat),
-      startDateMilliseconds: moment().valueOf(),
+      timeRan: new Date().toISOString(),
       status: item.status,
     });
   }
@@ -83,9 +75,7 @@ export const addQueriesToCache = (
   let allQueries = [...getCachedQueries()];
 
   if (allQueries.length >= maxQueriesAllowed + 1) {
-    const sortedByDate = allQueries.sort((a, b) =>
-      sortDates(b?.startDateMilliseconds, a?.startDateMilliseconds)
-    );
+    const sortedByDate = allQueries.sort((a, b) => sortDates(b.timeRan, a.timeRan));
 
     // queries to store in the localstorage
     allQueries = sortedByDate.slice(0, maxQueriesAllowed);

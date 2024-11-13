@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import moment from 'moment';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
@@ -17,14 +16,8 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiButtonIcon } from '@elastic/eui';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { FAVORITES_LIMIT as ESQL_STARRED_QUERIES_LIMIT } from '@kbn/content-management-favorites-common';
-import {
-  type QueryHistoryItem,
-  getMomentTimeZone,
-  getTrimmedQuery,
-} from '../history_local_storage';
+import { type QueryHistoryItem, getTrimmedQuery } from '../history_local_storage';
 import { TooltipWrapper } from './tooltip_wrapper';
-
-const ISO8601_TZ_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
 
 const STARRED_QUERIES_DISCARD_KEY = 'esqlEditor.starredQueriesDiscard';
 
@@ -116,13 +109,12 @@ export class EsqlStarredQueriesService {
     return this.starredQueries.length >= ESQL_STARRED_QUERIES_LIMIT;
   }
 
-  async addStarredQuery(item: QueryHistoryItem) {
-    const tz = getMomentTimeZone();
+  async addStarredQuery(item: Pick<QueryHistoryItem, 'queryString' | 'status'>) {
     const favoriteItem = {
       id: generateId(),
       metadata: {
         queryString: getTrimmedQuery(item.queryString),
-        timeRan: moment().tz(tz).format(ISO8601_TZ_FORMAT),
+        timeRan: new Date().toISOString(),
         status: item.status,
       },
     };
