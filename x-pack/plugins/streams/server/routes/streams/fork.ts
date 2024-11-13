@@ -38,7 +38,6 @@ export const forkStreamsRoute = createServerRoute({
     body: z.object({ stream: streamDefinitonWithoutChildrenSchema, condition: conditionSchema }),
   }),
   handler: async ({
-    response,
     params,
     logger,
     request,
