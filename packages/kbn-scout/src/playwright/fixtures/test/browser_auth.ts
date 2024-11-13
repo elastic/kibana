@@ -12,29 +12,37 @@ import { PROJECT_DEFAULT_ROLES } from '../../../common';
 import { LoginFixture, ScoutWorkerFixtures } from '../types';
 import { serviceLoadedMsg } from '../../utils';
 
+type LoginFunction = (role: string) => Promise<void>;
+
 export const browserAuthFixture = base.extend<{ browserAuth: LoginFixture }, ScoutWorkerFixtures>({
   browserAuth: async ({ log, context, samlAuth, config }, use) => {
-    const loginAs = async (role: string) => {
+    const setSessionCookie = async (cookieValue: string) => {
       await context.clearCookies();
-      const cookie = await samlAuth.getInteractiveUserSessionCookieWithRoleScope(role);
       await context.addCookies([
         {
           name: 'sid',
-          value: cookie,
+          value: cookieValue,
           path: '/',
           domain: 'localhost',
         },
       ]);
     };
+
+    const loginAs: LoginFunction = async (role) => {
+      const cookie = await samlAuth.getInteractiveUserSessionCookieWithRoleScope(role);
+      await setSessionCookie(cookie);
+    };
+
     const loginAsAdmin = () => loginAs('admin');
     const loginAsViewer = () => loginAs('viewer');
-    const loginAsPrivilegedUser = async () => {
+    const loginAsPrivilegedUser = () => {
       const roleName = config.serverless
         ? PROJECT_DEFAULT_ROLES.get(config.projectType!)!
         : 'editor';
       return loginAs(roleName);
     };
+
     log.debug(serviceLoadedMsg('browserAuth'));
-    use({ loginAsViewer, loginAsPrivilegedUser, loginAsAdmin });
+    await use({ loginAsAdmin, loginAsViewer, loginAsPrivilegedUser });
   },
 });

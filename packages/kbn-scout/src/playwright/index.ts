@@ -14,5 +14,9 @@ import { scoutCoreFixtures } from './fixtures';
 export const test = mergeTests(scoutCoreFixtures);
 
 export { createPlaywrightConfig } from './config';
+export { createLazyPageObject } from './page_objects/utils';
 export { expect } from './expect';
+
 export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
+export type { PageObjects } from './page_objects';
+export type { ScoutTestFixtures, ScoutWorkerFixtures, ScoutPage } from './fixtures';

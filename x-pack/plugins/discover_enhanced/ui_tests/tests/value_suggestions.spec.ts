@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { test, expect } from '@kbn/scout';
+import { expect } from '@kbn/scout';
+import { test } from '../fixtures';
 
 test.describe('Discover app - value suggestions', () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {

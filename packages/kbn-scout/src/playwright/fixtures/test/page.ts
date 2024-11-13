@@ -9,56 +9,74 @@
 
 import { Page, test as base } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
-import { ScoutPage } from '../types';
+import { ScoutPage, KibanaUrl } from '../types';
 
+/**
+ * Instead of defining each method individually, we use a list of method names and loop through them, creating methods dynamically.
+ * All methods must have 'selector: string' as the first argument
+ */
 function extendPageWithTestSubject(page: Page) {
-  return {
-    check: async (selector: string, options?: Parameters<Page['check']>[1]) => {
-      return page.check(subj(selector), options);
-    },
-    click: async (selector: string, options?: Parameters<Page['click']>[1]) => {
-      return page.click(subj(selector), options);
-    },
-    dblclick: async (selector: string, options?: Parameters<Page['dblclick']>[1]) => {
-      return page.dblclick(subj(selector), options);
-    },
-    fill: async (selector: string, value: string, options?: Parameters<Page['fill']>[2]) => {
-      return page.fill(subj(selector), value, options);
-    },
-    focus: async (selector: string, options?: Parameters<Page['focus']>[1]) => {
-      return page.focus(subj(selector), options);
-    },
-    getAttribute: async (
-      selector: string,
-      name: string,
-      options?: Parameters<Page['getAttribute']>[2]
-    ) => {
-      return page.getAttribute(subj(selector), name, options);
-    },
-    hover: async (selector: string, options?: Parameters<Page['hover']>[1]) => {
-      return page.hover(subj(selector), options);
-    },
-    isEnabled: async (selector: string, options?: Parameters<Page['isEnabled']>[1]) => {
-      return page.isEnabled(subj(selector), options);
-    },
-    innerText: async (selector: string, options?: Parameters<Page['innerText']>[1]) => {
-      return page.innerText(subj(selector), options);
-    },
-    isChecked: async (selector: string, options?: Parameters<Page['isChecked']>[1]) => {
-      return page.isChecked(subj(selector), options);
-    },
-    isHidden: async (selector: string, options?: Parameters<Page['isHidden']>[1]) => {
-      return page.isHidden(subj(selector), options);
-    },
-    locator: (selector: string, options?: Parameters<Page['locator']>[1]) => {
-      return page.locator(subj(selector), options);
-    },
-  };
+  const methods: Array<keyof Page> = [
+    'check',
+    'click',
+    'dblclick',
+    'fill',
+    'focus',
+    'getAttribute',
+    'hover',
+    'isEnabled',
+    'innerText',
+    'isChecked',
+    'isHidden',
+    'locator',
+  ];
+
+  const extendedMethods: Partial<Record<keyof Page, Function>> = {};
+
+  for (const method of methods) {
+    extendedMethods[method] = (...args: any[]) => {
+      const selector = args[0];
+      const testSubjSelector = subj(selector);
+      return (page[method] as Function)(testSubjSelector, ...args.slice(1));
+    };
+  }
+
+  return extendedMethods as Record<keyof Page, any>;
 }
 
-export const scoutPageFixture = base.extend<{ page: ScoutPage }>({
-  page: async ({ page }, use) => {
+/**
+ * Extends the 'page' fixture with Kibana-specific functionality
+ *
+ * 1. Allow calling methods with simplified 'data-test-subj' selectors.
+ * Instead of manually constructing 'data-test-subj' selectors, this extension provides a `testSubj` object on the page
+ * Supported methods include `click`, `check`, `fill`, and others that interact with `data-test-subj`.
+ *
+ * Example Usage:
+ *
+ * ```typescript
+ * // Without `testSubj` extension:
+ * await page.locator('[data-test-subj="foo"][data-test-subj="bar"]').click();
+ *
+ * // With `testSubj` extension:
+ * await page.testSubj.click('foo & bar');
+ * ```
+ *
+ * 2. Navigate to Kibana apps by using 'kbnUrl' fixture
+ *
+ * Example Usage:
+ *
+ * ```typescript
+ * // Navigate to '/app/discover'
+ * await page.gotoApp('discover);
+ * ```
+ */
+export const scoutPageFixture = base.extend<{ page: ScoutPage; kbnUrl: KibanaUrl }>({
+  page: async ({ page, kbnUrl }, use) => {
+    // Extend page with '@kbn/test-subj-selector' support
     page.testSubj = extendPageWithTestSubject(page);
+
+    // Method to navigate to specific Kibana apps
+    page.gotoApp = (appName: string) => page.goto(kbnUrl.app(appName));
 
     await use(page);
   },

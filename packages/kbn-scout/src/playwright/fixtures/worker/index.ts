@@ -25,9 +25,7 @@ import { ScoutTestOptions } from '../../types';
 export const scoutWorkerFixtures = base.extend<{}, ScoutWorkerFixtures>({
   log: [
     ({}, use) => {
-      const logInstance = createLogger();
-
-      use(logInstance);
+      use(createLogger());
     },
     { scope: 'worker' },
   ],
@@ -46,27 +44,21 @@ export const scoutWorkerFixtures = base.extend<{}, ScoutWorkerFixtures>({
 
   kbnUrl: [
     ({ config, log }, use) => {
-      const kbnUrlInstance = createKbnUrl(config, log);
-
-      use(kbnUrlInstance);
+      use(createKbnUrl(config, log));
     },
     { scope: 'worker' },
   ],
 
   esClient: [
     ({ config, log }, use) => {
-      const esClientInstance = createEsClient(config, log);
-
-      use(esClientInstance);
+      use(createEsClient(config, log));
     },
     { scope: 'worker' },
   ],
 
   kbnClient: [
     ({ log, config }, use) => {
-      const kbnClientInstance = createKbnClient(config, log);
-
-      use(kbnClientInstance);
+      use(createKbnClient(config, log));
     },
     { scope: 'worker' },
   ],
@@ -85,9 +77,7 @@ export const scoutWorkerFixtures = base.extend<{}, ScoutWorkerFixtures>({
 
   samlAuth: [
     ({ log, config }, use) => {
-      const sessionManager = createSamlSessionManager(config, log);
-
-      use(sessionManager);
+      use(createSamlSessionManager(config, log));
     },
     { scope: 'worker' },
   ],

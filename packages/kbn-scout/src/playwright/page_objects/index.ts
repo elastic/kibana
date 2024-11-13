@@ -10,31 +10,23 @@
 import { ScoutPage } from '../fixtures/types';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
-import type { KibanaUrl } from '../../common/services';
+import { createLazyPageObject } from './utils';
 
 export interface PageObjects {
   datePicker: DatePicker;
   discover: DiscoverApp;
 }
 
-export function createLazyPageObjects(page: ScoutPage, kbnUrl: KibanaUrl): PageObjects {
-  return new Proxy({} as Partial<PageObjects>, {
-    get: (target, prop: keyof PageObjects) => {
-      if (!(prop in target)) {
-        // Lazy-load and cache the instance
-        switch (prop) {
-          case 'datePicker':
-            target[prop] = new DatePicker(page);
-            break;
-          case 'discover':
-            target[prop] = new DiscoverApp(page, kbnUrl);
-            break;
-          // Add other cases as needed for additional page objects
-          default:
-            throw new Error(`Unknown page object: ${String(prop)}`);
-        }
-      }
-      return target[prop];
-    },
-  }) as PageObjects;
+/**
+ * Creates a set of core page objects, each lazily instantiated on first access.
+ *
+ * @param page - `ScoutPage` instance used for initializing page objects.
+ * @returns An object containing lazy-loaded core page objects.
+ */
+export function createCorePageObjects(page: ScoutPage): PageObjects {
+  return {
+    datePicker: createLazyPageObject(DatePicker, page),
+    discover: createLazyPageObject(DiscoverApp, page),
+    // Add new page objects here
+  };
 }

@@ -32,3 +32,9 @@ export interface ScoutWorkerFixtures {
   esArchiver: EsArchiverFixture;
   samlAuth: SamlSessionManager;
 }
+
+// re-export to import types from '@kbn-scout'
+export type { KbnClient, SamlSessionManager } from '@kbn/test';
+export type { ToolingLog } from '@kbn/tooling-log';
+export type { Client } from '@elastic/elasticsearch';
+export type { KibanaUrl } from '../../../common/services/kibana_url';

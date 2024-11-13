@@ -8,10 +8,12 @@
  */
 
 import { Page } from 'playwright/test';
+import { PageObjects } from '../../page_objects';
 
 export interface ScoutTestFixtures {
   browserAuth: LoginFixture;
   page: ScoutPage;
+  pageObjects: PageObjects;
 }
 
 export interface LoginFixture {
@@ -21,6 +23,7 @@ export interface LoginFixture {
 }
 
 export type ScoutPage = Page & {
+  gotoApp: (appName: string, options?: Parameters<Page['goto']>[1]) => ReturnType<Page['goto']>;
   testSubj: {
     check: (selector: string, options?: Parameters<Page['check']>[1]) => ReturnType<Page['check']>;
     click: (selector: string, options?: Parameters<Page['click']>[1]) => ReturnType<Page['click']>;

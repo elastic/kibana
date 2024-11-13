@@ -8,18 +8,13 @@
  */
 
 import { test as base } from '@playwright/test';
-import { KibanaUrl } from '../../../common';
-import { ScoutPage } from '../types';
-import { PageObjects, createLazyPageObjects } from '../../page_objects';
+import { ScoutTestFixtures, ScoutWorkerFixtures } from '../types';
+import { createCorePageObjects } from '../../page_objects';
 
-export const pageObjectsFixture = base.extend<{
-  page: ScoutPage;
-  kbnUrl: KibanaUrl;
-  pageObjects: PageObjects;
-}>({
-  pageObjects: async ({ page, kbnUrl }, use) => {
-    const pages = createLazyPageObjects(page, kbnUrl);
+export const pageObjectsFixture = base.extend<ScoutTestFixtures, ScoutWorkerFixtures>({
+  pageObjects: async ({ page }, use) => {
+    const corePageObjects = createCorePageObjects(page);
 
-    await use(pages);
+    await use(corePageObjects);
   },
 });

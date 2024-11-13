@@ -9,5 +9,12 @@
 
 export { startServersCli } from './src/cli/start_servers_cli';
 
-export { expect, test, createPlaywrightConfig } from './src/playwright';
-export type { ScoutPlaywrightOptions, ScoutTestOptions } from './src/playwright';
+export { expect, test, createPlaywrightConfig, createLazyPageObject } from './src/playwright';
+export type {
+  ScoutPage,
+  ScoutPlaywrightOptions,
+  ScoutTestOptions,
+  PageObjects,
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
+} from './src/playwright';

@@ -13,3 +13,13 @@ import { scoutWorkerFixtures } from './worker';
 import { scoutTestFixtures } from './test';
 
 export const scoutCoreFixtures = mergeTests(scoutWorkerFixtures, scoutTestFixtures);
+
+export type {
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
+  ScoutPage,
+  Client,
+  KbnClient,
+  KibanaUrl,
+  ToolingLog,
+} from './types';

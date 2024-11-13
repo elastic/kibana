@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaUrl } from '../../common/services/kibana_url';
 import { ScoutPage } from '../fixtures/types';
 
 export class DiscoverApp {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(private readonly page: ScoutPage) {}
 
   async goto() {
-    await this.page.goto(this.kbnUrl.app('discover'));
+    await this.page.gotoApp('discover');
   }
 }

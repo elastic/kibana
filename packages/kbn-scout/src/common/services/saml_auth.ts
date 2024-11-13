@@ -8,28 +8,44 @@
  */
 
 import path from 'path';
+import { URL } from 'url';
 import {
   SERVERLESS_ROLES_ROOT_PATH,
   STATEFUL_ROLES_ROOT_PATH,
   readRolesDescriptorsFromResource,
 } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { SamlSessionManager } from '@kbn/test';
+import { HostOptions, SamlSessionManager } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ScoutServerConfig } from '../../types';
 import { Protocol } from '../../playwright/types';
 import { serviceLoadedMsg } from '../../playwright/utils';
 
-export const createSamlSessionManager = (config: ScoutServerConfig, log: ToolingLog) => {
+const getResourceDirPath = (config: ScoutServerConfig) => {
+  return config.serverless
+    ? path.resolve(SERVERLESS_ROLES_ROOT_PATH, config.projectType!)
+    : path.resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH);
+};
+
+const createKibanaHostOptions = (config: ScoutServerConfig): HostOptions => {
   const kibanaUrl = new URL(config.hosts.kibana);
   kibanaUrl.username = config.auth.username;
   kibanaUrl.password = config.auth.password;
 
-  const resourceDirPath = path.resolve(
-    ...(config.serverless
-      ? [SERVERLESS_ROLES_ROOT_PATH, config.projectType!]
-      : [REPO_ROOT, STATEFUL_ROLES_ROOT_PATH])
-  );
+  return {
+    protocol: kibanaUrl.protocol.replace(':', '') as Protocol,
+    hostname: kibanaUrl.hostname,
+    port: Number(kibanaUrl.port),
+    username: kibanaUrl.username,
+    password: kibanaUrl.password,
+  };
+};
+
+export const createSamlSessionManager = (
+  config: ScoutServerConfig,
+  log: ToolingLog
+): SamlSessionManager => {
+  const resourceDirPath = getResourceDirPath(config);
   const rolesDefinitionPath = path.resolve(resourceDirPath, 'roles.yml');
 
   const supportedRoleDescriptors = readRolesDescriptorsFromResource(rolesDefinitionPath) as Record<
@@ -39,13 +55,7 @@ export const createSamlSessionManager = (config: ScoutServerConfig, log: Tooling
   const supportedRoles = Object.keys(supportedRoleDescriptors);
 
   const sessionManager = new SamlSessionManager({
-    hostOptions: {
-      protocol: kibanaUrl.protocol.replace(':', '') as Protocol,
-      hostname: kibanaUrl.hostname,
-      port: Number(kibanaUrl.port),
-      username: kibanaUrl.username,
-      password: kibanaUrl.password,
-    },
+    hostOptions: createKibanaHostOptions(config),
     log,
     isCloud: config.isCloud,
     supportedRoles: {
