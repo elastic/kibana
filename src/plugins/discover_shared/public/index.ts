@@ -19,7 +19,6 @@ export type {
   ObservabilityLogsAIAssistantFeature,
   SecuritySolutionCellRendererFeature,
   SecuritySolutionAppWrapperFeature,
-  SecuritySolutionReduxStoreInitFeature,
   DiscoverFeature,
   DiscoverFeaturesServiceSetup,
   DiscoverFeaturesServiceStart,

@@ -40,27 +40,14 @@ export interface SecuritySolutionCellRendererFeature {
   >;
 }
 
-export interface SecuritySolutionAppWrapperFeatureArgs {
-  store: unknown;
-}
-
 export interface SecuritySolutionAppWrapperFeature {
   id: 'security-solution-app-wrapper';
-  getWrapper: () => Promise<
-    (args: SecuritySolutionAppWrapperFeatureArgs) => FunctionComponent<PropsWithChildren<{}>>
-  >;
-}
-
-export interface SecuritySolutionReduxStoreInitFeature {
-  id: 'security-solution-redux-store-init';
-  /* returns the security's redux store instance */
-  get: () => Promise<unknown>;
+  getWrapper: () => Promise<() => FunctionComponent<PropsWithChildren<{}>>>;
 }
 
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
-  | SecuritySolutionAppWrapperFeature
-  | SecuritySolutionReduxStoreInitFeature;
+  | SecuritySolutionAppWrapperFeature;
 /** ****************************************************************************************/
 
 // This should be a union of all the available client features.

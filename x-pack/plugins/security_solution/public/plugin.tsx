@@ -24,7 +24,6 @@ import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_met
 import type {
   SecuritySolutionAppWrapperFeature,
   SecuritySolutionCellRendererFeature,
-  SecuritySolutionReduxStoreInitFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
@@ -245,6 +244,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const [coreStart, startPlugins] = await core.getStartServices();
 
         const services = await this.services.generateServices(coreStart, startPlugins);
+        const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
+        const securityStoreForDiscover = await this.getStoreForDiscover(
+          coreStart,
+          startPlugins,
+          subPlugins
+        );
 
         const { createSecuritySolutionDiscoverAppWrapperGetter } =
           await this.getLazyDiscoverSharedDeps();
@@ -253,24 +258,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           core: coreStart,
           services,
           plugins: startPlugins,
+          store: securityStoreForDiscover,
         });
-      },
-    };
-
-    const securityReduxStoreInitFeature: SecuritySolutionReduxStoreInitFeature = {
-      id: 'security-solution-redux-store-init',
-      get: async () => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-
-        const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
-
-        return this.getStoreForDiscover(coreStart, startPlugins, subPlugins);
       },
     };
 
     discoverFeatureRegistry.register(cellRendererFeature);
     discoverFeatureRegistry.register(appWrapperFeature);
-    discoverFeatureRegistry.register(securityReduxStoreInitFeature);
   }
 
   public async getLazyDiscoverSharedDeps() {

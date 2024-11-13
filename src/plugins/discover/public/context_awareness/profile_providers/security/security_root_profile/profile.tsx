@@ -16,7 +16,6 @@ import { createCellRendererAccessor } from '../accessors/get_cell_renderer_acces
 import { createAppWrapperAccessor } from '../accessors/create_app_wrapper_accessor';
 
 interface SecurityRootProfileContext {
-  store?: unknown;
   appWrapper?: FunctionComponent<PropsWithChildren<{}>>;
   getCellRenderer?: (
     fieldName: string
@@ -32,9 +31,6 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
   const discoverFeaturesRegistry = discoverShared.features.registry;
   const cellRendererFeature = discoverFeaturesRegistry.getById('security-solution-cell-renderer');
   const appWrapperFeature = discoverFeaturesRegistry.getById('security-solution-app-wrapper');
-  const reduxStoreInitFeature = discoverFeaturesRegistry.getById(
-    'security-solution-redux-store-init'
-  );
 
   return {
     profileId: 'security-root-profile',
@@ -74,7 +70,6 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
         };
       }
 
-      const store = await reduxStoreInitFeature?.get();
       const getAppWrapper = await createAppWrapperAccessor(appWrapperFeature);
       const getCellRenderer = await createCellRendererAccessor(cellRendererFeature);
 
@@ -82,8 +77,7 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
         isMatch: true,
         context: {
           solutionType: SolutionType.Security,
-          store,
-          appWrapper: getAppWrapper?.({ store }),
+          appWrapper: getAppWrapper?.(),
           getCellRenderer,
         },
       };

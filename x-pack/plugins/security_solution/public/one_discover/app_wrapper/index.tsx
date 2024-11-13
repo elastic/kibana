@@ -30,14 +30,19 @@ export const createSecuritySolutionDiscoverAppWrapperGetter = ({
   core,
   services,
   plugins,
+  store,
 }: {
   core: CoreStart;
   services: StartServices;
   plugins: StartPluginsDependencies;
+  /**
+   * instance of Security App store that should be used in Discover
+   */
+  store: SecurityAppStore;
 }) => {
   const getSecuritySolutionDiscoverAppWrapper: Awaited<
     ReturnType<SecuritySolutionAppWrapperFeature['getWrapper']>
-  > = ({ store }) => {
+  > = () => {
     return function SecuritySolutionDiscoverAppWrapper({ children }) {
       const CasesContext = useMemo(() => plugins.cases.ui.getCasesContext(), []);
 
@@ -81,7 +86,7 @@ export const createSecuritySolutionDiscoverAppWrapperGetter = ({
                   <NavigationProvider core={core}>
                     <UpsellingProvider upsellingService={services.upselling}>
                       {/* ^_^ Needed for Alert Preview from Expanded Section of Entity Flyout */}
-                      <ReduxStoreProvider store={store as SecurityAppStore}>
+                      <ReduxStoreProvider store={store}>
                         <ReactQueryClientProvider>
                           <ConsoleManager>
                             {/* ^_^ Needed for AlertPreview -> Alert Details Flyout Action */}
