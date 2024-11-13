@@ -5938,7 +5938,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils@link:x-pack/packages/observability/observability_utils":
+"@kbn/observability-utils-browser@link:x-pack/packages/observability/observability_utils/observability_utils_browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-utils-common@link:x-pack/packages/observability/observability_utils/observability_utils_common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-utils-server@link:x-pack/packages/observability/observability_utils/observability_utils_server":
   version "0.0.0"
   uid ""
 
