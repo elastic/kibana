@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { v1 as uuidv1 } from 'uuid';
-
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { KueryNode } from '@kbn/es-query';
 import { toElasticsearchQuery, toKqlExpression } from '@kbn/es-query';
@@ -496,18 +494,14 @@ describe('utils', () => {
       [CaseStatuses['in-progress'], CasePersistedStatus.IN_PROGRESS],
       [CaseStatuses.closed, CasePersistedStatus.CLOSED],
     ])('creates a filter for status "%s"', (status, expectedStatus) => {
-      expect(constructQueryOptions({ status }).filter).toMatchInlineSnapshot(`
-        Object {
-          "arguments": Array [
-            Object {
-              "isQuoted": false,
-              "type": "literal",
-              "value": "cases.attributes.status",
-            },
-            Object {
-              "isQuoted": false,
-              "type": "literal",
-              "value": "`);
+      expect(constructQueryOptions({ status }).filter).toMatchObject({
+        arguments: [
+          { isQuoted: false, type: 'literal', value: 'cases.attributes.status' },
+          { isQuoted: false, type: 'literal', value: `${expectedStatus}` },
+        ],
+        function: 'is',
+        type: 'function',
+      });
     });
 
     it('should create a filter for multiple status values', () => {
@@ -560,18 +554,14 @@ describe('utils', () => {
       [CaseSeverity.HIGH, CasePersistedSeverity.HIGH],
       [CaseSeverity.CRITICAL, CasePersistedSeverity.CRITICAL],
     ])('creates a filter for severity "%s"', (severity, expectedSeverity) => {
-      expect(constructQueryOptions({ severity }).filter).toMatchInlineSnapshot(`
-        Object {
-          "arguments": Array [
-            Object {
-              "isQuoted": false,
-              "type": "literal",
-              "value": "cases.attributes.severity",
-            },
-            Object {
-              "isQuoted": false,
-              "type": "literal",
-              "value": "`);
+      expect(constructQueryOptions({ severity }).filter).toMatchObject({
+        arguments: [
+          { isQuoted: false, type: 'literal', value: 'cases.attributes.severity' },
+          { isQuoted: false, type: 'literal', value: `${expectedSeverity}` },
+        ],
+        function: 'is',
+        type: 'function',
+      });
     });
 
     it('should create a filter for multiple severity values', () => {
@@ -1093,7 +1083,7 @@ describe('utils', () => {
     const savedObjectsSerializer = createSavedObjectsSerializerMock();
 
     it('returns the rootSearchFields and search with correct values when given a uuid', () => {
-      const uuid = uuidv1(); // the specific version is irrelevant
+      const uuid = 'b52e293e-4a37-4e67-9aa6-716bb6e69b42'; // the specific version is irrelevant
 
       expect(constructSearch(uuid, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer))
         .toMatchInlineSnapshot(`
@@ -1101,7 +1091,9 @@ describe('utils', () => {
           "rootSearchFields": Array [
             "_id",
           ],
-          "search": "\\"`);
+          "search": "\\"b52e293e-4a37-4e67-9aa6-716bb6e69b42\\" \\"cases:b52e293e-4a37-4e67-9aa6-716bb6e69b42\\"",
+        }
+      `);
     });
 
     it('search value not changed and no rootSearchFields when search is non-uuid', () => {
