@@ -38,20 +38,14 @@ import { useIndexDocumentSearch } from '../../hooks/api/use_document_search';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
+import { usePageChrome } from '../../hooks/use_page_chrome';
+import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const tabId = decodeURIComponent(useParams<{ tabId: string }>().tabId);
 
-  const {
-    console: consolePlugin,
-    docLinks,
-    application,
-    history,
-    share,
-    chrome,
-    serverless,
-  } = useKibana().services;
+  const { console: consolePlugin, docLinks, application, history, share } = useKibana().services;
   const {
     data: index,
     refetch,
@@ -84,23 +78,12 @@ export const SearchIndexDetailsPage = () => {
     setHasDocuments(!(!isInitialLoading && indexDocuments?.results?.data.length === 0));
   }, [indexDocuments, isInitialLoading, setHasDocuments, setDocumentsLoading]);
 
-  useEffect(() => {
-    chrome.docTitle.change(indexName);
-
-    if (serverless) {
-      serverless.setBreadcrumbs([
-        {
-          text: i18n.translate('xpack.searchIndices.indexBreadcrumbLabel', {
-            defaultMessage: 'Index Management',
-          }),
-          href: '/app/management/data/index_management/indices',
-        },
-        {
-          text: indexName,
-        },
-      ]);
-    }
-  }, [chrome, indexName, serverless]);
+  usePageChrome(indexName, [
+    ...IndexManagementBreadcrumbs,
+    {
+      text: indexName,
+    },
+  ]);
 
   const usageTracker = useUsageTracker();
 

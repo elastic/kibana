@@ -20,6 +20,9 @@ import {
   FLEET_FINAL_PIPELINE_CONTENT,
   FLEET_FINAL_PIPELINE_ID,
   FLEET_FINAL_PIPELINE_VERSION,
+  FLEET_EVENT_INGESTED_PIPELINE_ID,
+  FLEET_EVENT_INGESTED_PIPELINE_VERSION,
+  FLEET_EVENT_INGESTED_PIPELINE_CONTENT,
 } from '../../../../constants';
 import { getPipelineNameForDatastream } from '../../../../../common/services';
 import type { ArchiveEntry, PackageInstallContext } from '../../../../../common/types';
@@ -293,6 +296,39 @@ export async function ensureFleetFinalPipelineIsInstalled(
       pipeline: {
         nameForInstallation: FLEET_FINAL_PIPELINE_ID,
         contentForInstallation: FLEET_FINAL_PIPELINE_CONTENT,
+        extension: 'yml',
+      },
+    });
+    return { isCreated: true };
+  }
+
+  return { isCreated: false };
+}
+
+export async function ensureFleetEventIngestedPipelineIsInstalled(
+  esClient: ElasticsearchClient,
+  logger: Logger
+) {
+  const esClientRequestOptions: TransportRequestOptions = {
+    ignore: [404],
+  };
+  const res = await esClient.ingest.getPipeline(
+    { id: FLEET_EVENT_INGESTED_PIPELINE_ID },
+    { ...esClientRequestOptions, meta: true }
+  );
+
+  const installedVersion = res?.body[FLEET_EVENT_INGESTED_PIPELINE_ID]?.version;
+  if (
+    res.statusCode === 404 ||
+    !installedVersion ||
+    installedVersion < FLEET_EVENT_INGESTED_PIPELINE_VERSION
+  ) {
+    await installPipeline({
+      esClient,
+      logger,
+      pipeline: {
+        nameForInstallation: FLEET_EVENT_INGESTED_PIPELINE_ID,
+        contentForInstallation: FLEET_EVENT_INGESTED_PIPELINE_CONTENT,
         extension: 'yml',
       },
     });

@@ -13643,6 +13643,138 @@
         }
       }
     },
+    "investigation": {
+      "properties": {
+        "investigation": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of investigations in the cluster"
+              }
+            },
+            "by_status": {
+              "properties": {
+                "triage": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of investigations in triage status in the cluster"
+                  }
+                },
+                "active": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of investigations in active status in the cluster"
+                  }
+                },
+                "mitigated": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of investigations in mitigated status in the cluster"
+                  }
+                },
+                "resolved": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of investigations in resolved status in the cluster"
+                  }
+                },
+                "cancelled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of investigations in cancelled status in the cluster"
+                  }
+                }
+              }
+            },
+            "by_origin": {
+              "properties": {
+                "alert": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of investigations created from alerts in the cluster"
+                  }
+                },
+                "blank": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of investigations created from scratch in the cluster"
+                  }
+                }
+              }
+            },
+            "items": {
+              "properties": {
+                "avg": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The average number of items across all investigations in the cluster"
+                  }
+                },
+                "p90": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The 90th percentile of the number of items across all investigations in the cluster"
+                  }
+                },
+                "p95": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The 95th percentile of the number of items across all investigations in the cluster"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of items across all investigations in the cluster"
+                  }
+                },
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of items across all investigations in the cluster"
+                  }
+                }
+              }
+            },
+            "notes": {
+              "properties": {
+                "avg": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The average number of notes across all investigations in the cluster"
+                  }
+                },
+                "p90": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The 90th percentile of the number of notes across all investigations in the cluster"
+                  }
+                },
+                "p95": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The 95th percentile of the number of notes across all investigations in the cluster"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of notes across all investigations in the cluster"
+                  }
+                },
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of notes across all investigations in the cluster"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "kibana_settings": {
       "properties": {
         "xpack": {
