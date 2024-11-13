@@ -5,20 +5,33 @@
  * 2.0.
  */
 
-import { ObservabilityError, SecurityException, SLOIdConflict, SLONotFound } from './errors';
+import { Boom, badRequest, conflict, forbidden, notFound } from '@hapi/boom';
+import { SLOError, SecurityException, SLOIdConflict, SLONotFound } from './errors';
 
-export function getHTTPResponseCode(error: ObservabilityError): number {
+function handleSLOError(error: SLOError): Boom {
   if (error instanceof SLONotFound) {
-    return 404;
+    return notFound(error.message);
   }
 
   if (error instanceof SLOIdConflict) {
-    return 409;
+    return conflict(error.message);
   }
 
   if (error instanceof SecurityException) {
-    return 403;
+    return forbidden(error.message);
   }
 
-  return 400;
+  return badRequest(error.message);
+}
+
+export async function executeWithErrorHandler(fn: () => Promise<any>): Promise<any> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (error instanceof SLOError) {
+      throw handleSLOError(error);
+    }
+
+    throw error;
+  }
 }

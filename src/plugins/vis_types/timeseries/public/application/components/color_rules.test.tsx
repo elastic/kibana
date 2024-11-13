@@ -81,7 +81,7 @@ describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js'
     it('should handle change of operator and value correctly', () => {
       collectionActions.handleChange = jest.fn();
       const wrapper = mountWithIntl(<ColorRules {...defaultProps} />);
-      const operatorInput = findTestSubject(wrapper, 'colorRuleOperator');
+      const operatorInput = findTestSubject(wrapper, 'colorRuleOperator').find('input');
       operatorInput.simulate('keyDown', { key: keys.ARROW_DOWN });
       operatorInput.simulate('keyDown', { key: keys.ARROW_DOWN });
       operatorInput.simulate('keyDown', { key: keys.ENTER });
