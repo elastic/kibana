@@ -25,11 +25,7 @@ import { getSortConfig, removeSOAttributes } from '../../../../../../../common';
 
 import { getSortFieldForAPI } from './use_fetch_agents_data';
 
-export function useExportCSV(
-  agents: Agent[] | string,
-  sortOptions?: { field?: string; direction?: string },
-  enableExportCSV?: boolean
-) {
+export function useExportCSV(enableExportCSV?: boolean) {
   const startServices = useStartServices();
   const { notifications, http, uiSettings } = startServices;
   const kibanaVersion = useKibanaVersion();
@@ -38,7 +34,9 @@ export function useExportCSV(
   useEffect(() => {
     const getRuntimeFields = async () => {
       const resp = await sendGetAgentStatusRuntimeField();
-      if (resp.data) setRuntimeFields(resp.data);
+      if (resp.data) {
+        setRuntimeFields(resp.data);
+      }
     };
     if (!enableExportCSV) {
       return;
@@ -46,64 +44,67 @@ export function useExportCSV(
     getRuntimeFields();
   }, [enableExportCSV]);
 
-  // TODO pass columns from Agent list UI
-  // TODO set readable column names
-  const columns = [
-    { field: 'agent.id' },
-    { field: 'status' },
-    { field: 'local_metadata.host.hostname' },
-    { field: 'policy_id' }, // policy name would need to be enriched
-    { field: 'last_checkin' },
-    { field: 'local_metadata.elastic.agent.version' },
-  ];
+  const getJobParams = (
+    agents: Agent[] | string,
+    sortOptions?: { field?: string; direction?: string }
+  ) => {
+    // TODO pass columns from Agent list UI
+    // TODO set readable column names
+    const columns = [
+      { field: 'agent.id' },
+      { field: 'status' },
+      { field: 'local_metadata.host.hostname' },
+      { field: 'policy_id' }, // policy name would need to be enriched
+      { field: 'last_checkin' },
+      { field: 'local_metadata.elastic.agent.version' },
+    ];
 
-  const index = new DataView({
-    spec: {
-      title: '.fleet-agents',
-      allowHidden: true,
-      runtimeFieldMap: {
-        status: {
-          type: 'keyword',
-          script: {
-            source: runtimeFields,
+    const index = new DataView({
+      spec: {
+        title: '.fleet-agents',
+        allowHidden: true,
+        runtimeFieldMap: {
+          status: {
+            type: 'keyword',
+            script: {
+              source: runtimeFields,
+            },
           },
         },
       },
-    },
-    fieldFormats: {} as FieldFormatsStartCommon,
-  });
+      fieldFormats: {} as FieldFormatsStartCommon,
+    });
 
-  let query: string;
-  if (Array.isArray(agents)) {
-    query = `agent.id:(${agents.map((agent) => agent.id).join(' OR ')})`;
-  } else {
-    query = agents;
-  }
+    let query: string;
+    if (Array.isArray(agents)) {
+      query = `agent.id:(${agents.map((agent) => agent.id).join(' OR ')})`;
+    } else {
+      query = agents;
+    }
 
-  const sortField = getSortFieldForAPI(sortOptions?.field ?? 'enrolled_at');
-  const sortOrder = (sortOptions?.direction as SortDirection) ?? SortDirection.desc;
+    const sortField = getSortFieldForAPI(sortOptions?.field ?? 'enrolled_at');
+    const sortOrder = (sortOptions?.direction as SortDirection) ?? SortDirection.desc;
 
-  const sort = getSortConfig(sortField, sortOrder) as EsQuerySortValue[];
+    const sort = getSortConfig(sortField, sortOrder) as EsQuerySortValue[];
 
-  const searchSource: SearchSourceFields = {
-    type: 'search',
-    query: {
-      query: '',
-      language: 'kuery',
-    },
-    filter: {
-      meta: {
-        index: 'fleet-agents',
-        params: {},
+    const searchSource: SearchSourceFields = {
+      type: 'search',
+      query: {
+        query: '',
+        language: 'kuery',
       },
-      query: toElasticsearchQuery(fromKueryExpression(removeSOAttributes(query))),
-    },
-    fields: columns,
-    index,
-    sort,
-  };
+      filter: {
+        meta: {
+          index: 'fleet-agents',
+          params: {},
+        },
+        query: toElasticsearchQuery(fromKueryExpression(removeSOAttributes(query))),
+      },
+      fields: columns,
+      index,
+      sort,
+    };
 
-  const getJobParams = () => {
     return {
       title: 'Agent List',
       objectType: 'search',
@@ -115,8 +116,11 @@ export function useExportCSV(
   const apiClient = new ReportingAPIClient(http, uiSettings, kibanaVersion);
 
   // copied and adapted logic from here: https://github.com/elastic/kibana/blob/2846a162de7e56d2107eeb2e33e006a3310a4ae1/packages/kbn-reporting/public/share/share_context_menu/register_csv_modal_reporting.tsx#L86
-  const generateReportingJobCSV = () => {
-    const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
+  const generateReportingJobCSV = (
+    agents: Agent[] | string,
+    sortOptions?: { field?: string; direction?: string }
+  ) => {
+    const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams(agents, sortOptions));
     return apiClient
       .createReportingShareJob('csv_searchsource', decoratedJobParams)
       .then(() => {

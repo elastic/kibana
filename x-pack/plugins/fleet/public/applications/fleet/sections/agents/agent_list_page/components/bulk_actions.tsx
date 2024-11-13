@@ -104,14 +104,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
   const { diagnosticFileUploadEnabled, enableExportCSV } = ExperimentalFeaturesService.get();
 
-  const { generateReportingJobCSV } = useExportCSV(
-    agents,
-    {
-      field: sortField,
-      direction: sortOrder,
-    },
-    enableExportCSV
-  );
+  const { generateReportingJobCSV } = useExportCSV(enableExportCSV);
 
   const menuItems = [
     {
@@ -248,7 +241,10 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             icon: <EuiIcon type="exportAction" size="m" />,
             onClick: () => {
               closeMenu();
-              generateReportingJobCSV();
+              generateReportingJobCSV(agents, {
+                field: sortField,
+                direction: sortOrder,
+              });
             },
           },
         ]
