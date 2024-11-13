@@ -7,17 +7,23 @@
 import { CoreSetup, Logger } from '@kbn/core/server';
 import { groupBy, mapValues } from 'lodash';
 import pLimit from 'p-limit';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { from, map, share } from 'rxjs';
+import { createIndexPatternMatcher } from './create_index_pattern_matcher';
+import { getDataStreamsForQuery } from './get_data_streams_for_query';
 import {
   DataDefinition,
   DataDefinitionRegistry,
   DataDefinitionRegistryClient,
-  DynamicDataDefinition,
-  StaticDataDefinition,
   DynamicDataAsset,
+  DynamicDataDefinition,
   GetMetricDefinitionResult,
+  InternalGetMetricDefinitionOptions,
+  InternalGetMetricDefinitionResult,
+  InternalGetTimeseriesOptionsOf,
+  InternalGetTimeseriesResult,
+  StaticDataDefinition,
 } from './types';
-import { getDataStreamsForQuery } from './get_data_streams_for_query';
-import { createIndexPatternMatcher } from './create_index_pattern_matcher';
 
 const NAME_ALL = '_all_';
 
@@ -90,11 +96,21 @@ export function createDataDefinitionRegistry({
       staticDefinitions.add(definition);
     },
     registerDynamicDataDefinition: (
-      metadata: { id: string; asset: { type: string; name?: string } },
+      metadata: {
+        id: string;
+        asset: {
+          type: string;
+          name?: string;
+        };
+      },
       getScopes: DynamicDataDefinition['getScopes'],
-      ...args:
-        | []
-        | [DynamicDataDefinition['getMetricDefinitions'], DynamicDataDefinition['getTimeseries']]
+      getMetricDefinitions?: (
+        options: InternalGetMetricDefinitionOptions,
+        assets?: DynamicDataAsset[]
+      ) => Promise<InternalGetMetricDefinitionResult>,
+      getTimeseries?: (
+        options: InternalGetTimeseriesOptionsOf<InternalGetMetricDefinitionResult>
+      ) => Promise<InternalGetTimeseriesResult>
     ) => {
       if (getDynamicDefinitionForAsset(metadata.asset)) {
         throw new Error(
@@ -106,8 +122,8 @@ export function createDataDefinitionRegistry({
         id: metadata.id,
         asset: metadata.asset,
         getScopes,
-        getMetricDefinitions: args[0],
-        getTimeseries: args[1],
+        getMetricDefinitions,
+        getTimeseries,
       };
 
       setDynamicDefinitionForSource(definition);
@@ -121,20 +137,35 @@ export function createDataDefinitionRegistry({
 
       const withClients = { esClient, soClient, request };
 
+      function createDataStreams$({
+        query,
+        index,
+      }: {
+        query: QueryDslQueryContainer;
+        index: string | string[];
+      }) {
+        return from(
+          getDataStreamsForQuery({
+            esClient: esClient.asCurrentUser,
+            query,
+            index,
+          })
+        ).pipe(
+          map((dataStreams) => {
+            return createIndexPatternMatcher(dataStreams);
+          }),
+          share()
+        );
+      }
+
       const client: DataDefinitionRegistryClient = {
         getScopes: async (options) => {
           const { query, start, end, index } = options;
 
-          const dataStreams = await getDataStreamsForQuery({
-            esClient: esClient.asCurrentUser,
-            query,
-            index,
-          });
-
           const optionsWithClient = {
             start,
             end,
-            dataStreams: createIndexPatternMatcher(dataStreams),
+            dataStreams$: createDataStreams$({ query, index }),
             ...withClients,
           };
 
@@ -165,7 +196,7 @@ export function createDataDefinitionRegistry({
           const optionsWithClient = {
             start,
             end,
-            dataStreams: createIndexPatternMatcher(dataStreams),
+            dataStreams$: createDataStreams$({ query, index }),
             ...withClients,
           };
 
@@ -178,7 +209,7 @@ export function createDataDefinitionRegistry({
                   .getMetricDefinitions(optionsWithClient, assetsByDefinitionId[definition.id])
                   .then((metricDefinitionsFromDefinition) =>
                     mapValues(metricDefinitionsFromDefinition, (metricDef) => ({
-                      ...metricDef,
+                      ...metricDef!,
                       definitionId: definition.id,
                     }))
                   );

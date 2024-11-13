@@ -9,6 +9,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { ValuesType } from 'utility-types';
 import { ToolSchema, FromToolSchema } from '@kbn/inference-common';
+import { Observable } from 'rxjs';
 
 interface DataDefinitionBase {
   id: string;
@@ -58,10 +59,10 @@ interface QueryOptions {
 }
 
 interface DataStreamOptions {
-  dataStreams: {
+  dataStreams$: Observable<{
     all: Set<string>;
     matches: (indexPattern: string) => boolean;
-  };
+  }>;
 }
 
 type InternalGetDataScopeOptions = TimeRangeOptions & DataStreamOptions & KibanaClientOptions;
@@ -103,10 +104,13 @@ interface MetricInputOf<
   TMetricId extends string,
   TMetricDefinition extends Omit<MetricDefinition, 'id'>
 > {
-  id: TMetricId;
-  properties: TMetricDefinition['properties'];
+  metric: Omit<TMetricDefinition, 'schema'> & { id: TMetricId };
   input: FromToolSchema<TMetricDefinition['schema']>;
 }
+
+type F = keyof InternalGetTimeseriesOptions['metrics'][number]['metric'];
+type B =
+  keyof InternalGetTimeseriesOptionsOf<InternalGetMetricDefinitionResult>['metrics'][number]['metric'];
 
 type InternalGetTimeseriesOptionsOf<
   TMetricDefinitionResult extends InternalGetMetricDefinitionResult
@@ -222,4 +226,9 @@ export type {
   GetMetricDefinitionResult,
   GetDataScopeResult,
   StaticDataDefinition,
+  InternalGetTimeseriesOptions,
+  InternalGetTimeseriesResult,
+  InternalGetMetricDefinitionOptions,
+  InternalGetTimeseriesOptionsOf,
+  InternalGetMetricDefinitionResult,
 };

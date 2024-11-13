@@ -18,8 +18,11 @@ export function registerDataDefinitions({
 }) {
   plugins.dataDefinitionRegistry?.registerStaticDataDefinition(
     { id: 'apm' },
-    async ({ dataStreams, soClient }) => {
-      const apmIndices = await plugins.apmDataAccess.getApmIndices(soClient);
+    async ({ dataStreams$, soClient }) => {
+      const [apmIndices, dataStreams] = await Promise.all([
+        plugins.apmDataAccess.getApmIndices(soClient),
+        lastValueFrom(dataStreams$),
+      ]);
 
       if (dataStreams.matches(apmIndices.metric)) {
         return {
