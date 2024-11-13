@@ -126,11 +126,14 @@ export const MisconfigurationFindingsDetailsTable = memo(
       return getNavUrlParams({ [queryField]: name }, 'configurations', ['rule.name']);
     };
 
+    const linkWidth = 40;
+    const resultWidth = 74;
+
     const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [
       {
         field: 'rule',
         name: '',
-        width: '5%',
+        width: `${linkWidth}`,
         render: (rule: CspBenchmarkRuleMetadata, finding: MisconfigurationFindingDetailFields) => (
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
@@ -160,7 +163,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             defaultMessage: 'Result',
           }
         ),
-        width: '10%',
+        width: `${resultWidth}px`,
       },
       {
         field: 'rule',
@@ -171,7 +174,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             defaultMessage: 'Rule',
           }
         ),
-        width: '90%',
+        width: `calc(100% - ${linkWidth + resultWidth}px)`,
       },
     ];
 

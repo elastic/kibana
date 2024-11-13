@@ -5,18 +5,14 @@
     "types": [
       "jest",
       "node",
-      "react",
-      "@emotion/react/types/css-prop",
-      "@testing-library/jest-dom",
-      "@testing-library/react"
     ]
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/std",
-    "@kbn/safer-lodash-set",
-    "@kbn/logging-mocks",
+    "@kbn/index-adapter",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ],
 }
