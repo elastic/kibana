@@ -122,7 +122,7 @@ describe('Agent configuration', () => {
       cy.contains('Create configuration').should('not.be.disabled');
     });
 
-    it.skip('persists service environment when clicking on edit button', () => {
+    it('persists service environment when clicking on edit button', () => {
       cy.intercept('GET', '/api/apm/settings/agent-configuration/environments?*').as(
         'serviceEnvironmentApi'
       );
@@ -147,7 +147,7 @@ describe('Agent configuration', () => {
         .should('contain', 'production');
     });
 
-    it.skip('displays All label when selecting all option', () => {
+    it('displays All label when selecting all option', () => {
       cy.intercept('GET', '/api/apm/settings/agent-configuration/environments').as(
         'serviceEnvironmentApi'
       );

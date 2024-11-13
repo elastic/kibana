@@ -88,7 +88,7 @@ describe('Service inventory', () => {
       cy.visitKibana(serviceInventoryHref);
     });
 
-    it.skip('with the correct environment when changing the environment', () => {
+    it('with the correct environment when changing the environment', () => {
       cy.wait(mainAliasNames);
 
       cy.getByTestSubj('environmentFilter').type('{selectall}production');
