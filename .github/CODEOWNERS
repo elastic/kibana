@@ -1457,7 +1457,6 @@ x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor te
 /test/plugin_functional/plugins/kbn_top_nav/ @elastic/kibana-core
 /test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 /test/plugin_functional/plugins/app_link_test @elastic/kibana-core
-/x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 /test/plugin_functional/plugins/saved_object* @elastic/kibana-core
 /test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
 /test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
