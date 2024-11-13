@@ -202,6 +202,9 @@ export const config: PluginConfigDescriptor = {
       }),
 
       internal: schema.object({
+        useMeteringApi: schema.boolean({
+          defaultValue: false,
+        }),
         disableILMPolicies: schema.boolean({
           defaultValue: false,
         }),

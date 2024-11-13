@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { keyBy, keys, merge } from 'lodash';
+import { Dictionary, keyBy, keys, merge } from 'lodash';
 import type { RequestHandler } from '@kbn/core/server';
 import pMap from 'p-map';
 
@@ -13,9 +13,12 @@ import { KibanaSavedObjectType } from '../../../common/types';
 import type { GetDataStreamsResponse } from '../../../common/types';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultFleetErrorHandler } from '../../errors';
-import { dataStreamService } from '../../services/data_streams';
+import { MeteringStats, dataStreamService } from '../../services/data_streams';
 
 import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
+import { IndicesDataStreamsStatsDataStreamsStatsItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { appContextService } from '../../services';
 
 const MANAGED_BY = 'fleet';
 const LEGACY_MANAGED_BY = 'ingest-manager';
@@ -51,10 +54,22 @@ export const getListHandler: RequestHandler = async (context, request, response)
   };
 
   try {
+    const useMeteringApi = appContextService.getConfig()?.internal?.useMeteringApi;
+
     // Get matching data streams, their stats, and package SOs
-    const [dataStreamsInfo, dataStreamStats, packageSavedObjects] = await Promise.all([
+    const [
+      dataStreamsInfo,
+      dataStreamStatsOrUndefined,
+      dataStreamMeteringStatsorUndefined,
+      packageSavedObjects,
+    ] = await Promise.all([
       dataStreamService.getAllFleetDataStreams(esClient),
-      dataStreamService.getAllFleetDataStreamsStats(esClient),
+      useMeteringApi
+        ? undefined
+        : dataStreamService.getAllFleetDataStreamsStats(elasticsearch.client.asSecondaryAuthUser),
+      useMeteringApi
+        ? dataStreamService.getAllFleetMeteringStats(elasticsearch.client.asSecondaryAuthUser)
+        : undefined,
       getPackageSavedObjects(savedObjects.client),
     ]);
 
@@ -67,13 +82,24 @@ export const getListHandler: RequestHandler = async (context, request, response)
 
     const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(filteredDataStreamsInfo, 'name');
 
-    const filteredDataStreamsStats = dataStreamStats.filter(
-      (dss) => !!dataStreamsInfoByName[dss.data_stream]
-    );
-    const dataStreamsStatsByName = keyBy(filteredDataStreamsStats, 'data_stream');
+    let dataStreamsStatsByName: Dictionary<IndicesDataStreamsStatsDataStreamsStatsItem> = {};
+    if (dataStreamStatsOrUndefined) {
+      const filteredDataStreamsStats = dataStreamStatsOrUndefined.filter(
+        (dss) => !!dataStreamsInfoByName[dss.data_stream]
+      );
+      dataStreamsStatsByName = keyBy(filteredDataStreamsStats, 'data_stream');
+    }
+    let dataStreamsMeteringStatsByName: Dictionary<MeteringStats> = {};
+    if (dataStreamMeteringStatsorUndefined) {
+      dataStreamsMeteringStatsByName = keyBy(dataStreamMeteringStatsorUndefined, 'name');
+    }
 
     // Combine data stream info
-    const dataStreams = merge(dataStreamsInfoByName, dataStreamsStatsByName);
+    const dataStreams = merge(
+      dataStreamsInfoByName,
+      dataStreamsStatsByName,
+      dataStreamsMeteringStatsByName
+    );
     const dataStreamNames = keys(dataStreams);
 
     // Map package SOs
@@ -132,10 +158,14 @@ export const getListHandler: RequestHandler = async (context, request, response)
         package: dataStream._meta?.package?.name || '',
         package_version: '',
         last_activity_ms: dataStream.maximum_timestamp, // overridden below if maxIngestedTimestamp agg returns a result
-        size_in_bytes: dataStream.store_size_bytes,
+        size_in_bytes: dataStream.store_size_bytes || dataStream.size_in_bytes,
         // `store_size` should be available from ES due to ?human=true flag
         // but fallback to bytes just in case
-        size_in_bytes_formatted: dataStream.store_size || `${dataStream.store_size_bytes}b`,
+        size_in_bytes_formatted:
+          dataStream.store_size ||
+          new ByteSizeValue(
+            dataStream.store_size_bytes || dataStream.size_in_bytes || 0
+          ).toString(),
         dashboards: [],
         serviceDetails: null,
       };
