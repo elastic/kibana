@@ -216,7 +216,9 @@ describe('useExpandedROw', () => {
       })
     );
 
-    result.current.toggleExpand({ journeyStep: defaultSteps[0] });
+    act(() => {
+      result.current.toggleExpand({ journeyStep: defaultSteps[0] });
+    });
 
     expect(result.current.expandedRows[0].props.browserConsoles).toEqual([
       browserConsoleStep.synthetics.payload.text,

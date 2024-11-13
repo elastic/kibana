@@ -9,7 +9,6 @@ import { renderHook, act } from '@testing-library/react';
 import { useStateDebounced } from './use_debounce'; // Replace 'your-module' with the actual module path
 
 describe('useStateDebounced', () => {
-  jest.useFakeTimers();
   beforeAll(() => {
     // Mocks console.error so it won't polute tests output when testing the api throwing error
     jest.spyOn(console, 'error').mockImplementation(() => null);
@@ -17,6 +16,14 @@ describe('useStateDebounced', () => {
 
   afterAll(() => {
     jest.restoreAllMocks();
+  });
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('returns the initial value and a debounced setter function', () => {
@@ -35,7 +42,9 @@ describe('useStateDebounced', () => {
       result.current[1]('updatedValue');
     });
     expect(result.current[0]).toBe('initialValue');
-    jest.advanceTimersByTime(300);
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
     expect(result.current[0]).toBe('updatedValue');
   });
 
@@ -45,12 +54,15 @@ describe('useStateDebounced', () => {
     act(() => {
       result.current[1]('updatedValue');
     });
-    jest.advanceTimersByTime(150);
+    act(() => {
+      jest.advanceTimersByTime(150);
+    });
     expect(result.current[0]).toBe('initialValue');
     act(() => {
       result.current[1]('newUpdatedValue');
+      jest.advanceTimersByTime(400);
     });
-    jest.advanceTimersByTime(400);
+
     expect(result.current[0]).toBe('newUpdatedValue');
   });
 });

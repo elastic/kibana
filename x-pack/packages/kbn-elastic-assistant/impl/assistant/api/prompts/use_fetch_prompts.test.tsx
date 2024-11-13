@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
@@ -41,22 +41,19 @@ describe('useFetchPrompts', () => {
       wrapper: createWrapper(),
     });
 
-    await act(async () => {
-      renderHook(() => useFetchPrompts());
-      await waitFor(() => {
-        expect(http.fetch).toHaveBeenCalledWith('/api/security_ai_assistant/prompts/_find', {
-          method: 'GET',
-          query: {
-            page: 1,
-            per_page: 1000,
-            filter: 'consumer:*',
-          },
-          version: API_VERSIONS.public.v1,
-          signal: undefined,
-        });
-
-        expect(http.fetch).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(http.fetch).toHaveBeenCalledWith('/api/security_ai_assistant/prompts/_find', {
+        method: 'GET',
+        query: {
+          page: 1,
+          per_page: 1000,
+          filter: 'consumer:*',
+        },
+        version: API_VERSIONS.public.v1,
+        signal: undefined,
       });
+
+      expect(http.fetch).toHaveBeenCalled();
     });
   });
 });

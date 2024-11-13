@@ -34,9 +34,11 @@ describe('Filters Sync to Local Storage', () => {
       writable: true,
     });
   });
+
   afterEach(() => {
     mockLocalStorage = {};
   });
+
   it('should not be undefined if localStorage has initial value', async () => {
     global.localStorage.setItem(TEST_STORAGE_KEY, JSON.stringify(DEFAULT_STORED_VALUE));
     const { result } = renderHook(() =>
@@ -50,6 +52,7 @@ describe('Filters Sync to Local Storage', () => {
       expect(result.current.controlGroupState).toMatchObject(DEFAULT_STORED_VALUE)
     );
   });
+
   it('should be undefined if localstorage as NO initial value', async () => {
     const { result } = renderHook(() =>
       useControlGroupSyncToLocalStorage({
@@ -90,13 +93,15 @@ describe('Filters Sync to Local Storage', () => {
     });
   });
   it('should not update values to local storage when sync is OFF', async () => {
-    const { result, rerender } = renderHook(() =>
-      useControlGroupSyncToLocalStorage({
-        Storage,
-        storageKey: TEST_STORAGE_KEY,
-        shouldSync: true,
-      })
-    );
+    const initialProps = {
+      Storage,
+      storageKey: TEST_STORAGE_KEY,
+      shouldSync: true,
+    };
+
+    const { result, rerender } = renderHook(useControlGroupSyncToLocalStorage, {
+      initialProps,
+    });
 
     // Sync is ON
     await waitFor(() => {
@@ -104,14 +109,21 @@ describe('Filters Sync to Local Storage', () => {
       expect(result.current.setControlGroupState).toBeTruthy();
     });
 
-    result.current.setControlGroupState(DEFAULT_STORED_VALUE);
+    act(() => {
+      result.current.setControlGroupState(DEFAULT_STORED_VALUE);
+    });
+
     await waitFor(() => {
       expect(result.current.controlGroupState).toMatchObject(DEFAULT_STORED_VALUE);
     });
 
     // Sync is OFF
-    rerender({ storageKey: TEST_STORAGE_KEY, shouldSync: false });
-    result.current.setControlGroupState(ANOTHER_SAMPLE_VALUE);
+    rerender({ ...initialProps, shouldSync: false });
+
+    act(() => {
+      result.current.setControlGroupState(ANOTHER_SAMPLE_VALUE);
+    });
+
     await waitFor(() => {
       expect(result.current.controlGroupState).toMatchObject(ANOTHER_SAMPLE_VALUE);
       // old value

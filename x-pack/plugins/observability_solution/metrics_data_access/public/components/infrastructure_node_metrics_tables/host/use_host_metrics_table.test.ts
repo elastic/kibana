@@ -40,6 +40,12 @@ describe('useHostMetricsTable hook', () => {
       },
     };
 
+    // include this to prevent rendering error in test
+    useInfrastructureNodeMetricsMock.mockReturnValue({
+      isLoading: true,
+      data: { state: 'empty-indices' },
+    });
+
     renderHook(() =>
       useHostMetricsTable({
         timerange: { from: 'now-30d', to: 'now' },

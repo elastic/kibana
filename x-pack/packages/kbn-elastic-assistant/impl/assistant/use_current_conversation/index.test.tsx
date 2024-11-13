@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCurrentConversation, Props } from '.';
 import { useConversation } from '../use_conversation';
 import deepEqual from 'fast-deep-equal';
@@ -49,10 +49,13 @@ describe('useCurrentConversation', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
     (useConversation as jest.Mock).mockReturnValue(mockUseConversation);
     (deepEqual as jest.Mock).mockReturnValue(false);
     (find as jest.Mock).mockReturnValue(undefined);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   const defaultProps: Props = {
@@ -321,16 +324,19 @@ describe('useCurrentConversation', () => {
     await act(async () => {
       await result.current.handleCreateConversation();
     });
+
     const { defaultSystemPromptId: _, ...everythingExceptSystemPromptId } =
       mockData.welcome_id.apiConfig;
 
-    expect(mockUseConversation.createConversation).toHaveBeenCalledWith({
-      apiConfig: {
-        ...everythingExceptSystemPromptId,
-        defaultSystemPromptId: 'LBOi3JEBy3uD9EGi1d_G',
-      },
-      title: 'New chat',
-    });
+    await waitFor(() =>
+      expect(mockUseConversation.createConversation).toHaveBeenCalledWith({
+        apiConfig: {
+          ...everythingExceptSystemPromptId,
+          defaultSystemPromptId: 'LBOi3JEBy3uD9EGi1d_G',
+        },
+        title: 'New chat',
+      })
+    );
   });
 
   it('should delete a conversation', async () => {

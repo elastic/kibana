@@ -66,7 +66,13 @@ describe('useExpViewTimeRange', function () {
     jest.spyOn(lensHook, 'useLensFormulaHelper').mockReturnValue(formulaHelper);
   });
 
-  const lensAttributesSpy = jest.spyOn(lensAttributes, 'LensAttributes');
+  const lensAttributesSpy = jest
+    .spyOn(lensAttributes, 'LensAttributes')
+    .mockImplementation(function (...args) {
+      return {
+        getJSON: () => {},
+      } as lensAttributes.LensAttributes;
+    });
 
   function Wrapper({ children }: React.PropsWithChildren) {
     return (

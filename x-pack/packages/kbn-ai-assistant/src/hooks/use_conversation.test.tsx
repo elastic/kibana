@@ -86,7 +86,7 @@ describe('useConversation', () => {
 
   describe('with initial messages and a conversation id', () => {
     it('throws an error', () => {
-      expect(() => {
+      expect(() =>
         renderHook(useConversation, {
           initialProps: {
             chatService: mockChatService,
@@ -100,8 +100,8 @@ describe('useConversation', () => {
             initialConversationId: 'foo',
           },
           wrapper,
-        });
-      }).toThrow(/Cannot set initialMessages if initialConversationId is set/);
+        })
+      ).toThrow(/Cannot set initialMessages if initialConversationId is set/);
     });
   });
 
@@ -427,25 +427,29 @@ describe('useConversation', () => {
 
   describe('when the title is updated', () => {
     describe('without a stored conversation', () => {
-      beforeEach(() => {
-        hookResult = renderHook(useConversation, {
-          initialProps: {
-            chatService: mockChatService,
-            connectorId: 'my-connector',
-            initialMessages: [
-              {
-                '@timestamp': new Date().toISOString(),
-                message: { content: '', role: MessageRole.User },
-              },
-            ],
-            initialConversationId: 'foo',
-          },
-          wrapper,
-        });
-      });
+      it('throws an error', (done) => {
+        try {
+          const { result } = renderHook(useConversation, {
+            initialProps: {
+              chatService: mockChatService,
+              connectorId: 'my-connector',
+              initialMessages: [
+                {
+                  '@timestamp': new Date().toISOString(),
+                  message: { content: '', role: MessageRole.User },
+                },
+              ],
+              initialConversationId: 'foo',
+            },
+            wrapper,
+          });
 
-      it('throws an error', () => {
-        expect(() => hookResult.result.current.saveTitle('my-new-title')).toThrow();
+          result.current.saveTitle('my-new-title');
+        } catch (e) {
+          expect(e).toBeInstanceOf(Error);
+          expect(e.message).toBe('Cannot set initialMessages if initialConversationId is set');
+          done();
+        }
       });
     });
 

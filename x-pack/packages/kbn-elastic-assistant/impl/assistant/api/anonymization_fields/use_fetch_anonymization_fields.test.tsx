@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
@@ -41,24 +41,21 @@ describe('useFetchAnonymizationFields', () => {
       wrapper: createWrapper(),
     });
 
-    await act(async () => {
-      renderHook(() => useFetchAnonymizationFields());
-      await waitFor(() => {
-        expect(http.fetch).toHaveBeenCalledWith(
-          '/api/security_ai_assistant/anonymization_fields/_find',
-          {
-            method: 'GET',
-            query: {
-              page: 1,
-              per_page: 1000,
-            },
-            version: API_VERSIONS.public.v1,
-            signal: undefined,
-          }
-        );
+    await waitFor(() => {
+      expect(http.fetch).toHaveBeenCalledWith(
+        '/api/security_ai_assistant/anonymization_fields/_find',
+        {
+          method: 'GET',
+          query: {
+            page: 1,
+            per_page: 1000,
+          },
+          version: API_VERSIONS.public.v1,
+          signal: undefined,
+        }
+      );
 
-        expect(http.fetch).toHaveBeenCalled();
-      });
+      expect(http.fetch).toHaveBeenCalled();
     });
   });
 });

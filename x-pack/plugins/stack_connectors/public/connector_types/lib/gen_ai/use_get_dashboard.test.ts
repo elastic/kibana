@@ -59,41 +59,43 @@ describe('useGetDashboard', () => {
     'fetches the %p dashboard and sets the dashboard URL with %p',
     async (selectedProvider, urlKey) => {
       const { result } = renderHook(() => useGetDashboard({ ...defaultArgs, selectedProvider }));
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-      expect(mockDashboard).toHaveBeenCalledWith(
-        expect.objectContaining({
-          connectorId,
+      await waitFor(() => {
+        expect(mockDashboard).toHaveBeenCalledWith(
+          expect.objectContaining({
+            connectorId,
+            dashboardId: `generative-ai-token-usage-${urlKey}-space`,
+          })
+        );
+        expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+          query: {
+            language: 'kuery',
+            query: `kibana.saved_objects: { id  : ${connectorId} }`,
+          },
           dashboardId: `generative-ai-token-usage-${urlKey}-space`,
-        })
-      );
-      expect(mockGetRedirectUrl).toHaveBeenCalledWith({
-        query: {
-          language: 'kuery',
-          query: `kibana.saved_objects: { id  : ${connectorId} }`,
-        },
-        dashboardId: `generative-ai-token-usage-${urlKey}-space`,
+        });
+        expect(result.current.isLoading).toBe(false);
+        expect(result.current.dashboardUrl).toBe(
+          `http://localhost:5601/app/dashboards#/view/generative-ai-token-usage-${urlKey}-space`
+        );
       });
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.dashboardUrl).toBe(
-        `http://localhost:5601/app/dashboards#/view/generative-ai-token-usage-${urlKey}-space`
-      );
     }
   );
 
   it('handles the case where the dashboard is not available.', async () => {
     mockDashboard.mockResolvedValue({ data: { available: false } });
     const { result } = renderHook(() => useGetDashboard(defaultArgs));
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    expect(mockDashboard).toHaveBeenCalledWith(
-      expect.objectContaining({
-        connectorId,
-        dashboardId: 'generative-ai-token-usage-openai-space',
-      })
-    );
-    expect(mockGetRedirectUrl).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockDashboard).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorId,
+          dashboardId: 'generative-ai-token-usage-openai-space',
+        })
+      );
+      expect(mockGetRedirectUrl).not.toHaveBeenCalled();
 
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.dashboardUrl).toBe(null);
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.dashboardUrl).toBe(null);
+    });
   });
 
   it('handles the case where the spaces API is not available.', async () => {

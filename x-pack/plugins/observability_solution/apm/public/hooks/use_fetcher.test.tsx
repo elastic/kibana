@@ -22,27 +22,34 @@ function wrapper({ children }: React.PropsWithChildren) {
 }
 
 describe('useFetcher', () => {
+  // beforeAll(() => {
+
+  //   jest.useFakeTimers();
+  // });
+
+  // afterAll(() => {
+  //   jest.useRealTimers();
+  // });
+
   describe('when resolving after 500ms', () => {
     let hook: RenderHookResult<ReturnType<typeof useFetcher>, Parameters<typeof useFetcher>>;
 
-    beforeAll(() => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
-    });
-
-    afterAll(() => {
-      jest.useRealTimers();
-    });
-
     beforeEach(() => {
-      // jest.useFakeTimers({ legacyFakeTimers: true });
+      jest.useFakeTimers();
+
       async function fn() {
         await delay(500);
         return 'response from hook';
       }
-      hook = renderHook(() => useFetcher(() => fn(), []), { wrapper });
+
+      hook = renderHook(() => useFetcher(fn, []), { wrapper });
     });
 
-    it('should have loading spinner initally', () => {
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should have loading spinner initially', () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
@@ -83,21 +90,18 @@ describe('useFetcher', () => {
   describe('when throwing after 500ms', () => {
     let hook: RenderHookResult<ReturnType<typeof useFetcher>, Parameters<typeof useFetcher>>;
 
-    beforeAll(() => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
-    });
-
-    afterAll(() => {
-      jest.useRealTimers();
-    });
-
     beforeEach(() => {
-      // jest.useFakeTimers({ legacyFakeTimers: true });
+      jest.useFakeTimers();
+
       async function fn(): Promise<string> {
         await delay(500);
         throw new Error('Something went wrong');
       }
-      hook = renderHook(() => useFetcher(() => fn(), []), { wrapper });
+      hook = renderHook(() => useFetcher(fn, []), { wrapper });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
     });
 
     it('should have loading spinner initially', () => {
@@ -139,28 +143,27 @@ describe('useFetcher', () => {
   });
 
   describe('when a hook already has data', () => {
-    beforeAll(() => {
-      jest.useFakeTimers({ legacyFakeTimers: true });
+    beforeEach(() => {
+      jest.useFakeTimers();
     });
 
-    afterAll(() => {
+    afterEach(() => {
       jest.useRealTimers();
     });
 
     it('should show "first response" while loading "second response"', async () => {
-      // jest.useFakeTimers({ legacyFakeTimers: true });
-
       const hook = renderHook(
         /* eslint-disable-next-line react-hooks/exhaustive-deps */
         ({ callback, args }) => useFetcher(callback, args),
         {
           initialProps: {
-            callback: async () => 'first response',
+            callback: () => Promise.resolve('first response'),
             args: ['a'],
           },
           wrapper,
         }
       );
+
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
@@ -168,15 +171,15 @@ describe('useFetcher', () => {
         status: 'loading',
       });
 
-      await waitFor(() => expect(hook.result.current.status).toBe('success'));
-
       // assert: first response has loaded and should be rendered
-      expect(hook.result.current).toEqual({
-        data: 'first response',
-        error: undefined,
-        refetch: expect.any(Function),
-        status: 'success',
-      });
+      await waitFor(() =>
+        expect(hook.result.current).toEqual({
+          data: 'first response',
+          error: undefined,
+          refetch: expect.any(Function),
+          status: 'success',
+        })
+      );
 
       // act: re-render hook with async callback
       hook.rerender({
@@ -191,34 +194,33 @@ describe('useFetcher', () => {
         jest.advanceTimersByTime(100);
       });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
       // assert: while loading new data the previous data should still be rendered
-      expect(hook.result.current).toEqual({
-        data: 'first response',
-        error: undefined,
-        refetch: expect.any(Function),
-        status: 'loading',
-      });
+      await waitFor(() =>
+        expect(hook.result.current).toEqual({
+          data: 'first response',
+          error: undefined,
+          refetch: expect.any(Function),
+          status: 'loading',
+        })
+      );
 
       act(() => {
         jest.advanceTimersByTime(500);
       });
 
-      await waitFor(() => expect(hook.result.current.status).toBe('success'));
-
-      // assert: "second response" has loaded and should be rendered
-      expect(hook.result.current).toEqual({
-        data: 'second response',
-        error: undefined,
-        refetch: expect.any(Function),
-        status: 'success',
-      });
+      await waitFor(() =>
+        expect(hook.result.current).toEqual({
+          data: 'second response',
+          error: undefined,
+          refetch: expect.any(Function),
+          status: 'success',
+        })
+      );
     });
 
     it('should return the same object reference when data is unchanged between rerenders', async () => {
       const initialProps = {
-        callback: async () => 'data response',
+        callback: () => Promise.resolve('data response'),
         args: ['a'],
       };
 
@@ -231,21 +233,49 @@ describe('useFetcher', () => {
         }
       );
 
-      await waitFor(() => expect(hook.result.current.status).toBe('success'));
+      act(() => {
+        jest.runAllTimers();
+      });
+
+      // assert: initial data has loaded;
+      await waitFor(() =>
+        expect(hook.result.current).toEqual(
+          expect.objectContaining({
+            data: 'data response',
+            status: 'success',
+          })
+        )
+      );
+
       const firstResult = hook.result.current;
       hook.rerender(initialProps);
+
+      expect(hook.result.current).toEqual(
+        expect.objectContaining({
+          data: 'data response',
+          status: 'success',
+        })
+      );
+
       const secondResult = hook.result.current;
 
       // assert: subsequent rerender returns the same object reference
       expect(secondResult === firstResult).toEqual(true);
 
       hook.rerender({
-        callback: async () => {
-          return 'second response';
-        },
+        callback: () => Promise.resolve('second response'),
         args: ['b'],
       });
-      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      await waitFor(() =>
+        expect(hook.result.current).toEqual(
+          expect.objectContaining({
+            data: 'second response',
+            status: 'success',
+          })
+        )
+      );
+
       const thirdResult = hook.result.current;
 
       // assert: rerender with different data returns a new object

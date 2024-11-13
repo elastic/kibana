@@ -76,7 +76,7 @@ describe('useAdditionalCellActions', () => {
   };
 
   const render = () => {
-    return renderHook((props) => useAdditionalCellActions(props), {
+    return renderHook(useAdditionalCellActions, {
       initialProps,
       wrapper: ({ children }) => (
         <KibanaContextProvider services={discoverServiceMock}>{children}</KibanaContextProvider>
@@ -90,6 +90,7 @@ describe('useAdditionalCellActions', () => {
 
   afterEach(() => {
     mockUuid = 0;
+    jest.clearAllMocks();
   });
 
   it('should return metadata', async () => {
@@ -108,7 +109,7 @@ describe('useAdditionalCellActions', () => {
     expect(mockActions).toHaveLength(1);
     expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER.id]).toEqual(['root-action-2']);
     await act(() => discoverServiceMock.profilesManager.resolveDataSourceProfile({}));
-    rerender();
+    rerender(initialProps);
     expect(result.current.instanceId).toEqual('3');
     expect(mockActions).toHaveLength(2);
     expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER.id]).toEqual([

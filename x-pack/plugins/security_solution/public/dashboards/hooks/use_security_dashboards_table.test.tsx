@@ -34,7 +34,7 @@ const {
   attributes: { title: mockReturnDashboardTitle, description: mockReturnDashboardDescription },
 } = DEFAULT_DASHBOARDS_RESPONSE[0];
 const renderUseSecurityDashboardsTableItems = async () => {
-  const renderedHook = renderHook(() => useSecurityDashboardsTableItems(), {
+  const renderedHook = renderHook(useSecurityDashboardsTableItems, {
     wrapper: DashboardContextProvider,
   });
   // needed to let dashboard items to be updated from saved objects response
@@ -85,24 +85,32 @@ describe('Security Dashboards Table hooks', () => {
     it('should return a memoized value when rerendered', async () => {
       const { result, rerender } = await renderUseSecurityDashboardsTableItems();
 
-      const result1 = result.current.items;
-      act(() => rerender());
-      const result2 = result.current.items;
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-      expect(result1).toBe(result2);
+      const result1 = result.current.items;
+
+      rerender();
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+        expect(result1).toBe(result.current.items);
+      });
     });
 
     it('should return dashboard items', async () => {
       const { result } = await renderUseSecurityDashboardsTableItems();
 
       const [dashboard1] = DEFAULT_DASHBOARDS_RESPONSE;
-      expect(result.current.items).toStrictEqual([
-        {
-          ...dashboard1,
-          title: dashboard1.attributes.title,
-          description: dashboard1.attributes.description,
-        },
-      ]);
+
+      await waitFor(() => {
+        expect(result.current.items).toStrictEqual([
+          {
+            ...dashboard1,
+            title: dashboard1.attributes.title,
+            description: dashboard1.attributes.description,
+          },
+        ]);
+      });
     });
   });
 
@@ -132,7 +140,9 @@ describe('Security Dashboards Table hooks', () => {
       const { result, rerender } = renderUseDashboardsTableColumns();
 
       const result1 = result.current;
-      act(() => rerender());
+
+      rerender();
+
       const result2 = result.current;
 
       expect(result1).toBe(result2);

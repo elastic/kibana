@@ -255,11 +255,15 @@ describe('useFailedTransactionsCorrelations', () => {
   });
   describe('when throwing an error', () => {
     it('should automatically start fetching results', async () => {
-      const { result, unmount } = renderHook(() => useFailedTransactionsCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+      const { result, unmount } = renderHook(useFailedTransactionsCorrelations, {
+        wrapper: ({ children }) =>
+          React.createElement(
+            wrapper,
+            {
+              error: true,
+            },
+            children
+          ),
       });
 
       await waitFor(() =>
@@ -273,11 +277,15 @@ describe('useFailedTransactionsCorrelations', () => {
     });
 
     it('should still be running after 50ms', async () => {
-      const { result, unmount } = renderHook(() => useFailedTransactionsCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+      const { result, unmount } = renderHook(useFailedTransactionsCorrelations, {
+        wrapper: ({ children }) =>
+          React.createElement(
+            wrapper,
+            {
+              error: true,
+            },
+            children
+          ),
       });
 
       try {
@@ -294,11 +302,15 @@ describe('useFailedTransactionsCorrelations', () => {
     });
 
     it('should stop and return an error after more than 100ms', async () => {
-      const { result, unmount } = renderHook(() => useFailedTransactionsCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+      const { result, unmount } = renderHook(useFailedTransactionsCorrelations, {
+        wrapper: ({ children }) =>
+          React.createElement(
+            wrapper,
+            {
+              error: true,
+            },
+            children
+          ),
       });
 
       try {

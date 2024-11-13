@@ -76,7 +76,9 @@ describe('useFetchSecurityDashboards', () => {
   it('should return Security Solution dashboards', async () => {
     const { result } = await asyncRenderUseFetchSecurityDashboards();
 
-    expect(result.current.isLoading).toEqual(false);
-    expect(result.current.dashboards).toEqual(DEFAULT_DASHBOARDS_RESPONSE);
+    await waitFor(() => {
+      expect(result.current.isLoading).toEqual(false);
+      expect(result.current.dashboards).toEqual(DEFAULT_DASHBOARDS_RESPONSE);
+    });
   });
 });

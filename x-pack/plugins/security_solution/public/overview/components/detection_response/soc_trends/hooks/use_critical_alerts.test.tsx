@@ -66,13 +66,19 @@ describe('useCriticalAlerts', () => {
     jest.clearAllMocks();
   });
   it('loads initial state', async () => {
+    // mock useQuery into state before data fetch
+    mockUseQueryAlerts.mockReturnValue({
+      ...basicReturn,
+      data: null,
+    });
+
     const { result } = renderHook(() => useCriticalAlerts(props), {
       wrapper: wrapperContainer,
     });
 
     expect(result.current).toEqual({
       stat: '-',
-      isLoading: true,
+      isLoading: false,
       percentage: {
         percent: null,
         color: 'hollow',

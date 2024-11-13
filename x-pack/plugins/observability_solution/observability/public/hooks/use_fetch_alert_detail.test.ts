@@ -63,10 +63,10 @@ describe('useFetchAlertDetail', () => {
     jest.clearAllMocks();
   });
 
-  it('initially is not loading and does not have data', () => {
+  it('initially is loading and does not have data', () => {
     const { result } = renderHook(() => useFetchAlertDetail(id));
 
-    expect(result.current).toEqual([false, null]);
+    expect(result.current).toEqual([true, null]);
   });
 
   it('returns no data when an error occurs', async () => {

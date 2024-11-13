@@ -211,7 +211,7 @@ describe('Sourcerer Hooks', () => {
       loading: false,
       signalIndexName: mockSourcererState.signalIndexName,
     }));
-    const { rerender } = renderHook(() => useInitSourcerer(), {
+    const { rerender } = renderHook(useInitSourcerer, {
       wrapper: StoreProvider,
     });
     await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -628,25 +628,28 @@ describe('Sourcerer Hooks', () => {
           },
         },
       });
+
       const { result, rerender } = renderHook<SelectedDataView, SourcererScopeName>(
-        () => useSourcererDataView(),
+        useSourcererDataView,
         {
-          wrapper: Wrapper,
+          wrapper: StoreProvider,
         }
       );
       await waitFor(() => new Promise((resolve) => resolve(null)));
       rerender();
-      expect(result.current.selectedPatterns).toEqual([
-        'apm-*-transaction*',
-        'auditbeat-*',
-        'endgame-*',
-        'filebeat-*',
-        'packetbeat-*',
-        'traces-apm*',
-        'winlogbeat-*',
-        '-filebeat-*',
-        '-packetbeat-*',
-      ]);
+      await waitFor(() =>
+        expect(result.current.selectedPatterns).toEqual([
+          'apm-*-transaction*',
+          'auditbeat-*',
+          'endgame-*',
+          'filebeat-*',
+          'packetbeat-*',
+          'traces-apm*',
+          'winlogbeat-*',
+          '-filebeat-*',
+          '-packetbeat-*',
+        ])
+      );
     });
 
     it('should update the title and name of the data view according to the selected patterns', async () => {
@@ -669,7 +672,7 @@ describe('Sourcerer Hooks', () => {
         );
       });
 
-      await rerender();
+      rerender();
 
       expect(result.current.sourcererDataView.title).toBe(testPatterns.join(','));
       expect(result.current.sourcererDataView.name).toBe(testPatterns.join(','));

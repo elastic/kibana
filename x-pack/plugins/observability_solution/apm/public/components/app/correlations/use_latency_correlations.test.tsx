@@ -87,16 +87,17 @@ function wrapper({ children, error = false }: PropsWithChildren<{ error?: boolea
 }
 
 describe('useLatencyCorrelations', () => {
-  beforeEach(async () => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   describe('when successfully loading results', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it('should automatically start fetching results', async () => {
-      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
+      const { result, unmount } = renderHook(useLatencyCorrelations, {
         wrapper,
       });
 
@@ -114,7 +115,7 @@ describe('useLatencyCorrelations', () => {
     });
 
     it('should not have received any results after 50ms', async () => {
-      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
+      const { result, unmount } = renderHook(useLatencyCorrelations, {
         wrapper,
       });
 
@@ -132,7 +133,7 @@ describe('useLatencyCorrelations', () => {
     });
 
     it('should receive partial updates and finish running', async () => {
-      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
+      const { result, unmount } = renderHook(useLatencyCorrelations, {
         wrapper,
       });
 
@@ -214,12 +215,17 @@ describe('useLatencyCorrelations', () => {
   });
 
   describe('when throwing an error', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it('should automatically start fetching results', async () => {
-      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+      const { result, unmount } = renderHook(useLatencyCorrelations, {
+        wrapper: ({ children }) => wrapper({ children, error: true }),
       });
 
       try {
@@ -233,11 +239,8 @@ describe('useLatencyCorrelations', () => {
     });
 
     it('should still be running after 50ms', async () => {
-      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+      const { result, unmount } = renderHook(useLatencyCorrelations, {
+        wrapper: ({ children }) => wrapper({ children, error: true }),
       });
 
       try {
@@ -254,22 +257,19 @@ describe('useLatencyCorrelations', () => {
     });
 
     it('should stop and return an error after more than 100ms', async () => {
-      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+      const { result, unmount } = renderHook(useLatencyCorrelations, {
+        wrapper: ({ children }) => wrapper({ children, error: true }),
       });
 
       try {
         jest.advanceTimersByTime(150);
-        await waitFor(() => expect(result.current.progress.error).toBeDefined());
-
-        expect(result.current.progress).toEqual({
-          error: 'Something went wrong',
-          isRunning: false,
-          loaded: 0,
-        });
+        await waitFor(() =>
+          expect(result.current.progress).toEqual({
+            error: 'Something went wrong',
+            isRunning: false,
+            loaded: 0,
+          })
+        );
       } finally {
         unmount();
       }
@@ -277,8 +277,16 @@ describe('useLatencyCorrelations', () => {
   });
 
   describe('when canceled', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it('should stop running', async () => {
-      const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
+      const { result, unmount } = renderHook(useLatencyCorrelations, {
         wrapper,
       });
 

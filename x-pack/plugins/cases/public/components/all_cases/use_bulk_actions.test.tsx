@@ -527,7 +527,7 @@ describe('useBulkActions', () => {
 
     it('shows the correct actions with no reopen permissions', async () => {
       appMockRender = createAppMockRenderer({ permissions: noReopenCasesPermissions() });
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCaseClosed] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -544,12 +544,12 @@ describe('useBulkActions', () => {
         </>
       );
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(res.queryByTestId('case-bulk-action-status')).toBeInTheDocument();
         res.queryByTestId('case-bulk-action-status')?.click();
       });
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(res.queryByTestId('cases-bulk-action-status-open')).toBeDisabled();
         expect(res.queryByTestId('cases-bulk-action-status-in-progress')).toBeDisabled();
         expect(res.queryByTestId('cases-bulk-action-status-closed')).toBeDisabled();

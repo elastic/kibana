@@ -32,7 +32,7 @@ describe('TTYPlayer/hooks', () => {
 
       // test memoization
       let last = result.current.lines;
-      rerender();
+      rerender({ pages: initial });
       expect(result.current.lines === last).toBeTruthy();
       last = result.current.lines;
       rerender({ pages: [...initial] });

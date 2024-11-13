@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
@@ -41,24 +41,21 @@ describe('useFetchCurrentUserConversations', () => {
       wrapper: createWrapper(),
     });
 
-    await act(async () => {
-      renderHook(() => useFetchCurrentUserConversations(defaultProps));
-      await waitFor(() => {
-        expect(defaultProps.http.fetch).toHaveBeenCalledWith(
-          '/api/security_ai_assistant/current_user/conversations/_find',
-          {
-            method: 'GET',
-            query: {
-              page: 1,
-              per_page: 99,
-            },
-            version: '2023-10-31',
-            signal: undefined,
-          }
-        );
+    await waitFor(() => {
+      expect(defaultProps.http.fetch).toHaveBeenCalledWith(
+        '/api/security_ai_assistant/current_user/conversations/_find',
+        {
+          method: 'GET',
+          query: {
+            page: 1,
+            per_page: 99,
+          },
+          version: '2023-10-31',
+          signal: undefined,
+        }
+      );
 
-        expect(onFetch).toHaveBeenCalled();
-      });
+      expect(onFetch).toHaveBeenCalled();
     });
   });
 });

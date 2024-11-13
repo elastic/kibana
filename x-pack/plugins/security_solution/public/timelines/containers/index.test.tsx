@@ -60,21 +60,23 @@ jest.mock('../../common/lib/kibana', () => ({
             mockSearch();
             return {
               subscribe: jest.fn().mockImplementation(({ next }) => {
-                next({
-                  isRunning: false,
-                  isPartial: false,
-                  inspect: {
-                    dsl: [],
-                    response: [],
-                  },
-                  edges: mockEvents.map((item) => ({ node: item })),
-                  pageInfo: {
-                    activePage: 0,
-                    totalPages: 10,
-                  },
-                  rawResponse: {},
-                  totalCount: mockTimelineData.length,
-                });
+                setTimeout(() => {
+                  next({
+                    isRunning: false,
+                    isPartial: false,
+                    inspect: {
+                      dsl: [],
+                      response: [],
+                    },
+                    edges: mockEvents.map((item) => ({ node: item })),
+                    pageInfo: {
+                      activePage: 0,
+                      totalPages: 10,
+                    },
+                    rawResponse: {},
+                    totalCount: mockTimelineData.length,
+                  });
+                }, 0);
                 return { unsubscribe: jest.fn() };
               }),
             };
@@ -140,7 +142,7 @@ describe('useTimelineEvents', () => {
     });
 
     expect(result.current).toEqual([
-      DataLoadingState.loaded,
+      DataLoadingState.loading,
       {
         events: [],
         id: TimelineId.active,
