@@ -147,6 +147,15 @@ export const DashboardLinkComponent = ({
     timeRange,
   ]);
 
+  const overflowStyles: React.CSSProperties = {};
+  if (link.options?.overflowEllipsis) {
+    overflowStyles.textOverflow = 'ellipsis';
+    overflowStyles.overflow = 'hidden';
+    overflowStyles.whiteSpace = 'nowrap';
+  } else if (link.options?.overflowTextWrap) {
+    overflowStyles.overflow = 'visible !important';
+    overflowStyles.whiteSpace = 'normal';
+  }
   const id = `dashboardLink--${link.id}`;
 
   return (
@@ -171,6 +180,8 @@ export const DashboardLinkComponent = ({
         linkCurrent: link.destination === parentDashboardId,
         dashboardLinkError: Boolean(link.error),
         'dashboardLinkError--noLabel': !link.label,
+        overflowEllipsis: link.options?.overflowEllipsis,
+        overflowTextWrap: link.options?.overflowTextWrap,
       })}
       label={linkLabel}
       external={link.options?.openInNewTab}

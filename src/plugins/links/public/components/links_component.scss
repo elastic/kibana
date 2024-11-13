@@ -15,10 +15,21 @@
 
     &.linkCurrent {
       border-radius: 0;
-      .euiListGroupItem__text {
+      &.euiListGroupItem__text {
         cursor: default;
         color: $euiColorPrimary;
       }
+    }
+
+    &.overflowTextWrap span:first-child {
+      white-space: normal !important;
+      overflow: auto !important;
+    }
+
+    &.overflowTextEllipsis {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
