@@ -10,12 +10,12 @@ import { meanBy } from 'lodash';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -73,7 +73,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   let latencyMetricValues: Awaited<ReturnType<typeof getLatencyValues>>;
   let latencyTransactionValues: Awaited<ReturnType<typeof getLatencyValues>>;
-  registry.when('Service Maps APIs', { config: 'trial', archives: [] }, () => {
+
+  describe('Service Maps APIs', () => {
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+    before(async () => {
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+    });
+
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;
