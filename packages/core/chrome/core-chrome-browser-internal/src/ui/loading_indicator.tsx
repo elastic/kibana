@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
+import { Global, css } from '@emotion/react';
 import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -107,19 +107,31 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       logoImage
     );
 
-    return !this.props.showAsBar ? (
-      logo
-    ) : (
-      <EuiProgress
-        className={className}
-        css={indicatorHiddenCss}
-        data-test-subj={testSubj}
-        max={this.props.maxAmount}
-        value={this.props.valueAmount}
-        position="fixed"
-        color="accent"
-        size="xs"
-      />
+    return (
+      <>
+        <Global
+          styles={{
+            '.euiHeaderSectionItem .euiButtonEmpty__text': {
+              // stop global header buttons from jumping during loading state
+              display: 'flex',
+            },
+          }}
+        />
+        {!this.props.showAsBar ? (
+          logo
+        ) : (
+          <EuiProgress
+            className={className}
+            css={indicatorHiddenCss}
+            data-test-subj={testSubj}
+            max={this.props.maxAmount}
+            value={this.props.valueAmount}
+            position="fixed"
+            color="accent"
+            size="xs"
+          />
+        )}
+      </>
     );
   }
 }
