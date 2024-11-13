@@ -45,6 +45,7 @@ interface FooterProps {
   isAnalyzeCelStep: boolean;
   isLastStep: boolean;
   isNextStepEnabled: boolean;
+  isNextAddingToElastic: boolean;
   onBack: () => void;
   onNext: () => void;
 }
@@ -56,26 +57,28 @@ export const Footer = React.memo<FooterProps>(
     isAnalyzeCelStep,
     isLastStep,
     isNextStepEnabled,
+    isNextAddingToElastic,
     onBack,
     onNext,
   }) => {
     const nextButtonText = useMemo(
       () =>
-        isAnalyzeStep ? (
+        isNextAddingToElastic ? (
+          i18n.ADD_TO_ELASTIC
+        ) : isAnalyzeStep ? (
           <AnalyzeButtonText isGenerating={isGenerating} />
         ) : isAnalyzeCelStep ? (
           <AnalyzeCelButtonText isGenerating={isGenerating} />
-        ) : (
-          i18n.ADD_TO_ELASTIC
-        ),
-      [isGenerating, isAnalyzeStep, isAnalyzeCelStep]
+        ) : null,
+      [isNextAddingToElastic, isAnalyzeStep, isGenerating, isAnalyzeCelStep]
     );
 
-    return (
+    return isLastStep ? (
+      <ButtonsFooter cancelButtonText={i18n.CLOSE} />
+    ) : (
       <ButtonsFooter
-        nextButtonText={isLastStep ? null : nextButtonText}
-        cancelButtonText={isLastStep ? i18n.CLOSE : null}
-        isNextDisabled={isGenerating || !isNextStepEnabled}
+        nextButtonText={nextButtonText}
+        isNextDisabled={!isNextStepEnabled}
         onBack={onBack}
         onNext={onNext}
       />

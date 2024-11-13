@@ -61,13 +61,17 @@ export const CreateIntegrationAssistant = React.memo(() => {
   }, [navigate, dispatch, state.step]);
 
   const completeStep = useCallback(() => {
+    if (!isNextStepEnabled) {
+      // If the user tries to navigate to the next step without completing the current step.
+      return;
+    }
     telemetry.reportAssistantStepComplete({ step: state.step });
     if (state.step === 3 || state.step === 5) {
       dispatch({ type: 'SET_IS_GENERATING', payload: true });
     } else {
       dispatch({ type: 'SET_STEP', payload: state.step + 1 });
     }
-  }, [telemetry, state.step]);
+  }, [telemetry, state.step, isNextStepEnabled]);
 
   const actions = useMemo<Actions>(
     () => ({
@@ -147,6 +151,7 @@ export const CreateIntegrationAssistant = React.memo(() => {
           isAnalyzeCelStep={state.step === celInputStepIndex}
           isLastStep={state.step === deployStepIndex}
           isNextStepEnabled={isNextStepEnabled}
+          isNextAddingToElastic={state.step === deployStepIndex - 1}
           onBack={goBackStep}
           onNext={completeStep}
         />
