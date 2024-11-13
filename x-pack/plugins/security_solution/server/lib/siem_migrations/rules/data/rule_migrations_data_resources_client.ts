@@ -6,7 +6,7 @@
  */
 
 import { sha256 } from 'js-sha256';
-import type { BulkRequest, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type {
   RuleMigrationResource,
   RuleMigrationResourceType,
@@ -17,55 +17,23 @@ import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client
 const BULK_MAX_SIZE = 500 as const;
 
 export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseClient {
-  /** Creates or updates an array of resources granularly */
-  public async createOrUpdate(resources: RuleMigrationResource[]): Promise<void> {
+  public async upsert(resources: RuleMigrationResource[]): Promise<void> {
     const index = await this.getIndexName();
 
     let resourcesSlice: RuleMigrationResource[];
     while ((resourcesSlice = resources.splice(0, BULK_MAX_SIZE)).length > 0) {
-      // Create the ids for all the resources
-      const allIds: string[] = [];
-      const resourcesToStore = resourcesSlice.map<RuleMigrationResource & { _id: string }>(
-        (resource) => {
-          const id = this.createId(resource);
-          allIds.push(id);
-          return { ...resource, _id: id };
-        }
-      );
-
-      // Get the existing resources by id
-      const query = { ids: { values: allIds } };
-      const existingResources: StoredRuleMigrationResource[] = await this.esClient
-        .search<RuleMigrationResource>({ index, query })
-        .then(this.processResponseHits.bind(this))
+      await this.esClient
+        .bulk({
+          refresh: 'wait_for',
+          operations: resourcesSlice.flatMap((resource) => [
+            { update: { _id: this.createId(resource), _index: index } },
+            { doc: resource, doc_as_upsert: true },
+          ]),
+        })
         .catch((error) => {
-          this.logger.error(`Error searching resources: ${error.message}`);
+          this.logger.error(`Error upsert resources: ${error.message}`);
           throw error;
         });
-
-      // Map the ids to obtain the backing index to update the existing ones
-      const toUpdateIds = Object.fromEntries(
-        existingResources.map(({ _id, _index }) => [_id, _index])
-      );
-
-      const updateFields = { updated_by: this.username, updated_at: new Date().toISOString() };
-      const createFields = { ...updateFields, '@timestamp': new Date().toISOString() };
-
-      // Create the bulk operations
-      const operations: BulkRequest['operations'] = [];
-      resourcesToStore.forEach(({ _id, ...resource }) => {
-        const _index = toUpdateIds[_id]; // updates need the specific backing index
-        if (_index) {
-          operations.push({ update: { _id, _index } }, { doc: { ...resource, ...updateFields } });
-        } else {
-          operations.push({ create: { _index: index, _id } }, { ...resource, ...createFields });
-        }
-      });
-
-      await this.esClient.bulk({ operations }).catch((error) => {
-        this.logger.error(`Error creating or updating resources: ${error.message}`);
-        throw error;
-      });
     }
   }
 

@@ -30,10 +30,10 @@ export class RuleMigrationsDataBaseClient {
     hits: Array<SearchHit<T>>,
     override: Partial<T> = {}
   ): Array<Stored<T>> {
-    return hits.map(({ _id, _index, _source }) => {
+    return hits.map(({ _id, _source }) => {
       assert(_id, 'document should have _id');
       assert(_source, 'document should have _source');
-      return { ..._source, ...override, _id, _index };
+      return { ..._source, ...override, _id };
     });
   }
 

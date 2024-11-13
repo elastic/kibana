@@ -10,10 +10,7 @@ import type {
   RuleMigrationResource,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 
-export type Stored<T extends object> = T & {
-  _id: string;
-  _index: string;
-};
+export type Stored<T extends object> = T & { _id: string };
 
 export type StoredRuleMigration = Stored<RuleMigration>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;

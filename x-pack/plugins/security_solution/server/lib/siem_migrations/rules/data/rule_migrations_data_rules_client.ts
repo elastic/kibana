@@ -91,8 +91,8 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     await this.esClient
       .bulk({
         refresh: 'wait_for',
-        operations: storedRuleMigrations.flatMap(({ _id, _index, status }) => [
-          { update: { _id, _index } },
+        operations: storedRuleMigrations.flatMap(({ _id, status }) => [
+          { update: { _id, _index: index } },
           {
             doc: { status, updated_by: this.username, updated_at: new Date().toISOString() },
           },
@@ -109,35 +109,33 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   }
 
   /** Updates one rule migration with the provided data and sets the status to `completed` */
-  async saveCompleted({ _id, _index, ...ruleMigration }: StoredRuleMigration): Promise<void> {
+  async saveCompleted({ _id, ...ruleMigration }: StoredRuleMigration): Promise<void> {
+    const index = await this.getIndexName();
     const doc = {
       ...ruleMigration,
       status: SiemMigrationStatus.COMPLETED,
       updated_by: this.username,
       updated_at: new Date().toISOString(),
     };
-    await this.esClient
-      .update({ index: _index, id: _id, doc, refresh: 'wait_for' })
-      .catch((error) => {
-        this.logger.error(`Error updating rule migration status to completed: ${error.message}`);
-        throw error;
-      });
+    await this.esClient.update({ index, id: _id, doc, refresh: 'wait_for' }).catch((error) => {
+      this.logger.error(`Error updating rule migration status to completed: ${error.message}`);
+      throw error;
+    });
   }
 
   /** Updates one rule migration with the provided data and sets the status to `failed` */
-  async saveError({ _id, _index, ...ruleMigration }: StoredRuleMigration): Promise<void> {
+  async saveError({ _id, ...ruleMigration }: StoredRuleMigration): Promise<void> {
+    const index = await this.getIndexName();
     const doc = {
       ...ruleMigration,
       status: SiemMigrationStatus.FAILED,
       updated_by: this.username,
       updated_at: new Date().toISOString(),
     };
-    await this.esClient
-      .update({ index: _index, id: _id, doc, refresh: 'wait_for' })
-      .catch((error) => {
-        this.logger.error(`Error updating rule migration status to failed: ${error.message}`);
-        throw error;
-      });
+    await this.esClient.update({ index, id: _id, doc, refresh: 'wait_for' }).catch((error) => {
+      this.logger.error(`Error updating rule migration status to failed: ${error.message}`);
+      throw error;
+    });
   }
 
   /** Updates all the rule migration with the provided id with status `processing` back to `pending` */
