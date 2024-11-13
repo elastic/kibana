@@ -7,16 +7,15 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { ARCHIVER_ROUTES } from '../constants/archiver';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const esArchiver = getService('esArchiver');
 
-  registry.when(
-    'Observability overview when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
+  describe('has data', () => {
+    describe('when no data is loaded', () => {
       it('returns false when there is no data', async () => {
         const response = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/observability_overview/has_data',
@@ -24,13 +23,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(response.body.hasData).to.eql(false);
       });
-    }
-  );
+    });
 
-  registry.when(
-    'Observability overview when only onboarding data is loaded',
-    { config: 'basic', archives: ['observability_overview'] },
-    () => {
+    describe('when only onboarding data is loaded', () => {
+      before(async () => {
+        await esArchiver.load(ARCHIVER_ROUTES.observability_overview);
+      });
+
+      after(async () => {
+        await esArchiver.unload(ARCHIVER_ROUTES.observability_overview);
+      });
+
       it('returns false when there is only onboarding data', async () => {
         const response = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/observability_overview/has_data',
@@ -38,13 +41,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(response.body.hasData).to.eql(false);
       });
-    }
-  );
+    });
 
-  registry.when(
-    'Observability overview when APM data is loaded',
-    { config: 'basic', archives: ['apm_8.0.0'] },
-    () => {
+    describe('when data is loaded', () => {
+      before(async () => {
+        await esArchiver.load(ARCHIVER_ROUTES['8.0.0']);
+      });
+      after(async () => {
+        await esArchiver.unload(ARCHIVER_ROUTES['8.0.0']);
+      });
+
       it('returns true when there is at least one document on transaction, error or metrics indices', async () => {
         const response = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/observability_overview/has_data',
@@ -52,6 +58,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(response.body.hasData).to.eql(true);
       });
-    }
-  );
+    });
+  });
 }
