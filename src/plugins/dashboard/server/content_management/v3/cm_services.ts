@@ -411,6 +411,19 @@ export const referenceSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
+const dashboardAttributesSchemaResponse = dashboardAttributesSchema.extends({
+  panels: schema.arrayOf(
+    panelSchema.extends({
+      // Responses always include the panel index and gridData.i
+      panelIndex: schema.string(),
+      gridData: gridDataSchema.extends({
+        i: schema.string(),
+      }),
+    }),
+    { defaultValue: [] }
+  ),
+});
+
 export const dashboardItemSchema = schema.object(
   {
     id: schema.string(),
@@ -422,7 +435,7 @@ export const dashboardItemSchema = schema.object(
     updatedBy: schema.maybe(schema.string()),
     managed: schema.maybe(schema.boolean()),
     error: schema.maybe(apiError),
-    attributes: dashboardAttributesSchema,
+    attributes: dashboardAttributesSchemaResponse,
     references: schema.arrayOf(referenceSchema),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
     originId: schema.maybe(schema.string()),
