@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, createContext, useState, useMemo } from 'react';
+import React, { useCallback, createContext, useState, useMemo, useRef } from 'react';
 import { useCreateApiKey } from '../hooks/use_create_api_key';
 import { Status } from '../constants';
 import { useValidateApiKey } from '../hooks/use_validate_api_key';
@@ -31,6 +31,7 @@ export const ApiKeyContext = createContext<APIKeyContext>({
 });
 
 export const SearchApiKeyProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+  const isInitialising = useRef(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>(Status.uninitialized);
   const updateApiKey = useCallback(({ id, encoded }: { id: string; encoded: string }) => {
@@ -66,9 +67,11 @@ export const SearchApiKeyProvider: React.FC<React.PropsWithChildren> = ({ childr
     },
   });
   const initialiseKey = useCallback(async () => {
-    if (status !== Status.uninitialized) {
+    if (status !== Status.uninitialized || isInitialising.current) {
       return;
     }
+
+    isInitialising.current = true;
 
     try {
       setStatus(Status.loading);
@@ -92,8 +95,10 @@ export const SearchApiKeyProvider: React.FC<React.PropsWithChildren> = ({ childr
     } catch (e) {
       setApiKey(null);
       setStatus(Status.showCreateButton);
+    } finally {
+      isInitialising.current = false;
     }
-  }, [createApiKey, status, validateApiKey]);
+  }, [status, createApiKey, validateApiKey]);
 
   const value: APIKeyContext = useMemo(
     () => ({
