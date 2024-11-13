@@ -30,7 +30,6 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { coreServices } from '../services/kibana_services';
 import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';
-import { DASHBOARD_ACTION_GROUP } from '.';
 
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
 
@@ -55,7 +54,6 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_UNLINK_FROM_LIBRARY;
   public readonly id = ACTION_UNLINK_FROM_LIBRARY;
   public order = 15;
-  public grouping = [DASHBOARD_ACTION_GROUP];
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();

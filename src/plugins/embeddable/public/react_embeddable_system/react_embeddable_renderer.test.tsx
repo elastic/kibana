@@ -194,8 +194,6 @@ describe('react embeddable renderer', () => {
         resetUnsavedChanges: expect.any(Function),
         snapshotRuntimeState: expect.any(Function),
         phase$: expect.any(Object),
-        hasLockedHoverActions$: expect.any(Object),
-        lockHoverActions: expect.any(Function),
       })
     );
   });

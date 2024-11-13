@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         exitFromEditMode: true,
       });
 
-      await dashboardPanelActions.clickPanelAction(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
+      await dashboardPanelActions.clickContextMenuItem(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
 
       const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
@@ -58,6 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show the open button for a compatible saved visualization with annotations and reference line', async () => {
       await dashboard.switchToEditMode();
+      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await header.waitUntilLoadingHasFinished();
       await lens.createLayer('annotations');
@@ -71,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         exitFromEditMode: true,
       });
 
-      await dashboardPanelActions.clickPanelAction(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
+      await dashboardPanelActions.clickContextMenuItem(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
 
       const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
@@ -88,6 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should bring both dashboard context and visualization context to discover', async () => {
       await dashboard.switchToEditMode();
+      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await savedQueryManagementComponent.openSavedQueryManagementComponent();
       await queryBar.switchQueryLanguage('lucene');
@@ -116,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.expectExistsPanelAction(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
       await dashboard.clickCancelOutOfEditMode();
 
-      await dashboardPanelActions.clickPanelAction(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
+      await dashboardPanelActions.clickContextMenuItem(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
 
       const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);

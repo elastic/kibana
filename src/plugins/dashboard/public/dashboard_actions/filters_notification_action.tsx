@@ -13,15 +13,17 @@ import { merge } from 'rxjs';
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import {
-  apiPublishesPartialUnifiedSearch,
-  apiHasUniqueId,
+  CanAccessViewMode,
   EmbeddableApiContext,
   HasParentApi,
   HasUniqueId,
   PublishesDataViews,
   PublishesUnifiedSearch,
-  CanLockHoverActions,
-  CanAccessViewMode,
+  apiCanAccessViewMode,
+  apiHasUniqueId,
+  apiPublishesPartialUnifiedSearch,
+  getInheritedViewMode,
+  getViewModeSubject,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
@@ -32,16 +34,17 @@ import { FiltersNotificationPopover } from './filters_notification_popover';
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
 export type FiltersNotificationActionApi = HasUniqueId &
+  CanAccessViewMode &
   Partial<PublishesUnifiedSearch> &
-  Partial<HasParentApi<Partial<PublishesDataViews>>> &
-  Partial<CanLockHoverActions> &
-  Partial<CanAccessViewMode>;
+  Partial<HasParentApi<Partial<PublishesDataViews>>>;
 
 const isApiCompatible = (api: unknown | null): api is FiltersNotificationActionApi =>
-  Boolean(apiHasUniqueId(api) && apiPublishesPartialUnifiedSearch(api));
+  Boolean(
+    apiHasUniqueId(api) && apiCanAccessViewMode(api) && apiPublishesPartialUnifiedSearch(api)
+  );
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
-  if (!isApiCompatible(api)) return false;
+  if (!isApiCompatible(api) || getInheritedViewMode(api) !== 'edit') return false;
   const query = api.query$?.value;
   return (
     (api.filters$?.value ?? []).length > 0 ||
@@ -94,7 +97,9 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
   ) {
     if (!isApiCompatible(embeddable)) return;
     return merge(
-      ...[embeddable.query$, embeddable.filters$].filter((value) => Boolean(value))
+      ...[embeddable.query$, embeddable.filters$, getViewModeSubject(embeddable)].filter((value) =>
+        Boolean(value)
+      )
     ).subscribe(() => onChange(compatibilityCheck(embeddable), this));
   }
 
