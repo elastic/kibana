@@ -44,7 +44,8 @@ export async function getHostsCount({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [query, ...rangeQuery(from, to), ...documentsFilter],
+          filter: [query, ...rangeQuery(from, to)],
+          must: [...documentsFilter],
         },
       },
       aggs: {

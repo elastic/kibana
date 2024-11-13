@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { APMIndices } from '.';
 import { getServices } from './services/get_services';
 
@@ -15,15 +14,8 @@ export interface ApmDataAccessPluginSetup {
   getServices: typeof getServices;
 }
 
-export interface ApmDataAccessServerDependencies {
-  security?: SecurityPluginStart;
-}
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ApmDataAccessPluginStart {}
-export interface ApmDataAccessServerDependencies {
-  security?: SecurityPluginStart;
-}
 
 export type ApmDataAccessServices = ReturnType<typeof getServices>;
 export type { ApmDataAccessServicesParams } from './services/get_services';
