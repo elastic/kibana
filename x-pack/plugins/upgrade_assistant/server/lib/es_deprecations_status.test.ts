@@ -331,6 +331,17 @@ describe('getESUpgradeStatus', () => {
         },
       ],
       ml_settings: [],
+      data_streams: {
+        'my-v7-data-stream': [
+          {
+            level: 'critical',
+            message: 'Old data stream with a compatibility version < 8.0',
+            url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html',
+            details:
+              'This data stream has backing indices that were created before Elasticsearch 8.0.0',
+          },
+        ],
+      },
       index_settings: {},
     });
 
@@ -345,7 +356,7 @@ describe('getESUpgradeStatus', () => {
 
     const upgradeStatus = await getESUpgradeStatus(esClient, featureSet);
 
-    expect(upgradeStatus.totalCriticalDeprecations).toBe(2);
+    expect(upgradeStatus.totalCriticalDeprecations).toBe(3);
     expect(upgradeStatus.deprecations).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -385,6 +396,17 @@ describe('getESUpgradeStatus', () => {
           "resolveDuringUpgrade": false,
           "type": "node_settings",
           "url": "https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html",
+        },
+        Object {
+          "correctiveAction": Object {
+            "type": "reindex",
+          },
+          "details": "This data stream has backing indices that were created before Elasticsearch 8.0.0",
+          "isCritical": true,
+          "message": "Old data stream with a compatibility version < 8.0",
+          "resolveDuringUpgrade": undefined,
+          "type": "data_streams",
+          "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
         },
       ]
     `);

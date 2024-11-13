@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { map } from 'lodash';
 import { EnrichedDeprecationInfo, ESUpgradeStatus, FeatureSet } from '../../common/types';
 import { esIndicesStateCheck } from './es_indices_state_check';
 import {
@@ -150,58 +151,66 @@ export async function getESUpgradeStatus(
 
           combinedDeprecations = combinedDeprecations.concat(withoutSystemIndices);
         } else {
-          const deprecationsByType = deprecations[
-            deprecationType as keyof estypes.MigrationDeprecationsResponse
-          ] as estypes.MigrationDeprecationsDeprecation[];
+          const deprecationsByType =
+            deprecations[deprecationType as keyof estypes.MigrationDeprecationsResponse];
 
-          const enrichedDeprecationInfo = deprecationsByType
-            .map(
-              ({
+          // We need to flatten the deprecations to a list of deprecations
+          // to be able to map over them. This is because the deprecations can
+          // be in the form of an object with keys as data stream names or
+          // in the form of an array.
+          const deprecationsAsListByType = Array.isArray(deprecationsByType)
+            ? deprecationsByType
+            : (Object.values(
+                deprecationsByType
+              ).flat() as estypes.MigrationDeprecationsDeprecation[]);
+
+          const enrichedDeprecationInfo = map(
+            deprecationsAsListByType,
+            ({
+              details,
+              level,
+              message,
+              url,
+              // @ts-expect-error @elastic/elasticsearch _meta not available yet in MigrationDeprecationInfoResponse
+              _meta: metadata,
+              // @ts-expect-error @elastic/elasticsearch resolve_during_rolling_upgrade not available yet in MigrationDeprecationInfoResponse
+              resolve_during_rolling_upgrade: resolveDuringUpgrade,
+            }) => {
+              return {
                 details,
-                level,
                 message,
                 url,
-                // @ts-expect-error @elastic/elasticsearch _meta not available yet in MigrationDeprecationInfoResponse
-                _meta: metadata,
-                // @ts-expect-error @elastic/elasticsearch resolve_during_rolling_upgrade not available yet in MigrationDeprecationInfoResponse
-                resolve_during_rolling_upgrade: resolveDuringUpgrade,
-              }) => {
-                return {
-                  details,
-                  message,
-                  url,
-                  type: deprecationType as keyof estypes.MigrationDeprecationsResponse,
-                  isCritical: level === 'critical',
-                  resolveDuringUpgrade,
-                  correctiveAction: getCorrectiveAction(message, metadata),
-                };
-              }
-            )
-            .filter(({ correctiveAction, type }) => {
-              /**
-               * This disables showing the ML deprecations in the UA if `featureSet.mlSnapshots`
-               * is set to `false`.
-               *
-               * This config should be set to true only on the `x.last` versions, or when
-               * the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
-               * is incremented to something higher than 7.0.0 in the Elasticsearch code.
-               */
-              if (!featureSet.mlSnapshots) {
-                if (type === 'ml_settings' || correctiveAction?.type === 'mlSnapshot') {
-                  return false;
-                }
-              }
-
-              /**
-               * This disables showing the reindexing deprecations in the UA if
-               * `featureSet.reindexCorrectiveActions` is set to `false`.
-               */
-              if (!featureSet.reindexCorrectiveActions && correctiveAction?.type === 'reindex') {
+                type: deprecationType as keyof estypes.MigrationDeprecationsResponse,
+                isCritical: level === 'critical',
+                resolveDuringUpgrade,
+                correctiveAction: getCorrectiveAction(message, metadata),
+              };
+            }
+          ).filter(({ correctiveAction, type }) => {
+            /**
+             * This disables showing the ML deprecations in the UA if `featureSet.mlSnapshots`
+             * is set to `false`.
+             *
+             * This config should be set to true only on the `x.last` versions, or when
+             * the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
+             * is incremented to something higher than 7.0.0 in the Elasticsearch code.
+             */
+            if (!featureSet.mlSnapshots) {
+              if (type === 'ml_settings' || correctiveAction?.type === 'mlSnapshot') {
                 return false;
               }
+            }
 
-              return true;
-            });
+            /**
+             * This disables showing the reindexing deprecations in the UA if
+             * `featureSet.reindexCorrectiveActions` is set to `false`.
+             */
+            if (!featureSet.reindexCorrectiveActions && correctiveAction?.type === 'reindex') {
+              return false;
+            }
+
+            return true;
+          });
 
           combinedDeprecations = combinedDeprecations.concat(enrichedDeprecationInfo);
         }
@@ -303,7 +312,8 @@ const getCorrectiveAction = (
   const clusterSettingDeprecation = metadata?.actions?.find(
     (action) => action.action_type === 'remove_settings' && typeof indexName === 'undefined'
   );
-  const requiresReindexAction = /Index created before/.test(message);
+  const requiresReindexAction =
+    /Index created before/.test(message) || /Old data stream/.test(message);
   const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
   const requiresClusterSettingsAction = Boolean(clusterSettingDeprecation);
   const requiresMlAction = /[Mm]odel snapshot/.test(message);
