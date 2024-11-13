@@ -325,7 +325,7 @@ packages/kbn-custom-icons @elastic/obs-ux-logs-team
 packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 packages/kbn-cypress-config @elastic/kibana-operations
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
-packages/kbn-data-stream-adapter @elastic/security-threat-hunting
+packages/kbn-data-stream-adapter @elastic/security-threat-hunting-explore
 packages/kbn-data-view-utils @elastic/kibana-data-discovery
 packages/kbn-datemath @elastic/kibana-data-discovery
 packages/kbn-dev-cli-errors @elastic/kibana-operations
