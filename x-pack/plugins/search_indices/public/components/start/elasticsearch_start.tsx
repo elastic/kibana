@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { IndicesStatusResponse } from '../../../common';
-import { docLinks } from '../../../common/doc_links';
 
 import { AnalyticsEvents } from '../../analytics/constants';
 import { AvailableLanguages } from '../../code_examples';

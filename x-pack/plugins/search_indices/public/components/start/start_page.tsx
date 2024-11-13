@@ -32,7 +32,7 @@ export const ElasticsearchStartPage = () => {
     isError: hasIndicesStatusFetchError,
     error: indicesFetchError,
   } = useIndicesStatusQuery();
-  
+
   usePageChrome(PageTitle, [...IndexManagementBreadcrumbs, { text: PageTitle }]);
 
   const embeddableConsole = useMemo(
