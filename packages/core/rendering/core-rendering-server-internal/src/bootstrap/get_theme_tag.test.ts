@@ -18,7 +18,7 @@ describe('getThemeTag', () => {
       })
     ).toEqual('v8light');
   });
-  it('returns the correct value for version:v8 and darkMode:true', () => {
+  it('returns the correct value for name:v8 and darkMode:true', () => {
     expect(
       getThemeTag({
         name: 'v8',
