@@ -187,7 +187,6 @@ export class EsqlStarredQueriesService {
 
   renderStarredButton(item: QueryHistoryItem) {
     const trimmedQueryString = getTrimmedQuery(item.queryString);
-    this.queryToEdit = trimmedQueryString;
     const isStarred = this.checkIfQueryIsStarred(trimmedQueryString);
     return (
       <TooltipWrapper
@@ -224,6 +223,7 @@ export class EsqlStarredQueriesService {
           iconType={isStarred ? 'starFilled' : 'starEmpty'}
           disabled={!isStarred && this.checkIfStarredQueriesLimitReached()}
           onClick={async () => {
+            this.queryToEdit = trimmedQueryString;
             if (isStarred) {
               // show the discard modal only if the user has not dismissed it
               if (!this.storage.get(STARRED_QUERIES_DISCARD_KEY)) {
