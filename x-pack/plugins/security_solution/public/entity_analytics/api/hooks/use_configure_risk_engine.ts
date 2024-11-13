@@ -11,10 +11,10 @@ import type { TaskManagerUnavailableResponse } from '../../../../common/api/enti
 import { useEntityAnalyticsRoutes } from '../api';
 import type { ConfigureRiskEngineSavedObjectResponse } from '../../../../common/api/entity_analytics/risk_engine/so_configure_route.gen';
 
+export const INIT_RISK_ENGINE_STATUS_KEY = ['POST', 'INIT_RISK_ENGINE'];
 interface ConfigureRiskEngineParams {
   includeClosedAlerts: boolean;
   range: { start: string; end: string };
-  filter?: object;
 }
 
 export const useConfigureSORiskEngineMutation = (
@@ -30,28 +30,11 @@ export const useConfigureSORiskEngineMutation = (
     ConfigureRiskEngineSavedObjectResponse,
     { body: ConfigureRiskEngineSavedObjectResponse | TaskManagerUnavailableResponse },
     ConfigureRiskEngineParams
-  >(
-    async (params) => {
-      return updateSavedObjectConfiguration({
-        includeClosedAlerts: params.includeClosedAlerts,
-        range: params.range,
-        filter: params.filter,
-      });
-    },
-    {
-      ...options,
-      onError: (error) => {
-        if (error?.response?.data?.error === 'Task Manager is unavailable') {
-          return {
-            body: {
-              configuration_successful: false,
-            },
-          };
-        }
-        return {
-          body: error.response.data,
-        };
-      },
-    }
-  );
+  >(async (params) => {
+    await updateSavedObjectConfiguration({
+      includeClosedAlerts: params.includeClosedAlerts,
+      range: params.range,
+    });
+    return { configuration_successful: true };
+  });
 };

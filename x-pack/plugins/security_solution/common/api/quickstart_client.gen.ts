@@ -278,7 +278,10 @@ import type {
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
-import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';
+import type {
+  InitRiskEngineRequestBodyInput,
+  InitRiskEngineResponse,
+} from './entity_analytics/risk_engine/engine_init_route.gen';
 import type { ScheduleRiskEngineNowResponse } from './entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import type { ReadRiskEngineSettingsResponse } from './entity_analytics/risk_engine/engine_settings_route.gen';
 import type { GetRiskEngineStatusResponse } from './entity_analytics/risk_engine/engine_status_route.gen';
@@ -1535,7 +1538,7 @@ finalize it.
   /**
    * Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
    */
-  async initRiskEngine() {
+  async initRiskEngine(props: InitRiskEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API InitRiskEngine`);
     return this.kbnClient
       .request<InitRiskEngineResponse>({
@@ -1544,6 +1547,7 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2244,6 +2248,9 @@ export interface ImportTimelinesProps {
 export interface InitEntityEngineProps {
   params: InitEntityEngineRequestParamsInput;
   body: InitEntityEngineRequestBodyInput;
+}
+export interface InitRiskEngineProps {
+  body: InitRiskEngineRequestBodyInput;
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;

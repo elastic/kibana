@@ -9,6 +9,7 @@ import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { getAlertsIndex } from '../../../../../common/utils/risk_score_modules';
 import type { RiskEngineConfiguration } from '../../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
+import type { Range } from '../../../../../common/entity_analytics/risk_engine';
 
 export interface SavedObjectsClientArg {
   savedObjectsClient: SavedObjectsClientContract;
@@ -16,8 +17,12 @@ export interface SavedObjectsClientArg {
 
 const getDefaultRiskEngineConfiguration = ({
   namespace,
+  range,
+  includeClosedAlerts,
 }: {
   namespace: string;
+  range: Range;
+  includeClosedAlerts: boolean;
 }): RiskEngineConfiguration => ({
   dataViewId: getAlertsIndex(namespace),
   enabled: false,
@@ -25,7 +30,8 @@ const getDefaultRiskEngineConfiguration = ({
   identifierType: undefined,
   interval: '1h',
   pageSize: 3_500,
-  range: { start: 'now-30d', end: 'now' },
+  range,
+  includeClosedAlerts,
 });
 
 const getConfigurationSavedObject = async ({
@@ -83,14 +89,23 @@ export const updateSavedObjectAttribute = async ({
 export const initSavedObjects = async ({
   namespace,
   savedObjectsClient,
-}: SavedObjectsClientArg & { namespace: string }) => {
+  range,
+  includeClosedAlerts,
+}: SavedObjectsClientArg & { namespace: string; range: Range; includeClosedAlerts: boolean }) => {
   const configuration = await getConfigurationSavedObject({ savedObjectsClient });
   if (configuration) {
-    return configuration;
+    const result = await updateSavedObjectAttribute({
+      savedObjectsClient,
+      attributes: {
+        range,
+        includeClosedAlerts,
+      },
+    });
+    return result;
   }
   const result = await savedObjectsClient.create(
     riskEngineConfigurationTypeName,
-    getDefaultRiskEngineConfiguration({ namespace }),
+    getDefaultRiskEngineConfiguration({ namespace, range, includeClosedAlerts }),
     {}
   );
   return result;

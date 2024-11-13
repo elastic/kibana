@@ -8,9 +8,11 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { InitRiskEngineRequestBody } from '../../../../../common/api/entity_analytics';
 import type {
-  InitRiskEngineResponse,
   InitRiskEngineResult,
+  InitRiskEngineResponse,
 } from '../../../../../common/api/entity_analytics';
 import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
@@ -31,7 +33,14 @@ export const riskEngineInitRoute = (
       },
     })
     .addVersion(
-      { version: '1', validate: {} },
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(InitRiskEngineRequestBody),
+          },
+        },
+      },
       withRiskEnginePrivilegeCheck(
         getStartServices,
         async (context, request, response): Promise<IKibanaResponse<InitRiskEngineResponse>> => {
@@ -52,8 +61,11 @@ export const riskEngineInitRoute = (
           const riskEngineDataClient = securitySolution.getRiskEngineDataClient();
           const riskScoreDataClient = securitySolution.getRiskScoreDataClient();
           const spaceId = securitySolution.getSpaceId();
-          const range = { start: 'now-30m', end: 'now' };
-          const includeClosedAlerts = false;
+          const range = {
+            start: request.body.range?.start || 'now-30m',
+            end: request.body.range?.end || 'now',
+          };
+          const includeClosedAlerts = request.body.includeClosedAlerts;
 
           try {
             if (!taskManager) {

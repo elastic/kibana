@@ -272,6 +272,7 @@ export const runTask = async ({
       range: configuredRange,
       pageSize,
       alertSampleSizePerShard,
+      includeClosedAlerts,
     } = configuration;
     if (!enabled) {
       log('risk engine is not enabled, exiting task');
@@ -307,6 +308,7 @@ export const runTask = async ({
           runtimeMappings,
           weights: [],
           alertSampleSizePerShard,
+          includeClosedAlerts,
         });
         const tookMs = Date.now() - now;
 

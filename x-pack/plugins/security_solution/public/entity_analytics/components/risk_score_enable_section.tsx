@@ -139,12 +139,12 @@ const RiskEngineHealth: React.FC<{ currentRiskEngineStatus?: RiskEngineStatus | 
   currentRiskEngineStatus,
 }) => {
   if (!currentRiskEngineStatus) {
-    return <EuiHealth color="subdued">{'-'}</EuiHealth>;
+    return <EuiHealth color="danger" />;
   }
   if (currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED) {
     return <EuiHealth color="success">{i18n.RISK_SCORE_MODULE_STATUS_ON}</EuiHealth>;
   }
-  return <EuiHealth color="subdued">{i18n.RISK_SCORE_MODULE_STATUS_OFF}</EuiHealth>;
+  return <EuiHealth color="danger">{i18n.RISK_SCORE_MODULE_STATUS_OFF}</EuiHealth>;
 };
 
 const RiskEngineStatusRow: React.FC<{

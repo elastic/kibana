@@ -12,6 +12,24 @@ paths:
       operationId: InitRiskEngine
       summary: Initialize the Risk Engine
       description: Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
+      requestBody:
+        description: Schema for the risk score engine initialization
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                includeClosedAlerts:
+                  type: boolean
+                  description: If true, it will include closed alerts for risk score calculation
+                  default: false
+                range:
+                  type: object
+                  properties:
+                    start:
+                      type: string
+                    end:
+                      type: string
       responses:
         '200':
           description: Successful response

@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import type { OnTimeChangeProps, EuiSuperDatePickerProps } from '@elastic/eui';
 import {
   EuiSuperDatePicker,
   EuiButton,
@@ -14,29 +13,47 @@ import {
   EuiFlexGroup,
   EuiSwitch,
   EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
+import { useConfigureSORiskEngineMutation } from '../api/hooks/use_configure_risk_engine';
 
 export const IncludeClosedAlertsSection = ({
-  width,
-  compressed,
   includeClosedAlerts,
   setIncludeClosedAlerts,
+  from,
+  to,
+  onDateChange,
 }: {
-  width: EuiSuperDatePickerProps['width'];
-  compressed: boolean;
   includeClosedAlerts: boolean;
   setIncludeClosedAlerts: (value: boolean) => void;
+  from: string;
+  to: string;
+  onDateChange: ({ start, end }: { start: string; end: string }) => void;
 }) => {
-  const [start, setStart] = useState('now-30m');
-  const [end, setEnd] = useState('now');
+  const [start, setFrom] = useState(from);
+  const [end, setTo] = useState(to);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const onTimeChange = ({ start: newStart, end: newEnd }: OnTimeChangeProps) => {
-    setStart(newStart);
-    setEnd(newEnd);
+  const onRefresh = ({ start: newStart, end: newEnd }: { start: string; end: string }) => {
+    setFrom(newStart);
+    setTo(newEnd);
+    onDateChange({ start: newStart, end: newEnd });
   };
 
   const handleToggle = () => {
     setIncludeClosedAlerts(!includeClosedAlerts);
+  };
+
+  const configureRiskEngineMutation = useConfigureSORiskEngineMutation({
+    onMutate: () => setIsLoading(true),
+    onSettled: () => setIsLoading(false),
+  });
+
+  const handleSave = () => {
+    configureRiskEngineMutation.mutate({
+      includeClosedAlerts,
+      range: { start, end },
+    });
   };
 
   return (
@@ -57,16 +74,13 @@ export const IncludeClosedAlertsSection = ({
           <EuiSuperDatePicker
             start={start}
             end={end}
-            onTimeChange={onTimeChange}
+            onTimeChange={({ start: newStart, end: newEnd }) =>
+              onRefresh({ start: newStart, end: newEnd })
+            }
             width={'auto'}
-            compressed={compressed}
+            compressed={false}
             showUpdateButton={false}
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton fill iconType="save">
-            {'Save'}
-          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiText size="s" style={{ marginTop: '10px' }}>
@@ -76,6 +90,14 @@ export const IncludeClosedAlertsSection = ({
           based on past incidents, leading to more accurate scoring and insights.`}
         </p>
       </EuiText>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButton fill iconType="save" size="m" onClick={handleSave} isLoading={isLoading}>
+            {'Save'}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };

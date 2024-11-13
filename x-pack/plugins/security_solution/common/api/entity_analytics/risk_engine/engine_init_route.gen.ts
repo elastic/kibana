@@ -31,6 +31,21 @@ export const InitRiskEngineErrorResponse = z.object({
   full_error: z.string(),
 });
 
+export type InitRiskEngineRequestBody = z.infer<typeof InitRiskEngineRequestBody>;
+export const InitRiskEngineRequestBody = z.object({
+  /**
+   * If true, it will include closed alerts for risk score calculation
+   */
+  includeClosedAlerts: z.boolean().optional().default(false),
+  range: z
+    .object({
+      start: z.string().optional(),
+      end: z.string().optional(),
+    })
+    .optional(),
+});
+export type InitRiskEngineRequestBodyInput = z.input<typeof InitRiskEngineRequestBody>;
+
 export type InitRiskEngineResponse = z.infer<typeof InitRiskEngineResponse>;
 export const InitRiskEngineResponse = z.object({
   result: InitRiskEngineResult,

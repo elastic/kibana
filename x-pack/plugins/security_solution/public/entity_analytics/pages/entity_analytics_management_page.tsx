@@ -22,12 +22,52 @@ import { RiskScoreUsefulLinksSection } from '../components/risk_score_useful_lin
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
 import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
+// /Users/abhishekbhatia/Work/elastic/kibana/x-pack/plugins/security_solution/public/entity_analytics/api/hooks/use_risk_engine_status.ts
+import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
+import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
 
 export const EntityAnalyticsManagementPage = () => {
   const privileges = useMissingRiskEnginePrivileges();
   const [includeClosedAlerts, setIncludeClosedAlerts] = useState(false);
   const { euiTheme } = useEuiTheme();
-  const [showItem, setShowItem] = useState(true);
+  const { data: riskEngineStatus } = useRiskEngineStatus();
+  const currentRiskEngineStatus = riskEngineStatus?.risk_engine_status;
+  const runEngineEnabled = currentRiskEngineStatus === 'ENABLED';
+  const [from, setFrom] = useState('now-30m');
+  const [to, setTo] = useState('now');
+  const { mutate: initRiskEngine } = useInitRiskEngineMutation();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleRunEngineClick = async () => {
+    setIsLoading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      initRiskEngine({
+        includeClosedAlerts,
+        range: { start: from, end: to },
+      });
+    } catch (error) {
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleToggle = (value: boolean) => {
+    setIncludeClosedAlerts(value);
+  };
+
+  const handleDateChange = ({ start, end }: { start: string; end: string }) => {
+    setFrom(start);
+    setTo(end);
+  };
+
+  const calculateNextRunTime = () => {
+    const now = new Date();
+    const nextRun = new Date(now.getTime() + (60 - now.getMinutes()) * 60000);
+    const minutesUntilNextRun = Math.round((nextRun.getTime() - now.getTime()) / 60000);
+    return `Next engine run in ${minutesUntilNextRun} minutes`;
+  };
 
   return (
     <>
@@ -43,36 +83,41 @@ export const EntityAnalyticsManagementPage = () => {
             {/* Right-aligned group with toggle, text, vertical line, and button */}
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="s">
-                {/* Toggle Button */}
-                <EuiFlexItem grow={false}>
-                  <RiskScoreEnableSection privileges={privileges} />
-                </EuiFlexItem>
-
-                {/* Text: "Next engine run in 14 minutes" */}
-                {showItem && (
+                {/* Run Engine Button */}
+                {runEngineEnabled && (
                   <EuiFlexItem grow={false}>
-                    <span style={{ fontSize: '14px', color: '#888888', fontWeight: 'normal' }}>
-                      {'Next engine run in 14 minutes'}
-                    </span>
+                    <EuiButton
+                      size="s"
+                      iconType="play"
+                      isLoading={isLoading}
+                      onClick={handleRunEngineClick}
+                    >
+                      {'Run Engine'}
+                    </EuiButton>
                   </EuiFlexItem>
                 )}
 
                 {/* Vertical Line */}
-                {showItem && (
+                {runEngineEnabled && (
                   <div
                     className="vertical-line"
                     style={{ height: '24px', borderLeft: '1px solid #ccc', margin: '0 8px' }}
                   />
                 )}
 
-                {/* Run Engine Button */}
-                {showItem && (
+                {/* Text: "Next engine run in 14 minutes" */}
+                {runEngineEnabled && (
                   <EuiFlexItem grow={false}>
-                    <EuiButton size="s" iconType="play">
-                      {'Run Engine'}
-                    </EuiButton>
+                    <span style={{ fontSize: '14px', color: '#888888', fontWeight: 'normal' }}>
+                      {calculateNextRunTime()}
+                    </span>
                   </EuiFlexItem>
                 )}
+
+                {/* Toggle Button */}
+                <EuiFlexItem grow={false}>
+                  <RiskScoreEnableSection privileges={privileges} />
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -85,9 +130,10 @@ export const EntityAnalyticsManagementPage = () => {
         <EuiFlexItem grow={2}>
           <IncludeClosedAlertsSection
             includeClosedAlerts={includeClosedAlerts}
-            setIncludeClosedAlerts={setIncludeClosedAlerts}
-            width={undefined}
-            compressed={false}
+            setIncludeClosedAlerts={handleToggle}
+            from={from}
+            to={to}
+            onDateChange={handleDateChange}
           />
           <EuiHorizontalRule />
           <RiskScoreUsefulLinksSection />
@@ -105,6 +151,9 @@ export const EntityAnalyticsManagementPage = () => {
           <RiskScorePreviewSection
             privileges={privileges}
             includeClosedAlerts={includeClosedAlerts}
+            from={from}
+            to={to}
+            key={`${from}-${to}-${includeClosedAlerts}`}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

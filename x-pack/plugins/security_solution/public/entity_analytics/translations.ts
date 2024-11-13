@@ -302,3 +302,24 @@ export const RISK_SCORE_MODULE_TURNED_OFF = i18n.translate(
     defaultMessage: 'Entity risk score has been turned off',
   }
 );
+
+export const RISK_SCORE_SO_CONFIGURED_SUCCESS = i18n.translate(
+  'xpack.securitySolution.riskScore.savedObjectsConfiguredSuccess',
+  {
+    defaultMessage: 'SavedObject for Entity risk score has been updated successfully',
+  }
+);
+
+export const RISK_SCORE_SO_CONFIGURED_FAILURE = i18n.translate(
+  'xpack.securitySolution.riskScore.savedObjectsConfiguredFailure',
+  {
+    defaultMessage: 'SavedObject for Entity risk score has not been updated',
+  }
+);
+
+export const RISK_SCORE_ENGINE_RUN_SUCCESS = i18n.translate(
+  'xpack.securitySolution.riskScore.engine.runSuccess',
+  {
+    defaultMessage: 'Risk engine has been run successfully',
+  }
+);

@@ -6,10 +6,8 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiAccordion,
-  EuiFormRow,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -33,7 +31,6 @@ import {
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../translations';
 import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
-import { useKibana } from '../../common/lib/kibana';
 import { SourcererScopeName } from '../../sourcerer/store/model';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
@@ -56,7 +53,9 @@ const getRiskiestScores = (scores: EntityRiskScoreRecord[] = [], field: string) 
 export const RiskScorePreviewSection: React.FC<{
   privileges: RiskEngineMissingPrivilegesResponse;
   includeClosedAlerts: boolean;
-}> = ({ privileges, includeClosedAlerts }) => {
+  from: string;
+  to: string;
+}> = ({ privileges, includeClosedAlerts, from, to }) => {
   const sectionBody = useMemo(() => {
     if (privileges.isLoading) {
       return (
@@ -68,11 +67,11 @@ export const RiskScorePreviewSection: React.FC<{
       );
     }
     if (userHasRiskEngineReadPermissions(privileges)) {
-      return <RiskEnginePreview includeClosedAlerts={includeClosedAlerts} />;
+      return <RiskEnginePreview includeClosedAlerts={includeClosedAlerts} from={from} to={to} />;
     }
 
     return <MissingPermissionsCallout />;
-  }, [privileges, includeClosedAlerts]);
+  }, [privileges, includeClosedAlerts, from, to]);
 
   return (
     <>
@@ -139,10 +138,14 @@ const RiskScorePreviewPanel = ({
   );
 };
 
-const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean }> = ({ includeClosedAlerts }) => {
+const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; to: string }> = ({
+  includeClosedAlerts,
+  from,
+  to,
+}) => {
   const [dateRange, setDateRange] = useState<{ from: string; to: string }>({
-    from: 'now-24h',
-    to: 'now',
+    from,
+    to,
   });
 
   const [filters, setFilters] = useState<{ bool: BoolQuery }>({
@@ -150,34 +153,17 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean }> = ({ include
   });
 
   useEffect(() => {
-    if (includeClosedAlerts) {
-      setFilters((prevFilters) => ({
-        bool: {
-          ...prevFilters.bool,
-          filter: [
-            ...prevFilters.bool.filter,
-            { terms: { 'kibana.alert.workflow_status': ['open', 'closed'] } },
-          ],
-        },
-      }));
-    } else {
-      setFilters((prevFilters) => ({
-        bool: {
-          ...prevFilters.bool,
-          filter: [],
-        },
-      }));
-    }
+    setFilters({
+      bool: {
+        must: [],
+        filter: includeClosedAlerts
+          ? [{ terms: { 'kibana.alert.workflow_status': ['closed', 'open'] } }]
+          : [],
+        should: [],
+        must_not: [],
+      },
+    });
   }, [includeClosedAlerts]);
-
-  const [dataViewsArray, setDataViewsArray] = useState<DataView[]>([]);
-
-  const {
-    unifiedSearch: {
-      ui: { SearchBar },
-    },
-    dataViews,
-  } = useKibana().services;
 
   const { addError } = useAppToasts();
 
@@ -214,11 +200,6 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean }> = ({ include
     },
     [addError, setDateRange, setFilters]
   );
-
-  useEffect(() => {
-    dataViews.create(sourcererDataView).then((dataView) => setDataViewsArray([dataView]));
-  }, [dataViews, sourcererDataView]);
-
   if (isError) {
     return (
       <EuiCallOut
@@ -242,23 +223,6 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean }> = ({ include
   return (
     <>
       <EuiText>{i18n.PREVIEW_DESCRIPTION}</EuiText>
-      <EuiSpacer />
-      <EuiFormRow fullWidth data-test-subj="risk-score-preview-search-bar">
-        <SearchBar
-          appName="siem"
-          isLoading={isLoading}
-          indexPatterns={dataViewsArray}
-          dateRangeFrom={dateRange.from}
-          dateRangeTo={dateRange.to}
-          onQuerySubmit={onQuerySubmit}
-          showFilterBar={false}
-          showDatePicker={true}
-          displayStyle={'inPage'}
-          submitButtonStyle={'iconOnly'}
-          dataTestSubj="risk-score-preview-search-bar-input"
-        />
-      </EuiFormRow>
-
       <EuiSpacer />
 
       <RiskScorePreviewPanel

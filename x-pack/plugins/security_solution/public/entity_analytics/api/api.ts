@@ -10,7 +10,10 @@ import { LIST_ENTITIES_URL } from '../../../common/entity_analytics/entity_store
 import type { UploadAssetCriticalityRecordsResponse } from '../../../common/api/entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type { DisableRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
 import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
-import type { InitRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
+import type {
+  InitRiskEngineResponse,
+  InitRiskEngineRequestBody,
+} from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
 import type { EnableRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_enable_route.gen';
 import type { RiskEngineScheduleNowResponse } from '../../../common/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import type {
@@ -42,7 +45,9 @@ import {
   API_VERSIONS,
   RISK_ENGINE_CLEANUP_URL,
   RISK_ENGINE_SCHEDULE_NOW_URL,
+  RISK_ENGINE_SAVED_OBJECT_CONFIG_URL,
 } from '../../../common/constants';
+// import { RISK_ENGINE_SAVED_OBJECT_CONFIG_URL } from '../../../server/lib/entity_analytics/risk_engine/saved_object/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import type { ReadRiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
@@ -110,10 +115,11 @@ export const useEntityAnalyticsRoutes = () => {
     /**
      * Init risk score engine
      */
-    const initRiskEngine = () =>
+    const initRiskEngine = (params: InitRiskEngineRequestBody) =>
       http.fetch<InitRiskEngineResponse>(RISK_ENGINE_INIT_URL, {
         version: '1',
         method: 'POST',
+        body: JSON.stringify(params),
       });
 
     /**
@@ -277,6 +283,24 @@ export const useEntityAnalyticsRoutes = () => {
       });
 
     /**
+     * Updates the Risk Engine savedObject Configuration
+     */
+
+    const updateSavedObjectConfiguration = async (params: {
+      includeClosedAlerts: boolean;
+      range: { start: string; end: string };
+    }) => {
+      http.fetch(RISK_ENGINE_SAVED_OBJECT_CONFIG_URL, {
+        version: '2023-10-31',
+        method: 'POST',
+        body: JSON.stringify({
+          range: params.range,
+          includeClosedAlerts: params.includeClosedAlerts,
+        }),
+      });
+    };
+
+    /**
      * Deletes Risk engine installation and associated data
      */
 
@@ -304,6 +328,7 @@ export const useEntityAnalyticsRoutes = () => {
       calculateEntityRiskScore,
       cleanUpRiskEngine,
       fetchEntitiesList,
+      updateSavedObjectConfiguration,
     };
   }, [http]);
 };
