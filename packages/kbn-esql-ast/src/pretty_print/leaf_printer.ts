@@ -11,8 +11,10 @@ import {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
   ESQLColumn,
+  ESQLIdentifier,
   ESQLLiteral,
   ESQLParamLiteral,
+  ESQLProperNode,
   ESQLSource,
   ESQLTimeInterval,
 } from '../types';
@@ -27,6 +29,18 @@ const regexUnquotedIdPattern = /^([a-z\*_\@]{1})[a-z0-9_\*]*$/i;
 export const LeafPrinter = {
   source: (node: ESQLSource) => node.name,
 
+  identifier: (node: ESQLIdentifier) => {
+    const name = node.name;
+
+    if (regexUnquotedIdPattern.test(name)) {
+      return name;
+    } else {
+      // Escape backticks "`" with double backticks "``".
+      const escaped = name.replace(/`/g, '``');
+      return '`' + escaped + '`';
+    }
+  },
+
   column: (node: ESQLColumn) => {
     const args = node.args;
 
@@ -35,18 +49,11 @@ export const LeafPrinter = {
     for (const arg of args) {
       switch (arg.type) {
         case 'identifier': {
-          const name = arg.name;
-
           if (formatted.length > 0) {
             formatted += '.';
           }
-          if (regexUnquotedIdPattern.test(name)) {
-            formatted += name;
-          } else {
-            // Escape backticks "`" with double backticks "``".
-            const escaped = name.replace(/`/g, '``');
-            formatted += '`' + escaped + '`';
-          }
+
+          formatted += LeafPrinter.identifier(arg);
 
           break;
         }
@@ -135,5 +142,23 @@ export const LeafPrinter = {
       if (commentText) text += (text ? ' ' : '') + commentText;
     }
     return text;
+  },
+
+  print: (node: ESQLProperNode): string => {
+    switch (node.type) {
+      case 'identifier': {
+        return LeafPrinter.identifier(node);
+      }
+      case 'column': {
+        return LeafPrinter.column(node);
+      }
+      case 'literal': {
+        return LeafPrinter.literal(node);
+      }
+      case 'timeInterval': {
+        return LeafPrinter.timeInterval(node);
+      }
+    }
+    return '';
   },
 };
