@@ -19,8 +19,9 @@ export const getTaskStatus = async ({
     const taskInstance = await taskManager.get(taskId);
     return taskInstance.status;
   } catch (e) {
-    if (isTaskCurrentlyRunningError(e)) {
-      return 'not_scheduled' as const;
+    // not found means the task was completed and the entry removed
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      return 'not_scheduled';
     }
     throw e;
   }
