@@ -9,12 +9,7 @@
 
 import './discover_layout.scss';
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPanel,
-  useEuiBackgroundColor,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';

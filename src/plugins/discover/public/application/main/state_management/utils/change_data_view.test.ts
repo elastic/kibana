@@ -38,6 +38,7 @@ const setupTestParams = (dataView: DataView | undefined) => {
     services,
     appState: discoverState.appState,
     internalState: discoverState.internalState,
+    savedSearchState: discoverState.savedSearchState,
   };
 };
 
