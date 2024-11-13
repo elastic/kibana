@@ -1590,7 +1590,6 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional/fixtures/ingest_pipeline_example_mapping.csv @elastic/kibana-management
 /x-pack/test/functional/apps/snapshot_restore @elastic/kibana-management
 /x-pack/test/functional/apps/painless_lab @elastic/kibana-management
-/test/functional/services/data_views.ts @elastic/kibana-management
 /x-pack/test_serverless/functional/test_suites/common/spaces/spaces_management.ts @elastic/kibana-management
 /x-pack/test/stack_functional_integration/apps/management @elastic/kibana-management
 /x-pack/test/functional/page_objects/*_management_page.ts @elastic/kibana-management
