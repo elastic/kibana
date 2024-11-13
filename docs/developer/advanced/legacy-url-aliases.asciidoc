@@ -18,8 +18,9 @@ There are two cases where a legacy URL alias will get generated.
 1. During migration, when an object's namespace type is being converted from the single-namespace type to a multi-namespace type. If
 the object resides in a non-default space, it gets a new ID and a legacy URL alias is generated.
 
-2. During copy/import of saved objects, when any object requires a new ID **and the compatibilityMode option is enabled** (see
-https://www.elastic.co/guide/en/kibana/current/spaces-api-copy-saved-objects.html#:~:text=the%20createNewCopies%20option.-,compatibilityMode,-(Optional%2C%20boolean)%20Applies [Copy saved objects to space API - compatibilityMode documentation] and https://github.com/elastic/kibana/pull/149021[PR #149021] for more information).
+2. During copy/import of saved objects, when any object requires a new ID **and the compatibilityMode option is enabled** (see the
+<<spaces-api-copy-saved-objects, copy saved objects to space>> API and https://github.com/elastic/kibana/pull/149021[PR #149021] 
+for more information).
 
 [[legacy-url-aliases-example]]
 === Examples
@@ -46,10 +47,9 @@ You have a data view and two dashboards in the default space, but you would also
 includes a Markdown visualization with a link to the other dashboard - a so-called **weak link**. This is a weak link because the ID of the
 referenced object is not added to the object's references array, and therefore there is no explicit relationship between the objects.
 
-If you were to use the https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-spaces-copy-saved-objects [copy API] to create
-new copies of these assets in another space **without the `compatibilityMode` option set to true**, the Markdown link would be broken. The
-copied objects created in the target space receive a new ID, and the weak link in the Markdown visualization would point to the ID of the
-source object from the originating space.
+If you were to use the <<spaces-api-copy-saved-objects, copy saved objects to space>> API to create new copies of these assets in another 
+space **without the `compatibilityMode` option set to true**, the Markdown link would be broken. The copied objects created in the target
+space receive a new ID, and the weak link in the Markdown visualization would point to the ID of the source object from the originating space.
 
 By setting `compatibilityMode` to true when using the copy API, legacy aliases will be generated for any objects that require a new ID. This
 allows the weak link to the second dashboard to be resolved. Though a dashboard with the ID from the weak link will not be found, a legacy
