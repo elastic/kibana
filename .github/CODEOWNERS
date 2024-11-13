@@ -1422,8 +1422,6 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /test/plugin_functional/README.md @elastic/appex-qa
 /test/plugin_functional/config.ts @elastic/appex-qa
 /test/kibana.jsonc @elastic/appex-qa
-/test/interpreter_functional/config.ts @elastic/appex-qa
-/test/interpreter_functional/README.md @elastic/appex-qa
 /test/harden @elastic/appex-qa
 /test/functional/services/supertest.ts @elastic/appex-qa
 /test/functional/services/remote_es/remote_es.ts @elastic/appex-qa
