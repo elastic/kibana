@@ -81,30 +81,6 @@ export const EntityInsight = <T,>({
     from,
   });
 
-  // const alertsData = {
-  //   closed: {
-  //     total: 2,
-  //     severities: [
-  //       { key: 'low', value: 1, label: 'Low' },
-  //       { key: 'critical', value: 1, label: 'Critical' },
-  //     ],
-  //   },
-  //   open: {
-  //     total: 3,
-  //     severities: [
-  //       { key: 'low', value: 2, label: 'Low' },
-  //       { key: 'medium', value: 1, label: 'Medium' },
-  //     ],
-  //   },
-  //   acknowledged: {
-  //     total: 2,
-  //     severities: [
-  //       { key: 'low', value: 1, label: 'Low' },
-  //       { key: 'high', value: 1, label: 'High' },
-  //     ],
-  //   },
-  // };
-
   const filteredAlertsData: ParsedAlertsData = alertsData
     ? Object.fromEntries(Object.entries(alertsData).filter(([key]) => key !== FILTER_CLOSED))
     : {};
