@@ -57,7 +57,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       await Promise.all([
         // setup the knowledge base
         observabilityAIAssistantAPIClient
-          .editor({
+          .admin({
             endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
             params: {
               query: {
