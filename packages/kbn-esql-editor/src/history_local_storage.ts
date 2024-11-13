@@ -35,6 +35,12 @@ const sortDates = (date1?: string, date2?: string) => {
 export const getHistoryItems = (sortDirection: 'desc' | 'asc'): QueryHistoryItem[] => {
   const localStorageString = localStorage.getItem(QUERY_HISTORY_ITEM_KEY) ?? '[]';
   const historyItems: QueryHistoryItem[] = JSON.parse(localStorageString);
+
+  // for backwards compatibility
+  historyItems.forEach((item) => {
+    item.timeRan = item.timeRan ? new Date(item.timeRan).toISOString() : undefined;
+  });
+
   const sortedByDate = historyItems.sort((a, b) => {
     return sortDirection === 'desc'
       ? sortDates(b.timeRan, a.timeRan)
@@ -60,11 +66,7 @@ export const addQueriesToCache = (
   const queries = getHistoryItems('desc');
   queries.forEach((queryItem) => {
     const trimmedQueryString = getTrimmedQuery(queryItem.queryString);
-    const updatedQueryItem = {
-      ...queryItem,
-      timeRan: queryItem.timeRan ? new Date(queryItem.timeRan).toISOString() : undefined,
-    };
-    cachedQueries.set(trimmedQueryString, updatedQueryItem);
+    cachedQueries.set(trimmedQueryString, queryItem);
   });
   const trimmedQueryString = getTrimmedQuery(item.queryString);
 
