@@ -20,13 +20,16 @@ import { CardSelectorList } from '../common/card_selector_list';
 import { DASHBOARDS_CARD_ITEMS, DASHBOARDS_CARD_ITEMS_BY_ID } from './dashboards_card_config';
 import { DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED } from './constants';
 import { useOnboardingContext } from '../../../onboarding_context';
+import { useDelayedVisibility } from '../../hooks/use_delayed_visibility';
 
 export const DashboardsCard: OnboardingCardComponent = ({
   isCardComplete,
   setComplete,
   setExpandedCardId,
+  isExpanded,
 }) => {
   const { spaceId } = useOnboardingContext();
+  const isCardContentVisible = useDelayedVisibility({ isExpanded });
   const [toggleIdSelected, setSelectedRulesCardItemIdToStorage] =
     useStoredSelectedDashboardsCardItemId(spaceId, DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED.id);
   const [selectedCardItem, setSelectedCardItem] = useState(
@@ -48,6 +51,8 @@ export const DashboardsCard: OnboardingCardComponent = ({
     },
     [setSelectedRulesCardItemIdToStorage]
   );
+
+  if (!isCardContentVisible) return null;
 
   return (
     <OnboardingCardContentImagePanel media={selectedCardItem.asset}>

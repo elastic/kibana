@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { useStoredSelectedAlertsCardItemId } from '../../../../hooks/use_stored_state';
@@ -20,6 +20,7 @@ import { CardSelectorList } from '../common/card_selector_list';
 import { DEFAULT_ALERTS_CARD_ITEM_SELECTED } from './constants';
 import { ALERTS_CARD_ITEMS, ALERTS_CARD_ITEMS_BY_ID } from './alerts_card_config';
 import { useOnboardingContext } from '../../../onboarding_context';
+import { useDelayedVisibility } from '../../hooks/use_delayed_visibility';
 
 export const AlertsCard: OnboardingCardComponent = ({
   isCardComplete,
@@ -28,7 +29,7 @@ export const AlertsCard: OnboardingCardComponent = ({
   isExpanded,
 }) => {
   const { spaceId } = useOnboardingContext();
-
+  const isCardContentVisible = useDelayedVisibility({ isExpanded });
   const [toggleIdSelected, setSelectedAlertsCardItemIdToStorage] =
     useStoredSelectedAlertsCardItemId(spaceId, DEFAULT_ALERTS_CARD_ITEM_SELECTED.id);
   const [selectedCardItem, setSelectedCardItem] = useState(
@@ -52,20 +53,7 @@ export const AlertsCard: OnboardingCardComponent = ({
     [setSelectedAlertsCardItemIdToStorage]
   );
 
-  const [isVisible, setIsVisible] = useState(true);
-
-  // /////////////// improve this implementation
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    if (!isExpanded) {
-      timeoutId = setTimeout(() => setIsVisible(false), 350);
-    } else {
-      setIsVisible(true); // Reset visibility when expanded
-    }
-    return () => clearTimeout(timeoutId); // Cleanup timeout on component unmount or dependency change
-  }, [isExpanded]);
-
-  if (!isVisible) return null;
+  if (!isCardContentVisible) return null;
 
   return (
     <OnboardingCardContentImagePanel media={selectedCardItem.asset}>
