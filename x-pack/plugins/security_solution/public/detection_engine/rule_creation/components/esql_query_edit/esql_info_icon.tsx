@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { EuiPopover, EuiText, EuiButtonIcon, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import * as i18n from './translations';
-
-import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import { useBoolean } from '@kbn/react-hooks';
 import { useKibana } from '../../../../common/lib/kibana';
+import * as i18n from './translations';
 
 /**
  * Icon and popover that gives hint to users how to get started with ES|QL rules
  */
-const EsqlInfoIconComponent = () => {
+export const EsqlInfoIcon = memo(function EsqlInfoIcon(): JSX.Element {
   const { docLinks } = useKibana().services;
-
-  const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
+  const [isPopoverOpen, { off: closePopover, on: togglePopover }] = useBoolean(false);
 
   const button = (
     <EuiButtonIcon iconType="iInCircle" onClick={togglePopover} aria-label={i18n.ARIA_LABEL} />
@@ -29,13 +27,13 @@ const EsqlInfoIconComponent = () => {
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
       <EuiText size="s">
         <FormattedMessage
-          id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipContent"
+          id="xpack.securitySolution.ruleManagement.esqlQuery.esqlInfoTooltipContent"
           defaultMessage="Check out our {createEsqlRuleTypeLink} to get started using ES|QL rules."
           values={{
             createEsqlRuleTypeLink: (
               <EuiLink href={docLinks.links.securitySolution.createEsqlRuleType} target="_blank">
                 <FormattedMessage
-                  id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipLink"
+                  id="xpack.securitySolution.ruleManagement.esqlQuery.esqlInfoTooltipLink"
                   defaultMessage="documentation"
                 />
               </EuiLink>
@@ -45,8 +43,4 @@ const EsqlInfoIconComponent = () => {
       </EuiText>
     </EuiPopover>
   );
-};
-
-export const EsqlInfoIcon = React.memo(EsqlInfoIconComponent);
-
-EsqlInfoIcon.displayName = 'EsqlInfoIcon';
+});

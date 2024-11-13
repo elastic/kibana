@@ -7,9 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ESQL_QUERY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryLabel',
+export const ESQL_QUERY = i18n.translate('xpack.securitySolution.ruleManagement.esqlQuery.label', {
+  defaultMessage: 'ES|QL query',
+});
+
+export const ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleManagement.esqlQuery.ariaLabel',
   {
-    defaultMessage: 'ES|QL query',
+    defaultMessage: `Open help popover`,
   }
 );
