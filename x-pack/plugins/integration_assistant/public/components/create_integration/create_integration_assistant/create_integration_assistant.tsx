@@ -9,6 +9,7 @@ import React, { useReducer, useMemo, useEffect, useCallback } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Header } from './header';
 import { Footer } from './footer';
+import { useNavigate, Page } from '../../../common/hooks/use_navigate';
 import { ConnectorStep, isConnectorStepReady } from './steps/connector_step';
 import { IntegrationStep, isIntegrationStepReady } from './steps/integration_step';
 import { DataStreamStep, isDataStreamStepReady } from './steps/data_stream_step';
@@ -22,8 +23,12 @@ import { ExperimentalFeaturesService } from '../../../services';
 
 export const CreateIntegrationAssistant = React.memo(() => {
   const [state, dispatch] = useReducer(reducer, initialState);
-
+  const navigate = useNavigate();
   const { generateCel: isGenerateCelEnabled } = ExperimentalFeaturesService.get();
+
+  const celInputStepIndex = isGenerateCelEnabled && state.hasCelInput ? 5 : null;
+  const celReviewStepIndex = isGenerateCelEnabled && state.celInputResult ? 6 : null;
+  const deployStepIndex = isGenerateCelEnabled && state.hasCelInput ? 7 : 5;
 
   const telemetry = useTelemetry();
   useEffect(() => {
@@ -47,15 +52,22 @@ export const CreateIntegrationAssistant = React.memo(() => {
     return false;
   }, [state, isGenerateCelEnabled]);
 
-  const completeStep = useCallback(() => {
-    if (isNextStepEnabled) {
-      dispatch({ type: 'SET_STEP', payload: state.step + 1 });
-      return true;
+  const goBackStep = useCallback(() => {
+    if (state.step === 1) {
+      navigate(Page.landing);
+    } else {
+      dispatch({ type: 'SET_STEP', payload: state.step - 1 });
     }
-    return false;
-  }, [isNextStepEnabled, state.step]);
+  }, [navigate, dispatch, state.step]);
 
-  const deployStepIndex = isGenerateCelEnabled && state.hasCelInput ? 7 : 5;
+  const completeStep = useCallback(() => {
+    telemetry.reportAssistantStepComplete({ step: state.step });
+    if (state.step === 3 || state.step === 5) {
+      dispatch({ type: 'SET_IS_GENERATING', payload: true });
+    } else {
+      dispatch({ type: 'SET_STEP', payload: state.step + 1 });
+    }
+  }, [telemetry, state.step]);
 
   const actions = useMemo<Actions>(
     () => ({
@@ -106,14 +118,14 @@ export const CreateIntegrationAssistant = React.memo(() => {
               result={state.result}
             />
           )}
-          {state.step === 5 && isGenerateCelEnabled && state.hasCelInput && (
+          {state.step === celInputStepIndex && (
             <CelInputStep
               integrationSettings={state.integrationSettings}
               connector={state.connector}
               isGenerating={state.isGenerating}
             />
           )}
-          {state.step === 6 && isGenerateCelEnabled && state.celInputResult && (
+          {state.step === celReviewStepIndex && (
             <ReviewCelStep
               isGenerating={state.isGenerating}
               celInputResult={state.celInputResult}
@@ -130,10 +142,13 @@ export const CreateIntegrationAssistant = React.memo(() => {
           )}
         </KibanaPageTemplate.Section>
         <Footer
-          currentStep={state.step}
           isGenerating={state.isGenerating}
-          hasCelInput={state.hasCelInput}
+          isAnalyzeStep={state.step === 3}
+          isAnalyzeCelStep={state.step === celInputStepIndex}
+          isLastStep={state.step === deployStepIndex}
           isNextStepEnabled={isNextStepEnabled}
+          onBack={goBackStep}
+          onNext={completeStep}
         />
       </KibanaPageTemplate>
     </ActionsProvider>

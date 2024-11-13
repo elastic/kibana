@@ -6,13 +6,10 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { ButtonsFooter } from '../../../../common/components/buttons_footer';
-import { useNavigate, Page } from '../../../../common/hooks/use_navigate';
-import { useTelemetry } from '../../telemetry';
-import { useActions, type State } from '../state';
+import { type State } from '../state';
 import * as i18n from './translations';
-import { ExperimentalFeaturesService } from '../../../../services';
 
 // Generation button for Step 3
 const AnalyzeButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating }) => {
@@ -43,61 +40,44 @@ const AnalyzeCelButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerati
 AnalyzeCelButtonText.displayName = 'AnalyzeCelButtonText';
 
 interface FooterProps {
-  currentStep: State['step'];
   isGenerating: State['isGenerating'];
-  hasCelInput: State['hasCelInput'];
-  isNextStepEnabled?: boolean;
+  isAnalyzeStep: boolean;
+  isAnalyzeCelStep: boolean;
+  isLastStep: boolean;
+  isNextStepEnabled: boolean;
+  onBack: () => void;
+  onNext: () => void;
 }
 
 export const Footer = React.memo<FooterProps>(
-  ({ currentStep, isGenerating, hasCelInput, isNextStepEnabled = false }) => {
-    const telemetry = useTelemetry();
-    const { setStep, setIsGenerating } = useActions();
-    const navigate = useNavigate();
+  ({
+    isGenerating,
+    isAnalyzeStep,
+    isAnalyzeCelStep,
+    isLastStep,
+    isNextStepEnabled,
+    onBack,
+    onNext,
+  }) => {
+    const nextButtonText = useMemo(
+      () =>
+        isAnalyzeStep ? (
+          <AnalyzeButtonText isGenerating={isGenerating} />
+        ) : isAnalyzeCelStep ? (
+          <AnalyzeCelButtonText isGenerating={isGenerating} />
+        ) : (
+          i18n.ADD_TO_ELASTIC
+        ),
+      [isGenerating, isAnalyzeStep, isAnalyzeCelStep]
+    );
 
-    const { generateCel: isGenerateCelEnabled } = ExperimentalFeaturesService.get();
-
-    const onBack = useCallback(() => {
-      if (currentStep === 1) {
-        navigate(Page.landing);
-      } else {
-        setStep(currentStep - 1);
-      }
-    }, [currentStep, navigate, setStep]);
-
-    const onNext = useCallback(() => {
-      telemetry.reportAssistantStepComplete({ step: currentStep });
-      if (currentStep === 3 || currentStep === 5) {
-        setIsGenerating(true);
-      } else {
-        setStep(currentStep + 1);
-      }
-    }, [currentStep, setIsGenerating, setStep, telemetry]);
-
-    const nextButtonText = useMemo(() => {
-      if (currentStep === 3) {
-        return <AnalyzeButtonText isGenerating={isGenerating} />;
-      }
-      if (currentStep === 4 && (!isGenerateCelEnabled || !hasCelInput)) {
-        return i18n.ADD_TO_ELASTIC;
-      }
-      if (currentStep === 5 && isGenerateCelEnabled && hasCelInput) {
-        return <AnalyzeCelButtonText isGenerating={isGenerating} />;
-      }
-      if (currentStep === 6 && isGenerateCelEnabled) {
-        return i18n.ADD_TO_ELASTIC;
-      }
-    }, [currentStep, isGenerating, hasCelInput, isGenerateCelEnabled]);
-
-    if (currentStep === 7 || (currentStep === 5 && (!isGenerateCelEnabled || !hasCelInput))) {
-      return <ButtonsFooter cancelButtonText={i18n.CLOSE} />;
-    }
     return (
       <ButtonsFooter
-        isNextDisabled={!isNextStepEnabled || isGenerating}
+        nextButtonText={isLastStep ? null : nextButtonText}
+        cancelButtonText={isLastStep ? i18n.CLOSE : null}
+        isNextDisabled={isGenerating || !isNextStepEnabled}
         onBack={onBack}
         onNext={onNext}
-        nextButtonText={nextButtonText}
       />
     );
   }
