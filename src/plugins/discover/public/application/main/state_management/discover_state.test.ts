@@ -851,10 +851,8 @@ describe('Test discover state actions', () => {
     });
     const unsubscribe = state.actions.initializeAndSync();
     await state.actions.onDataViewEdited(dataViewMock);
-
-    await waitFor(() => {
-      expect(state.internalState.getState().dataView).not.toBe(selectedDataView);
-    });
+    expect(state.internalState.getState().dataView?.id).toBe(dataViewMock.id);
+    expect(state.dataState.fetch).toHaveBeenCalledTimes(1);
     unsubscribe();
   });
   test('onDataViewEdited - ad-hoc data view', async () => {
@@ -866,6 +864,7 @@ describe('Test discover state actions', () => {
     await waitFor(() => {
       expect(state.internalState.getState().dataView?.id).not.toBe(previousId);
     });
+    expect(state.dataState.fetch).toHaveBeenCalledTimes(1);
     unsubscribe();
   });
 

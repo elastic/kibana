@@ -14,6 +14,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
+import { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
 import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverAppStateContainer } from '../discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
@@ -29,10 +30,12 @@ export async function changeDataView(
     services,
     internalState,
     appState,
+    savedSearchState,
   }: {
     services: DiscoverServices;
     internalState: DiscoverInternalStateContainer;
     appState: DiscoverAppStateContainer;
+    savedSearchState: DiscoverSavedSearchContainer;
   }
 ) {
   addLog('[ui] changeDataView', { id });
@@ -42,7 +45,7 @@ export async function changeDataView(
   const state = appState.getState();
   let nextDataView: DataView | null = null;
 
-  internalState.transitions.setIsDataViewLoading(true);
+  internalState.transitions.setIsLoading(true);
   internalState.transitions.setResetDefaultProfileState({ columns: true, rowHeight: true });
 
   try {
@@ -62,7 +65,8 @@ export async function changeDataView(
       uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
       state.query
     );
-
+    savedSearchState.update({ nextDataView, nextState: nextAppState });
+    internalState.transitions.setDataView(nextDataView);
     appState.update(nextAppState);
 
     if (internalState.getState().expandedDoc) {
@@ -70,5 +74,5 @@ export async function changeDataView(
     }
   }
 
-  internalState.transitions.setIsDataViewLoading(false);
+  internalState.transitions.setIsLoading(false);
 }

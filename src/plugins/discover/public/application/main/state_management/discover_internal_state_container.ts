@@ -19,7 +19,6 @@ import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/p
 
 export interface InternalState {
   dataView: DataView | undefined;
-  isDataViewLoading: boolean;
   isLoading: boolean;
   savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
@@ -32,7 +31,6 @@ export interface InternalState {
 
 export interface InternalStateTransitions {
   setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
-  setIsDataViewLoading: (state: InternalState) => (isLoading: boolean) => InternalState;
   setIsLoading: (state: InternalState) => (isLoading: boolean) => InternalState;
   setSavedDataViews: (state: InternalState) => (dataView: DataViewListItem[]) => InternalState;
   setAdHocDataViews: (state: InternalState) => (dataViews: DataView[]) => InternalState;
@@ -73,7 +71,6 @@ export function getInternalStateContainer() {
   return createStateContainer<InternalState, InternalStateTransitions, {}>(
     {
       dataView: undefined,
-      isDataViewLoading: false,
       isLoading: true,
       adHocDataViews: [],
       savedDataViews: [],
@@ -88,10 +85,6 @@ export function getInternalStateContainer() {
         dataView: nextDataView,
         expandedDoc:
           nextDataView?.id !== prevState.dataView?.id ? undefined : prevState.expandedDoc,
-      }),
-      setIsDataViewLoading: (prevState: InternalState) => (loading: boolean) => ({
-        ...prevState,
-        isDataViewLoading: loading,
       }),
       setIsLoading: (prevState: InternalState) => (isLoading: boolean) => ({
         ...prevState,

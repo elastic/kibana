@@ -353,6 +353,7 @@ export function DiscoverMainRoute({
             mainContent={mainContent}
             showNoDataPage={noDataState.showNoDataPage}
             stateContainer={stateContainer}
+            loadingIndicator={loadingIndicator}
           />
         </rootProfileState.AppWrapper>
       </DiscoverMainProvider>
@@ -366,10 +367,12 @@ export function DiscoverMainLoading({
   stateContainer,
   showNoDataPage,
   mainContent,
+  loadingIndicator,
 }: {
   stateContainer: DiscoverStateContainer;
   showNoDataPage: boolean;
-  mainContent: JSX.Element;
+  mainContent: React.ReactNode;
+  loadingIndicator: React.ReactNode;
 }) {
   const loading = useInternalStateSelector((state) => state.isLoading);
 
@@ -379,7 +382,7 @@ export function DiscoverMainLoading({
         stateContainer={stateContainer}
         hideNavMenuItems={showNoDataPage || loading}
       />
-      {loading && !showNoDataPage ? <LoadingIndicator /> : mainContent}
+      {loading && !showNoDataPage ? loadingIndicator : mainContent}
     </>
   );
 }

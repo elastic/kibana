@@ -13,9 +13,7 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPanel,
-  EuiProgress,
   useEuiBackgroundColor,
-  EuiDelayRender,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -101,10 +99,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     }
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
-  const [dataView, dataViewLoading] = useInternalStateSelector((state) => [
-    state.dataView!,
-    state.isDataViewLoading,
-  ]);
+  const [dataView] = useInternalStateSelector((state) => [state.dataView!]);
   const customFilters = useInternalStateSelector((state) => state.customFilters);
 
   const dataState: DataMainMsg = useDataState(main$);
@@ -276,12 +271,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (removedFieldName && currentColumns.includes(removedFieldName)) {
         onRemoveColumn(removedFieldName);
       }
-      if (!dataView.isPersisted()) {
-        await stateContainer.actions.updateAdHocDataViewId();
-      }
-      stateContainer.dataState.refetch$.next('reset');
+      await stateContainer.actions.onDataViewFieldEdited();
     },
-    [dataView, stateContainer, currentColumns, onRemoveColumn]
+    [stateContainer, currentColumns, onRemoveColumn]
   );
 
   const onDisableFilters = useCallback(() => {
@@ -423,11 +415,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             height: 100%;
           `}
         >
-          {dataViewLoading && (
-            <EuiDelayRender delay={300}>
-              <EuiProgress size="xs" color="accent" position="absolute" />
-            </EuiDelayRender>
-          )}
           <SavedSearchURLConflictCallout
             savedSearch={savedSearch}
             spaces={spaces}

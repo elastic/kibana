@@ -21,7 +21,7 @@ import {
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
 import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
@@ -177,6 +177,8 @@ export interface DiscoverStateContainer {
      * @param dataView
      */
     onDataViewEdited: (dataView: DataView) => Promise<void>;
+
+    onDataViewFieldEdited: () => Promise<void>;
     /**
      * Triggered when transitioning from ESQL to Dataview
      * Clean ups the ES|QL query and moves to the dataview mode
@@ -221,10 +223,14 @@ export interface DiscoverStateContainer {
      */
     undoSavedSearchChanges: () => Promise<SavedSearch>;
     /**
-     * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
-     * This is to prevent duplicate ids messing with our system
+     * Persist the given saved search
+     * @param savedSearch
+     * @param saveOptions
      */
-    updateAdHocDataViewId: () => Promise<DataView | undefined>;
+    persistSavedSearch: (
+      savedSearch: SavedSearch,
+      saveOptions?: SaveSavedSearchOptions
+    ) => Promise<{ id: string | undefined } | undefined>;
     /**
      * Updates the ES|QL query string
      */
@@ -338,8 +344,6 @@ export function getDiscoverStateContainer({
       id: uuidv4(),
     });
 
-    services.dataViews.clearInstanceCache(prevDataView.id);
-
     updateFiltersReferences({
       prevDataView,
       nextDataView,
@@ -358,7 +362,6 @@ export function getDiscoverStateContainer({
 
     const trackingEnabled = Boolean(nextDataView.isPersisted() || savedSearchContainer.getId());
     services.urlTracker.setTrackingEnabled(trackingEnabled);
-
     return nextDataView;
   };
 
@@ -424,18 +427,17 @@ export function getDiscoverStateContainer({
   const onDataViewEdited = async (editedDataView: DataView) => {
     setIsLoading(true);
     const edited = editedDataView.id;
-    if (editedDataView.isPersisted()) {
-      // Clear the current data view from the cache and create a new instance
-      // of it, ensuring we have a new object reference to trigger a re-render
-      services.dataViews.clearInstanceCache(edited);
-      setDataView(await services.dataViews.create(editedDataView.toSpec(), true));
-    } else {
+    let clearCache = false;
+    if (!editedDataView.isPersisted()) {
       await updateAdHocDataViewId();
+      clearCache = true;
     }
-    await loadDataViewList();
     addLog('[getDiscoverStateContainer] onDataViewEdited triggers data fetching');
-    setIsLoading(false);
     fetchData();
+    if (clearCache) {
+      services.dataViews.clearInstanceCache(edited);
+    }
+    setIsLoading(false);
   };
 
   const loadSavedSearch = async (params?: LoadParams): Promise<SavedSearch> => {
@@ -552,6 +554,7 @@ export function getDiscoverStateContainer({
       services,
       internalState: internalStateContainer,
       appState: appStateContainer,
+      savedSearchState: savedSearchContainer,
     });
   };
 
@@ -605,6 +608,31 @@ export function getDiscoverStateContainer({
     appStateContainer.update({ query });
   };
 
+  const persistSavedSearch = async (
+    savedSearch: SavedSearch,
+    saveOptions?: SaveSavedSearchOptions
+  ) => {
+    const prevDataView = internalStateContainer.getState().dataView;
+    if (prevDataView && !prevDataView?.isPersisted() && saveOptions?.copyOnSave) {
+      await updateAdHocDataViewId();
+      services.dataViews.clearInstanceCache(prevDataView.id!);
+    }
+    return savedSearchContainer.persist(savedSearch, saveOptions);
+  };
+
+  const onDataViewFieldEdited = async () => {
+    setIsLoading(true);
+    const dataView = internalStateContainer.getState().dataView;
+    if (!dataView?.isPersisted()) {
+      await updateAdHocDataViewId();
+    }
+    dataStateContainer.refetch$.next('reset');
+    setIsLoading(false);
+    if (dataView && !dataView?.isPersisted()) {
+      services.dataViews.clearInstanceCache(dataView.id!);
+    }
+  };
+
   return {
     globalState: globalStateContainer,
     appState: appStateContainer,
@@ -623,14 +651,15 @@ export function getDiscoverStateContainer({
       createAndAppendAdHocDataView,
       onDataViewCreated,
       onDataViewEdited,
+      onDataViewFieldEdited,
       onOpenSavedSearch,
       setIsLoading,
       transitionFromESQLToDataView,
       transitionFromDataViewToESQL,
       onUpdateQuery,
+      persistSavedSearch,
       setDataView,
       undoSavedSearchChanges,
-      updateAdHocDataViewId,
       updateESQLQuery,
     },
   };

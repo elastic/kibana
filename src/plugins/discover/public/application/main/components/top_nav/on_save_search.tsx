@@ -68,7 +68,7 @@ async function saveDataSource({
   }
 
   try {
-    const response = await state.savedSearchState.persist(savedSearch, saveOptions);
+    const response = await state.actions.persistSavedSearch(savedSearch, saveOptions);
     if (response?.id) {
       onSuccess(response.id!);
     }
@@ -155,10 +155,6 @@ export async function onSaveSearch({
       copyOnSave: newCopyOnSave,
       isTitleDuplicateConfirmed,
     };
-
-    if (newCopyOnSave) {
-      await state.actions.updateAdHocDataViewId();
-    }
 
     const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
     const response = await saveDataSource({
