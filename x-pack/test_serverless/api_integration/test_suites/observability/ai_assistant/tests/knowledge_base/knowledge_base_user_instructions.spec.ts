@@ -13,6 +13,7 @@ import {
   clearConversations,
   clearKnowledgeBase,
   createKnowledgeBaseModel,
+  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { getConversationCreatedEvent } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/conversations/helpers';
@@ -59,6 +60,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     after(async () => {
       await deleteKnowledgeBaseModel(ml);
+      await deleteInferenceEndpoint({ es });
       await clearKnowledgeBase(es);
       await clearConversations(es);
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(johnRoleAuthc);

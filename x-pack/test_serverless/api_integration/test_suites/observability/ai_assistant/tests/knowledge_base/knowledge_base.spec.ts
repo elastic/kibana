@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import {
   clearKnowledgeBase,
   createKnowledgeBaseModel,
+  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -35,6 +36,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     after(async () => {
       await deleteKnowledgeBaseModel(ml);
+      await deleteInferenceEndpoint({ es });
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
