@@ -1439,7 +1439,6 @@ x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor te
 /test/server_integration/http @elastic/kibana-core
 /test/scripts/run_multiple_kibana_nodes.sh @elastic/kibana-core
 /test/plugin_functional/test_suites/application_links @elastic/kibana-core
-/test/interpreter_functional/test_suites/run_pipeline @elastic/kibana-core
 /test/functional/services/usage_collection.ts @elastic/kibana-core
 /test/functional/services/saved_objects_finder.ts @elastic/kibana-core
 /test/api_integration/fixtures/import_managed* @elastic/kibana-core
