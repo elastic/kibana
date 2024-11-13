@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { IndicesStatusResponse } from '../../../common';
-import { docLinks } from '../../../common/doc_links';
 
 import { AnalyticsEvents } from '../../analytics/constants';
 import { AvailableLanguages } from '../../code_examples';
@@ -44,7 +43,9 @@ export const ElasticsearchStart: React.FC<ElasticsearchStartProps> = () => {
   const { data: userPrivileges } = useUserPrivilegesQuery(formState.indexName);
 
   const [createIndexView, setCreateIndexViewMode] = useState<CreateIndexViewMode>(
-    userPrivileges?.privileges.canManageIndex === false ? CreateIndexView.Code : CreateIndexView.UI
+    userPrivileges?.privileges.canManageIndex === false
+      ? CreateIndexViewMode.Code
+      : CreateIndexViewMode.UI
   );
   const usageTracker = useUsageTracker();
 
@@ -54,7 +55,7 @@ export const ElasticsearchStart: React.FC<ElasticsearchStartProps> = () => {
   useEffect(() => {
     if (userPrivileges === undefined) return;
     if (userPrivileges.privileges.canManageIndex === false) {
-      setCreateIndexViewMode(CreateIndexView.Code);
+      setCreateIndexViewMode(CreateIndexViewMode.Code);
     }
   }, [userPrivileges]);
 
