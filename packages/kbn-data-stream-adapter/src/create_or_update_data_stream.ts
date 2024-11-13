@@ -11,7 +11,7 @@ import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { retryTransientEsErrors } from '@kbn/index-adapter';
 
 interface UpdateIndexMappingsOpts {
   logger: Logger;
@@ -168,7 +168,7 @@ export async function createDataStream({
   esClient,
   name,
 }: CreateDataStreamParams): Promise<void> {
-  logger.info(`Creating data stream - ${name}`);
+  logger.debug(`Checking data stream exists - ${name}`);
 
   // check if data stream exists
   let dataStreamExists = false;
@@ -189,6 +189,7 @@ export async function createDataStream({
   if (dataStreamExists) {
     return;
   }
+  logger.info(`Installing data stream - ${name}`);
 
   try {
     await retryTransientEsErrors(() => esClient.indices.createDataStream({ name }), { logger });
