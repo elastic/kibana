@@ -195,6 +195,4 @@ export const VISUALIZATION_HEATMAP_MAX_BUCKETS_ID = 'visualization:heatmap:maxBu
 export const VISUALIZATION_USE_LEGACY_TIME_AXIS_ID = 'visualization:useLegacyTimeAxis';
 export const VISUALIZATION_LEGACY_GAUGE_CHARTS_LIBRARY_ID =
   'visualization:visualize:legacyGaugeChartsLibrary';
-export const VISUALIZATION_LEGACY_HEATMAP_CHARTS_LIBRARY_ID =
-  'visualization:visualize:legacyHeatmapChartsLibrary';
 export const VISUALIZATION_ENABLE_LABS_ID = 'visualize:enableLabs';

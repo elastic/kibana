@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vislibPointSeriesTypes as pointSeries } from './point_series';
 import { vislibGaugeConfig } from './gauge';
 
 export const vislibTypesConfig = {
-  heatmap: pointSeries.heatmap,
   gauge: vislibGaugeConfig,
   goal: vislibGaugeConfig,
   metric: vislibGaugeConfig,

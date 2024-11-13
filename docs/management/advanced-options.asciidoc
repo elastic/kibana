@@ -635,9 +635,6 @@ Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 [[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::
 The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
 
-[[visualization-visualize-heatmapChartslibrary]]`visualization:visualize:legacyHeatmapChartsLibrary`::
-Disable this option if you prefer to use the new heatmap charts with improved performance, legend settings, and more..
-
 [float]
 [[kibana-global-settings-reference]]
 === Change the global settings

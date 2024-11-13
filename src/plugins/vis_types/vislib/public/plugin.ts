@@ -15,11 +15,9 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
-import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '@kbn/vis-type-heatmap-plugin/common';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '@kbn/vis-type-gauge-plugin/common';
 import type { VislibPublicConfig } from '../server/config';
 import { setAnalytics, setI18n, setUsageCollectionStart } from './services';
-import { heatmapVisTypeDefinition } from './heatmap';
 
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { setFormatService, setDataActions, setTheme } from './services';
@@ -58,15 +56,6 @@ export class VisTypeVislibPlugin
     expressions.registerFunction(createVisTypeVislibVisFn());
 
     const { readOnly } = this.initializerContext.config.get<VislibPublicConfig>();
-
-    if (core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY)) {
-      // register vislib heatmap chart
-      visualizations.createBaseVisualization({
-        ...heatmapVisTypeDefinition,
-        disableCreate: Boolean(readOnly),
-        disableEdit: Boolean(readOnly),
-      });
-    }
 
     if (core.uiSettings.get(LEGACY_GAUGE_CHARTS_LIBRARY)) {
       // register vislib gauge and goal charts

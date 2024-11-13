@@ -23,7 +23,6 @@
     ],
     "requiredBundles": [
       "kibanaUtils",
-      "visTypeHeatmap",
       "visTypeGauge"
     ]
   }

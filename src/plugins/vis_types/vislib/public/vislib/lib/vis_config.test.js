@@ -79,7 +79,7 @@ describe('Vislib VisConfig Class Test Suite', function () {
 
     visConfig = new VisConfig(
       {
-        type: 'heatmap',
+        type: 'gauge',
       },
       data,
       getMockUiState(),
@@ -99,7 +99,7 @@ describe('Vislib VisConfig Class Test Suite', function () {
 
     it('should get the property', function () {
       expect(visConfig.get('el')).toBe(el);
-      expect(visConfig.get('type')).toBe('point_series');
+      expect(visConfig.get('type')).toBe('gauge');
     });
 
     it('should return defaults if property does not exist', function () {

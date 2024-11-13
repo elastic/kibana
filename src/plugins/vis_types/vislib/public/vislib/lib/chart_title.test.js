@@ -100,7 +100,7 @@ describe('Vislib ChartTitle Class Test Suite', function () {
 
     const visConfig = new VisConfig(
       {
-        type: 'heatmap',
+        type: 'gauge',
         title: {
           text: 'rows',
         },

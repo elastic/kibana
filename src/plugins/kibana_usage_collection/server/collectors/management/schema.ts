@@ -420,10 +420,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:visualize:legacyHeatmapChartsLibrary': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'doc_table:legacy': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },

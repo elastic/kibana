@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PointSeries } from './point_series';
 import { GaugeChart } from './gauge_chart';
 
 export const visTypes = {
-  point_series: PointSeries,
   gauge: GaugeChart,
   goal: GaugeChart,
   metric: GaugeChart,

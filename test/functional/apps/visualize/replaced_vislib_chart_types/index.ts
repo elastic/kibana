@@ -46,6 +46,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
     loadTestFile(require.resolve('./_timelion'));
     loadTestFile(require.resolve('../group3/_pie_chart'));
-    loadTestFile(require.resolve('../group2/_heatmap_chart'));
   });
 }

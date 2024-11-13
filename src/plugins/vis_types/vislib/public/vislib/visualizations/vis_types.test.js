@@ -15,7 +15,7 @@ describe('Vislib Vis Types Test Suite', function () {
   let visFunc;
 
   beforeEach(function () {
-    visFunc = visTypes.point_series;
+    visFunc = visTypes.gauge;
   });
 
   it('should be an object', function () {

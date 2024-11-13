@@ -108,16 +108,25 @@ describe('Vislib _chart Test Suite', function () {
     el = d3.select('body').append('div').attr('class', 'column-chart');
 
     config = {
-      type: 'heatmap',
+      type: 'gauge',
       addLegend: true,
       addTooltip: true,
-      colorsNumber: 4,
-      colorSchema: 'Greens',
-      setColorRange: false,
-      percentageMode: true,
-      percentageFormatPattern: '0.0%',
-      invertColors: false,
-      colorsRange: [],
+      gauge: {
+        alignment: 'horizontal',
+        autoExtend: false,
+        percentageMode: false,
+        gaugeStyle: 'Full',
+        backStyle: 'Full',
+        orientation: 'vertical',
+        colorSchema: 'Greens',
+        colorsRange: [
+          { from: 0, to: 1500 },
+          { from: 1500, to: 2500 },
+          { from: 2500, to: 3000 },
+        ],
+        invertColors: false,
+        type: 'meter',
+      },
     };
     vis = getVis(config, el[0][0]);
     vis.render(data, getMockUiState());

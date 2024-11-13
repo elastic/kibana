@@ -1,6 +1,6 @@
 # Charts supported
 
-Vislib supports the gauge/goal charts from the aggregation-based visualizations. It also contains the legacy implemementation of the heatmap chart (enabled by the visualization:visualize:legacyHeatmapChartsLibrary advanced setting).
+Vislib supports the gauge/goal charts from the aggregation-based visualizations.
 
 # General overview
 
@@ -16,9 +16,4 @@ Each base vis type (`lib/types`) can have a different layout defined (`lib/layou
 
 All base visualizations extend from `visualizations/_chart`
 
-
 ### Map
-
-### Point series chart
-
-`visualizations/point_series` takes care of drawing the point series chart (no axes or titles, just the chart itself). It creates all the series defined and calls render method on them.

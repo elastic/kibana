@@ -55,16 +55,25 @@ describe('Vislib Dispatch Class Test Suite', function () {
     let mockUiState;
 
     const vislibParams = {
-      type: 'heatmap',
+      type: 'gauge',
       addLegend: true,
       addTooltip: true,
-      colorsNumber: 4,
-      colorSchema: 'Greens',
-      setColorRange: false,
-      percentageMode: true,
-      percentageFormatPattern: '0.0%',
-      invertColors: false,
-      colorsRange: [],
+      gauge: {
+        alignment: 'horizontal',
+        autoExtend: false,
+        percentageMode: false,
+        gaugeStyle: 'Full',
+        backStyle: 'Full',
+        orientation: 'vertical',
+        colorSchema: 'Greens',
+        colorsRange: [
+          { from: 0, to: 1500 },
+          { from: 1500, to: 2500 },
+          { from: 2500, to: 3000 },
+        ],
+        invertColors: false,
+        type: 'meter',
+      },
     };
 
     function generateVis(opts = {}) {
@@ -99,16 +108,25 @@ describe('Vislib Dispatch Class Test Suite', function () {
     let mockUiState;
 
     const vislibParams = {
-      type: 'heatmap',
+      type: 'gauge',
       addLegend: true,
       addTooltip: true,
-      colorsNumber: 4,
-      colorSchema: 'Greens',
-      setColorRange: false,
-      percentageMode: true,
-      percentageFormatPattern: '0.0%',
-      invertColors: false,
-      colorsRange: [],
+      gauge: {
+        alignment: 'horizontal',
+        autoExtend: false,
+        percentageMode: false,
+        gaugeStyle: 'Full',
+        backStyle: 'Full',
+        orientation: 'vertical',
+        colorSchema: 'Greens',
+        colorsRange: [
+          { from: 0, to: 1500 },
+          { from: 1500, to: 2500 },
+          { from: 2500, to: 3000 },
+        ],
+        invertColors: false,
+        type: 'meter',
+      },
     };
 
     function generateVis(opts = {}) {
@@ -205,16 +223,25 @@ describe('Vislib Dispatch Class Test Suite', function () {
 
   describe('Custom event handlers', function () {
     const vislibParams = {
-      type: 'heatmap',
+      type: 'gauge',
       addLegend: true,
       addTooltip: true,
-      colorsNumber: 4,
-      colorSchema: 'Greens',
-      setColorRange: false,
-      percentageMode: true,
-      percentageFormatPattern: '0.0%',
-      invertColors: false,
-      colorsRange: [],
+      gauge: {
+        alignment: 'horizontal',
+        autoExtend: false,
+        percentageMode: false,
+        gaugeStyle: 'Full',
+        backStyle: 'Full',
+        orientation: 'vertical',
+        colorSchema: 'Greens',
+        colorsRange: [
+          { from: 0, to: 1500 },
+          { from: 1500, to: 2500 },
+          { from: 2500, to: 3000 },
+        ],
+        invertColors: false,
+        type: 'meter',
+      },
     };
     const config = _.defaultsDeep({}, vislibParams);
     const vis = getVis(config);

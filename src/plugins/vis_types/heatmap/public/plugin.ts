@@ -15,7 +15,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HeatmapPublicConfig } from '../server/config';
-import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '../common';
 import { heatmapVisType } from './vis_type';
 import { setDataViewsStart } from './services';
 
@@ -48,18 +47,15 @@ export class VisTypeHeatmapPlugin {
     core: CoreSetup<VisTypeHeatmapPluginStartDependencies>,
     { visualizations, charts, usageCollection }: VisTypeHeatmapSetupDependencies
   ) {
-    if (!core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY)) {
-      const { readOnly } = this.initializerContext.config.get<HeatmapPublicConfig>();
-      visualizations.createBaseVisualization({
-        ...heatmapVisType({
-          showElasticChartsOptions: true,
-          palettes: charts.palettes,
-        }),
-        disableCreate: Boolean(readOnly),
-        disableEdit: Boolean(readOnly),
-      });
-    }
-    return {};
+    const { readOnly } = this.initializerContext.config.get<HeatmapPublicConfig>();
+    visualizations.createBaseVisualization({
+      ...heatmapVisType({
+        showElasticChartsOptions: true,
+        palettes: charts.palettes,
+      }),
+      disableCreate: Boolean(readOnly),
+      disableEdit: Boolean(readOnly),
+    });
   }
 
   start(core: CoreStart, { dataViews }: VisTypeHeatmapStartDependencies) {

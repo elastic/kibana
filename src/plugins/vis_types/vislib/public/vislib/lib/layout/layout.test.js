@@ -50,16 +50,25 @@ dateHistogramArray.forEach(function (data, i) {
 
     beforeEach(() => {
       const vislibParams = {
-        type: 'heatmap',
+        type: 'gauge',
         addLegend: true,
         addTooltip: true,
-        colorsNumber: 4,
-        colorSchema: 'Greens',
-        setColorRange: false,
-        percentageMode: true,
-        percentageFormatPattern: '0.0%',
-        invertColors: false,
-        colorsRange: [],
+        gauge: {
+          alignment: 'horizontal',
+          autoExtend: false,
+          percentageMode: false,
+          gaugeStyle: 'Full',
+          backStyle: 'Full',
+          orientation: 'vertical',
+          colorSchema: 'Greens',
+          colorsRange: [
+            { from: 0, to: 1500 },
+            { from: 1500, to: 2500 },
+            { from: 2500, to: 3000 },
+          ],
+          invertColors: false,
+          type: 'meter',
+        },
       };
       const config = _.defaultsDeep({}, vislibParams);
       vis = getVis(config);
@@ -99,7 +108,7 @@ dateHistogramArray.forEach(function (data, i) {
       beforeEach(function () {
         const visConfig = new VisConfig(
           {
-            type: 'heatmap',
+            type: 'gauge',
           },
           data,
           mockUiState,
