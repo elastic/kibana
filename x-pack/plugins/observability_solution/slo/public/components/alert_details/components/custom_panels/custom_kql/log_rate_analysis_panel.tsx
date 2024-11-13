@@ -27,7 +27,7 @@ import type { WindowSchema } from '../../../../../typings';
 import { TimeRange } from '../../../../slo/error_rate_chart/use_lens_definition';
 import { BurnRateAlert, BurnRateRule } from '../../../types';
 import { getActionGroupFromReason } from '../../../utils/alert';
-import { useKibana } from '../../../../../utils/kibana_react';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import { getESQueryForLogRateAnalysis } from './helpers/log_rate_analysis_query';
 function getDataTimeRange(
   timeRange: { gte: string; lte?: string },

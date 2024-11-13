@@ -6,15 +6,28 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { unflattenObject } from '../../object/unflatten_object';
 
-export function esqlResultToPlainObjects<T extends Record<string, any>>(
+export function esqlResultToPlainObjects<TDocument = unknown>(
   result: ESQLSearchResponse
-): T[] {
+): TDocument[] {
   return result.values.map((row) => {
-    return row.reduce<Record<string, unknown>>((acc, value, index) => {
-      const column = result.columns[index];
-      acc[column.name] = value;
-      return acc;
-    }, {});
-  }) as T[];
+    return unflattenObject(
+      row.reduce<Record<string, any>>((acc, value, index) => {
+        const column = result.columns[index];
+
+        if (!column) {
+          return acc;
+        }
+
+        // Removes the type suffix from the column name
+        const name = column.name.replace(/\.(text|keyword)$/, '');
+        if (!acc[name]) {
+          acc[name] = value;
+        }
+
+        return acc;
+      }, {})
+    ) as TDocument;
+  });
 }

@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useMemo, useState } from 'react';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { TimeBounds } from '../../types';
 import { EventsChartPanel } from '../events_chart_panel';
 import { HistoricalDataCharts } from '../historical_data_charts';

@@ -10,7 +10,7 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
 import { TimeBounds } from '../../../pages/slo_details/types';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { getDelayInSecondsFromSLO } from '../../../utils/slo/get_delay_in_seconds_from_slo';
 import { AlertAnnotation, TimeRange, useLensDefinition } from './use_lens_definition';
 
