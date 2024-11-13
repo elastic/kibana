@@ -38,10 +38,11 @@ export default ({ getService }: FtrProviderContext) => {
         await ml.api.initSavedObjects();
         await ml.testResources.setKibanaTimeZoneToUTC();
 
-        const adJobConfig = ml.commonConfig.getADFqSingleMetricJobConfig('fq_job');
+        const jobId = `fq_job_${Date.now()}`;
+        const adJobConfig = ml.commonConfig.getADFqSingleMetricJobConfig(jobId);
         await ml.api.createAnomalyDetectionJob(adJobConfig);
 
-        await ml.api.waitForJobNotificationsToIndex('fq_job');
+        await ml.api.waitForJobNotificationsToIndex(jobId);
       });
 
       after(async () => {
