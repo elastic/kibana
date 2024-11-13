@@ -12,7 +12,7 @@ import { getSignalVersionsByIndex } from '../get_signal_versions_by_index';
 import { isOutdated as getIsOutdated, signalsAreOutdated } from '../helpers';
 import { getLatestIndexTemplateVersion } from './get_latest_index_template_version';
 import { getIndexAliasPerSpace } from './get_index_alias_per_space';
-import { getOldestSignalTimestamp } from './get_oldest_signal';
+import { getOldestSignalTimestamp } from './get_oldest_signal_timestamp';
 
 interface OutdatedSpaces {
   isMigrationRequired: boolean;

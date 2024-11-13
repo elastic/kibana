@@ -25,7 +25,7 @@ export const getLatestIndexTemplateVersion = async ({
       (template) => template.index_template.version ?? 0
     );
 
-    latestTemplateVersion = Math.max(...versions);
+    latestTemplateVersion = versions.length ? Math.max(...versions) : 0;
   } catch (e) {
     latestTemplateVersion = 0;
   }
