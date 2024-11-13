@@ -1563,7 +1563,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.waitFor('rendering count to stabilize', async () => {
         const firstCount = await getRenderingCount();
 
-        await common.sleep(1000);
+        await common.sleep(500);
 
         const secondCount = await getRenderingCount();
 

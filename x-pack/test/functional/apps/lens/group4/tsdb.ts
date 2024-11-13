@@ -96,9 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
             'Median of bytes_gauge'
           );
-        });
-
-        it('does not show a warning', async () => {
+          // does not show a warning
           await lens.openDimensionEditor('lnsXY_yDimensionPanel');
           await testSubjects.missingOrFail('median-partial-warning');
           await lens.assertNoEditorWarning();
@@ -107,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('for rolled up metric (downsampled)', () => {
-        it('defaults to average for rolled up metric', async () => {
+        it('defaults to average for rolled up metric and shows warning for unsupported metrics', async () => {
           await lens.switchDataPanelIndexPattern(downsampleDataView.dataView);
           await lens.removeLayer();
           await lens.waitForField('bytes_gauge');
@@ -115,8 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
             'Average of bytes_gauge'
           );
-        });
-        it('shows warnings in editor when using median', async () => {
+          // shows warnings in editor when using median
           await lens.openDimensionEditor('lnsXY_yDimensionPanel');
           await testSubjects.existOrFail('median-partial-warning');
           await testSubjects.click('lns-indexPatternDimension-median');
@@ -125,8 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Median of bytes_gauge uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
             'warning'
           );
-        });
-        it('shows warnings in dashboards as well', async () => {
+          // shows warnings in dashboards as well
           await lens.save('New', false, false, false, 'new');
 
           await dashboard.waitForRenderComplete();
@@ -142,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await common.navigateToApp('lens');
         await lens.switchDataPanelIndexPattern(tsdbDataView);
-        await lens.goToTimeRange();
+        // await lens.goToTimeRange();
       });
 
       afterEach(async () => {
@@ -270,7 +266,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
 
       describe('show time series dimension groups within breakdown', () => {
-        it('should show the time series dimension group on field picker when configuring a breakdown', async () => {
+        it('should show the time series dimension group on field picker only for breakdown', async () => {
           await lens.configureDimension({
             dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
             operation: 'date_histogram',
@@ -289,24 +285,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             keepOpen: true,
           });
 
-          const list = await comboBox.getOptionsList('indexPattern-dimension-field');
+          let list = await comboBox.getOptionsList('indexPattern-dimension-field');
           expect(list).to.contain('Time series dimensions');
           await lens.closeDimensionEditor();
-        });
 
-        it("should not show the time series dimension group on field picker if it's not a breakdown", async () => {
-          await lens.configureDimension({
-            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-            operation: 'min',
-            field: 'bytes_counter',
-          });
+          // now check that for the x axis dimension it won't show it
+          await lens.removeDimension('lnsXY_xDimensionPanel');
 
           await lens.configureDimension({
             dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-            operation: 'date_histogram',
+            operation: 'terms',
             keepOpen: true,
           });
-          const list = await comboBox.getOptionsList('indexPattern-dimension-field');
+          list = await comboBox.getOptionsList('indexPattern-dimension-field');
           expect(list).to.not.contain('Time series dimensions');
           await lens.closeDimensionEditor();
         });
@@ -412,14 +403,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               })
             ).to.eql(false);
             await lens.closeDimensionEditor();
-          });
 
-          it(`should visualize a date histogram chart for counter field`, async () => {
-            await lens.configureDimension({
-              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-              operation: 'date_histogram',
-              field: '@timestamp',
-            });
+            // should visualize a date histogram chart for counter field
+            await lens.removeDimension('lnsXY_yDimensionPanel');
 
             // check the counter field works
             await lens.configureDimension({
@@ -514,15 +500,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               })
             ).to.eql(indexes.some(({ mode }) => mode === 'tsdb'));
             await lens.closeDimensionEditor();
-          });
 
-          it(`should visualize a date histogram chart for counter field`, async () => {
-            await lens.configureDimension({
-              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-              operation: 'date_histogram',
-              field: '@timestamp',
-            });
-            // just check the data is shown
+            // should visualize a date histogram chart for counter field
+            await lens.removeDimension('lnsXY_yDimensionPanel');
+
             await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'count',

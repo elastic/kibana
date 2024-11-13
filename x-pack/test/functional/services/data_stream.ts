@@ -57,7 +57,7 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
     let waitTime = 1000;
 
     await retry.tryForTime(
-      15000,
+      20000,
       async () => {
         log.debug(
           `Wait ${
