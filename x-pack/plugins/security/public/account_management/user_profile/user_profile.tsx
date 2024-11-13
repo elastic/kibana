@@ -49,7 +49,11 @@ import {
   useFormChangesContext,
 } from '@kbn/security-form-components';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { DarkModeValue, UserProfileData } from '@kbn/user-profile-components';
+import type {
+  ContrastModeValue,
+  DarkModeValue,
+  UserProfileData,
+} from '@kbn/user-profile-components';
 import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
 
 import { createImageHandler, getRandomColor, VALID_HEX_COLOR } from './utils';
@@ -104,9 +108,17 @@ export interface UserProfileFormValues {
     };
     userSettings: {
       darkMode: DarkModeValue;
+      contrastMode: ContrastModeValue;
     };
   };
   avatarType: 'initials' | 'image';
+}
+
+interface KeyPadItem {
+  id: string;
+  label: string;
+  icon: string;
+  isDefault?: boolean;
 }
 
 const UserDetailsEditor: FunctionComponent<UserDetailsEditorProps> = ({ user }) => {
@@ -183,30 +195,24 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
     return null;
   }
 
-  let idSelected = formik.values.data.userSettings.darkMode;
+  let idSelectedTheme = formik.values.data.userSettings.darkMode;
 
   if (isThemeOverridden) {
     if (isOverriddenThemeDarkMode) {
-      idSelected = 'dark';
+      idSelectedTheme = 'dark';
     } else {
-      idSelected = 'light';
+      idSelectedTheme = 'light';
     }
   }
 
-  interface ThemeKeyPadItem {
-    id: string;
-    label: string;
-    icon: string;
-  }
-
-  const themeItem = ({ id, label, icon }: ThemeKeyPadItem) => {
+  const themeItem = ({ id, label, icon }: KeyPadItem) => {
     return (
       <EuiKeyPadMenuItem
         name={id}
         label={label}
         data-test-subj={`themeKeyPadItem${label}`}
         checkable="single"
-        isSelected={idSelected === id}
+        isSelected={idSelectedTheme === id}
         isDisabled={isThemeOverridden}
         onChange={() => formik.setFieldValue('data.userSettings.darkMode', id)}
       >
@@ -276,29 +282,112 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
     );
   };
 
+  const idSelectedContrast = formik.values.data.userSettings.contrastMode;
+
+  const contrastModeItem = ({ id, label, icon, isDefault }: KeyPadItem) => {
+    return (
+      <EuiKeyPadMenuItem
+        name={id}
+        label={label}
+        data-test-subj={`contrastModeKeyPadItem${label}`}
+        checkable="single"
+        isSelected={idSelectedContrast === id || (!idSelectedContrast && isDefault)}
+        onChange={() => formik.setFieldValue('data.userSettings.contrastMode', id)}
+      >
+        <EuiIcon type={icon} size="l" />
+      </EuiKeyPadMenuItem>
+    );
+  };
+
+  const contrastModeMenu = () => {
+    const contrastModeKeyPadMenu = (
+      <EuiKeyPadMenu
+        aria-label={i18n.translate(
+          'xpack.security.accountManagement.userProfile.userSettings.contrastModeGroupDescription',
+          { defaultMessage: 'Contrast mode' }
+        )}
+        data-test-subj="contrastModeMenu"
+        checkable={{
+          legend: (
+            <FormLabel for="data.userSettings.contrastMode">
+              <FormattedMessage
+                id="xpack.security.accountManagement.userProfile.userSettings.contrastMode"
+                defaultMessage="Mode"
+              />
+            </FormLabel>
+          ),
+        }}
+      >
+        {contrastModeItem({
+          id: 'standard',
+          isDefault: true,
+          label: i18n.translate(
+            'xpack.security.accountManagement.userProfile.standardContrastModeButton',
+            { defaultMessage: 'Standard' }
+          ),
+          icon: 'heart',
+        })}
+        {contrastModeItem({
+          id: 'high',
+          label: i18n.translate(
+            'xpack.security.accountManagement.userProfile.highContrastModeButton',
+            { defaultMessage: 'High contrast' }
+          ),
+          icon: 'heart',
+        })}
+      </EuiKeyPadMenu>
+    );
+    return contrastModeKeyPadMenu;
+  };
+
   return (
-    <EuiDescribedFormGroup
-      fullWidth
-      fieldFlexItemProps={{ style: { alignSelf: 'flex-start' } }}
-      title={
-        <h2>
+    <>
+      <EuiDescribedFormGroup
+        fullWidth
+        fieldFlexItemProps={{ style: { alignSelf: 'flex-start' } }}
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.security.accountManagement.userProfile.userSettingsTitle.theme"
+              defaultMessage="Theme"
+            />
+          </h2>
+        }
+        description={
           <FormattedMessage
-            id="xpack.security.accountManagement.userProfile.userSettingsTitle"
-            defaultMessage="Theme"
+            id="xpack.security.accountManagement.userProfile.themeFormGroupDescription"
+            defaultMessage="Select the appearance of your interface."
           />
-        </h2>
-      }
-      description={
-        <FormattedMessage
-          id="xpack.security.accountManagement.userProfile.themeFormGroupDescription"
-          defaultMessage="Select the appearance of your interface."
-        />
-      }
-    >
-      <FormRow name="data.userSettings.darkMode" fullWidth>
-        {themeMenu(isThemeOverridden)}
-      </FormRow>
-    </EuiDescribedFormGroup>
+        }
+      >
+        <FormRow name="data.userSettings.darkMode" fullWidth>
+          {themeMenu(isThemeOverridden)}
+        </FormRow>
+      </EuiDescribedFormGroup>
+
+      <EuiDescribedFormGroup
+        fullWidth
+        fieldFlexItemProps={{ style: { alignSelf: 'flex-start' } }}
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.security.accountManagement.userProfile.userSettingsTitle.contrast"
+              defaultMessage="Contrast"
+            />
+          </h2>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.contrastFormGroupDescription"
+            defaultMessage="Increase contrast levels to improve accessibility."
+          />
+        }
+      >
+        <FormRow name="data.userSettings.contrast" fullWidth>
+          {contrastModeMenu()}
+        </FormRow>
+      </EuiDescribedFormGroup>
+    </>
   );
 };
 
@@ -876,6 +965,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
           },
           userSettings: {
             darkMode: data.userSettings?.darkMode || '',
+            contrastMode: data.userSettings?.contrastMode || 'standard',
           },
         }
       : undefined,
@@ -928,7 +1018,10 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       resetInitialValues(values);
 
       let isRefreshRequired = false;
-      if (initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode) {
+      if (
+        initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode ||
+        initialValues.data?.userSettings.contrastMode !== values.data?.userSettings.contrastMode
+      ) {
         isRefreshRequired = true;
       }
       showSuccessNotification({ isRefreshRequired });
