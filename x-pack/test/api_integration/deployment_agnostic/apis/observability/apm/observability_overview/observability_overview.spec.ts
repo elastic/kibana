@@ -9,14 +9,13 @@ import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { roundNumber } from '../../utils';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { roundNumber } from '../../../../../../apm_api_integration/utils';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -62,35 +61,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     };
   }
 
-  registry.when(
-    'Observability overview when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
-      describe('when data is not loaded', () => {
-        it('handles the empty state', async () => {
-          const response = await apmApiClient.readUser({
-            endpoint: `GET /internal/apm/observability_overview`,
-            params: {
-              query: {
-                start: new Date(start).toISOString(),
-                end: new Date(end).toISOString(),
-                bucketSize,
-                intervalString,
-              },
+  describe('Observability overview', () => {
+    describe('when data is not loaded', () => {
+      it('handles the empty state', async () => {
+        const response = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/observability_overview`,
+          params: {
+            query: {
+              start: new Date(start).toISOString(),
+              end: new Date(end).toISOString(),
+              bucketSize,
+              intervalString,
             },
-          });
-          expect(response.status).to.be(200);
-
-          expect(response.body.serviceCount).to.be(0);
-          expect(response.body.transactionPerMinute.timeseries.length).to.be(0);
+          },
         });
-      });
-    }
-  );
+        expect(response.status).to.be(200);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177497
-  registry.when('data is loaded', { config: 'basic', archives: [] }, () => {
+        expect(response.body.serviceCount).to.be(0);
+        expect(response.body.transactionPerMinute.timeseries.length).to.be(0);
+      });
+    });
+
     describe('Observability overview api ', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       const GO_PROD_RATE = 50;
       const GO_DEV_RATE = 5;
       const JAVA_PROD_RATE = 45;
@@ -105,6 +99,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const serviceJavaInstance = apm
           .service({ name: 'synth-java', environment: 'production', agentName: 'java' })
           .instance('instance-c');
+
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
         await apmSynthtraceEsClient.index([
           timerange(start, end)
