@@ -13303,7 +13303,6 @@ paths:
         - Security Exceptions API
   /api/fleet/agent_download_sources:
     get:
-      description: List agent binary download sources
       operationId: get-fleet-agent-download-sources
       parameters:
         - description: The version of the API to use
@@ -13375,11 +13374,10 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get agent binary download sources
       tags:
         - Elastic Agent binary download sources
     post:
-      description: Create agent binary download source
       operationId: post-fleet-agent-download-sources
       parameters:
         - description: The version of the API to use
@@ -13473,12 +13471,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Create an agent binary download source
       tags:
         - Elastic Agent binary download sources
   /api/fleet/agent_download_sources/{sourceId}:
     delete:
-      description: Delete agent binary download source by ID
+      description: Delete an agent binary download source by ID.
       operationId: delete-fleet-agent-download-sources-sourceid
       parameters:
         - description: The version of the API to use
@@ -13529,11 +13527,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Delete an agent binary download source
       tags:
         - Elastic Agent binary download sources
     get:
-      description: Get agent binary download source by ID
+      description: Get an agent binary download source by ID.
       operationId: get-fleet-agent-download-sources-sourceid
       parameters:
         - description: The version of the API to use
@@ -13599,11 +13597,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get an agent binary download source
       tags:
         - Elastic Agent binary download sources
     put:
-      description: Update agent binary download source by ID
+      description: Update an agent binary download source by ID.
       operationId: put-fleet-agent-download-sources-sourceid
       parameters:
         - description: The version of the API to use
@@ -13702,12 +13700,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Update an agent binary download source
       tags:
         - Elastic Agent binary download sources
   /api/fleet/agent_policies:
     get:
-      description: List agent policies
       operationId: get-fleet-agent-policies
       parameters:
         - description: The version of the API to use
@@ -14317,11 +14314,10 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get agent policies
       tags:
         - Elastic Agent policies
     post:
-      description: Create an agent policy
       operationId: post-fleet-agent-policies
       parameters:
         - description: The version of the API to use
@@ -15051,12 +15047,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Create an agent policy
       tags:
         - Elastic Agent policies
   /api/fleet/agent_policies/_bulk_get:
     post:
-      description: Bulk get agent policies
       operationId: post-fleet-agent-policies-bulk-get
       parameters:
         - description: The version of the API to use
@@ -15631,12 +15626,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Bulk get agent policies
       tags:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}:
     get:
-      description: Get an agent policy by ID
+      description: Get an agent policy by ID.
       operationId: get-fleet-agent-policies-agentpolicyid
       parameters:
         - description: The version of the API to use
@@ -16188,11 +16183,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get an agent policy
       tags:
         - Elastic Agent policies
     put:
-      description: Update an agent policy by ID
+      description: Update an agent policy by ID.
       operationId: put-fleet-agent-policies-agentpolicyid
       parameters:
         - description: The version of the API to use
@@ -16930,12 +16925,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Update an agent policy
       tags:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/copy:
     post:
-      description: Copy an agent policy by ID
+      description: Copy an agent policy by ID.
       operationId: post-fleet-agent-policies-agentpolicyid-copy
       parameters:
         - description: The version of the API to use
@@ -17508,12 +17503,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Copy an agent policy
       tags:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/download:
     get:
-      description: Download an agent policy by ID
+      description: Download an agent policy by ID.
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
         - description: The version of the API to use
@@ -17582,12 +17577,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Download an agent policy
       tags:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/full:
     get:
-      description: Get a full agent policy by ID
+      description: Get a full agent policy by ID.
       operationId: get-fleet-agent-policies-agentpolicyid-full
       parameters:
         - description: The version of the API to use
@@ -17914,12 +17909,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get a full agent policy
       tags:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/outputs:
     get:
-      description: Get list of outputs associated with agent policy by policy id
+      description: Get a list of outputs associated with agent policy by policy id.
       operationId: get-fleet-agent-policies-agentpolicyid-outputs
       parameters:
         - description: The version of the API to use
@@ -18018,12 +18013,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get outputs for an agent policy
       tags:
         - Elastic Agent policies
   /api/fleet/agent_policies/delete:
     post:
-      description: Delete agent policy by ID
+      description: Delete an agent policy by ID.
       operationId: post-fleet-agent-policies-delete
       parameters:
         - description: The version of the API to use
@@ -18088,12 +18083,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Delete an agent policy
       tags:
         - Elastic Agent policies
   /api/fleet/agent_policies/outputs:
     post:
-      description: Get list of outputs associated with agent policies
+      description: Get a list of outputs associated with agent policies.
       operationId: post-fleet-agent-policies-outputs
       parameters:
         - description: The version of the API to use
@@ -18210,12 +18205,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get outputs for agent policies
       tags:
         - Elastic Agent policies
   /api/fleet/agent_status:
     get:
-      description: Get agent status summary
       operationId: get-fleet-agent-status
       parameters:
         - description: The version of the API to use
@@ -18306,12 +18300,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get an agent status summary
       tags:
         - Elastic Agent status
   /api/fleet/agent_status/data:
     get:
-      description: Get incoming agent data
       operationId: get-fleet-agent-status-data
       parameters:
         - description: The version of the API to use
@@ -18379,12 +18372,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get incoming agent data
       tags:
         - Elastic Agents
   /api/fleet/agents:
     get:
-      description: List agents
       operationId: get-fleet-agents
       parameters:
         - description: The version of the API to use
@@ -18766,11 +18758,10 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get agents
       tags:
         - Elastic Agents
     post:
-      description: List agents by action ids
       operationId: post-fleet-agents
       parameters:
         - description: The version of the API to use
@@ -18831,12 +18822,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get agents by action ids
       tags:
         - Elastic Agents
   /api/fleet/agents/{agentId}:
     delete:
-      description: Delete agent by ID
+      description: Delete an agent by ID.
       operationId: delete-fleet-agents-agentid
       parameters:
         - description: The version of the API to use
@@ -18889,11 +18880,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Delete an agent
       tags:
         - Elastic Agents
     get:
-      description: Get agent by ID
+      description: Get an agent by ID.
       operationId: get-fleet-agents-agentid
       parameters:
         - description: The version of the API to use
@@ -19217,11 +19208,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get an agent
       tags:
         - Elastic Agents
     put:
-      description: Update agent by ID
+      description: Update an agent by ID.
       operationId: put-fleet-agents-agentid
       parameters:
         - description: The version of the API to use
@@ -19560,12 +19551,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Update an agent
       tags:
         - Elastic Agents
   /api/fleet/agents/{agentId}/actions:
     post:
-      description: Create agent action
       operationId: post-fleet-agents-agentid-actions
       parameters:
         - description: The version of the API to use
@@ -19705,12 +19695,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Create an agent action
       tags:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/reassign:
     post:
-      description: Reassign agent
       operationId: post-fleet-agents-agentid-reassign
       parameters:
         - description: The version of the API to use
@@ -19768,12 +19757,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Reassign an agent
       tags:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/request_diagnostics:
     post:
-      description: Request agent diagnostics
       operationId: post-fleet-agents-agentid-request-diagnostics
       parameters:
         - description: The version of the API to use
@@ -19838,12 +19826,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Request agent diagnostics
       tags:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/unenroll:
     post:
-      description: Unenroll agent
       operationId: post-fleet-agents-agentid-unenroll
       parameters:
         - description: The version of the API to use
@@ -19879,12 +19866,11 @@ paths:
                 revoke:
                   type: boolean
       responses: {}
-      summary: ''
+      summary: Unenroll an agent
       tags:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/upgrade:
     post:
-      description: Upgrade agent
       operationId: post-fleet-agents-agentid-upgrade
       parameters:
         - description: The version of the API to use
@@ -19948,12 +19934,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Upgrade an agent
       tags:
         - Elastic Agent actions
   /api/fleet/agents/{agentId}/uploads:
     get:
-      description: List agent uploads
       operationId: get-fleet-agents-agentid-uploads
       parameters:
         - description: The version of the API to use
@@ -20029,12 +20014,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get agent uploads
       tags:
         - Elastic Agents
   /api/fleet/agents/action_status:
     get:
-      description: Get agent action status
       operationId: get-fleet-agents-action-status
       parameters:
         - description: The version of the API to use
@@ -20197,12 +20181,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get an agent action status
       tags:
         - Elastic Agent actions
   /api/fleet/agents/actions/{actionId}/cancel:
     post:
-      description: Cancel agent action
       operationId: post-fleet-agents-actions-actionid-cancel
       parameters:
         - description: The version of the API to use
@@ -20292,12 +20275,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Cancel an agent action
       tags:
         - Elastic Agent actions
   /api/fleet/agents/available_versions:
     get:
-      description: Get available agent versions
       operationId: get-fleet-agents-available-versions
       parameters:
         - description: The version of the API to use
@@ -20338,12 +20320,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get available agent versions
       tags:
         - Elastic Agents
   /api/fleet/agents/bulk_reassign:
     post:
-      description: Bulk reassign agents
       operationId: post-fleet-agents-bulk-reassign
       parameters:
         - description: The version of the API to use
@@ -20412,12 +20393,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Bulk reassign agents
       tags:
         - Elastic Agent actions
   /api/fleet/agents/bulk_request_diagnostics:
     post:
-      description: Bulk request diagnostics from agents
       operationId: post-fleet-agents-bulk-request-diagnostics
       parameters:
         - description: The version of the API to use
@@ -20486,12 +20466,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Bulk request diagnostics from agents
       tags:
         - Elastic Agent actions
   /api/fleet/agents/bulk_unenroll:
     post:
-      description: Bulk unenroll agents
       operationId: post-fleet-agents-bulk-unenroll
       parameters:
         - description: The version of the API to use
@@ -20567,12 +20546,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Bulk unenroll agents
       tags:
         - Elastic Agent actions
   /api/fleet/agents/bulk_update_agent_tags:
     post:
-      description: Bulk update agent tags
       operationId: post-fleet-agents-bulk-update-agent-tags
       parameters:
         - description: The version of the API to use
@@ -20646,12 +20624,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Bulk update agent tags
       tags:
         - Elastic Agent actions
   /api/fleet/agents/bulk_upgrade:
     post:
-      description: Bulk upgrade agents
       operationId: post-fleet-agents-bulk-upgrade
       parameters:
         - description: The version of the API to use
@@ -20731,12 +20708,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Bulk upgrade agents
       tags:
         - Elastic Agent actions
   /api/fleet/agents/files/{fileId}:
     delete:
-      description: Delete file uploaded by agent
+      description: Delete a file uploaded by an agent.
       operationId: delete-fleet-agents-files-fileid
       parameters:
         - description: The version of the API to use
@@ -20790,12 +20767,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Delete an uploaded file
       tags:
         - Elastic Agents
   /api/fleet/agents/files/{fileId}/{fileName}:
     get:
-      description: Get file uploaded by agent
+      description: Get a file uploaded by an agent.
       operationId: get-fleet-agents-files-fileid-filename
       parameters:
         - description: The version of the API to use
@@ -20838,12 +20815,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get an uploaded file
       tags:
         - Elastic Agents
   /api/fleet/agents/setup:
     get:
-      description: Get agent setup info
       operationId: get-fleet-agents-setup
       parameters:
         - description: The version of the API to use
@@ -20910,11 +20886,10 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get agent setup info
       tags:
         - Elastic Agents
     post:
-      description: Initiate agent setup
       operationId: post-fleet-agents-setup
       parameters:
         - description: The version of the API to use
@@ -20979,12 +20954,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Initiate agent setup
       tags:
         - Elastic Agents
   /api/fleet/agents/tags:
     get:
-      description: List agent tags
       operationId: get-fleet-agents-tags
       parameters:
         - description: The version of the API to use
@@ -21036,12 +21010,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get agent tags
       tags:
         - Elastic Agents
   /api/fleet/check-permissions:
     get:
-      description: Check permissions
       operationId: get-fleet-check-permissions
       parameters:
         - description: The version of the API to use
@@ -21091,12 +21064,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Check permissions
       tags:
         - Fleet internals
   /api/fleet/data_streams:
     get:
-      description: List data streams
       operationId: get-fleet-data-streams
       parameters:
         - description: The version of the API to use
@@ -21196,12 +21168,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get data streams
       tags:
         - Data streams
   /api/fleet/enrollment_api_keys:
     get:
-      description: List enrollment API keys
       operationId: get-fleet-enrollment-api-keys
       parameters:
         - description: The version of the API to use
@@ -21301,11 +21272,10 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get enrollment API keys
       tags:
         - Fleet enrollment API keys
     post:
-      description: Create enrollment API key
       operationId: post-fleet-enrollment-api-keys
       parameters:
         - description: The version of the API to use
@@ -21404,12 +21374,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Create an enrollment API key
       tags:
         - Fleet enrollment API keys
   /api/fleet/enrollment_api_keys/{keyId}:
     delete:
-      description: Revoke enrollment API key by ID by marking it as inactive
+      description: Revoke an enrollment API key by ID by marking it as inactive.
       operationId: delete-fleet-enrollment-api-keys-keyid
       parameters:
         - description: The version of the API to use
@@ -21462,11 +21432,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Revoke an enrollment API key
       tags:
         - Fleet enrollment API keys
     get:
-      description: Get enrollment API key by ID
+      description: Get an enrollment API key by ID.
       operationId: get-fleet-enrollment-api-keys-keyid
       parameters:
         - description: The version of the API to use
@@ -21543,12 +21513,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get an enrollment API key
       tags:
         - Fleet enrollment API keys
   /api/fleet/epm/bulk_assets:
     post:
-      description: Bulk get assets
       operationId: post-fleet-epm-bulk-assets
       parameters:
         - description: The version of the API to use
@@ -21642,12 +21611,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Bulk get assets
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/categories:
     get:
-      description: List package categories
       operationId: get-fleet-epm-categories
       parameters:
         - description: The version of the API to use
@@ -21714,12 +21682,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get package categories
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/custom_integrations:
     post:
-      description: Create custom integration
       operationId: post-fleet-epm-custom-integrations
       parameters:
         - description: The version of the API to use
@@ -21857,12 +21824,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Create a custom integration
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/data_streams:
     get:
-      description: List data streams
       operationId: get-fleet-epm-data-streams
       parameters:
         - description: The version of the API to use
@@ -21940,12 +21906,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get data streams
       tags:
         - Data streams
   /api/fleet/epm/packages:
     get:
-      description: List packages
       operationId: get-fleet-epm-packages
       parameters:
         - description: The version of the API to use
@@ -22341,11 +22306,10 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get packages
       tags:
         - Elastic Package Manager (EPM)
     post:
-      description: Install package by upload
       operationId: post-fleet-epm-packages
       parameters:
         - description: The version of the API to use
@@ -22468,12 +22432,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Install a package by upload
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/_bulk:
     post:
-      description: Bulk install packages
       operationId: post-fleet-epm-packages-bulk
       parameters:
         - description: The version of the API to use
@@ -22651,12 +22614,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Bulk install packages
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}:
     delete:
-      description: Delete package
       operationId: delete-fleet-epm-packages-pkgname-pkgversion
       parameters:
         - description: The version of the API to use
@@ -22767,11 +22729,10 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Delete a package
       tags:
         - Elastic Package Manager (EPM)
     get:
-      description: Get package
       operationId: get-fleet-epm-packages-pkgname-pkgversion
       parameters:
         - description: The version of the API to use
@@ -23247,11 +23208,10 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get a package
       tags:
         - Elastic Package Manager (EPM)
     post:
-      description: Install package from registry
       operationId: post-fleet-epm-packages-pkgname-pkgversion
       parameters:
         - description: The version of the API to use
@@ -23397,11 +23357,10 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Install a package from the registry
       tags:
         - Elastic Package Manager (EPM)
     put:
-      description: Update package settings
       operationId: put-fleet-epm-packages-pkgname-pkgversion
       parameters:
         - description: The version of the API to use
@@ -23866,12 +23825,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Update package settings
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath*}:
     get:
-      description: Get package file
       operationId: get-fleet-epm-packages-pkgname-pkgversion-filepath
       parameters:
         - description: The version of the API to use
@@ -23918,12 +23876,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get a package file
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize:
     post:
-      description: Authorize transforms
       operationId: post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize
       parameters:
         - description: The version of the API to use
@@ -24011,12 +23968,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Authorize transforms
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/stats:
     get:
-      description: Get package stats
       operationId: get-fleet-epm-packages-pkgname-stats
       parameters:
         - description: The version of the API to use
@@ -24066,12 +24022,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get package stats
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/installed:
     get:
-      description: Get installed packages
       operationId: get-fleet-epm-packages-installed
       parameters:
         - description: The version of the API to use
@@ -24220,12 +24175,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get installed packages
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/limited:
     get:
-      description: Get limited package list
       operationId: get-fleet-epm-packages-limited
       parameters:
         - description: The version of the API to use
@@ -24266,12 +24220,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get a limited package list
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs:
     get:
-      description: Get inputs template
       operationId: get-fleet-epm-templates-pkgname-pkgversion-inputs
       parameters:
         - description: The version of the API to use
@@ -24374,12 +24327,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get an inputs template
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/verification_key_id:
     get:
-      description: Get a package signature verification key ID
       operationId: get-fleet-epm-verification-key-id
       parameters:
         - description: The version of the API to use
@@ -24419,12 +24371,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get a package signature verification key ID
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/fleet_server_hosts:
     get:
-      description: List Fleet Server hosts
       operationId: get-fleet-fleet-server-hosts
       parameters:
         - description: The version of the API to use
@@ -24500,11 +24451,10 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get Fleet Server hosts
       tags:
         - Fleet Server hosts
     post:
-      description: Create Fleet Server host
       operationId: post-fleet-fleet-server-hosts
       parameters:
         - description: The version of the API to use
@@ -24606,12 +24556,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Create a Fleet Server host
       tags:
         - Fleet Server hosts
   /api/fleet/fleet_server_hosts/{itemId}:
     delete:
-      description: Delete Fleet Server host by ID
+      description: Delete a Fleet Server host by ID.
       operationId: delete-fleet-fleet-server-hosts-itemid
       parameters:
         - description: The version of the API to use
@@ -24662,11 +24612,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Delete a Fleet Server host
       tags:
         - Fleet Server hosts
     get:
-      description: Get Fleet Server host by ID
+      description: Get a Fleet Server host by ID.
       operationId: get-fleet-fleet-server-hosts-itemid
       parameters:
         - description: The version of the API to use
@@ -24736,11 +24686,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get a Fleet Server host
       tags:
         - Fleet Server hosts
     put:
-      description: Update Fleet Server host by ID
+      description: Update a Fleet Server host by ID.
       operationId: put-fleet-fleet-server-hosts-itemid
       parameters:
         - description: The version of the API to use
@@ -24840,12 +24790,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Update a Fleet Server host
       tags:
         - Fleet Server hosts
   /api/fleet/health_check:
     post:
-      description: Check Fleet Server health
       operationId: post-fleet-health-check
       parameters:
         - description: The version of the API to use
@@ -24922,12 +24871,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Check Fleet Server health
       tags:
         - Fleet internals
   /api/fleet/kubernetes:
     get:
-      description: Get full K8s agent manifest
       operationId: get-fleet-kubernetes
       parameters:
         - description: The version of the API to use
@@ -24981,7 +24929,7 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get a full K8s agent manifest
       tags:
         - Elastic Agent policies
   /api/fleet/kubernetes/download:
@@ -25049,12 +24997,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Download an agent manifest
       tags:
         - Elastic Agent policies
   /api/fleet/logstash_api_keys:
     post:
-      description: Generate Logstash API key
       operationId: post-fleet-logstash-api-keys
       parameters:
         - description: The version of the API to use
@@ -25100,12 +25047,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Generate a Logstash API key
       tags:
         - Fleet outputs
   /api/fleet/message_signing_service/rotate_key_pair:
     post:
-      description: Rotate fleet message signing key pair
       operationId: post-fleet-message-signing-service-rotate-key-pair
       parameters:
         - description: The version of the API to use
@@ -25173,12 +25119,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Rotate a Fleet message signing key pair
       tags:
         - Message Signing Service
   /api/fleet/outputs:
     get:
-      description: List outputs
       operationId: get-fleet-outputs
       parameters:
         - description: The version of the API to use
@@ -25852,29 +25797,6 @@ paths:
                               type: number
                             topic:
                               type: string
-                            topics:
-                              items:
-                                additionalProperties: true
-                                type: object
-                                properties:
-                                  topic:
-                                    type: string
-                                  when:
-                                    additionalProperties: true
-                                    type: object
-                                    properties:
-                                      condition:
-                                        type: string
-                                      type:
-                                        enum:
-                                          - equals
-                                          - contains
-                                          - regexp
-                                        type: string
-                                required:
-                                  - topic
-                              minItems: 1
-                              type: array
                             type:
                               enum:
                                 - kafka
@@ -25930,11 +25852,10 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get outputs
       tags:
         - Fleet outputs
     post:
-      description: Create output
       operationId: post-fleet-outputs
       parameters:
         - description: The version of the API to use
@@ -26609,29 +26530,6 @@ paths:
                       type: number
                     topic:
                       type: string
-                    topics:
-                      items:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          topic:
-                            type: string
-                          when:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              condition:
-                                type: string
-                              type:
-                                enum:
-                                  - equals
-                                  - contains
-                                  - regexp
-                                type: string
-                        required:
-                          - topic
-                      minItems: 1
-                      type: array
                     type:
                       enum:
                         - kafka
@@ -27321,29 +27219,6 @@ paths:
                             type: number
                           topic:
                             type: string
-                          topics:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                topic:
-                                  type: string
-                                when:
-                                  additionalProperties: true
-                                  type: object
-                                  properties:
-                                    condition:
-                                      type: string
-                                    type:
-                                      enum:
-                                        - equals
-                                        - contains
-                                        - regexp
-                                      type: string
-                              required:
-                                - topic
-                            minItems: 1
-                            type: array
                           type:
                             enum:
                               - kafka
@@ -27389,12 +27264,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Create output
       tags:
         - Fleet outputs
   /api/fleet/outputs/{outputId}:
     delete:
-      description: Delete output by ID
+      description: Delete output by ID.
       operationId: delete-fleet-outputs-outputid
       parameters:
         - description: The version of the API to use
@@ -27461,11 +27336,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Delete output
       tags:
         - Fleet outputs
     get:
-      description: Get output by ID
+      description: Get output by ID.
       operationId: get-fleet-outputs-outputid
       parameters:
         - description: The version of the API to use
@@ -28143,29 +28018,6 @@ paths:
                             type: number
                           topic:
                             type: string
-                          topics:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                topic:
-                                  type: string
-                                when:
-                                  additionalProperties: true
-                                  type: object
-                                  properties:
-                                    condition:
-                                      type: string
-                                    type:
-                                      enum:
-                                        - equals
-                                        - contains
-                                        - regexp
-                                      type: string
-                              required:
-                                - topic
-                            minItems: 1
-                            type: array
                           type:
                             enum:
                               - kafka
@@ -28211,11 +28063,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get output
       tags:
         - Fleet outputs
     put:
-      description: Update output by ID
+      description: Update output by ID.
       operationId: put-fleet-outputs-outputid
       parameters:
         - description: The version of the API to use
@@ -28877,29 +28729,6 @@ paths:
                       type: number
                     topic:
                       type: string
-                    topics:
-                      items:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          topic:
-                            type: string
-                          when:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              condition:
-                                type: string
-                              type:
-                                enum:
-                                  - equals
-                                  - contains
-                                  - regexp
-                                type: string
-                        required:
-                          - topic
-                      minItems: 1
-                      type: array
                     type:
                       enum:
                         - kafka
@@ -29586,29 +29415,6 @@ paths:
                             type: number
                           topic:
                             type: string
-                          topics:
-                            items:
-                              additionalProperties: true
-                              type: object
-                              properties:
-                                topic:
-                                  type: string
-                                when:
-                                  additionalProperties: true
-                                  type: object
-                                  properties:
-                                    condition:
-                                      type: string
-                                    type:
-                                      enum:
-                                        - equals
-                                        - contains
-                                        - regexp
-                                      type: string
-                              required:
-                                - topic
-                            minItems: 1
-                            type: array
                           type:
                             enum:
                               - kafka
@@ -29654,12 +29460,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Update output
       tags:
         - Fleet outputs
   /api/fleet/outputs/{outputId}/health:
     get:
-      description: Get latest output health
       operationId: get-fleet-outputs-outputid-health
       parameters:
         - description: The version of the API to use
@@ -29712,12 +29517,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get the latest output health
       tags:
         - Fleet outputs
   /api/fleet/package_policies:
     get:
-      description: List package policies
       operationId: get-fleet-package-policies
       parameters:
         - description: The version of the API to use
@@ -30218,11 +30022,10 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get package policies
       tags:
         - Fleet package policies
     post:
-      description: Create package policy
       operationId: post-fleet-package-policies
       parameters:
         - description: The version of the API to use
@@ -31120,12 +30923,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Create a package policy
       tags:
         - Fleet package policies
   /api/fleet/package_policies/_bulk_get:
     post:
-      description: Bulk get package policies
       operationId: post-fleet-package-policies-bulk-get
       parameters:
         - description: The version of the API to use
@@ -31613,12 +31415,12 @@ paths:
                     type: string
                 required:
                   - message
-      summary: ''
+      summary: Bulk get package policies
       tags:
         - Fleet package policies
   /api/fleet/package_policies/{packagePolicyId}:
     delete:
-      description: Delete package policy by ID
+      description: Delete a package policy by ID.
       operationId: delete-fleet-package-policies-packagepolicyid
       parameters:
         - description: The version of the API to use
@@ -31674,11 +31476,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Delete a package policy
       tags:
         - Fleet package policies
     get:
-      description: Get package policy by ID
+      description: Get a package policy by ID.
       operationId: get-fleet-package-policies-packagepolicyid
       parameters:
         - description: The version of the API to use
@@ -32143,11 +31945,11 @@ paths:
                     type: string
                 required:
                   - message
-      summary: ''
+      summary: Get a package policy
       tags:
         - Fleet package policies
     put:
-      description: Update package policy by ID
+      description: Update a package policy by ID.
       operationId: put-fleet-package-policies-packagepolicyid
       parameters:
         - description: The version of the API to use
@@ -33039,12 +32841,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Update a package policy
       tags:
         - Fleet package policies
   /api/fleet/package_policies/delete:
     post:
-      description: Bulk delete package policies
       operationId: post-fleet-package-policies-delete
       parameters:
         - description: The version of the API to use
@@ -33176,12 +32977,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Bulk delete package policies
       tags:
         - Fleet package policies
   /api/fleet/package_policies/upgrade:
     post:
-      description: Upgrade package policy to a newer package version
+      description: Upgrade a package policy to a newer package version.
       operationId: post-fleet-package-policies-upgrade
       parameters:
         - description: The version of the API to use
@@ -33257,12 +33058,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Upgrade a package policy
       tags:
         - Fleet package policies
   /api/fleet/package_policies/upgrade/dryrun:
     post:
-      description: Dry run package policy upgrade
       operationId: post-fleet-package-policies-upgrade-dryrun
       parameters:
         - description: The version of the API to use
@@ -34107,12 +33907,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Dry run a package policy upgrade
       tags:
         - Fleet package policies
   /api/fleet/proxies:
     get:
-      description: List proxies
       operationId: get-fleet-proxies
       parameters:
         - description: The version of the API to use
@@ -34194,11 +33993,10 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get proxies
       tags:
         - Fleet proxies
     post:
-      description: Create proxy
       operationId: post-fleet-proxies
       parameters:
         - description: The version of the API to use
@@ -34312,12 +34110,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Create a proxy
       tags:
         - Fleet proxies
   /api/fleet/proxies/{itemId}:
     delete:
-      description: Delete proxy by ID
+      description: Delete a proxy by ID
       operationId: delete-fleet-proxies-itemid
       parameters:
         - description: The version of the API to use
@@ -34368,11 +34166,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Delete a proxy
       tags:
         - Fleet proxies
     get:
-      description: Get proxy by ID
+      description: Get a proxy by ID.
       operationId: get-fleet-proxies-itemid
       parameters:
         - description: The version of the API to use
@@ -34448,11 +34246,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get a proxy
       tags:
         - Fleet proxies
     put:
-      description: Update proxy by ID
+      description: Update a proxy by ID.
       operationId: put-fleet-proxies-itemid
       parameters:
         - description: The version of the API to use
@@ -34568,12 +34366,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Update a proxy
       tags:
         - Fleet proxies
   /api/fleet/service_tokens:
     post:
-      description: Create a service token
       operationId: post-fleet-service-tokens
       parameters:
         - description: The version of the API to use
@@ -34633,12 +34430,11 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Create a service token
       tags:
         - Fleet service tokens
   /api/fleet/settings:
     get:
-      description: Get settings
       operationId: get-fleet-settings
       parameters:
         - description: The version of the API to use
@@ -34729,11 +34525,10 @@ paths:
                     type: string
                 required:
                   - message
-      summary: ''
+      summary: Get settings
       tags:
         - Fleet internals
     put:
-      description: Update settings
       operationId: put-fleet-settings
       parameters:
         - description: The version of the API to use
@@ -34862,12 +34657,11 @@ paths:
                     type: string
                 required:
                   - message
-      summary: ''
+      summary: Update settings
       tags:
         - Fleet internals
   /api/fleet/setup:
     post:
-      description: Initiate Fleet setup
       operationId: post-fleet-setup
       parameters:
         - description: The version of the API to use
@@ -34944,12 +34738,12 @@ paths:
                     type: string
                 required:
                   - message
-      summary: ''
+      summary: Initiate Fleet setup
       tags:
         - Fleet internals
   /api/fleet/uninstall_tokens:
     get:
-      description: List metadata for latest uninstall tokens per agent policy
+      description: List the metadata for the latest uninstall tokens per agent policy.
       operationId: get-fleet-uninstall-tokens
       parameters:
         - description: The version of the API to use
@@ -35044,12 +34838,12 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get metadata for latest uninstall tokens
       tags:
         - Fleet uninstall tokens
   /api/fleet/uninstall_tokens/{uninstallTokenId}:
     get:
-      description: Get one decrypted uninstall token by its ID
+      description: Get one decrypted uninstall token by its ID.
       operationId: get-fleet-uninstall-tokens-uninstalltokenid
       parameters:
         - description: The version of the API to use
@@ -35115,7 +34909,7 @@ paths:
                     type: number
                 required:
                   - message
-      summary: ''
+      summary: Get a decrypted uninstall token
       tags:
         - Fleet uninstall tokens
   /api/lists:
@@ -37229,7 +37023,7 @@ paths:
           description: >
             Indicates a successful call. NOTE: This HTTP response code indicates
             that the bulk operation succeeded.  Errors pertaining to individual
-            objects will be returned in the response body. 
+            objects will be returned in the response body.
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -37263,7 +37057,7 @@ paths:
           description: >
             Indicates a successful call. NOTE: This HTTP response code indicates
             that the bulk operation succeeded. Errors pertaining to individual
-            objects will be returned in the response body. 
+            objects will be returned in the response body.
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -40934,7 +40728,7 @@ paths:
         - $ref: '#/components/parameters/SLOs_space_id'
         - $ref: '#/components/parameters/SLOs_slo_id'
       responses:
-        '204':
+        '200':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
@@ -40978,7 +40772,7 @@ paths:
         - $ref: '#/components/parameters/SLOs_space_id'
         - $ref: '#/components/parameters/SLOs_slo_id'
       responses:
-        '200':
+        '204':
           description: Successful request
         '400':
           content:
@@ -48426,17 +48220,20 @@ components:
       type: object
       properties:
         unit:
-          enum:
-            - s
-            - m
-            - h
-          type: string
+          $ref: >-
+            #/components/schemas/Security_Detections_API_AlertSuppressionDurationUnit
         value:
           minimum: 1
           type: integer
       required:
         - value
         - unit
+    Security_Detections_API_AlertSuppressionDurationUnit:
+      enum:
+        - s
+        - m
+        - h
+      type: string
     Security_Detections_API_AlertSuppressionGroupBy:
       items:
         type: string
@@ -58900,7 +58697,7 @@ tags:
     name: ml
   - name: roles
   - description: >
-      Export sets of saved objects that you want to import into {kib}, resolve
+      Export sets of saved objects that you want to import into Kibana, resolve
       import errors, and rotate an encryption key for encrypted saved objects
       with the saved objects APIs.
 
