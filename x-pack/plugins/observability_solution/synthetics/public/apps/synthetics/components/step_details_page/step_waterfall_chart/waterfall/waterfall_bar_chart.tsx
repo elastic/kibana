@@ -22,7 +22,7 @@ import {
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAppFixedViewport } from '@kbn/core-rendering-browser-internal';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useBaseChartTheme } from '../../../../../../hooks/use_base_chart_theme';
 import { BAR_HEIGHT } from './constants';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';

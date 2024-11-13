@@ -33,6 +33,8 @@ export interface StartDeps extends StartServices {
   targetDomElement: HTMLDivElement;
 }
 
+export const APP_FIXED_VIEWPORT_ID = 'app-fixed-viewport';
+
 /**
  * Renders all Core UI in a single React tree.
  *
@@ -68,7 +70,7 @@ export class RenderingService {
           {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
           <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
             {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
-            <div id="app-fixed-viewport" />
+            <div id={APP_FIXED_VIEWPORT_ID} />
 
             {/* The actual plugin/app */}
             {appComponent}

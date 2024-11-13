@@ -41,7 +41,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
-import { useAppFixedViewport } from '@kbn/core-rendering-browser-internal';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {

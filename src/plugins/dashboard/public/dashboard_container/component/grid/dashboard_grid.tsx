@@ -18,7 +18,7 @@ import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layo
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { useAppFixedViewport } from '@kbn/core-rendering-browser-internal';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';

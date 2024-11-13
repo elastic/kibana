@@ -79,7 +79,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/deeplinks-observability",
     "@kbn/ebt-tools",
-    "@kbn/core-rendering-browser-internal",
+    "@kbn/core-rendering-browser",
   ],
   "exclude": ["target/**/*"]
 }

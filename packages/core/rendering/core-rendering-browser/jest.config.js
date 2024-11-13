@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { APP_FIXED_VIEWPORT_ID, RenderingService } from './rendering_service';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/rendering/core-rendering-browser'],
+};

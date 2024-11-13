@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useRef } from 'react';
-
-export function useAppFixedViewport() {
-  const ref = useRef(document.getElementById('app-fixed-viewport') ?? undefined);
-  return ref.current;
-}
+export { useAppFixedViewport } from './use_app_fixed_viewport';

@@ -21,7 +21,7 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { useAppFixedViewport } from '@kbn/core-rendering-browser-internal';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { BAR_HEIGHT } from './constants';
 import { useBaseChartTheme } from '../../../../../hooks/use_base_chart_theme';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';

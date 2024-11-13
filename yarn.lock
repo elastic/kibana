@@ -4342,6 +4342,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-rendering-browser@link:packages/core/rendering/core-rendering-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-rendering-server-internal@link:packages/core/rendering/core-rendering-server-internal":
   version "0.0.0"
   uid ""

@@ -55,7 +55,7 @@ import {
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
-import { useAppFixedViewport } from '@kbn/core-rendering-browser-internal';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import type {
   FilterEvent,
   BrushEvent,

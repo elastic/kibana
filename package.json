@@ -360,6 +360,7 @@
     "@kbn/core-preboot-server": "link:packages/core/preboot/core-preboot-server",
     "@kbn/core-preboot-server-internal": "link:packages/core/preboot/core-preboot-server-internal",
     "@kbn/core-provider-plugin": "link:test/plugin_functional/plugins/core_provider_plugin",
+    "@kbn/core-rendering-browser": "link:packages/core/rendering/core-rendering-browser",
     "@kbn/core-rendering-browser-internal": "link:packages/core/rendering/core-rendering-browser-internal",
     "@kbn/core-rendering-server-internal": "link:packages/core/rendering/core-rendering-server-internal",
     "@kbn/core-root-browser-internal": "link:packages/core/root/core-root-browser-internal",
