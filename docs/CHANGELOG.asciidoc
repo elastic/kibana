@@ -114,9 +114,22 @@ The Observability AI Assistant specific advanced setting for Logs index patterns
 //*Impact* +
 //!!TODO!!
 ====
-    
 
-      
+[float]
+[[breaking-changes-8.16.0]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.16.0, review the breaking changes, then mitigate the impact to your application.
+
+[discrete]
+.Updated request processing during shutdown.
+[%collapsible]
+====
+*Details* +
+During shutdown, {kib} now waits for all the ongoing requests to complete according to the `server.shutdownTimeout` setting. During that period, the incoming socket is closed and any new incoming requests are rejected. Before this update, new incoming requests received a response with the status code 503 and body `{"message": "{kib} is shutting down and not accepting new incoming requests"}`.
+==== 
+  
 [float]
 [[features-8.16.0]]
 === Features
