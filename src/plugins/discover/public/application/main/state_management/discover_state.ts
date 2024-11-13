@@ -219,7 +219,7 @@ export interface DiscoverStateContainer {
      * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
      * This is to prevent duplicate ids messing with our system
      */
-    updateAdHocDataViewId: (cleanCache?: boolean) => Promise<DataView | undefined>;
+    updateAdHocDataViewId: () => Promise<DataView | undefined>;
     /**
      * Updates the ES|QL query string
      */
@@ -324,7 +324,7 @@ export function getDiscoverStateContainer({
    * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
    * This is to prevent duplicate ids messing with our system
    */
-  const updateAdHocDataViewId = async (cleanCache = true) => {
+  const updateAdHocDataViewId = async () => {
     const prevDataView = internalStateContainer.getState().dataView;
     if (!prevDataView || prevDataView.isPersisted()) return;
 
@@ -332,9 +332,8 @@ export function getDiscoverStateContainer({
       ...prevDataView.toSpec(),
       id: uuidv4(),
     });
-    if (cleanCache) {
-      services.dataViews.clearInstanceCache(prevDataView.id);
-    }
+
+    services.dataViews.clearInstanceCache(prevDataView.id);
 
     updateFiltersReferences({
       prevDataView,
