@@ -63,6 +63,9 @@ export function registerGetMessageByIdRoute(router: IRouter) {
   router.get(
     {
       path: `${INTERNAL_GET_MESSAGE_BY_ID_ROUTE}/{id}`,
+      options: {
+        access: 'internal',
+      },
       validate: {
         params: schema.object({
           id: schema.string(),

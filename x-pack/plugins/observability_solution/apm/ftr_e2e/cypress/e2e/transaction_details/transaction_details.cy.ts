@@ -116,8 +116,11 @@ describe.skip('Transaction details', () => {
       })}`
     );
 
-    cy.contains('Top 5 errors');
-    cy.getByTestSubj('topErrorsForTransactionTable').contains('a', '[MockError] Foo').click();
+    cy.contains('Top 5 errors', { timeout: 30000 });
+    cy.getByTestSubj('topErrorsForTransactionTable')
+      .should('be.visible')
+      .contains('a', '[MockError] Foo', { timeout: 10000 })
+      .click();
     cy.url().should('include', 'opbeans-java/errors');
   });
 

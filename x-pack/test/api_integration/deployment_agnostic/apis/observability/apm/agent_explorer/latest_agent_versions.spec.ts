@@ -14,7 +14,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const unlistedAgentName = 'unlistedAgent';
 
   async function callApi() {
-    return await apmApiClient.readUser({
+    return apmApiClient.readUser({
       endpoint: 'GET /internal/apm/get_latest_agent_versions',
     });
   }
