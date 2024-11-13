@@ -541,11 +541,7 @@ const exampleInsight = `${insightPrefix}{
   ]
 }}`;
 
-export const plugin = ({
-  insightsUpsellingMessage,
-}: {
-  insightsUpsellingMessage: string | null;
-}) => {
+export const plugin = ({ insightsUpsellingMessage }: { insightsUpsellingMessage?: string }) => {
   return {
     name: 'insights',
     button: {
