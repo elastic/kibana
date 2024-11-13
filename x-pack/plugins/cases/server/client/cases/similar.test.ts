@@ -38,6 +38,13 @@ describe('similar', () => {
       saved_objects: [],
     });
 
+    clientArgs.services.caseConfigureService.find.mockResolvedValue({
+      saved_objects: [],
+      page: 1,
+      per_page: 10,
+      total: mockCases.length,
+    });
+
     afterEach(() => {
       jest.clearAllMocks();
     });
@@ -58,52 +65,8 @@ describe('similar', () => {
       expect(call).toMatchInlineSnapshot(`
         Object {
           "filter": Object {
-            "arguments": Array [
-              Object {
-                "isQuoted": false,
-                "type": "literal",
-                "value": "cases.attributes.observables",
-              },
-              Object {
-                "arguments": Array [
-                  Object {
-                    "arguments": Array [
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": "value",
-                      },
-                      Object {
-                        "isQuoted": true,
-                        "type": "literal",
-                        "value": "test",
-                      },
-                    ],
-                    "function": "is",
-                    "type": "function",
-                  },
-                  Object {
-                    "arguments": Array [
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": "typeKey",
-                      },
-                      Object {
-                        "isQuoted": true,
-                        "type": "literal",
-                        "value": "e47bb0d9-665a-43ea-a9aa-4d07c728e666",
-                      },
-                    ],
-                    "function": "is",
-                    "type": "function",
-                  },
-                ],
-                "function": "and",
-                "type": "function",
-              },
-            ],
-            "function": "nested",
+            "arguments": Array [],
+            "function": "or",
             "type": "function",
           },
           "page": 1,
