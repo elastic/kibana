@@ -23,5 +23,6 @@ export default function apmApiIntegrationTests({
     loadTestFile(require.resolve('./entities'));
     loadTestFile(require.resolve('./cold_start'));
     loadTestFile(require.resolve('./infrastructure'));
+    loadTestFile(require.resolve('./inspect'));
   });
 }
