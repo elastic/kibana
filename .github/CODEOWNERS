@@ -2023,6 +2023,12 @@ x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
 
 # Shared UX
+/test/accessibility/apps/home.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077237
+/test/api_integration/apis/home/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077065
+/test/functional/apps/home @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840075278
+/x-pack/test/plugin_functional/plugins/global_search_test @elastic/appex-sharedux
+/test/functional/services/saved_objects_finder.ts @elastic/appex-sharedux
+/test/interpreter_functional/test_suites/run_pipeline @elastic/appex-sharedux
 /test/functional/apps/kibana_overview @elastic/appex-sharedux
 /x-pack/test/functional_solution_sidenav/config.ts @elastic/appex-sharedux
 /x-pack/test/functional_solution_sidenav/ftr_provider_context.ts @elastic/appex-sharedux
