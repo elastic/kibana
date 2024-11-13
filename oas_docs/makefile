@@ -20,7 +20,7 @@ api-docs: ## Generate ESS Kibana OpenAPI bundles with kbn-openapi-bundler
 .PHONY: api-docs-stateful
 api-docs-stateful: ## Generate only kibana.yaml
 	@node scripts/merge_ess_oas.js
-	
+
 .PHONY: api-docs-lint
 api-docs-lint: ## Run redocly API docs linter
 	@npx @redocly/cli lint "output/*.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
@@ -31,20 +31,20 @@ api-docs-lint-stateful: ## Run redocly API docs linter on kibana.yaml
 
 .PHONY: api-docs-overlay
 api-docs-overlay: ## Run spectral API docs linter on kibana.yaml
-	@npx bump overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
-	@npx bump overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
-	@npx bump overlay "output/kibana.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.tmp3.yaml"
-	@npx bump overlay "output/kibana.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.tmp4.yaml"
+	@npx bump-cli overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
+	@npx bump-cli overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
+	@npx bump-cli overlay "output/kibana.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.tmp3.yaml"
+	@npx bump-cli overlay "output/kibana.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.tmp4.yaml"
 	@npx @redocly/cli bundle output/kibana.tmp4.yaml --ext yaml -o output/kibana.new.yaml
 	rm output/kibana.tmp*.yaml
 
 .PHONY: api-docs-preview
 api-docs-preview: ## Generate a preview for kibana.yaml
-	@npx bump preview "output/kibana.yaml"
+	@npx bump-cli preview "output/kibana.yaml"
 
 .PHONY: api-docs-overlay-preview
 api-docs-overlay-preview: ## Generate a preview for kibana.new.yaml
-	@npx bump preview "output/kibana.new.yaml"
+	@npx bump-cli preview "output/kibana.new.yaml"
 
 help:  ## Display help
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
