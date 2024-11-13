@@ -8661,7 +8661,6 @@ paths:
                                       minimum: 1
                                       type: number
                                     i:
-                                      description: The unique identifier of the panel
                                       type: string
                                     w:
                                       default: 24
@@ -8682,6 +8681,7 @@ paths:
                                   required:
                                     - x
                                     - 'y'
+                                    - i
                                 id:
                                   description: The saved object id for by reference panels
                                   type: string
@@ -8714,7 +8714,6 @@ paths:
                                         panel.
                                       type: string
                                 panelIndex:
-                                  description: The unique ID of the panel.
                                   type: string
                                 panelRefName:
                                   type: string
@@ -8738,6 +8737,7 @@ paths:
                                 - panelConfig
                                 - type
                                 - gridData
+                                - panelIndex
                             type: array
                           refreshInterval:
                             additionalProperties: false
@@ -9615,7 +9615,6 @@ paths:
                                       minimum: 1
                                       type: number
                                     i:
-                                      description: The unique identifier of the panel
                                       type: string
                                     w:
                                       default: 24
@@ -9636,6 +9635,7 @@ paths:
                                   required:
                                     - x
                                     - 'y'
+                                    - i
                                 id:
                                   description: The saved object id for by reference panels
                                   type: string
@@ -9668,7 +9668,6 @@ paths:
                                         panel.
                                       type: string
                                 panelIndex:
-                                  description: The unique ID of the panel.
                                   type: string
                                 panelRefName:
                                   type: string
@@ -9692,6 +9691,7 @@ paths:
                                 - panelConfig
                                 - type
                                 - gridData
+                                - panelIndex
                             type: array
                           refreshInterval:
                             additionalProperties: false
@@ -10545,7 +10545,6 @@ paths:
                                       minimum: 1
                                       type: number
                                     i:
-                                      description: The unique identifier of the panel
                                       type: string
                                     w:
                                       default: 24
@@ -10566,6 +10565,7 @@ paths:
                                   required:
                                     - x
                                     - 'y'
+                                    - i
                                 id:
                                   description: The saved object id for by reference panels
                                   type: string
@@ -10598,7 +10598,6 @@ paths:
                                         panel.
                                       type: string
                                 panelIndex:
-                                  description: The unique ID of the panel.
                                   type: string
                                 panelRefName:
                                   type: string
@@ -10622,6 +10621,7 @@ paths:
                                 - panelConfig
                                 - type
                                 - gridData
+                                - panelIndex
                             type: array
                           refreshInterval:
                             additionalProperties: false

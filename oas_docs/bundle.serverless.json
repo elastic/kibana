@@ -6228,7 +6228,6 @@
                                         "type": "number"
                                       },
                                       "i": {
-                                        "description": "The unique identifier of the panel",
                                         "type": "string"
                                       },
                                       "w": {
@@ -6249,7 +6248,8 @@
                                     },
                                     "required": [
                                       "x",
-                                      "y"
+                                      "y",
+                                      "i"
                                     ],
                                     "type": "object"
                                   },
@@ -6288,7 +6288,6 @@
                                     "type": "object"
                                   },
                                   "panelIndex": {
-                                    "description": "The unique ID of the panel.",
                                     "type": "string"
                                   },
                                   "panelRefName": {
@@ -6311,7 +6310,8 @@
                                 "required": [
                                   "panelConfig",
                                   "type",
-                                  "gridData"
+                                  "gridData",
+                                  "panelIndex"
                                 ],
                                 "type": "object"
                               },
@@ -7430,7 +7430,6 @@
                                         "type": "number"
                                       },
                                       "i": {
-                                        "description": "The unique identifier of the panel",
                                         "type": "string"
                                       },
                                       "w": {
@@ -7451,7 +7450,8 @@
                                     },
                                     "required": [
                                       "x",
-                                      "y"
+                                      "y",
+                                      "i"
                                     ],
                                     "type": "object"
                                   },
@@ -7490,7 +7490,6 @@
                                     "type": "object"
                                   },
                                   "panelIndex": {
-                                    "description": "The unique ID of the panel.",
                                     "type": "string"
                                   },
                                   "panelRefName": {
@@ -7513,7 +7512,8 @@
                                 "required": [
                                   "panelConfig",
                                   "type",
-                                  "gridData"
+                                  "gridData",
+                                  "panelIndex"
                                 ],
                                 "type": "object"
                               },
@@ -8598,7 +8598,6 @@
                                         "type": "number"
                                       },
                                       "i": {
-                                        "description": "The unique identifier of the panel",
                                         "type": "string"
                                       },
                                       "w": {
@@ -8619,7 +8618,8 @@
                                     },
                                     "required": [
                                       "x",
-                                      "y"
+                                      "y",
+                                      "i"
                                     ],
                                     "type": "object"
                                   },
@@ -8658,7 +8658,6 @@
                                     "type": "object"
                                   },
                                   "panelIndex": {
-                                    "description": "The unique ID of the panel.",
                                     "type": "string"
                                   },
                                   "panelRefName": {
@@ -8681,7 +8680,8 @@
                                 "required": [
                                   "panelConfig",
                                   "type",
-                                  "gridData"
+                                  "gridData",
+                                  "panelIndex"
                                 ],
                                 "type": "object"
                               },
