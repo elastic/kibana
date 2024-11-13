@@ -11,6 +11,7 @@
 Review important information about the {kib} 8.x releases.
 
 * <<release-notes-8.16.0>>
+* <<release-notes-8.15.4>>
 * <<release-notes-8.15.3>>
 * <<release-notes-8.15.2>>
 * <<release-notes-8.15.1>>
@@ -93,7 +94,7 @@ Deprecated functionality does not have an immediate impact on your application, 
 you make the necessary updates after you upgrade to 8.16.0.
 
 [discrete]
-* The Logs Stream is now hidden by default in favor of the Logs Explorer app.
+.The Logs Stream is now hidden by default in favor of the Logs Explorer app.
 [%collapsible]
 ====
 *Details* +
@@ -104,7 +105,7 @@ You can still show the Logs Stream app again by navigating to Stack Management >
 ====
       
 [discrete]
-* Deprecates the Observability AI Assistant specific advanced setting `observability:aiAssistantLogsIndexPattern`.
+.Deprecates the Observability AI Assistant specific advanced setting `observability:aiAssistantLogsIndexPattern`.
 [%collapsible]
 ====
 *Details* +
@@ -126,6 +127,7 @@ AGPL license::
 Alerting::
 * Adds TheHive connector ({kibana-pull}180138[#180138]).
 * Adds flapping settings per rule ({kibana-pull}189341[#189341]).
+* Efficiency improvements in the Kibana task manager and alerting frameworks ({kibana-issue}188194[#188194])
 Cases::
 * Support TheHive connector in cases ({kibana-pull}180931[#180931]).
 Dashboards and visualizations::
@@ -138,10 +140,8 @@ Data ingestion and Fleet::
 * Advanced agent monitoring options UI for HTTP endpoint and diagnostics ({kibana-pull}193361[#193361]).
 * Adds option to have Kafka dynamic topics in outputs ({kibana-pull}192720[#192720]).
 * Adds support for GeoIP processor databases in Ingest Pipelines ({kibana-pull}190830[#190830]).
-////
-!!TODO!! The above PR had a lengthy release note description:
-The Ingest Pipelines app now supports adding and managing databases for the GeoIP processor. Additionally, the pipeline creation flow now includes support for the IP Location processor.
-////
+// !!TODO!! The above PR had a lengthy release note description:
+// The Ingest Pipelines app now supports adding and managing databases for the GeoIP processor. Additionally, the pipeline creation flow now includes support for the IP Location processor.
 * Adds agentless ux creation flow ({kibana-pull}189932[#189932]).
 * Enable feature flag for reusable integration policies ({kibana-pull}187153[#187153]).
 Discover::
@@ -154,7 +154,6 @@ Discover::
 * Adds density settings to allow further customization of the Documents table layout ({kibana-pull}188495[#188495]).
 * Enables the time picker for indices without the @timestamp field when editing ES|QL queries ({kibana-pull}184361[#184361]).
 Elastic Observability solution::
-* Show monitors from all permitted spaces !! ({kibana-pull}196109[#196109]).
 * Adds experimental logs overview to the observability hosts and service overviews ({kibana-pull}195673[#195673]).
 * Show alerts for entities ({kibana-pull}195250[#195250]).
 * Create sub-feature role to manage APM settings write permissions ({kibana-pull}194419[#194419]).
@@ -431,6 +430,33 @@ Management::
 * Fixes the pagination of the source documents data grid in Transforms ({kibana-pull}196119[#196119]).
 * Fixes autocomplete suggestions after a comma in Console ({kibana-pull}189656[#189656]).
 
+[[release-notes-8.15.4]]
+== {kib} 8.15.4
+
+The 8.15.4 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.15.4]]
+=== Bug fixes
+Dashboards and visualizations::
+* Fixes incomplete string escaping and encoding in *TSVB* ({kibana-pull}196248[#196248]).
+* Adds scroll margin to panels ({kibana-pull}193430[#193430]).
+* Fixes an issue where label truncation in heat map legends was not working properly in *Lens* ({kibana-pull}195928[#195928]).
+Discover::
+* Fixes the width for saved object Type column ({kibana-pull}194388[#194388]).
+Elastic Observability solution::
+* Changes the slice outcome from bad to good whenever there is no data during the slice window ({kibana-pull}196942[#196942]).
+Elastic Search solution::
+* Fixes a bug with the {ref}/es-connectors-network-drive.html[Network Drive connector] where advanced configuration fields were not displayed for CSV file role mappings with `Drive Type: Linux` selected ({kibana-pull}195567[#195567]).
+Elastic Security solution::
+For the Elastic Security 8.15.4 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Fixes an issue causing the wrong date to show in the header of a report when generated from a relative date ({kibana-pull}197027[#197027]).
+* Fixes an issue with the export options for PNG/PDF reports in a dashboard ({kibana-pull}192530[#192530]).
+Machine Learning::
+* Fixes an issue preventing Anomaly swim lane panels from updating on query changes ({kibana-pull}195090[#195090]).
+Management::
+* Fixes the pagination of the source documents data grid in Transforms ({kibana-pull}196119[#196119]).
 
 [[release-notes-8.15.3]]
 == {kib} 8.15.3
@@ -457,7 +483,6 @@ Elastic Security solution::
 For the Elastic Security 8.15.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana security::
 * Automatic Import no longer asks the LLM to map fields to reserved ECS fields ({kibana-pull}195168[#195168]).
-* Automatic Import no longer returns an "Invalid ECS field" message when the ECS mapping slightly differs from the expected format. For example `date_format` instead of `date_formats` ({kibana-pull}195167[#195167]).
 * Fixes an issue that was causing the Grok processor to return non-ECS compatible fields when processing structured or unstructured syslog samples in Automatic Import ({kibana-pull}194727[#194727]).
 * Fixes the integrationName when uploading a new version of an existing integration using a ZIP upload ({kibana-pull}194298[#194298]).
 * Fixes a bug that caused the Deploy step of Automatic Import to fail after a pipeline was edited and saved ({kibana-pull}194203[#194203]).
