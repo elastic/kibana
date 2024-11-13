@@ -1420,6 +1420,9 @@ describe('secrets', () => {
             service_token: {
               id: 'token',
             },
+            remote_api_key: {
+              id: 'key',
+            },
           },
         },
         outputUpdate: {
@@ -1437,7 +1440,7 @@ describe('secrets', () => {
         esClient: esClientMock,
       });
 
-      expect(result.secretsToDelete).toEqual([{ id: 'token' }]);
+      expect(result.secretsToDelete).toEqual([{ id: 'token' }, { id: 'key' }]);
     });
   });
 });

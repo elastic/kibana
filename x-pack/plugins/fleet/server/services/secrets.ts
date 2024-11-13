@@ -333,6 +333,12 @@ function getOutputSecretPaths(
         value: remoteESOutput.secrets.service_token,
       });
     }
+    if (remoteESOutput.secrets?.remote_api_key) {
+      outputSecretPaths.push({
+        path: 'secrets.remote_api_key',
+        value: remoteESOutput.secrets.remote_api_key,
+      });
+    }
   }
 
   return outputSecretPaths;
@@ -378,13 +384,20 @@ export function getOutputSecretReferences(output: Output): PolicySecretReference
     });
   }
 
-  if (
-    output.type === 'remote_elasticsearch' &&
-    typeof output?.secrets?.service_token === 'object'
-  ) {
-    outputSecretPaths.push({
-      id: output.secrets.service_token.id,
-    });
+  if (output.type === 'remote_elasticsearch') {
+    if (typeof output?.secrets?.service_token === 'object') {
+      outputSecretPaths.push({
+        id: output.secrets.service_token.id,
+      });
+    }
+    if (
+      typeof output?.secrets?.remote_api_key === 'object' &&
+      output?.secrets?.remote_api_key !== null
+    ) {
+      outputSecretPaths.push({
+        id: output.secrets.remote_api_key.id,
+      });
+    }
   }
 
   return outputSecretPaths;

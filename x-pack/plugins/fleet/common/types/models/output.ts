@@ -63,8 +63,12 @@ export interface NewElasticsearchOutput extends NewBaseOutput {
 export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   type: OutputType['RemoteElasticsearch'];
   service_token?: string | null;
+  integration_sync?: boolean;
+  remote_kibana_url?: string | null;
+  remote_api_key?: string | null;
   secrets?: {
     service_token?: OutputSecret;
+    remote_api_key?: OutputSecret | null;
   };
 }
 

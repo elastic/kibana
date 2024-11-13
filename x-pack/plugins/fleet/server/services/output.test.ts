@@ -21,13 +21,16 @@ import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import { packagePolicyService } from './package_policy';
 import { auditLoggingService } from './audit_logging';
+import { remoteClusterService } from './remote';
 
 jest.mock('./app_context');
 jest.mock('./agent_policy');
 jest.mock('./package_policy');
 jest.mock('./audit_logging');
+jest.mock('./remote');
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const mockedRemoteClusterService = remoteClusterService as jest.Mocked<typeof remoteClusterService>;
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
@@ -146,6 +149,17 @@ function getMockedSoClient(
           type: 'remote_elasticsearch',
           is_default: false,
           service_token: 'plain',
+        });
+      }
+
+      case outputIdToUuid('existing-remote-es-output-sync-enabled'): {
+        return mockOutputSO('existing-remote-es-output-sync-enabled', {
+          type: 'remote_elasticsearch',
+          is_default: false,
+          service_token: 'plain',
+          integration_sync: true,
+          remote_kibana_url: 'https://test.kb.elastic.co',
+          remote_api_key: 'foo',
         });
       }
 
@@ -327,6 +341,7 @@ describe('Output Service', () => {
     mockedAppContextService.getInternalUserSOClient.mockReset();
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReset();
     mockedAuditLoggingService.writeCustomSoAuditLog.mockReset();
+    mockedRemoteClusterService.syncPackagesWithRemote.mockReset();
     mockedAgentPolicyService.update.mockReset();
     mockedPackagePolicyService.list.mockResolvedValue({
       items: [],
@@ -954,6 +969,35 @@ describe('Output Service', () => {
             { id: 'output-1' }
           )
         ).resolves.not.toThrow();
+      });
+
+      it('should sync integrations with the remote cluster if integration sync enabled', async () => {
+        const soClient = getMockedSoClient({
+          defaultOutputId: 'output-test',
+        });
+        jest.mocked(appContextService).getExperimentalFeatures.mockReturnValue({
+          remoteIntegrationSync: true,
+        } as any);
+        await outputService.create(
+          soClient,
+          esClientMock,
+          {
+            is_default: false,
+            is_default_monitoring: true,
+            name: 'Test remote output with integration sync enabled',
+            type: 'remote_elasticsearch',
+            integration_sync: true,
+            remote_kibana_url: 'https://test.kb.elastic.co',
+            remote_api_key: 'foo',
+          },
+          { id: 'output-test' }
+        );
+
+        expect(mockedRemoteClusterService.syncPackagesWithRemote).toHaveBeenCalledWith(
+          soClient,
+          'https://test.kb.elastic.co',
+          'foo'
+        );
       });
     });
   });
@@ -1821,7 +1865,7 @@ describe('Output Service', () => {
       ).resolves.not.toThrow();
     });
 
-    it('Should delete service_token if updated remote es output does not have a value', async () => {
+    it('Should delete service_token and remote_api_key if updated remote es output does not have values for these fields', async () => {
       const soClient = getMockedSoClient({});
       mockedAgentPolicyService.list.mockResolvedValue({
         items: [{}],
@@ -1833,10 +1877,108 @@ describe('Output Service', () => {
         type: 'remote_elasticsearch',
       });
 
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
-        type: 'remote_elasticsearch',
-        service_token: null,
+      expect(soClient.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          type: 'remote_elasticsearch',
+          service_token: null,
+          remote_api_key: null,
+        })
+      );
+    });
+
+    it('should remove fields specific to remote ES output if changing to a different type', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+
+      await outputService.update(soClient, esClientMock, 'existing-remote-es-output', {
+        type: 'elasticsearch',
       });
+
+      expect(soClient.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          type: 'elasticsearch',
+          service_token: null,
+          integration_sync: false,
+          remote_kibana_url: null,
+          remote_api_key: null,
+        })
+      );
+    });
+
+    it('should reset the remote kibana url and api key if updating a remote output with integration sync is disabled', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+
+      await outputService.update(soClient, esClientMock, 'existing-remote-es-output-sync-enabled', {
+        type: 'remote_elasticsearch',
+        integration_sync: false,
+      });
+
+      expect(soClient.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          integration_sync: false,
+          remote_kibana_url: null,
+          remote_api_key: null,
+        })
+      );
+    });
+
+    it('should sync integrations with the remote cluster if updating to a remote es output with sync enabled', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+      jest.mocked(appContextService).getExperimentalFeatures.mockReturnValue({
+        remoteIntegrationSync: true,
+      } as any);
+
+      await outputService.update(soClient, esClientMock, 'existing-es-output', {
+        type: 'remote_elasticsearch',
+        integration_sync: true,
+        remote_kibana_url: 'https://test.kb.elastic.co',
+        remote_api_key: 'foo',
+      });
+
+      expect(mockedRemoteClusterService.syncPackagesWithRemote).toHaveBeenCalledWith(
+        soClient,
+        'https://test.kb.elastic.co',
+        'foo'
+      );
+    });
+
+    it('should not sync integrations with the remote cluster if updating to remote es output with sync disabled', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+      jest.mocked(appContextService).getExperimentalFeatures.mockReturnValue({
+        remoteIntegrationSync: true,
+      } as any);
+
+      await outputService.update(soClient, esClientMock, 'existing-es-output', {
+        type: 'remote_elasticsearch',
+        integration_sync: false,
+      });
+
+      expect(mockedRemoteClusterService.syncPackagesWithRemote).not.toHaveBeenCalled();
     });
   });
 

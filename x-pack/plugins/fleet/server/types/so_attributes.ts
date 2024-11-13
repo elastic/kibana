@@ -165,8 +165,12 @@ interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
 export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttributes {
   type: OutputType['RemoteElasticsearch'];
   service_token?: string;
+  integration_sync?: boolean;
+  remote_kibana_url?: string;
+  remote_api_key?: string;
   secrets?: {
     service_token?: { id: string };
+    remote_api_key?: { id: string } | null;
   };
 }
 

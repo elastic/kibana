@@ -22,6 +22,8 @@ import _ from 'lodash';
 
 import pMap from 'p-map';
 
+import type { NewRemoteElasticsearchOutput } from '../../common/types';
+
 import {
   getDefaultPresetForEsOutput,
   outputTypeSupportPresets,
@@ -80,6 +82,7 @@ import {
   isOutputSecretStorageEnabled,
 } from './secrets';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
+import { remoteClusterService } from './remote';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -446,6 +449,51 @@ class OutputService {
     }
   }
 
+  private async _syncRemoteIntegrations(
+    soClient: SavedObjectsClientContract,
+    output: Partial<NewRemoteElasticsearchOutput>,
+    outputId: string
+  ) {
+    if (!appContextService.getExperimentalFeatures().remoteIntegrationSync) {
+      return;
+    }
+
+    if (!output.integration_sync) {
+      return;
+    }
+    const logger = appContextService.getLogger();
+    logger.debug(`Attempting to sync integrations for remote ES output ${outputId}`);
+
+    if (!output.remote_kibana_url) {
+      logger.error(
+        `Cannot sync remote integrations for remote ES output ${outputId}: missing remote Kibana URL`
+      );
+      return;
+    }
+
+    // FIXME: right now, Kibana is unable to retrieve secret values
+    // This will work on output create/update, where the remote API key value is accessible as a string.
+    if (typeof output.secrets?.remote_api_key === 'object') {
+      logger.error(
+        `Cannot sync remote integrations for remote ES output ${outputId}: unexpected remote Kibana API key format`
+      );
+      return;
+    }
+    const remoteApiKey = output.remote_api_key || (output.secrets?.remote_api_key as string);
+    if (!remoteApiKey) {
+      logger.error(
+        `Cannot sync remote integrations for remote ES output ${outputId}: missing remote API key`
+      );
+      return;
+    }
+
+    await remoteClusterService.syncPackagesWithRemote(
+      soClient,
+      output.remote_kibana_url,
+      remoteApiKey
+    );
+  }
+
   public async ensureDefaultOutput(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient
@@ -688,7 +736,14 @@ class OutputService {
         if (!output.service_token && output.secrets?.service_token) {
           data.service_token = output.secrets?.service_token as string;
         }
+        if (!output.remote_api_key && output.secrets?.remote_api_key) {
+          data.remote_api_key = output.secrets?.remote_api_key as string;
+        }
       }
+    }
+
+    if (output.type === outputType.RemoteElasticsearch) {
+      this._syncRemoteIntegrations(soClient, output, id);
     }
 
     auditLoggingService.writeCustomSoAuditLog({
@@ -927,6 +982,15 @@ class OutputService {
       target.ssl = null;
     };
 
+    const removeRemoteESFields = (
+      target: Nullable<Partial<OutputSoRemoteElasticsearchAttributes>>
+    ) => {
+      target.service_token = null;
+      target.integration_sync = false;
+      target.remote_kibana_url = null;
+      target.remote_api_key = null;
+    };
+
     // If the output type changed
     if (data.type && data.type !== originalOutput.type) {
       if (data.type === outputType.Elasticsearch && updateData.type === outputType.Elasticsearch) {
@@ -935,6 +999,10 @@ class OutputService {
 
       if (data.type !== outputType.Kafka && originalOutput.type === outputType.Kafka) {
         removeKafkaFields(updateData as Nullable<OutputSoKafkaAttributes>);
+      }
+
+      if (originalOutput.type === outputType.RemoteElasticsearch) {
+        removeRemoteESFields(updateData as Nullable<OutputSoRemoteElasticsearchAttributes>);
       }
 
       if (data.type === outputType.Logstash) {
@@ -949,6 +1017,7 @@ class OutputService {
         updateData.ssl = null;
       }
 
+      // If changing output type to Kafka
       if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
         updateData.ca_trusted_fingerprint = null;
         updateData.ca_sha256 = null;
@@ -1001,6 +1070,11 @@ class OutputService {
           // required_acks can be 0
           updateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
         }
+      }
+
+      // If changing output type to RemoteElasticsearch
+      if (data.type === outputType.RemoteElasticsearch) {
+        this._syncRemoteIntegrations(soClient, data, id);
       }
     }
 
@@ -1057,6 +1131,7 @@ class OutputService {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
 
+    // When updating a RemoteElasticsearch output
     if (
       data.type === outputType.RemoteElasticsearch &&
       updateData.type === outputType.RemoteElasticsearch
@@ -1064,6 +1139,19 @@ class OutputService {
       if (!data.service_token) {
         updateData.service_token = null;
       }
+      if (!data.remote_api_key) {
+        updateData.remote_api_key = null;
+      }
+      // Erase integration sync data if integration sync is disabled
+      if (!data.integration_sync) {
+        updateData.remote_kibana_url = null;
+        updateData.remote_api_key = null;
+        if (data.secrets?.remote_api_key) {
+          data.secrets.remote_api_key = null;
+          updateData.secrets = { remote_api_key: null };
+        }
+      }
+      this._syncRemoteIntegrations(soClient, data, id);
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
@@ -1092,7 +1180,8 @@ class OutputService {
         secretHashes: data.is_preconfigured ? secretHashes : undefined,
       });
 
-      updateData.secrets = secretsRes.outputUpdate.secrets;
+      // secrets.remote_api_key might already have been set to null
+      updateData.secrets = { ...updateData.secrets, ...secretsRes.outputUpdate.secrets };
       secretsToDelete = secretsRes.secretsToDelete;
     } else {
       if (data.type === outputType.Logstash && updateData.type === outputType.Logstash) {
@@ -1112,6 +1201,9 @@ class OutputService {
       ) {
         if (!data.service_token && data.secrets?.service_token) {
           updateData.service_token = data.secrets?.service_token as string;
+        }
+        if (!data.remote_api_key && data.secrets?.remote_api_key) {
+          updateData.remote_api_key = data.secrets?.remote_api_key as string;
         }
       }
     }
@@ -1168,6 +1260,19 @@ class OutputService {
         concurrency: 5,
       }
     );
+  }
+
+  public async syncIntegrationsForAllRemoteESOutputs(soClient: SavedObjectsClientContract) {
+    const remoteESOutputsWithIntegrationSyncEnabled = (await this.list(soClient)).items.filter(
+      (o) => o.type === outputType.RemoteElasticsearch && o.integration_sync
+    );
+    for (const output of remoteESOutputsWithIntegrationSyncEnabled) {
+      await this._syncRemoteIntegrations(
+        soClient,
+        output as NewRemoteElasticsearchOutput,
+        output.id
+      );
+    }
   }
 
   async getLatestOutputHealth(esClient: ElasticsearchClient, id: string): Promise<OutputHealth> {

@@ -370,6 +370,9 @@ export const getSavedObjectTypes = (
           ca_sha256: { type: 'keyword', index: false },
           ca_trusted_fingerprint: { type: 'keyword', index: false },
           service_token: { type: 'keyword', index: false },
+          integration_sync: { type: 'boolean', index: false },
+          remote_kibana_url: { type: 'keyword', index: false },
+          remote_api_key: { type: 'keyword', index: false },
           config: { type: 'flattened' },
           config_yaml: { type: 'text' },
           is_preconfigured: { type: 'boolean', index: false },
@@ -464,6 +467,12 @@ export const getSavedObjectTypes = (
                 },
               },
               service_token: {
+                dynamic: false,
+                properties: {
+                  id: { type: 'keyword' },
+                },
+              },
+              remote_api_key: {
                 dynamic: false,
                 properties: {
                   id: { type: 'keyword' },
@@ -568,6 +577,43 @@ export const getSavedObjectTypes = (
             {
               type: 'data_backfill',
               backfillFn: backfillOutputPolicyToV7,
+            },
+          ],
+        },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                integration_sync: { type: 'boolean', index: false },
+              },
+            },
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                remote_kibana_url: { type: 'keyword', index: false },
+              },
+            },
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                remote_api_key: { type: 'keyword', index: false },
+              },
+            },
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                secrets: {
+                  properties: {
+                    remote_api_key: {
+                      dynamic: false,
+                      properties: {
+                        id: { type: 'keyword' },
+                      },
+                    },
+                  },
+                },
+              },
             },
           ],
         },

@@ -286,6 +286,28 @@ export function validateServiceToken(value: string) {
 
 export const validateServiceTokenSecret = toSecretValidator(validateServiceToken);
 
+export function validateIntegrationSyncKibanaUrl(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.KibanaUrlRequiredErrorMessage', {
+        defaultMessage: 'Kibana URL is required',
+      }),
+    ];
+  }
+}
+
+export function validateIntegrationSyncApiKey(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.ApiKeyRequiredErrorMessage', {
+        defaultMessage: 'API key is required',
+      }),
+    ];
+  }
+}
+
+export const validateIntegrationSyncApiKeySecret = toSecretValidator(validateIntegrationSyncApiKey);
+
 export function validateSSLCertificate(value: string) {
   if (!value || value === '') {
     return [

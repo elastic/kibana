@@ -67,7 +67,7 @@ import {
   MAX_TIME_COMPLETE_INSTALL,
   MAX_REINSTALL_RETRIES,
 } from '../../../constants';
-import { dataStreamService, licenseService } from '../..';
+import { dataStreamService, licenseService, outputService } from '../..';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 import {
@@ -718,6 +718,7 @@ async function installPackageWithStateMachine(options: {
           pkgName: packageInfo.name,
           currentVersion: packageInfo.version,
         });
+        await outputService.syncIntegrationsForAllRemoteESOutputs(savedObjectsClient);
         sendEvent({
           ...telemetryEvent!,
           status: 'success',

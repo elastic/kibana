@@ -16,6 +16,8 @@ import { PackageNotFoundError } from '../../../errors';
 
 import { auditLoggingService } from '../../audit_logging';
 
+import { outputService } from '../..';
+
 import { getInstallationObject, getPackageInfo } from './get';
 
 export async function updatePackage(
@@ -31,6 +33,8 @@ export async function updatePackage(
   if (!installedPackage) {
     throw new PackageNotFoundError(`Error while updating package: ${pkgName} is not installed`);
   }
+
+  await outputService.syncIntegrationsForAllRemoteESOutputs(savedObjectsClient);
 
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
