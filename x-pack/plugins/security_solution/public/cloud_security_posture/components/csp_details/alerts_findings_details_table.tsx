@@ -8,15 +8,7 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { capitalize } from 'lodash';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiSpacer,
-  EuiPanel,
-  EuiText,
-  EuiBasicTable,
-  EuiIcon,
-  EuiLink,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import {
@@ -27,6 +19,12 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { buildEntityAlertsQuery } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
+import {
+  OPEN_IN_ALERTS_TITLE_HOSTNAME,
+  OPEN_IN_ALERTS_TITLE_STATUS,
+  OPEN_IN_ALERTS_TITLE_USERNAME,
+} from '../../../overview/components/detection_response/translations';
+import { useNavigateToAlertsPageWithFilters } from '../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { DocumentDetailsPreviewPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
@@ -35,6 +33,7 @@ import { useSignalIndex } from '../../../detections/containers/detection_engine/
 import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { SeverityBadge } from '../../../common/components/severity_badge';
 import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
+import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 
 interface CspAlertsField {
   _id: string[];
@@ -64,22 +63,19 @@ export const AlertsDetailsTable = memo(
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
 
-    const findingsPagination = (findings: AlertsDetailsFields[]) => {
+    const alertsPagination = (alerts: AlertsDetailsFields[]) => {
       let pageOfItems;
 
       if (!pageIndex && !pageSize) {
-        pageOfItems = findings;
+        pageOfItems = alerts;
       } else {
         const startIndex = pageIndex * pageSize;
-        pageOfItems = findings?.slice(
-          startIndex,
-          Math.min(startIndex + pageSize, findings?.length)
-        );
+        pageOfItems = alerts?.slice(startIndex, Math.min(startIndex + pageSize, alerts?.length));
       }
 
       return {
         pageOfItems,
-        totalItemCount: findings?.length,
+        totalItemCount: alerts?.length,
       };
     };
 
@@ -110,7 +106,7 @@ export const AlertsDetailsTable = memo(
       color: getSeverityColor(key),
     }));
 
-    const { pageOfItems, totalItemCount } = findingsPagination(alertDataResults || []);
+    const { pageOfItems, totalItemCount } = alertsPagination(alertDataResults || []);
 
     const pagination = {
       pageIndex,
@@ -208,16 +204,41 @@ export const AlertsDetailsTable = memo(
       },
     ];
 
+    const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
+
+    const openHostInAlerts = useCallback(
+      () =>
+        openAlertsPageWithFilters(
+          [
+            {
+              title:
+                fieldName === 'host.name'
+                  ? OPEN_IN_ALERTS_TITLE_HOSTNAME
+                  : OPEN_IN_ALERTS_TITLE_USERNAME,
+              selectedOptions: [queryName],
+              fieldName,
+            },
+            {
+              title: OPEN_IN_ALERTS_TITLE_STATUS,
+              selectedOptions: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
+              fieldName: 'kibana.alert.workflow_status',
+            },
+          ],
+          true
+        ),
+      [fieldName, openAlertsPageWithFilters, queryName]
+    );
+
     return (
       <>
         <EuiPanel hasShadow={false}>
-          <EuiTitle size="s">
+          <EuiLink onClick={() => openHostInAlerts()}>
             <h1 data-test-subj={'securitySolutionFlyoutInsightsAlertsCount'}>
               {i18n.translate('xpack.securitySolution.flyout.left.insights.alerts.tableTitle', {
                 defaultMessage: 'Alerts ',
               })}
             </h1>
-          </EuiTitle>
+          </EuiLink>
 
           <EuiSpacer size="xl" />
           <DistributionBar stats={alertStats} />
