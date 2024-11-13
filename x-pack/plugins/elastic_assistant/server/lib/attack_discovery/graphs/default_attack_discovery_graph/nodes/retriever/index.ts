@@ -60,11 +60,3 @@ export const getRetrieveAnonymizedAlertsNode = ({
 
   return retrieveAnonymizedAlerts;
 };
-
-/**
- * Retrieve documents
- *
- * @param {GraphState} state The current state of the graph.
- * @param {RunnableConfig | undefined} config The configuration object for tracing.
- * @returns {Promise<GraphState>} The new state object.
- */
