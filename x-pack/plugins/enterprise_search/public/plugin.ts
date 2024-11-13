@@ -199,7 +199,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       this.esConfig = { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER };
     }
 
-    if (!this.config.host) return; // No API to call
     if (this.hasInitialized) return; // We've already made an initial call
 
     try {
@@ -297,8 +296,6 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
-        console.log('Ent search content plugin data\n\n\n');
-        console.log(pluginData);
 
         const { renderApp } = await import('./applications');
         const { EnterpriseSearchContent } = await import(
