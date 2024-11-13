@@ -6,8 +6,12 @@
  */
 
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
+import { ElasticAgentVersionInfo } from '../../common/types';
 
-export function getAgentVersion(fleetStart: FleetStartContract, kibanaVersion: string) {
+export async function getAgentVersionInfo(
+  fleetStart: FleetStartContract,
+  kibanaVersion: string
+): Promise<ElasticAgentVersionInfo> {
   // If undefined, we will follow fleet's strategy to select latest available version:
   // for serverless we will use the latest published version, for statefull we will use
   // current Kibana version. If false, irrespective of fleet flags and logic, we are
@@ -15,5 +19,14 @@ export function getAgentVersion(fleetStart: FleetStartContract, kibanaVersion: s
   const includeCurrentVersion = kibanaVersion.endsWith('-SNAPSHOT') ? false : undefined;
 
   const agentClient = fleetStart.agentService.asInternalUser;
-  return agentClient.getLatestAgentAvailableVersion(includeCurrentVersion);
+  const [agentVersion, agentBaseVersion, agentDockerImageVersion] = await Promise.all([
+    agentClient.getLatestAgentAvailableVersion(includeCurrentVersion),
+    agentClient.getLatestAgentAvailableBaseVersion(includeCurrentVersion),
+    agentClient.getLatestAgentAvailableDockerImageVersion(includeCurrentVersion),
+  ]);
+  return {
+    agentVersion,
+    agentBaseVersion,
+    agentDockerImageVersion,
+  };
 }

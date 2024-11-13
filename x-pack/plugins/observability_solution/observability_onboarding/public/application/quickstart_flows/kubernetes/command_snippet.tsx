@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiCodeBlock, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { ElasticAgentVersionInfo } from '../../../../common/types';
 import { buildKubectlCommand } from './build_kubectl_command';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 
@@ -16,7 +17,7 @@ interface Props {
   encodedApiKey: string;
   onboardingId: string;
   elasticsearchUrl: string;
-  elasticAgentVersion: string;
+  elasticAgentVersionInfo: ElasticAgentVersionInfo;
   isCopyPrimaryAction: boolean;
 }
 
@@ -24,14 +25,14 @@ export function CommandSnippet({
   encodedApiKey,
   onboardingId,
   elasticsearchUrl,
-  elasticAgentVersion,
+  elasticAgentVersionInfo,
   isCopyPrimaryAction,
 }: Props) {
   const command = buildKubectlCommand({
     encodedApiKey,
     onboardingId,
     elasticsearchUrl,
-    elasticAgentVersion,
+    elasticAgentVersionInfo,
   });
 
   return (
