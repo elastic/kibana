@@ -113,7 +113,7 @@ For more information, refer to {kibana-issue}199902[#199902].
 [%collapsible]
 ====
 *Details* +
-Tutorials linked from the {kib} home page show an error "Unable to load page error". The Stack trace mentions `The above error occurred in tutorial_TutorialUi`.
+Tutorials linked from the {kib} home page show an "Unable to load page" error. The Stack trace mentions `The above error occurred in tutorial_TutorialUi`.
 
 *Workaround* +
 The APM / OpenTelemetry tutorials represented a shortcut to get important parameters to use in the configuration files quickly.
