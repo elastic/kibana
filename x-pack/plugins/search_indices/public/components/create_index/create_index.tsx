@@ -50,7 +50,6 @@ export const CreateIndex = ({ indicesData }: CreateIndexProps) => {
       ? CreateIndexViewMode.Code
       : CreateIndexViewMode.UI
   );
-
   const usageTracker = useUsageTracker();
   const onChangeView = useCallback(
     (id: string) => {
