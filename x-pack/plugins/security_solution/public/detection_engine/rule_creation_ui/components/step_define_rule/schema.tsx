@@ -32,6 +32,9 @@ import type { DefineStepRule } from '../../../../detections/pages/detection_engi
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
 import { esqlValidator } from '../../../rule_creation/logic/esql_validator';
+import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
+import { indexPatternValidatorFactory } from '../../validators/index_pattern_validator_factory';
+import { alertSuppressionFieldsValidatorFactory } from '../../validators/alert_suppression_fields_validator_factory';
 import {
   CUSTOM_QUERY_REQUIRED,
   INVALID_CUSTOM_QUERY,
@@ -41,8 +44,12 @@ import {
   THREAT_MATCH_EMPTIES,
 } from './translations';
 import { getQueryRequiredMessage } from './utils';
-import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
-import { indexPatternValidatorFactory } from '../../validators/index_pattern_validator_factory';
+import {
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../rule_creation/components/alert_suppression_edit';
+import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -109,6 +116,7 @@ export const schema: FormSchema<DefineStepRule> = {
     fieldsToValidateOnChange: ['eqlOptions', 'queryBar'],
   },
   queryBar: {
+    fieldsToValidateOnChange: ['queryBar', ALERT_SUPPRESSION_FIELDS_FIELD_NAME],
     validations: [
       {
         validator: (
@@ -644,67 +652,33 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  groupByFields: {
-    type: FIELD_TYPES.COMBO_BOX,
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByFieldHelpText',
-      {
-        defaultMessage: 'Select field(s) to use for suppressing extra alerts',
-      }
-    ),
+  [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: {
     validations: [
       {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+        validator: (...args: Parameters<ValidationFunc>) => {
           const [{ formData }] = args;
           const needsValidation = isSuppressionRuleConfiguredWithGroupBy(formData.ruleType);
           if (!needsValidation) {
             return;
           }
-          return fieldValidators.maxLengthField({
-            length: 3,
-            message: i18n.translate(
-              'xpack.securitySolution.detectionEngine.validations.stepDefineRule.groupByFieldsMax',
-              {
-                defaultMessage: 'Number of grouping fields must be at most 3',
-              }
-            ),
-          })(...args);
+
+          return alertSuppressionFieldsValidatorFactory()(...args);
         },
       },
     ],
   },
-  groupByRadioSelection: {},
-  groupByDuration: {
+  [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel',
       {
         defaultMessage: 'Suppress alerts for',
       }
     ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByDurationValueHelpText',
-      {
-        defaultMessage: 'Suppress alerts for',
-      }
-    ),
-    value: {},
-    unit: {},
   },
-  suppressionMissingFields: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.suppressionMissingFieldsLabel',
-      {
-        defaultMessage: 'If a suppression field is missing',
-      }
-    ),
+  [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: {
+    label: alertSuppressionEditI81n.ALERT_SUPPRESSION_MISSING_FIELDS_LABEL,
   },
   shouldLoadQueryDynamically: {
-    type: FIELD_TYPES.CHECKBOX,
-    defaultValue: false,
-  },
-  enableThresholdSuppression: {
     type: FIELD_TYPES.CHECKBOX,
     defaultValue: false,
   },

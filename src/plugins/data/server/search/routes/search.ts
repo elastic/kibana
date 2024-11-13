@@ -10,6 +10,7 @@
 import { first } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
+import { IncomingMessage } from 'http';
 import { reportSearchError } from '../report_search_error';
 import { getRequestAbortedSignal } from '../../lib';
 import type { DataPluginRouter } from '../types';
@@ -25,6 +26,12 @@ export function registerSearchRoute(router: DataPluginRouter): void {
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             params: schema.object({
@@ -38,6 +45,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
                 isStored: schema.maybe(schema.boolean()),
                 isRestore: schema.maybe(schema.boolean()),
                 retrieveResults: schema.maybe(schema.boolean()),
+                stream: schema.maybe(schema.boolean()),
               },
               { unknowns: 'allow' }
             ),
@@ -51,6 +59,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
           isStored,
           isRestore,
           retrieveResults,
+          stream,
           ...searchRequest
         } = request.body;
         const { strategy, id } = request.params;
@@ -69,12 +78,23 @@ export function registerSearchRoute(router: DataPluginRouter): void {
                 isStored,
                 isRestore,
                 retrieveResults,
+                stream,
               }
             )
             .pipe(first())
             .toPromise();
 
-          return res.ok({ body: response });
+          if (response && (response.rawResponse as unknown as IncomingMessage).pipe) {
+            return res.ok({
+              body: response.rawResponse,
+              headers: {
+                'kbn-search-is-restored': response.isRestored ? '?1' : '?0',
+                'kbn-search-request-params': JSON.stringify(response.requestParams),
+              },
+            });
+          } else {
+            return res.ok({ body: response });
+          }
         } catch (err) {
           return reportSearchError(res, err);
         }
@@ -89,6 +109,12 @@ export function registerSearchRoute(router: DataPluginRouter): void {
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             params: schema.object({

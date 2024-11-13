@@ -11,7 +11,7 @@ import type { IndicesStatusResponse } from '../../../../common';
 
 import { useKibana } from '../../../hooks/use_kibana';
 
-import { navigateToIndexDetails } from './utils';
+import { navigateToIndexDetails } from '../../utils';
 import { useUsageTracker } from '../../../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../../analytics/constants';
 

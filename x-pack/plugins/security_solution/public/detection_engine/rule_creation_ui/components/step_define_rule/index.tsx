@@ -14,8 +14,6 @@ import {
   EuiSpacer,
   EuiButtonGroup,
   EuiText,
-  EuiRadioGroup,
-  EuiToolTip,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from 'react';
@@ -41,10 +39,7 @@ import type {
   DefineStepRule,
   RuleStepProps,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import {
-  DataSourceType,
-  GroupByOptions,
-} from '../../../../detections/pages/detection_engine/rules/types';
+import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import type { QueryBarDefineRuleProps } from '../query_bar';
 import { QueryBarDefineRule } from '../query_bar';
@@ -54,7 +49,6 @@ import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { ThresholdInput } from '../threshold_input';
-import { SuppressionInfoIcon } from '../suppression_info_icon';
 import { EsqlInfoIcon } from '../../../rule_creation/components/esql_info_icon';
 import {
   Field,
@@ -89,10 +83,7 @@ import { ScheduleItem } from '../../../rule_creation/components/schedule_item_fo
 import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../../detections/pages/detection_engine/rules/utils';
-import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useAllEsqlRuleFields } from '../../hooks';
@@ -100,6 +91,9 @@ import { useAlertSuppression } from '../../../rule_management/logic/use_alert_su
 import { AiAssistant } from '../ai_assistant';
 import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
 import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_rule_config';
+import { AlertSuppressionEdit } from '../../../rule_creation/components/alert_suppression_edit';
+import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
+import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -121,13 +115,12 @@ export interface StepDefineRuleProps extends RuleStepProps {
   ruleType: Type;
   index: string[];
   threatIndex: string[];
-  groupByFields: string[];
+  alertSuppressionFields?: string[];
   dataSourceType: DataSourceType;
   shouldLoadQueryDynamically: boolean;
   queryBarTitle: string | undefined;
   queryBarSavedId: string | null | undefined;
   thresholdFields: string[] | undefined;
-  enableThresholdSuppression: boolean;
 }
 
 interface StepDefineRuleReadOnlyProps {
@@ -157,25 +150,11 @@ const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ 
   },
 }))<{ $isVisible: boolean }>``;
 
-const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
-  ${({ theme }) => `padding-left: ${theme.eui.euiSizeXL};`}
-`;
-
-/* eslint-disable react/no-unused-prop-types */
-interface GroupByChildrenProps {
-  groupByRadioSelection: FieldHook<string>;
-  groupByDurationUnit: FieldHook<string>;
-  groupByDurationValue: FieldHook<number | undefined>;
-}
-/* eslint-enable react/no-unused-prop-types */
-
-// eslint-disable-next-line complexity
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   dataSourceType,
   defaultSavedQuery,
-  enableThresholdSuppression,
   form,
-  groupByFields,
+  alertSuppressionFields,
   index,
   indexPattern,
   indicesConfig,
@@ -271,10 +250,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [form]
   );
 
-  const [aggFields, setAggregatableFields] = useState<FieldSpec[]>([]);
-
-  useEffect(() => {
-    const { fields } = indexPattern;
+  const aggFields = useMemo(
+    () => (indexPattern.fields as FieldSpec[]).filter((field) => field.aggregatable === true),
+    [indexPattern.fields]
+  );
+  const termsAggregationFields = useMemo(
     /**
      * Typecasting to FieldSpec because fields is
      * typed as DataViewFieldBase[] which does not have
@@ -284,12 +264,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
      * We will need to determine where these types are defined and
      * figure out where the discrepency is.
      */
-    setAggregatableFields(aggregatableFields(fields as FieldSpec[]));
-  }, [indexPattern]);
-
-  const termsAggregationFields: FieldSpec[] = useMemo(
-    () => getTermsAggregationFields(aggFields),
-    [aggFields]
+    () => getTermsAggregationFields(indexPattern.fields as FieldSpec[]),
+    [indexPattern.fields]
   );
 
   const [threatIndexPatternsLoading, { indexPatterns: threatIndexPatterns }] =
@@ -396,14 +372,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
   }, [ruleType, previousRuleType, getFields]);
 
-  /**
-   * for threshold rule suppression only time interval suppression mode is available
-   */
-  useEffect(() => {
-    if (isThresholdRule) {
-      form.setFieldValue('groupByRadioSelection', GroupByOptions.PerTimePeriod);
-    }
-  }, [isThresholdRule, form]);
+  usePersistentAlertSuppressionState({ form });
 
   // if saved query failed to load:
   // - reset shouldLoadFormDynamically to false, as non existent query cannot be used for loading and execution
@@ -483,7 +452,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * disable these fields and leave users in a bad state that they cannot change.
    * The exception is threshold rules, which use an existing threshold field for the same
    * purpose and so are treated as if the field is always selected.  */
-  const areSuppressionFieldsSelected = isThresholdRule || groupByFields.length > 0;
+  const areSuppressionFieldsSelected = isThresholdRule || Boolean(alertSuppressionFields?.length);
 
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(
     ruleType,
@@ -493,8 +462,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   /** If we don't have ML field information, users can't meaningfully interact with suppression fields */
   const areSuppressionFieldsDisabledByMlFields =
     isMlRule(ruleType) && (mlRuleConfigLoading || !mlSuppressionFields.length);
-
-  const isThresholdSuppressionDisabled = isThresholdRule && !enableThresholdSuppression;
 
   /** Suppression fields are generally disabled if either:
    * - License is insufficient (i.e. less than platinum)
@@ -524,96 +491,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
   }, [esqlSuppressionFields, mlSuppressionFields, ruleType, termsAggregationFields]);
 
-  const isGroupByChildrenDisabled =
-    areSuppressionFieldsDisabled || isThresholdSuppressionDisabled || !areSuppressionFieldsSelected;
-  const isPerRuleExecutionDisabled = areSuppressionFieldsDisabled || isThresholdRule;
-  const isPerTimePeriodDisabled =
-    areSuppressionFieldsDisabled || isThresholdSuppressionDisabled || !areSuppressionFieldsSelected;
-  const isDurationDisabled =
-    areSuppressionFieldsDisabled || isThresholdSuppressionDisabled || !areSuppressionFieldsSelected;
-  const isMissingFieldsDisabled = areSuppressionFieldsDisabled || !areSuppressionFieldsSelected;
-
-  const GroupByChildren = useCallback(
-    ({
-      groupByRadioSelection,
-      groupByDurationUnit,
-      groupByDurationValue,
-    }: GroupByChildrenProps) => (
-      <EuiRadioGroup
-        disabled={isGroupByChildrenDisabled}
-        idSelected={groupByRadioSelection.value}
-        options={[
-          {
-            id: GroupByOptions.PerRuleExecution,
-            label: (
-              <EuiToolTip
-                content={
-                  isThresholdRule ? i18n.THRESHOLD_SUPPRESSION_PER_RULE_EXECUTION_WARNING : null
-                }
-              >
-                <> {i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION}</>
-              </EuiToolTip>
-            ),
-            disabled: isPerRuleExecutionDisabled,
-          },
-          {
-            id: GroupByOptions.PerTimePeriod,
-            disabled: isPerTimePeriodDisabled,
-            label: (
-              <>
-                {i18n.ALERT_SUPPRESSION_PER_TIME_PERIOD}
-                <DurationInput
-                  data-test-subj="alertSuppressionDurationInput"
-                  durationValueField={groupByDurationValue}
-                  durationUnitField={groupByDurationUnit}
-                  // Suppression duration is also disabled suppression by rule execution is selected in radio button
-                  isDisabled={
-                    isDurationDisabled ||
-                    groupByRadioSelection.value !== GroupByOptions.PerTimePeriod
-                  }
-                  minimumValue={1}
-                />
-              </>
-            ),
-          },
-        ]}
-        onChange={(id: string) => {
-          groupByRadioSelection.setValue(id);
-        }}
-        data-test-subj="groupByDurationOptions"
-      />
+  const alertSuppressionFieldsAppendText = useMemo(
+    () => (
+      <EuiText color="subdued" size="xs">
+        {isSuppressionRuleInGA(ruleType)
+          ? i18n.ALERT_SUPPRESSION_FIELDS_GA_LABEL_APPEND
+          : i18n.ALERT_SUPPRESSION_FIELDS_TECH_PREVIEW_LABEL_APPEND}
+      </EuiText>
     ),
-    [
-      isThresholdRule,
-      isDurationDisabled,
-      isPerTimePeriodDisabled,
-      isPerRuleExecutionDisabled,
-      isGroupByChildrenDisabled,
-    ]
-  );
-
-  const AlertSuppressionMissingFields = useCallback(
-    ({ suppressionMissingFields }: Record<string, FieldHook<string | undefined>>) => (
-      <EuiRadioGroup
-        disabled={isMissingFieldsDisabled}
-        idSelected={suppressionMissingFields.value}
-        options={[
-          {
-            id: AlertSuppressionMissingFieldsStrategyEnum.suppress,
-            label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS_OPTION,
-          },
-          {
-            id: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
-            label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION,
-          },
-        ]}
-        onChange={(id: string) => {
-          suppressionMissingFields.setValue(id);
-        }}
-        data-test-subj="suppressionMissingFieldsOptions"
-      />
-    ),
-    [isMissingFieldsDisabled]
+    [ruleType]
   );
 
   const dataViewIndexPatternToggleButtonOptions: EuiButtonGroupOptionProps[] = useMemo(
@@ -928,7 +814,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               )}
             </>
           </RuleTypeEuiFormRow>
-
           {!isMlRule(ruleType) && !isQueryBarValid && queryBar?.query?.query && (
             <AiAssistant
               getFields={form.getFields}
@@ -936,7 +821,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               language={queryBar?.query?.language}
             />
           )}
-
           {isQueryRule(ruleType) && (
             <>
               <EuiSpacer size="s" />
@@ -1048,99 +932,27 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </RuleTypeEuiFormRow>
           <EuiSpacer size="m" />
 
-          <>
-            <RuleTypeEuiFormRow $isVisible={isAlertSuppressionEnabled && isThresholdRule} fullWidth>
-              <EuiToolTip content={alertSuppressionUpsellingMessage} position="right">
-                <CommonUseField
-                  path="enableThresholdSuppression"
-                  componentProps={{
-                    idAria: 'detectionEngineStepDefineRuleThresholdEnableSuppression',
-                    'data-test-subj': 'detectionEngineStepDefineRuleThresholdEnableSuppression',
-                    euiFieldProps: {
-                      label: i18n.getEnableThresholdSuppressionLabel(thresholdFields),
-                      disabled: !isAlertSuppressionLicenseValid,
-                    },
-                  }}
-                />
-              </EuiToolTip>
-            </RuleTypeEuiFormRow>
-
-            <RuleTypeEuiFormRow
-              $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
-              data-test-subj="alertSuppressionInput"
-              label={i18n.GROUP_BY_LABEL}
-              labelAppend={
-                <EuiText color="subdued" size="xs">
-                  {isSuppressionRuleInGA(ruleType)
-                    ? i18n.GROUP_BY_GA_LABEL_APPEND
-                    : i18n.GROUP_BY_TECH_PREVIEW_LABEL_APPEND}
-                </EuiText>
-              }
-            >
-              <>
-                <UseField
-                  path="groupByFields"
-                  component={MultiSelectFieldsAutocomplete}
-                  componentProps={{
-                    browserFields: suppressionGroupByFields,
-                    isDisabled: isSuppressionGroupByDisabled,
-                    disabledText: suppressionGroupByDisabledText,
-                  }}
-                />
-                {isMlSuppressionIncomplete && (
-                  <EuiText size="xs" color="warning">
-                    {i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL}
-                  </EuiText>
-                )}
-              </>
-            </RuleTypeEuiFormRow>
-
-            <IntendedRuleTypeEuiFormRow
-              $isVisible={isAlertSuppressionEnabled}
-              data-test-subj="alertSuppressionDuration"
-            >
-              <UseMultiFields
-                fields={{
-                  groupByRadioSelection: {
-                    path: 'groupByRadioSelection',
-                  },
-                  groupByDurationValue: {
-                    path: 'groupByDuration.value',
-                  },
-                  groupByDurationUnit: {
-                    path: 'groupByDuration.unit',
-                  },
-                }}
-              >
-                {GroupByChildren}
-              </UseMultiFields>
-            </IntendedRuleTypeEuiFormRow>
-
-            <IntendedRuleTypeEuiFormRow
-              // threshold rule does not have this suppression configuration
-              $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
-              data-test-subj="alertSuppressionMissingFields"
-              label={
-                <span>
-                  {i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL} <SuppressionInfoIcon />
-                </span>
-              }
-              fullWidth
-            >
-              <UseMultiFields
-                fields={{
-                  suppressionMissingFields: {
-                    path: 'suppressionMissingFields',
-                  },
-                }}
-              >
-                {AlertSuppressionMissingFields}
-              </UseMultiFields>
-            </IntendedRuleTypeEuiFormRow>
-          </>
-
-          <EuiSpacer size="l" />
-
+          <RuleTypeEuiFormRow $isVisible={isAlertSuppressionEnabled} fullWidth>
+            {isThresholdRule ? (
+              <ThresholdAlertSuppressionEdit
+                suppressionFieldNames={thresholdFields}
+                disabled={!isAlertSuppressionLicenseValid}
+                disabledText={alertSuppressionUpsellingMessage}
+              />
+            ) : (
+              <AlertSuppressionEdit
+                suppressibleFields={suppressionGroupByFields}
+                labelAppend={alertSuppressionFieldsAppendText}
+                warningText={
+                  isMlSuppressionIncomplete
+                    ? i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL
+                    : undefined
+                }
+                disabled={isSuppressionGroupByDisabled}
+                disabledText={suppressionGroupByDisabledText}
+              />
+            )}
+          </RuleTypeEuiFormRow>
           {!isMlRule(ruleType) && (
             <>
               <RequiredFields
@@ -1151,9 +963,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <EuiSpacer size="l" />
             </>
           )}
-
           <RelatedIntegrations path="relatedIntegrations" dataTestSubj="relatedIntegrations" />
-
           <UseField
             path="timeline"
             component={PickTimeline}
@@ -1192,7 +1002,3 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
   );
 };
 export const StepDefineRuleReadOnly = memo(StepDefineRuleReadOnlyComponent);
-
-export function aggregatableFields<T extends { aggregatable: boolean }>(browserFields: T[]): T[] {
-  return browserFields.filter((field) => field.aggregatable === true);
-}
