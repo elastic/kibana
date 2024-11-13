@@ -164,7 +164,6 @@ export function CollapsibleNav({
       button={button}
       ownFocus={false}
       size={248}
-      className="kbnCollapsibleNav"
       css={styles.navCss}
     >
       {customNavLink && (
@@ -278,7 +277,6 @@ export function CollapsibleNav({
             color="subdued"
             gutterSize="none"
             size="s"
-            className="kbnCollapsibleNav__recentsListGroup"
             css={styles.navRecentsListGroupCss}
           />
         </EuiCollapsibleNavGroup>
@@ -286,7 +284,7 @@ export function CollapsibleNav({
 
       <EuiHorizontalRule margin="none" />
 
-      <EuiFlexItem className="kbnCollapsibleNav__solutions" css={styles.navSolutions}>
+      <EuiFlexItem css={styles.navSolutions}>
         {/* Kibana, Observability, Security, and Management sections */}
         {orderedCategories.map((categoryName) => {
           const category = categoryDictionary[categoryName]!;
@@ -298,12 +296,11 @@ export function CollapsibleNav({
               iconType={category.euiIconType}
               iconSize="m"
               buttonElement={overviewLink ? 'div' : 'button'}
-              buttonClassName="kbnCollapsibleNav__solutionGroupButton"
               css={styles.navSolutionGroupButton}
               title={
                 overviewLink ? (
                   <a
-                    className="eui-textInheritColor kbnCollapsibleNav__solutionGroupLink"
+                    className="eui-textInheritColor"
                     css={styles.navSolutionGroupLink}
                     {...createOverviewLink({
                       link: overviewLink,
