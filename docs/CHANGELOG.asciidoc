@@ -94,7 +94,7 @@ Deprecated functionality does not have an immediate impact on your application, 
 you make the necessary updates after you upgrade to 8.16.0.
 
 [discrete]
-* The Logs Stream is now hidden by default in favor of the Logs Explorer app.
+.The Logs Stream is now hidden by default in favor of the Logs Explorer app.
 [%collapsible]
 ====
 *Details* +
@@ -105,7 +105,7 @@ You can still show the Logs Stream app again by navigating to Stack Management >
 ====
       
 [discrete]
-* Deprecates the Observability AI Assistant specific advanced setting `observability:aiAssistantLogsIndexPattern`.
+.Deprecates the Observability AI Assistant specific advanced setting `observability:aiAssistantLogsIndexPattern`.
 [%collapsible]
 ====
 *Details* +
@@ -154,7 +154,6 @@ Discover::
 * Adds density settings to allow further customization of the Documents table layout ({kibana-pull}188495[#188495]).
 * Enables the time picker for indices without the @timestamp field when editing ES|QL queries ({kibana-pull}184361[#184361]).
 Elastic Observability solution::
-* Show monitors from all permitted spaces !! ({kibana-pull}196109[#196109]).
 * Adds experimental logs overview to the observability hosts and service overviews ({kibana-pull}195673[#195673]).
 * Show alerts for entities ({kibana-pull}195250[#195250]).
 * Create sub-feature role to manage APM settings write permissions ({kibana-pull}194419[#194419]).

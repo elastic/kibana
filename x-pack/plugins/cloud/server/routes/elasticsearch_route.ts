@@ -27,6 +27,12 @@ export function setElasticsearchRoute({
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {},
       },
       async (context, request, response) => {
