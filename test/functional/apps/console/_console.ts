@@ -228,7 +228,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.clearEditorText();
 
       // This request will return 200 but with an empty body
-      await PageObjects.console.enterText('POST /_cluster/voting_config_exclusions?node_names=node');
+      await PageObjects.console.enterText(
+        'POST /_cluster/voting_config_exclusions?node_names=node'
+      );
       await PageObjects.console.clickPlay();
 
       await retry.try(async () => {
