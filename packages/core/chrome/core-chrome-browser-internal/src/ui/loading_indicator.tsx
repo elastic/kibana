@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import classNames from 'classnames';
 import type { Subscription } from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
 
@@ -57,6 +58,7 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
   }
 
   render() {
+    const className = classNames(!this.state.visible && 'kbnLoadingIndicator-hidden');
     const indicatorHiddenCss = !this.state.visible
       ? css({
           visibility: 'hidden',
@@ -109,6 +111,7 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       logo
     ) : (
       <EuiProgress
+        className={className}
         css={indicatorHiddenCss}
         data-test-subj={testSubj}
         max={this.props.maxAmount}

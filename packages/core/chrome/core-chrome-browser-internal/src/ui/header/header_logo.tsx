@@ -106,6 +106,7 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables 
   return (
     <a
       onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
+      className="chrHeaderLogo"
       css={styles.logoCss}
       href={href}
       data-test-subj="logo"
@@ -117,12 +118,13 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables 
       {customizedLogo ? (
         <img
           src={customizedLogo}
+          className="chrHeaderLogo__mark"
           css={styles.logoMarkCss}
           style={{ maxWidth: '200px', maxHeight: '84px' }}
           alt="custom mark"
         />
       ) : (
-        <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
+        <ElasticMark className="chrHeaderLogo__mark" css={styles.logoMarkCss} aria-hidden={true} />
       )}
     </a>
   );
