@@ -16,7 +16,6 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { InferenceEndpointResponse } from '../../service/inference_endpoint';
 import { Instruction, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
@@ -31,7 +30,7 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     errorMessage?: string;
     ready: boolean;
     enabled: boolean;
-    endpoint?: Partial<InferenceEndpointResponse['endpoints'][0]>;
+    endpoint?: Partial<InferenceInferenceEndpointInfo>;
     model_stats?: {
       deployment_state: MlDeploymentState | undefined;
       allocation_state: MlDeploymentAllocationState | undefined;

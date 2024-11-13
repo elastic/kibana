@@ -69,15 +69,15 @@ export class ObservabilityAIAssistantService {
     this.getSearchConnectorModelId = getSearchConnectorModelId;
     this.enableKnowledgeBase = enableKnowledgeBase;
 
-    this.registerInit();
+    this.resetInit();
   }
 
   init = async () => {};
 
-  private registerInit = () => {
+  private resetInit = () => {
     this.init = once(async () => {
       return this.doInit().catch((error) => {
-        this.registerInit(); // reset the once flag if an error occurs
+        this.resetInit(); // reset the once flag if an error occurs
         throw error;
       });
     });
@@ -85,20 +85,18 @@ export class ObservabilityAIAssistantService {
 
   private doInit = async () => {
     try {
-      this.logger.info('Setting up index assets');
+      this.logger.debug('Setting up index assets');
       const [coreStart] = await this.core.getStartServices();
 
-      const esClient = {
-        asInternalUser: coreStart.elasticsearch.client.asInternalUser,
-      };
+      const { asInternalUser } = coreStart.elasticsearch.client;
 
-      await esClient.asInternalUser.cluster.putComponentTemplate({
+      await asInternalUser.cluster.putComponentTemplate({
         create: false,
         name: resourceNames.componentTemplate.conversations,
         template: conversationComponentTemplate,
       });
 
-      await esClient.asInternalUser.indices.putIndexTemplate({
+      await asInternalUser.indices.putIndexTemplate({
         name: resourceNames.indexTemplate.conversations,
         composed_of: [resourceNames.componentTemplate.conversations],
         create: false,
@@ -115,7 +113,7 @@ export class ObservabilityAIAssistantService {
       const conversationAliasName = resourceNames.aliases.conversations;
 
       await createConcreteWriteIndex({
-        esClient: esClient.asInternalUser,
+        esClient: asInternalUser,
         logger: this.logger,
         totalFieldsLimit: 10000,
         indexPatterns: {
@@ -129,14 +127,14 @@ export class ObservabilityAIAssistantService {
       });
 
       // Knowledge base: component template
-      await esClient.asInternalUser.cluster.putComponentTemplate({
+      await asInternalUser.cluster.putComponentTemplate({
         create: false,
         name: resourceNames.componentTemplate.kb,
         template: kbComponentTemplate,
       });
 
       // Knowledge base: index template
-      await esClient.asInternalUser.indices.putIndexTemplate({
+      await asInternalUser.indices.putIndexTemplate({
         name: resourceNames.indexTemplate.kb,
         composed_of: [resourceNames.componentTemplate.kb],
         create: false,
@@ -154,7 +152,7 @@ export class ObservabilityAIAssistantService {
 
       // Knowledge base: write index
       await createConcreteWriteIndex({
-        esClient: esClient.asInternalUser,
+        esClient: asInternalUser,
         logger: this.logger,
         totalFieldsLimit: 10000,
         indexPatterns: {
@@ -169,7 +167,9 @@ export class ObservabilityAIAssistantService {
 
       this.kbService = new KnowledgeBaseService({
         logger: this.logger.get('kb'),
-        esClient,
+        esClient: {
+          asInternalUser,
+        },
         getSearchConnectorModelId: this.getSearchConnectorModelId,
         enabled: this.enableKnowledgeBase,
       });

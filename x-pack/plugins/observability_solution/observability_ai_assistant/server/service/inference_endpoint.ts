@@ -34,11 +34,7 @@ export async function createInferenceEndpoint({
           service: 'elasticsearch',
           service_settings: {
             model_id: modelId,
-            adaptive_allocations: {
-              enabled: true,
-              min_number_of_allocations: 0,
-              max_number_of_allocations: 8,
-            },
+            adaptive_allocations: { enabled: true },
             num_threads: 1,
           },
           task_settings: {},
@@ -76,19 +72,6 @@ export async function deleteInferenceEndpoint({
     logger.error(`Failed to delete inference endpoint: ${e.message}`);
     throw e;
   }
-}
-
-export interface InferenceEndpointResponse {
-  endpoints: Array<{
-    task_type: string;
-    service: string;
-    service_settings: {
-      num_allocations: number;
-      num_threads: number;
-      model_id: string;
-    };
-    task_settings: {};
-  }>;
 }
 
 export async function getInferenceEndpoint({

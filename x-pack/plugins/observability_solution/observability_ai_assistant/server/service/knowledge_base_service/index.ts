@@ -469,7 +469,10 @@ export class KnowledgeBaseService {
     );
     const deploymentState = elserModelStats?.deployment_stats?.state;
     const allocationState = elserModelStats?.deployment_stats?.allocation_status.state;
-    const ready = deploymentState === 'started' && allocationState === 'fully_allocated';
+    const allocationCount =
+      elserModelStats?.deployment_stats?.allocation_status.allocation_count ?? 0;
+    const ready =
+      deploymentState === 'started' && allocationState === 'fully_allocated' && allocationCount > 0;
 
     this.dependencies.logger.debug(
       `Model deployment state: ${deploymentState}, allocation state: ${allocationState}, ready: ${ready}`
@@ -480,6 +483,7 @@ export class KnowledgeBaseService {
       ready,
       enabled,
       model_stats: {
+        allocation_count: allocationCount,
         deployment_state: deploymentState,
         allocation_state: allocationState,
       },

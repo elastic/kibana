@@ -137,10 +137,13 @@ async function waitForInferenceEndpoint({
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
 }) {
-  return pRetry(async () => {
-    const endpoint = await getInferenceEndpoint({ esClient, logger });
-    if (!endpoint) {
-      throw new Error('Inference endpoint not yet ready');
-    }
-  });
+  return pRetry(
+    async () => {
+      const endpoint = await getInferenceEndpoint({ esClient, logger });
+      if (!endpoint) {
+        throw new Error('Inference endpoint not yet ready');
+      }
+    },
+    { retries: 20, factor: 2 }
+  );
 }
