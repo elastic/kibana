@@ -91,7 +91,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     fieldsMetadata,
     uiSettings,
   } = kibana.services;
-  const timeZone = core?.uiSettings?.get('dateFormat:tz');
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
@@ -456,11 +455,10 @@ export const ESQLEditor = memo(function ESQLEditor({
       validateQuery();
       addQueriesToCache({
         queryString: code,
-        timeZone,
         status: clientParserStatus,
       });
     }
-  }, [clientParserStatus, isLoading, isQueryLoading, parseMessages, code, timeZone]);
+  }, [clientParserStatus, isLoading, isQueryLoading, parseMessages, code]);
 
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {

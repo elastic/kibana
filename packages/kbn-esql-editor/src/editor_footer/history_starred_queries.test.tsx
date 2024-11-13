@@ -25,7 +25,6 @@ jest.mock('../history_local_storage', () => {
     getHistoryItems: () => [
       {
         queryString: 'from kibana_sample_data_flights | limit 10',
-        timeZone: 'Browser',
         timeRan: 'Mar. 25, 24 08:45:27',
         queryRunning: false,
         status: 'success',
