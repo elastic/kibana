@@ -92,7 +92,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { detailName: ruleId } = useParams<{ detailName: string }>();
 
   const [activeStep, setActiveStep] = useState<RuleStep>(
-    isPrebuiltRulesCustomizationEnabled === false && rule.immutable
+    !isPrebuiltRulesCustomizationEnabled && rule.immutable
       ? RuleStep.ruleActions
       : RuleStep.defineRule
   );
@@ -215,7 +215,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-define-tab',
         id: RuleStep.defineRule,
         name: ruleI18n.DEFINITION,
-        disabled: isPrebuiltRulesCustomizationEnabled === false && rule?.immutable,
+        disabled: !isPrebuiltRulesCustomizationEnabled && rule?.immutable,
         content: (
           <div
             style={{
@@ -260,7 +260,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-about-tab',
         id: RuleStep.aboutRule,
         name: ruleI18n.ABOUT,
-        disabled: isPrebuiltRulesCustomizationEnabled === false && rule?.immutable,
+        disabled: !isPrebuiltRulesCustomizationEnabled && rule?.immutable,
         content: (
           <div
             style={{
@@ -292,7 +292,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-schedule-tab',
         id: RuleStep.scheduleRule,
         name: ruleI18n.SCHEDULE,
-        disabled: isPrebuiltRulesCustomizationEnabled === false && rule?.immutable,
+        disabled: !isPrebuiltRulesCustomizationEnabled && rule?.immutable,
         content: (
           <div
             style={{
@@ -419,7 +419,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     setNonBlockingRuleErrors([]);
 
     const actionsStepFormValid = await actionsStepForm.validate();
-    if (isPrebuiltRulesCustomizationEnabled === false && rule.immutable) {
+    if (!isPrebuiltRulesCustomizationEnabled && rule.immutable) {
       // Since users cannot edit Define, About and Schedule tabs of the rule, we skip validation of those to avoid
       // user confusion of seeing that those tabs have error and not being able to see or do anything about that.
       // We will need to remove this condition once rule customization work is done.
