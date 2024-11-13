@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { EntityClient, EnitityInstance } from './entity_client';
+import { EntityClient } from './entity_client';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { EntityInstance } from '@kbn/entities-schema';
 
-const commonEntityFields: EnitityInstance = {
+const commonEntityFields: EntityInstance = {
   entity: {
     last_seen_timestamp: '2023-10-09T00:00:00Z',
     id: '1',
     display_name: 'entity_name',
     definition_id: 'entity_definition_id',
-  } as EnitityInstance['entity'],
+  } as EntityInstance['entity'],
 };
 
 describe('EntityClient', () => {
@@ -26,7 +27,7 @@ describe('EntityClient', () => {
 
   describe('asKqlFilter', () => {
     it('should return the kql filter', () => {
-      const entityLatest: EnitityInstance = {
+      const entityLatest: EntityInstance = {
         entity: {
           ...commonEntityFields.entity,
           identity_fields: ['service.name', 'service.environment'],
@@ -42,7 +43,7 @@ describe('EntityClient', () => {
     });
 
     it('should return the kql filter when indentity_fields is composed by multiple fields', () => {
-      const entityLatest: EnitityInstance = {
+      const entityLatest: EntityInstance = {
         entity: {
           ...commonEntityFields.entity,
           identity_fields: ['service.name', 'service.environment'],
@@ -59,7 +60,7 @@ describe('EntityClient', () => {
     });
 
     it('should ignore fields that are not present in the entity', () => {
-      const entityLatest: EnitityInstance = {
+      const entityLatest: EntityInstance = {
         entity: {
           ...commonEntityFields.entity,
           identity_fields: ['host.name', 'foo.bar'],
@@ -76,7 +77,7 @@ describe('EntityClient', () => {
 
   describe('getIdentityFieldsValue', () => {
     it('should return identity fields values', () => {
-      const entityLatest: EnitityInstance = {
+      const entityLatest: EntityInstance = {
         entity: {
           ...commonEntityFields.entity,
           identity_fields: ['service.name', 'service.environment'],
@@ -93,7 +94,7 @@ describe('EntityClient', () => {
     });
 
     it('should return identity fields values when indentity_fields is composed by multiple fields', () => {
-      const entityLatest: EnitityInstance = {
+      const entityLatest: EntityInstance = {
         entity: {
           ...commonEntityFields.entity,
           identity_fields: ['service.name', 'service.environment'],
@@ -112,7 +113,7 @@ describe('EntityClient', () => {
     });
 
     it('should return identity fields when field is in the root', () => {
-      const entityLatest: EnitityInstance = {
+      const entityLatest: EntityInstance = {
         entity: {
           ...commonEntityFields.entity,
           identity_fields: ['name'],
@@ -127,7 +128,7 @@ describe('EntityClient', () => {
     });
 
     it('should throw an error when identity fields are missing', () => {
-      const entityLatest: EnitityInstance = {
+      const entityLatest: EntityInstance = {
         ...commonEntityFields,
       };
 

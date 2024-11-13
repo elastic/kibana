@@ -35,9 +35,6 @@ describe('Attack discovery tour', () => {
     jest.clearAllMocks();
     (useAssistantContext as jest.Mock).mockReturnValue({
       navigateToApp,
-      assistantFeatures: {
-        assistantKnowledgeBaseByDefault: true,
-      },
     });
     jest.mocked(useLocalStorage).mockReturnValue([
       {
@@ -56,25 +53,6 @@ describe('Attack discovery tour', () => {
       },
       persistToLocalStorage,
     ] as unknown as ReturnType<typeof useLocalStorage>);
-    render(
-      <KnowledgeBaseTour>
-        <h1>{'Hello world'}</h1>
-      </KnowledgeBaseTour>,
-      {
-        wrapper: TestProviders,
-      }
-    );
-    expect(screen.queryByTestId('knowledgeBase-tour-step-1')).toBeNull();
-    expect(screen.queryByTestId('knowledgeBase-tour-step-2')).toBeNull();
-  });
-
-  it('should not render any tour steps when knowledge base feature flag is not activated', () => {
-    (useAssistantContext as jest.Mock).mockReturnValue({
-      navigateToApp,
-      assistantFeatures: {
-        assistantKnowledgeBaseByDefault: false,
-      },
-    });
     render(
       <KnowledgeBaseTour>
         <h1>{'Hello world'}</h1>

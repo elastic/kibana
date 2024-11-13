@@ -23,6 +23,7 @@ import {
 } from './mocks';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
+import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('CreateSLO', () => {
   let mockEsClient: ElasticsearchClientMock;
@@ -55,11 +56,19 @@ describe('CreateSLO', () => {
   });
 
   describe('happy path', () => {
+    beforeEach(() => {
+      mockRepository.exists.mockResolvedValue(false);
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as SecurityHasPrivilegesResponse);
+    });
+
     it('calls the expected services', async () => {
       const sloParams = createSLOParams({
         id: 'unique-id',
         indicator: createAPMTransactionErrorRateIndicator(),
       });
+
       mockTransformManager.install.mockResolvedValue('slo-id-revision');
       mockSummaryTransformManager.install.mockResolvedValue('slo-summary-id-revision');
 
@@ -157,6 +166,33 @@ describe('CreateSLO', () => {
   });
 
   describe('unhappy path', () => {
+    beforeEach(() => {
+      mockRepository.exists.mockResolvedValue(false);
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as SecurityHasPrivilegesResponse);
+    });
+
+    it('throws a SLOIdConflict error when the SLO already exists', async () => {
+      mockRepository.exists.mockResolvedValue(true);
+
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      await expect(createSLO.execute(sloParams)).rejects.toThrowError(/SLO \[.*\] already exists/);
+    });
+
+    it('throws a SecurityException error when the user does not have the required privileges', async () => {
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: false,
+      } as SecurityHasPrivilegesResponse);
+
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      await expect(createSLO.execute(sloParams)).rejects.toThrowError(
+        "Missing ['read', 'view_index_metadata'] privileges on the source index [metrics-apm*]"
+      );
+    });
+
     it('rollbacks completed operations when rollup transform install fails', async () => {
       mockTransformManager.install.mockRejectedValue(new Error('Rollup transform install error'));
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
