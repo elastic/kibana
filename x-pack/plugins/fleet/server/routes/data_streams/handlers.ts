@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Dictionary, keyBy, keys, merge } from 'lodash';
+import type { Dictionary } from 'lodash';
+import { keyBy, keys, merge } from 'lodash';
 import type { RequestHandler } from '@kbn/core/server';
 import pMap from 'p-map';
 
@@ -13,10 +14,11 @@ import { KibanaSavedObjectType } from '../../../common/types';
 import type { GetDataStreamsResponse } from '../../../common/types';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultFleetErrorHandler } from '../../errors';
-import { MeteringStats, dataStreamService } from '../../services/data_streams';
+import type { MeteringStats } from '../../services/data_streams';
+import { dataStreamService } from '../../services/data_streams';
 
 import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
-import { IndicesDataStreamsStatsDataStreamsStatsItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesDataStreamsStatsDataStreamsStatsItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { appContextService } from '../../services';
 
