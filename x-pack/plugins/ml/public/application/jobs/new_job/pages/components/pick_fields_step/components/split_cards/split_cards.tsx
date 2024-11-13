@@ -97,42 +97,45 @@ export const SplitCards: FC<PropsWithChildren<Props>> = memo(
     }
 
     return (
-      <EuiFlexGroup>
-        <EuiFlexItem data-test-subj="mlDataSplit">
-          {(fieldValues.length === 0 || numberOfDetectors === 0) && <>{children}</>}
-          {fieldValues.length > 0 && numberOfDetectors > 0 && splitField !== null && (
-            <Fragment>
-              {(jobType === JOB_TYPE.MULTI_METRIC || jobType === JOB_TYPE.GEO) && (
-                <Fragment>
-                  <div
-                    css={{ fontSize: 'small' }}
-                    data-test-subj={`mlDataSplitTitle ${splitField.name}`}
-                  >
-                    <FormattedMessage
-                      id="xpack.ml.newJob.wizard.pickFieldsStep.splitCards.dataSplitBy"
-                      defaultMessage="Data split by {field}"
-                      values={{ field: splitField.name }}
-                    />
-                  </div>
-                  <EuiSpacer size="m" />
-                </Fragment>
-              )}
+      <>
+        <EuiFlexGroup>
+          <EuiFlexItem data-test-subj="mlDataSplit">
+            {(fieldValues.length === 0 || numberOfDetectors === 0) && <>{children}</>}
+            {fieldValues.length > 0 && numberOfDetectors > 0 && splitField !== null && (
+              <Fragment>
+                {(jobType === JOB_TYPE.MULTI_METRIC || jobType === JOB_TYPE.GEO) && (
+                  <Fragment>
+                    <div
+                      css={{ fontSize: 'small' }}
+                      data-test-subj={`mlDataSplitTitle ${splitField.name}`}
+                    >
+                      <FormattedMessage
+                        id="xpack.ml.newJob.wizard.pickFieldsStep.splitCards.dataSplitBy"
+                        defaultMessage="Data split by {field}"
+                        values={{ field: splitField.name }}
+                      />
+                    </div>
+                    <EuiSpacer size="m" />
+                  </Fragment>
+                )}
 
-              {getBackPanels()}
-              <EuiPanel paddingSize="m" css={splitCardStyle} data-test-subj="mlSplitCard front">
-                <div
-                  css={{ fontWeight: 'bold', fontSize: 'small' }}
-                  data-test-subj="mlSplitCardTitle"
-                >
-                  {fieldValues[0]}
-                </div>
-                <EuiHorizontalRule margin="s" />
-                <>{children}</>
-              </EuiPanel>
-            </Fragment>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+                {getBackPanels()}
+                <EuiPanel paddingSize="m" css={splitCardStyle} data-test-subj="mlSplitCard front">
+                  <div
+                    css={{ fontWeight: 'bold', fontSize: 'small' }}
+                    data-test-subj="mlSplitCardTitle"
+                  >
+                    {fieldValues[0]}
+                  </div>
+                  <EuiHorizontalRule margin="s" />
+                  <>{children}</>
+                </EuiPanel>
+              </Fragment>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {splitField !== null ? <EuiSpacer size="m" /> : null}
+      </>
     );
   }
 );
