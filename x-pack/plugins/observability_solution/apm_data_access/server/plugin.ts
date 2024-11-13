@@ -25,7 +25,6 @@ import {
   getApmIndicesSavedObject,
 } from './saved_objects/apm_indices';
 import { getServices } from './services/get_services';
-import { ApmDataAccessPrivilegesCheck, checkPrivileges } from './lib/check_privileges';
 
 export class ApmDataAccessPlugin
   implements Plugin<ApmDataAccessPluginSetup, ApmDataAccessPluginStart>
@@ -48,10 +47,17 @@ export class ApmDataAccessPlugin
     // register saved object
     core.savedObjects.registerType(apmIndicesSavedObjectDefinition);
 
+    const getApmIndicesWithInternalUserFn = async () => {
+      const [coreStart] = await core.getStartServices();
+      const soClient = await coreStart.savedObjects.createInternalRepository();
+
+      return this.getApmIndices(soClient);
+    };
+
     // expose
     return {
       apmIndicesFromConfigFile: this.config.indices,
-      getApmIndices: this.getApmIndices,
+      getApmIndices: getApmIndicesWithInternalUserFn,
       getServices,
     };
   }
@@ -63,21 +69,7 @@ export class ApmDataAccessPlugin
       this.logger.error(e);
     });
 
-    const getApmIndicesWithInternalUserFn = async () => {
-      const soClient = core.savedObjects.createInternalRepository();
-      return this.getApmIndices(soClient);
-    };
-
-    const startServices = {
-      hasPrivileges: ({ request }: Pick<ApmDataAccessPrivilegesCheck, 'request'>) =>
-        checkPrivileges({
-          request,
-          getApmIndices: getApmIndicesWithInternalUserFn,
-          security: plugins.security,
-        }),
-    };
-
-    return { ...startServices };
+    return {};
   }
 
   public stop() {}

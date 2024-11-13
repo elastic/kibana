@@ -18,9 +18,7 @@
     "requiredPlugins": [
       "data"
     ],
-    "optionalPlugins": [
-      "security"
-    ],
+    "optionalPlugins": [],
     "requiredBundles": []
   }
 }
