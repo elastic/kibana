@@ -493,7 +493,7 @@
         "Props",
         ">>; getDataDriftComponent: () => Promise<() => React.FC<",
         "DataDriftDetectionAppStateProps",
-        ">>; getMaxBytesFormatted: () => string; FieldStatisticsTable: React.ForwardRefExoticComponent<",
+        ">>; getMaxBytesFormatted: () => string; FieldStatsUnavailableMessage: React.ForwardRefExoticComponent<{ id?: string | undefined; title?: string | undefined; } & React.RefAttributes<{}>>; FieldStatisticsTable: React.ForwardRefExoticComponent<",
         "FieldStatisticTableEmbeddableProps",
         " & React.RefAttributes<{}>>; }"
       ],
