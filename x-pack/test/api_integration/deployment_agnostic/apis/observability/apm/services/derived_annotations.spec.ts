@@ -25,7 +25,7 @@ export default function annotationApiTests({ getService }: DeploymentAgnosticFtr
 
   const indexName = 'apm-8.0.0-transaction';
 
-  describe('Derived deployment annotations with a basic license', () => {
+  describe('Derived deployment annotations', () => {
     describe('when there are multiple service versions', () => {
       let roleAuthc: RoleCredentials;
       let response: APIReturnType<'GET /api/apm/services/{serviceName}/annotation/search 2023-10-31'>;
