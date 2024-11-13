@@ -72,8 +72,6 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    await userEvent.click(await screen.findByTestId('webhookAddCommentToggle'));
-
     expect(await screen.findByTestId('authNone')).toBeInTheDocument();
     expect(await screen.findByTestId('authBasic')).toBeInTheDocument();
     expect(await screen.findByTestId('authSSL')).toBeInTheDocument();
@@ -99,6 +97,32 @@ describe('CasesWebhookActionConnectorFields renders', () => {
   });
 
   it('Add comment to case section is rendered only when the toggle button is on', async () => {
+    const incompleteActionConnector = {
+      ...actionConnector,
+      config: {
+        ...actionConnector.config,
+        createCommentUrl: undefined,
+        createCommentJson: undefined,
+      },
+    };
+    render(
+      <ConnectorFormTestProvider connector={incompleteActionConnector}>
+        <CasesWebhookActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    await userEvent.click(await screen.findByTestId('webhookAddCommentToggle'));
+
+    expect(await screen.findByTestId('webhookCreateCommentMethodSelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('createCommentUrlInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookCreateCommentJson')).toBeInTheDocument();
+  });
+
+  it('Toggle button is active when create comment section fields are populated', async () => {
     render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <CasesWebhookActionConnectorFields
@@ -108,15 +132,11 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         />
       </ConnectorFormTestProvider>
     );
-    expect(screen.queryByTestId('webhookCreateCommentMethodSelect')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('createCommentUrlInput')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('webhookCreateCommentJson')).not.toBeInTheDocument();
 
-    await userEvent.click(await screen.findByTestId('webhookAddCommentToggle'));
-
-    expect(await screen.findByTestId('webhookCreateCommentMethodSelect')).toBeInTheDocument();
-    expect(await screen.findByTestId('createCommentUrlInput')).toBeInTheDocument();
-    expect(await screen.findByTestId('webhookCreateCommentJson')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookAddCommentToggle')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
   });
 
   it('connector auth toggles work as expected', async () => {
@@ -380,7 +400,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           />
         </ConnectorFormTestProvider>
       );
-      await userEvent.click(await screen.findByTestId('webhookAddCommentToggle'));
+
       await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
       const { isPreconfigured, ...rest } = actionConnector;
       await waitFor(() =>
@@ -416,7 +436,6 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.click(await screen.findByTestId('webhookAddCommentToggle'));
       await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       const { isPreconfigured, secrets, ...rest } = actionConnector;
@@ -457,7 +476,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           />
         </ConnectorFormTestProvider>
       );
-      await userEvent.click(await screen.findByTestId('webhookAddCommentToggle'));
+
       await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       const { isPreconfigured, ...rest } = actionConnector;
@@ -519,8 +538,6 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.click(await screen.findByTestId('webhookAddCommentToggle'));
-
       await userEvent.clear(await screen.findByTestId(field));
       if (value !== '') {
         await userEvent.type(await screen.findByTestId(field), value, {
@@ -554,7 +571,6 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             />
           </ConnectorFormTestProvider>
         );
-        await userEvent.click(await screen.findByTestId('webhookAddCommentToggle'));
 
         await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
         await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false }));
