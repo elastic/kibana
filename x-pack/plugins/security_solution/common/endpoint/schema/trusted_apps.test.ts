@@ -12,7 +12,11 @@ import {
   PutTrustedAppUpdateRequestSchema,
 } from './trusted_apps';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
-import type { TrustedAppConditionEntry, PutTrustedAppsRequestParams } from '../types';
+import type {
+  TrustedAppConditionEntry,
+  PutTrustedAppsRequestParams,
+  NewTrustedApp,
+} from '../types';
 
 describe('When invoking Trusted Apps Schema', () => {
   describe('for GET List', () => {
@@ -101,30 +105,15 @@ describe('When invoking Trusted Apps Schema', () => {
       value: 'c:/programs files/Anti-Virus',
       ...(data || {}),
     });
-    const createNewTrustedApp = <T>(
-      data?: T
-    ):
-      | (T & {
-          effectScope: { type: string };
-          entries: TrustedAppConditionEntry[];
-          os: OperatingSystem.WINDOWS;
-          name: string;
-          description: string;
-        })
-      | {
-          effectScope: { type: string };
-          entries: TrustedAppConditionEntry[];
-          os: OperatingSystem.WINDOWS;
-          name: string;
-          description: string;
-        } => ({
-      name: 'Some Anti-Virus App',
-      description: 'this one is ok',
-      os: OperatingSystem.WINDOWS,
-      effectScope: { type: 'global' },
-      entries: [createConditionEntry()],
-      ...(data || {}),
-    });
+    const createNewTrustedApp = <T>(data?: T): NewTrustedApp =>
+      ({
+        name: 'Some Anti-Virus App',
+        description: 'this one is ok',
+        os: OperatingSystem.WINDOWS,
+        effectScope: { type: 'global' },
+        entries: [createConditionEntry()],
+        ...(data || {}),
+      } as NewTrustedApp);
     const body = PostTrustedAppCreateRequestSchema.body;
 
     it('should not error on a valid message', () => {
@@ -401,30 +390,15 @@ describe('When invoking Trusted Apps Schema', () => {
       value: 'c:/programs files/Anti-Virus',
       ...(data || {}),
     });
-    const createNewTrustedApp = <T>(
-      data?: T
-    ):
-      | (T & {
-          effectScope: { type: string };
-          entries: TrustedAppConditionEntry[];
-          os: OperatingSystem.WINDOWS;
-          name: string;
-          description: string;
-        })
-      | {
-          effectScope: { type: string };
-          entries: TrustedAppConditionEntry[];
-          os: OperatingSystem.WINDOWS;
-          name: string;
-          description: string;
-        } => ({
-      name: 'Some Anti-Virus App',
-      description: 'this one is ok',
-      os: OperatingSystem.WINDOWS,
-      effectScope: { type: 'global' },
-      entries: [createConditionEntry()],
-      ...(data || {}),
-    });
+    const createNewTrustedApp = <T>(data?: T): NewTrustedApp =>
+      ({
+        name: 'Some Anti-Virus App',
+        description: 'this one is ok',
+        os: OperatingSystem.WINDOWS,
+        effectScope: { type: 'global' },
+        entries: [createConditionEntry()],
+        ...(data || {}),
+      } as NewTrustedApp);
 
     const updateParams = <T>(data?: T): PutTrustedAppsRequestParams => ({
       id: 'validId',
