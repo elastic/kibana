@@ -10,7 +10,11 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
-import { type UiSettingsParams, parseThemeTags, SUPPORTED_THEME_NAMES } from '@kbn/core-ui-settings-common';
+import {
+  type UiSettingsParams,
+  parseThemeTags,
+  SUPPORTED_THEME_NAMES,
+} from '@kbn/core-ui-settings-common';
 
 function getThemeInfo(options: GetThemeSettingsOptions) {
   if (options?.isDist ?? true) {

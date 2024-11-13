@@ -110,9 +110,11 @@ describe('bootstrapRenderer', () => {
     });
 
     it('calls getThemeTag with the values from the UiSettingsClient (true/dark) when the UserSettingsService is not provided', async () => {
-      uiSettingsClient.get.mockImplementation(getClientGetMockImplementation({
-        darkMode: true,
-      }));
+      uiSettingsClient.get.mockImplementation(
+        getClientGetMockImplementation({
+          darkMode: true,
+        })
+      );
       const request = httpServerMock.createKibanaRequest();
 
       await renderer({
@@ -128,7 +130,7 @@ describe('bootstrapRenderer', () => {
     });
 
     it('calls getThemeTag with the values from the UiSettingsClient (false/light) when the UserSettingsService is not provided', async () => {
-      uiSettingsClient.get.mockImplementation(getClientGetMockImplementation({}))
+      uiSettingsClient.get.mockImplementation(getClientGetMockImplementation({}));
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -231,9 +233,11 @@ describe('bootstrapRenderer', () => {
         userSettingsService,
       });
 
-      uiSettingsClient.get.mockImplementation(getClientGetMockImplementation({
-        darkMode: true,
-      }));
+      uiSettingsClient.get.mockImplementation(
+        getClientGetMockImplementation({
+          darkMode: true,
+        })
+      );
       const request = httpServerMock.createKibanaRequest();
 
       await renderer({
@@ -271,9 +275,11 @@ describe('bootstrapRenderer', () => {
     });
 
     it('calls getThemeTag with the correct parameters', async () => {
-      uiSettingsClient.get.mockImplementation(getClientGetMockImplementation({
-        darkMode: true,
-      }));
+      uiSettingsClient.get.mockImplementation(
+        getClientGetMockImplementation({
+          darkMode: true,
+        })
+      );
 
       const request = httpServerMock.createKibanaRequest();
 

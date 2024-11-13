@@ -10,7 +10,7 @@
 export const DEFAULT_THEME_NAME = 'amsterdam';
 export const SUPPORTED_THEME_NAMES = ['amsterdam', 'borealis'];
 
-export type ThemeName = typeof SUPPORTED_THEME_NAMES[number];
+export type ThemeName = (typeof SUPPORTED_THEME_NAMES)[number];
 
 /**
  * Theme tags of the Amsterdam theme
