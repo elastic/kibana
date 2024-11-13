@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { config, generateData } from './generate_data';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
@@ -33,9 +33,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/176990
-  registry.when('Memory', { config: 'trial', archives: [] }, () => {
+  describe('Memory', () => {
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     before(async () => {
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
       await generateData({ start, end, apmSynthtraceEsClient });
     });
 
