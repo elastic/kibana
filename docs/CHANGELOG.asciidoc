@@ -116,7 +116,7 @@ For more information, refer to {kibana-issue}199902[#199902].
 Tutorials linked from the {kib} home page show an "Unable to load page" error. The Stack trace mentions `The above error occurred in tutorial_TutorialUi`.
 
 *Workaround* +
-The APM / OpenTelemetry tutorials represented a shortcut to get important parameters to use in the configuration files quickly.
+The APM / OpenTelemetry tutorials represented a shortcut to quickly add important parameters to the configuration files.
 It is still possible to obtain the same parameters following the documentation tutorials of APM.
 
 More information can be found in the {observability-guide}/apm-collect-application-data.html[APM documentation] and the {observability-guide}/get-started-with-fleet-apm-server.html[Fleet documentation].
