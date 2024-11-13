@@ -41,7 +41,7 @@ describe(
       login();
     });
 
-    describe.skip('Scan operation:', () => {
+    describe('Scan operation:', () => {
       const homeFilePath = Cypress.env('IS_CI') ? '/home/vagrant' : '/home';
 
       const fileContent = 'This is a test file for the scan command.';
