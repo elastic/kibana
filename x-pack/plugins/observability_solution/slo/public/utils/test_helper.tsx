@@ -16,7 +16,9 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render as testLibRender } from '@testing-library/react';
 import React from 'react';
+import { DefaultClientOptions, createRepositoryClient } from '@kbn/server-route-repository-client';
 import { PluginContext } from '../context/plugin_context';
+import type { SLORouteRepository } from '../../server/routes/get_slo_server_route_repository';
 
 const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
 const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
@@ -39,6 +41,8 @@ const queryClient = new QueryClient({
   },
 });
 
+const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
+
 export const render = (component: React.ReactNode) => {
   return testLibRender(
     // @ts-ignore
@@ -60,6 +64,7 @@ export const render = (component: React.ReactNode) => {
             appMountParameters,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate: KibanaPageTemplate,
+            sloClient,
           }}
         >
           <QueryClientProvider client={queryClient}>
