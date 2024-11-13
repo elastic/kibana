@@ -30,6 +30,7 @@ const LOGS_INDEX_PATTERN_NAMES: ObsPatternName[] = [
   'metricbeat',
   'generic-metricbeat',
   'apm',
+  'functionbeat',
   'heartbeat',
   'generic-heartbeat',
   'logstash',
