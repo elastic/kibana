@@ -39,11 +39,8 @@ import * as i18n from './translations';
 
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;
-const CAPABILITIES_URL = `rest/capabilities`;
 
 const VIEW_INCIDENT_URL = `browse`;
-
-const createMetaCapabilities = ['list-project-issuetypes', 'list-issuetype-fields'];
 
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
@@ -60,10 +57,7 @@ export const createExternalService = (
 
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
   const incidentUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/issue`;
-  const capabilitiesUrl = `${urlWithoutTrailingSlash}/${CAPABILITIES_URL}`;
   const commentUrl = `${incidentUrl}/{issueId}/comment`;
-  const getIssueTypesOldAPIURL = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&expand=projects.issuetypes.fields`;
-  const getIssueTypeFieldsOldAPIURL = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&issuetypeIds={issueTypeId}&expand=projects.issuetypes.fields`;
   const getIssueTypesUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes`;
   const getIssueTypeFieldsUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes/{issueTypeId}`;
   const searchUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/search`;
@@ -143,9 +137,6 @@ export const createExternalService = (
       return msg;
     }, '');
   };
-
-  const hasSupportForNewAPI = (capabilities: { capabilities?: {} }) =>
-    createMetaCapabilities.every((c) => Object.keys(capabilities?.capabilities ?? {}).includes(c));
 
   const normalizeIssueTypes = (issueTypes: Array<{ id: string; name: string }>) =>
     issueTypes.map((type) => ({ id: type.id, name: type.name }));
@@ -356,12 +347,12 @@ export const createExternalService = (
     }
   };
 
-  const getCapabilities = async () => {
+  const getIssueTypes = async () => {
     try {
       const res = await request({
         axios: axiosInstance,
         method: 'get',
-        url: capabilitiesUrl,
+        url: getIssueTypesUrl,
         logger,
         configurationUtilities,
         connectorUsageCollector,
@@ -369,59 +360,11 @@ export const createExternalService = (
 
       throwIfResponseIsNotValid({
         res,
-        requiredAttributesToBeInTheResponse: ['capabilities'],
       });
 
-      return { ...res.data };
-    } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to get capabilities. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
-      );
-    }
-  };
-
-  const getIssueTypes = async () => {
-    const capabilitiesResponse = await getCapabilities();
-    const supportsNewAPI = hasSupportForNewAPI(capabilitiesResponse);
-    try {
-      if (!supportsNewAPI) {
-        const res = await request({
-          axios: axiosInstance,
-          method: 'get',
-          url: getIssueTypesOldAPIURL,
-          logger,
-          configurationUtilities,
-          connectorUsageCollector,
-        });
-
-        throwIfResponseIsNotValid({
-          res,
-        });
-
-        const issueTypes = res.data.projects[0]?.issuetypes ?? [];
-        return normalizeIssueTypes(issueTypes);
-      } else {
-        const res = await request({
-          axios: axiosInstance,
-          method: 'get',
-          url: getIssueTypesUrl,
-          logger,
-          configurationUtilities,
-          connectorUsageCollector,
-        });
-
-        throwIfResponseIsNotValid({
-          res,
-        });
-
-        const issueTypes = res.data.values;
-        return normalizeIssueTypes(issueTypes);
-      }
+      // Cloud returns issueTypes and Data Center returns values
+      const { issueTypes, values } = res.data;
+      return normalizeIssueTypes(issueTypes || values);
     } catch (error) {
       throw new Error(
         getErrorMessage(
@@ -435,47 +378,29 @@ export const createExternalService = (
   };
 
   const getFieldsByIssueType = async (issueTypeId: string) => {
-    const capabilitiesResponse = await getCapabilities();
-    const supportsNewAPI = hasSupportForNewAPI(capabilitiesResponse);
     try {
-      if (!supportsNewAPI) {
-        const res = await request({
-          axios: axiosInstance,
-          method: 'get',
-          url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsOldAPIURL, issueTypeId),
-          logger,
-          configurationUtilities,
-          connectorUsageCollector,
-        });
+      const res = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsUrl, issueTypeId),
+        logger,
+        configurationUtilities,
+      });
 
-        throwIfResponseIsNotValid({
-          res,
-        });
+      throwIfResponseIsNotValid({
+        res,
+      });
 
-        const fields = res.data.projects[0]?.issuetypes[0]?.fields || {};
-        return normalizeFields(fields);
-      } else {
-        const res = await request({
-          axios: axiosInstance,
-          method: 'get',
-          url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsUrl, issueTypeId),
-          logger,
-          configurationUtilities,
-        });
-
-        throwIfResponseIsNotValid({
-          res,
-        });
-
-        const fields = res.data.values.reduce(
-          (acc: { [x: string]: {} }, value: { fieldId: string }) => ({
-            ...acc,
-            [value.fieldId]: { ...value },
-          }),
-          {}
-        );
-        return normalizeFields(fields);
-      }
+      // Cloud returns fields and Data Center returns values
+      const { fields: rawFields, values } = res.data;
+      const fields = (rawFields || values).reduce(
+        (acc: { [x: string]: {} }, value: { fieldId: string }) => ({
+          ...acc,
+          [value.fieldId]: { ...value },
+        }),
+        {}
+      );
+      return normalizeFields(fields);
     } catch (error) {
       throw new Error(
         getErrorMessage(
@@ -580,7 +505,6 @@ export const createExternalService = (
     createIncident,
     updateIncident,
     createComment,
-    getCapabilities,
     getIssueTypes,
     getFieldsByIssueType,
     getIssues,

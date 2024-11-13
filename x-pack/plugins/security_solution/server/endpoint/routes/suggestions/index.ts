@@ -42,7 +42,12 @@ export function registerEndpointSuggestionsRoutes(
     .post({
       access: 'public',
       path: SUGGESTIONS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
       // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
       deprecated: true,
     })
@@ -64,7 +69,12 @@ export function registerEndpointSuggestionsRoutes(
     .post({
       access: 'internal',
       path: SUGGESTIONS_INTERNAL_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {

@@ -213,7 +213,6 @@ export class DiscoverPlugin
           .pipe(
             map((solutionNavId) => ({
               ...defaultCustomizationContext,
-              solutionNavId,
               inlineTopNav:
                 this.inlineTopNav.get(solutionNavId) ??
                 this.inlineTopNav.get(null) ??

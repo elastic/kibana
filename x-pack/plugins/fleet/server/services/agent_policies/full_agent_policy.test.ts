@@ -1198,16 +1198,7 @@ ssl.test: 123
     const policyOutput = transformOutputToFullPolicyOutput({
       id: 'id123',
       hosts: ['test:9999'],
-      topics: [
-        {
-          topic: 'test',
-        },
-        // Deprecated conditionnal topic
-        {
-          topic: 'deprecated',
-          when: { condition: 'test:100', type: 'equals' },
-        },
-      ],
+      topic: 'test',
       is_default: false,
       is_default_monitoring: false,
       name: 'test output',

@@ -87,6 +87,12 @@ export function defineOIDCRoutes({
     router.get(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route must remain accessible to 3rd-party OIDC providers',
+          },
+        },
         validate: {
           query: schema.object(
             {
@@ -176,6 +182,12 @@ export function defineOIDCRoutes({
     router.post(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route must remain accessible to 3rd-party OIDC providers',
+          },
+        },
         validate: {
           body: schema.object(
             {
@@ -221,6 +233,12 @@ export function defineOIDCRoutes({
   router.get(
     {
       path: '/api/security/oidc/initiate_login',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route must remain accessible to 3rd-party OIDC providers',
+        },
+      },
       validate: {
         query: schema.object(
           {
