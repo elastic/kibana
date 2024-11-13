@@ -10,7 +10,7 @@
 import { getThemeTag } from './get_theme_tag';
 
 describe('getThemeTag', () => {
-  it('returns the correct value for version:v8 and darkMode:false', () => {
+  it('returns the correct value for name:v8 and darkMode:false', () => {
     expect(
       getThemeTag({
         name: 'v8',
