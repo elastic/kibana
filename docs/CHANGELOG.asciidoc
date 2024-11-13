@@ -85,6 +85,40 @@ include::upgrade-notes.asciidoc[]
 
 For information about the {kib} 8.16.0 release, review the following information.
 
+The 8.16.0 release includes the following known issues.
+
+[float]
+[[known-issues-8.16.0]]
+=== Known issues
+
+[discrete]
+[[known-199902]]
+.Stack Monitoring shows "Unable to load page error"
+[%collapsible]
+====
+*Details* +
+The Stack Monitoring pages Overview, Nodes, Logs can stop working with the error "Unable to load page error". The Stack trace mentions `TypeError: Cannot read properties of undefined (reading 'logsLocator')`.
+
+*Workaround* +
+None at the moment.
+
+For more information, refer to {kibana-issue}199902[#199902].
+====
+
+[discrete]
+[[known-199891-199892]]
+.Onboarding, tutorial of APM and OpenTelemetry and some "Beats Only" integrations will show the error "Unable to load page error"
+[%collapsible]
+====
+*Details* +
+Tutorials linked from the {kib} home page show an error "Unable to load page error". The Stack trace mentions `The above error occurred in tutorial_TutorialUi`.
+
+*Workaround* +
+None at the moment.
+
+For more information, refer to {kibana-issue}199891[#199891] and {kibana-issue}199892[#199892].
+====
+
 [float]
 [[deprecations-8.16.0]]
 === Deprecations
