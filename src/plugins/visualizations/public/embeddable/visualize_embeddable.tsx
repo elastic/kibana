@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -454,6 +454,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         const hasRendered = useStateFromPublishingSubject(hasRendered$);
         const domNode = useRef<HTMLDivElement>(null);
         const { error, isLoading } = useExpressionRenderer(domNode, expressionParams);
+        const { euiTheme } = useEuiTheme();
 
         useEffect(() => {
           return () => {
@@ -495,7 +496,12 @@ export const getVisualizeEmbeddableFactory: (deps: {
                     </h2>
                   }
                   body={
-                    <p>
+                    <p
+                      style={{
+                        fontFamily: euiTheme.font.familyCode,
+                        whiteSpace: 'break-spaces',
+                      }}
+                    >
                       {error.name}: {error.message}
                     </p>
                   }

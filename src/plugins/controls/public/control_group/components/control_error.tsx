@@ -9,15 +9,21 @@
 
 import React, { useState } from 'react';
 
-import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/shared-ux-markdown';
+import { css } from '@emotion/react';
 
 interface ControlErrorProps {
   error: Error | string;
 }
 
 export const ControlError = ({ error }: ControlErrorProps) => {
+  const { euiTheme } = useEuiTheme();
+  const errorTextStyle = css`
+    font-family: ${euiTheme.font.familyCode};
+    white-space: break-spaces;
+  `;
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const errorMessage = error instanceof Error ? error.message : error;
 
@@ -47,7 +53,7 @@ export const ControlError = ({ error }: ControlErrorProps) => {
       className="controlPanel errorEmbeddableCompact__popover"
       closePopover={() => setPopoverOpen(false)}
     >
-      <Markdown data-test-subj="errorMessageMarkdown" readOnly>
+      <Markdown data-test-subj="errorMessageMarkdown" readOnly css={errorTextStyle}>
         {errorMessage}
       </Markdown>
     </EuiPopover>

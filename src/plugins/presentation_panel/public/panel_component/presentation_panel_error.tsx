@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiEmptyPrompt, EuiText, useEuiTheme } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { ErrorLike } from '@kbn/expressions-plugin/common';
@@ -16,6 +16,7 @@ import { renderSearchError } from '@kbn/search-errors';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { editPanelAction } from '../panel_actions/panel_actions';
 import { getErrorCallToAction } from './presentation_panel_strings';
 import { DefaultPresentationPanelApi } from './types';
@@ -27,6 +28,12 @@ export const PresentationPanelError = ({
   error: ErrorLike;
   api?: DefaultPresentationPanelApi;
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const errorTextStyle = css`
+    font-family: ${euiTheme.font.familyCode};
+    white-space: break-spaces;
+  `;
+
   const [isEditable, setIsEditable] = useState(false);
   const handleErrorClick = useMemo(
     () => (isEditable ? () => editPanelAction?.execute({ embeddable: api }) : undefined),
@@ -82,7 +89,7 @@ export const PresentationPanelError = ({
     <EuiEmptyPrompt
       body={
         searchErrorDisplay?.body ?? (
-          <EuiText size="s">
+          <EuiText size="s" css={errorTextStyle}>
             <Markdown data-test-subj="errorMessageMarkdown" readOnly>
               {error.message?.length
                 ? error.message

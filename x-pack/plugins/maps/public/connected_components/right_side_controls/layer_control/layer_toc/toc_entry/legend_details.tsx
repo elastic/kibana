@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { ILayer } from '../../../../../classes/layers/layer';
 
 interface Props {
@@ -16,13 +17,19 @@ interface Props {
 }
 
 export function LegendDetails({ inspectorAdapters, layer }: Props) {
+  const { euiTheme } = useEuiTheme();
+  const errorTextStyle = css`
+    font-family: ${euiTheme.font.familyCode};
+    white-space: break-spaces;
+  `;
+
   const errors = layer.getErrors(inspectorAdapters);
   if (errors.length) {
     return (
       <>
         {errors.map(({ title, body }, index) => (
           <div key={index}>
-            <EuiCallOut color="danger" size="s" title={title}>
+            <EuiCallOut color="danger" size="s" title={title} css={errorTextStyle}>
               {body}
             </EuiCallOut>
             <EuiSpacer size="m" />
@@ -37,7 +44,7 @@ export function LegendDetails({ inspectorAdapters, layer }: Props) {
     <>
       {warnings.map(({ title, body }, index) => (
         <div key={index}>
-          <EuiCallOut color="warning" size="s">
+          <EuiCallOut color="warning" size="s" css={errorTextStyle}>
             {body}
           </EuiCallOut>
           <EuiSpacer size="m" />
