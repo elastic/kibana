@@ -68,7 +68,7 @@ export const getTemplate = ({
   order = getRandomNumber(),
   indexPatterns = [],
   template: { settings, aliases, mappings } = {},
-  indexMode,
+  indexMode = 'standard',
   dataStream,
   composedOf,
   ignoreMissingComponentTemplates,

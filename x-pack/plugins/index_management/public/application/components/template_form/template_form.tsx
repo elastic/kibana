@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButton, EuiPageHeader } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
-import { allowAutoCreateRadioIds } from '../../../../common/constants';
+import { allowAutoCreateRadioIds, STANDARD_INDEX_MODE } from '../../../../common/constants';
 import { TemplateDeserialized } from '../../../../common';
 import { serializers, Forms, GlobalFlyout } from '../../../shared_imports';
 import {
@@ -118,6 +118,7 @@ export const TemplateForm = ({
     name: '',
     indexPatterns: [],
     dataStream: {},
+    indexMode: STANDARD_INDEX_MODE,
     template: {},
     _kbnMeta: {
       type: 'default',

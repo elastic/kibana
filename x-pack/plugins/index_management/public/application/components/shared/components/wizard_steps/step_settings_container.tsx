@@ -8,12 +8,14 @@
 import React from 'react';
 
 import { Forms } from '../../../../../shared_imports';
+import { TemplateDeserialized } from '../../../../../../common';
+import { WizardContent } from '../../../template_form/template_form';
 import { CommonWizardSteps } from './types';
 import { StepSettings } from './step_settings';
 
 interface Props {
   esDocsBase: string;
-  getTemplateData: (wizardContent: WizardContent) => TemplateDeserialized;
+  getTemplateData?: (wizardContent: WizardContent) => TemplateDeserialized;
 }
 
 export const StepSettingsContainer = React.memo(({ esDocsBase, getTemplateData }: Props) => {
@@ -22,16 +24,20 @@ export const StepSettingsContainer = React.memo(({ esDocsBase, getTemplateData }
   );
   const { getData } = Forms.useMultiContentContext<WizardContent>();
 
-  const wizardContent = getData();
-  // Build the current template object, providing the wizard content data
-  const template = getTemplateData(wizardContent);
+  let indexMode;
+  if (getTemplateData) {
+    const wizardContent = getData();
+    // Build the current template object, providing the wizard content data
+    const template = getTemplateData(wizardContent);
+    indexMode = template.indexMode;
+  }
 
   return (
     <StepSettings
       defaultValue={defaultValue}
       onChange={updateContent}
       esDocsBase={esDocsBase}
-      indexMode={template?.indexMode}
+      indexMode={indexMode}
     />
   );
 });

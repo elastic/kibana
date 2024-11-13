@@ -450,8 +450,6 @@ describe('<TemplateCreate />', () => {
         testBed = await setup(httpSetup);
       });
       testBed.component.update();
-
-      const { actions } = testBed;
     });
 
     it('setting index pattern to logs-*-* should set the index mode to logsdb', async () => {

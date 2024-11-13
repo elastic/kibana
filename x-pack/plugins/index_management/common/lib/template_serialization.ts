@@ -11,6 +11,7 @@ import {
   TemplateSerialized,
   TemplateListItem,
   TemplateType,
+  IndexMode,
 } from '../types';
 import { deserializeESLifecycle } from './data_stream_utils';
 import {
@@ -90,11 +91,10 @@ export function deserializeTemplate(
 
   const ilmPolicyName = settings?.index?.lifecycle?.name;
 
-  const indexMode =
-    settings?.index?.mode ??
+  const indexMode = (settings?.index?.mode ??
     (indexPatterns.some((pattern) => pattern === 'logs-*-*')
       ? LOGSDB_INDEX_MODE
-      : STANDARD_INDEX_MODE);
+      : STANDARD_INDEX_MODE)) as IndexMode;
 
   const deserializedTemplate: TemplateDeserialized = {
     name,

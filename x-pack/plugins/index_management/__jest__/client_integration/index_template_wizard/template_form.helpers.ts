@@ -371,6 +371,7 @@ export type TestSubjects =
   | 'priorityField.input'
   | 'dataStreamField.input'
   | 'indexModeField'
+  | 'indexModeCallout'
   | 'dataRetentionToggle.input'
   | 'allowAutoCreateField.input'
   | 'pageTitle'

@@ -26,7 +26,7 @@ import { Forms } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';
 import { documentationService } from '../../../mappings_editor/shared_imports';
 import { indexModeLabels } from '../../../../lib/index_mode_labels';
-import { IndexMode } from '../../../../../../common/types/data_streams';
+import { IndexMode } from '../../../../../../common/types';
 
 interface Props {
   onChange: (content: Forms.Content) => void;
