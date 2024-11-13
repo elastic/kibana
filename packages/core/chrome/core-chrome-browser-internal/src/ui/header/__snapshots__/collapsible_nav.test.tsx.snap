@@ -168,7 +168,7 @@ Array [
           >
             <ul
               aria-label="Recently viewed links"
-              class="euiListGroup kbnCollapsibleNav__recentsListGroup emotion-euiListGroup-none"
+              class="euiListGroup kbnCollapsibleNav__recentsListGroup emotion-EuiListGroup"
               style="max-inline-size: none;"
             >
               <li
@@ -221,7 +221,7 @@ Array [
       class="euiFlexItem kbnCollapsibleNav__solutions emotion-euiFlexItem-grow-1"
     >
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-EuiCollapsibleNavGroup"
         data-test-subj="collapsibleNavGroup-kibana"
       >
         <div
@@ -351,7 +351,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-EuiCollapsibleNavGroup"
         data-test-subj="collapsibleNavGroup-observability"
       >
         <div
@@ -464,7 +464,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-EuiCollapsibleNavGroup"
         data-test-subj="collapsibleNavGroup-securitySolution"
       >
         <div
@@ -560,7 +560,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-EuiCollapsibleNavGroup"
         data-test-subj="collapsibleNavGroup-management"
       >
         <div
