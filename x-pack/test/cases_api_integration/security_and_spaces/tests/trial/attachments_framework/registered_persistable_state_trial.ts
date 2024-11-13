@@ -39,6 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ml_anomaly_charts: '23e92e824af9db6e8b8bb1d63c222e04f57d2147',
           ml_anomaly_swimlane: 'a3517f3e53fb041e9cbb150477fb6ef0f731bd5f',
           ml_single_metric_viewer: '8b9532b0a40dfdfa282e262949b82cc1a643147c',
+          aiopsPatternAnalysisEmbeddable: '6c2809a0c51e668d11794de0815b293fdb3a9060',
         });
       });
     });

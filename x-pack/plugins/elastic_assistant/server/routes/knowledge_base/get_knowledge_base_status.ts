@@ -17,7 +17,6 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { KibanaRequest } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantPluginRouter } from '../../types';
-import { isV2KnowledgeBaseEnabled } from '../helpers';
 
 /**
  * Get the status of the Knowledge Base index, pipeline, and resources (collection of documents)
@@ -49,12 +48,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
         const logger = ctx.elasticAssistant.logger;
 
         try {
-          // FF Check for V2 KB
-          const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
-
-          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient({
-            v2KnowledgeBaseEnabled,
-          });
+          const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
           if (!kbDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
@@ -63,7 +57,7 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
           const pipelineExists = true; // Installed at startup, always true
           const modelExists = await kbDataClient.isModelInstalled();
           const setupAvailable = await kbDataClient.isSetupAvailable();
-          const isModelDeployed = await kbDataClient.isModelDeployed();
+          const isInferenceEndpointExists = await kbDataClient.isInferenceEndpointExists();
 
           const body: ReadKnowledgeBaseResponse = {
             elser_exists: modelExists,
@@ -73,13 +67,9 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
             pipeline_exists: pipelineExists,
           };
 
-          if (indexExists && isModelDeployed) {
-            const securityLabsExists = v2KnowledgeBaseEnabled
-              ? await kbDataClient.isSecurityLabsDocsLoaded()
-              : true;
-            const userDataExists = v2KnowledgeBaseEnabled
-              ? await kbDataClient.isUserDataExists()
-              : true;
+          if (indexExists && isInferenceEndpointExists) {
+            const securityLabsExists = await kbDataClient.isSecurityLabsDocsLoaded();
+            const userDataExists = await kbDataClient.isUserDataExists();
 
             return response.ok({
               body: {

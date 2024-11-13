@@ -324,7 +324,7 @@ packages/kbn-custom-icons @elastic/obs-ux-logs-team
 packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 packages/kbn-cypress-config @elastic/kibana-operations
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
-packages/kbn-data-stream-adapter @elastic/security-threat-hunting-explore
+packages/kbn-data-stream-adapter @elastic/security-threat-hunting
 packages/kbn-data-view-utils @elastic/kibana-data-discovery
 packages/kbn-datemath @elastic/kibana-data-discovery
 packages/kbn-dev-cli-errors @elastic/kibana-operations
@@ -380,6 +380,7 @@ packages/kbn-i18n @elastic/kibana-core
 packages/kbn-i18n-react @elastic/kibana-core
 packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-import-resolver @elastic/kibana-operations
+packages/kbn-index-adapter @elastic/security-threat-hunting
 packages/kbn-interpreter @elastic/kibana-visualizations
 packages/kbn-investigation-shared @elastic/obs-ux-management-team
 packages/kbn-io-ts-utils @elastic/obs-knowledge-team
@@ -967,6 +968,7 @@ x-pack/plugins/snapshot_restore @elastic/kibana-management
 x-pack/plugins/spaces @elastic/kibana-security
 x-pack/plugins/stack_alerts @elastic/response-ops
 x-pack/plugins/stack_connectors @elastic/response-ops
+x-pack/plugins/streams @simianhacker @flash1293 @dgieselaar
 x-pack/plugins/task_manager @elastic/response-ops
 x-pack/plugins/telemetry_collection_xpack @elastic/kibana-core
 x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
@@ -1191,6 +1193,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/plugins/observability_solution/infra/server/usage @elastic/obs-ux-infra_services-team
 /x-pack/plugins/observability_solution/infra/server/utils @elastic/obs-ux-infra_services-team
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/infra @elastic/obs-ux-logs-team
+/x-pack/test/api_integration/deployment_agnostic/apis/observability/apm @elastic/obs-ux-logs-team
 
 ## Logs UI code exceptions -> @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/page_objects/svl_oblt_onboarding_stream_log_file.ts @elastic/obs-ux-logs-team
@@ -1230,7 +1233,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test_serverless/**/test_suites/observability/custom_threshold_rule/ @elastic/obs-ux-management-team
 /x-pack/test_serverless/**/test_suites/observability/slos/ @elastic/obs-ux-management-team
 /x-pack/test_serverless/api_integration/test_suites/observability/es_query_rule @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/apis/observability/alerting/burn_rate_rule @elastic/obs-ux-management-team
+/x-pack/test/api_integration/deployment_agnostic/apis/observability/alerting @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/services/alerting_api @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/services/slo_api @elastic/obs-ux-management-team
 /x-pack/test_serverless/**/test_suites/observability/infra/ @elastic/obs-ux-infra_services-team
