@@ -301,15 +301,11 @@ export const createExternalService: ServiceFactory = ({
         throw new Error('No correlationId or incidentId found.');
       }
 
-      console.log('incidentId: ', incidentId);
-
       if (incidentId) {
         incidentToBeClosed = await getIncident(incidentId);
       } else if (correlationId) {
         incidentToBeClosed = await getIncidentByCorrelationId(correlationId);
       }
-
-      console.log('incidentToBeClosed', incidentToBeClosed);
 
       if (incidentToBeClosed === null || isEmpty(incidentToBeClosed)) {
         logger.warn(
