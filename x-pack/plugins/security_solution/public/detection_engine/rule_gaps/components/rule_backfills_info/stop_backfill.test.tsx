@@ -14,6 +14,7 @@ import { TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from '../../translations';
 import type { BackfillRow } from '../../types';
+import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../api/hooks/use_delete_backfill');
@@ -25,7 +26,7 @@ const mockUseKibana = useKibana as jest.Mock;
 
 describe('StopBackfill', () => {
   const mockTelemetry = {
-    reportManualRuleRunCancelJob: jest.fn(),
+    reportEvent: jest.fn(),
   };
 
   const addSuccess = jest.fn();
@@ -90,11 +91,14 @@ describe('StopBackfill', () => {
     fireEvent.click(getByTestId('confirmModalConfirmButton'));
 
     await waitFor(() => {
-      expect(mockTelemetry.reportManualRuleRunCancelJob).toHaveBeenCalledWith({
-        totalTasks: backfill.total,
-        completedTasks: backfill.complete,
-        errorTasks: backfill.error,
-      });
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+        ManualRuleRunEventTypes.ManualRuleRunCancelJob,
+        {
+          totalTasks: backfill.total,
+          completedTasks: backfill.complete,
+          errorTasks: backfill.error,
+        }
+      );
     });
 
     expect(addSuccess).toHaveBeenCalledWith(i18n.BACKFILLS_TABLE_STOP_CONFIRMATION_SUCCESS);
