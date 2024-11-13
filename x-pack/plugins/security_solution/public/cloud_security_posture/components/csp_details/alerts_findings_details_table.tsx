@@ -37,8 +37,8 @@ interface CspAlertsField {
   _index: string[];
   'kibana.alert.rule.uuid': string[];
   'kibana.alert.reason': string[];
-  'signal.rule.name': string[];
-  'signal.rule.severity': Array<'low' | 'medium' | 'high' | 'critical'>;
+  'kibana.alert.severity': Array<'low' | 'medium' | 'high' | 'critical'>;
+  'kibana.alert.rule.name': string[];
 }
 
 interface AlertsDetailsFields {
@@ -100,7 +100,7 @@ export const AlertsDetailsTable = memo(
     );
 
     const severitiesMap =
-      alertDataResults?.map((item) => item.fields['signal.rule.severity'][0]) || [];
+      alertDataResults?.map((item) => item.fields['kibana.alert.severity'][0]) || [];
     const alertStats = Object.entries(
       severitiesMap.reduce((acc: Record<string, number>, item) => {
         acc[item] = (acc[item] || 0) + 1;
@@ -167,7 +167,7 @@ export const AlertsDetailsTable = memo(
       {
         field: 'fields',
         render: (field: CspAlertsField) => (
-          <EuiText size="s">{field['signal.rule.name'][0]}</EuiText>
+          <EuiText size="s">{field['kibana.alert.rule.name'][0]}</EuiText>
         ),
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.misconfigurations.table.resultColumnName',
@@ -182,7 +182,7 @@ export const AlertsDetailsTable = memo(
         render: (field: CspAlertsField) => (
           <EuiText size="s">
             <SeverityBadge
-              value={field['signal.rule.severity'][0] as 'low' | 'medium' | 'high' | 'critical'}
+              value={field['kibana.alert.severity'][0] as 'low' | 'medium' | 'high' | 'critical'}
               data-test-subj="severityPropertyValue"
             />
           </EuiText>

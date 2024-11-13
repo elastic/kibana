@@ -77,9 +77,9 @@ export const buildEntityAlertsQuery = (
       '_id',
       '_index',
       'kibana.alert.rule.uuid',
-      'signal.rule.name',
-      'signal.rule.severity',
       'kibana.alert.reason',
+      'kibana.alert.severity',
+      'kibana.alert.rule.name',
     ],
     query: {
       bool: {
