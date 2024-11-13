@@ -1486,7 +1486,6 @@ x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor te
 /test/api_integration/apis/status @elastic/kibana-core
 /test/api_integration/apis/stats @elastic/kibana-core # Assigned per: https://github.com/elastic/kibana/pull/20577
 /test/api_integration/apis/saved_objects* @elastic/kibana-core
-/test/api_integration/apis/home/*.ts @elastic/kibana-core
 /test/api_integration/apis/core/*.ts @elastic/kibana-core
 /test/accessibility/apps/home.ts @elastic/kibana-core
 /x-pack/test/functional/apps/saved_objects_management @elastic/kibana-core
