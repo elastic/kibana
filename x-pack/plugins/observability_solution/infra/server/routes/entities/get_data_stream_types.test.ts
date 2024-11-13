@@ -74,7 +74,7 @@ describe('getDataStreamTypes', () => {
   it('should return metrics and entity source_data_stream types when entityCentriExperienceEnabled is true and has entity data', async () => {
     (getHasMetricsData as jest.Mock).mockResolvedValue(true);
     (getLatestEntity as jest.Mock).mockResolvedValue({
-      'source_data_stream.type': ['logs', 'metrics'],
+      sourceDataStreamType: ['logs', 'metrics'],
     });
 
     const params = {
@@ -118,7 +118,7 @@ describe('getDataStreamTypes', () => {
   it('should return entity source_data_stream types when has no metrics', async () => {
     (getHasMetricsData as jest.Mock).mockResolvedValue(false);
     (getLatestEntity as jest.Mock).mockResolvedValue({
-      'source_data_stream.type': ['logs', 'traces'],
+      sourceDataStreamType: ['logs', 'traces'],
     });
 
     const params = {

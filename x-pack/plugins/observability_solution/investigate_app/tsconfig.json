@@ -69,5 +69,6 @@
     "@kbn/charts-plugin",
     "@kbn/observability-alerting-rule-utils",
     "@kbn/observability-utils-browser",
+    "@kbn/usage-collection-plugin",
   ],
 }
