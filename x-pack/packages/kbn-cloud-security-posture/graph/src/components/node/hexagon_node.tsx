@@ -14,8 +14,8 @@ import {
   NodeShapeOnHoverSvg,
   NodeShapeSvg,
   NodeIcon,
-  HandleStyleOverride,
   NodeButton,
+  HandleStyleOverride,
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { HexagonHoverShape, HexagonShape } from './shapes/hexagon_shape';
@@ -48,7 +48,6 @@ export const HexagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           viewBox="0 0 71 78"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="node-shape"
         >
           <HexagonShape
             fill={useEuiBackgroundColor(color ?? 'primary')}

@@ -14,8 +14,8 @@ import {
   NodeShapeOnHoverSvg,
   NodeShapeSvg,
   NodeIcon,
-  HandleStyleOverride,
   NodeButton,
+  HandleStyleOverride,
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { RectangleHoverShape, RectangleShape } from './shapes/rectangle_shape';

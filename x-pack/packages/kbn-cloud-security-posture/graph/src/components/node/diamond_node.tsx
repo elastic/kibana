@@ -15,8 +15,8 @@ import {
   NodeShapeOnHoverSvg,
   NodeShapeSvg,
   NodeIcon,
-  HandleStyleOverride,
   NodeButton,
+  HandleStyleOverride,
 } from './styles';
 import { DiamondHoverShape, DiamondShape } from './shapes/diamond_shape';
 import { NodeExpandButton } from './node_expand_button';
