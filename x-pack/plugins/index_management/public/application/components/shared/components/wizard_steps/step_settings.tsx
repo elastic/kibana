@@ -16,6 +16,7 @@ import {
   EuiFormRow,
   EuiText,
   EuiCode,
+  EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
@@ -23,15 +24,17 @@ import { CodeEditor } from '@kbn/code-editor';
 import { Forms } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';
 import { documentationService } from '../../../mappings_editor/shared_imports';
+import { indexModeLabels } from '../../../../lib/index_mode_labels';
 
 interface Props {
   onChange: (content: Forms.Content) => void;
   esDocsBase: string;
   defaultValue?: { [key: string]: any };
+  indexMode?: IndexMode;
 }
 
 export const StepSettings: React.FunctionComponent<Props> = React.memo(
-  ({ defaultValue = {}, onChange, esDocsBase }) => {
+  ({ defaultValue = {}, onChange, esDocsBase, indexMode }) => {
     const { jsonContent, setJsonContent, error } = useJsonStep({
       defaultValue,
       onChange,
@@ -79,6 +82,18 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
         </EuiFlexGroup>
 
         <EuiSpacer size="l" />
+
+        {indexMode && (
+          <>
+            <EuiCallOut
+              title={`The selected index mode setting in the Logistics step is ${indexModeLabels[indexMode]}. Any index mode set here will be overwritten by the Logistics selection.`}
+              color="warning"
+              iconType="warning"
+            />
+
+            <EuiSpacer size="l" />
+          </>
+        )}
 
         {/* Settings code editor */}
         <EuiFormRow

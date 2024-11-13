@@ -258,7 +258,10 @@ export const ComponentTemplateForm = ({
       </FormWizardStep>
 
       <FormWizardStep id={wizardSections.settings.id} label={wizardSections.settings.label}>
-        <StepSettingsContainer esDocsBase={documentation.esDocsBase} />
+        <StepSettingsContainer
+          esDocsBase={documentation.esDocsBase}
+          getTemplateData={buildComponentTemplateObject(defaultValue)}
+        />
       </FormWizardStep>
 
       <FormWizardStep id={wizardSections.mappings.id} label={wizardSections.mappings.label}>

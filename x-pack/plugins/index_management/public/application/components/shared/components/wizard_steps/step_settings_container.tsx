@@ -13,14 +13,25 @@ import { StepSettings } from './step_settings';
 
 interface Props {
   esDocsBase: string;
+  getTemplateData: (wizardContent: WizardContent) => TemplateDeserialized;
 }
 
-export const StepSettingsContainer = React.memo(({ esDocsBase }: Props) => {
+export const StepSettingsContainer = React.memo(({ esDocsBase, getTemplateData }: Props) => {
   const { defaultValue, updateContent } = Forms.useContent<CommonWizardSteps, 'settings'>(
     'settings'
   );
+  const { getData } = Forms.useMultiContentContext<WizardContent>();
+
+  const wizardContent = getData();
+  // Build the current template object, providing the wizard content data
+  const template = getTemplateData(wizardContent);
 
   return (
-    <StepSettings defaultValue={defaultValue} onChange={updateContent} esDocsBase={esDocsBase} />
+    <StepSettings
+      defaultValue={defaultValue}
+      onChange={updateContent}
+      esDocsBase={esDocsBase}
+      indexMode={template?.indexMode}
+    />
   );
 });
