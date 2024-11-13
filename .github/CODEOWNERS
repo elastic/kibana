@@ -1469,7 +1469,6 @@ x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor te
 /test/functional/fixtures/es_archiver/deprecations_service @elastic/kibana-core
 /test/health_gateway/**/* @elastic/kibana-core
 /test/api_integration/apis/saved_objects* @elastic/kibana-core
-/test/functional/apps/home @elastic/kibana-core
 /test/health_gateway @elastic/kibana-core
 /test/node_roles_functional @elastic/kibana-core
 /test/plugin_functional/plugins/app_link_test @elastic/kibana-core
@@ -1477,7 +1476,6 @@ x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor te
 /test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 /test/functional/firefox/home.config.ts @elastic/kibana-core
 /test/functional/apps/status_page/*.ts @elastic/kibana-core
-/test/functional/apps/home @elastic/kibana-core
 /test/functional/apps/bundles @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/64367
 /test/examples/hello_world @elastic/kibana-core
 /test/examples/routing/index.ts @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/69581
