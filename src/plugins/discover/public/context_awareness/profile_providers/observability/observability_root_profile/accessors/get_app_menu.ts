@@ -132,13 +132,13 @@ const registerCreateSLOAction = (
         onClick: ({ onFinishAction }) => {
           const index = dataView?.getIndexPattern();
           const timestampField = dataView?.timeFieldName;
-          const { filters, query } = data.query.getState();
+          const { filters, query: kqlQuery } = data.query.getState();
 
           const filter = isEsqlMode
             ? {}
             : {
-                kqlQuery: isOfQueryType(query) ? query.query : '',
-                filters,
+                kqlQuery: isOfQueryType(kqlQuery) ? kqlQuery.query : '',
+                filters: filters?.map(({ meta, query }) => ({ meta, query })),
               };
 
           return sloFeature.createSLOFlyout({
