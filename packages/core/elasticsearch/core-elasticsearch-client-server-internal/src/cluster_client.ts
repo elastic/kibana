@@ -20,6 +20,7 @@ import type {
   ScopeableRequest,
   UnauthorizedErrorHandler,
   ICustomClusterClient,
+  ElasticsearchClient,
 } from '@kbn/core-elasticsearch-server';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { configureClient } from './configure_client';
@@ -38,13 +39,13 @@ const noop = () => undefined;
 export class ClusterClient implements ICustomClusterClient {
   private readonly config: ElasticsearchClientConfig;
   private readonly authHeaders?: IAuthHeadersStorage;
-  private readonly rootScopedClient: Client;
+  private readonly rootScopedClient: ElasticsearchClient;
   private readonly kibanaVersion: string;
   private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
   private readonly getExecutionContext: () => string | undefined;
   private isClosed = false;
 
-  public readonly asInternalUser: Client;
+  public readonly asInternalUser: ElasticsearchClient;
 
   constructor({
     config,
@@ -97,7 +98,7 @@ export class ClusterClient implements ICustomClusterClient {
         getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
       });
 
-      return this.rootScopedClient.child({
+      return (this.rootScopedClient as unknown as Client).child({
         headers: scopedHeaders,
         Transport: transportClass,
       });
@@ -106,15 +107,15 @@ export class ClusterClient implements ICustomClusterClient {
     const createSecondaryScopedClient = () => {
       const secondaryAuthHeaders = this.getSecondaryAuthHeaders(request);
 
-      return this.asInternalUser.child({
+      return (this.asInternalUser as unknown as Client).child({
         headers: secondaryAuthHeaders,
       });
     };
 
     return new ScopedClusterClient({
-      asInternalUser: this.asInternalUser,
-      asCurrentUserFactory: createScopedClient,
-      asSecondaryAuthUserFactory: createSecondaryScopedClient,
+      asInternalUser: this.asInternalUser as any as ElasticsearchClient,
+      asCurrentUserFactory: createScopedClient as any as () => ElasticsearchClient,
+      asSecondaryAuthUserFactory: createSecondaryScopedClient as any as () => ElasticsearchClient,
     });
   }
 
@@ -123,7 +124,10 @@ export class ClusterClient implements ICustomClusterClient {
       return;
     }
     this.isClosed = true;
-    await Promise.all([this.asInternalUser.close(), this.rootScopedClient.close()]);
+    await Promise.all([
+      (this.asInternalUser as unknown as Client).close(),
+      (this.rootScopedClient as unknown as Client).close(),
+    ]);
   }
 
   private createInternalErrorHandlerAccessor = (

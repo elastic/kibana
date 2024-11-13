@@ -9,7 +9,10 @@
 
 import { Client, HttpConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchClientConfig,
+} from '@kbn/core-elasticsearch-server';
 import { parseClientOptions } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 import { createTransport } from './create_transport';
@@ -38,7 +41,7 @@ export const configureClient = (
     agentFactoryProvider: AgentFactoryProvider;
     kibanaVersion: string;
   }
-): Client => {
+): ElasticsearchClient => {
   const clientOptions = parseClientOptions(config, scoped, kibanaVersion);
   const KibanaTransport = createTransport({ getExecutionContext });
   const client = new Client({
@@ -53,5 +56,5 @@ export const configureClient = (
   const { apisToRedactInLogs = [] } = config;
   instrumentEsQueryAndDeprecationLogger({ logger, client, type, apisToRedactInLogs });
 
-  return client;
+  return client as unknown as ElasticsearchClient;
 };

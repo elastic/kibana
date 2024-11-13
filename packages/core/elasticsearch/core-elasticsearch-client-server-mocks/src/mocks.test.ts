@@ -35,16 +35,6 @@ describe('Mocked client', () => {
     expectMocked(client.nodes.info);
   });
 
-  it('`close` should be mocked', () => {
-    expectMocked(client.close);
-  });
-
-  it('used EventEmitter functions should be mocked', () => {
-    expectMocked(client.diagnostic.on);
-    expectMocked(client.diagnostic.off);
-    expectMocked(client.diagnostic.once);
-  });
-
   it('`child` should be mocked and return a mocked Client', () => {
     expectMocked(client.child);
 

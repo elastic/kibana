@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from './client';
 import type { ScopeableRequest } from './scopeable_request';
 import type { IScopedClusterClient } from './scoped_cluster_client';
+import { ElasticsearchClient } from './client';
 
 /**
  * Represents an Elasticsearch cluster API client created by the platform.
