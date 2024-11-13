@@ -20,7 +20,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177655
   describe('Service group counts', () => {
     let synthbeansServiceGroupId: string;
     let opbeansServiceGroupId: string;
