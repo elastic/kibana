@@ -11,7 +11,7 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { useStoredSelectedDashboardsCardItemId } from '../../../../hooks/use_stored_state';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
-import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
+import { OnboardingCardContentAssetPanel } from '../common/card_content_asset_panel';
 import { CardCallOut } from '../common/card_callout';
 import { CardLinkButton } from '../common/card_link_button';
 import * as i18n from './translations';
@@ -55,7 +55,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
   if (!isCardContentVisible) return null;
 
   return (
-    <OnboardingCardContentImagePanel media={selectedCardItem.asset}>
+    <OnboardingCardContentAssetPanel asset={selectedCardItem.asset}>
       <EuiFlexGroup
         direction="column"
         gutterSize="xl"
@@ -109,7 +109,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
           </CardLinkButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </OnboardingCardContentImagePanel>
+    </OnboardingCardContentAssetPanel>
   );
 };
 

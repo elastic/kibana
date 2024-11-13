@@ -11,7 +11,7 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
-import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
+import { OnboardingCardContentImagePanel } from '../common/card_content_asset_panel';
 import { CardCallOut } from '../common/card_callout';
 import attackDiscoveryImageSrc from './images/attack_discovery.png';
 import * as i18n from './translations';

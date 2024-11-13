@@ -7,7 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import installRulesImageSrc from './images/install_rule.png';
-import type { CardSelectorListItem } from '../common/card_selector_list';
+import {
+  CardSelectorListItemAssetType,
+  type CardSelectorListItem,
+} from '../common/card_selector_list';
 import { RulesCardItemId } from './types';
 
 const VIDEO_SOURCE = '//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?autoplay=1';
@@ -25,7 +28,7 @@ export const RULES_CARD_ITEMS: CardSelectorListItem[] = [
       }
     ),
     asset: {
-      type: 'image',
+      type: CardSelectorListItemAssetType.image,
       source: installRulesImageSrc,
       alt: 'install_image',
     },
@@ -39,7 +42,7 @@ export const RULES_CARD_ITEMS: CardSelectorListItem[] = [
       defaultMessage: 'Create a custom detection rule for local or remote data',
     }),
     asset: {
-      type: 'video',
+      type: CardSelectorListItemAssetType.video,
       source: VIDEO_SOURCE,
       alt: 'create_video',
     },

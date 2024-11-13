@@ -6,7 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CardSelectorListItem } from '../common/card_selector_list';
+import {
+  CardSelectorListItemAssetType,
+  type CardSelectorListItem,
+} from '../common/card_selector_list';
 import { DashboardsCardItemId } from './types';
 
 const VIDEO_SOURCE = '//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?autoplay=1';
@@ -24,7 +27,7 @@ export const DASHBOARDS_CARD_ITEMS: CardSelectorListItem[] = [
       }
     ),
     asset: {
-      type: 'video',
+      type: CardSelectorListItemAssetType.video,
       source: VIDEO_SOURCE,
       alt: 'discover_video',
     },

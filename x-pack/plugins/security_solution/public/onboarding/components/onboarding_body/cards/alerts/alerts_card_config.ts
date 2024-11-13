@@ -7,9 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import alertTimelineImageSrc from './images/alert_timeline.png';
-// import eventAnalyzerImageSrc from './images/event_analyzer.png';
 import sessionViewImageSrc from './images/session_view.png';
-import type { CardSelectorListItem } from '../common/card_selector_list';
+import {
+  CardSelectorListItemAssetType,
+  type CardSelectorListItem,
+} from '../common/card_selector_list';
 import { AlertsCardItemId } from './types';
 
 const VIDEO_SOURCE = '//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?autoplay=1';
@@ -27,7 +29,7 @@ export const ALERTS_CARD_ITEMS: CardSelectorListItem[] = [
       }
     ),
     asset: {
-      type: 'video',
+      type: CardSelectorListItemAssetType.video,
       source: VIDEO_SOURCE,
       alt: 'details_video',
     },
@@ -44,7 +46,7 @@ export const ALERTS_CARD_ITEMS: CardSelectorListItem[] = [
       }
     ),
     asset: {
-      type: 'image',
+      type: CardSelectorListItemAssetType.image,
       source: alertTimelineImageSrc,
       alt: 'timeline_image',
     },
@@ -61,7 +63,7 @@ export const ALERTS_CARD_ITEMS: CardSelectorListItem[] = [
       }
     ),
     asset: {
-      type: 'video',
+      type: CardSelectorListItemAssetType.video,
       source: VIDEO_SOURCE,
       alt: 'analyzer_video',
     },
@@ -78,7 +80,7 @@ export const ALERTS_CARD_ITEMS: CardSelectorListItem[] = [
       }
     ),
     asset: {
-      type: 'image',
+      type: CardSelectorListItemAssetType.image,
       source: sessionViewImageSrc,
       alt: 'sessionView_image',
     },

@@ -8,16 +8,17 @@ import React, { useMemo, type PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { OnboardingCardContentPanel } from './card_content_panel';
 import { useCardContentImagePanelStyles } from './card_content_image_panel.styles';
+import { CardSelectorListItemAssetType } from './card_selector_list';
 
-export const OnboardingCardContentImagePanel = React.memo<
+export const OnboardingCardContentAssetPanel = React.memo<
   PropsWithChildren<{
-    media: { type: 'video' | 'image'; source: string; alt: string };
+    asset: { type: CardSelectorListItemAssetType; source: string; alt: string };
   }>
->(({ children, media: { type, source, alt } }) => {
+>(({ children, asset: { type, source, alt } }) => {
   const styles = useCardContentImagePanelStyles();
 
-  const renderMediaContent = useMemo(() => {
-    if (type === 'video')
+  const renderAssetContent = useMemo(() => {
+    if (type === CardSelectorListItemAssetType.video)
       return (
         <iframe
           allowFullScreen
@@ -41,10 +42,10 @@ export const OnboardingCardContentImagePanel = React.memo<
           <EuiSpacer size="xl" />
         </EuiFlexItem>
         <EuiFlexItem className="cardImage" grow={false}>
-          {renderMediaContent}
+          {renderAssetContent}
         </EuiFlexItem>
       </EuiFlexGroup>
     </OnboardingCardContentPanel>
   );
 });
-OnboardingCardContentImagePanel.displayName = 'OnboardingCardContentImagePanel';
+OnboardingCardContentAssetPanel.displayName = 'OnboardingCardContentAssetPanel';

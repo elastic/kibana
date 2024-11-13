@@ -22,12 +22,16 @@ import type { DashboardsCardItemId } from '../dashboards/types';
 const INITIAL_SCROLL_ANIMATION_DURATION = 500;
 const SCROLL_ANIMATION_DURATION = 300;
 
+export enum CardSelectorListItemAssetType {
+  video = 'video',
+  image = 'image',
+}
 export interface CardSelectorListItem {
   id: RulesCardItemId | AlertsCardItemId | DashboardsCardItemId;
   title: string;
   description: string;
   asset: {
-    type: 'video' | 'image';
+    type: CardSelectorListItemAssetType;
     source: string;
     alt: string;
   };
