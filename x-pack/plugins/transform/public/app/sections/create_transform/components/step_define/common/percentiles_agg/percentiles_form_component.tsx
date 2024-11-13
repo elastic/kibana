@@ -88,6 +88,7 @@ export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent']
           onChange={handleOptionsChange}
           onSearchChange={handleSearchChange}
           isInvalid={!isValid}
+          data-test-subj="transformPercentilesAggPercentsSelector"
         />
       </EuiFormRow>
     </>
