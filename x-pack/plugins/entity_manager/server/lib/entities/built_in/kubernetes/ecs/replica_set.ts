@@ -7,6 +7,8 @@
 
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
+import { commonEcsMetadata } from '../common/ecs_metadata';
+import { commonEcsIndexPatterns } from '../common/ecs_index_patterns';
 
 export const builtInKubernetesReplicaSetEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
@@ -16,9 +18,9 @@ export const builtInKubernetesReplicaSetEcsEntityDefinition: EntityDefinition =
     name: 'Kubernetes ReplicaSet from ECS data',
     description:
       'This definition extracts Kubernetes replica set entities from the Kubernetes integration data streams',
-    type: 'kubernetes_replica_set_ecs',
-    indexPatterns: ['metrics-kubernetes*'],
-    identityFields: ['kubernetes.replicaset.name'],
+    type: 'k8s.replicaset.ecs',
+    indexPatterns: commonEcsIndexPatterns,
+    identityFields: ['kubernetes.replicaset.uid'],
     displayNameTemplate: '{{kubernetes.replicaset.name}}',
     latest: {
       timestampField: '@timestamp',
@@ -40,7 +42,6 @@ export const builtInKubernetesReplicaSetEcsEntityDefinition: EntityDefinition =
         source: 'data_stream.dataset',
         destination: 'source_data_stream.dataset',
       },
-      'kubernetes.namespace',
-      'orchestrator.cluster.name',
+      ...commonEcsMetadata,
     ],
   });

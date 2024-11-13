@@ -7,18 +7,21 @@
 
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
+import { commonEcsMetadata } from '../common/ecs_metadata';
+import { commonEcsIndexPatterns } from '../common/ecs_index_patterns';
 
 export const builtInKubernetesStatefulSetEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_stateful_set_ecs`,
+    filter: 'kubernetes.statefulset.uid : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes StatefulSet from ECS data',
     description:
       'This definition extracts Kubernetes stateful set entities from the Kubernetes integration data streams',
-    type: 'kubernetes_stateful_set_ecs',
-    indexPatterns: ['metrics-kubernetes*'],
-    identityFields: ['kubernetes.statefulset.name'],
+    type: 'k8s.statefulset.ecs',
+    indexPatterns: commonEcsIndexPatterns,
+    identityFields: ['kubernetes.statefulset.uid'],
     displayNameTemplate: '{{kubernetes.statefulset.name}}',
     latest: {
       timestampField: '@timestamp',
@@ -40,7 +43,6 @@ export const builtInKubernetesStatefulSetEcsEntityDefinition: EntityDefinition =
         source: 'data_stream.dataset',
         destination: 'source_data_stream.dataset',
       },
-      'kubernetes.namespace',
-      'orchestrator.cluster.name',
+      ...commonEcsMetadata,
     ],
   });

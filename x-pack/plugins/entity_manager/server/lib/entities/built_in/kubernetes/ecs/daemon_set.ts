@@ -7,17 +7,20 @@
 
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
+import { commonEcsIndexPatterns } from '../common/ecs_index_patterns';
+import { commonEcsMetadata } from '../common/ecs_metadata';
 
 export const builtInKubernetesDaemonSetEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_daemon_set_ecs`,
+    filter: 'kubernetes.daemonset.uid : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes DaemonSet from ECS data',
     description:
       'This definition extracts Kubernetes daemon set entities from the Kubernetes integration data streams',
-    type: 'kubernetes_daemon_set_ecs',
-    indexPatterns: ['metrics-kubernetes*'],
+    type: 'k8s.daemonset.ecs',
+    indexPatterns: commonEcsIndexPatterns,
     identityFields: ['kubernetes.daemonset.name'],
     displayNameTemplate: '{{kubernetes.daemonset.name}}',
     latest: {
@@ -40,7 +43,6 @@ export const builtInKubernetesDaemonSetEcsEntityDefinition: EntityDefinition =
         source: 'data_stream.dataset',
         destination: 'source_data_stream.dataset',
       },
-      'kubernetes.namespace',
-      'orchestrator.cluster.name',
+      ...commonEcsMetadata,
     ],
   });

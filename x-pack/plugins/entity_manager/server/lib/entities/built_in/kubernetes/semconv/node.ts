@@ -7,17 +7,20 @@
 
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
+import { commonOtelIndexPatterns } from '../common/otel_index_patterns';
+import { commonOtelMetadata } from '../common/otel_metadata';
 
 export const builtInKubernetesNodeSemConvEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_node_semconv`,
+    filter: 'k8s.node.uid: *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes Node from SemConv data',
     description:
       'This definition extracts Kubernetes node entities using data collected with OpenTelemetry',
-    type: 'kubernetes_node_semconv',
-    indexPatterns: ['metrics-kubernetes*'],
+    type: 'k8s.node.otel',
+    indexPatterns: commonOtelIndexPatterns,
     identityFields: ['k8s.node.uid'],
     displayNameTemplate: '{{k8s.node.uid}}',
     latest: {
@@ -27,20 +30,5 @@ export const builtInKubernetesNodeSemConvEntityDefinition: EntityDefinition =
         frequency: '5m',
       },
     },
-    metadata: [
-      {
-        source: '_index',
-        destination: 'source_index',
-      },
-      {
-        source: 'data_stream.type',
-        destination: 'source_data_stream.type',
-      },
-      {
-        source: 'data_stream.dataset',
-        destination: 'source_data_stream.dataset',
-      },
-      'cloud.availability_zone',
-      'k8s.cluster.name',
-    ],
+    metadata: commonOtelMetadata,
   });

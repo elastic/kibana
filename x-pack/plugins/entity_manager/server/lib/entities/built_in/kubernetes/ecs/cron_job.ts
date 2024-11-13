@@ -7,18 +7,21 @@
 
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
+import { commonEcsIndexPatterns } from '../common/ecs_index_patterns';
+import { commonEcsMetadata } from '../common/ecs_metadata';
 
 export const builtInKubernetesCronJobEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_cron_job_ecs`,
+    filter: 'kubernetes.cronjob.uid : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes CronJob from ECS data',
     description:
       'This definition extracts Kubernetes cron job entities from the Kubernetes integration data streams',
-    type: 'kubernetes_cron_job_ecs',
-    indexPatterns: ['metrics-kubernetes*'],
-    identityFields: ['kubernetes.cronjob.name'],
+    type: 'k8s.cronjob.ecs',
+    indexPatterns: commonEcsIndexPatterns,
+    identityFields: ['kubernetes.cronjob.uid'],
     displayNameTemplate: '{{kubernetes.cronjob.name}}',
     latest: {
       timestampField: '@timestamp',
@@ -27,20 +30,5 @@ export const builtInKubernetesCronJobEcsEntityDefinition: EntityDefinition =
         frequency: '5m',
       },
     },
-    metadata: [
-      {
-        source: '_index',
-        destination: 'source_index',
-      },
-      {
-        source: 'data_stream.type',
-        destination: 'source_data_stream.type',
-      },
-      {
-        source: 'data_stream.dataset',
-        destination: 'source_data_stream.dataset',
-      },
-      'kubernetes.namespace',
-      'orchestrator.cluster.name',
-    ],
+    metadata: commonEcsMetadata,
   });

@@ -14,4 +14,3 @@ export { builtInKubernetesStatefulSetSemConvEntityDefinition } from './stateful_
 export { builtInKubernetesDaemonSetSemConvEntityDefinition } from './daemon_set';
 export { builtInKubernetesJobSemConvEntityDefinition } from './job';
 export { builtInKubernetesCronJobSemConvEntityDefinition } from './cron_job';
-export { builtInKubernetesContainerSemConvEntityDefinition } from './container';

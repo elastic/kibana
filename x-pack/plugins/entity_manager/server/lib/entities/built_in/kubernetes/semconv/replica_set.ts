@@ -7,17 +7,20 @@
 
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
+import { commonOtelMetadata } from '../common/otel_metadata';
+import { commonOtelIndexPatterns } from '../common/otel_index_patterns';
 
 export const builtInKubernetesReplicaSetSemConvEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_replica_set_semconv`,
+    filter: 'k8s.replicaset.uid : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes ReplicaSet from SemConv data',
     description:
       'This definition extracts Kubernetes replica set entities using data collected with OpenTelemetry',
     type: 'kubernetes_replica_set_semconv',
-    indexPatterns: ['metrics-kubernetes*'],
+    indexPatterns: commonOtelIndexPatterns,
     identityFields: ['k8s.replicaset.name'],
     displayNameTemplate: '{{k8s.replicaset.name}}',
     latest: {
@@ -40,7 +43,6 @@ export const builtInKubernetesReplicaSetSemConvEntityDefinition: EntityDefinitio
         source: 'data_stream.dataset',
         destination: 'source_data_stream.dataset',
       },
-      'k8s.namespace.name',
-      'k8s.cluster.name',
+      ...commonOtelMetadata,
     ],
   });

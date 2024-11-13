@@ -7,17 +7,19 @@
 
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
+import { commonEcsIndexPatterns } from '../common/ecs_index_patterns';
 
 export const builtInKubernetesClusterEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_cluster_ecs`,
+    filter: 'orchestrator.cluster.name: *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes Clusters from ECS data',
     description:
       'This definition extracts Kubernetes cluster entities from the Kubernetes integration data streams',
-    type: 'kubernetes_cluster_ecs',
-    indexPatterns: ['metrics-kubernetes*'],
+    type: 'k8s.cluster.ecs',
+    indexPatterns: commonEcsIndexPatterns,
     identityFields: ['orchestrator.cluster.name'],
     displayNameTemplate: '{{orchestrator.cluster.name}}',
     latest: {
@@ -40,7 +42,15 @@ export const builtInKubernetesClusterEcsEntityDefinition: EntityDefinition =
         source: 'data_stream.dataset',
         destination: 'source_data_stream.dataset',
       },
-      'cloud.region',
-      'cloud.provider',
+      {
+        source: 'orchestrator.namespace',
+        destination: 'orchestrator.namespace',
+        aggregation: 'terms',
+      },
+      {
+        source: 'orchestrator.cluster_ip',
+        destination: 'orchestrator.cluster_id',
+        aggregation: 'top_value',
+      },
     ],
   });

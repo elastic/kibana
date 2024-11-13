@@ -14,4 +14,4 @@ export { builtInKubernetesStatefulSetEcsEntityDefinition } from './stateful_set'
 export { builtInKubernetesDaemonSetEcsEntityDefinition } from './daemon_set';
 export { builtInKubernetesJobEcsEntityDefinition } from './job';
 export { builtInKubernetesCronJobEcsEntityDefinition } from './cron_job';
-export { builtInKubernetesContainerEcsEntityDefinition } from './container';
+export { builtInKubernetesServiceEcsEntityDefinition } from './service';

@@ -7,19 +7,21 @@
 
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
+import { commonOtelIndexPatterns } from '../common/otel_index_patterns';
 
 export const builtInKubernetesClusterSemConvEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_cluster_semconv`,
+    filter: 'k8s.cluster.uid: *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes Clusters from SemConv data',
     description:
       'This definition extracts Kubernetes cluster entities using data collected with OpenTelemetry',
     type: 'kubernetes_cluster_semconv',
-    indexPatterns: ['metrics-kubernetes*'],
+    indexPatterns: commonOtelIndexPatterns,
     identityFields: ['k8s.cluster.uid'],
-    displayNameTemplate: '{{k8s.cluster.uid}}',
+    displayNameTemplate: '{{k8s.cluster.name}}',
     latest: {
       timestampField: '@timestamp',
       lookbackPeriod: '10m',
@@ -40,7 +42,15 @@ export const builtInKubernetesClusterSemConvEntityDefinition: EntityDefinition =
         source: 'data_stream.dataset',
         destination: 'source_data_stream.dataset',
       },
-      'cloud.region',
-      'cloud.provider',
+      {
+        source: 'k8s.namespace.name',
+        destination: 'k8s.namespace.name',
+        aggregation: 'terms',
+      },
+      {
+        source: 'k8s.cluster.name',
+        destination: 'k8s.cluster.name',
+        aggregation: 'top_value',
+      },
     ],
   });

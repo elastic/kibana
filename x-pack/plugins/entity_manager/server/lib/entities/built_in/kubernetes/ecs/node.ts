@@ -7,18 +7,21 @@
 
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
+import { commonEcsIndexPatterns } from '../common/ecs_index_patterns';
+import { commonEcsMetadata } from '../common/ecs_metadata';
 
 export const builtInKubernetesNodeEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_node_ecs`,
+    filer: 'kubernetes.node.uid : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes Node from ECS data',
     description:
       'This definition extracts Kubernetes node entities from the Kubernetes integration data streams',
-    type: 'kubernetes_node_ecs',
-    indexPatterns: ['metrics-kubernetes*'],
-    identityFields: ['kubernetes.node.name'],
+    type: 'k8s.node.ecs',
+    indexPatterns: commonEcsIndexPatterns,
+    identityFields: ['kubernetes.node.uid'],
     displayNameTemplate: '{{kubernetes.node.name}}',
     latest: {
       timestampField: '@timestamp',
@@ -27,20 +30,5 @@ export const builtInKubernetesNodeEcsEntityDefinition: EntityDefinition =
         frequency: '5m',
       },
     },
-    metadata: [
-      {
-        source: '_index',
-        destination: 'source_index',
-      },
-      {
-        source: 'data_stream.type',
-        destination: 'source_data_stream.type',
-      },
-      {
-        source: 'data_stream.dataset',
-        destination: 'source_data_stream.dataset',
-      },
-      'cloud.availability_zone',
-      'orchestrator.cluster.name',
-    ],
+    metadata: commonEcsMetadata,
   });

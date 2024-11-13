@@ -7,18 +7,21 @@
 
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
+import { commonOtelMetadata } from '../common/otel_metadata';
+import { commonOtelIndexPatterns } from '../common/otel_index_patterns';
 
 export const builtInKubernetesPodSemConvEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_pod_semconv`,
+    filter: 'k8s.pod.uid : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes Pod from SemConv data',
     description:
       'This definition extracts Kubernetes pod entities using data collected with OpenTelemetry',
-    type: 'kubernetes_pod_semconv',
-    indexPatterns: ['metrics-kubernetes*'],
-    identityFields: ['k8s.pod.name'],
+    type: 'k8s.pod.otel',
+    indexPatterns: commonOtelIndexPatterns,
+    identityFields: ['k8s.pod.uid'],
     displayNameTemplate: '{{k8s.pod.name}}',
     latest: {
       timestampField: '@timestamp',
@@ -40,8 +43,6 @@ export const builtInKubernetesPodSemConvEntityDefinition: EntityDefinition =
         source: 'data_stream.dataset',
         destination: 'source_data_stream.dataset',
       },
-      'k8s.namespace.name',
-      'k8s.cluster.name',
-      'kubernetes.pod.status.ready',
+      ...commonOtelMetadata,
     ],
   });

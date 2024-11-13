@@ -7,18 +7,21 @@
 
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
+import { commonOtelIndexPatterns } from '../common/otel_index_patterns';
+import { commonOtelMetadata } from '../common/otel_metadata';
 
 export const builtInKubernetesCronJobSemConvEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_cron_job_semconv`,
+    filter: 'k8s.cronjob.uid : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes CronJob from SemConv data',
     description:
       'This definition extracts Kubernetes cron job entities using data collected with OpenTelemetry',
-    type: 'kubernetes_cron_job_semconv',
-    indexPatterns: ['metrics-kubernetes*'],
-    identityFields: ['k8s.cronjob.name'],
+    type: 'k8s.cronjob.otel',
+    indexPatterns: commonOtelIndexPatterns,
+    identityFields: ['k8s.cronjob.uid'],
     displayNameTemplate: '{{k8s.cronjob.name}}',
     latest: {
       timestampField: '@timestamp',
@@ -27,20 +30,5 @@ export const builtInKubernetesCronJobSemConvEntityDefinition: EntityDefinition =
         frequency: '5m',
       },
     },
-    metadata: [
-      {
-        source: '_index',
-        destination: 'source_index',
-      },
-      {
-        source: 'data_stream.type',
-        destination: 'source_data_stream.type',
-      },
-      {
-        source: 'data_stream.dataset',
-        destination: 'source_data_stream.dataset',
-      },
-      'k8s.namespace.name',
-      'k8s.cluster.name',
-    ],
+    metadata: commonOtelMetadata,
   });

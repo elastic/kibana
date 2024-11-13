@@ -7,17 +7,20 @@
 
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
+import { commonEcsMetadata } from '../common/ecs_metadata';
+import { commonEcsIndexPatterns } from '../common/ecs_index_patterns';
 
 export const builtInKubernetesPodEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_pod_ecs`,
+    filter: 'kubernetes.pod.uid: *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes Pod from ECS data',
     description:
       'This definition extracts Kubernetes pod entities from the Kubernetes integration data streams',
-    type: 'kubernetes_pod_ecs',
-    indexPatterns: ['metrics-kubernetes*'],
+    type: 'k8s.pod.ecs',
+    indexPatterns: commonEcsIndexPatterns,
     identityFields: ['kubernetes.pod.name'],
     displayNameTemplate: '{{kubernetes.pod.name}}',
     latest: {
@@ -40,8 +43,6 @@ export const builtInKubernetesPodEcsEntityDefinition: EntityDefinition =
         source: 'data_stream.dataset',
         destination: 'source_data_stream.dataset',
       },
-      'kubernetes.namespace',
-      'orchestrator.cluster.name',
-      'kubernetes.pod.status.ready',
+      ...commonEcsMetadata,
     ],
   });

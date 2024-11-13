@@ -7,18 +7,21 @@
 
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
+import { commonEcsIndexPatterns } from '../common/ecs_index_patterns';
+import { commonEcsMetadata } from '../common/ecs_metadata';
 
 export const builtInKubernetesJobEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_job_ecs`,
+    filter: 'kubernetes.job.uid : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes Job from ECS data',
     description:
       'This definition extracts Kubernetes job entities from the Kubernetes integration data streams',
-    type: 'kubernetes_job_ecs',
-    indexPatterns: ['metrics-kubernetes*'],
-    identityFields: ['kubernetes.job.name'],
+    type: 'k8s.job.ecs',
+    indexPatterns: commonEcsIndexPatterns,
+    identityFields: ['kubernetes.job.uid'],
     displayNameTemplate: '{{kubernetes.job.name}}',
     latest: {
       timestampField: '@timestamp',
@@ -27,20 +30,5 @@ export const builtInKubernetesJobEcsEntityDefinition: EntityDefinition =
         frequency: '5m',
       },
     },
-    metadata: [
-      {
-        source: '_index',
-        destination: 'source_index',
-      },
-      {
-        source: 'data_stream.type',
-        destination: 'source_data_stream.type',
-      },
-      {
-        source: 'data_stream.dataset',
-        destination: 'source_data_stream.dataset',
-      },
-      'kubernetes.namespace',
-      'orchestrator.cluster.name',
-    ],
+    metadata: commonEcsMetadata,
   });

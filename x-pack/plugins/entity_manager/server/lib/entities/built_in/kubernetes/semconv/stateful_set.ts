@@ -7,18 +7,21 @@
 
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
+import { commonOtelMetadata } from '../common/otel_metadata';
+import { commonOtelIndexPatterns } from '../common/otel_index_patterns';
 
 export const builtInKubernetesStatefulSetSemConvEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_stateful_set_semconv`,
+    filter: 'k8s.statefulset.uid : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes StatefulSet from SemConv data',
     description:
       'This definition extracts Kubernetes stateful set entities using data collected with OpenTelemetry',
-    type: 'kubernetes_stateful_set_semconv',
-    indexPatterns: ['metrics-kubernetes*'],
-    identityFields: ['k8s.statefulset.name'],
+    type: 'k8s.statefulset.otel',
+    indexPatterns: commonOtelIndexPatterns,
+    identityFields: ['k8s.statefulset.uid'],
     displayNameTemplate: '{{k8s.statefulset.name}}',
     latest: {
       timestampField: '@timestamp',
@@ -40,7 +43,6 @@ export const builtInKubernetesStatefulSetSemConvEntityDefinition: EntityDefiniti
         source: 'data_stream.dataset',
         destination: 'source_data_stream.dataset',
       },
-      'k8s.namespace.name',
-      'k8s.cluster.name',
+      ...commonOtelMetadata,
     ],
   });
