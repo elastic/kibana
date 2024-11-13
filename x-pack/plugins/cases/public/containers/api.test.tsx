@@ -70,6 +70,7 @@ import {
   customFieldsMock,
   mockCase,
   similarCases,
+  similarCasesSnake,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
@@ -1198,7 +1199,7 @@ describe('Cases API', () => {
   describe('getSimilarCases', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(allCasesSnake);
+      fetchMock.mockResolvedValue(similarCasesSnake);
     });
 
     it('should be called with correct url, method, signal', async () => {

@@ -60,6 +60,7 @@ import type {
 } from '../client/attachment_framework/types';
 import type {
   CasesFindResponse,
+  CasesSimilarResponse,
   CasesStatusResponse,
   UserActionWithResponse,
 } from '../../common/types/api';
@@ -469,7 +470,7 @@ export const allCases: CasesFindResponseUI = {
 };
 
 export const similarCases: CasesSimilarResponseUI = {
-  cases: cases.map((theCase) => ({ ...theCase, similarities: [] })),
+  cases: cases.map(({ comments, ...theCase }) => ({ ...theCase, similarities: [] })),
   page: 1,
   perPage: 5,
   total: 10,
@@ -638,6 +639,13 @@ export const allCasesSnake: CasesFindResponse = {
   per_page: 5,
   total: 10,
   ...casesStatusSnake,
+};
+
+export const similarCasesSnake: CasesSimilarResponse = {
+  cases: casesSnake.map(({ ...theCase }) => ({ ...theCase, similarities: [] })),
+  page: 1,
+  per_page: 5,
+  total: 10,
 };
 
 export const getUserAction = (
