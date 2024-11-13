@@ -745,7 +745,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'disabled'
           );
 
-          expect(currentFieldLimit).to.be(44);
+          expect(currentFieldLimit).to.be(43);
           expect(currentFieldLimitDisabledStatus).to.be('true');
 
           // Should display new field limit
