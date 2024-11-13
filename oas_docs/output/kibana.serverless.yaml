@@ -36267,7 +36267,7 @@ paths:
         - $ref: '#/components/parameters/SLOs_space_id'
         - $ref: '#/components/parameters/SLOs_slo_id'
       responses:
-        '204':
+        '200':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
@@ -36311,7 +36311,7 @@ paths:
         - $ref: '#/components/parameters/SLOs_space_id'
         - $ref: '#/components/parameters/SLOs_slo_id'
       responses:
-        '200':
+        '204':
           description: Successful request
         '400':
           content:
@@ -39976,17 +39976,20 @@ components:
       type: object
       properties:
         unit:
-          enum:
-            - s
-            - m
-            - h
-          type: string
+          $ref: >-
+            #/components/schemas/Security_Detections_API_AlertSuppressionDurationUnit
         value:
           minimum: 1
           type: integer
       required:
         - value
         - unit
+    Security_Detections_API_AlertSuppressionDurationUnit:
+      enum:
+        - s
+        - m
+        - h
+      type: string
     Security_Detections_API_AlertSuppressionGroupBy:
       items:
         type: string
