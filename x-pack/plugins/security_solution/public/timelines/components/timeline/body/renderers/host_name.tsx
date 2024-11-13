@@ -9,15 +9,13 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import useObservable from 'react-use/lib/useObservable';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { HostPanelKey } from '../../../../../flyout/entity_details/host_right';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { HostDetailsLink } from '../../../../../common/components/links';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
-import { APP_UI_ID } from '../../../../../../common';
+import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 
 interface Props {
   contextId: string;
@@ -48,13 +46,7 @@ const HostNameComponent: React.FC<Props> = ({
 }) => {
   const { openRightPanel } = useExpandableFlyoutApi();
 
-  const {
-    services: { application },
-  } = useKibana();
-
-  const currentAppId = useObservable(application.currentAppId$);
-
-  const isAppSecurity = useMemo(() => currentAppId === APP_UI_ID, [currentAppId]);
+  const isInSecurityApp = useIsInSecurityApp();
 
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
@@ -100,7 +92,7 @@ const HostNameComponent: React.FC<Props> = ({
         Component={Component}
         hostName={hostName}
         isButton={isButton}
-        onClick={isInTimelineContext || !isAppSecurity ? openHostDetailsSidePanel : undefined}
+        onClick={isInTimelineContext || !isInSecurityApp ? openHostDetailsSidePanel : undefined}
         title={title}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{hostName}</TruncatableText>
@@ -113,7 +105,7 @@ const HostNameComponent: React.FC<Props> = ({
       isInTimelineContext,
       openHostDetailsSidePanel,
       title,
-      isAppSecurity,
+      isInSecurityApp,
     ]
   );
 

@@ -9,15 +9,13 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import useObservable from 'react-use/lib/useObservable';
-import { APP_UI_ID } from '../../../../../../common';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { UserPanelKey } from '../../../../../flyout/entity_details/user_right';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
+import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 
 interface Props {
   contextId: string;
@@ -50,13 +48,8 @@ const UserNameComponent: React.FC<Props> = ({
   const userName = `${value}`;
   const isInTimelineContext = userName && eventContext?.timelineID;
   const { openRightPanel } = useExpandableFlyoutApi();
-  const {
-    services: { application },
-  } = useKibana();
 
-  const currentAppId = useObservable(application.currentAppId$);
-
-  const isAppSecurity = useMemo(() => currentAppId === APP_UI_ID, [currentAppId]);
+  const isInSecurityApp = useIsInSecurityApp();
 
   const openUserDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent) => {
@@ -93,7 +86,7 @@ const UserNameComponent: React.FC<Props> = ({
         Component={Component}
         userName={userName}
         isButton={isButton}
-        onClick={isInTimelineContext || !isAppSecurity ? openUserDetailsSidePanel : undefined}
+        onClick={isInTimelineContext || !isInSecurityApp ? openUserDetailsSidePanel : undefined}
         title={title}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{userName}</TruncatableText>
@@ -106,7 +99,7 @@ const UserNameComponent: React.FC<Props> = ({
       openUserDetailsSidePanel,
       Component,
       title,
-      isAppSecurity,
+      isInSecurityApp,
     ]
   );
 
