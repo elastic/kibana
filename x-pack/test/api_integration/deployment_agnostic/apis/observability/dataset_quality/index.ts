@@ -16,5 +16,9 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./update_field_limit'));
     loadTestFile(require.resolve('./check_and_load_integration'));
     loadTestFile(require.resolve('./data_stream_total_docs'));
+    loadTestFile(require.resolve('./degraded_docs'));
+    loadTestFile(require.resolve('./degraded_fields'));
+    loadTestFile(require.resolve('./data_stream_details'));
+    loadTestFile(require.resolve('./degraded_field_values'));
   });
 }

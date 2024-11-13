@@ -14,11 +14,9 @@ import {
 } from '@kbn/core/server';
 
 import {
-  DocumentEntryCreateFields,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
   KnowledgeBaseEntryUpdateProps,
-  Metadata,
 } from '@kbn/elastic-assistant-common';
 import {
   CREATE_KNOWLEDGE_BASE_ENTRY_ERROR_EVENT,
@@ -33,9 +31,8 @@ export interface CreateKnowledgeBaseEntryParams {
   logger: Logger;
   spaceId: string;
   user: AuthenticatedUser;
-  knowledgeBaseEntry: KnowledgeBaseEntryCreateProps | LegacyKnowledgeBaseEntryCreateProps;
+  knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
   global?: boolean;
-  isV2?: boolean;
   telemetry: AnalyticsServiceSetup;
 }
 
@@ -47,25 +44,16 @@ export const createKnowledgeBaseEntry = async ({
   knowledgeBaseEntry,
   logger,
   global = false,
-  isV2 = false,
   telemetry,
 }: CreateKnowledgeBaseEntryParams): Promise<KnowledgeBaseEntryResponse | null> => {
   const createdAt = new Date().toISOString();
-  const body = isV2
-    ? transformToCreateSchema({
-        createdAt,
-        spaceId,
-        user,
-        entry: knowledgeBaseEntry as unknown as KnowledgeBaseEntryCreateProps,
-        global,
-      })
-    : transformToLegacyCreateSchema({
-        createdAt,
-        spaceId,
-        user,
-        entry: knowledgeBaseEntry as unknown as TransformToLegacyCreateSchemaProps['entry'],
-        global,
-      });
+  const body = transformToCreateSchema({
+    createdAt,
+    spaceId,
+    user,
+    entry: knowledgeBaseEntry as unknown as KnowledgeBaseEntryCreateProps,
+    global,
+  });
   const telemetryPayload = {
     entryType: body.type,
     required: body.required ?? false,
@@ -156,13 +144,7 @@ export const transformToUpdateSchema = ({
   };
 };
 
-export const getUpdateScript = ({
-  entry,
-  isPatch,
-}: {
-  entry: UpdateKnowledgeBaseEntrySchema;
-  isPatch?: boolean;
-}) => {
+export const getUpdateScript = ({ entry }: { entry: UpdateKnowledgeBaseEntrySchema }) => {
   // Cannot use script for updating documents with semantic_text fields
   return {
     doc: {
@@ -228,47 +210,5 @@ export const transformToCreateSchema = ({
     source: entry.source,
     text: entry.text,
     semantic_text: entry.text,
-  };
-};
-
-export type LegacyKnowledgeBaseEntryCreateProps = Omit<
-  DocumentEntryCreateFields,
-  'kbResource' | 'source'
-> & {
-  metadata: Metadata;
-};
-
-interface TransformToLegacyCreateSchemaProps {
-  createdAt: string;
-  spaceId: string;
-  user: AuthenticatedUser;
-  entry: LegacyKnowledgeBaseEntryCreateProps;
-  global?: boolean;
-}
-
-export const transformToLegacyCreateSchema = ({
-  createdAt,
-  spaceId,
-  user,
-  entry,
-  global = false,
-}: TransformToLegacyCreateSchemaProps): CreateKnowledgeBaseEntrySchema => {
-  return {
-    '@timestamp': createdAt,
-    created_at: createdAt,
-    created_by: user.profile_uid ?? 'unknown',
-    updated_at: createdAt,
-    updated_by: user.profile_uid ?? 'unknown',
-    namespace: spaceId,
-    users: global
-      ? []
-      : [
-          {
-            id: user.profile_uid,
-            name: user.username,
-          },
-        ],
-    ...entry,
-    vector: undefined,
   };
 };

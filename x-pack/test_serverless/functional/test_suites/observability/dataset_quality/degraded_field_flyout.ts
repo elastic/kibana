@@ -220,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Set Limit of 42
         await PageObjects.datasetQuality.setDataStreamSettings(nginxAccessDataStreamName, {
-          'mapping.total_fields.limit': 43,
+          'mapping.total_fields.limit': 42,
         });
 
         // Set Limit of 26
@@ -318,13 +318,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
         );
 
-        // Set Limit of 44
+        // Set Limit of 43
         await PageObjects.datasetQuality.setDataStreamSettings(
           PageObjects.datasetQuality.generateBackingIndexNameWithoutVersion({
             dataset: nginxAccessDatasetName,
           }) + '-000002',
           {
-            'mapping.total_fields.limit': 44,
+            'mapping.total_fields.limit': 43,
           }
         );
 
@@ -865,7 +865,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'disabled'
           );
 
-          expect(currentFieldLimit).to.be(44);
+          expect(currentFieldLimit).to.be(43);
           expect(currentFieldLimitDisabledStatus).to.be('true');
 
           // Should display new field limit
@@ -936,13 +936,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud.project.id',
           });
 
-          const applyButton = await testSubjects.find(
-            'datasetQualityIncreaseFieldMappingLimitButton'
-          );
-
-          await applyButton.click();
-
           await retry.tryForTime(5000, async () => {
+            const applyButton = await testSubjects.find(
+              'datasetQualityIncreaseFieldMappingLimitButton'
+            );
+            await applyButton.click();
+
             // Should display the error callout
             await testSubjects.existOrFail('datasetQualityDetailsNewFieldLimitErrorCallout');
           });
