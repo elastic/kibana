@@ -19,5 +19,7 @@ storiesOf('renderers/error', module).add('default', () => {
     error: thrownError,
   };
 
-  return <Render renderer={getErrorRenderer(coreMock.createStart().theme.theme$)} config={config} />;
+  return (
+    <Render renderer={getErrorRenderer(coreMock.createStart().theme.theme$)} config={config} />
+  );
 });

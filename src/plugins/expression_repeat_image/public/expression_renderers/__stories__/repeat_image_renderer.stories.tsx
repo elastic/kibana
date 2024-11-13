@@ -30,7 +30,13 @@ const Renderer = ({
     emptyImage: elasticOutline,
   };
 
-  return <Render renderer={getRepeatImageRenderer(coreMock.createStart().theme.theme$)} config={config} width="400px" />;
+  return (
+    <Render
+      renderer={getRepeatImageRenderer(coreMock.createStart().theme.theme$)}
+      config={config}
+      width="400px"
+    />
+  );
 };
 
 storiesOf('enderers/repeatImage', module).add(

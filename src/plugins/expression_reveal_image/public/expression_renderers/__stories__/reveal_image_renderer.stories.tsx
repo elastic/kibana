@@ -29,7 +29,12 @@ const Renderer = ({
     percent: 0.45,
   };
 
-  return <Render renderer={getRevealImageRenderer(coreMock.createStart().theme.theme$)} config={config} />;
+  return (
+    <Render
+      renderer={getRevealImageRenderer(coreMock.createStart().theme.theme$)}
+      config={config}
+    />
+  );
 };
 
 storiesOf('renderers/revealImage', module).add(

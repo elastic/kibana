@@ -34,8 +34,7 @@ export const strings = {
 };
 
 export const getRevealImageRenderer =
-  (theme$: Observable<CoreTheme>) =>
-  (): ExpressionRenderDefinition<RevealImageRendererConfig> => ({
+  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<RevealImageRendererConfig> => ({
     name: 'revealImage',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),

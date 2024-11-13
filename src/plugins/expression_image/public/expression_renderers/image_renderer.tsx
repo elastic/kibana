@@ -34,8 +34,7 @@ const strings = {
 };
 
 export const getImageRenderer =
-  (theme$: Observable<CoreTheme>) =>
-  (): ExpressionRenderDefinition<ImageRendererConfig> => ({
+  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<ImageRendererConfig> => ({
     name: 'image',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),

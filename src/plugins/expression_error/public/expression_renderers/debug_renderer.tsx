@@ -37,8 +37,7 @@ const strings = {
 };
 
 export const getDebugRenderer =
-  (theme$: Observable<CoreTheme>) =>
-  (): ExpressionRenderDefinition<any> => ({
+  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<any> => ({
     name: 'debug',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),

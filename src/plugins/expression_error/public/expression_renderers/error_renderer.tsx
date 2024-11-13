@@ -38,8 +38,7 @@ const errorStrings = {
 const ErrorComponent = withSuspense(LazyErrorRenderComponent);
 
 export const getErrorRenderer =
-  (theme$: Observable<CoreTheme>) =>
-  (): ExpressionRenderDefinition<ErrorRendererConfig> => ({
+  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<ErrorRendererConfig> => ({
     name: 'error',
     displayName: errorStrings.getDisplayName(),
     help: errorStrings.getHelpDescription(),

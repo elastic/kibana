@@ -34,8 +34,7 @@ const strings = {
 };
 
 export const getShapeRenderer =
-  (theme$: Observable<CoreTheme>) =>
-  (): ExpressionRenderDefinition<ShapeRendererConfig> => ({
+  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<ShapeRendererConfig> => ({
     name: 'shape',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),

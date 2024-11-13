@@ -34,8 +34,7 @@ const strings = {
 };
 
 export const getProgressRenderer =
-  (theme$: Observable<CoreTheme>) =>
-  (): ExpressionRenderDefinition<ProgressRendererConfig> => ({
+  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<ProgressRendererConfig> => ({
     name: 'progress',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),

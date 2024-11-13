@@ -33,8 +33,7 @@ const strings = {
 };
 
 export const getMetricRenderer =
-  (theme$: Observable<CoreTheme>) =>
-  (): ExpressionRenderDefinition<MetricRendererConfig> => ({
+  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<MetricRendererConfig> => ({
     name: 'metric',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),

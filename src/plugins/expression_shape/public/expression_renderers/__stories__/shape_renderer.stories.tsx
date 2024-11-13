@@ -24,5 +24,7 @@ storiesOf('renderers/shape', module).add('default', () => {
     maintainAspect: true,
   };
 
-  return <Render renderer={getShapeRenderer(coreMock.createStart().theme.theme$)} config={config} />;
+  return (
+    <Render renderer={getShapeRenderer(coreMock.createStart().theme.theme$)} config={config} />
+  );
 });

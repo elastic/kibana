@@ -31,5 +31,7 @@ storiesOf('renderers/progress', module).add('default', () => {
     valueWeight: 15,
   };
 
-  return <Render renderer={getProgressRenderer(coreMock.createStart().theme.theme$)} config={config} />;
+  return (
+    <Render renderer={getProgressRenderer(coreMock.createStart().theme.theme$)} config={config} />
+  );
 });

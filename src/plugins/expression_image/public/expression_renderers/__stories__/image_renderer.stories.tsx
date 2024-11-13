@@ -21,7 +21,14 @@ const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
     mode: ImageMode.COVER,
   };
 
-  return <Render renderer={getImageRenderer(coreMock.createStart().theme.theme$)} config={config} width="500px" height="500px" />;
+  return (
+    <Render
+      renderer={getImageRenderer(coreMock.createStart().theme.theme$)}
+      config={config}
+      width="500px"
+      height="500px"
+    />
+  );
 };
 
 storiesOf('renderers/image', module).add(

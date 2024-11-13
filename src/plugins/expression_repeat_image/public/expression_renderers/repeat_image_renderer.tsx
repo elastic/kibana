@@ -35,8 +35,7 @@ const strings = {
 };
 
 export const getRepeatImageRenderer =
-  (theme$: Observable<CoreTheme>) =>
-  (): ExpressionRenderDefinition<RepeatImageRendererConfig> => ({
+  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<RepeatImageRendererConfig> => ({
     name: 'repeatImage',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
