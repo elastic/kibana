@@ -1,5 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/security-solution-common",
-  "owner": "@elastic/security-threat-hunting-investigations"
-}

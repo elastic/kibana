@@ -12,6 +12,12 @@ export function registerNotifyFeatureUsageRoute(router: LicensingRouter) {
   router.post(
     {
       path: '/internal/licensing/feature_usage/notify',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           featureName: schema.string(),

@@ -53,5 +53,10 @@
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
     "@kbn/storybook",
+    "@kbn/dashboard-plugin",
+    "@kbn/deeplinks-analytics",
+    "@kbn/controls-plugin",
+    "@kbn/securitysolution-io-ts-types",
+    "@kbn/react-hooks"
   ]
 }
