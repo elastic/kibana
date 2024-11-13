@@ -22,11 +22,10 @@ the object resides in a non-default space, it gets a new ID and a legacy URL ali
 https://www.elastic.co/guide/en/kibana/current/spaces-api-copy-saved-objects.html#:~:text=the%20createNewCopies%20option.-,compatibilityMode,-(Optional%2C%20boolean)%20Applies [Copy saved objects to space API - compatibilityMode documentation] and https://github.com/elastic/kibana/pull/149021[PR #149021] for more information).
 
 [[legacy-url-aliases-example]]
-=== Example
-
+=== Examples
 Consider the following scenarios:
 
-1. Migration scenario
+==== Migration scenario
 You have {kib} 7.16, and you create a new dashboard.The ID of this dashboard is "123". You create a new space called "Bill's space" and
 <<managing-saved-objects-copy-to-space,copy>> your dashboard to the other space. Now you have two different dashboards that can be accessed
 at the following URLs:
@@ -42,7 +41,7 @@ If you use your bookmark to access that dashboard using its old URL, {kib} detec
 ID. If you navigate to `http://localhost:5601/s/bills-space/app/dashboards#/view/123`, you'll see a message indicating that the dashboard
 has a new URL, and you're automatically redirected to `http://localhost:5601/s/bills-space/app/dashboards#/view/456`.
 
-2. Copy scenario/weak links
+==== Copy scenario (weak links)
 You have a data view and two dashboards in the default space, but you would also like to have them in another space. One of the dashboards
 includes a Markdown visualization with a link to the other dashboard - a so-called **weak link**. This is a weak link because the ID of the
 referenced object is not added to the object's references array, and therefore there is no explicit relationship between the objects.
