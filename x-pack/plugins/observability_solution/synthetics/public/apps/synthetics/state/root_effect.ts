@@ -17,7 +17,9 @@ import { fetchManualTestRunsEffect } from './manual_test_runs/effects';
 import {
   enableDefaultAlertingEffect,
   enableDefaultAlertingSilentlyEffect,
+  fetchSyntheticsRules,
   getDefaultAlertingEffect,
+  updateActiveRulesEffect,
   updateDefaultAlertingEffect,
 } from './alert_rules/effects';
 import { executeEsQueryEffect } from './elasticsearch';
@@ -80,5 +82,7 @@ export const rootEffect = function* root(): Generator {
     fork(quietFetchMonitorStatusHeatmap),
     fork(fetchOverviewTrendStats),
     fork(refreshOverviewTrendStats),
+    fork(fetchSyntheticsRules),
+    fork(updateActiveRulesEffect),
   ]);
 };

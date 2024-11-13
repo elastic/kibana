@@ -6,12 +6,29 @@
  */
 
 import React from 'react';
+import * as reactRedux from 'react-redux';
 import { waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
-import { AlertingCallout, MISSING_RULES_PRIVILEGES_LABEL } from './alerting_callout';
+import {
+  AlertingCallout,
+  MISSING_DEFAULT_CONNECTOR_LABEL,
+  MISSING_MONITOR_STATUS_CONTENT,
+  MISSING_MONITOR_STATUS_HEADER,
+  MISSING_TLS_RULE_CONTENT,
+  MISSING_TLS_RULE_HEADER,
+} from './alerting_callout';
+import { selectSyntheticsRules } from '../../../state/alert_rules/selectors';
+import { selectDynamicSettings } from '../../../state/settings';
+import { selectMonitorListState } from '../../../state';
+import { ConfigKey } from '../../../../../../common/runtime_types';
+import { SYNTHETICS_STATUS_RULE, SYNTHETICS_TLS_RULE } from '@kbn/rule-data-utils';
+import * as contextHelpers from '../../../contexts';
 
 jest.mock('../../../contexts', () => ({
   ...jest.requireActual('../../../contexts'),
+  useSyntheticsSettingsContext: jest.fn().mockReturnValue({
+    canSave: true,
+  }),
   useSyntheticsStartPlugins: jest.fn().mockReturnValue({
     share: {
       url: {
@@ -25,116 +42,118 @@ jest.mock('../../../contexts', () => ({
   }),
 }));
 
+function injectReduxState(syntheticsRules?: any, dynamicSettings?: any, monitorList?: any) {
+  jest.spyOn(reactRedux, 'useSelector').mockImplementation((selector) => {
+    if (selector === selectSyntheticsRules) {
+      return syntheticsRules;
+    } else if (selector === selectDynamicSettings) {
+      return dynamicSettings;
+    } else if (selector === selectMonitorListState) {
+      return monitorList;
+    }
+  });
+}
+
 describe('AlertingCallout', () => {
+  afterEach(() => jest.clearAllMocks());
+  it('renders null when `activeRules` is undefined', () => {
+    injectReduxState(undefined, { settings: {} }, { data: { monitors: [] }, loaded: true });
+    const { container } = render(<AlertingCallout />);
+    expect(container).toBeEmptyDOMElement();
+  });
   it.each([
-    [false, false, false],
-    [false, true, true],
-    [true, false, false],
-    [true, true, false],
-  ])('renders correctly', async (hasConnectors, statusAlertEnabled, shouldShowCallout) => {
-    const { getByText, queryByText } = render(<AlertingCallout />, {
-      state: {
-        dynamicSettings: {
-          ...(shouldShowCallout
-            ? {
-                settings: {
-                  defaultTLSRuleEnabled: true,
-                },
-              }
-            : {}),
+    [
+      // rules
+      [{ rule_type_id: SYNTHETICS_STATUS_RULE, enabled: true }],
+      // monitors
+      [
+        {
+          [ConfigKey.ALERT_CONFIG]: { status: { enabled: true } },
+          [ConfigKey.MONITOR_TYPE]: 'http',
+          [ConfigKey.ENABLED]: true,
         },
-        defaultAlerting: {
-          data: {
-            statusRule: {},
-            tlsRule: {},
-          },
-          loading: false,
-          success: true,
+      ],
+      // expected messages
+      [MISSING_DEFAULT_CONNECTOR_LABEL, MISSING_TLS_RULE_CONTENT, MISSING_TLS_RULE_HEADER],
+    ],
+    [
+      // rules
+      [{ rule_type_id: SYNTHETICS_TLS_RULE, enabled: true }],
+      // monitors
+      [
+        {
+          [ConfigKey.ALERT_CONFIG]: { status: { enabled: true } },
+          [ConfigKey.MONITOR_TYPE]: 'http',
+          [ConfigKey.ENABLED]: true,
         },
-        monitorList: {
-          loaded: true,
+      ],
+      // expected messages
+      [
+        MISSING_DEFAULT_CONNECTOR_LABEL,
+        MISSING_MONITOR_STATUS_CONTENT,
+        MISSING_MONITOR_STATUS_HEADER,
+      ],
+    ],
+  ])('renders correctly', async (rules, monitors, expectedContent) => {
+    jest
+      .spyOn(contextHelpers, 'useSyntheticsSettingsContext')
+      // casting to any because we aren't testing the rest of these fields
+      .mockReturnValue({ canSave: true } as any);
+    injectReduxState(
+      rules,
+      { settings: {} },
+      {
+        data: { monitors },
+        loaded: true,
+      }
+    );
+    const { getByText } = render(<AlertingCallout />);
+
+    await waitFor(() => {
+      expectedContent.forEach((content) => {
+        expect(getByText(content)).toBeInTheDocument();
+      });
+    });
+  });
+
+  it.each([true, false])(
+    '`isAlertingEnabled` impacts whether callouts are rendered',
+    async (isAlertingEnabled) => {
+      injectReduxState(
+        [],
+        { settings: {} },
+        {
           data: {
-            total: 1,
             monitors: [
               {
-                alert: {
-                  status: {
-                    enabled: statusAlertEnabled,
-                  },
-                },
+                [ConfigKey.ALERT_CONFIG]: { status: { enabled: true } },
+                [ConfigKey.MONITOR_TYPE]: 'http',
+                [ConfigKey.ENABLED]: true,
               },
             ],
           },
-        },
-      },
-    });
-
-    await waitFor(() => {
-      if (shouldShowCallout) {
-        expect(getByText(/Alerts are not being sent/)).toBeInTheDocument();
-      } else {
-        expect(queryByText(/Alerts are not being sent/)).not.toBeInTheDocument();
-      }
-    });
-  });
-
-  it.each([
-    [false, false, false],
-    [false, true, true],
-    [true, false, false],
-    [true, true, false],
-  ])(
-    'overwrites rendering with isAlertingEnabled prop',
-    async (hasConnectors, statusAlertEnabled, shouldShowCallout) => {
-      const { getByText, queryByText } = render(
-        <AlertingCallout isAlertingEnabled={statusAlertEnabled} />,
-        {
-          state: {
-            dynamicSettings: {
-              ...(shouldShowCallout
-                ? {
-                    settings: {
-                      defaultTLSRuleEnabled: true,
-                    },
-                  }
-                : {}),
-            },
-            defaultAlerting: {
-              data: {
-                statusRule: {},
-                tlsRule: {},
-              },
-              loading: false,
-              success: true,
-            },
-          },
         }
       );
+      const { container, getByText } = render(
+        <AlertingCallout isAlertingEnabled={isAlertingEnabled} />
+      );
 
-      await waitFor(() => {
-        if (shouldShowCallout) {
-          expect(getByText(/Alerts are not being sent/)).toBeInTheDocument();
-        } else {
-          expect(queryByText(/Alerts are not being sent/)).not.toBeInTheDocument();
-        }
-      });
+      const calloutContent = [
+        MISSING_MONITOR_STATUS_CONTENT,
+        MISSING_MONITOR_STATUS_HEADER,
+        MISSING_TLS_RULE_CONTENT,
+        MISSING_TLS_RULE_HEADER,
+      ];
+
+      if (!isAlertingEnabled) {
+        expect(container.firstChild).toBeNull();
+      } else {
+        await waitFor(() => {
+          if (isAlertingEnabled) {
+            calloutContent.forEach((content) => expect(getByText(content)).toBeInTheDocument());
+          }
+        });
+      }
     }
   );
-
-  it('show call out for missing privileges rules', async () => {
-    const { getByText } = render(<AlertingCallout />, {
-      state: {
-        defaultAlerting: {
-          data: {},
-          loading: false,
-          success: true,
-        },
-      },
-    });
-
-    await waitFor(() => {
-      expect(getByText(/Alerts are not being sent/)).toBeInTheDocument();
-      expect(getByText(MISSING_RULES_PRIVILEGES_LABEL)).toBeInTheDocument();
-    });
-  });
 });

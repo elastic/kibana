@@ -54,8 +54,6 @@ export const fromSettingsAttribute = (
     certAgeThreshold: attr.certAgeThreshold,
     defaultConnectors: attr.defaultConnectors,
     defaultEmail: attr.defaultEmail,
-    defaultStatusRuleEnabled: attr.defaultStatusRuleEnabled ?? true,
-    defaultTLSRuleEnabled: attr.defaultTLSRuleEnabled ?? true,
   };
 };
 

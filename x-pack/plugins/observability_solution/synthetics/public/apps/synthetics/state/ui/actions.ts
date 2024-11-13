@@ -6,10 +6,7 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
-import {
-  SYNTHETICS_STATUS_RULE,
-  SYNTHETICS_TLS_RULE,
-} from '../../../../../common/constants/synthetics_alerts';
+import type { FlyoutIdArgument } from '../../../../../common/constants/synthetics_alerts';
 
 export interface PopoverState {
   id: string;
@@ -17,7 +14,7 @@ export interface PopoverState {
 }
 
 export const setAlertFlyoutVisible = createAction<{
-  id: typeof SYNTHETICS_STATUS_RULE | typeof SYNTHETICS_TLS_RULE | null;
+  id: FlyoutIdArgument;
   isNewRuleFlyout: boolean;
 } | null>('[UI] TOGGLE ALERT FLYOUT');
 

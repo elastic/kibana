@@ -12,10 +12,19 @@ import {
   enableDefaultAlertingAction,
   enableDefaultAlertingSilentlyAction,
   getDefaultAlertingAction,
+  putSyntheticsRules,
   updateDefaultAlertingAction,
 } from './actions';
 
+export interface RuleInfo {
+  id: string;
+  enabled: boolean;
+  name: string;
+  rule_type_id: string;
+}
+
 export interface DefaultAlertingState {
+  syntheticsRules?: RuleInfo[];
   data?: DEFAULT_ALERT_RESPONSE;
   success: boolean | null;
   loading: boolean;
@@ -55,6 +64,9 @@ export const defaultAlertingReducer = createReducer(initialSettingState, (builde
     .addCase(updateDefaultAlertingAction.success, (state, action) => {
       state.success = Boolean(action.payload);
       state.loading = false;
+    })
+    .addCase(putSyntheticsRules, (state, action) => {
+      state.syntheticsRules = action.payload;
     })
     .addCase(updateDefaultAlertingAction.fail, (state, action) => {
       state.error = action.payload;
