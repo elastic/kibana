@@ -62,8 +62,8 @@ export interface ServerRouteCreateOptions {
 }
 
 type RouteMethodOf<TEndpoint extends string> = TEndpoint extends `${infer TRouteMethod} ${string}`
-  ? TRouteMethod extends RouteMethod
-    ? TRouteMethod
+  ? Lowercase<TRouteMethod> extends RouteMethod
+    ? Lowercase<TRouteMethod>
     : RouteMethod
   : RouteMethod;
 
