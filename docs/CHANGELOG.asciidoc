@@ -117,7 +117,7 @@ Tutorials linked from the {kib} home page show an "Unable to load page" error. T
 
 *Workaround* +
 The APM / OpenTelemetry tutorials represented a shortcut to quickly add important parameters to the configuration files.
-It is still possible to obtain the same parameters following the documentation tutorials of APM.
+It is still possible to obtain the same parameters following the tutorials in the APM documentation.
 
 More information can be found in the {observability-guide}/apm-collect-application-data.html[APM documentation] and the {observability-guide}/get-started-with-fleet-apm-server.html[Fleet documentation].
 
