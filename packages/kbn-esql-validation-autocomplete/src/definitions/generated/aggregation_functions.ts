@@ -36,6 +36,7 @@ const avgDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.avg', {
     defaultMessage: 'The average of a numeric field.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -85,6 +86,7 @@ const countDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.count', {
     defaultMessage: 'Returns the total number (count) of input values.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -228,6 +230,7 @@ const countDistinctDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.count_distinct', {
     defaultMessage: 'Returns the approximate number of distinct values.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -743,6 +746,7 @@ const maxDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.max', {
     defaultMessage: 'The maximum value of a field.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -823,7 +827,7 @@ const maxDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -853,6 +857,7 @@ const medianDefinition: FunctionDefinition = {
     defaultMessage:
       'The value that is greater than half of all values and less than half of all values, also known as the 50% `PERCENTILE`.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -906,6 +911,7 @@ const medianAbsoluteDeviationDefinition: FunctionDefinition = {
         "Returns the median absolute deviation, a measure of variability. It is a robust statistic, meaning that it is useful for describing data that may have outliers, or may not be normally distributed. For such data it can be more descriptive than standard deviation.\n\nIt is calculated as the median of each data point's deviation from the median of the entire sample. That is, for a random variable `X`, the median absolute deviation is `median(|median(X) - X|)`.",
     }
   ),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -955,6 +961,7 @@ const minDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.min', {
     defaultMessage: 'The minimum value of a field.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1035,7 +1042,7 @@ const minDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -1065,6 +1072,7 @@ const percentileDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns the value at which a certain percentage of observed values occur. For example, the 95th percentile is the value which is greater than 95% of the observed values and the 50th percentile is the `MEDIAN`.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1228,6 +1236,7 @@ const stCentroidAggDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_centroid_agg', {
     defaultMessage: 'Calculate the spatial centroid over a field with spatial point geometry type.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1264,6 +1273,7 @@ const sumDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sum', {
     defaultMessage: 'The sum of a numeric expression.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1313,6 +1323,7 @@ const topDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.top', {
     defaultMessage: 'Collects the top values for a field. Includes repeated values.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1491,7 +1502,7 @@ const topDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics'],
@@ -1510,6 +1521,7 @@ const valuesDefinition: FunctionDefinition = {
     defaultMessage:
       "Returns all values in a group as a multivalued field. The order of the returned values isn't guaranteed. If you need the values returned in order use esql-mv_sort.",
   }),
+  preview: true,
   alias: undefined,
   signatures: [
     {
@@ -1590,7 +1602,7 @@ const valuesDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'text',
+      returnType: 'keyword',
     },
     {
       params: [
@@ -1618,6 +1630,7 @@ const weightedAvgDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.weighted_avg', {
     defaultMessage: 'The weighted average of a numeric expression.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {

@@ -24,6 +24,11 @@ import {
   AgentlessAgentCreateError,
   AgentlessAgentDeleteError,
 } from '../../errors';
+import {
+  AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
+  AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
+  AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+} from '../../constants';
 
 import { appContextService } from '../app_context';
 
@@ -88,12 +93,15 @@ class AgentlessAgentService {
     );
     const tlsConfig = this.createTlsConfig(agentlessConfig);
 
+    const labels = this.getAgentlessTags(agentlessAgentPolicy);
+
     const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
       data: {
         policy_id: policyId,
         fleet_url: fleetUrl,
         fleet_token: fleetToken,
+        labels,
       },
       method: 'POST',
       headers: {
@@ -201,6 +209,23 @@ class AgentlessAgentService {
     });
 
     return response;
+  }
+
+  private getAgentlessTags(agentlessAgentPolicy: AgentPolicy) {
+    if (!agentlessAgentPolicy.global_data_tags) {
+      return undefined;
+    }
+
+    const getGlobalTagValueByName = (name: string) =>
+      agentlessAgentPolicy.global_data_tags?.find((tag) => tag.name === name)?.value;
+
+    return {
+      owner: {
+        org: getGlobalTagValueByName(AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION),
+        division: getGlobalTagValueByName(AGENTLESS_GLOBAL_TAG_NAME_DIVISION),
+        team: getGlobalTagValueByName(AGENTLESS_GLOBAL_TAG_NAME_TEAM),
+      },
+    };
   }
 
   private withRequestIdMessage(message: string, traceId?: string) {

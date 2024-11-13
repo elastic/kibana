@@ -21,14 +21,6 @@ export const navigationTree = (): NavigationTreeDefinition => ({
       breadcrumbStatus: 'hidden',
       children: [
         {
-          id: 'home',
-          title: i18n.translate('xpack.serverlessSearch.nav.home', {
-            defaultMessage: 'Home',
-          }),
-          link: 'elasticsearchStart',
-          spaceBefore: 'm',
-        },
-        {
           id: 'data',
           title: i18n.translate('xpack.serverlessSearch.nav.data', {
             defaultMessage: 'Data',
@@ -47,9 +39,8 @@ export const navigationTree = (): NavigationTreeDefinition => ({
                   pathNameSerialized.startsWith(
                     prepend('/app/management/data/index_management/')
                   ) ||
-                  pathNameSerialized.startsWith(
-                    prepend('/app/elasticsearch/indices/index_details/')
-                  )
+                  pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices')) ||
+                  pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
                 );
               },
             },
@@ -130,18 +121,19 @@ export const navigationTree = (): NavigationTreeDefinition => ({
           spaceBefore: 'm',
           children: [{ link: 'maps' }],
         },
-        {
-          id: 'gettingStarted',
-          title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-            defaultMessage: 'Getting Started',
-          }),
-          link: 'serverlessElasticsearch',
-          spaceBefore: 'm',
-        },
       ],
     },
   ],
   footer: [
+    {
+      id: 'gettingStarted',
+      type: 'navItem',
+      title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+        defaultMessage: 'Getting Started',
+      }),
+      link: 'serverlessElasticsearch',
+      icon: 'launch',
+    },
     {
       type: 'navGroup',
       id: 'project_settings_project_nav',

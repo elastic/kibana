@@ -41,7 +41,7 @@ import {
   reactRouterNavigate,
   attemptToURIDecode,
 } from '../../../../../shared_imports';
-import { getDataStreamDetailsLink, getIndexDetailsLink } from '../../../../services/routing';
+import { getDataStreamDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
@@ -73,12 +73,13 @@ const getColumnConfigs = ({
             <EuiLink
               data-test-subj="indexTableIndexNameLink"
               onClick={() => {
-                if (!extensionsService.indexDetailsPageRoute) {
-                  history.push(getIndexDetailsLink(index.name, location.search || ''));
-                } else {
-                  const route = extensionsService.indexDetailsPageRoute.renderRoute(index.name);
-                  application.navigateToUrl(http.basePath.prepend(route));
-                }
+                navigateToIndexDetailsPage(
+                  index.name,
+                  location.search || '',
+                  extensionsService,
+                  application,
+                  http
+                );
               }}
             >
               {index.name}
@@ -544,9 +545,10 @@ export class IndexTable extends Component {
 
     return (
       <AppContextConsumer>
-        {({ services, config, core }) => {
+        {({ services, config, core, plugins }) => {
           const { extensionsService } = services;
           const { application, http } = core;
+          const { share } = plugins;
           const columnConfigs = getColumnConfigs({
             showIndexStats: config.enableIndexStats,
             showSizeAndDocCount: config.enableSizeAndDocCount,
@@ -668,7 +670,7 @@ export class IndexTable extends Component {
                   </>
                 )}
                 <EuiFlexItem grow={false}>
-                  <CreateIndexButton loadIndices={loadIndices} />
+                  <CreateIndexButton loadIndices={loadIndices} share={share} />
                 </EuiFlexItem>
               </EuiFlexGroup>
 
@@ -713,6 +715,7 @@ export class IndexTable extends Component {
                         <EuiTableRowCell align="center" colSpan={columnsCount}>
                           <NoMatch
                             loadIndices={loadIndices}
+                            share={share}
                             filter={filter}
                             resetFilter={() => filterChanged('')}
                             extensionsService={extensionsService}

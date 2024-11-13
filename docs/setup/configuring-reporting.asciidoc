@@ -48,9 +48,10 @@ NOTE: If you use the default settings, you can still create a custom role that g
 
 . Create the reporting role.
 
-.. Open the main menu, then click *Stack Management*.
+.. Go to the *Roles* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
-.. Click *Roles > Create role*.
+.. Click *Create role*.
 
 . Specify the role settings.
 
@@ -86,9 +87,10 @@ NOTE: If the *Reporting* options for application features are unavailable, and t
 
 . Assign the reporting role to a user.
 
-.. Open the main menu, then click *Stack Management*.
+.. Go to the *Users* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
-.. Click *Users*, then click the user you want to assign the reporting role to.
+.. Select the user you want to assign the reporting role to.
 
 .. From the *Roles* dropdown, select *custom_reporting_user*.
 
@@ -99,9 +101,10 @@ Granting the privilege to generate reports also grants the user the privilege to
 [float]
 [[reporting-roles-user-api]]
 ==== Grant access with the role API
-With <<grant-user-access, {kib} application privileges>> enabled in Reporting, you can also use the {ref}/security-api-put-role.html[role API] to grant access to the {report-features}, using *All* privileges, or sub-feature privileges.
+With <<grant-user-access,{kib} application privileges>> enabled in Reporting, you can also use the {api-kibana}/group/endpoint-roles[role APIs] to grant access to the {report-features}, using *All* privileges, or sub-feature privileges.
 
-NOTE: This link:https://www.elastic.co/guide/en/kibana/current/role-management-api-put.html[API request] needs to be executed against the link:https://www.elastic.co/guide/en/kibana/current/api.html[Kibana API endpoint].
+NOTE: This API request needs to be run against the <<api,Kibana API endpoint>>.
+
 [source, sh]
 ---------------------------------------------------------------
 PUT <kibana host>:<port>/api/security/role/custom_reporting_user

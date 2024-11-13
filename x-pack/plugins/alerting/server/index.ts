@@ -82,20 +82,4 @@ export const config: PluginConfigDescriptor<AlertingConfig> = {
   exposeToBrowser: {
     rules: { run: { alerts: { max: true } } },
   },
-  deprecations: ({ renameFromRoot, deprecate }) => [
-    renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck', { level: 'warning' }),
-    renameFromRoot(
-      'xpack.alerts.invalidateApiKeysTask.interval',
-      'xpack.alerting.invalidateApiKeysTask.interval',
-      { level: 'warning' }
-    ),
-    renameFromRoot(
-      'xpack.alerts.invalidateApiKeysTask.removalDelay',
-      'xpack.alerting.invalidateApiKeysTask.removalDelay',
-      { level: 'warning' }
-    ),
-    renameFromRoot('xpack.alerting.defaultRuleTaskTimeout', 'xpack.alerting.rules.run.timeout', {
-      level: 'warning',
-    }),
-  ],
 };

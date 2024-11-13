@@ -350,37 +350,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     );
 
   router.versioned
-    .post({
-      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/_validate/detector`,
-      access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
-      },
-      summary: 'Validates detector',
-      description: 'Validates specified detector.',
-    })
-    .addVersion(
-      {
-        version: '1',
-        validate: {
-          request: {
-            body: schema.any(),
-          },
-        },
-      },
-      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-        try {
-          const body = await mlClient.validateDetector({ body: request.body });
-          return response.ok({
-            body,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
-        }
-      })
-    );
-
-  router.versioned
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_forecast/{forecastId}`,
       access: 'internal',
@@ -439,11 +408,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const jobId = request.params.jobId;
-          const duration = request.body.duration;
           const body = await mlClient.forecast({
             job_id: jobId,
             body: {
-              duration,
+              ...request.body,
             },
           });
           return response.ok({

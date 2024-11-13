@@ -289,10 +289,7 @@ function getTransportConfig(
         tlsConfig.ca = sslSettings?.certificateAuthoritiesData;
       }
 
-      const sslSettingsFromConfig = getSSLSettingsFromConfig(
-        sslSettings?.verificationMode,
-        sslSettings?.rejectUnauthorized
-      );
+      const sslSettingsFromConfig = getSSLSettingsFromConfig(sslSettings?.verificationMode);
       const nodeTLSOptions = getNodeSSLOptions(logger, sslSettingsFromConfig.verificationMode);
       if (!transportConfig.tls) {
         transportConfig.tls = { ...tlsConfig, ...nodeTLSOptions };

@@ -24,6 +24,7 @@ import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
 import { useAssistantContext } from '../../..';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -31,10 +32,10 @@ const mockContext = {
   http: {
     get: jest.fn(),
   },
-  assistantFeatures: { assistantKnowledgeBaseByDefault: true },
   selectedSettingsTab: null,
   assistantAvailability: {
     isAssistantEnabled: true,
+    hasManageGlobalKnowledgeBase: true,
   },
 };
 jest.mock('../../assistant_context');
@@ -43,18 +44,19 @@ jest.mock('../../assistant/api/knowledge_base/entries/use_update_knowledge_base_
 jest.mock('../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries');
 
 jest.mock('../../assistant/settings/use_settings_updater/use_settings_updater');
+jest.mock('../../assistant/api/knowledge_base/use_knowledge_base_indices');
 jest.mock('../../assistant/api/knowledge_base/use_knowledge_base_status');
 jest.mock('../../assistant/api/knowledge_base/entries/use_knowledge_base_entries');
 jest.mock(
   '../../assistant/common/components/assistant_settings_management/flyout/use_flyout_modal_visibility'
 );
 const mockDataViews = {
-  getIndices: jest.fn().mockResolvedValue([{ name: 'index-1' }, { name: 'index-2' }]),
   getFieldsForWildcard: jest.fn().mockResolvedValue([
     { name: 'field-1', esTypes: ['semantic_text'] },
     { name: 'field-2', esTypes: ['text'] },
     { name: 'field-3', esTypes: ['semantic_text'] },
   ]),
+  getExistingIndices: jest.fn().mockResolvedValue(['index-2']),
 } as unknown as DataViewsContract;
 const queryClient = new QueryClient();
 const wrapper = (props: { children: React.ReactNode }) => (
@@ -63,9 +65,68 @@ const wrapper = (props: { children: React.ReactNode }) => (
   </I18nProvider>
 );
 describe('KnowledgeBaseSettingsManagement', () => {
+  const mockCreateEntry = jest.fn();
+  const mockUpdateEntry = jest.fn();
+  const mockDeleteEntry = jest.fn();
   const mockData = [
-    { id: '1', name: 'Test Entry 1', type: 'document', kbResource: 'user', users: [{ id: 'hi' }] },
-    { id: '2', name: 'Test Entry 2', type: 'index', kbResource: 'global', users: [] },
+    {
+      id: '1',
+      createdAt: '2024-10-21T18:54:14.773Z',
+      createdBy: 'u_user_id_1',
+      updatedAt: '2024-10-23T17:33:15.933Z',
+      updatedBy: 'u_user_id_1',
+      users: [{ name: 'Test User 1' }],
+      name: 'Test Entry 1',
+      namespace: 'default',
+      type: 'document',
+      kbResource: 'user',
+      source: 'user',
+      text: 'Very nice text',
+    },
+    {
+      id: '2',
+      createdAt: '2024-10-25T09:55:56.596Z',
+      createdBy: 'u_user_id_2',
+      updatedAt: '2024-10-25T09:55:56.596Z',
+      updatedBy: 'u_user_id_2',
+      users: [],
+      name: 'Test Entry 2',
+      namespace: 'default',
+      type: 'index',
+      index: 'index-1',
+      field: 'semantic_field1',
+      description: 'Test description',
+      queryDescription: 'Test query instruction',
+    },
+    {
+      id: '3',
+      createdAt: '2024-10-25T09:55:56.596Z',
+      createdBy: 'u_user_id_1',
+      updatedAt: '2024-10-25T09:55:56.596Z',
+      updatedBy: 'u_user_id_1',
+      users: [{ name: 'Test User 1' }],
+      name: 'Test Entry 3',
+      namespace: 'default',
+      type: 'index',
+      index: 'index-2',
+      field: 'semantic_field2',
+      description: 'Test description',
+      queryDescription: 'Test query instruction',
+    },
+    {
+      id: '4',
+      createdAt: '2024-10-21T18:54:14.773Z',
+      createdBy: 'u_user_id_3',
+      updatedAt: '2024-10-23T17:33:15.933Z',
+      updatedBy: 'u_user_id_3',
+      users: [],
+      name: 'Test Entry 4',
+      namespace: 'default',
+      type: 'document',
+      kbResource: 'user',
+      source: 'user',
+      text: 'Very nice text',
+    },
   ];
 
   beforeEach(() => {
@@ -87,6 +148,9 @@ describe('KnowledgeBaseSettingsManagement', () => {
       },
       isFetched: true,
     });
+    (useKnowledgeBaseIndices as jest.Mock).mockReturnValue({
+      data: { indices: ['index-1', 'index-2'] },
+    });
     (useKnowledgeBaseEntries as jest.Mock).mockReturnValue({
       data: { data: mockData },
       isFetching: false,
@@ -98,28 +162,17 @@ describe('KnowledgeBaseSettingsManagement', () => {
       closeFlyout: jest.fn(),
     });
     (useCreateKnowledgeBaseEntry as jest.Mock).mockReturnValue({
-      mutateAsync: jest.fn(),
+      mutateAsync: mockCreateEntry,
       isLoading: false,
     });
     (useUpdateKnowledgeBaseEntries as jest.Mock).mockReturnValue({
-      mutateAsync: jest.fn(),
+      mutateAsync: mockUpdateEntry,
       isLoading: false,
     });
     (useDeleteKnowledgeBaseEntries as jest.Mock).mockReturnValue({
-      mutateAsync: jest.fn(),
+      mutateAsync: mockDeleteEntry,
       isLoading: false,
     });
-  });
-  it('renders old kb settings when enableKnowledgeBaseByDefault is not enabled', () => {
-    (useAssistantContext as jest.Mock).mockImplementation(() => ({
-      ...mockContext,
-      assistantFeatures: {
-        assistantKnowledgeBaseByDefault: false,
-      },
-    }));
-    render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, { wrapper });
-
-    expect(screen.getByTestId('knowledge-base-settings')).toBeInTheDocument();
   });
   it('renders loading spinner when data is not fetched', () => {
     (useKnowledgeBaseStatus as jest.Mock).mockReturnValue({ data: {}, isFetched: false });
@@ -240,5 +293,200 @@ describe('KnowledgeBaseSettingsManagement', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
     });
     expect(screen.queryByTestId('delete-entry-confirmation')).not.toBeInTheDocument();
+  });
+
+  it('does not create a duplicate document entry when switching sharing option twice', async () => {
+    (useFlyoutModalVisibility as jest.Mock).mockReturnValue({
+      isFlyoutOpen: true,
+      openFlyout: jest.fn(),
+      closeFlyout: jest.fn(),
+    });
+    render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
+      wrapper,
+    });
+
+    await waitFor(() => {
+      fireEvent.click(screen.getAllByTestId('edit-button')[0]);
+    });
+    expect(screen.getByTestId('flyout')).toBeVisible();
+
+    await waitFor(() => {
+      expect(screen.getByText('Edit document entry')).toBeInTheDocument();
+    });
+
+    const updatedName = 'New Entry Name';
+    await waitFor(() => {
+      const nameInput = screen.getByTestId('entryNameInput');
+      fireEvent.change(nameInput, { target: { value: updatedName } });
+    });
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('sharing-select'));
+      fireEvent.click(screen.getByTestId('sharing-global-option'));
+      fireEvent.click(screen.getByTestId('sharing-select'));
+      fireEvent.click(screen.getByTestId('sharing-private-option'));
+      fireEvent.click(screen.getByTestId('save-button'));
+    });
+
+    await waitFor(() => {
+      expect(mockUpdateEntry).toHaveBeenCalledTimes(1);
+    });
+    expect(mockCreateEntry).toHaveBeenCalledTimes(0);
+    expect(mockUpdateEntry).toHaveBeenCalledWith([{ ...mockData[0], name: updatedName }]);
+  });
+
+  it('does not create a duplicate index entry when switching sharing option twice', async () => {
+    (useFlyoutModalVisibility as jest.Mock).mockReturnValue({
+      isFlyoutOpen: true,
+      openFlyout: jest.fn(),
+      closeFlyout: jest.fn(),
+    });
+    render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
+      wrapper,
+    });
+
+    await waitFor(() => {
+      fireEvent.click(screen.getAllByTestId('edit-button')[2]);
+    });
+    expect(screen.getByTestId('flyout')).toBeVisible();
+
+    await waitFor(() => {
+      expect(screen.getByText('Edit index entry')).toBeInTheDocument();
+    });
+
+    const updatedName = 'New Entry Name';
+    await waitFor(() => {
+      const nameInput = screen.getByTestId('entry-name');
+      fireEvent.change(nameInput, { target: { value: updatedName } });
+    });
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('sharing-select'));
+      fireEvent.click(screen.getByTestId('sharing-global-option'));
+      fireEvent.click(screen.getByTestId('sharing-select'));
+      fireEvent.click(screen.getByTestId('sharing-private-option'));
+      fireEvent.click(screen.getByTestId('save-button'));
+    });
+
+    await waitFor(() => {
+      expect(mockUpdateEntry).toHaveBeenCalledTimes(1);
+    });
+    expect(mockCreateEntry).toHaveBeenCalledTimes(0);
+    expect(mockUpdateEntry).toHaveBeenCalledWith([{ ...mockData[2], name: updatedName }]);
+  });
+
+  it('shows duplicate entry modal when making global to private entry update', async () => {
+    (useFlyoutModalVisibility as jest.Mock).mockReturnValue({
+      isFlyoutOpen: true,
+      openFlyout: jest.fn(),
+      closeFlyout: jest.fn(),
+    });
+    render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
+      wrapper,
+    });
+
+    await waitFor(() => {
+      fireEvent.click(screen.getAllByTestId('edit-button')[3]);
+    });
+    expect(screen.getByTestId('flyout')).toBeVisible();
+
+    await waitFor(() => {
+      expect(screen.getByText('Edit document entry')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('sharing-select'));
+      fireEvent.click(screen.getByTestId('sharing-private-option'));
+      fireEvent.click(screen.getByTestId('save-button'));
+    });
+
+    expect(screen.getByTestId('create-duplicate-entry-modal')).toBeInTheDocument();
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+    });
+    expect(screen.queryByTestId('create-duplicate-entry-modal')).not.toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(mockCreateEntry).toHaveBeenCalledTimes(1);
+    });
+    expect(mockUpdateEntry).toHaveBeenCalledTimes(0);
+    expect(mockCreateEntry).toHaveBeenCalledWith({ ...mockData[3], users: undefined });
+  });
+
+  it('does not show duplicate entry modal on new document entry creation', async () => {
+    // Covers the BUG: https://github.com/elastic/kibana/issues/198892
+    const closeFlyoutMock = jest.fn();
+    (useFlyoutModalVisibility as jest.Mock).mockReturnValue({
+      isFlyoutOpen: true,
+      openFlyout: jest.fn(),
+      closeFlyout: closeFlyoutMock,
+    });
+    render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
+      wrapper,
+    });
+
+    await waitFor(() => {
+      fireEvent.click(screen.getAllByTestId('edit-button')[3]);
+    });
+    expect(screen.getByTestId('flyout')).toBeVisible();
+
+    await waitFor(() => {
+      expect(screen.getByText('Edit document entry')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('sharing-select'));
+      fireEvent.click(screen.getByTestId('sharing-private-option'));
+      fireEvent.click(screen.getByTestId('save-button'));
+    });
+
+    expect(screen.getByTestId('create-duplicate-entry-modal')).toBeInTheDocument();
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+    });
+    expect(screen.queryByTestId('create-duplicate-entry-modal')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(mockCreateEntry).toHaveBeenCalledTimes(1);
+    });
+
+    // Create a new document entry
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('addEntry'));
+    });
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('addDocument'));
+    });
+
+    expect(screen.getByTestId('flyout')).toBeVisible();
+
+    await userEvent.type(screen.getByTestId('entryNameInput'), 'hi');
+    await userEvent.type(screen.getByTestId('entryMarkdownInput'), 'hi');
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('save-button'));
+    });
+
+    expect(screen.queryByTestId('create-duplicate-entry-modal')).not.toBeInTheDocument();
+    expect(closeFlyoutMock).toHaveBeenCalled();
+  });
+
+  it('shows warning icon for index entries with missing indices', async () => {
+    render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
+      wrapper,
+    });
+
+    await waitFor(() => expect(screen.getByTestId('missing-index-icon')).toBeInTheDocument());
+
+    expect(screen.getAllByTestId('missing-index-icon').length).toEqual(1);
+
+    fireEvent.mouseOver(screen.getByTestId('missing-index-icon'));
+
+    await waitFor(() => screen.getByTestId('missing-index-tooltip'));
+
+    expect(
+      screen.getByText(
+        'The index assigned to this knowledge base entry is unavailable. Check the permissions on the configured index, or that the index has not been deleted. You can update the index to be used for this knowledge entry, or delete the entry entirely.'
+      )
+    ).toBeInTheDocument();
   });
 });

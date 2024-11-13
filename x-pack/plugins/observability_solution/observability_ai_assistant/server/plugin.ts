@@ -32,7 +32,6 @@ import {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
-import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { initLangtrace } from './service/client/instrumentation/init_langtrace';
@@ -159,11 +158,10 @@ export class ObservabilityAIAssistantPlugin
       core,
       taskManager: plugins.taskManager,
       getModelId,
+      enableKnowledgeBase: this.config.enableKnowledgeBase,
     }));
 
     service.register(registerFunctions);
-
-    addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
 
     registerServerRoutes({
       core,

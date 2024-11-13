@@ -17,14 +17,21 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { action } from '@storybook/addon-actions';
 import type { InventoryKibanaContext } from '../public/hooks/use_kibana';
-import type { ITelemetryClient } from '../public/services/telemetry/types';
+import { ITelemetryClient } from '../public/services/telemetry/types';
 
 export function getMockInventoryContext(): InventoryKibanaContext {
   const coreStart = coreMock.createStart();
 
   return {
     ...coreStart,
-    entityManager: {} as unknown as EntityManagerPublicPluginStart,
+    entityManager: {
+      entityClient: {
+        asKqlFilter: jest.fn(),
+        getIdentityFieldsValue() {
+          return 'entity_id';
+        },
+      },
+    } as unknown as EntityManagerPublicPluginStart,
     observabilityShared: {} as unknown as ObservabilitySharedPluginStart,
     inference: {} as unknown as InferencePublicStart,
     share: {

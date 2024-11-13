@@ -56,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should be able to a read a scheduled action correctly', async () => {
           // create an action
           const { body: hookAction } = await supertest
-            .post('/api/actions/action')
+            .post('/api/actions/connector')
             .set('kbn-xsrf', 'true')
             .send(getWebHookAction())
             .expect(200);
@@ -80,7 +80,7 @@ export default ({ getService }: FtrProviderContext) => {
                     message:
                       'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                   },
-                  actionTypeId: hookAction.actionTypeId,
+                  actionTypeId: hookAction.connector_type_id,
                 },
               ],
             })
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
-                action_type_id: hookAction.actionTypeId,
+                action_type_id: hookAction.connector_type_id,
                 frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],

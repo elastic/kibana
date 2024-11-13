@@ -427,16 +427,16 @@ export class WebElementWrapper {
   /**
    * Moves the remote environment’s mouse cursor to the current element with optional offset
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
-   * @param { xOffset: 0, yOffset: 0 } options
+   * @param { xOffset: 0, yOffset: 0, topOffset: number } options Optional
    * @return {Promise<void>}
    */
-  public async moveMouseTo(options = { xOffset: 0, yOffset: 0 }) {
+  public async moveMouseTo({ xOffset = 0, yOffset = 0, topOffset = 0 } = {}) {
     await this.retryCall(async function moveMouseTo(wrapper) {
-      await wrapper.scrollIntoViewIfNecessary();
+      await wrapper.scrollIntoViewIfNecessary(topOffset);
       await wrapper.getActions().move({ x: 0, y: 0 }).perform();
       await wrapper
         .getActions()
-        .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+        .move({ x: xOffset, y: yOffset, origin: wrapper._webElement })
         .perform();
     });
   }

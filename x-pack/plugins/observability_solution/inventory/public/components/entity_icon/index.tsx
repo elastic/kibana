@@ -6,56 +6,49 @@
  */
 
 import React from 'react';
-import { AGENT_NAME, CLOUD_PROVIDER, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { type CloudProvider, CloudProviderIcon, AgentIcon } from '@kbn/custom-icons';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import type { AgentName } from '@kbn/elastic-agent-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { Entity } from '../../../common/entities';
+import { castArray } from 'lodash';
+import type { InventoryEntity } from '../../../common/entities';
+import { isBuiltinEntityOfType } from '../../../common/utils/entity_type_guards';
 
 interface EntityIconProps {
-  entity: Entity;
+  entity: InventoryEntity;
 }
 
-type NotNullableCloudProvider = Exclude<CloudProvider, null>;
-
-const getSingleValue = <T,>(value?: T | T[] | null): T | undefined => {
-  return value == null ? undefined : Array.isArray(value) ? value[0] : value;
-};
-
 export function EntityIcon({ entity }: EntityIconProps) {
-  const entityType = entity[ENTITY_TYPE];
   const defaultIconSize = euiThemeVars.euiSizeL;
 
-  switch (entityType) {
-    case 'host':
-    case 'container': {
-      const cloudProvider = getSingleValue(
-        entity[CLOUD_PROVIDER] as NotNullableCloudProvider | NotNullableCloudProvider[]
-      );
-      return (
-        <EuiFlexGroup
-          style={{ width: defaultIconSize, height: defaultIconSize }}
-          alignItems="center"
-          justifyContent="center"
-        >
-          <EuiFlexItem grow={false}>
-            <CloudProviderIcon
-              cloudProvider={cloudProvider}
-              size="m"
-              title={cloudProvider}
-              role="presentation"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-    case 'service': {
-      const agentName = getSingleValue(entity[AGENT_NAME] as AgentName | AgentName[]);
-      return <AgentIcon agentName={agentName} role="presentation" />;
-    }
-    default:
-      // Return an empty EuiIcon instead of null to maintain UI alignment across all EntityIcon usages
-      return <EuiIcon type="" size="l" />;
+  if (isBuiltinEntityOfType('host', entity) || isBuiltinEntityOfType('container', entity)) {
+    const cloudProvider = castArray(entity.cloud?.provider)[0];
+
+    return (
+      <EuiFlexGroup
+        style={{ width: defaultIconSize, height: defaultIconSize }}
+        alignItems="center"
+        justifyContent="center"
+      >
+        <EuiFlexItem grow={false}>
+          <CloudProviderIcon
+            cloudProvider={cloudProvider as CloudProvider | undefined}
+            size="m"
+            title={cloudProvider}
+            role="presentation"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
+
+  if (isBuiltinEntityOfType('service', entity)) {
+    return <AgentIcon agentName={castArray(entity.agent?.name)[0]} role="presentation" />;
+  }
+
+  if (entity.entityType.startsWith('kubernetes')) {
+    return <EuiIcon type="logoKubernetes" size="l" />;
+  }
+
+  // Return an empty EuiIcon instead of null to maintain UI alignment across all EntityIcon usages
+  return <EuiIcon type="" size="l" />;
 }

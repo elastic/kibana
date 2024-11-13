@@ -1,13 +1,20 @@
 {
   "type": "plugin",
   "id": "@kbn/reporting-plugin",
-  "owner": "@elastic/appex-sharedux",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "description": "Reporting Services enables applications to feature reports that the user can automate with Watcher and download later.",
   "plugin": {
     "id": "reporting",
-    "server": true,
     "browser": true,
-    "configPath": ["xpack", "reporting"],
+    "server": true,
+    "configPath": [
+      "xpack",
+      "reporting"
+    ],
     "requiredPlugins": [
       "data",
       "discover",
@@ -21,7 +28,16 @@
       "share",
       "features"
     ],
-    "optionalPlugins": ["security", "spaces", "usageCollection", "screenshotting"],
-    "requiredBundles": ["embeddable", "esUiShared", "kibanaReact"]
+    "optionalPlugins": [
+      "security",
+      "spaces",
+      "usageCollection",
+      "screenshotting"
+    ],
+    "requiredBundles": [
+      "embeddable",
+      "esUiShared",
+      "kibanaReact"
+    ]
   }
 }
