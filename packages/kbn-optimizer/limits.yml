@@ -119,7 +119,7 @@ pageLoadAssetSize:
   observabilityAiAssistantManagement: 19279
   observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
-  observabilityShared: 80000
+  observabilityShared: 111036
   osquery: 107090
   painlessLab: 179748
   presentationPanel: 55463
@@ -159,6 +159,7 @@ pageLoadAssetSize:
   spaces: 57868
   stackAlerts: 58316
   stackConnectors: 67227
+  streams: 16742
   synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586
