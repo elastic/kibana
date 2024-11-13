@@ -38,53 +38,6 @@
       },
       {
         "parentPluginId": "unifiedHistogram",
-        "id": "def-public.fieldSupportsBreakdown",
-        "type": "Function",
-        "tags": [],
-        "label": "fieldSupportsBreakdown",
-        "description": [],
-        "signature": [
-          "(field: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewField",
-            "text": "DataViewField"
-          },
-          ") => boolean"
-        ],
-        "path": "src/plugins/unified_histogram/public/utils/field_supports_breakdown.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.fieldSupportsBreakdown.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "field",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
-              }
-            ],
-            "path": "src/plugins/unified_histogram/public/utils/field_supports_breakdown.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "unifiedHistogram",
         "id": "def-public.getBreakdownField",
         "type": "Function",
         "tags": [],
