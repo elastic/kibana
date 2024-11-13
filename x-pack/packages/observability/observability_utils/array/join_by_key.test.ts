@@ -221,4 +221,50 @@ describe('joinByKey', () => {
       },
     });
   });
+
+  it('deeply merges by unflatten keys', () => {
+    const joined = joinByKey(
+      [
+        {
+          service: {
+            name: 'opbeans-node',
+            metrics: {
+              cpu: 0.1,
+            },
+          },
+          properties: {
+            foo: 'bar',
+          },
+        },
+        {
+          service: {
+            environment: 'prod',
+            metrics: {
+              memory: 0.5,
+            },
+          },
+          properties: {
+            foo: 'bar',
+          },
+        },
+      ],
+      'properties.foo'
+    );
+
+    expect(joined).toEqual([
+      {
+        service: {
+          name: 'opbeans-node',
+          environment: 'prod',
+          metrics: {
+            cpu: 0.1,
+            memory: 0.5,
+          },
+        },
+        properties: {
+          foo: 'bar',
+        },
+      },
+    ]);
+  });
 });
