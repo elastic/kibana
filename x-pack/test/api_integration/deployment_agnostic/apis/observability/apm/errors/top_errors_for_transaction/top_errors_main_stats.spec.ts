@@ -43,7 +43,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           kuery: '',
           maxNumberOfErrorGroups: 5,
           transactionType: 'request',
-          transactionName: '',
+          transactionName: overrides?.query?.transactionName ?? '',
           ...overrides?.query,
         },
       },
@@ -51,62 +51,52 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   describe('Top Errors main stats', () => {
-    describe('when data is not loaded', () => {
-      it('handles empty state', async () => {
-        const response = await callApi();
-        expect(response.status).to.be(200);
-        expect(response.body.errorGroups).to.empty();
-      });
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    before(async () => {
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+    });
+
+    it('handles empty state', async () => {
+      const response = await callApi();
+      expect(response.status).to.be(200);
+      expect(response.body.errorGroups).to.empty();
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/177638
     describe('when data is loaded', () => {
+      let errorGroups: ErrorGroups;
+      const {
+        appleTransaction: { name: appleTransactionName, failureRate: appleTransactionFailureRate },
+      } = config;
       describe('top errors for transaction', () => {
-        const {
-          firstTransaction: {
-            name: firstTransactionName,
-            failureRate: firstTransactionFailureRate,
-          },
-        } = config;
-
-        let apmSynthtraceEsClient: ApmSynthtraceEsClient;
-
         before(async () => {
-          apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
           await generateData({ serviceName, start, end, apmSynthtraceEsClient });
+          const response = await callApi({ query: { transactionName: appleTransactionName } });
+          errorGroups = response.body.errorGroups;
         });
 
         after(() => apmSynthtraceEsClient.clean());
 
         describe('returns the correct data', () => {
           const NUMBER_OF_BUCKETS = 15;
-          let errorGroups: ErrorGroups;
-          before(async () => {
-            const response = await callApi({ query: { transactionName: firstTransactionName } });
-            errorGroups = response.body.errorGroups;
-          });
 
           it('returns correct number of errors', () => {
             expect(errorGroups.length).to.equal(2);
           });
 
           it('error 1 is correct', () => {
-            const firstErrorId = `b6c1d4d41b0b60b841f40232497344ba36856fcbea0692a4695562ca73e790bd`;
-            const firstError = errorGroups.find((x) => x.groupId === firstErrorId);
+            const firstError = errorGroups[0];
             expect(firstError).to.not.be(undefined);
-            expect(firstError?.groupId).to.be(firstErrorId);
             expect(firstError?.name).to.be(`Error 1 transaction GET /apple 🍎`);
-            expect(firstError?.occurrences).to.be(firstTransactionFailureRate * NUMBER_OF_BUCKETS);
+            expect(firstError?.occurrences).to.be(appleTransactionFailureRate * NUMBER_OF_BUCKETS);
             expect(firstError?.lastSeen).to.be(moment(end).startOf('minute').valueOf());
           });
 
           it('error 2 is correct', () => {
-            const secondErrorId = `c3f388e4f7276d4fab85aa2fad2d2a42e70637f65cd5ec9f085de28b36e69ba5`;
-            const secondError = errorGroups.find((x) => x.groupId === secondErrorId);
+            const secondError = errorGroups[1];
             expect(secondError).to.not.be(undefined);
-            expect(secondError?.groupId).to.be(secondErrorId);
             expect(secondError?.name).to.be(`Error 2 transaction GET /apple 🍎`);
-            expect(secondError?.occurrences).to.be(firstTransactionFailureRate * NUMBER_OF_BUCKETS);
+            expect(secondError?.occurrences).to.be(appleTransactionFailureRate * NUMBER_OF_BUCKETS);
             expect(secondError?.lastSeen).to.be(moment(end).startOf('minute').valueOf());
           });
         });

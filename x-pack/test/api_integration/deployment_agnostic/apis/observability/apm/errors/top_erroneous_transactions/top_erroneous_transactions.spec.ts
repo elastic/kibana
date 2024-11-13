@@ -71,11 +71,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     // FLAKY: https://github.com/elastic/kibana/issues/177637
     describe('when data is loaded', () => {
       const {
+        appleTransaction: { name: appleTransactionName, failureRate: appleTransactionFailureRate },
         bananaTransaction: {
           name: bananaTransactionName,
           failureRate: bananaTransactionFailureRate,
         },
-        appleTransaction: { name: appleTransactionName, failureRate: appleTransactionFailureRate },
       } = config;
 
       describe('returns the correct data', () => {

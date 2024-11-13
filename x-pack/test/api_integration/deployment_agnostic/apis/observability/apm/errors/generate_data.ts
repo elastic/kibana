@@ -9,7 +9,7 @@ import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export const config = {
   appleTransaction: {
-    name: 'GET /apple 🍎 ',
+    name: 'GET /apple 🍎',
     successRate: 75,
     failureRate: 25,
   },
