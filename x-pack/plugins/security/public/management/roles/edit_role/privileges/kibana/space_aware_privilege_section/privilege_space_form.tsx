@@ -267,6 +267,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               onChangeAll={this.onChangeAllFeaturePrivileges}
               kibanaPrivileges={this.props.kibanaPrivileges}
               privilegeIndex={this.state.privilegeIndex}
+              canAccessRoleManagement={true}
               canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
               disabled={this.state.selectedBasePrivilege.length > 0 || !hasSelectedSpaces}
               allSpacesSelected={this.state.selectedSpaceIds.includes(ALL_SPACES_ID)}

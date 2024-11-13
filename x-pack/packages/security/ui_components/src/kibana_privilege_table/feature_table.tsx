@@ -45,6 +45,7 @@ interface Props {
   privilegeIndex: number;
   onChange: (featureId: string, privileges: string[]) => void;
   onChangeAll: (privileges: string[]) => void;
+  canAccessRoleManagement: boolean;
   canCustomizeSubFeaturePrivileges: boolean;
   allSpacesSelected: boolean;
   disabled?: boolean;
@@ -379,7 +380,7 @@ export class FeatureTable extends Component<Props, State> {
   };
 
   private getCategoryHelpText = (category: AppCategory) => {
-    if (category.id === 'management') {
+    if (category.id === 'management' && this.props.canAccessRoleManagement) {
       return i18n.translate(
         'xpack.security.management.editRole.featureTable.managementCategoryHelpText',
         {
