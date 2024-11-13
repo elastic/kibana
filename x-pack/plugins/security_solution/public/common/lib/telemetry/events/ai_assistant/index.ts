@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { TelemetryEvent } from '../../types';
-import { TelemetryEventTypes } from '../../constants';
+import type { AssistantTelemetryEvent } from './types';
+import { AssistantEventTypes } from './types';
 
-export const assistantInvokedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.AssistantInvoked,
+export const assistantInvokedEvent: AssistantTelemetryEvent = {
+  eventType: AssistantEventTypes.AssistantInvoked,
   schema: {
     conversationId: {
       type: 'keyword',
@@ -28,8 +28,8 @@ export const assistantInvokedEvent: TelemetryEvent = {
   },
 };
 
-export const assistantMessageSentEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.AssistantMessageSent,
+export const assistantMessageSentEvent: AssistantTelemetryEvent = {
+  eventType: AssistantEventTypes.AssistantMessageSent,
   schema: {
     conversationId: {
       type: 'keyword',
@@ -75,8 +75,8 @@ export const assistantMessageSentEvent: TelemetryEvent = {
   },
 };
 
-export const assistantQuickPrompt: TelemetryEvent = {
-  eventType: TelemetryEventTypes.AssistantQuickPrompt,
+export const assistantQuickPrompt: AssistantTelemetryEvent = {
+  eventType: AssistantEventTypes.AssistantQuickPrompt,
   schema: {
     conversationId: {
       type: 'keyword',
@@ -95,8 +95,8 @@ export const assistantQuickPrompt: TelemetryEvent = {
   },
 };
 
-export const assistantSettingToggledEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.AssistantSettingToggled,
+export const assistantSettingToggledEvent: AssistantTelemetryEvent = {
+  eventType: AssistantEventTypes.AssistantSettingToggled,
   schema: {
     alertsCountUpdated: {
       type: 'boolean',
@@ -114,3 +114,10 @@ export const assistantSettingToggledEvent: TelemetryEvent = {
     },
   },
 };
+
+export const assistantTelemetryEvents = [
+  assistantInvokedEvent,
+  assistantMessageSentEvent,
+  assistantQuickPrompt,
+  assistantSettingToggledEvent,
+];
