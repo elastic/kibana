@@ -249,23 +249,16 @@ export const MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL = i18n.translate(
   }
 );
 
-export const GROUP_BY_TECH_PREVIEW_LABEL_APPEND = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsTechPreviewLabelAppend',
+export const ALERT_SUPPRESSION_FIELDS_TECH_PREVIEW_LABEL_APPEND = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionTechPreviewLabelAppend',
   {
     defaultMessage: 'Optional (Technical Preview)',
   }
 );
 
-export const GROUP_BY_GA_LABEL_APPEND = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsGALabelAppend',
+export const ALERT_SUPPRESSION_FIELDS_GA_LABEL_APPEND = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionGALabelAppend',
   {
     defaultMessage: 'Optional',
-  }
-);
-
-export const GROUP_BY_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel',
-  {
-    defaultMessage: 'Suppress alerts by',
   }
 );
