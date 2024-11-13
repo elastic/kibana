@@ -64,7 +64,7 @@ export const getCasesBaseKibanaFeature = ({
         },
         ui: uiCapabilities.all,
         replacedBy: {
-          default: [{ feature: CASES_FEATURE_ID_V2, privileges: ['all', 'create_comment'] }],
+          default: [{ feature: CASES_FEATURE_ID_V2, privileges: ['all'] }],
           minimal: [
             {
               feature: CASES_FEATURE_ID_V2,
