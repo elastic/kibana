@@ -20,13 +20,19 @@ export const normalizeValueType = (value: string): keyof typeof fieldsConfig.val
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const GENERIC_REGEX = /^[a-zA-Z0-9._:/\\]+$/;
 
+const notStringError = (path: string) => ({
+  code: 'ERR_NOT_STRING',
+  message: 'Value should be a string',
+  path,
+});
+
 const { emptyField } = fieldValidators;
 
-const emailValidator: ValidationFunc = (...args: Parameters<ValidationFunc>) => {
+export const emailValidator: ValidationFunc = (...args: Parameters<ValidationFunc>) => {
   const [{ value, path }] = args;
 
   if (typeof value !== 'string') {
-    return emptyField('Value is required')(...args);
+    return notStringError(path);
   }
 
   if (!EMAIL_REGEX.test(value)) {
@@ -38,11 +44,11 @@ const emailValidator: ValidationFunc = (...args: Parameters<ValidationFunc>) => 
   }
 };
 
-const genericValidator: ValidationFunc = (...args: Parameters<ValidationFunc>) => {
+export const genericValidator: ValidationFunc = (...args: Parameters<ValidationFunc>) => {
   const [{ value, path }] = args;
 
   if (typeof value !== 'string') {
-    return emptyField('Value is required')(...args);
+    return notStringError(path);
   }
 
   if (!GENERIC_REGEX.test(value)) {
