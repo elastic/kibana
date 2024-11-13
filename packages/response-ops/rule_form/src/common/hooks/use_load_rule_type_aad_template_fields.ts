@@ -16,7 +16,6 @@ import {
   getDescription,
 } from '@kbn/alerts-ui-shared/src/common/apis';
 import { useState } from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
 
 export interface UseLoadRuleTypeAadTemplateFieldProps {
   http: HttpStart;
@@ -32,14 +31,12 @@ export const useLoadRuleTypeAadTemplateField = (props: UseLoadRuleTypeAadTemplat
   const [EcsFlat, setEcsFlat] = useState<Record<string, EcsMetadata> | null>(null);
   const { http, ruleTypeId, enabled, cacheTime } = props;
 
-  useEffectOnce(() => {
-    import('@elastic/ecs').then((pkg) => {
-      setEcsFlat(pkg.EcsFlat);
-    });
-  });
-
-  const queryFn = () => {
-    if (!EcsFlat) return;
+  const queryFn = async () => {
+    if (!EcsFlat) {
+      await import('@elastic/ecs').then((pkg) => {
+        setEcsFlat(pkg.EcsFlat);
+      });
+    }
     if (!ruleTypeId) {
       return;
     }
