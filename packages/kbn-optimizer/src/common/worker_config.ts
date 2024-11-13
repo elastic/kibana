@@ -10,7 +10,7 @@
 import Path from 'path';
 
 import { UnknownVals } from './ts_helpers';
-import { ThemeTags, parseThemeTags } from './theme_tags';
+import { ThemeTags, parseThemeTags } from '@kbn/core-ui-settings-common';
 
 export interface WorkerConfig {
   readonly repoRoot: string;
