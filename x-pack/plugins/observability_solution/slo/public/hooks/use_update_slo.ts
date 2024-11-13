@@ -10,9 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { encode } from '@kbn/rison';
 import type { FindSLOResponse, UpdateSLOInput, UpdateSLOResponse } from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useKibana } from '../utils/kibana_react';
 import { paths } from '../../common/locators/paths';
+import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
+import { usePluginContext } from './use_plugin_context';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -23,6 +24,7 @@ export function useUpdateSlo() {
     notifications: { toasts },
   } = useKibana().services;
   const queryClient = useQueryClient();
+  const { sloClient } = usePluginContext();
 
   return useMutation<
     UpdateSLOResponse,
@@ -32,8 +34,9 @@ export function useUpdateSlo() {
   >(
     ['updateSlo'],
     ({ sloId, slo }) => {
-      const body = JSON.stringify(slo);
-      return http.put<UpdateSLOResponse>(`/api/observability/slos/${sloId}`, { body });
+      return sloClient.fetch('PUT /api/observability/slos/{id} 2023-10-31', {
+        params: { path: { id: sloId }, body: slo },
+      });
     },
     {
       onSuccess: (_data, { slo: { name } }) => {

@@ -9,6 +9,7 @@ import type { CellAction, CellActionExecutionContext } from '@kbn/cell-actions';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { StartServices } from '../../types';
 import type { SecurityCellActionExecutionContext } from './types';
+import { AppEventTypes } from '../../common/lib/telemetry';
 
 export const enhanceActionWithTelemetry = (
   action: CellAction<CellActionExecutionContext>,
@@ -19,7 +20,7 @@ export const enhanceActionWithTelemetry = (
   const enhancedExecute = (
     context: ActionExecutionContext<SecurityCellActionExecutionContext>
   ): Promise<void> => {
-    telemetry.reportCellActionClicked({
+    telemetry.reportEvent(AppEventTypes.CellActionClicked, {
       actionId: rest.id,
       displayName: rest.getDisplayName(context),
       fieldName: context.data.map(({ field }) => field.name).join(', '),
