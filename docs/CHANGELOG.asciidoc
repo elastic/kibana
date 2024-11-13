@@ -102,7 +102,7 @@ The Stack Monitoring pages Overview, Nodes, Logs can stop working with the error
 *Workaround* +
 Disabling the `Set feature visibility > Logs` feature at Kibana Space settings level will prevent the error from occurring. Please note the `Logs` feature will not be available on such space.
 
-It's also possible to `Observability > Logs` feature privilege to `None` on the role level - this will hide the `Logs` feature for individual users and prevent the error for these users as well.
+It's also possible to set the `Observability > Logs` feature privilege to `None` on the role level. This will hide the `Logs` feature for individual users and prevent the error for these users as well.
 
 For more information, refer to {kibana-issue}199902[#199902].
 ====
