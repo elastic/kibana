@@ -6,7 +6,7 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { unflattenObject } from '../../object/unflatten_object';
+import { unflattenObject } from '@kbn/observability-utils-common/object/unflatten_object';
 
 export function esqlResultToPlainObjects<TDocument = unknown>(
   result: ESQLSearchResponse
