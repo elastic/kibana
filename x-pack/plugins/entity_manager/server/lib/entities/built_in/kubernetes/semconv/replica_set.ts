@@ -30,19 +30,5 @@ export const builtInKubernetesReplicaSetSemConvEntityDefinition: EntityDefinitio
         frequency: '5m',
       },
     },
-    metadata: [
-      {
-        source: '_index',
-        destination: 'source_index',
-      },
-      {
-        source: 'data_stream.type',
-        destination: 'source_data_stream.type',
-      },
-      {
-        source: 'data_stream.dataset',
-        destination: 'source_data_stream.dataset',
-      },
-      ...commonOtelMetadata,
-    ],
+    metadata: commonOtelMetadata,
   });

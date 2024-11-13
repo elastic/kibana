@@ -29,19 +29,5 @@ export const builtInKubernetesReplicaSetEcsEntityDefinition: EntityDefinition =
         frequency: '5m',
       },
     },
-    metadata: [
-      {
-        source: '_index',
-        destination: 'source_index',
-      },
-      {
-        source: 'data_stream.type',
-        destination: 'source_data_stream.type',
-      },
-      {
-        source: 'data_stream.dataset',
-        destination: 'source_data_stream.dataset',
-      },
-      ...commonEcsMetadata,
-    ],
+    metadata: commonEcsMetadata,
   });

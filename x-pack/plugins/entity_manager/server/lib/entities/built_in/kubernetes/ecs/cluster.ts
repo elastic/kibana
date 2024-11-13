@@ -8,6 +8,7 @@
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
 import { commonEcsIndexPatterns } from '../common/ecs_index_patterns';
+import { globalMetadata } from '../common/global_metadata';
 
 export const builtInKubernetesClusterEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
@@ -30,18 +31,7 @@ export const builtInKubernetesClusterEcsEntityDefinition: EntityDefinition =
       },
     },
     metadata: [
-      {
-        source: '_index',
-        destination: 'source_index',
-      },
-      {
-        source: 'data_stream.type',
-        destination: 'source_data_stream.type',
-      },
-      {
-        source: 'data_stream.dataset',
-        destination: 'source_data_stream.dataset',
-      },
+      ...globalMetadata,
       {
         source: 'orchestrator.namespace',
         destination: 'orchestrator.namespace',
