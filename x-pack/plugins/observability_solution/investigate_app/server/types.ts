@@ -10,6 +10,7 @@ import {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -18,6 +19,7 @@ export interface ConfigSchema {}
 export interface InvestigateAppSetupDependencies {
   observability: ObservabilityPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface InvestigateAppStartDependencies {

@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_EVALUATION_VALUE, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { useKibana } from '../../../../../../utils/kibana_react';
+import { useKibana } from '../../../../../../hooks/use_kibana';
 import { ErrorRateChart } from '../../../../error_rate_chart';
 import { TimeRange } from '../../../../error_rate_chart/use_lens_definition';
 import { BurnRateAlert } from '../../types';

@@ -816,13 +816,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud.project.id',
           });
 
-          const applyButton = await testSubjects.find(
-            'datasetQualityIncreaseFieldMappingLimitButtonButton'
-          );
-
-          await applyButton.click();
-
           await retry.tryForTime(5000, async () => {
+            const applyButton = await testSubjects.find(
+              'datasetQualityIncreaseFieldMappingLimitButtonButton'
+            );
+            await applyButton.click();
+
             // Should display the error callout
             await testSubjects.existOrFail('datasetQualityDetailsNewFieldLimitErrorCallout');
           });
