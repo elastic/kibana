@@ -1561,6 +1561,11 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/functional/es_archives/cases/signals/hosts_users @elastic/response-ops
 
 # Enterprise Search
+# search
+/x-pack/test/functional_solution_sidenav/tests/search_sidenav.ts @elastic/search-kibana
+/x-pack/test/functional/services/search_sessions.ts @elastic/search-kibana
+/x-pack/test/functional/page_objects/search_* @elastic/search-kibana
+/x-pack/test/functional/apps/search_playground @elastic/search-kibana
 /x-pack/test_serverless/functional/page_objects/svl_ingest_pipelines.ts @elastic/search-kibana
 /x-pack/test/functional/apps/dev_tools/embedded_console.ts @elastic/search-kibana
 /x-pack/test/functional/apps/ingest_pipelines/feature_controls/ingest_pipelines_security.ts @elastic/search-kibana
