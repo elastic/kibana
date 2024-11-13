@@ -288,7 +288,10 @@ export const getDatasetQualityTableColumns = ({
       field: 'quality',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
-        <DatasetQualityIndicator isLoading={loadingDegradedStats} dataStreamStat={dataStreamStat} />
+        <DatasetQualityIndicator
+          isLoading={loadingDegradedStats}
+          quality={dataStreamStat.quality}
+        />
       ),
       width: '140px',
     },
