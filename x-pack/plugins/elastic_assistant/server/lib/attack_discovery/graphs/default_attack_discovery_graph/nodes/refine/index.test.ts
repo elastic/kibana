@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { FakeLLM } from '@langchain/core/utils/testing';
 
-import { getGenerateNode } from '.';
+import { getRefineNode } from '.';
 import {
   mockAnonymizedAlerts,
   mockAnonymizedAlertsReplacements,
 } from '../../../../evaluation/__mocks__/mock_anonymized_alerts';
-import { getAnonymizedAlertsFromState } from './helpers/get_anonymized_alerts_from_state';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
 import { getDefaultAttackDiscoveryPrompt } from '../helpers/get_default_attack_discovery_prompt';
-import { getDefaultRefinePrompt } from '../refine/helpers/get_default_refine_prompt';
+import { getDefaultRefinePrompt } from './helpers/get_default_refine_prompt';
 import { GraphState } from '../../types';
 import {
   getParsedAttackDiscoveriesMock,
@@ -25,6 +25,27 @@ import {
 } from '../../../../../../__mocks__/raw_attack_discoveries';
 
 const attackDiscoveryTimestamp = '2024-10-11T17:55:59.702Z';
+
+export const mockUnrefinedAttackDiscoveries: AttackDiscovery[] = [
+  {
+    title: 'unrefinedTitle1',
+    alertIds: ['unrefinedAlertId1', 'unrefinedAlertId2', 'unrefinedAlertId3'],
+    timestamp: '2024-10-10T22:59:52.749Z',
+    detailsMarkdown: 'unrefinedDetailsMarkdown1',
+    summaryMarkdown: 'unrefinedSummaryMarkdown1 - entity A',
+    mitreAttackTactics: ['Input Capture'],
+    entitySummaryMarkdown: 'entitySummaryMarkdown1',
+  },
+  {
+    title: 'unrefinedTitle2',
+    alertIds: ['unrefinedAlertId3', 'unrefinedAlertId4', 'unrefinedAlertId5'],
+    timestamp: '2024-10-10T22:59:52.749Z',
+    detailsMarkdown: 'unrefinedDetailsMarkdown2',
+    summaryMarkdown: 'unrefinedSummaryMarkdown2 - also entity A',
+    mitreAttackTactics: ['Credential Access'],
+    entitySummaryMarkdown: 'entitySummaryMarkdown2',
+  },
+];
 
 jest.mock('../helpers/get_chain_with_format_instructions', () => {
   const mockInvoke = jest.fn().mockResolvedValue('');
@@ -41,21 +62,18 @@ jest.mock('../helpers/get_chain_with_format_instructions', () => {
   };
 });
 
-const mockLogger = {
-  debug: (x: Function) => x(),
-} as unknown as Logger;
-
+const mockLogger = loggerMock.create();
 let mockLlm: ActionsClientLlm;
 
 const initialGraphState: GraphState = {
   attackDiscoveries: null,
   attackDiscoveryPrompt: getDefaultAttackDiscoveryPrompt(),
   anonymizedAlerts: [...mockAnonymizedAlerts],
-  combinedGenerations: '',
+  combinedGenerations: 'gen1',
   combinedRefinements: '',
   errors: [],
-  generationAttempts: 0,
-  generations: [],
+  generationAttempts: 1,
+  generations: ['gen1'],
   hallucinationFailures: 0,
   maxGenerationAttempts: 10,
   maxHallucinationFailures: 5,
@@ -65,10 +83,10 @@ const initialGraphState: GraphState = {
   replacements: {
     ...mockAnonymizedAlertsReplacements,
   },
-  unrefinedResults: null,
+  unrefinedResults: [...mockUnrefinedAttackDiscoveries],
 };
 
-describe('getGenerateNode', () => {
+describe('getRefineNode', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -85,33 +103,34 @@ describe('getGenerateNode', () => {
   });
 
   it('returns a function', () => {
-    const generateNode = getGenerateNode({
+    const refineNode = getRefineNode({
       llm: mockLlm,
       logger: mockLogger,
     });
 
-    expect(typeof generateNode).toBe('function');
+    expect(typeof refineNode).toBe('function');
   });
 
-  it('invokes the chain with the expected alerts from state and formatting instructions', async () => {
+  it('invokes the chain with the unrefinedResults from state and format instructions', async () => {
     const mockInvoke = getChainWithFormatInstructions(mockLlm).chain.invoke as jest.Mock;
 
-    const generateNode = getGenerateNode({
+    const refineNode = getRefineNode({
       llm: mockLlm,
       logger: mockLogger,
     });
 
-    await generateNode(initialGraphState);
+    await refineNode(initialGraphState);
 
     expect(mockInvoke).toHaveBeenCalledWith({
       format_instructions: ['mock format instructions'],
       query: `${initialGraphState.attackDiscoveryPrompt}
 
-Use context from the following alerts to provide insights:
+${getDefaultRefinePrompt()}
 
 \"\"\"
-${getAnonymizedAlertsFromState(initialGraphState).join('\n\n')}
+${JSON.stringify(initialGraphState.unrefinedResults, null, 2)}
 \"\"\"
+
 `,
     });
   });
@@ -126,21 +145,21 @@ ${getAnonymizedAlertsFromState(initialGraphState).join('\n\n')}
 
     mockInvoke.mockResolvedValue(response);
 
-    const generateNode = getGenerateNode({
-      llm: mockLlmWithResponse,
+    const refineNode = getRefineNode({
+      llm: mockLlm,
       logger: mockLogger,
     });
 
-    const state = await generateNode(initialGraphState);
+    const state = await refineNode(initialGraphState);
 
     expect(state).toEqual({
       ...initialGraphState,
-      combinedGenerations: '{"key": "value"}',
+      combinedRefinements: '{"key": "value"}',
       errors: [
-        'generate node is unable to parse (fake) response from attempt 0; (this may be an incomplete response from the model): [\n  {\n    "code": "invalid_type",\n    "expected": "array",\n    "received": "undefined",\n    "path": [\n      "insights"\n    ],\n    "message": "Required"\n  }\n]',
+        'refine node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): [\n  {\n    "code": "invalid_type",\n    "expected": "array",\n    "received": "undefined",\n    "path": [\n      "insights"\n    ],\n    "message": "Required"\n  }\n]',
       ],
-      generationAttempts: 1,
-      generations: ['{"key": "value"}'],
+      generationAttempts: 2,
+      refinements: ['{"key": "value"}'],
     });
   });
 
@@ -156,31 +175,30 @@ ${getAnonymizedAlertsFromState(initialGraphState).join('\n\n')}
 
     mockInvoke.mockResolvedValue(hallucinatedResponse);
 
-    const generateNode = getGenerateNode({
+    const refineNode = getRefineNode({
       llm: mockLlmWithHallucination,
       logger: mockLogger,
     });
 
     const withPreviousGenerations = {
       ...initialGraphState,
-      combinedGenerations: '{"key": "value"}',
-      generationAttempts: 1,
-      generations: ['{"key": "value"}'],
+      combinedRefinements: '{"key": "value"}',
+      refinements: ['{"key": "value"}'],
     };
 
-    const state = await generateNode(withPreviousGenerations);
+    const state = await refineNode(withPreviousGenerations);
 
     expect(state).toEqual({
       ...withPreviousGenerations,
-      combinedGenerations: '', // <-- reset
+      combinedRefinements: '', // <-- reset
       generationAttempts: 2, // <-- incremented
-      generations: [], // <-- reset
+      refinements: [], // <-- reset
       hallucinationFailures: 1, // <-- incremented
     });
   });
 
-  it('discards previous generations and starts over when the maxRepeatedGenerations limit is reached', async () => {
-    const repeatedResponse = 'gen1';
+  it('discards previous refinements and starts over when the maxRepeatedGenerations limit is reached', async () => {
+    const repeatedResponse = '{"key": "value"}';
 
     const mockLlmWithRepeatedGenerations = new FakeLLM({
       response: repeatedResponse,
@@ -190,30 +208,30 @@ ${getAnonymizedAlertsFromState(initialGraphState).join('\n\n')}
 
     mockInvoke.mockResolvedValue(repeatedResponse);
 
-    const generateNode = getGenerateNode({
+    const refineNode = getRefineNode({
       llm: mockLlmWithRepeatedGenerations,
       logger: mockLogger,
     });
 
     const withPreviousGenerations = {
       ...initialGraphState,
-      combinedGenerations: 'gen1gen1',
-      generationAttempts: 2,
-      generations: ['gen1', 'gen1'],
+      combinedRefinements: '{"key": "value"}{"key": "value"}',
+      generationAttempts: 3,
+      refinements: ['{"key": "value"}', '{"key": "value"}'],
     };
 
-    const state = await generateNode(withPreviousGenerations);
+    const state = await refineNode(withPreviousGenerations);
 
     expect(state).toEqual({
       ...withPreviousGenerations,
-      combinedGenerations: '',
-      generationAttempts: 3, // <-- incremented
-      generations: [],
+      combinedRefinements: '',
+      generationAttempts: 4, // <-- incremented
+      refinements: [],
     });
   });
 
-  it('combines the response with the previous generations', async () => {
-    const response = 'gen1';
+  it('combines the response with the previous refinements', async () => {
+    const response = 'refine1';
 
     const mockLlmWithResponse = new FakeLLM({
       response,
@@ -223,32 +241,32 @@ ${getAnonymizedAlertsFromState(initialGraphState).join('\n\n')}
 
     mockInvoke.mockResolvedValue(response);
 
-    const generateNode = getGenerateNode({
+    const refineNode = getRefineNode({
       llm: mockLlmWithResponse,
       logger: mockLogger,
     });
 
     const withPreviousGenerations = {
       ...initialGraphState,
-      combinedGenerations: 'gen0',
-      generationAttempts: 1,
-      generations: ['gen0'],
+      combinedRefinements: 'refine0',
+      generationAttempts: 2,
+      refinements: ['refine0'],
     };
 
-    const state = await generateNode(withPreviousGenerations);
+    const state = await refineNode(withPreviousGenerations);
 
     expect(state).toEqual({
       ...withPreviousGenerations,
-      combinedGenerations: 'gen0gen1',
+      combinedRefinements: 'refine0refine1',
       errors: [
-        'generate node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): SyntaxError: Unexpected token \'g\', "gen0gen1" is not valid JSON',
+        'refine node is unable to parse (fake) response from attempt 2; (this may be an incomplete response from the model): SyntaxError: Unexpected token \'r\', "refine0refine1" is not valid JSON',
       ],
-      generationAttempts: 2,
-      generations: ['gen0', 'gen1'],
+      generationAttempts: 3,
+      refinements: ['refine0', 'refine1'],
     });
   });
 
-  it('returns unrefined results when combined responses pass validation', async () => {
+  it('returns refined results when combined responses pass validation', async () => {
     // split the response into two parts to simulate a valid response
     const splitIndex = 100; // arbitrary index
     const firstResponse = getRawAttackDiscoveriesMock().slice(0, splitIndex);
@@ -262,67 +280,63 @@ ${getAnonymizedAlertsFromState(initialGraphState).join('\n\n')}
 
     mockInvoke.mockResolvedValue(secondResponse);
 
-    const generateNode = getGenerateNode({
+    const refineNode = getRefineNode({
       llm: mockLlmWithResponse,
       logger: mockLogger,
     });
 
     const withPreviousGenerations = {
       ...initialGraphState,
-      combinedGenerations: firstResponse,
-      generationAttempts: 1,
-      generations: [firstResponse],
+      combinedRefinements: firstResponse,
+      generationAttempts: 2,
+      refinements: [firstResponse],
     };
 
-    const state = await generateNode(withPreviousGenerations);
+    const state = await refineNode(withPreviousGenerations);
 
     expect(state).toEqual({
       ...withPreviousGenerations,
-      attackDiscoveries: null,
-      combinedGenerations: firstResponse.concat(secondResponse),
-      errors: [],
-      generationAttempts: 2,
-      generations: [firstResponse, secondResponse],
-      unrefinedResults: getParsedAttackDiscoveriesMock(attackDiscoveryTimestamp), // <-- generated from the combined response
+      attackDiscoveries: getParsedAttackDiscoveriesMock(attackDiscoveryTimestamp),
+      combinedRefinements: firstResponse.concat(secondResponse),
+      generationAttempts: 3,
+      refinements: [firstResponse, secondResponse],
     });
   });
 
-  it('skips the refinements step if the max number of retries has already been reached', async () => {
-    // split the response into two parts to simulate a valid response
-    const splitIndex = 100; // arbitrary index
-    const firstResponse = getRawAttackDiscoveriesMock().slice(0, splitIndex);
-    const secondResponse = getRawAttackDiscoveriesMock().slice(splitIndex);
+  it('uses the unrefined results when the max number of retries has already been reached', async () => {
+    const response = 'this will not pass JSON parsing';
 
     const mockLlmWithResponse = new FakeLLM({
-      response: secondResponse,
+      response,
     }) as unknown as ActionsClientLlm;
     const mockInvoke = getChainWithFormatInstructions(mockLlmWithResponse).chain
       .invoke as jest.Mock;
 
-    mockInvoke.mockResolvedValue(secondResponse);
+    mockInvoke.mockResolvedValue(response);
 
-    const generateNode = getGenerateNode({
+    const refineNode = getRefineNode({
       llm: mockLlmWithResponse,
       logger: mockLogger,
     });
 
     const withPreviousGenerations = {
       ...initialGraphState,
-      combinedGenerations: firstResponse,
+      combinedRefinements: 'refine1',
       generationAttempts: 9,
-      generations: [firstResponse],
+      refinements: ['refine1'],
     };
 
-    const state = await generateNode(withPreviousGenerations);
+    const state = await refineNode(withPreviousGenerations);
 
     expect(state).toEqual({
       ...withPreviousGenerations,
-      attackDiscoveries: getParsedAttackDiscoveriesMock(attackDiscoveryTimestamp), // <-- skip the refinement step
-      combinedGenerations: firstResponse.concat(secondResponse),
-      errors: [],
+      attackDiscoveries: state.unrefinedResults, // <-- the unrefined results are returned
+      combinedRefinements: 'refine1this will not pass JSON parsing',
+      errors: [
+        'refine node is unable to parse (fake) response from attempt 9; (this may be an incomplete response from the model): SyntaxError: Unexpected token \'r\', "refine1thi"... is not valid JSON',
+      ],
       generationAttempts: 10,
-      generations: [firstResponse, secondResponse],
-      unrefinedResults: getParsedAttackDiscoveriesMock(attackDiscoveryTimestamp), // <-- generated from the combined response
+      refinements: ['refine1', response],
     });
   });
 });
