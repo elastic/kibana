@@ -25,6 +25,8 @@ describe('.isConfigValid()', () => {
         useCurrentDateRange: false,
         useCurrentFilters: false,
         openInNewTab: false,
+        overflowEllipsis: true,
+        overflowTextWrap: false,
       })
     ).toBe(false);
   });
@@ -36,6 +38,8 @@ describe('.isConfigValid()', () => {
         useCurrentDateRange: false,
         useCurrentFilters: false,
         openInNewTab: false,
+        overflowEllipsis: true,
+        overflowTextWrap: false,
       })
     ).toBe(true);
   });
@@ -111,6 +115,8 @@ describe('.execute() & getHref', () => {
       useCurrentFilters: false,
       useCurrentDateRange: false,
       openInNewTab: false,
+      overflowEllipsis: true,
+      overflowTextWrap: false,
       ...config,
     };
 

@@ -124,6 +124,8 @@ describe('UrlDrilldown', () => {
         },
         openInNewTab: false,
         encodeUrl: true,
+        overflowEllipsis: true,
+        overflowTextWrap: false,
       };
 
       const context: ValueClickContext = {
@@ -142,6 +144,8 @@ describe('UrlDrilldown', () => {
         },
         openInNewTab: false,
         encodeUrl: true,
+        overflowEllipsis: true,
+        overflowTextWrap: false,
       };
 
       const context: ValueClickContext = {
@@ -162,6 +166,8 @@ describe('UrlDrilldown', () => {
         },
         openInNewTab: false,
         encodeUrl: true,
+        overflowEllipsis: true,
+        overflowTextWrap: false,
       };
 
       const context: ValueClickContext = {
@@ -183,6 +189,8 @@ describe('UrlDrilldown', () => {
         },
         openInNewTab: false,
         encodeUrl: true,
+        overflowEllipsis: true,
+        overflowTextWrap: false,
       };
 
       const context: ValueClickContext = {
@@ -208,6 +216,8 @@ describe('UrlDrilldown', () => {
         },
         openInNewTab: false,
         encodeUrl: true,
+        overflowEllipsis: true,
+        overflowTextWrap: false,
       };
 
       const context: ValueClickContext = {
@@ -229,6 +239,8 @@ describe('UrlDrilldown', () => {
         },
         openInNewTab: false,
         encodeUrl: true,
+        overflowEllipsis: true,
+        overflowTextWrap: false,
       };
 
       const context: ValueClickContext = {
@@ -251,6 +263,8 @@ describe('UrlDrilldown', () => {
         },
         openInNewTab: false,
         encodeUrl: true,
+        overflowEllipsis: true,
+        overflowTextWrap: false,
       };
 
       const context: ValueClickContext = {
@@ -280,6 +294,8 @@ describe('UrlDrilldown', () => {
         },
         openInNewTab: false,
         encodeUrl: true,
+        overflowEllipsis: true,
+        overflowTextWrap: false,
       };
 
       const context: ValueClickContext = {
@@ -306,6 +322,8 @@ describe('UrlDrilldown', () => {
         },
         openInNewTab: false,
         encodeUrl: true,
+        overflowEllipsis: true,
+        overflowTextWrap: false,
       };
 
       const context: ValueClickContext = {
@@ -334,6 +352,8 @@ describe('UrlDrilldown', () => {
         },
         openInNewTab: false,
         encodeUrl: true,
+        overflowEllipsis: true,
+        overflowTextWrap: false,
       };
 
       const context: ValueClickContext = {
@@ -588,6 +608,8 @@ describe('encoding', () => {
       },
       openInNewTab: false,
       encodeUrl: true,
+      overflowEllipsis: true,
+      overflowTextWrap: false,
     };
     const url = await urlDrilldown.getHref(config, context);
 
@@ -601,6 +623,8 @@ describe('encoding', () => {
       },
       openInNewTab: false,
       encodeUrl: true,
+      overflowEllipsis: true,
+      overflowTextWrap: false,
     };
     const url = await urlDrilldown.getHref(config, context);
 
@@ -614,6 +638,8 @@ describe('encoding', () => {
       },
       openInNewTab: false,
       encodeUrl: false,
+      overflowEllipsis: true,
+      overflowTextWrap: false,
     };
     const url = await urlDrilldown.getHref(config, context);
 
@@ -627,6 +653,8 @@ describe('encoding', () => {
       },
       openInNewTab: false,
       encodeUrl: false,
+      overflowEllipsis: true,
+      overflowTextWrap: false,
     };
     const url = await urlDrilldown.getHref(config, context);
 
@@ -640,6 +668,8 @@ describe('encoding', () => {
       },
       openInNewTab: false,
       encodeUrl: false,
+      overflowEllipsis: true,
+      overflowTextWrap: false,
     };
     const url = await urlDrilldown.getHref(config, context);
 

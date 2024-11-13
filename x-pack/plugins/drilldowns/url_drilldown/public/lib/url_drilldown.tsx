@@ -165,6 +165,8 @@ export class UrlDrilldown implements Drilldown<Config, ChartActionContext, Actio
     },
     openInNewTab: true,
     encodeUrl: true,
+    overflowEllipsis: true,
+    overflowTextWrap: false,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {
