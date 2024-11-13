@@ -1516,6 +1516,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
 # Response Ops team
+/x-pack/test/plugin_api_perf @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
 /x-pack/test/functional/page_objects/maintenance_windows_page.ts @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/observability/screenshot_creation/index.ts @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/observability/rules/rules_list.ts @elastic/response-ops
@@ -1539,8 +1540,6 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/functional/es_archives/cases @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
-/x-pack/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
-/x-pack/test/plugin_api_perf/test_suites/task_manager @elastic/response-ops
 /x-pack/test/screenshot_creation/apps/response_ops_docs @elastic/response-ops
 /x-pack/test/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 /x-pack/test/accessibility/apps/group3/rules_connectors.ts @elastic/response-ops
