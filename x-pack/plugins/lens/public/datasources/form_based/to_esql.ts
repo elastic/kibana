@@ -205,6 +205,8 @@ export function getESQLForLayer(
       );
     });
 
+  if (buckets.some((m) => !m)) return;
+
   if (buckets.length > 0) {
     esql += ` BY ${buckets.join(', ')}`;
 

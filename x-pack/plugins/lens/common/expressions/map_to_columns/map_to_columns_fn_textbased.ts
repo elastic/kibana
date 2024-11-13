@@ -41,8 +41,11 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
           name: originalColumn.label,
           meta: {
             ...column.meta,
-            ...(originalColumn.params
-              ? { params: originalColumn.params as SerializedFieldFormat }
+            ...(originalColumn.params && 'format' in (originalColumn.params as object)
+              ? {
+                  params: (originalColumn.params as Record<string, unknown>)
+                    .format as SerializedFieldFormat,
+                }
               : {}),
             ...(originalColumn.sourceField ? { field: originalColumn.sourceField } : {}),
           },
