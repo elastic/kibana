@@ -62,7 +62,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(response.body.errorGroups).to.empty();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177638
     describe('when data is loaded', () => {
       let errorGroups: ErrorGroups;
       const {

@@ -61,7 +61,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177336
     describe('when data is loaded', () => {
       describe('errors distribution', () => {
         const { appleTransaction, bananaTransaction } = config;

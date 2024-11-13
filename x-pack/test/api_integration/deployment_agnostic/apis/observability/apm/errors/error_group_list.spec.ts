@@ -53,7 +53,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177382
     describe('when data is loaded', () => {
       describe('errors group', () => {
         let apmSynthtraceEsClient: ApmSynthtraceEsClient;

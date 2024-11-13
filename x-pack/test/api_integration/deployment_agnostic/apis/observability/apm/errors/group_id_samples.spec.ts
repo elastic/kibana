@@ -77,7 +77,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(response.body.occurrencesCount).to.be(0);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177397
     describe('when samples data is loaded', () => {
       let errorsSamplesResponse: ErrorGroupSamples;
       const { bananaTransaction } = config;
@@ -102,7 +101,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177383
     describe('when error sample data is loaded', () => {
       describe('error sample id', () => {
         before(async () => {

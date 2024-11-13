@@ -68,7 +68,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(response.body.topErroneousTransactions).to.be.empty();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177637
     describe('when data is loaded', () => {
       const {
         appleTransaction: { name: appleTransactionName, failureRate: appleTransactionFailureRate },
