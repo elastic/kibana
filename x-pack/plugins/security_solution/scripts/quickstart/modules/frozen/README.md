@@ -1,4 +1,6 @@
-## Creating Frozen Data
+## Creating Frozen Data On Cloud
+
+The following instructions assume you have a cluster set up on ECH with at least one frozen tier node. To test frozen locally, follow instructions in https://docs.elastic.dev/security-soution/analyst-experience-team/eng-prod/how-to/configure-local-frozen-tier instead. Note that results may differ locally since ECH puts frozen shards on logically separate nodes whereas locally everything is running on your machine.
 
 This module provides utilities to quickly move data to the frozen tier for testing. The main API call that accomplishes this is `ilm.moveToStep`, however, there's setup that must be done first to make the index ready. The basic process to go from nothing to having data in frozen is:
 
