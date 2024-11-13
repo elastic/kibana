@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
-
 import { v4 as uuidV4 } from 'uuid';
+import { resolve } from 'path';
 import { FlagsReader, FlagOptions } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -33,20 +32,24 @@ export function parseFlags(flags: FlagsReader) {
   const serverlessType = flags.enum('serverless', ['es', 'oblt', 'security']);
   const isStateful = flags.boolean('stateful');
 
-  if ((!serverlessType && !isStateful) || (serverlessType && isStateful)) {
-    throw createFlagError(`expected exactly one --serverless=<type> or --stateful flag`);
+  if (!(serverlessType || isStateful) || (serverlessType && isStateful)) {
+    throw createFlagError(`Expected exactly one of --serverless=<type> or --stateful flag`);
   }
 
   const mode: CliSupportedServerModes = serverlessType
     ? `serverless=${serverlessType}`
     : 'stateful';
 
+  const esFrom = flags.enum('esFrom', ['source', 'snapshot', 'serverless']);
+  const installDir = flags.string('kibana-install-dir');
+  const logsDir = flags.boolean('logToFile')
+    ? resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
+    : undefined;
+
   return {
     mode,
-    esFrom: flags.enum('esFrom', ['source', 'snapshot', 'serverless']),
-    installDir: flags.string('kibana-install-dir'),
-    logsDir: flags.boolean('logToFile')
-      ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
-      : undefined,
+    esFrom,
+    installDir,
+    logsDir,
   };
 }

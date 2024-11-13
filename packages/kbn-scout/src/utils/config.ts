@@ -24,16 +24,21 @@ export const saveTestServersConfigOnDisk = (
   testServersConfig: ScoutServerConfig,
   log: ToolingLog
 ) => {
-  const jsonData = JSON.stringify(testServersConfig, null, 2);
-  // create temp directory to store test servers confugration
-  const tempDirPath = path.join(REPO_ROOT, '.scout', 'servers');
-  if (!Fs.existsSync(tempDirPath)) {
-    log.debug(`scout: creating new config directory: ${tempDirPath}`);
-    Fs.mkdirSync(tempDirPath, { recursive: true });
-  }
+  const configDirPath = path.resolve(REPO_ROOT, '.scout', 'servers');
+  const configFilePath = path.join(configDirPath, `local.json`);
 
-  const serversConfigPath = path.join(tempDirPath, `local.json`);
-  // saving file with local servers configuration
-  Fs.writeFileSync(serversConfigPath, jsonData, 'utf-8');
-  log.info(`scout: test configuration was saved to ${serversConfigPath}`);
+  try {
+    const jsonData = JSON.stringify(testServersConfig, null, 2);
+
+    if (!Fs.existsSync(configDirPath)) {
+      log.debug(`scout: creating configuration directory: ${configDirPath}`);
+      Fs.mkdirSync(configDirPath, { recursive: true });
+    }
+
+    Fs.writeFileSync(configFilePath, jsonData, 'utf-8');
+    log.info(`scout: Test server configuration saved at ${configFilePath}`);
+  } catch (error) {
+    log.error(`scout: Failed to save test server configuration - ${error.message}`);
+    throw new Error(`Failed to save test server configuration at ${configFilePath}`);
+  }
 };

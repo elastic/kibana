@@ -10,10 +10,17 @@
 import path from 'path';
 import { CliSupportedServerModes } from '../types';
 
-export const getConfigFilePath = (config: CliSupportedServerModes) => {
+export const getConfigFilePath = (config: CliSupportedServerModes): string => {
   if (config === 'stateful') {
     return path.join(__dirname, 'stateful', 'stateful.config.ts');
-  } else {
-    return path.join(__dirname, 'serverless', `${config.split('=')[1]}.serverless.config.ts`);
   }
+
+  const [mode, type] = config.split('=');
+  if (mode !== 'serverless' || !type) {
+    throw new Error(
+      `Invalid config format: ${config}. Expected "stateful" or "serverless=<type>".`
+    );
+  }
+
+  return path.join(__dirname, 'serverless', `${type}.serverless.config.ts`);
 };

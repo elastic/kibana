@@ -22,7 +22,7 @@ export const servers: ScoutLoaderConfig = {
   kbnTestServer: {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      '--serverless=es',
+      '--serverless=security',
       '--coreApp.allowDynamicConfigOverrides=true',
       `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
     ],

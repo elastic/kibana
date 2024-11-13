@@ -8,9 +8,10 @@
  */
 
 import path from 'path';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '../config';
 
-export const loadConfig = async (configPath: string) => {
+export const loadConfig = async (configPath: string, log: ToolingLog): Promise<Config> => {
   try {
     const absolutePath = path.resolve(configPath);
     const configModule = await import(absolutePath);
@@ -18,9 +19,9 @@ export const loadConfig = async (configPath: string) => {
     if (configModule.servers) {
       return new Config(configModule.servers);
     } else {
-      throw new Error(`No 'servers' found in the specified config file: ${absolutePath}`);
+      throw new Error(`No 'servers' found in the config file at path: ${absolutePath}`);
     }
   } catch (error) {
-    process.exit(1);
+    throw new Error(`Failed to load config from ${configPath}: ${error.message}`);
   }
 };

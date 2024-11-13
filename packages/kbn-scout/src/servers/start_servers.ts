@@ -27,7 +27,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     // get path to one of the predefined config files
     const configPath = getConfigFilePath(options.mode);
     // load config that is compatible with kbn-test input format
-    const config = await loadConfig(configPath);
+    const config = await loadConfig(configPath, log);
     // construct config for Playwright Test
     const scoutServerConfig = config.getTestServersConfig();
     // save test config to the file
