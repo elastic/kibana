@@ -212,12 +212,12 @@ export class SLOPlugin
       experimentalFeatures: this.experimentalFeatures,
       sloClient,
     });
-    
+
     const getCreateSLOFlyout = lazyWithContextProviders(
       lazy(() => import('./pages/slo_edit/shared_flyout/slo_add_form_flyout')),
       { spinnerSize: 'm' }
-    )
-    
+    );
+
     pluginsStart.discoverShared.features.registry.register({
       id: 'observability-create-slo',
       createSLOFlyout: getCreateSLOFlyout,
