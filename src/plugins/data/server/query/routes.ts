@@ -45,8 +45,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
       version,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
+          requiredPrivileges: ['savedQuery:read'],
         },
       },
       validate: {
@@ -83,8 +82,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
       version,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
+          requiredPrivileges: ['savedQuery:manage'],
         },
       },
       validate: {
@@ -115,8 +113,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
       version,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
+          requiredPrivileges: ['savedQuery:manage'],
         },
       },
       validate: {
@@ -149,8 +146,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
       version,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
+          requiredPrivileges: ['savedQuery:read'],
         },
       },
       validate: {
@@ -182,8 +178,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
       version,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
+          requiredPrivileges: ['savedQuery:read'],
         },
       },
       validate: {
@@ -212,8 +207,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
       version,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
+          requiredPrivileges: ['savedQuery:read'],
         },
       },
       validate: {
@@ -252,8 +246,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
       version,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
+          requiredPrivileges: ['savedQuery:manage'],
         },
       },
       validate: {

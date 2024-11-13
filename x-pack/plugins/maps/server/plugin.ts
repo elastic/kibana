@@ -188,6 +188,7 @@ export class MapsPlugin implements Plugin {
             read: ['index-pattern', 'tag'],
           },
           ui: ['save', 'show', 'saveQuery'],
+          api: ['savedQuery:manage', 'savedQuery:read'],
         },
         read: {
           app: [APP_ID, 'kibana'],
@@ -197,6 +198,7 @@ export class MapsPlugin implements Plugin {
             read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query', 'tag'],
           },
           ui: ['show'],
+          api: ['savedQuery:read'],
         },
       },
     });
