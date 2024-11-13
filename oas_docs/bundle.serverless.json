@@ -5915,12 +5915,11 @@
                                         "type": "object"
                                       },
                                       "grow": {
-                                        "default": true,
+                                        "default": false,
                                         "description": "Expand width of the control panel to fit available space.",
                                         "type": "boolean"
                                       },
                                       "id": {
-                                        "default": "edc483da-2dcf-4469-8d36-c99ca8f699a7",
                                         "description": "The unique ID of the control.",
                                         "type": "string"
                                       },
@@ -6229,7 +6228,6 @@
                                         "type": "number"
                                       },
                                       "i": {
-                                        "default": "49de787f-528f-47bd-a3f5-616351ccbc43",
                                         "description": "The unique identifier of the panel",
                                         "type": "string"
                                       },
@@ -6290,14 +6288,6 @@
                                     "type": "object"
                                   },
                                   "panelIndex": {
-                                    "default": {
-                                      "ref": {
-                                        "path": [
-                                          "gridData",
-                                          "i"
-                                        ]
-                                      }
-                                    },
                                     "description": "The unique ID of the panel.",
                                     "type": "string"
                                   },
@@ -6589,12 +6579,11 @@
                                   "type": "object"
                                 },
                                 "grow": {
-                                  "default": true,
+                                  "default": false,
                                   "description": "Expand width of the control panel to fit available space.",
                                   "type": "boolean"
                                 },
                                 "id": {
-                                  "default": "edc483da-2dcf-4469-8d36-c99ca8f699a7",
                                   "description": "The unique ID of the control.",
                                   "type": "string"
                                 },
@@ -6903,7 +6892,6 @@
                                   "type": "number"
                                 },
                                 "i": {
-                                  "default": "49de787f-528f-47bd-a3f5-616351ccbc43",
                                   "description": "The unique identifier of the panel",
                                   "type": "string"
                                 },
@@ -6964,14 +6952,6 @@
                               "type": "object"
                             },
                             "panelIndex": {
-                              "default": {
-                                "ref": {
-                                  "path": [
-                                    "gridData",
-                                    "i"
-                                  ]
-                                }
-                              },
                               "description": "The unique ID of the panel.",
                               "type": "string"
                             },
@@ -7137,12 +7117,11 @@
                                         "type": "object"
                                       },
                                       "grow": {
-                                        "default": true,
+                                        "default": false,
                                         "description": "Expand width of the control panel to fit available space.",
                                         "type": "boolean"
                                       },
                                       "id": {
-                                        "default": "edc483da-2dcf-4469-8d36-c99ca8f699a7",
                                         "description": "The unique ID of the control.",
                                         "type": "string"
                                       },
@@ -7451,7 +7430,6 @@
                                         "type": "number"
                                       },
                                       "i": {
-                                        "default": "49de787f-528f-47bd-a3f5-616351ccbc43",
                                         "description": "The unique identifier of the panel",
                                         "type": "string"
                                       },
@@ -7512,14 +7490,6 @@
                                     "type": "object"
                                   },
                                   "panelIndex": {
-                                    "default": {
-                                      "ref": {
-                                        "path": [
-                                          "gridData",
-                                          "i"
-                                        ]
-                                      }
-                                    },
                                     "description": "The unique ID of the panel.",
                                     "type": "string"
                                   },
@@ -7783,12 +7753,11 @@
                                   "type": "object"
                                 },
                                 "grow": {
-                                  "default": true,
+                                  "default": false,
                                   "description": "Expand width of the control panel to fit available space.",
                                   "type": "boolean"
                                 },
                                 "id": {
-                                  "default": "edc483da-2dcf-4469-8d36-c99ca8f699a7",
                                   "description": "The unique ID of the control.",
                                   "type": "string"
                                 },
@@ -8097,7 +8066,6 @@
                                   "type": "number"
                                 },
                                 "i": {
-                                  "default": "49de787f-528f-47bd-a3f5-616351ccbc43",
                                   "description": "The unique identifier of the panel",
                                   "type": "string"
                                 },
@@ -8158,14 +8126,6 @@
                               "type": "object"
                             },
                             "panelIndex": {
-                              "default": {
-                                "ref": {
-                                  "path": [
-                                    "gridData",
-                                    "i"
-                                  ]
-                                }
-                              },
                               "description": "The unique ID of the panel.",
                               "type": "string"
                             },
@@ -8325,12 +8285,11 @@
                                         "type": "object"
                                       },
                                       "grow": {
-                                        "default": true,
+                                        "default": false,
                                         "description": "Expand width of the control panel to fit available space.",
                                         "type": "boolean"
                                       },
                                       "id": {
-                                        "default": "edc483da-2dcf-4469-8d36-c99ca8f699a7",
                                         "description": "The unique ID of the control.",
                                         "type": "string"
                                       },
@@ -8639,7 +8598,6 @@
                                         "type": "number"
                                       },
                                       "i": {
-                                        "default": "49de787f-528f-47bd-a3f5-616351ccbc43",
                                         "description": "The unique identifier of the panel",
                                         "type": "string"
                                       },
@@ -8700,14 +8658,6 @@
                                     "type": "object"
                                   },
                                   "panelIndex": {
-                                    "default": {
-                                      "ref": {
-                                        "path": [
-                                          "gridData",
-                                          "i"
-                                        ]
-                                      }
-                                    },
                                     "description": "The unique ID of the panel.",
                                     "type": "string"
                                   },
