@@ -28,7 +28,8 @@ const EmptyAppWrapper: FunctionComponent<PropsWithChildren<{}>> = ({ children })
 export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
   RootProfileProvider<SecurityRootProfileContext>
 > = (services: ProfileProviderServices) => {
-  const { discoverFeaturesRegistry } = services;
+  const { discoverShared } = services;
+  const discoverFeaturesRegistry = discoverShared.features.registry;
   const cellRendererFeature = discoverFeaturesRegistry.getById('security-solution-cell-renderer');
   const appWrapperFeature = discoverFeaturesRegistry.getById('security-solution-app-wrapper');
   const reduxStoreInitFeature = discoverFeaturesRegistry.getById(
