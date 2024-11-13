@@ -22,7 +22,6 @@ import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import usePrevious from 'react-use/lib/usePrevious';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { SavedQuery } from '@kbn/data-plugin/public';
@@ -224,10 +223,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const { onOpenTimeline, loading: timelineQueryLoading } =
     useRuleFromTimeline(handleSetRuleFromTimeline);
 
-  // if 'index' is selected, use these browser fields
-  // otherwise use the dataview browserfields
-  const previousRuleType = usePrevious(ruleType);
-
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = useCallback(
     (optionId: string) => {
@@ -276,7 +271,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setThreatIndexModified(!isEqual(threatIndex, threatIndicesConfig));
   }, [threatIndex, threatIndicesConfig]);
 
-  usePersistentQuery({ form });
+  usePersistentQuery({ form, ruleTypePath: 'ruleType', queryPath: 'queryBar' });
   usePersistentAlertSuppressionState({ form });
 
   // if saved query failed to load:

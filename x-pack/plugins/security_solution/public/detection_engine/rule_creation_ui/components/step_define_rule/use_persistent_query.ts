@@ -15,16 +15,31 @@ import {
   isEsqlRule,
   isThreatMatchRule,
 } from '../../../../../common/detection_engine/utils';
-import type { FieldValueQueryBar } from '../query_bar';
+import {
+  DEFAULT_EQL_QUERY_FIELD_VALUE,
+  DEFAULT_ESQL_QUERY_FIELD_VALUE,
+  DEFAULT_KQL_QUERY_FIELD_VALUE,
+  DEFAULT_THREAT_MATCH_KQL_QUERY_FIELD_VALUE,
+  type FieldValueQueryBar,
+} from '../query_bar';
 
 interface UsePersistentQueryParams {
   form: FormHook<DefineStepRule>;
+  ruleTypePath: string;
+  queryPath: string;
 }
 
-export function usePersistentQuery({ form }: UsePersistentQueryParams): void {
-  const [{ ruleType, queryBar: currentQuery }] = useFormData({
+/**
+ * Persists query when switching between different rule types using different queries (kuery, EQL, ES|QL).
+ */
+export function usePersistentQuery({
+  form,
+  ruleTypePath,
+  queryPath,
+}: UsePersistentQueryParams): void {
+  const [{ [ruleTypePath]: ruleType, [queryPath]: currentQuery }] = useFormData({
     form,
-    watch: ['ruleType', 'queryBar'],
+    watch: [ruleTypePath, queryPath],
   });
   const previousRuleType = usePrevious(ruleType);
   const queryRef = useRef<FieldValueQueryBar | undefined>();
@@ -46,11 +61,11 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): void {
       return;
     }
 
-    const queryField = form.getFields().queryBar;
+    const queryField = form.getFields()[queryPath];
 
     if (isEsqlRule(ruleType)) {
       queryField.reset({
-        defaultValue: esqlQueryRef.current ?? DEFAULT_ESQL_QUERY,
+        defaultValue: esqlQueryRef.current ?? DEFAULT_ESQL_QUERY_FIELD_VALUE,
       });
 
       return;
@@ -58,7 +73,7 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): void {
 
     if (isEqlRule(ruleType)) {
       queryField.reset({
-        defaultValue: eqlQueryRef.current ?? DEFAULT_EQL_QUERY,
+        defaultValue: eqlQueryRef.current ?? DEFAULT_EQL_QUERY_FIELD_VALUE,
       });
 
       return;
@@ -66,8 +81,8 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): void {
 
     if (isThreatMatchRule(ruleType)) {
       queryField.reset({
-        defaultValue: isEqual(queryRef.current, DEFAULT_KQL_QUERY)
-          ? DEFAULT_THREAT_MATCH_KQL_QUERY
+        defaultValue: isEqual(queryRef.current, DEFAULT_KQL_QUERY_FIELD_VALUE)
+          ? DEFAULT_THREAT_MATCH_KQL_QUERY_FIELD_VALUE
           : queryRef.current,
       });
 
@@ -75,33 +90,9 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): void {
     }
 
     queryField.reset({
-      defaultValue: isEqual(queryRef.current, DEFAULT_THREAT_MATCH_KQL_QUERY)
-        ? DEFAULT_KQL_QUERY
+      defaultValue: isEqual(queryRef.current, DEFAULT_THREAT_MATCH_KQL_QUERY_FIELD_VALUE)
+        ? DEFAULT_KQL_QUERY_FIELD_VALUE
         : queryRef.current,
     });
-  }, [ruleType, previousRuleType, form]);
+  }, [queryPath, ruleType, previousRuleType, form]);
 }
-
-const DEFAULT_KQL_QUERY = {
-  query: { query: '', language: 'kuery' },
-  filters: [],
-  saved_id: null,
-};
-
-const DEFAULT_THREAT_MATCH_KQL_QUERY = {
-  query: { query: '*:*', language: 'kuery' },
-  filters: [],
-  saved_id: null,
-};
-
-const DEFAULT_EQL_QUERY = {
-  query: { query: '', language: 'eql' },
-  filters: [],
-  saved_id: null,
-};
-
-const DEFAULT_ESQL_QUERY = {
-  query: { query: '', language: 'esql' },
-  filters: [],
-  saved_id: null,
-};
