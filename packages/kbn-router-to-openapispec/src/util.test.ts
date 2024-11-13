@@ -17,8 +17,9 @@ import {
   getPathParameters,
   createOpIdGenerator,
   GetOpId,
+  assignToPaths,
+  extractTags,
 } from './util';
-import { assignToPaths, extractTags } from './util';
 
 describe('extractTags', () => {
   test.each([
@@ -115,9 +116,11 @@ describe('assignToPaths', () => {
     const paths = {};
     assignToPaths(paths, '/foo', {});
     assignToPaths(paths, '/bar/{id?}', {});
+    assignToPaths(paths, '/bar/file/{path*}', {});
     expect(paths).toEqual({
       '/foo': {},
       '/bar/{id}': {},
+      '/bar/file/{path}': {},
     });
   });
 });
