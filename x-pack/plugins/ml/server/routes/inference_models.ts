@@ -26,8 +26,10 @@ export function inferenceModelRoutes(
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/_inference/{taskType}/{inferenceId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateInferenceEndpoint'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateInferenceEndpoint'],
+        },
       },
       summary: 'Create an inference endpoint',
       description: 'Create an inference endpoint',
@@ -67,8 +69,10 @@ export function inferenceModelRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/_inference/all`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetTrainedModels'],
+        },
       },
       summary: 'Get all inference endpoints',
       description: 'Get all inference endpoints',
