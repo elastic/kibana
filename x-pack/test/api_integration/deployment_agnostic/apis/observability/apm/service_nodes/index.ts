@@ -8,7 +8,7 @@
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('agent_explorer', () => {
+  describe('service_nodes', () => {
     loadTestFile(require.resolve('./get_service_nodes.spec.ts'));
   });
 }
