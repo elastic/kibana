@@ -18,7 +18,7 @@ import { defaultAlertsTableColumns } from '../configuration';
 export const DefaultAlertsFlyoutHeader: FlyoutSectionRenderer = ({ alert }) => {
   return (
     <EuiTitle size="s">
-      <h3>{alert[ALERT_RULE_NAME]}</h3>
+      <h3>{alert[ALERT_RULE_NAME] ?? 'Unknown'}</h3>
     </EuiTitle>
   );
 };
