@@ -1450,7 +1450,6 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /test/functional/fixtures/es_archiver/README.md @elastic/appex-qa
 /test/functional/firefox/config.base.ts @elastic/appex-qa
 /test/functional/config.* @elastic/appex-qa
-/test/functional/apps/getting_started/*.ts @elastic/appex-qa
 /test/functional/README.md @elastic/appex-qa
 /test/examples/config.js @elastic/appex-qa
 /test/examples/README.md @elastic/appex-qa
