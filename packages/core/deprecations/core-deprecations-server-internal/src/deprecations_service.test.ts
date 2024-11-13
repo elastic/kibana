@@ -52,7 +52,10 @@ describe('DeprecationsService', () => {
       expect(http.createRouter).toBeCalledWith('/api/deprecations');
       // registers get route '/'
       expect(router.get).toHaveBeenCalledTimes(1);
-      expect(router.get).toHaveBeenCalledWith({ path: '/', validate: false }, expect.any(Function));
+      expect(router.get).toHaveBeenCalledWith(
+        { options: { access: 'public' }, path: '/', validate: false },
+        expect.any(Function)
+      );
     });
 
     it('calls registerConfigDeprecationsInfo', async () => {

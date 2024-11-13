@@ -12,12 +12,12 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import createContainter from 'constate';
+import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import {
   type InventoryFiltersState,
   inventoryFiltersStateRT,
 } from '../../../../../common/inventory_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
-import { useUrlState } from '../../../../hooks/use_url_state';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 
