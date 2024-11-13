@@ -34,6 +34,7 @@ export {
   isESQLFieldGroupable,
   TextBasedLanguages,
   sanitazeESQLInput,
+  queryCannotBeSampled,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

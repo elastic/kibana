@@ -6,7 +6,6 @@
  */
 
 import { termQuery } from '@kbn/observability-plugin/server';
-import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { AlertsClient } from '../../lib/create_alerts_client.ts/create_alerts_client';
 import { getGroupByTermsAgg } from './get_group_by_terms_agg';
@@ -25,7 +24,7 @@ export async function getLatestEntitiesAlerts({
 }: {
   alertsClient: AlertsClient;
   identityFieldsPerEntityType: IdentityFieldsPerEntityType;
-}): Promise<Array<{ [key: string]: any; alertsCount?: number; [ENTITY_TYPE]: string }>> {
+}): Promise<Array<{ [key: string]: any; alertsCount?: number; entityType: string }>> {
   if (identityFieldsPerEntityType.size === 0) {
     return [];
   }
@@ -54,7 +53,7 @@ export async function getLatestEntitiesAlerts({
 
     return buckets.map((bucket: Bucket) => ({
       alertsCount: bucket.doc_count,
-      [ENTITY_TYPE]: entityType,
+      entityType,
       ...bucket.key,
     }));
   });
