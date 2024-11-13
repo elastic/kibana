@@ -228,13 +228,13 @@ export default function ({ getService }: FtrProviderContext) {
         const type = 'esql_query';
         const metadata1 = {
           queryString: 'SELECT * FROM test1',
-          timeRan: '2021-09-01T00:00:00Z',
+          createdAt: '2021-09-01T00:00:00Z',
           status: 'success',
         };
 
         const metadata2 = {
           queryString: 'SELECT * FROM test2',
-          timeRan: '2023-09-01T00:00:00Z',
+          createdAt: '2023-09-01T00:00:00Z',
           status: 'success',
         };
 

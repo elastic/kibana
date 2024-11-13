@@ -48,7 +48,7 @@ interface EsqlStarredQueriesServices {
 }
 
 interface EsqlStarredQueriesParams {
-  client: FavoritesClient<QueryHistoryItem>;
+  client: FavoritesClient<StarredQueryMetadata>;
   starredQueries: StarredQueryItem[];
   storage: Storage;
 }
@@ -57,8 +57,14 @@ function generateId() {
   return uuidv4();
 }
 
+interface StarredQueryMetadata {
+  queryString: string;
+  createdAt: string;
+  status: 'success' | 'warning' | 'error';
+}
+
 export class EsqlStarredQueriesService {
-  private client: FavoritesClient<QueryHistoryItem>;
+  private client: FavoritesClient<StarredQueryMetadata>;
   private starredQueries: StarredQueryItem[] = [];
   private queryToEdit: string = '';
   private storage: Storage;
@@ -73,7 +79,7 @@ export class EsqlStarredQueriesService {
   }
 
   static async initialize(services: EsqlStarredQueriesServices) {
-    const client = new FavoritesClient<QueryHistoryItem>('esql_editor', 'esql_query', {
+    const client = new FavoritesClient<StarredQueryMetadata>('esql_editor', 'esql_query', {
       http: services.http,
       usageCollection: services.usageCollection,
     });
@@ -90,8 +96,8 @@ export class EsqlStarredQueriesService {
     }
     Object.keys(favoriteMetadata).forEach((id) => {
       const item = favoriteMetadata[id];
-      const { queryString, timeRan, status } = item;
-      retrievedQueries.push({ id, queryString, timeRan, status });
+      const { queryString, createdAt, status } = item;
+      retrievedQueries.push({ id, queryString, timeRan: createdAt, status });
     });
 
     return new EsqlStarredQueriesService({
@@ -110,12 +116,12 @@ export class EsqlStarredQueriesService {
   }
 
   async addStarredQuery(item: Pick<QueryHistoryItem, 'queryString' | 'status'>) {
-    const favoriteItem = {
+    const favoriteItem: { id: string; metadata: StarredQueryMetadata } = {
       id: generateId(),
       metadata: {
         queryString: getTrimmedQuery(item.queryString),
-        timeRan: new Date().toISOString(),
-        status: item.status,
+        createdAt: new Date().toISOString(),
+        status: item.status ?? 'success',
       },
     };
 
@@ -131,7 +137,7 @@ export class EsqlStarredQueriesService {
 
     starredQueries.push({
       queryString: favoriteItem.metadata.queryString,
-      timeRan: favoriteItem.metadata.timeRan,
+      timeRan: favoriteItem.metadata.createdAt,
       status: favoriteItem.metadata.status,
       id: favoriteItem.id,
     });
