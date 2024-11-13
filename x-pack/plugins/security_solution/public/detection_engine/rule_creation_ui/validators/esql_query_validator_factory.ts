@@ -23,15 +23,15 @@ export enum ESQL_ERROR_CODES {
   ERR_MISSING_ID_FIELD_FROM_RESULT = 'ERR_MISSING_ID_FIELD_FROM_RESULT',
 }
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60 * 1000,
-    },
-  },
-});
-
 export function esqlQueryValidatorFactory(): ValidationFunc<FormData, string, FieldValueQueryBar> {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60 * 1000,
+      },
+    },
+  });
+
   return async (...args) => {
     const [{ value }] = args;
     const esqlQuery = value.query.query as string;
@@ -42,15 +42,15 @@ export function esqlQueryValidatorFactory(): ValidationFunc<FormData, string, Fi
 
     try {
       const services = KibanaServices.get();
-      const { isEsqlQueryAggregating, isMissingMetadataOperator, errors } =
-        parseEsqlQuery(esqlQuery);
+      const { isEsqlQueryAggregating, hasMetadataOperator, errors } = parseEsqlQuery(esqlQuery);
 
       // Check if there are any syntax errors
       if (errors.length) {
         return constructSyntaxError(new Error(errors[0].message));
       }
 
-      if (isMissingMetadataOperator) {
+      // non-aggregating query which does not have metadata, is not a valid one
+      if (!isEsqlQueryAggregating && !hasMetadataOperator) {
         return {
           code: ESQL_ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
           message: ESQL_VALIDATION_MISSING_METADATA_OPERATOR_IN_QUERY_ERROR,
@@ -66,11 +66,8 @@ export function esqlQueryValidatorFactory(): ValidationFunc<FormData, string, Fi
           }),
       });
 
-      // check whether _id field is present in response
-      const isIdFieldPresent = columns.find(({ id }) => '_id' === id);
-
       // for non-aggregating query, we want to disable queries w/o _id property returned in response
-      if (!isEsqlQueryAggregating && !isIdFieldPresent) {
+      if (!isEsqlQueryAggregating && !columns.some(({ id }) => '_id' === id)) {
         return {
           code: ESQL_ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
           message: ESQL_VALIDATION_MISSING_ID_FIELD_IN_QUERY_ERROR,
@@ -93,8 +90,7 @@ function parseEsqlQuery(query: string) {
   return {
     errors,
     isEsqlQueryAggregating,
-    // non-aggregating query which does not have metadata, is not a valid one
-    isMissingMetadataOperator: !isEsqlQueryAggregating && !computeHasMetadataOperator(root),
+    hasMetadataOperator: computeHasMetadataOperator(root),
   };
 }
 

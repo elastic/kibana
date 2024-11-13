@@ -9,9 +9,8 @@
 
 import { type ESQLAstQueryExpression, parse } from '@kbn/esql-ast';
 
-export const isAggregatingQuery = (astExpression: ESQLAstQueryExpression): boolean => {
-  return astExpression.commands.some((command) => command.name === 'stats');
-};
+export const isAggregatingQuery = (astExpression: ESQLAstQueryExpression): boolean =>
+  astExpression.commands.some((command) => command.name === 'stats');
 
 /**
  * compute if esqlQuery is aggregating/grouping, i.e. using STATS...BY command
