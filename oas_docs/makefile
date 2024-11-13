@@ -45,14 +45,14 @@ api-docs-lint-serverless: ## Run redocly API docs linter on kibana.serverless.ya
 
 .PHONY: api-docs-overlay
 api-docs-overlay: ## Apply all overlays
-	@npx bump overlay "output/kibana.serverless.yaml" "overlays/kibana.overlays.serverless.yaml" > "output/kibana.serverless.tmp1.yaml"
-	@npx bump overlay "output/kibana.serverless.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.serverless.tmp2.yaml"
-	@npx bump overlay "output/kibana.serverless.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.serverless.tmp3.yaml"
-	@npx bump overlay "output/kibana.serverless.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.serverless.tmp4.yaml"
-	@npx bump overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
-	@npx bump overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
-	@npx bump overlay "output/kibana.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.tmp3.yaml"
-	@npx bump overlay "output/kibana.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.tmp4.yaml"
+	@npx bump-cli overlay "output/kibana.serverless.yaml" "overlays/kibana.overlays.serverless.yaml" > "output/kibana.serverless.tmp1.yaml"
+	@npx bump-cli overlay "output/kibana.serverless.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.serverless.tmp2.yaml"
+	@npx bump-cli overlay "output/kibana.serverless.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.serverless.tmp3.yaml"
+	@npx bump-cli overlay "output/kibana.serverless.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.serverless.tmp4.yaml"
+	@npx bump-cli overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
+	@npx bump-cli overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
+	@npx bump-cli overlay "output/kibana.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.tmp3.yaml"
+	@npx bump-cli overlay "output/kibana.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.tmp4.yaml"
 	@npx @redocly/cli bundle output/kibana.serverless.tmp4.yaml --ext yaml -o output/kibana.serverless.yaml
 	@npx @redocly/cli bundle output/kibana.tmp4.yaml --ext yaml -o output/kibana.yaml
 	rm output/kibana.tmp*.yaml
@@ -61,9 +61,9 @@ api-docs-overlay: ## Apply all overlays
 .PHONY: api-docs-preview
 api-docs-preview: ## Generate a preview for kibana.yaml and kibana.serverless.yaml
 	@echo "Rendering stateful docs preview..."
-	@npx bump preview "output/kibana.yaml"
+	@npx bump-cli preview "output/kibana.yaml"
 	@echo "Rendering serverless docs preview..."
-	@npx bump preview "output/kibana.serverless.yaml"
+	@npx bump-cli preview "output/kibana.serverless.yaml"
 
 help:  ## Display help
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
