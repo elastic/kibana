@@ -7,6 +7,42 @@
             "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
             "type": "beats_state",
             "beats_state" : {
+              "state" : {
+                "functionbeat" : {
+                  "functions": {
+                    "count": 1
+                  }
+                },
+                "queue": {
+                  "name": "mem"
+                }
+              }
+            }
+          }
+        },
+        {
+          "_source" : {
+            "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
+            "type": "beats_state",
+            "beats_state" : {
+              "state" : {
+                "functionbeat" : {
+                  "functions": {
+                    "count": 3
+                  }
+                },
+                "queue": {
+                  "name": "mem"
+                }
+              }
+            }
+          }
+        },
+        {
+          "_source" : {
+            "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
+            "type": "beats_state",
+            "beats_state" : {
             "state" : {
               "heartbeat" : {
                   "endpoints" : 2,

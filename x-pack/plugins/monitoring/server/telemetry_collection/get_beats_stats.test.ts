@@ -148,7 +148,7 @@ describe('Get Beats Stats', () => {
             names: ['firehose'],
           },
           queue: {
-            mem: 0,
+            mem: 2,
             spool: 1,
           },
           architecture: {
@@ -176,6 +176,11 @@ describe('Get Beats Stats', () => {
               endpoints: 3,
             },
             monitors: 3,
+          },
+          functionbeat: {
+            functions: {
+              count: 4,
+            },
           },
         },
         FlV4ckTxQ0a78hmBkzzc9A: {

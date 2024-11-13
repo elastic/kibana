@@ -222,6 +222,17 @@
                             }
                           }
                         }
+                      },
+                      "functionbeat": {
+                        "properties": {
+                          "functions": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
                       }
                     }
                   }

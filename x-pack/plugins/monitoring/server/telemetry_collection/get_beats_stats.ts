@@ -78,6 +78,11 @@ export interface BeatsStats {
         name?: string;
       };
       heartbeat?: Heartbeat;
+      functionbeat?: {
+        functions?: {
+          count?: number;
+        };
+      };
       host?: {
         architecture: string;
         os: { platform: string };
@@ -118,6 +123,11 @@ export interface BeatsBaseStats {
     architectures: BeatsArchitecture[];
   };
   heartbeat?: Heartbeat;
+  functionbeat?: {
+    functions: {
+      count: number;
+    };
+  };
 }
 
 export interface BeatsProcessOptions {
@@ -251,6 +261,20 @@ export function processResults(
           (clusterHb[proto] as HeartbeatBase).monitors += val.monitors;
           (clusterHb[proto] as HeartbeatBase).endpoints += val.endpoints;
         }
+      }
+
+      const functionbeatState = hit._source?.beats_state?.state?.functionbeat;
+      if (functionbeatState !== undefined) {
+        if (!Object.hasOwn(clusters[clusterUuid], 'functionbeat')) {
+          clusters[clusterUuid].functionbeat = {
+            functions: {
+              count: 0,
+            },
+          };
+        }
+
+        clusters[clusterUuid].functionbeat!.functions.count +=
+          functionbeatState.functions?.count || 0;
       }
 
       const stateHost = hit._source?.beats_state?.state?.host;
