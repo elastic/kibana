@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiCode,
   EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
@@ -35,6 +36,7 @@ interface Props {
 
 export const StepSettings: React.FunctionComponent<Props> = React.memo(
   ({ defaultValue = {}, onChange, esDocsBase, indexMode }) => {
+    const { navigateToStep } = Forms.useFormWizardContext();
     const { jsonContent, setJsonContent, error } = useJsonStep({
       defaultValue,
       onChange,
@@ -86,9 +88,38 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
         {indexMode && (
           <>
             <EuiCallOut
-              title={`The selected index mode setting in the Logistics step is ${indexModeLabels[indexMode]}. Any index mode set here will be overwritten by the Logistics selection.`}
+              title={
+                <FormattedMessage
+                  id="xpack.idxMgmt.formWizard.stepSettings.indexModeCallout.title"
+                  defaultMessage="{settingName} has been set to {indexMode} within template {logisticsLink}. Any changes to {settingName} set on this page will be overwritten by the Logistics selection"
+                  values={{
+                    settingName: (
+                      <EuiCode>
+                        {i18n.translate(
+                          'xpack.idxMgmt.formWizard.stepSettings.indexModeCallout.indexModeSettingLabel',
+                          {
+                            defaultMessage: 'index.mode',
+                          }
+                        )}
+                      </EuiCode>
+                    ),
+                    indexMode: indexModeLabels[indexMode],
+                    logisticsLink: (
+                      <EuiLink onClick={() => navigateToStep(0)}>
+                        {i18n.translate(
+                          'xpack.idxMgmt.formWizard.stepSettings.indexModeCallout.logisticsLinkLabel',
+                          {
+                            defaultMessage: 'Logistics',
+                          }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              }
               color="warning"
               iconType="warning"
+              data-test-subj="indexModeCallout"
             />
 
             <EuiSpacer size="l" />

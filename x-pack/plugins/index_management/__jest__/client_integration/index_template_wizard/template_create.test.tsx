@@ -52,6 +52,15 @@ jest.mock('@elastic/eui', () => {
         }}
       />
     ),
+    EuiSuperSelect: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
+        value={props.valueOfSelected}
+        onChange={(e) => {
+          props.onChange(e.target.value);
+        }}
+      />
+    ),
   };
 });
 
@@ -301,6 +310,15 @@ describe('<TemplateCreate />', () => {
         expect(find('stepTitle').text()).toEqual('Index settings (optional)');
       });
 
+      it('should display a warning callout displaying the selected index mode', async () => {
+        const { exists, find } = testBed;
+
+        expect(exists('indexModeCallout')).toBe(true);
+        expect(find('indexModeCallout').text()).toContain(
+          'index.mode has been set to Standard within template Logistics.'
+        );
+      });
+
       it('should not allow invalid json', async () => {
         const { form, actions } = testBed;
 
@@ -529,6 +547,7 @@ describe('<TemplateCreate />', () => {
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
         allowAutoCreate: 'TRUE',
+        indexMode: 'time_series',
       });
       // Component templates
       await actions.completeStepTwo('test_component_template_1');
@@ -557,6 +576,7 @@ describe('<TemplateCreate />', () => {
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
             allowAutoCreate: 'TRUE',
+            indexMode: 'time_series',
             dataStream: {},
             _kbnMeta: {
               type: 'default',
