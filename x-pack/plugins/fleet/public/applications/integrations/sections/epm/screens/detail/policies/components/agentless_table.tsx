@@ -211,7 +211,7 @@ export const AgentlessPackagePoliciesTable = ({
                     return agent ? (
                       <AgentHealth agent={agent} {...statusBadgeProps} />
                     ) : (
-                      <EuiBadge color="subdued" {...statusBadgeProps}>
+                      <EuiBadge color="default" {...statusBadgeProps}>
                         <FormattedMessage
                           id="xpack.fleet.packageDetails.integrationList.pendingAgentlessStatus"
                           defaultMessage="Pending"

@@ -210,10 +210,16 @@ export function useSetupTechnology({
           updateAgentPolicies([newAgentlessPolicy] as AgentPolicy[]);
           setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
         }
+        updatePackagePolicy({
+          supports_agentless: null,
+        });
       } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
         setNewAgentPolicy({
           ...newAgentBasedPolicy.current,
           supports_agentless: false,
+        });
+        updatePackagePolicy({
+          supports_agentless: null,
         });
         setSelectedPolicyTab(SelectedPolicyTab.NEW);
         updateAgentPolicies([newAgentBasedPolicy.current] as AgentPolicy[]);
@@ -225,11 +231,12 @@ export function useSetupTechnology({
       selectedSetupTechnology,
       isAgentlessApiEnabled,
       isDefaultAgentlessPolicyEnabled,
-      setNewAgentPolicy,
+      updatePackagePolicy,
       newAgentlessPolicy,
+      packageInfo,
+      setNewAgentPolicy,
       setSelectedPolicyTab,
       updateAgentPolicies,
-      packageInfo,
     ]
   );
 

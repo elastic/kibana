@@ -225,6 +225,7 @@ describe('useSetupTechnology', () => {
       })
     );
 
+    expect(updatePackagePolicyMock).not.toHaveBeenCalled();
     expect(sendGetOneAgentPolicy).not.toHaveBeenCalled();
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
   });
@@ -256,6 +257,7 @@ describe('useSetupTechnology', () => {
       })
     );
 
+    expect(updatePackagePolicyMock).not.toHaveBeenCalled();
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
   });
 
@@ -296,6 +298,7 @@ describe('useSetupTechnology', () => {
       })
     );
 
+    expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
   });
 
@@ -377,6 +380,7 @@ describe('useSetupTechnology', () => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
     await waitFor(() => {
+      expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
       expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-1',
@@ -421,6 +425,7 @@ describe('useSetupTechnology', () => {
     });
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
+    expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
     expect(setNewAgentPolicy).toHaveBeenCalledWith({
       inactivity_timeout: 3600,
       name: 'Agentless policy for endpoint-1',
@@ -440,6 +445,7 @@ describe('useSetupTechnology', () => {
     });
 
     await waitFor(() => {
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-2',
         inactivity_timeout: 3600,
@@ -522,6 +528,7 @@ describe('useSetupTechnology', () => {
           supports_agentless: true,
         },
       ]);
+      expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
       expect(setSelectedPolicyTabMock).toHaveBeenCalledWith(SelectedPolicyTab.EXISTING);
     });
   });
@@ -553,6 +560,7 @@ describe('useSetupTechnology', () => {
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
     await waitFor(() => {
+      expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: null });
       expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
       expect(setSelectedPolicyTabMock).toHaveBeenCalledWith(SelectedPolicyTab.NEW);
     });
@@ -605,6 +613,7 @@ describe('useSetupTechnology', () => {
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
+    expect(updatePackagePolicyMock).not.toHaveBeenCalled();
     expect(setNewAgentPolicy).not.toHaveBeenCalled();
     expect(setSelectedPolicyTabMock).not.toHaveBeenCalled();
   });
@@ -635,6 +644,7 @@ describe('useSetupTechnology', () => {
         supports_agentless: true,
         inactivity_timeout: 3600,
       });
+      expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
     });
 
     act(() => {
@@ -643,6 +653,7 @@ describe('useSetupTechnology', () => {
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
     expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
+    expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: null });
   });
 
   it('should have global_data_tags with the integration team when creating agentless policy with global_data_tags', async () => {
