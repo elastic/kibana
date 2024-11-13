@@ -268,27 +268,27 @@ async function getActionTaskParams(
     const { actionId, relatedSavedObjects: injectedRelatedSavedObjects } =
       injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
 
-      return {
-        ...actionTask,
-        attributes: {
-          ...actionTask.attributes,
-          ...(actionId ? { actionId } : {}),
-          ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
-        },
-      };
-    } catch (e) {
-      const errorSource = SavedObjectsErrorHelpers.isNotFoundError(e)
-        ? TaskErrorSource.USER
-        : TaskErrorSource.FRAMEWORK;
-      logger.error(
-        `Failed to load action task params ${executorParams.actionTaskParamsId}: ${e.message}`,
-        { tags: ['connector-run-failed', `${errorSource}-error`] }
-      );
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw createRetryableError(createTaskRunError(e, errorSource), true);
-      }
+    return {
+      ...actionTask,
+      attributes: {
+        ...actionTask.attributes,
+        ...(actionId ? { actionId } : {}),
+        ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
+      },
+    };
+  } catch (e) {
+    const errorSource = SavedObjectsErrorHelpers.isNotFoundError(e)
+      ? TaskErrorSource.USER
+      : TaskErrorSource.FRAMEWORK;
+    logger.error(
+      `Failed to load action task params ${executorParams.actionTaskParamsId}: ${e.message}`,
+      { tags: ['connector-run-failed', `${errorSource}-error`] }
+    );
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
       throw createRetryableError(createTaskRunError(e, errorSource), true);
     }
+    throw createRetryableError(createTaskRunError(e, errorSource), true);
+  }
 }
 
 function getSource(references: SavedObjectReference[], sourceType?: string) {
