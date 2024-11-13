@@ -1493,7 +1493,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/common/services/spaces.ts @elastic/kibana-security
 /x-pack/test/api_integration/config_security_*.ts @elastic/kibana-security
 /x-pack/test/functional/apps/api_keys @elastic/kibana-security
-/x-pack/test/ftr_apis @elastic/kibana-security
+/x-pack/test/ftr_apis/security_and_spaces @elastic/kibana-security
 /test/server_integration/services/supertest.js @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
 /test/server_integration/http/ssl @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
 /test/server_integration/config.base.js @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
