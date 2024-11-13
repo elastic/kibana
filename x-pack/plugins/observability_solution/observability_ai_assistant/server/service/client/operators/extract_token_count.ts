@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, OperatorFunction, scan } from 'rxjs';
+import { filter, OperatorFunction, scan, endWith } from 'rxjs';
 import {
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
@@ -24,13 +24,15 @@ export function extractTokenCount(): OperatorFunction<
       ),
       scan(
         (acc, event) => {
-          acc.completion += event.tokens.completion;
-          acc.prompt += event.tokens.prompt;
-          acc.total += event.tokens.total;
+          acc.completion += event?.tokens?.completion ?? 0;
+          acc.prompt += event?.tokens?.prompt ?? 0;
+          acc.total += event?.tokens?.total ?? 0;
           return acc;
         },
         { completion: 0, prompt: 0, total: 0 }
-      )
+      ),
+      // Emit a default value at the end if no events were processed
+      endWith({ completion: 0, prompt: 0, total: 0 })
     );
   };
 }
