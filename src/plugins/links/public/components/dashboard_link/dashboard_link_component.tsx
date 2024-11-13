@@ -147,15 +147,6 @@ export const DashboardLinkComponent = ({
     timeRange,
   ]);
 
-  const overflowStyles: React.CSSProperties = {};
-  if (link.options?.overflowEllipsis) {
-    overflowStyles.textOverflow = 'ellipsis';
-    overflowStyles.overflow = 'hidden';
-    overflowStyles.whiteSpace = 'nowrap';
-  } else if (link.options?.overflowTextWrap) {
-    overflowStyles.overflow = 'visible !important';
-    overflowStyles.whiteSpace = 'normal';
-  }
   const id = `dashboardLink--${link.id}`;
 
   return (

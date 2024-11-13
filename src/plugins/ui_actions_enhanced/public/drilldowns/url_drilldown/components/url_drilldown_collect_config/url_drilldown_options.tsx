@@ -62,29 +62,6 @@ export const UrlDrilldownOptionsComponent = ({
           <EuiSpacer size="s" />
           <EuiSwitch
             compressed
-            id="overflowTextWrap"
-            name="overflowTextWrap"
-            label={
-              <>
-                {txtUrlTemplateOverflowTextWrap}
-                <EuiSpacer size={'s'} />
-                <EuiTextColor color="subdued">
-                  {txtUrlTemplateOverflowTextWrapDescription}
-                </EuiTextColor>
-              </>
-            }
-            checked={options.overflowTextWrap}
-            onChange={() =>
-              onOptionChange({
-                overflowTextWrap: !options.overflowTextWrap,
-                overflowEllipsis: !options.overflowEllipsis,
-              })
-            }
-            data-test-subj="urlDrilldownOverflowTextWrap"
-          />
-          <EuiSpacer size="s" />
-          <EuiSwitch
-            compressed
             id="overflowEllipsis"
             name="overflowEllipsis"
             label={
@@ -104,6 +81,29 @@ export const UrlDrilldownOptionsComponent = ({
               })
             }
             data-test-subj="urlDrilldownOverflowEllipsis"
+          />
+          <EuiSpacer size="s" />
+          <EuiSwitch
+            compressed
+            id="overflowTextWrap"
+            name="overflowTextWrap"
+            label={
+              <>
+                {txtUrlTemplateOverflowTextWrap}
+                <EuiSpacer size={'s'} />
+                <EuiTextColor color="subdued">
+                  {txtUrlTemplateOverflowTextWrapDescription}
+                </EuiTextColor>
+              </>
+            }
+            checked={options.overflowTextWrap}
+            onChange={() =>
+              onOptionChange({
+                overflowTextWrap: !options.overflowTextWrap,
+                overflowEllipsis: !options.overflowEllipsis,
+              })
+            }
+            data-test-subj="urlDrilldownOverflowTextWrap"
           />
         </div>
       </EuiFormRow>
