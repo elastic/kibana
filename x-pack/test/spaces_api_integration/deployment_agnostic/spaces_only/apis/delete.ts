@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import type { SuperTest } from 'supertest';
+import { SPACES } from '../../../common/lib/spaces';
+import { deleteTestSuiteFactory } from '../../../common/suites/delete.agnostic';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
-import { SPACES } from '../../common/lib/spaces';
-import { deleteTestSuiteFactory } from '../../common/suites/delete';
-
-// eslint-disable-next-line import/no-default-export
-export default function deleteSpaceTestSuite({ getService }: FtrProviderContext) {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-  const es = getService('es');
-
+export default function deleteSpaceTestSuite(context: DeploymentAgnosticFtrProviderContext) {
   const { deleteTest, expectEmptyResult, expectReservedSpaceResult, expectNotFound } =
-    deleteTestSuiteFactory(es, esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
+    deleteTestSuiteFactory(context);
 
   describe('delete', () => {
     [

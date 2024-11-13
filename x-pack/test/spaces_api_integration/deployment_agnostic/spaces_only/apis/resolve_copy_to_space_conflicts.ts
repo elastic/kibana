@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
-import { resolveCopyToSpaceConflictsSuite } from '../../common/suites/resolve_copy_to_space_conflicts';
+import { resolveCopyToSpaceConflictsSuite } from '../../../common/suites/resolve_copy_to_space_conflicts.agnostic';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function resolveCopyToSpaceConflictsTestSuite(context: FtrProviderContext) {
+export default function resolveCopyToSpaceConflictsTestSuite(
+  context: DeploymentAgnosticFtrProviderContext
+) {
   const {
     resolveCopyToSpaceConflictsTest,
     createExpectNonOverriddenResponseWithReferences,

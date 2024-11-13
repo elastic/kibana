@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { SuperTest } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 
 import expect from '@kbn/expect';
 
+import type {
+  DeploymentAgnosticFtrProviderContext,
+  SupertestWithRoleScopeType,
+} from '../../deployment_agnostic/ftr_provider_context';
+import { getRoleDefinitionForUser, isBuiltInRole } from '../lib/authentication';
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -25,12 +30,17 @@ interface CreateTests {
 }
 
 interface CreateTestDefinition {
-  user: TestDefinitionAuthentication;
+  user?: TestDefinitionAuthentication;
   spaceId: string;
   tests: CreateTests;
 }
 
-export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const esArchiver = getService('esArchiver');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  const samlAuth = getService('samlAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+
   const expectConflictResponse = (resp: { [key: string]: any }) => {
     expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
     expect(resp.body.error).to.equal('Conflict');
@@ -81,15 +91,10 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         'inventory',
         'logs',
         'observabilityCases',
-        'observabilityCasesV2',
         'securitySolutionAssistant',
         'securitySolutionAttackDiscovery',
         'securitySolutionCases',
-        'securitySolutionCasesV2',
-        'securitySolutionNotes',
-        'securitySolutionTimeline',
         'siem',
-        'siemV2',
         'slo',
         'uptime',
       ],
@@ -103,6 +108,32 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     (describeFn: DescribeFn) =>
     (description: string, { user, spaceId, tests }: CreateTestDefinition) => {
       describeFn(description, () => {
+        let supertest: SupertestWithRoleScopeType | SuperTestAgent;
+
+        before(async () => {
+          if (user) {
+            const isBuiltIn = isBuiltInRole(user.role);
+            if (!isBuiltIn) {
+              await samlAuth.setCustomRole(getRoleDefinitionForUser(user));
+            }
+            supertest = await roleScopedSupertest.getSupertestWithRoleScope(
+              isBuiltIn ? user.role : 'customRole',
+              {
+                useCookieHeader: true,
+                withInternalHeaders: true,
+              }
+            );
+          } else {
+            supertest = supertestWithoutAuth;
+          }
+        });
+
+        after(async () => {
+          if (user) {
+            (supertest as SupertestWithRoleScopeType).destroy();
+          }
+        });
+
         beforeEach(() =>
           esArchiver.load(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
@@ -118,7 +149,6 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           it(`should return ${tests.newSpace.statusCode} ${scenario}`, async () => {
             return supertest
               .post(`${urlPrefix}/api/spaces/space`)
-              .auth(user.username, user.password)
               .send({
                 name: 'marketing',
                 id: 'marketing',
@@ -134,7 +164,6 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
             it(`should return ${tests.alreadyExists.statusCode} ${scenario}`, async () => {
               return supertest
                 .post(`${urlPrefix}/api/spaces/space`)
-                .auth(user.username, user.password)
                 .send({
                   name: 'space_1',
                   id: 'space_1',
@@ -151,7 +180,6 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
             it(`should return ${tests.reservedSpecified.statusCode} and ignore _reserved ${scenario}`, async () => {
               return supertest
                 .post(`${urlPrefix}/api/spaces/space`)
-                .auth(user.username, user.password)
                 .send({
                   name: 'reserved space',
                   id: 'reserved',
@@ -169,7 +197,6 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
             it(`should return ${tests.solutionSpecified.statusCode}`, async () => {
               return supertest
                 .post(`${urlPrefix}/api/spaces/space`)
-                .auth(user.username, user.password)
                 .send({
                   name: 'space with solution',
                   id: 'solution',

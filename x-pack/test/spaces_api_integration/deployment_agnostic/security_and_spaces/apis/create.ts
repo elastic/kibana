@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import type { SuperTest } from 'supertest';
+import { AUTHENTICATION } from '../../../common/lib/authentication';
+import { SPACES } from '../../../common/lib/spaces';
+import { createTestSuiteFactory } from '../../../common/suites/create.agnostic';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
-import { AUTHENTICATION } from '../../common/lib/authentication';
-import { SPACES } from '../../common/lib/spaces';
-import { createTestSuiteFactory } from '../../common/suites/create';
-
-// eslint-disable-next-line import/no-default-export
-export default function createSpacesOnlySuite({ getService }: FtrProviderContext) {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-
+export default function createSpacesOnlySuite(context: DeploymentAgnosticFtrProviderContext) {
   const {
     createTest,
     expectNewSpaceResult,
@@ -24,7 +18,7 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
     expectConflictResponse,
     expectRbacForbiddenResponse,
     expectSolutionSpecifiedResult,
-  } = createTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
+  } = createTestSuiteFactory(context);
 
   describe('create', () => {
     [
@@ -100,7 +94,6 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
           },
         },
       });
-
       createTest(`rbac user with all globally from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         user: scenario.users.allGlobally,
@@ -169,7 +162,6 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
           },
         },
       });
-
       createTest(`rbac user with read globally from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         user: scenario.users.readGlobally,

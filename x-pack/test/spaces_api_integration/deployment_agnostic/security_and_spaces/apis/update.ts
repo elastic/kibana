@@ -5,28 +5,21 @@
  * 2.0.
  */
 
-import type { SuperTest } from 'supertest';
+import { AUTHENTICATION } from '../../../common/lib/authentication';
+import { SPACES } from '../../../common/lib/spaces';
+import { updateTestSuiteFactory } from '../../../common/suites/update.agnostic';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
-import { AUTHENTICATION } from '../../common/lib/authentication';
-import { SPACES } from '../../common/lib/spaces';
-import { deleteTestSuiteFactory } from '../../common/suites/delete';
-
-// eslint-disable-next-line import/no-default-export
-export default function deleteSpaceTestSuite({ getService }: FtrProviderContext) {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-  const es = getService('es');
-
+export default function updateSpaceTestSuite(context: DeploymentAgnosticFtrProviderContext) {
   const {
-    deleteTest,
-    expectRbacForbidden,
-    expectEmptyResult,
+    updateTest,
     expectNotFound,
-    expectReservedSpaceResult,
-  } = deleteTestSuiteFactory(es, esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
+    expectAlreadyExistsResult,
+    expectDefaultSpaceResult,
+    expectRbacForbidden,
+  } = updateTestSuiteFactory(context);
 
-  describe('delete', () => {
+  describe('update', () => {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
@@ -35,7 +28,8 @@ export default function deleteSpaceTestSuite({ getService }: FtrProviderContext)
           superuser: AUTHENTICATION.SUPERUSER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-          allAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+          allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+          readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
@@ -49,158 +43,178 @@ export default function deleteSpaceTestSuite({ getService }: FtrProviderContext)
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
+          readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
       },
     ].forEach((scenario) => {
-      deleteTest(`user with no access from the ${scenario.spaceId} space`, {
+      updateTest(`user with no access from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         user: scenario.users.noAccess,
         tests: {
-          exists: {
+          alreadyExists: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
-          reservedSpace: {
+          defaultSpace: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
-          doesntExist: {
+          newSpace: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
         },
       });
 
-      deleteTest(`superuser from the ${scenario.spaceId} space`, {
+      updateTest(`superuser from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         user: scenario.users.superuser,
         tests: {
-          exists: {
-            statusCode: 204,
-            response: expectEmptyResult,
+          alreadyExists: {
+            statusCode: 200,
+            response: expectAlreadyExistsResult,
           },
-          reservedSpace: {
-            statusCode: 400,
-            response: expectReservedSpaceResult,
+          defaultSpace: {
+            statusCode: 200,
+            response: expectDefaultSpaceResult,
           },
-          doesntExist: {
+          newSpace: {
             statusCode: 404,
             response: expectNotFound,
           },
         },
       });
 
-      deleteTest(`rbac user with all globally from the ${scenario.spaceId} space`, {
+      updateTest(`rbac user with all globally from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         user: scenario.users.allGlobally,
         tests: {
-          exists: {
-            statusCode: 204,
-            response: expectEmptyResult,
+          alreadyExists: {
+            statusCode: 200,
+            response: expectAlreadyExistsResult,
           },
-          reservedSpace: {
-            statusCode: 400,
-            response: expectReservedSpaceResult,
+          defaultSpace: {
+            statusCode: 200,
+            response: expectDefaultSpaceResult,
           },
-          doesntExist: {
+          newSpace: {
             statusCode: 404,
             response: expectNotFound,
           },
         },
       });
 
-      deleteTest(`dual-privileges user from the ${scenario.spaceId} space`, {
+      updateTest(`dual-privileges used from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         user: scenario.users.dualAll,
         tests: {
-          exists: {
-            statusCode: 204,
-            response: expectEmptyResult,
+          alreadyExists: {
+            statusCode: 200,
+            response: expectAlreadyExistsResult,
           },
-          reservedSpace: {
-            statusCode: 400,
-            response: expectReservedSpaceResult,
+          defaultSpace: {
+            statusCode: 200,
+            response: expectDefaultSpaceResult,
           },
-          doesntExist: {
+          newSpace: {
             statusCode: 404,
             response: expectNotFound,
           },
         },
       });
 
-      deleteTest(`legacy user from the ${scenario.spaceId} space`, {
+      updateTest(`legacy user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         user: scenario.users.legacyAll,
         tests: {
-          exists: {
+          alreadyExists: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
-          reservedSpace: {
+          defaultSpace: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
-          doesntExist: {
+          newSpace: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
         },
       });
 
-      deleteTest(`rbac user with read globally from the ${scenario.spaceId} space`, {
+      updateTest(`rbac user with read globally from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         user: scenario.users.readGlobally,
         tests: {
-          exists: {
+          alreadyExists: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
-          reservedSpace: {
+          defaultSpace: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
-          doesntExist: {
+          newSpace: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
         },
       });
 
-      deleteTest(`dual-privileges readonly user from the ${scenario.spaceId} space`, {
+      updateTest(`dual-privileges readonly user from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         user: scenario.users.dualRead,
         tests: {
-          exists: {
+          alreadyExists: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
-          reservedSpace: {
+          defaultSpace: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
-          doesntExist: {
+          newSpace: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
         },
       });
 
-      deleteTest(`rbac user with all at space from the ${scenario.spaceId} space`, {
+      updateTest(`rbac user with all at space from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         user: scenario.users.allAtSpace,
         tests: {
-          exists: {
+          alreadyExists: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
-          reservedSpace: {
+          defaultSpace: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
-          doesntExist: {
+          newSpace: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+        },
+      });
+
+      updateTest(`rbac user with read at space from the ${scenario.spaceId} space`, {
+        spaceId: scenario.spaceId,
+        user: scenario.users.readAtSpace,
+        tests: {
+          alreadyExists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          defaultSpace: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          newSpace: {
             statusCode: 403,
             response: expectRbacForbidden,
           },

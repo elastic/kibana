@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-export type DescribeFn = (text: string, fn: () => void) => void;
+import { createTestConfig } from './stateful.config';
 
-export interface TestDefinitionAuthentication {
-  username?: string;
-  password?: string;
-  role: string;
-}
+export default createTestConfig({
+  license: 'trial',
+  testFiles: [require.resolve('./security_and_spaces/apis/copy_to_space')],
+});

@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
-import { AUTHENTICATION } from '../../common/lib/authentication';
-import { SPACES } from '../../common/lib/spaces';
-import { resolveCopyToSpaceConflictsSuite } from '../../common/suites/resolve_copy_to_space_conflicts';
+import { AUTHENTICATION } from '../../../common/lib/authentication';
+import { SPACES } from '../../../common/lib/spaces';
+import { resolveCopyToSpaceConflictsSuite } from '../../../common/suites/resolve_copy_to_space_conflicts.agnostic';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function resolveCopyToSpaceConflictsTestSuite(context: FtrProviderContext) {
+interface TestUser {
+  username: string;
+  password: string;
+  role: string;
+}
+
+export default function resolveCopyToSpaceConflictsTestSuite(
+  context: DeploymentAgnosticFtrProviderContext
+) {
   const {
     resolveCopyToSpaceConflictsTest,
     createExpectNonOverriddenResponseWithReferences,
@@ -54,7 +61,7 @@ export default function resolveCopyToSpaceConflictsTestSuite(context: FtrProvide
         },
       },
     ].forEach(({ spaceId, ...scenario }) => {
-      const definitionNoAccess = (user: { username: string; password: string }) => ({
+      const definitionNoAccess = (user: TestUser) => ({
         spaceId,
         user,
         tests: {
@@ -81,7 +88,7 @@ export default function resolveCopyToSpaceConflictsTestSuite(context: FtrProvide
           multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'noAccess'),
         },
       });
-      const definitionUnauthorizedRead = (user: { username: string; password: string }) => ({
+      const definitionUnauthorizedRead = (user: TestUser) => ({
         spaceId,
         user,
         tests: {
@@ -111,7 +118,7 @@ export default function resolveCopyToSpaceConflictsTestSuite(context: FtrProvide
           multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'unauthorizedRead'),
         },
       });
-      const definitionUnauthorizedWrite = (user: { username: string; password: string }) => ({
+      const definitionUnauthorizedWrite = (user: TestUser) => ({
         spaceId,
         user,
         tests: {
@@ -141,7 +148,7 @@ export default function resolveCopyToSpaceConflictsTestSuite(context: FtrProvide
           multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'unauthorizedWrite'),
         },
       });
-      const definitionAuthorized = (user: { username: string; password: string }) => ({
+      const definitionAuthorized = (user: TestUser) => ({
         spaceId,
         user,
         tests: {

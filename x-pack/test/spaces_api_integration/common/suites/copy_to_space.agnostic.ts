@@ -5,18 +5,22 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import type { SuperTest } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 
 import type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportFailure,
 } from '@kbn/core/server';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
 
 import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
-import type { FtrProviderContext } from '../ftr_provider_context';
+import type {
+  DeploymentAgnosticFtrProviderContext,
+  SupertestWithRoleScopeType,
+} from '../../deployment_agnostic/ftr_provider_context';
+import { getRoleDefinitionForUser, isBuiltInRole } from '../lib/authentication';
 import { getAggregatedSpaceData, getUrlPrefix } from '../lib/space_test_utils';
 import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -99,12 +103,12 @@ const getDestinationWithConflicts = (originSpaceId?: string) =>
 interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
   buckets: SpaceBucket[];
 }
-export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
+export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
   const testDataLoader = getTestDataLoader(context);
-  const supertestWithoutAuth = context.getService(
-    'supertestWithoutAuth'
-  ) as unknown as SuperTest<any>;
   const es = context.getService('es');
+  const roleScopedSupertest = context.getService('roleScopedSupertest');
+  const samlAuth = context.getService('samlAuth');
+  const supertestWithoutAuth = context.getService('supertestWithoutAuth');
 
   const collectSpaceContents = async () => {
     const response = await getAggregatedSpaceData(es, [
@@ -797,18 +801,37 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
     (describeFn: DescribeFn) =>
     (
       description: string,
-      { user = {}, spaceId = DEFAULT_SPACE_ID, tests }: CopyToSpaceTestDefinition
+      { user, spaceId = DEFAULT_SPACE_ID, tests }: CopyToSpaceTestDefinition
     ) => {
       describeFn(description, () => {
+        let supertest: SupertestWithRoleScopeType | SuperTestAgent;
         before(async () => {
           // test data only allows for the following spaces as the copy origin
           expect(['default', 'space_1']).to.contain(spaceId);
-
           await testDataLoader.createFtrSpaces();
+
+          if (user) {
+            const isBuiltIn = isBuiltInRole(user.role);
+            if (!isBuiltIn) {
+              await samlAuth.setCustomRole(getRoleDefinitionForUser(user));
+            }
+            supertest = await roleScopedSupertest.getSupertestWithRoleScope(
+              isBuiltIn ? user.role : 'customRole',
+              {
+                useCookieHeader: true,
+                withInternalHeaders: true,
+              }
+            );
+          } else {
+            supertest = supertestWithoutAuth;
+          }
         });
 
         after(async () => {
           await testDataLoader.deleteFtrSpaces();
+          if (user) {
+            (supertest as SupertestWithRoleScopeType).destroy();
+          }
         });
 
         describe('single-namespace types', () => {
@@ -825,9 +848,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertestWithoutAuth
+            return supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 spaces: [destination],
@@ -844,9 +866,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertestWithoutAuth
+            return supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 spaces: [destination],
@@ -863,9 +884,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertestWithoutAuth
+            return supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 spaces: [destination],
@@ -882,9 +902,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertestWithoutAuth
+            return supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 spaces: [destination],
@@ -900,9 +919,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
             const conflictDestination = getDestinationWithConflicts(spaceId);
             const noConflictDestination = getDestinationWithoutConflicts();
 
-            return supertestWithoutAuth
+            return supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 spaces: [conflictDestination, noConflictDestination],
@@ -933,9 +951,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
           });
 
           it(`should return ${tests.nonExistentSpace.statusCode} when copying to non-existent space`, async () => {
-            return supertestWithoutAuth
+            return supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 spaces: ['non_existent_space'],
@@ -963,9 +980,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
             const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);
             testCases.forEach(({ testTitle, objects, statusCode, response }) => {
               it(`should return ${statusCode} when ${testTitle}`, async () => {
-                return supertestWithoutAuth
+                return supertest
                   .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-                  .auth(user.username, user.password)
                   .send({ objects, spaces, includeReferences, createNewCopies, overwrite })
                   .expect(statusCode)
                   .then(response);

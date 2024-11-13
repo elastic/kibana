@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { AUTHENTICATION } from '../../../common/lib/authentication';
 import { SPACES } from '../../../common/lib/spaces';
-import { copyToSpaceTestSuiteFactory } from '../../../common/suites/copy_to_space';
+import { copyToSpaceTestSuiteFactory } from '../../../common/suites/copy_to_space.agnostic';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function copyToSpaceSpacesAndSecuritySuite(context: FtrProviderContext) {
+interface User {
+  username: string;
+  password: string;
+  role: string;
+}
+
+export default function copyToSpaceSpacesAndSecuritySuite(
+  context: DeploymentAgnosticFtrProviderContext
+) {
   const {
     copyToSpaceTest,
     expectNoConflictsWithoutReferencesResult,
@@ -54,7 +61,7 @@ export default function copyToSpaceSpacesAndSecuritySuite(context: FtrProviderCo
         },
       },
     ].forEach(({ spaceId, ...scenario }) => {
-      const definitionNoAccess = (user: { username: string; password: string }) => ({
+      const definitionNoAccess = (user: User) => ({
         spaceId,
         user,
         tests: {
@@ -117,7 +124,7 @@ export default function copyToSpaceSpacesAndSecuritySuite(context: FtrProviderCo
           response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(spaceId, 'non-existent'),
         },
       };
-      const definitionUnauthorizedRead = (user: { username: string; password: string }) => ({
+      const definitionUnauthorizedRead = (user: User) => ({
         spaceId,
         user,
         tests: {
@@ -125,7 +132,7 @@ export default function copyToSpaceSpacesAndSecuritySuite(context: FtrProviderCo
           multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'unauthorizedRead'),
         },
       });
-      const definitionUnauthorizedWrite = (user: { username: string; password: string }) => ({
+      const definitionUnauthorizedWrite = (user: User) => ({
         spaceId,
         user,
         tests: {
@@ -133,7 +140,7 @@ export default function copyToSpaceSpacesAndSecuritySuite(context: FtrProviderCo
           multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'unauthorizedWrite'),
         },
       });
-      const definitionAuthorized = (user: { username: string; password: string }) => ({
+      const definitionAuthorized = (user: User) => ({
         spaceId,
         user,
         tests: {
