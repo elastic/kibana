@@ -16,7 +16,7 @@ import { useActiveCursor } from '@kbn/charts-plugin/public';
 import moment from 'moment';
 import { getBrushTimeBounds } from '../../../utils/slo/duration';
 import { TimeBounds } from '../types';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export function EventsAreaChart({
   slo,
