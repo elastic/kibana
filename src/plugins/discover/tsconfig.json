@@ -99,7 +99,6 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/esql-ast",
-    "@kbn/logs-data-access-plugin",
     "@kbn/discover-shared-plugin",
   ],
   "exclude": [
