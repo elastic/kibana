@@ -462,6 +462,18 @@ describe('blocklist form', () => {
     expect(screen.queryByText(ERRORS.INVALID_PATH)).toBeTruthy();
   });
 
+  it('should prevail duplicate value warning on lost focus', async () => {
+    const item = createItem({
+      os_types: [OperatingSystem.WINDOWS],
+      entries: [createEntry('file.Ext.code_signature', ['valid', 'invalid'])],
+    });
+    render(createProps({ item }));
+    await user.type(screen.getByRole('combobox'), 'invalid{enter}');
+    expect(screen.queryByText(ERRORS.DUPLICATE_VALUE)).toBeTruthy();
+    await user.click(screen.getByTestId('blocklist-form-os-select'));
+    expect(screen.queryByText(ERRORS.DUPLICATE_VALUE)).toBeTruthy();
+  });
+
   it('should warn if single duplicate value entry', async () => {
     const hash = 'C3AB8FF13720E8AD9047DD39466B3C8974E592C2FA383D4A3960714CAEF0C4F2';
     const item = createItem({
