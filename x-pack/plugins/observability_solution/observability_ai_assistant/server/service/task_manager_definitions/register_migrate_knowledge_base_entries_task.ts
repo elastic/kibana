@@ -15,8 +15,8 @@ import { resourceNames } from '..';
 import { getInferenceEndpoint } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 
-const TASK_ID = 'ai-assistant-knowledge-base-migration-task-id';
-const TASK_TYPE = 'ai-assistant-knowledge-base-migration-task';
+const TASK_ID = 'obs-ai-assistant:knowledge-base-migration-task-id';
+const TASK_TYPE = 'obs-ai-assistant:knowledge-base-migration';
 
 // This task will re-index all knowledge base entries without `semantic_text` field
 // to ensure the field is populated with the correct embeddings.
