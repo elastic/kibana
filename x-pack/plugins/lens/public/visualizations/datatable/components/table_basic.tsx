@@ -71,7 +71,7 @@ export const DataContext = React.createContext<DataContextType>({});
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
   header: 'shade',
-  footer: 'shade'
+  footer: 'shade',
 };
 
 export const DEFAULT_PAGE_SIZE = 10;
