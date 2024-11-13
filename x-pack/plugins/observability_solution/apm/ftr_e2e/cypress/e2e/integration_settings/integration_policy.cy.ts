@@ -28,7 +28,7 @@ const policyFormFields = [
   },
 ];
 
-describe.skip('when navigating to integration page', () => {
+describe('when navigating to integration page', () => {
   beforeEach(() => {
     const integrationsPath = '/app/integrations/browse';
 

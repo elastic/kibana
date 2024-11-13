@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visEditor, visualize, lens, timePicker, visChart } = getPageObjects([
+  const { visEditor, visualize, lens, visChart, timePicker } = getPageObjects([
     'visEditor',
     'visualize',
     'visChart',

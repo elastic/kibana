@@ -55,6 +55,7 @@ import { FieldValidationCallout } from './category_validation_callout';
 import { createDocumentStatsHash } from './utils';
 import { TableHeader } from './category_table/table_header';
 import { useActions } from './category_table/use_actions';
+import { AttachmentsMenu } from './attachments_menu';
 
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
@@ -334,6 +335,13 @@ export const LogCategorizationPage: FC = () => {
 
   const actions = getActions(true);
 
+  const attachmentsMenuProps = {
+    dataView,
+    selectedField,
+    randomSamplerMode: randomSampler.getMode(),
+    randomSamplerProbability: randomSampler.getProbability(),
+  };
+
   return (
     <EuiPageBody data-test-subj="aiopsLogPatternAnalysisPage" paddingSize="none" panelled={false}>
       <PageHeader />
@@ -390,9 +398,14 @@ export const LogCategorizationPage: FC = () => {
           )}
         </EuiFlexItem>
         <EuiFlexItem />
-        <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
-          <SamplingMenu randomSampler={randomSampler} reload={() => loadCategories()} />
-        </EuiFlexItem>
+        <EuiFlexGroup css={{ marginTop: 'auto' }} alignItems="center" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <SamplingMenu randomSampler={randomSampler} reload={() => loadCategories()} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AttachmentsMenu {...attachmentsMenuProps} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
 
       {eventRate.length ? (

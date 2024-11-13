@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import agent from 'elastic-apm-node';
+import agent, { Logger } from 'elastic-apm-node';
 import asyncHooks from 'async_hooks';
 
 export interface SpanOptions {
@@ -34,14 +34,48 @@ const runInNewContext = <T extends (...args: any[]) => any>(cb: T): ReturnType<T
 
 export async function withSpan<T>(
   optionsOrName: SpanOptions | string,
-  cb: (span?: Span) => Promise<T>
+  cb: (span?: Span) => Promise<T>,
+  logger?: Logger
 ): Promise<T> {
   const options = parseSpanOptions(optionsOrName);
 
   const { name, type, subtype, labels, intercept } = options;
 
+  let time: number | undefined;
+  if (logger?.isLevelEnabled('debug')) {
+    time = performance.now();
+  }
+
+  function logTook(failed: boolean) {
+    if (time) {
+      logger?.debug(
+        () =>
+          `Operation ${name}${failed ? ` (failed)` : ''} ${
+            Math.round(performance.now() - time!) / 1000
+          }s`
+      );
+    }
+  }
+
+  const withLogTook = [
+    <TR>(res: TR): TR | Promise<TR> => {
+      logTook(false);
+      return res;
+    },
+    (err: any): never => {
+      logTook(true);
+      throw err;
+    },
+  ];
+
   if (!agent.isStarted()) {
-    return cb();
+    const promise = cb();
+    // make sure tests that mock out the callback with a sync
+    // function don't fail.
+    if (typeof promise === 'object' && 'then' in promise) {
+      return promise.then(...withLogTook);
+    }
+    return promise;
   }
 
   let createdSpan: Span | undefined;
@@ -57,7 +91,7 @@ export async function withSpan<T>(
     createdSpan = agent.startSpan(name) ?? undefined;
 
     if (!createdSpan) {
-      return cb();
+      return cb().then(...withLogTook);
     }
   }
 
@@ -76,7 +110,7 @@ export async function withSpan<T>(
     }
 
     if (!span) {
-      return promise;
+      return promise.then(...withLogTook);
     }
 
     const targetedSpan = span;
@@ -98,6 +132,7 @@ export async function withSpan<T>(
     }
 
     return promise
+      .then(...withLogTook)
       .then((res) => {
         if (!targetedSpan.outcome || targetedSpan.outcome === 'unknown') {
           targetedSpan.outcome = 'success';

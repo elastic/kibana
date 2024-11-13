@@ -240,6 +240,7 @@ class AppContextService {
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(fakeRequest, {
       excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
+      includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
     });
   }
 
