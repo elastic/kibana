@@ -364,7 +364,9 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   return (
     <>
       <FieldValidationCallout validationResults={fieldValidationResult} />
-      {(loading ?? true) === true ? <LoadingCategorization /> : null}
+      {(loading ?? true) === true ? (
+        <LoadingCategorization {...(!isCasesEmbeddable ? { onCancel: cancelRequest } : {})} />
+      ) : null}
 
       <InformationText
         loading={loading ?? true}
