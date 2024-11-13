@@ -264,6 +264,11 @@ export const CASES_CONNECTOR_TIME_WINDOW_REGEX = '^[1-9][0-9]*[d,w]$';
  */
 export const OWNER_FIELD = 'owner';
 
+export const OBSERVABLE_TYPE_EMAIL = {
+  label: 'Email',
+  key: 'observable-type-email',
+} as const;
+
 /**
  * Exporting an array of built-in observable types for use in the application
  */
@@ -297,7 +302,6 @@ export const OBSERVABLE_TYPES_BUILTIN = [
     key: 'observable-type-file-path',
   },
   {
-    label: 'Email',
-    key: 'observable-type-email',
+    ...OBSERVABLE_TYPE_EMAIL,
   },
 ];

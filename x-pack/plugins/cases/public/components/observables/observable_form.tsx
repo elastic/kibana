@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo, memo } from 'react';
+import React, { type FC, useCallback, useMemo, memo, useState } from 'react';
 import { useForm, Form, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { EuiButton, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
 import {
@@ -20,33 +19,11 @@ import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
 import type { ObservablePatchType, Observable } from '../../../common/types/domain';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import * as i18n from './translations';
-
-const { emptyField } = fieldValidators;
-
-const fieldsConfig = {
-  value: {
-    validations: [
-      {
-        validator: emptyField('Value is required'),
-      },
-    ],
-    label: 'Value',
-  },
-  typeKey: {
-    validations: [
-      {
-        validator: emptyField('Type is required'),
-      },
-    ],
-    label: 'Type',
-  },
-  description: {
-    label: 'Description',
-  },
-};
+import { fieldsConfig, normalizeValueType } from './fields_config';
 
 export const ObservableFormFields = memo(() => {
   const { data, isLoading } = useGetCaseConfiguration();
+  const [selectedTypeKey, setSelectedTypeKey] = useState<string>('');
 
   const options = useMemo(() => {
     return [...OBSERVABLE_TYPES_BUILTIN, ...data.observableTypes].map((observableType) => ({
@@ -60,12 +37,13 @@ export const ObservableFormFields = memo(() => {
       <UseField
         component={SelectField}
         componentProps={{ euiFieldProps: { options, hasNoInitialSelection: true, isLoading } }}
+        onChange={setSelectedTypeKey}
         path="typeKey"
         config={fieldsConfig.typeKey}
       />
       <UseField
         path="value"
-        config={fieldsConfig.value}
+        config={fieldsConfig.value[normalizeValueType(selectedTypeKey)]}
         componentProps={{ placeholder: i18n.VALUE_PLACEHOLDER }}
         component={TextField}
       />
