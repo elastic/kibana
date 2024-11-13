@@ -56,7 +56,6 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
   options: {
     tags: ['access:ai_assistant'],
     timeout: {
-      payload: moment.duration(20, 'minutes').asMilliseconds(),
       idleSocket: moment.duration(20, 'minutes').asMilliseconds(),
     },
   },
