@@ -44,7 +44,7 @@ enum CreateIndexViewMode {
 export const CreateIndex = ({ indicesData }: CreateIndexProps) => {
   const { application } = useKibana().services;
   const [formState, setFormState] = useState<CreateIndexFormState>(initCreateIndexState);
-  const { data: userPrivileges } = useUserPrivilegesQuery(formState.indexName);
+  const { data: userPrivileges } = useUserPrivilegesQuery(formState.defaultIndexName);
   const [createIndexView, setCreateIndexView] = useState<CreateIndexViewMode>(
     userPrivileges?.privileges.canManageIndex === false
       ? CreateIndexViewMode.Code
