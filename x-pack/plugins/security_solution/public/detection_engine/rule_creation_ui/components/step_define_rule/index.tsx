@@ -91,7 +91,10 @@ import { useAlertSuppression } from '../../../rule_management/logic/use_alert_su
 import { AiAssistant } from '../ai_assistant';
 import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
 import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_rule_config';
-import { AlertSuppressionEdit } from '../../../rule_creation/components/alert_suppression_edit';
+import {
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  AlertSuppressionEdit,
+} from '../../../rule_creation/components/alert_suppression_edit';
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 
@@ -797,6 +800,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   <EqlQueryEdit
                     key="eqlQueryBar"
                     path="queryBar"
+                    fieldsToValidateOnChange={ALERT_SUPPRESSION_FIELDS_FIELD_NAME}
                     required
                     showFilterBar
                     eqlFieldsComboBoxOptions={optionsData}

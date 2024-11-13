@@ -23,6 +23,7 @@ import type { FieldValueQueryBar } from '../query_bar';
 
 interface EqlQueryEditProps {
   path: string;
+  fieldsToValidateOnChange?: string | string[];
   eqlFieldsComboBoxOptions?: EqlFieldsComboBoxOptions;
   eqlOptions?: EqlOptions;
   showEqlSizeOption?: boolean;
@@ -38,6 +39,7 @@ interface EqlQueryEditProps {
 
 export function EqlQueryEdit({
   path,
+  fieldsToValidateOnChange,
   eqlFieldsComboBoxOptions,
   eqlOptions,
   showEqlSizeOption = false,
@@ -81,6 +83,9 @@ export function EqlQueryEdit({
   const fieldConfig: FieldConfig<FieldValueQueryBar> = useMemo(
     () => ({
       label: i18n.EQL_QUERY_BAR_LABEL,
+      fieldsToValidateOnChange: fieldsToValidateOnChange
+        ? [path, fieldsToValidateOnChange].flat()
+        : undefined,
       validations: [
         ...(required
           ? [
@@ -107,7 +112,7 @@ export function EqlQueryEdit({
         },
       ],
     }),
-    [required, dataView.id, dataView.title, eqlOptions]
+    [required, dataView.id, dataView.title, eqlOptions, path, fieldsToValidateOnChange]
   );
 
   return (
