@@ -26,12 +26,13 @@ import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
 import type { CaseAttachmentWithoutOwner } from '../../types';
 import type { AppMockRenderer } from '../../common/mock';
+import { useCreateAttachments } from '../../containers/use_create_attachments';
 
-jest.mock('../../containers/api', () => ({
-  createAttachments: jest.fn(),
-}));
+jest.mock('../../containers/use_create_attachments');
 
-const createAttachmentsMock = createAttachments as jest.Mock;
+const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+
+const createAttachmentsMock = jest.fn().mockImplementation(() => defaultResponse);
 const onCommentSaving = jest.fn();
 const onCommentPosted = jest.fn();
 
@@ -63,7 +64,10 @@ describe('AddComment ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
-    createAttachmentsMock.mockImplementation(() => defaultResponse);
+    useCreateAttachmentsMock.mockReturnValue({
+      isLoading: false,
+      mutate: createAttachmentsMock,
+    });
   });
 
   afterEach(() => {
@@ -77,6 +81,11 @@ describe('AddComment ', () => {
   });
 
   it('should render spinner and disable submit when loading', async () => {
+    useCreateAttachmentsMock.mockReturnValue({
+      isLoading: true,
+      mutateAsync: createAttachmentsMock,
+    });
+
     appMockRender.render(<AddComment {...{ ...addCommentProps, showLoading: true }} />);
 
     fireEvent.change(screen.getByLabelText('caseComment'), {
@@ -131,16 +140,19 @@ describe('AddComment ', () => {
 
     await waitFor(() => expect(onCommentSaving).toBeCalled());
     await waitFor(() =>
-      expect(createAttachmentsMock).toBeCalledWith({
-        caseId: addCommentProps.caseId,
-        attachments: [
-          {
-            comment: sampleData.comment,
-            owner: SECURITY_SOLUTION_OWNER,
-            type: AttachmentType.user,
-          },
-        ],
-      })
+      expect(createAttachmentsMock).toBeCalledWith(
+        {
+          caseId: addCommentProps.caseId,
+          attachments: [
+            {
+              comment: sampleData.comment,
+              type: AttachmentType.user,
+            },
+          ],
+          caseOwner: SECURITY_SOLUTION_OWNER,
+        },
+        { onSuccess: expect.any(Function) }
+      )
     );
     await waitFor(() => {
       expect(screen.getByTestId('euiMarkdownEditorTextArea')).toHaveTextContent('');
@@ -280,16 +292,19 @@ describe('draft comment ', () => {
 
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
-      expect(createAttachmentsMock).toBeCalledWith({
-        caseId: addCommentProps.caseId,
-        attachments: [
-          {
-            comment: sampleData.comment,
-            owner: SECURITY_SOLUTION_OWNER,
-            type: AttachmentType.user,
-          },
-        ],
-      });
+      expect(createAttachmentsMock).toBeCalledWith(
+        {
+          caseId: addCommentProps.caseId,
+          attachments: [
+            {
+              comment: sampleData.comment,
+              type: AttachmentType.user,
+            },
+          ],
+          caseOwner: SECURITY_SOLUTION_OWNER,
+        },
+        { onSuccess: expect.any(Function) }
+      );
     });
 
     await waitFor(() => {

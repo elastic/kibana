@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '@kbn/esql-ast';
+import type { ESQLAstItem, ESQLCommand } from '@kbn/esql-ast';
+import { SupportedDataType } from '../../../definitions/types';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
 import {
   TRIGGER_SUGGESTION_COMMAND,
@@ -24,6 +25,7 @@ export async function suggest(
   getColumnsByType: GetColumnsByTypeFn,
   _columnExists: (column: string) => boolean,
   getSuggestedVariableName: () => string,
+  _getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
 ): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
