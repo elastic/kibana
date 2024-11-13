@@ -39,7 +39,6 @@ function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisua
 }
 
 function getNewShape(
-  groups: TableSuggestionColumn[],
   subVisualizationId?: PieVisualizationState['shape'],
   currentShape?: PieVisualizationState['shape']
 ) {
@@ -51,13 +50,7 @@ function getNewShape(
     return currentShape;
   }
 
-  let newShape: PieVisualizationState['shape'] | undefined;
-
-  if (groups.length !== 1 && !subVisualizationId) {
-    newShape = PieChartTypes.PIE;
-  }
-
-  return newShape ?? PieChartTypes.PIE;
+  return PieChartTypes.PIE;
 }
 
 function hasCustomSuggestionsExists(shape: PieChartType | string | undefined) {
@@ -128,7 +121,6 @@ export function suggestions({
     !hasCustomSuggestionsExists(subVisualizationId)
   ) {
     const newShape = getNewShape(
-      groups,
       subVisualizationId as PieVisualizationState['shape'],
       state?.shape
     );
