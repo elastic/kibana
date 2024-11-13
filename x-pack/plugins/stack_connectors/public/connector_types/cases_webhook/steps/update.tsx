@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState, useMemo } from 'react';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiSwitch } from '@elastic/eui';
 import {
   FIELD_TYPES,
   UseField,
   useFormContext,
-  useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { JsonFieldWrapper, MustacheTextFieldWrapper } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   containsCommentsOrEmpty,
   containsTitleAndDesc,
-  isCreateCommentEmpty,
   isUrlButCanBeEmpty,
+  validateCreateComment,
 } from '../validator';
 import { casesVars, commentVars, urlVars } from '../action_variables';
 import { HTTP_VERBS } from '../webhook_connectors';
@@ -35,16 +34,6 @@ interface Props {
 
 export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
   const { getFieldDefaultValue } = useFormContext();
-  // const [{ createCommentUrl, createCommentJson }] = useFormData({
-  //   watch: ['config.createCommentUrl', 'config.createCommentJson'],
-  // });
-
-  const [{ config }] = useFormData({
-    watch: ['config.createCommentUrl', 'config.createCommentJson'],
-  });
-
-  const createCommentUrl = config?.createCommentUrl;
-  const createCommentJson = config?.createCommentJson;
 
   const hasCommentDefaultValue =
     !!getFieldDefaultValue<boolean | undefined>('config.createCommentUrl') ||
@@ -55,6 +44,83 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
   const onAddCommentToggle = () => {
     setIsAddCommentToggled((prev) => !prev);
   };
+
+  const updateIncidentMethodConfig = useMemo(
+    () => ({
+      label: i18n.UPDATE_INCIDENT_METHOD,
+      defaultValue: 'put',
+      type: FIELD_TYPES.SELECT,
+      validations: [{ validator: emptyField(i18n.UPDATE_METHOD_REQUIRED) }],
+    }),
+    []
+  );
+
+  const updateIncidentUrlConfig = useMemo(
+    () => ({
+      label: i18n.UPDATE_INCIDENT_URL,
+      validations: [{ validator: urlField(i18n.UPDATE_URL_REQUIRED) }],
+      helpText: i18n.UPDATE_INCIDENT_URL_HELP,
+    }),
+    []
+  );
+
+  const updateIncidentJsonConfig = useMemo(
+    () => ({
+      label: i18n.UPDATE_INCIDENT_JSON,
+      helpText: i18n.UPDATE_INCIDENT_JSON_HELP,
+      validations: [
+        { validator: emptyField(i18n.UPDATE_INCIDENT_REQUIRED) },
+        { validator: containsTitleAndDesc() },
+      ],
+    }),
+    []
+  );
+
+  const createCommentMethodConfig = useMemo(
+    () => ({
+      label: i18n.CREATE_COMMENT_METHOD,
+      defaultValue: 'put',
+      type: FIELD_TYPES.SELECT,
+      validations: [{ validator: emptyField(i18n.CREATE_COMMENT_METHOD_REQUIRED) }],
+    }),
+    []
+  );
+
+  const createCommentUrlConfig = useMemo(
+    () => ({
+      label: i18n.CREATE_COMMENT_URL,
+      fieldsToValidateOnChange: ['config.createCommentUrl', 'config.createCommentJson'],
+      validations: [
+        { validator: isUrlButCanBeEmpty(i18n.CREATE_COMMENT_URL_FORMAT_REQUIRED) },
+        {
+          validator: validateCreateComment(
+            i18n.CREATE_COMMENT_URL_MISSING,
+            'config.createCommentJson'
+          ),
+        },
+      ],
+      helpText: i18n.CREATE_COMMENT_URL_HELP,
+    }),
+    []
+  );
+
+  const createCommentJsonConfig = useMemo(
+    () => ({
+      label: i18n.CREATE_COMMENT_JSON,
+      helpText: i18n.CREATE_COMMENT_JSON_HELP,
+      fieldsToValidateOnChange: ['config.createCommentJson', 'config.createCommentUrl'],
+      validations: [
+        { validator: containsCommentsOrEmpty(i18n.CREATE_COMMENT_FORMAT_MESSAGE) },
+        {
+          validator: validateCreateComment(
+            i18n.CREATE_COMMENT_JSON_MISSING,
+            'config.createCommentUrl'
+          ),
+        },
+      ],
+    }),
+    []
+  );
 
   return (
     <>
@@ -71,16 +137,7 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
             <UseField
               path="config.updateIncidentMethod"
               component={Field}
-              config={{
-                label: i18n.UPDATE_INCIDENT_METHOD,
-                defaultValue: 'put',
-                type: FIELD_TYPES.SELECT,
-                validations: [
-                  {
-                    validator: emptyField(i18n.UPDATE_METHOD_REQUIRED),
-                  },
-                ],
-              }}
+              config={updateIncidentMethodConfig}
               css={styles.method}
               componentProps={{
                 euiFieldProps: {
@@ -94,15 +151,7 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
           <EuiFlexItem>
             <UseField
               path="config.updateIncidentUrl"
-              config={{
-                label: i18n.UPDATE_INCIDENT_URL,
-                validations: [
-                  {
-                    validator: urlField(i18n.UPDATE_URL_REQUIRED),
-                  },
-                ],
-                helpText: i18n.UPDATE_INCIDENT_URL_HELP,
-              }}
+              config={updateIncidentUrlConfig}
               component={MustacheTextFieldWrapper}
               componentProps={{
                 euiFieldProps: {
@@ -121,18 +170,7 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
           <EuiFlexItem>
             <UseField
               path="config.updateIncidentJson"
-              config={{
-                helpText: i18n.UPDATE_INCIDENT_JSON_HELP,
-                label: i18n.UPDATE_INCIDENT_JSON,
-                validations: [
-                  {
-                    validator: emptyField(i18n.UPDATE_INCIDENT_REQUIRED),
-                  },
-                  {
-                    validator: containsTitleAndDesc(),
-                  },
-                ],
-              }}
+              config={updateIncidentJsonConfig}
               component={JsonFieldWrapper}
               componentProps={{
                 euiCodeEditorProps: {
@@ -170,16 +208,7 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
                 <UseField
                   path="config.createCommentMethod"
                   component={Field}
-                  config={{
-                    label: i18n.CREATE_COMMENT_METHOD,
-                    defaultValue: 'put',
-                    type: FIELD_TYPES.SELECT,
-                    validations: [
-                      {
-                        validator: emptyField(i18n.CREATE_COMMENT_METHOD_REQUIRED),
-                      },
-                    ],
-                  }}
+                  config={createCommentMethodConfig}
                   css={styles.method}
                   componentProps={{
                     euiFieldProps: {
@@ -196,22 +225,7 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
               <EuiFlexItem>
                 <UseField
                   path="config.createCommentUrl"
-                  config={{
-                    label: i18n.CREATE_COMMENT_URL,
-                    // fieldsToValidateOnChange: [
-                    //   'config.createCommentUrl',
-                    //   'config.createCommentJson',
-                    // ],
-                    validations: [
-                      {
-                        validator: isUrlButCanBeEmpty(i18n.CREATE_COMMENT_URL_REQUIRED),
-                      },
-                      {
-                        validator: isCreateCommentEmpty('Required field', createCommentJson),
-                      },
-                    ],
-                    helpText: i18n.CREATE_COMMENT_URL_HELP,
-                  }}
+                  config={createCommentUrlConfig}
                   component={MustacheTextFieldWrapper}
                   componentProps={{
                     euiFieldProps: {
@@ -230,22 +244,7 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => {
               <EuiFlexItem>
                 <UseField
                   path="config.createCommentJson"
-                  config={{
-                    helpText: i18n.CREATE_COMMENT_JSON_HELP,
-                    label: i18n.CREATE_COMMENT_JSON,
-                    // fieldsToValidateOnChange: [
-                    //   'config.createCommentJson',
-                    //   'config.createCommentUrl',
-                    // ],
-                    validations: [
-                      {
-                        validator: containsCommentsOrEmpty(i18n.CREATE_COMMENT_MESSAGE),
-                      },
-                      {
-                        validator: isCreateCommentEmpty('Required field', createCommentUrl),
-                      },
-                    ],
-                  }}
+                  config={createCommentJsonConfig}
                   component={JsonFieldWrapper}
                   componentProps={{
                     euiCodeEditorProps: {

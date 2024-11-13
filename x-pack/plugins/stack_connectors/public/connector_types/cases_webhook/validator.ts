@@ -124,18 +124,17 @@ export const isUrlButCanBeEmpty =
     return typeof value === 'string' && isUrl(value) ? undefined : error;
   };
 
-export const isCreateCommentEmpty =
-  (message: string, validateField: string | undefined) =>
+export const validateCreateComment =
+  (message: string, fieldName) =>
   (...args: Parameters<ValidationFunc>) => {
-    const [{ value }] = args;
-
-    const isOnlyOneFieldFilled = !!((value && !validateField) || (!value && validateField));
+    const [{ value, formData }] = args;
+    const otherFielValue = formData[fieldName];
 
     const error: ValidationError<ERROR_CODE> = {
-      code: 'ERR_FIELD_MISSING',
+      code: 'ERR_FIELD_FORMAT',
       formatType: 'STRING',
       message,
     };
 
-    return isOnlyOneFieldFilled ? error : undefined;
+    return !value && otherFielValue ? error : undefined;
   };

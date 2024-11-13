@@ -54,13 +54,28 @@ export const UPDATE_METHOD_REQUIRED = i18n.translate(
   }
 );
 
-export const CREATE_COMMENT_URL_REQUIRED = i18n.translate(
+export const CREATE_COMMENT_URL_FORMAT_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.error.requiredCreateCommentUrlText',
   {
     defaultMessage: 'Create comment URL must be URL format.',
   }
 );
-export const CREATE_COMMENT_MESSAGE = i18n.translate(
+
+export const CREATE_COMMENT_URL_MISSING = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.error.requiredCreateCommentUrlMissing',
+  {
+    defaultMessage: 'Create comment URL is required.',
+  }
+);
+
+export const CREATE_COMMENT_JSON_MISSING = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.error.requiredCreateCommentJsonMissing',
+  {
+    defaultMessage: 'Create comment Json is required.',
+  }
+);
+
+export const CREATE_COMMENT_FORMAT_MESSAGE = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.error.requiredCreateCommentIncidentText',
   {
     defaultMessage: 'Create comment object must be valid JSON.',
