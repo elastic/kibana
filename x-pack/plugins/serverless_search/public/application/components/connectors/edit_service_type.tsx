@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Connector as BaseConnector } from '@kbn/search-connectors';
+import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 interface Connector extends BaseConnector {
   iconPath?: string;
@@ -27,7 +28,6 @@ interface Connector extends BaseConnector {
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useConnector } from '../../hooks/api/use_connector';
-import connectorLogo from '../../../assets/connectors.svg';
 
 interface EditServiceTypeProps {
   connector: Connector;
@@ -42,6 +42,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
   const connectorTypes = useConnectorTypes();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
+  const assetBasePath = useAssetBasePath();
 
   const allConnectors = useMemo(
     () => connectorTypes.sort((a, b) => a.name.localeCompare(b.name)),
@@ -157,7 +158,12 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
           isDisabled={Boolean(connector.service_type) || isDisabled}
           isLoading={isLoading}
           data-test-subj="serverlessSearchEditConnectorTypeChoices"
-          prepend={<EuiIcon type={selectedConnector?.iconPath ?? connectorLogo} size="l" />}
+          prepend={
+            <EuiIcon
+              type={selectedConnector?.iconPath ?? `${assetBasePath}/connectors.svg`}
+              size="l"
+            />
+          }
           singleSelection
           fullWidth
           placeholder={i18n.translate(
