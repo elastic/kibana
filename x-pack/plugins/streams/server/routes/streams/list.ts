@@ -18,7 +18,9 @@ export const listStreamsRoute = createServerRoute({
     access: 'internal',
     security: {
       authz: {
-        requiredPrivileges: ['streams_read'],
+        enabled: false,
+        reason:
+          'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
       },
     },
   },

@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/streams-plugin",
-  "owner": "@elastic/obs-entities",
+  "owner": "@simianhacker @flash1293 @dgieselaar",
   "description": "A manager for Streams",
   "group": "observability",
   "visibility": "private",
@@ -16,8 +16,7 @@
       "encryptedSavedObjects",
       "usageCollection",
       "licensing",
-      "taskManager",
-      "features"
+      "taskManager"
     ],
     "optionalPlugins": [
       "cloud",

@@ -25,7 +25,9 @@ export const forkStreamsRoute = createServerRoute({
     access: 'internal',
     security: {
       authz: {
-        requiredPrivileges: ['streams_write'],
+        enabled: false,
+        reason:
+          'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
       },
     },
   },
