@@ -27,7 +27,7 @@ export function StreamListView() {
 
   const streamsListFetch = useStreamsAppFetch(
     ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', {
+      return streamsRepositoryClient.fetch('GET /api/streams', {
         signal,
       });
     },
@@ -39,7 +39,7 @@ export function StreamListView() {
       <StreamsAppPageHeader
         title={
           <StreamsAppPageHeaderTitle
-            title={i18n.translate('xpack.streams.streamsListViewPageHeaderTitle', {
+            title={i18n.translate('app_not_found_in_i18nrc.streamsListViewPageHeaderTitle', {
               defaultMessage: 'Streams',
             })}
           />

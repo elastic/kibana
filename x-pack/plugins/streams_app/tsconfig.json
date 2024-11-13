@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -24,7 +24,6 @@
     "@kbn/typed-react-router-config",
     "@kbn/i18n",
     "@kbn/observability-utils-browser",
-    "@kbn/es-types",
     "@kbn/kibana-react-plugin",
     "@kbn/es-query",
     "@kbn/logging",
@@ -33,5 +32,6 @@
     "@kbn/calculate-auto",
     "@kbn/streams-plugin",
     "@kbn/share-plugin",
+    "@kbn/observability-utils-server",
   ]
 }
