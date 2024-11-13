@@ -64,7 +64,7 @@ function callEncodeURI(logger: Logger, string: string): string {
   try {
     return encodeURI(s);
   } catch (err) {
-    return logAndReturnErr(logger, `error with encodeURI("${s}"): ${err.message}`);
+    return logAndReturnErr(logger, `error evaluating encodeURI("${s}"): ${err.message}`);
   }
 }
 
@@ -73,7 +73,7 @@ function callEncodeURIComponent(logger: Logger, string: string): string {
   try {
     return encodeURIComponent(s);
   } catch (err) {
-    return logAndReturnErr(logger, `error with encodeURIComponent("${s}"): ${err.message}`);
+    return logAndReturnErr(logger, `error evaluating encodeURIComponent("${s}"): ${err.message}`);
   }
 }
 

@@ -220,7 +220,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     });
 
     it('should handle FormatNumber', async () => {
-      // from xx-pack/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
+      // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
       // const DeepContextVariables
       const template = `{{#context.deep}}{{#FormatNumber}}
         {{{arrayI.1}}}; en-US; style: currency, currency: EUR
@@ -237,7 +237,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     });
 
     it('should handle EncodeURI', async () => {
-      // from xx-pack/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
+      // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
       // const DeepContextVariables
       const template = `{{#context.deep}}{{#EncodeURI}}{{{encodeableUrl}}}{{/EncodeURI}}{{/context.deep}}`;
       const rule = await createRule({
@@ -252,7 +252,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     });
 
     it('should handle EncodeURIComponent', async () => {
-      // from xx-pack/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
+      // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
       // const DeepContextVariables
       const template = `{{#context.deep}}{{#EncodeURIComponent}}{{{encodeableUrl}}}{{/EncodeURIComponent}}{{/context.deep}}`;
       const rule = await createRule({

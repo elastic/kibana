@@ -259,16 +259,15 @@ describe('mustache lambdas', () => {
       );
     });
 
-    it('logs an error message and returns empty string on errors', () => {
+    it('logs an error message and returns the error message on errors', () => {
       const uri = '\uDC00'; // invalid UTF-8
       const template = dedent`
           {{#EncodeURI}} {{uri}} {{/EncodeURI}}
         `.trim();
 
-      expect(renderMustacheString(logger, template, { uri }, 'none')).toMatch('URI malformed');
-      expect(logger.warn).toHaveBeenCalledWith(
-        `mustache render error: error with encodeURI(\"${uri}\"): URI malformed`
-      );
+      const errMessage = `error evaluating encodeURI(\"${uri}\"): URI malformed`;
+      expect(renderMustacheString(logger, template, { uri }, 'none')).toBe(errMessage);
+      expect(logger.warn).toHaveBeenCalledWith(`mustache render error: ${errMessage}`);
     });
   });
 
@@ -284,16 +283,15 @@ describe('mustache lambdas', () => {
       );
     });
 
-    it('logs an error message and returns empty string on errors', () => {
+    it('logs an error message and returns the error message on errors', () => {
       const uri = '\uDC00'; // invalid UTF-8
       const template = dedent`
           {{#EncodeURIComponent}} {{uri}} {{/EncodeURIComponent}}
         `.trim();
 
-      expect(renderMustacheString(logger, template, { uri }, 'none')).toMatch('URI malformed');
-      expect(logger.warn).toHaveBeenCalledWith(
-        `mustache render error: error with encodeURIComponent(\"${uri}\"): URI malformed`
-      );
+      const errMessage = `error evaluating encodeURIComponent(\"${uri}\"): URI malformed`;
+      expect(renderMustacheString(logger, template, { uri }, 'none')).toBe(errMessage);
+      expect(logger.warn).toHaveBeenCalledWith(`mustache render error: ${errMessage}`);
     });
   });
 });
