@@ -136,10 +136,11 @@ describe('createOrUpdateDataStream', () => {
   it(`should create data stream if not exists`, async () => {
     esClient.indices.getDataStream.mockResolvedValueOnce({ data_streams: [] });
 
-    await createDataStream({
+    await createOrUpdateDataStream({
       esClient,
       logger,
       name,
+      totalFieldsLimit,
     });
 
     expect(esClient.indices.createDataStream).toHaveBeenCalledWith({ name });
