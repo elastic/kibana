@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { registerSyntheticsTLSCheckRule } from './alert_rules/tls_rule/tls_rule';
 import { registerSyntheticsStatusCheckRule } from './alert_rules/status_rule/monitor_status_rule';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from './types';
@@ -16,8 +15,7 @@ import { syntheticsAppPublicRestApiRoutes, syntheticsAppRestApiRoutes } from './
 export const initSyntheticsServer = (
   server: SyntheticsServerSetup,
   syntheticsMonitorClient: SyntheticsMonitorClient,
-  plugins: SyntheticsPluginsSetupDependencies,
-  ruleDataClient: IRuleDataClient
+  plugins: SyntheticsPluginsSetupDependencies
 ) => {
   const { router } = server;
   syntheticsAppRestApiRoutes.forEach((route) => {

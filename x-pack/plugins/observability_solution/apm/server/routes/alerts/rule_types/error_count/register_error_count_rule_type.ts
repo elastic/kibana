@@ -91,7 +91,6 @@ export function registerErrorCountRuleType({
   basePath,
   getApmIndices,
   logger,
-  ruleDataClient,
 }: RegisterRuleDependencies) {
   if (!alerting) {
     throw new Error(

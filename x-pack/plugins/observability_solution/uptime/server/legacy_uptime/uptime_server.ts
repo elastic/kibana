@@ -6,7 +6,6 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { getRequestValidation } from '@kbn/core-http-server';
 import { INITIAL_REST_VERSION } from '../../common/constants';
 import { DynamicSettingsSchema } from './routes/dynamic_settings';
@@ -36,7 +35,6 @@ export type UMServerLibs = typeof libs;
 export const initUptimeServer = (
   server: UptimeServerSetup,
   plugins: UptimeCorePluginsSetup,
-  ruleDataClient: IRuleDataClient,
   logger: Logger,
   router: UptimeRouter
 ) => {

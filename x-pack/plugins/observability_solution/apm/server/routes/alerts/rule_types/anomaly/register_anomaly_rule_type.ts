@@ -84,7 +84,6 @@ export function registerAnomalyRuleType({
   basePath,
   logger,
   ml,
-  ruleDataClient,
 }: RegisterRuleDependencies) {
   if (!alerting) {
     throw new Error('Cannot register anomaly rule type. The alerting plugin needs to be enabled.');

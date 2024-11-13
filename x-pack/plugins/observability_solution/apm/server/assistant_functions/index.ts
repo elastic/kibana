@@ -11,7 +11,6 @@ import type {
   RegistrationCallback,
   RegisterFunction,
 } from '@kbn/observability-ai-assistant-plugin/server/service/types';
-import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { APMConfig } from '..';
 import type { ApmFeatureFlags } from '../../common/apm_feature_flags';
 import { APMEventClient } from '../lib/helpers/create_es_client/create_apm_event_client';
@@ -38,7 +37,6 @@ export function registerAssistantFunctions({
   featureFlags,
   logger,
   kibanaVersion,
-  ruleDataClient,
   plugins,
 }: {
   coreSetup: CoreSetup;
@@ -46,7 +44,6 @@ export function registerAssistantFunctions({
   featureFlags: ApmFeatureFlags;
   logger: Logger;
   kibanaVersion: string;
-  ruleDataClient: IRuleDataClient;
   plugins: APMRouteHandlerResources['plugins'];
 }): RegistrationCallback {
   return async ({ resources, functions: { registerFunction }, scopes }) => {
@@ -69,7 +66,6 @@ export function registerAssistantFunctions({
       featureFlags,
       logger,
       kibanaVersion,
-      ruleDataClient,
       plugins,
       getApmIndices: async () => {
         const coreContext = await resources.context.core;

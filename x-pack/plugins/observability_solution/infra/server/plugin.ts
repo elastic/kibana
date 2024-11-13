@@ -25,7 +25,6 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
 import { mapValues } from 'lodash';
-import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
 import { registerRoutes } from './infra_server';
@@ -34,10 +33,6 @@ import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapt
 import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_status';
 import { registerRuleTypes } from './lib/alerting';
-import {
-  LOGS_RULES_ALERT_CONTEXT,
-  METRICS_RULES_ALERT_CONTEXT,
-} from './lib/alerting/register_rule_types';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
@@ -49,7 +44,6 @@ import {
 } from './saved_objects';
 import { InventoryViewsService } from './services/inventory_views';
 import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
-import { RulesService } from './services/rules';
 import {
   InfraConfig,
   InfraPluginCoreSetup,
@@ -153,25 +147,12 @@ export class InfraServerPlugin
   public libs!: InfraBackendLibs;
   public logger: Logger;
 
-  private logsRules: RulesService;
-  private metricsRules: RulesService;
   private inventoryViews: InventoryViewsService;
   private metricsExplorerViews?: MetricsExplorerViewsService;
 
   constructor(context: PluginInitializerContext<InfraConfig>) {
     this.config = context.config.get();
     this.logger = context.logger.get();
-
-    this.logsRules = new RulesService(
-      LOGS_FEATURE_ID,
-      LOGS_RULES_ALERT_CONTEXT,
-      this.logger.get('logsRules')
-    );
-    this.metricsRules = new RulesService(
-      METRICS_FEATURE_ID,
-      METRICS_RULES_ALERT_CONTEXT,
-      this.logger.get('metricsRules')
-    );
 
     this.inventoryViews = new InventoryViewsService(this.logger.get('inventoryViews'));
     this.metricsExplorerViews = this.config.featureFlags.metricsExplorerEnabled
@@ -251,8 +232,6 @@ export class InfraServerPlugin
       sourceStatus,
       ...domainLibs,
       handleEsError,
-      logsRules: this.logsRules.setup(core, plugins),
-      metricsRules: this.metricsRules.setup(core, plugins),
       getStartServices: () => core.getStartServices(),
       getAlertDetailsConfig: () => plugins.observability.getAlertDetailsConfig(),
       logger: this.logger,

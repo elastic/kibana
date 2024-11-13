@@ -7,8 +7,6 @@
 
 import { IBasePath, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
@@ -75,9 +73,6 @@ export const createRuleTypeMocks = () => {
       getAlertDetailsConfig: jest.fn().mockReturnValue({ apm: true }),
     } as unknown as ObservabilityPluginSetup,
     logger: loggerMock,
-    ruleDataClient: ruleRegistryMocks.createRuleDataClient(
-      '.alerts-observability.apm.alerts'
-    ) as IRuleDataClient,
   } as unknown as RegisterRuleDependencies;
 
   return {

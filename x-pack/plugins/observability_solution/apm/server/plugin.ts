@@ -7,16 +7,10 @@
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { isEmpty, mapValues } from 'lodash';
-import { Dataset } from '@kbn/rule-registry-plugin/server';
-import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
-import {
-  registerApmRuleTypes,
-  apmRuleTypeAlertFieldMap,
-  APM_RULE_TYPE_ALERT_CONTEXT,
-} from './routes/alerts/register_apm_rule_types';
+import { registerApmRuleTypes } from './routes/alerts/register_apm_rule_types';
 import { registerFleetPolicyCallbacks } from './routes/fleet/register_fleet_policy_callbacks';
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
@@ -89,20 +83,6 @@ export class APMPlugin
     const getPluginStart = () =>
       core.getStartServices().then(([coreStart, pluginStart]) => pluginStart);
 
-    const { ruleDataService } = plugins.ruleRegistry;
-    const ruleDataClient = ruleDataService.initializeIndex({
-      feature: APM_SERVER_FEATURE_ID,
-      registrationContext: APM_RULE_TYPE_ALERT_CONTEXT,
-      dataset: Dataset.alerts,
-      componentTemplateRefs: [],
-      componentTemplates: [
-        {
-          name: 'mappings',
-          mappings: mappingFromFieldMap(apmRuleTypeAlertFieldMap, 'strict'),
-        },
-      ],
-    });
-
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,
@@ -156,7 +136,6 @@ export class APMPlugin
       config: currentConfig,
       featureFlags: currentConfig.featureFlags,
       repository: getGlobalApmServerRouteRepository(),
-      ruleDataClient,
       plugins: resourcePlugins,
       telemetryUsageCounter,
       kibanaVersion,
@@ -173,7 +152,6 @@ export class APMPlugin
         logger: this.logger!.get('rule'),
         ml: plugins.ml,
         observability: plugins.observability,
-        ruleDataClient,
         alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
       });
     }
@@ -218,7 +196,6 @@ export class APMPlugin
         kibanaVersion,
         logger: this.logger.get('assistant'),
         plugins: resourcePlugins,
-        ruleDataClient,
       })
     );
 

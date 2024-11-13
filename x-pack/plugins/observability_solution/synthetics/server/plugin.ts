@@ -13,8 +13,6 @@ import {
   SavedObjectsClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import { Dataset } from '@kbn/rule-registry-plugin/server';
 import {
   SyntheticsPluginsSetupDependencies,
   SyntheticsPluginsStartDependencies,
@@ -28,8 +26,6 @@ import { registerSyntheticsSavedObjects } from './saved_objects/saved_objects';
 import { UptimeConfig } from './config';
 import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
-import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
-import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -46,21 +42,6 @@ export class Plugin implements PluginType {
 
   public setup(core: CoreSetup, plugins: SyntheticsPluginsSetupDependencies) {
     const config = this.initContext.config.get<UptimeConfig>();
-
-    const { ruleDataService } = plugins.ruleRegistry;
-
-    const ruleDataClient = ruleDataService.initializeIndex({
-      feature: 'uptime',
-      registrationContext: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
-      dataset: Dataset.alerts,
-      componentTemplateRefs: [],
-      componentTemplates: [
-        {
-          name: 'mappings',
-          mappings: mappingFromFieldMap(syntheticsRuleTypeFieldMap, 'strict'),
-        },
-      ],
-    });
 
     this.server = {
       config,
@@ -85,7 +66,7 @@ export class Plugin implements PluginType {
 
     plugins.features.registerKibanaFeature(syntheticsFeature);
 
-    initSyntheticsServer(this.server, this.syntheticsMonitorClient, plugins, ruleDataClient);
+    initSyntheticsServer(this.server, this.syntheticsMonitorClient, plugins);
 
     registerSyntheticsSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 

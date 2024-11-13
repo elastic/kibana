@@ -42,8 +42,6 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   basePath: IBasePath;
   configuration: InfraConfig;
   framework: KibanaFramework;
-  logsRules: RulesServiceSetup;
-  metricsRules: RulesServiceSetup;
   sources: InfraSources;
   sourceStatus: InfraSourceStatus;
   getAlertDetailsConfig: () => ObservabilityConfig['unsafe']['alertDetails'];

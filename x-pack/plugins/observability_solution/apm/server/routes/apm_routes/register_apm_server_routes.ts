@@ -25,7 +25,6 @@ import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import apm from 'elastic-apm-node';
 import { VersionedRouteRegistrar } from '@kbn/core-http-server';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import type {
@@ -59,7 +58,6 @@ export function registerRoutes({
   plugins,
   logger,
   config,
-  ruleDataClient,
   telemetryUsageCounter,
   kibanaVersion,
 }: {
@@ -69,7 +67,6 @@ export function registerRoutes({
   logger: APMRouteHandlerResources['logger'];
   repository: ServerRouteRepository;
   config: APMRouteHandlerResources['config'];
-  ruleDataClient: APMRouteHandlerResources['ruleDataClient'];
   telemetryUsageCounter?: TelemetryUsageCounter;
   kibanaVersion: string;
 }) {
@@ -135,7 +132,6 @@ export function registerRoutes({
               },
               validatedParams
             ),
-            ruleDataClient,
             kibanaVersion,
           }).then((value: Record<string, any> | undefined | null) => {
             return {
@@ -268,7 +264,6 @@ export interface APMRouteHandlerResources {
   logger: Logger;
   core: APMCore;
   plugins: Plugins;
-  ruleDataClient: IRuleDataClient;
   telemetryUsageCounter?: TelemetryUsageCounter;
   kibanaVersion: string;
   getApmIndices: () => Promise<APMIndices>;

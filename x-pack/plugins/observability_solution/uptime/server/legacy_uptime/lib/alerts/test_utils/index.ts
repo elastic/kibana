@@ -6,8 +6,6 @@
  */
 
 import { IBasePath, Logger } from '@kbn/core/server';
-import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -91,9 +89,6 @@ export const createRuleTypeMocks = (recoveredAlerts: Array<Record<string, any>> 
   return {
     dependencies: {
       logger: loggerMock,
-      ruleDataClient: ruleRegistryMocks.createRuleDataClient(
-        '.alerts-observability.uptime.alerts'
-      ) as IRuleDataClient,
     },
     services,
     scheduleActions,

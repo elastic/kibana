@@ -6,7 +6,7 @@
  */
 
 import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
-import { IRuleDataClient, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 export interface RulesServiceSetupDeps {
   alerting: AlertingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
@@ -15,9 +15,7 @@ export interface RulesServiceSetupDeps {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RulesServiceStartDeps {}
 
-export interface RulesServiceSetup {
-  ruleDataClient: IRuleDataClient;
-}
+export interface RulesServiceSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RulesServiceStart {}
