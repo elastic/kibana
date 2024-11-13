@@ -24,6 +24,8 @@
     &.overflowTextWrap span:first-child {
       white-space: normal !important;
       overflow: auto !important;
+      overflow-wrap: anywhere !important;
+      text-overflow: unset !important;
     }
 
     &.overflowTextEllipsis {
