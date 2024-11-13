@@ -38,6 +38,8 @@ const dashboardLinkSchema = schema.object({
         openInNewTab: schema.boolean(),
         useCurrentFilters: schema.boolean(),
         useCurrentDateRange: schema.boolean(),
+        overflowTextWrap: schema.boolean(),
+        overflowEllipsis: schema.boolean(),
       },
       { unknowns: 'forbid' }
     )
