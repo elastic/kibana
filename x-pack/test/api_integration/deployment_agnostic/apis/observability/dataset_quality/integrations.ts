@@ -47,6 +47,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Integrations', () => {
     let adminRoleAuthc: RoleCredentials;
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
+    let preExistingIntegrations: string[];
 
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
@@ -57,6 +58,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           withInternalHeaders: true,
         }
       );
+
+      preExistingIntegrations = (
+        await callApiAs({
+          roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
+        })
+      ).integrations.map((integration: Integration) => integration.name);
     });
 
     after(async () => {
@@ -80,13 +87,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
         });
 
-        expect(body.integrations.map((integration: Integration) => integration.name)).to.eql([
-          'synthetics',
-          'system',
-        ]);
+        expect(body.integrations.map((integration: Integration) => integration.name).sort()).to.eql(
+          preExistingIntegrations.concat(['synthetics', 'system']).sort()
+        );
 
-        expect(body.integrations[0].datasets).not.empty();
-        expect(body.integrations[1].datasets).not.empty();
+        expect(
+          body.integrations.find((integration: Integration) => integration.name === 'synthetics')
+            ?.datasets
+        ).not.empty();
+        expect(
+          body.integrations.find((integration: Integration) => integration.name === 'system')
+            ?.datasets
+        ).not.empty();
       });
 
       after(
@@ -113,13 +125,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
         });
 
-        expect(body.integrations.map((integration: Integration) => integration.name)).to.eql([
-          'my.custom.integration',
-        ]);
+        expect(body.integrations.map((integration: Integration) => integration.name).sort()).to.eql(
+          preExistingIntegrations.concat('my.custom.integration').sort()
+        );
 
-        expect(body.integrations[0].datasets).to.eql({
-          'my.custom.integration': 'My.custom.integration',
-        });
+        expect(
+          Object.entries(
+            body.integrations.find(
+              (integration: Integration) => integration.name === 'my.custom.integration'
+            ).datasets
+          ).sort()
+        ).to.eql(Object.entries({ 'my.custom.integration': 'My.custom.integration' }).sort());
       });
 
       after(

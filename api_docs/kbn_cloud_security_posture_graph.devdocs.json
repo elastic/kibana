@@ -15,7 +15,7 @@
           "\nGraph component renders a graph visualization using ReactFlow.\nIt takes nodes and edges as input and provides interactive controls\nfor panning, zooming, and manipulating the graph.\n"
         ],
         "signature": [
-          "({ nodes, edges, interactive, ...rest }: ",
+          "({ nodes, edges, interactive, isLocked, ...rest }: ",
           {
             "pluginId": "@kbn/cloud-security-posture-graph",
             "scope": "public",
@@ -34,7 +34,7 @@
             "id": "def-public.Graph.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ nodes, edges, interactive, ...rest }",
+            "label": "{\n  nodes,\n  edges,\n  interactive,\n  isLocked = false,\n  ...rest\n}",
             "description": [],
             "signature": [
               {
@@ -54,6 +54,75 @@
         "returnComment": [
           "The rendered Graph component."
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.GraphPopover",
+        "type": "Function",
+        "tags": [],
+        "label": "GraphPopover",
+        "description": [],
+        "signature": [
+          "({ isOpen, anchorElement, closePopover, children, ...rest }: ",
+          "GraphPopoverProps",
+          ") => React.JSX.Element | null"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph_popover.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphPopover.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isOpen,\n  anchorElement,\n  closePopover,\n  children,\n  ...rest\n}",
+            "description": [],
+            "signature": [
+              "GraphPopoverProps"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph_popover.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.useGraphPopover",
+        "type": "Function",
+        "tags": [],
+        "label": "useGraphPopover",
+        "description": [],
+        "signature": [
+          "(id: string) => ",
+          "GraphPopoverState"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/use_graph_popover.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.useGraphPopover.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/use_graph_popover.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
@@ -110,58 +179,27 @@
             "label": "expandButtonClick",
             "description": [],
             "signature": [
-              "((e: React.MouseEvent<HTMLElement, MouseEvent>, node: ",
-              {
-                "pluginId": "@kbn/cloud-security-posture-graph",
-                "scope": "public",
-                "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
-                "section": "def-public.NodeProps",
-                "text": "NodeProps"
-              },
-              ") => void) | undefined"
+              "ExpandButtonClickCallback",
+              " | undefined"
             ],
             "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/cloud-security-posture-graph",
-                "id": "def-public.EntityNodeViewModel.expandButtonClick.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "e",
-                "description": [],
-                "signature": [
-                  "React.MouseEvent<HTMLElement, MouseEvent>"
-                ],
-                "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/cloud-security-posture-graph",
-                "id": "def-public.EntityNodeViewModel.expandButtonClick.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "node",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/cloud-security-posture-graph",
-                    "scope": "public",
-                    "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
-                    "section": "def-public.NodeProps",
-                    "text": "NodeProps"
-                  }
-                ],
-                "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.EntityNodeViewModel.nodeClick",
+            "type": "Function",
+            "tags": [],
+            "label": "nodeClick",
+            "description": [],
+            "signature": [
+              "NodeClickCallback",
+              " | undefined"
             ],
-            "returnComment": []
+            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -194,7 +232,9 @@
             "type": "Array",
             "tags": [],
             "label": "nodes",
-            "description": [],
+            "description": [
+              "\nArray of node view models to be rendered in the graph."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/cloud-security-posture-graph",
@@ -215,7 +255,9 @@
             "type": "Array",
             "tags": [],
             "label": "edges",
-            "description": [],
+            "description": [
+              "\nArray of edge view models to be rendered in the graph."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/cloud-security-posture-graph",
@@ -236,7 +278,25 @@
             "type": "boolean",
             "tags": [],
             "label": "interactive",
-            "description": [],
+            "description": [
+              "\nDetermines whether the graph is interactive (allows panning, zooming, etc.).\nWhen set to false, the graph is locked and user interactions are disabled, effectively putting it in view-only mode."
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphProps.isLocked",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isLocked",
+            "description": [
+              "\nDetermines whether the graph is locked. Nodes and edges are still interactive, but the graph itself is not."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -296,58 +356,12 @@
             "label": "expandButtonClick",
             "description": [],
             "signature": [
-              "((e: React.MouseEvent<HTMLElement, MouseEvent>, node: ",
-              {
-                "pluginId": "@kbn/cloud-security-posture-graph",
-                "scope": "public",
-                "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
-                "section": "def-public.NodeProps",
-                "text": "NodeProps"
-              },
-              ") => void) | undefined"
+              "ExpandButtonClickCallback",
+              " | undefined"
             ],
             "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/cloud-security-posture-graph",
-                "id": "def-public.LabelNodeViewModel.expandButtonClick.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "e",
-                "description": [],
-                "signature": [
-                  "React.MouseEvent<HTMLElement, MouseEvent>"
-                ],
-                "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/cloud-security-posture-graph",
-                "id": "def-public.LabelNodeViewModel.expandButtonClick.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "node",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/cloud-security-posture-graph",
-                    "scope": "public",
-                    "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
-                    "section": "def-public.NodeProps",
-                    "text": "NodeProps"
-                  }
-                ],
-                "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -373,7 +387,7 @@
             "section": "def-public.NodeViewModel",
             "text": "NodeViewModel"
           },
-          ", string>, \"id\" | \"draggable\" | \"data\" | \"width\" | \"height\" | \"selectable\" | \"selected\" | \"parentId\" | \"sourcePosition\" | \"targetPosition\" | \"dragHandle\" | \"deletable\"> & Required<Pick<",
+          ", string>, \"id\" | \"data\" | \"draggable\" | \"width\" | \"height\" | \"selectable\" | \"selected\" | \"parentId\" | \"sourcePosition\" | \"targetPosition\" | \"dragHandle\" | \"deletable\"> & Required<Pick<",
           "Node",
           "<",
           {

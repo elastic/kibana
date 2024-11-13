@@ -8,7 +8,15 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { capitalize } from 'lodash';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiLink } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiPanel,
+  EuiText,
+  EuiBasicTable,
+  EuiIcon,
+  EuiLink,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import {
@@ -16,15 +24,11 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
-import { SecurityPageName } from '@kbn/deeplinks-security';
-
 import { buildEntityAlertsQuery } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { DocumentDetailsPreviewPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -77,12 +81,6 @@ export const AlertsDetailsTable = memo(
         pageOfItems,
         totalItemCount: findings?.length,
       };
-    };
-
-    const getNavUrlParams = useGetNavigationUrlParams();
-
-    const getAlertsPageUrl = (name: string, queryField: 'host.name' | 'user.name') => {
-      return getNavUrlParams({ [queryField]: name });
     };
 
     const { to, from } = useGlobalTime();
@@ -213,18 +211,14 @@ export const AlertsDetailsTable = memo(
     return (
       <>
         <EuiPanel hasShadow={false}>
-          <SecuritySolutionLinkAnchor
-            deepLinkId={SecurityPageName.alerts}
-            path={`${getAlertsPageUrl(queryName, fieldName)}`}
-            target={'_blank'}
-            external={false}
-            onClick={() => {}}
-          >
-            {i18n.translate('xpack.securitySolution.flyout.left.insights.alerts.tableTitle', {
-              defaultMessage: 'Alerts ',
-            })}
-            <EuiIcon type={'popout'} />
-          </SecuritySolutionLinkAnchor>
+          <EuiTitle size="s">
+            <h1 data-test-subj={'securitySolutionFlyoutInsightsAlertsCount'}>
+              {i18n.translate('xpack.securitySolution.flyout.left.insights.alerts.tableTitle', {
+                defaultMessage: 'Alerts ',
+              })}
+            </h1>
+          </EuiTitle>
+
           <EuiSpacer size="xl" />
           <DistributionBar stats={alertStats} />
           <EuiSpacer size="l" />

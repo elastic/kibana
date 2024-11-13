@@ -153,8 +153,8 @@ export const VulnerabilitiesPreview = ({
             callback: goToEntityInsightTab,
             tooltip: (
               <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.misconfiguration.misconfigurationTooltip"
-                defaultMessage="Show all misconfiguration findings"
+                id="xpack.securitySolution.flyout.right.insights.vulnerabilities.vulnerabilitiesTooltip"
+                defaultMessage="Show all vulnerabilities findings"
               />
             ),
           }

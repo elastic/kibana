@@ -36,6 +36,7 @@ import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
+import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -146,7 +147,7 @@ export const UserPanel = ({
   const { openLeftPanel } = useExpandableFlyoutApi();
   const openPanelTab = useCallback(
     (tab?: EntityDetailsLeftPanelTab) => {
-      telemetry.reportRiskInputsExpandedFlyoutOpened({
+      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
         entity: 'user',
       });
 

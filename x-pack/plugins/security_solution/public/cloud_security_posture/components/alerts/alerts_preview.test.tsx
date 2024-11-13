@@ -11,9 +11,11 @@ import { AlertsPreview } from './alerts_preview';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ParsedAlertsData } from '../../../overview/components/detection_response/alerts_by_status/types';
+import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 
 const mockAlertsData: ParsedAlertsData = {
-  closed: { total: 2, severities: [{ key: 'low', value: 1, label: 'Low' }] },
   open: {
     total: 3,
     severities: [
@@ -30,9 +32,13 @@ const mockAlertsData: ParsedAlertsData = {
   },
 };
 
-jest.mock(
-  '../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data'
-);
+// Mock hooks
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
+jest.mock('../../../entity_analytics/api/hooks/use_risk_score');
+// jest.mock(
+//   '../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data'
+// );
 jest.mock('@kbn/expandable-flyout');
 
 describe('AlertsPreview', () => {
@@ -40,6 +46,13 @@ describe('AlertsPreview', () => {
 
   beforeEach(() => {
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
+    (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({
+      data: { count: { CRITICAL: 0, HIGH: 1, MEDIUM: 1, LOW: 0, UNKNOWN: 0 } },
+    });
+    (useRiskScore as jest.Mock).mockReturnValue({ data: [{ host: { risk: 75 } }] });
+    (useMisconfigurationPreview as jest.Mock).mockReturnValue({
+      data: { count: { passed: 1, failed: 1 } },
+    });
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -48,30 +61,30 @@ describe('AlertsPreview', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsPreview alertsData={mockAlertsData} alertsCount={5} />
+        <AlertsPreview alertsData={mockAlertsData} name="host1" fieldName="host.name" />
       </TestProviders>
     );
 
-    expect(getByTestId('securitySolutionFlyoutInsightsAlertsTitleText')).toBeInTheDocument();
+    expect(getByTestId('securitySolutionFlyoutInsightsAlertsTitleLink')).toBeInTheDocument();
   });
 
   it('renders correct alerts number', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsPreview alertsData={mockAlertsData} alertsCount={5} />
+        <AlertsPreview alertsData={mockAlertsData} name="host1" fieldName="host.name" />
       </TestProviders>
     );
 
     expect(getByTestId('securitySolutionFlyoutInsightsAlertsCount').textContent).toEqual('5');
   });
 
-  it('renders correct number distribution bar based on severity', () => {
+  it('should render the correct number of distribution bar section based on the number of severities', () => {
     const { queryAllByTestId } = render(
       <TestProviders>
-        <AlertsPreview alertsData={mockAlertsData} alertsCount={5} />
+        <AlertsPreview alertsData={mockAlertsData} name="host1" fieldName="host.name" />
       </TestProviders>
     );
 
-    expect(queryAllByTestId('undefined__part').length).toEqual(3);
+    expect(queryAllByTestId('AlertsPreviewDistributionBarTestId__part').length).toEqual(3);
   });
 });
