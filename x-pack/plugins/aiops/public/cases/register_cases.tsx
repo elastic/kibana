@@ -11,10 +11,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { CASES_ATTACHMENT_CHANGE_POINT_CHART } from '@kbn/aiops-change-point-detection/constants';
-import { getChangePointDetectionComponent } from '../shared_components';
+import { CASES_ATTACHMENT_LOG_PATTERN } from '@kbn/aiops-log-pattern-analysis/constants';
+import {
+  getChangePointDetectionComponent,
+  getPatternAnalysisComponent,
+} from '../shared_components';
 import type { AiopsPluginStartDeps } from '../types';
 
-export function registerChangePointChartsAttachment(
+export function registerCases(
   cases: CasesPublicSetup,
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps
@@ -41,6 +45,30 @@ export function registerChangePointChartsAttachment(
         return {
           default: initComponent(pluginStart.fieldFormats, ChangePointDetectionComponent),
         };
+      }),
+    }),
+  });
+
+  const LogPatternAttachmentComponent = getPatternAnalysisComponent(coreStart, pluginStart);
+
+  cases.attachmentFramework.registerPersistableState({
+    id: CASES_ATTACHMENT_LOG_PATTERN,
+    icon: 'machineLearningApp',
+    displayName: i18n.translate('xpack.aiops.logPatternAnalysis.cases.attachmentName', {
+      defaultMessage: 'Log pattern analysis',
+    }),
+    getAttachmentViewObject: () => ({
+      event: (
+        <FormattedMessage
+          id="xpack.aiops.logPatternAnalysis.cases.attachmentEvent"
+          defaultMessage="added log pattern analysis"
+        />
+      ),
+      timelineAvatar: 'machineLearningApp',
+      children: React.lazy(async () => {
+        const { initComponent } = await import('./log_pattern_attachment');
+
+        return { default: initComponent(pluginStart.fieldFormats, LogPatternAttachmentComponent) };
       }),
     }),
   });
