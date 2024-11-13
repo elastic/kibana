@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { useFetchDataViews } from '@kbn/observability-plugin/public';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 export const getDataViewPattern = ({
   byId,
