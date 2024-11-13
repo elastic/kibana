@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FormattedMessage } from '@kbn/i18n-react';
 
-import React from 'react';
-import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RecursivePartial } from '@kbn/utility-types';
 import { merge } from 'lodash';
-import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
-import { CreateSLOForm } from '../types';
+import React from 'react';
+import { OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { SloEditForm } from '../components/slo_edit_form';
+import { CreateSLOForm } from '../types';
 
 export const sloEditFormFooterPortal = createHtmlPortalNode();
 
-function SloAddFormFlyout({
+// eslint-disable-next-line import/no-default-export
+export default function SloAddFormFlyout({
   onClose,
   initialValues,
 }: {
@@ -69,6 +70,3 @@ function SloAddFormFlyout({
     </EuiFlyout>
   );
 }
-
-// eslint-disable-next-line import/no-default-export
-export default SloAddFormFlyout;
