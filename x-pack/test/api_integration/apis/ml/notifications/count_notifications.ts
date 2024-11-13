@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import moment from 'moment';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
@@ -14,13 +13,16 @@ import { getCommonRequestHeader } from '../../../../functional/services/ml/commo
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
+  let testStart: number;
 
   describe('GET notifications count', () => {
+    testStart = Date.now();
+
     describe('when no ML entities present', () => {
       it('return a default response', async () => {
         const { body, status } = await supertest
           .get(`/internal/ml/notifications/count`)
-          .query({ lastCheckedAt: moment().subtract(7, 'd').valueOf() })
+          .query({ lastCheckedAt: testStart })
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
@@ -50,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('return notifications count by level', async () => {
         const { body, status } = await supertest
           .get(`/internal/ml/notifications/count`)
-          .query({ lastCheckedAt: moment().subtract(7, 'd').valueOf() })
+          .query({ lastCheckedAt: testStart })
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
