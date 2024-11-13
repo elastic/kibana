@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { InstallationStatus } from '../../../common/install_status';
 
 /**
@@ -45,6 +46,12 @@ export interface DocGetStatusResponse {
  */
 export interface DocInstallOptions {
   /**
+   * When the operation was requested by a user, the request that initiated it.
+   *
+   * If not provided, the call will be considered as being done on behalf of system.
+   */
+  request?: KibanaRequest;
+  /**
    * If true, will reinstall the documentation even if already present.
    * Defaults to `false`
    */
@@ -61,6 +68,12 @@ export interface DocInstallOptions {
  */
 export interface DocUninstallOptions {
   /**
+   * When the operation was requested by a user, the request that initiated it.
+   *
+   * If not provided, the call will be considered as being done on behalf of system.
+   */
+  request?: KibanaRequest;
+  /**
    * If true, the returned promise will wait until the update task has completed before resolving.
    * Defaults to `false`
    */
@@ -71,6 +84,12 @@ export interface DocUninstallOptions {
  * Options for {@link DocumentationManagerAPI.update}
  */
 export interface DocUpdateOptions {
+  /**
+   * When the operation was requested by a user, the request that initiated it.
+   *
+   * If not provided, the call will be considered as being done on behalf of system.
+   */
+  request?: KibanaRequest;
   /**
    * If true, the returned promise will wait until the update task has completed before resolving.
    * Defaults to `false`

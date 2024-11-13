@@ -68,6 +68,7 @@ export const registerInstallationRoutes = ({
       const { documentationManager } = getServices();
 
       await documentationManager.install({
+        request: req,
         force: false,
         wait: true,
       });
@@ -96,7 +97,10 @@ export const registerInstallationRoutes = ({
     async (ctx, req, res) => {
       const { documentationManager } = getServices();
 
-      await documentationManager.uninstall({ wait: true });
+      await documentationManager.uninstall({
+        request: req,
+        wait: true,
+      });
 
       return res.ok<UninstallResponse>({
         body: {

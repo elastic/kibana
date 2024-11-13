@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { CoreAuditService } from '@kbn/core/server';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { InstallationStatus } from '../../../common/install_status';
@@ -39,26 +40,30 @@ export class DocumentationManager implements DocumentationManagerAPI {
   private taskManager: TaskManagerStartContract;
   private licensing: LicensingPluginStart;
   private docInstallClient: ProductDocInstallClient;
+  private auditService: CoreAuditService;
 
   constructor({
     logger,
     taskManager,
     licensing,
     docInstallClient,
+    auditService,
   }: {
     logger: Logger;
     taskManager: TaskManagerStartContract;
     licensing: LicensingPluginStart;
     docInstallClient: ProductDocInstallClient;
+    auditService: CoreAuditService;
   }) {
     this.logger = logger;
     this.taskManager = taskManager;
     this.licensing = licensing;
     this.docInstallClient = docInstallClient;
+    this.auditService = auditService;
   }
 
   async install(options: DocInstallOptions = {}): Promise<void> {
-    const { force = false, wait = false } = options;
+    const { request, force = false, wait = false } = options;
 
     const { status } = await this.getStatus();
     if (!force && status === 'installed') {
@@ -75,6 +80,18 @@ export class DocumentationManager implements DocumentationManagerAPI {
       logger: this.logger,
     });
 
+    if (request) {
+      this.auditService.asScoped(request).log({
+        message: `User is requesting installation of product documentation for AI Assistants. Task ID=[${taskId}]`,
+        event: {
+          action: 'product_documentation_create',
+          category: ['database'],
+          type: ['creation'],
+          outcome: 'unknown',
+        },
+      });
+    }
+
     if (wait) {
       await waitUntilTaskCompleted({
         taskManager: this.taskManager,
@@ -85,12 +102,24 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async update(options: DocUpdateOptions = {}): Promise<void> {
-    const { wait = false } = options;
+    const { request, wait = false } = options;
 
     const taskId = await scheduleEnsureUpToDateTask({
       taskManager: this.taskManager,
       logger: this.logger,
     });
+
+    if (request) {
+      this.auditService.asScoped(request).log({
+        message: `User is requesting update of product documentation for AI Assistants. Task ID=[${taskId}]`,
+        event: {
+          action: 'product_documentation_update',
+          category: ['database'],
+          type: ['change'],
+          outcome: 'unknown',
+        },
+      });
+    }
 
     if (wait) {
       await waitUntilTaskCompleted({
@@ -102,12 +131,24 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async uninstall(options: DocUninstallOptions = {}): Promise<void> {
-    const { wait = false } = options;
+    const { request, wait = false } = options;
 
     const taskId = await scheduleUninstallAllTask({
       taskManager: this.taskManager,
       logger: this.logger,
     });
+
+    if (request) {
+      this.auditService.asScoped(request).log({
+        message: `User is requesting deletion of product documentation for AI Assistants. Task ID=[${taskId}]`,
+        event: {
+          action: 'product_documentation_delete',
+          category: ['database'],
+          type: ['deletion'],
+          outcome: 'unknown',
+        },
+      });
+    }
 
     if (wait) {
       await waitUntilTaskCompleted({

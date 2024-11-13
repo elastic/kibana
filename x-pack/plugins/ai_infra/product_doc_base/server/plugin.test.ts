@@ -43,6 +43,10 @@ describe('ProductDocBasePlugin', () => {
     PackageInstallMock.mockReturnValue({ ensureUpToDate: jest.fn().mockResolvedValue({}) });
   });
 
+  afterEach(() => {
+    (scheduleEnsureUpToDateTask as jest.Mock).mockReset();
+  });
+
   describe('#setup', () => {
     it('register the routes', () => {
       plugin.setup(coreMock.createSetup(), pluginSetupDeps);
@@ -63,7 +67,7 @@ describe('ProductDocBasePlugin', () => {
     it('register the task definitions', () => {
       plugin.setup(coreMock.createSetup(), pluginSetupDeps);
 
-      expect(registerTaskDefinitions).toHaveBeenCalledTimes(1);
+      expect(registerTaskDefinitions).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -72,7 +76,12 @@ describe('ProductDocBasePlugin', () => {
       plugin.setup(coreMock.createSetup(), pluginSetupDeps);
       const startContract = plugin.start(coreMock.createStart(), pluginStartDeps);
       expect(startContract).toEqual({
-        isInstalled: expect.any(Function),
+        management: {
+          getStatus: expect.any(Function),
+          install: expect.any(Function),
+          uninstall: expect.any(Function),
+          update: expect.any(Function),
+        },
         search: expect.any(Function),
       });
     });

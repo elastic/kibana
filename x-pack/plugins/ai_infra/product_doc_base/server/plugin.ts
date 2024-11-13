@@ -104,6 +104,7 @@ export class ProductDocBasePlugin
       docInstallClient: productDocClient,
       licensing,
       taskManager,
+      auditService: core.security.audit,
     });
 
     this.internalServices = {
