@@ -110,8 +110,10 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/anomalies_table_data`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get anomalies records for table display',
       description:
@@ -143,8 +145,10 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/category_definition`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get category definition',
       description: 'Returns the definition of the category with the specified ID and job ID.',
@@ -175,8 +179,10 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/max_anomaly_score`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get the maximum anomaly_score',
       description:
@@ -208,8 +214,10 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/category_examples`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get category examples',
       description:
@@ -241,8 +249,10 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/partition_fields_values`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get partition fields values',
       description:
@@ -274,8 +284,10 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_search`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Run a search on the anomaly results index',
       description:
@@ -307,8 +319,10 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/results/{jobId}/categorizer_stats`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get categorizer statistics',
       description: 'Returns the categorizer statistics for the specified job ID.',
@@ -339,8 +353,10 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/category_stopped_partitions`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get partitions that have stopped being categorized',
       description:
@@ -371,8 +387,10 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/datafeed_results_chart`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get datafeed results chart data',
       description: 'Returns datafeed results chart data',
@@ -404,8 +422,10 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_charts`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get data for anomaly charts',
       description: 'Returns anomaly charts data',
@@ -437,8 +457,10 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_records`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get anomaly records for criteria',
       description: 'Returns anomaly records',
