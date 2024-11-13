@@ -148,7 +148,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      // Delete
+      // Update
       for (const scenario of [
         { user: secOnlyCreateComment, space: 'space1' },
         { user: secOnlyReadCreateComment, space: 'space1' },

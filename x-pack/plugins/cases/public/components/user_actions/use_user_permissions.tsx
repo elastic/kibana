@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useMemo, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
@@ -12,16 +12,16 @@ export const useUserPermissions = () => {
   const { permissions } = useCasesContext();
 
   /**
-   * Determines if a user has the capability to change the case status in any form.
+   * Determines if a user has the capability to update the case. Reopening a case is not part of this capability.
    */
 
-  const canUpdate = useMemo(() => permissions.update, [permissions.update]);
+  const canUpdate = permissions.update;
 
   /**
    * Determines if a user has the capability to change the case from closed => open or closed => in progress
    */
 
-  const canReopenCase = useMemo(() => permissions.reopenCase, [permissions.reopenCase]);
+  const canReopenCase = permissions.reopenCase;
 
   /**
    * Determines if a user has the capability to add comments and attachments

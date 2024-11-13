@@ -91,3 +91,32 @@ export const deleteCases = async ({
 
   return body;
 };
+
+export const updateCaseStatus = async ({
+  supertest,
+  caseId,
+  version = '2',
+  status = 'open',
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}): {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  version?: string;
+  status?: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+} => {
+  const updateRequest: CasePatchRequest = {
+    status,
+    version,
+    id: caseId,
+  };
+
+  const { body: updatedCase } = await supertest
+    .patch(`/api/cases/${caseId}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'xxx')
+    .send(updateRequest);
+  return updatedCase;
+};

@@ -72,8 +72,6 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               uiCapabilities.value!.catalogue,
               (enabled, catalogueId) => !exceptions.includes(catalogueId)
             );
-            expected.observability = true;
-            expected.securitySolution = true;
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
           }
@@ -129,15 +127,11 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
           case 'superuser at nothing_space': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            const exceptions = [
-              'observability',
-              'securitySolution',
-              'spaces',
-              ...esFeatureExceptions,
-            ];
             // everything is disabled except for the es feature exceptions and spaces management
-            const expected = mapValues(uiCapabilities.value!.catalogue, (enabled, catalogueId) =>
-              exceptions.includes(catalogueId)
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (enabled, catalogueId) =>
+                esFeatureExceptions.includes(catalogueId) || catalogueId === 'spaces'
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
@@ -151,31 +145,13 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               uiCapabilities.value!.catalogue,
               (enabled, catalogueId) => catalogueId === 'spaces'
             );
-            expect(uiCapabilities.value!.catalogue).to.eql({
-              ...expected,
-              observability: true,
-              securitySolution: true,
-            });
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
           }
-          case 'global_read at nothing_space': // fail
+          case 'global_read at nothing_space':
           case 'dual_privileges_read at nothing_space':
           case 'nothing_space_all at nothing_space':
-          case 'nothing_space_read at nothing_space': {
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything is disabled
-            const expected = mapValues(
-              uiCapabilities.value!.catalogue,
-              (enabled, catalogueId) => false
-            );
-            expect(uiCapabilities.value!.catalogue).to.eql({
-              ...expected,
-              observability: true,
-              securitySolution: true,
-            });
-            break;
-          }
+          case 'nothing_space_read at nothing_space':
           // the nothing_space has no Kibana features enabled, so even if we have
           // privileges to perform these actions, we won't be able to.
           case 'foo_all at nothing_space':
@@ -196,11 +172,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               uiCapabilities.value!.catalogue,
               (enabled, catalogueId) => false
             );
-            expect(uiCapabilities.value!.catalogue).to.eql({
-              ...expected,
-              observability: false,
-              securitySolution: false,
-            });
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
           }
           default:

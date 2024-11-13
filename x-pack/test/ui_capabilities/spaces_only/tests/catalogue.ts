@@ -32,9 +32,6 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
     'workplaceSearch',
   ];
 
-  // These will show in the catalogue due to deprecated features, ignore them for now until capabilities accounts for this.
-  const deprecatedUiCapabilities = ['observability', 'securitySolution'];
-
   describe('catalogue', () => {
     SpaceScenarios.forEach((scenario) => {
       it(`${scenario.name}`, async () => {
@@ -58,9 +55,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
               (enabled, catalogueId) =>
-                esFeatureExceptions.includes(catalogueId) ||
-                catalogueId === 'spaces' ||
-                deprecatedUiCapabilities.includes(catalogueId)
+                esFeatureExceptions.includes(catalogueId) || catalogueId === 'spaces'
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;

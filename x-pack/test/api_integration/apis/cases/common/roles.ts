@@ -26,7 +26,7 @@ export const secAllCasesOnlyDelete: Role = {
       {
         feature: {
           siem: ['all'],
-          securitySolutionCasesV2: ['cases_delete'],
+          securitySolutionCases: ['cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -51,7 +51,7 @@ export const secAllCasesOnlyReadDelete: Role = {
       {
         feature: {
           siem: ['all'],
-          securitySolutionCasesV2: ['read', 'cases_delete'],
+          securitySolutionCases: ['read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -76,7 +76,7 @@ export const secAllCasesNoDelete: Role = {
       {
         feature: {
           siem: ['all'],
-          securitySolutionCasesV2: ['minimal_all'],
+          securitySolutionCases: ['minimal_all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -88,6 +88,31 @@ export const secAllCasesNoDelete: Role = {
 
 export const secAll: Role = {
   name: 'sec_all_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+          securitySolutionCases: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const secCasesV2All: Role = {
+  name: 'sec_cases_v2_all_role_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -126,7 +151,7 @@ export const secAllSpace1: Role = {
       {
         feature: {
           siem: ['all'],
-          securitySolutionCasesV2: ['all'],
+          securitySolutionCases: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -151,7 +176,7 @@ export const secAllCasesRead: Role = {
       {
         feature: {
           siem: ['all'],
-          securitySolutionCasesV2: ['read'],
+          securitySolutionCases: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -200,7 +225,7 @@ export const secReadCasesAll: Role = {
       {
         feature: {
           siem: ['read'],
-          securitySolutionCasesV2: ['all'],
+          securitySolutionCases: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -225,7 +250,7 @@ export const secReadCasesRead: Role = {
       {
         feature: {
           siem: ['read'],
-          securitySolutionCasesV2: ['read'],
+          securitySolutionCases: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -250,7 +275,7 @@ export const secRead: Role = {
       {
         feature: {
           siem: ['read'],
-          securitySolutionCasesV2: ['read'],
+          securitySolutionCases: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -302,7 +327,7 @@ export const casesOnlyDelete: Role = {
     kibana: [
       {
         feature: {
-          generalCasesV2: ['cases_delete'],
+          generalCases: ['cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -326,7 +351,7 @@ export const casesOnlyReadDelete: Role = {
     kibana: [
       {
         feature: {
-          generalCasesV2: ['read', 'cases_delete'],
+          generalCases: ['read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -350,7 +375,7 @@ export const casesNoDelete: Role = {
     kibana: [
       {
         feature: {
-          generalCasesV2: ['minimal_all'],
+          generalCases: ['minimal_all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -374,11 +399,36 @@ export const casesAll: Role = {
     kibana: [
       {
         feature: {
-          generalCasesV2: ['all'],
+          generalCases: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
         spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const casesV2All: Role = {
+  name: 'cases_v2_all_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          generalCasesV2: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
       },
     ],
   },
@@ -398,7 +448,7 @@ export const casesRead: Role = {
     kibana: [
       {
         feature: {
-          generalCasesV2: ['read'],
+          generalCases: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -426,7 +476,7 @@ export const obsCasesOnlyDelete: Role = {
     kibana: [
       {
         feature: {
-          observabilityCasesV2: ['cases_delete'],
+          observabilityCases: ['cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -450,7 +500,7 @@ export const obsCasesOnlyReadDelete: Role = {
     kibana: [
       {
         feature: {
-          observabilityCasesV2: ['read', 'cases_delete'],
+          observabilityCases: ['read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -474,6 +524,7 @@ export const obsCasesNoDelete: Role = {
     kibana: [
       {
         feature: {
+          observabilityCases: ['minimal_all'],
           observabilityCasesV2: ['minimal_all'],
           actions: ['all'],
           actionsSimulators: ['all'],
@@ -498,11 +549,36 @@ export const obsCasesAll: Role = {
     kibana: [
       {
         feature: {
-          observabilityCasesV2: ['all'],
+          observabilityCases: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
         spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const obsCasesV2All: Role = {
+  name: 'obs_cases_v2_all_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          observabilityCasesV2: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
       },
     ],
   },
@@ -522,7 +598,7 @@ export const obsCasesRead: Role = {
     kibana: [
       {
         feature: {
-          observabilityCasesV2: ['read'],
+          observabilityCases: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -537,6 +613,7 @@ export const roles = [
   secAllCasesOnlyReadDelete,
   secAllCasesNoDelete,
   secAll,
+  secCasesV2All,
   secAllSpace1,
   secAllCasesRead,
   secAllCasesNone,
@@ -548,10 +625,12 @@ export const roles = [
   casesOnlyReadDelete,
   casesNoDelete,
   casesAll,
+  casesV2All,
   casesRead,
   obsCasesOnlyDelete,
   obsCasesOnlyReadDelete,
   obsCasesNoDelete,
   obsCasesAll,
+  obsCasesV2All,
   obsCasesRead,
 ];

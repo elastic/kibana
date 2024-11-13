@@ -81,33 +81,14 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             );
             break;
           case 'foo_all at nothing_space':
-          case 'foo_read at nothing_space': {
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            const navLinks = navLinksBuilder.only('management');
-            // Previously these cases were part of the last block, but with the addition of
-            // migratable plugin permissions, the deprecated permissions keep this value enabled now.
-            // This is a temporary solution until the deprecated permissions are removed.
-            navLinks.kibana = true;
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinks);
-            break;
-          }
+          case 'foo_read at nothing_space':
           case 'superuser at nothing_space':
           case 'global_all at nothing_space':
           case 'global_read at nothing_space':
           case 'dual_privileges_all at nothing_space':
           case 'dual_privileges_read at nothing_space':
           case 'nothing_space_all at nothing_space':
-          case 'nothing_space_read at nothing_space': {
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            const navLinks = navLinksBuilder.only('management');
-            // Same as above, only securitySolutionCases is true as well.
-            navLinks.kibana = true;
-            navLinks.securitySolutionCases = true;
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinks);
-            break;
-          }
+          case 'nothing_space_read at nothing_space':
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
           case 'legacy_all at everything_space':

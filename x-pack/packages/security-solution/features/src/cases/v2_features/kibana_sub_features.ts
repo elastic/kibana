@@ -145,7 +145,6 @@ export const getCasesSubFeaturesMapV2 = ({
         groupType: 'independent',
         privileges: [
           {
-            api: apiTags.all,
             id: 'case_reopen',
             name: i18n.translate(
               'securitySolutionPackages.features.featureRegistry.reopenCaseSubFeatureDetails',

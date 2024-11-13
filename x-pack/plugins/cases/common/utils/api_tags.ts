@@ -9,7 +9,6 @@ import {
   BULK_GET_USER_PROFILES_API_TAG,
   GET_CONNECTORS_CONFIGURE_API_TAG,
   SUGGEST_USER_PROFILES_API_TAG,
-  CREATE_COMMENT_API_TAG,
 } from '../constants';
 import { HttpApiTagOperation } from '../constants/types';
 import type { Owner } from '../constants/types';
@@ -32,6 +31,7 @@ export const getApiTags = (owner: Owner): CasesApiTags => {
       SUGGEST_USER_PROFILES_API_TAG,
       BULK_GET_USER_PROFILES_API_TAG,
       GET_CONNECTORS_CONFIGURE_API_TAG,
+      create,
       read,
     ] as const,
     read: [
@@ -41,6 +41,6 @@ export const getApiTags = (owner: Owner): CasesApiTags => {
       read,
     ] as const,
     delete: [deleteTag] as const,
-    createComment: [create, CREATE_COMMENT_API_TAG] as const,
+    createComment: [create] as const,
   };
 };
