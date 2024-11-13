@@ -5326,7 +5326,6 @@
   version "0.0.0"
   uid ""
 
-
 "@kbn/index-adapter@link:packages/kbn-index-adapter":
   version "0.0.0"
   uid ""
