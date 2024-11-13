@@ -59,6 +59,7 @@ export class KnowledgeBaseService {
     },
     modelId: string | undefined
   ) {
+    await deleteInferenceEndpoint({ esClient, logger: this.dependencies.logger }).catch((e) => {}); // ensure existing inference endpoint is deleted
     return createInferenceEndpoint({ esClient, logger: this.dependencies.logger, modelId });
   }
 
