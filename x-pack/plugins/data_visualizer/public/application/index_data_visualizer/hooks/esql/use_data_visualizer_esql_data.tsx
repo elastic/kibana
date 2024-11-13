@@ -44,6 +44,7 @@ import type {
 } from '../../embeddables/grid_embeddable/types';
 import { getDefaultPageState } from '../../constants/index_data_visualizer_viewer';
 import { DEFAULT_ESQL_LIMIT } from '../../constants/esql_constants';
+import { getReasonIfFieldStatsUnavailableForQuery } from '../../utils/get_reason_fieldstats_unavailable_for_esql_query';
 
 type AnyQuery = Query | AggregateQuery;
 
@@ -160,9 +161,17 @@ export const useESQLDataVisualizerData = (
 
       const tf = timefilter;
 
-      if (!buckets || !tf || (isESQLQuery(query) && query.esql === '')) return;
-      const activeBounds = tf.getActiveBounds();
+      if (!buckets || !tf || query.esql === '') return;
 
+      // Safeguard to not ever run query if not supported
+      if (isESQLQuery(query)) {
+        const unsupportedReasonForQuery = getReasonIfFieldStatsUnavailableForQuery(query);
+        if (unsupportedReasonForQuery) {
+          return;
+        }
+      }
+
+      const activeBounds = tf.getActiveBounds();
       let earliest: number | undefined;
       let latest: number | undefined;
       if (activeBounds !== undefined && currentDataView?.timeFieldName !== undefined) {

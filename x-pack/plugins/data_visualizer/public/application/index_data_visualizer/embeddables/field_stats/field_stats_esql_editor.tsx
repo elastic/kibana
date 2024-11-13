@@ -14,12 +14,14 @@ interface FieldStatsESQLEditorProps {
   query: AggregateQuery;
   setQuery: (query: AggregateQuery) => void;
   onQuerySubmit: (query: AggregateQuery, abortController?: AbortController) => Promise<void>;
+  disableSubmitAction?: boolean;
 }
 export const FieldStatsESQLEditor = ({
   canEditTextBasedQuery = true,
   query,
   setQuery,
   onQuerySubmit,
+  disableSubmitAction = false,
 }: FieldStatsESQLEditorProps) => {
   const prevQuery = useRef<AggregateQuery>(query);
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
@@ -48,8 +50,8 @@ export const FieldStatsESQLEditor = ({
         editorIsInline
         hideRunQueryText
         onTextLangQuerySubmit={onTextLangQuerySubmit}
-        isDisabled={false}
-        allowQueryCancellation
+        allowQueryCancellation={false}
+        disableSubmitAction={disableSubmitAction}
         isLoading={isVisualizationLoading}
       />
     </EuiFlexItem>
