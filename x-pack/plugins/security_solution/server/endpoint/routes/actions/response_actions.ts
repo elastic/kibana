@@ -6,7 +6,6 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import type { TypeOf } from '@kbn/config-schema';
 
 import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
 import { stringify } from '../../utils/stringify';
@@ -24,7 +23,6 @@ import {
   GetProcessesRouteRequestSchema,
   IsolateRouteRequestSchema,
   KillProcessRouteRequestSchema,
-  type NoParametersRequestSchema,
   type ResponseActionGetFileRequestBody,
   type ResponseActionsRequestBody,
   type ScanActionRequestBody,
@@ -39,12 +37,10 @@ import {
   EXECUTE_ROUTE,
   GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
-  ISOLATE_HOST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
   SCAN_ROUTE,
   SUSPEND_PROCESS_ROUTE,
-  UNISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
@@ -72,58 +68,6 @@ export function registerResponseActionRoutes(
   endpointContext: EndpointAppContext
 ) {
   const logger = endpointContext.logFactory.get('hostIsolation');
-
-  /**
-   * @deprecated use ISOLATE_HOST_ROUTE_V2 instead
-   */
-  router.versioned
-    .post({
-      access: 'public',
-      path: ISOLATE_HOST_ROUTE,
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
-      },
-      options: { authRequired: true },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: IsolateRouteRequestSchema,
-        },
-      },
-      withEndpointAuthz({ all: ['canIsolateHost'] }, logger, redirectHandler(ISOLATE_HOST_ROUTE_V2))
-    );
-
-  /**
-   * @deprecated use RELEASE_HOST_ROUTE instead
-   */
-  router.versioned
-    .post({
-      access: 'public',
-      path: UNISOLATE_HOST_ROUTE,
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
-      },
-      options: { authRequired: true },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: UnisolateRouteRequestSchema,
-        },
-      },
-      withEndpointAuthz(
-        { all: ['canUnIsolateHost'] },
-        logger,
-        redirectHandler(UNISOLATE_HOST_ROUTE_V2)
-      )
-    );
 
   router.versioned
     .post({
@@ -474,21 +418,4 @@ async function handleActionCreation(
         501
       );
   }
-}
-
-function redirectHandler(
-  location: string
-): RequestHandler<
-  unknown,
-  unknown,
-  TypeOf<typeof NoParametersRequestSchema.body>,
-  SecuritySolutionRequestHandlerContext
-> {
-  return async (context, _req, res) => {
-    const basePath = (await context.securitySolution).getServerBasePath();
-    return res.custom({
-      statusCode: 308,
-      headers: { location: `${basePath}${location}` },
-    });
-  };
 }
