@@ -36,7 +36,7 @@ import {
   RuleTypeState,
 } from '../types';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
-import { AdHocRun, AdHocRunSchedule } from '../data/ad_hoc_run/types';
+import { AdHocRun, AdHocRunSO, AdHocRunSchedule } from '../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { AdHocTaskRunningHandler } from './ad_hoc_task_running_handler';
@@ -53,7 +53,6 @@ import {
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { getEsErrorMessage } from '../lib/errors';
 import { Result, isOk, asOk, asErr } from '../lib/result_type';
-import { RawAdHocRunParams } from '../saved_objects/schemas/raw_ad_hoc_run_params/latest';
 import { ActionScheduler } from './action_scheduler';
 
 interface ConstructorParams {
@@ -323,8 +322,8 @@ export class AdHocTaskRunner implements CancellableTask {
       let adHocRunData: AdHocRun;
 
       try {
-        const adHocRunSO: SavedObject<RawAdHocRunParams> =
-          await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAdHocRunParams>(
+        const adHocRunSO: SavedObject<AdHocRunSO> =
+          await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<AdHocRunSO>(
             AD_HOC_RUN_SAVED_OBJECT_TYPE,
             adHocRunParamsId,
             { namespace }

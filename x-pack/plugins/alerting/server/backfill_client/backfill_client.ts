@@ -135,9 +135,13 @@ export class BackfillClient {
           name: `rule`,
           type: RULE_SAVED_OBJECT_TYPE,
         };
+        const allActions = [
+          ...rule.actions,
+          ...(rule.systemActions ?? []),
+        ] as NormalizedAlertActionWithGeneratedValues[];
         const { references: actionReferences, actions } = await denormalizeActions(
           () => Promise.resolve(actionsClient),
-          rule.actions as NormalizedAlertActionWithGeneratedValues[]
+          allActions
         );
         adHocSOsToCreate.push({
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,

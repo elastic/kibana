@@ -6,16 +6,17 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-types';
+import { RuleTypeParams } from '@kbn/alerting-types';
 import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { GetViewInAppRelativeUrlFn } from '../../../types';
+import { ActionSchedulerRule } from '../types';
 
 interface BuildRuleUrlOpts<Params extends RuleTypeParams> {
   end?: number;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
   kibanaBaseUrl: string | undefined;
   logger: Logger;
-  rule: SanitizedRule<Params>;
+  rule: ActionSchedulerRule<Params>;
   spaceId: string;
   start?: number;
 }
