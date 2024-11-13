@@ -14,6 +14,7 @@ import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hook
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
+import { FILTER_CLOSED } from '../../../common/types';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 import { AlertsPreview } from './alerts/alerts_preview';
@@ -80,8 +81,32 @@ export const EntityInsight = <T,>({
     from,
   });
 
+  // const alertsData = {
+  //   closed: {
+  //     total: 2,
+  //     severities: [
+  //       { key: 'low', value: 1, label: 'Low' },
+  //       { key: 'critical', value: 1, label: 'Critical' },
+  //     ],
+  //   },
+  //   open: {
+  //     total: 3,
+  //     severities: [
+  //       { key: 'low', value: 2, label: 'Low' },
+  //       { key: 'medium', value: 1, label: 'Medium' },
+  //     ],
+  //   },
+  //   acknowledged: {
+  //     total: 2,
+  //     severities: [
+  //       { key: 'low', value: 1, label: 'Low' },
+  //       { key: 'high', value: 1, label: 'High' },
+  //     ],
+  //   },
+  // };
+
   const filteredAlertsData: ParsedAlertsData = alertsData
-    ? Object.fromEntries(Object.entries(alertsData).filter(([key]) => key !== 'closed'))
+    ? Object.fromEntries(Object.entries(alertsData).filter(([key]) => key !== FILTER_CLOSED))
     : {};
 
   const alertsOpenCount = filteredAlertsData?.open?.total || 0;

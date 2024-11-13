@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { capitalize } from 'lodash';
-import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,7 +23,7 @@ const AlertsCount = ({
   alertsTotal,
   euiTheme,
 }: {
-  alertsTotal: string | number;
+  alertsTotal: number;
   euiTheme: EuiThemeComputed<{}>;
 }) => {
   return (
@@ -32,15 +31,17 @@ const AlertsCount = ({
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h1 data-test-subj={'securitySolutionFlyoutInsightsAlertsCount'}>{alertsTotal}</h1>
+            <h1 data-test-subj={'securitySolutionFlyoutInsightsAlertsCount'}>
+              {getAbbreviatedNumber(alertsTotal)}
+            </h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText
             size="m"
-            css={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
-            `}
+            css={{
+              fontWeight: euiTheme.font.weight.semiBold,
+            }}
           >
             <FormattedMessage
               id="xpack.securitySolution.flyout.right.insights.alerts.alertsCountDescription"
@@ -64,14 +65,13 @@ export const AlertsPreview = ({
 
   const severityMap = new Map<string, number>();
 
-  (['open', 'acknowledged'] as AlertsByStatus[]).forEach((status) => {
-    alertsData?.[status]?.severities.forEach((severity) => {
-      if (severityMap.has(severity.key)) {
-        severityMap.set(severity.key, (severityMap?.get(severity.key) || 0) + severity.value);
-      } else {
-        severityMap.set(severity.key, severity.value);
-      }
-    });
+  (Object.keys(alertsData || {}) as AlertsByStatus[]).forEach((status) => {
+    if (alertsData?.[status]?.severities) {
+      alertsData?.[status]?.severities.forEach((severity) => {
+        const currentSeverity = severityMap.get(severity.key) || 0;
+        severityMap.set(severity.key, currentSeverity + severity.value);
+      });
+    }
   });
 
   const alertStats = Array.from(severityMap, ([key, count]) => ({
@@ -88,9 +88,9 @@ export const AlertsPreview = ({
         title: (
           <EuiText
             size="xs"
-            css={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
-            `}
+            css={{
+              fontWeight: euiTheme.font.weight.semiBold,
+            }}
           >
             <FormattedMessage
               id="xpack.securitySolution.flyout.right.insights.alerts.alertsTitle"
@@ -102,7 +102,7 @@ export const AlertsPreview = ({
       data-test-subj={'securitySolutionFlyoutInsightsAlerts'}
     >
       <EuiFlexGroup gutterSize="none">
-        <AlertsCount alertsTotal={getAbbreviatedNumber(totalAlertsCount)} euiTheme={euiTheme} />
+        <AlertsCount alertsTotal={totalAlertsCount} euiTheme={euiTheme} />
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem />

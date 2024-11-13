@@ -13,7 +13,6 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ParsedAlertsData } from '../../../overview/components/detection_response/alerts_by_status/types';
 
 const mockAlertsData: ParsedAlertsData = {
-  closed: { total: 2, severities: [{ key: 'low', value: 1, label: 'Low' }] },
   open: {
     total: 3,
     severities: [
@@ -65,14 +64,13 @@ describe('AlertsPreview', () => {
     expect(getByTestId('securitySolutionFlyoutInsightsAlertsCount').textContent).toEqual('5');
   });
 
-  it('renders correct number distribution bar based on severity', () => {
+  it('should render the correct number of distribution bar section based on the number of severities', () => {
     const { queryAllByTestId } = render(
       <TestProviders>
         <AlertsPreview alertsData={mockAlertsData} />
       </TestProviders>
     );
 
-    // there should be 3 element with this id because we have 3 different severities in this test
     expect(queryAllByTestId('AlertsPreviewDistributionBarTestId__part').length).toEqual(3);
   });
 });
