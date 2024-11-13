@@ -119,7 +119,7 @@ describe('useBulkActions', () => {
               "items": Array [
                 Object {
                   "data-test-subj": "cases-bulk-action-status-open",
-                  "disabled": true,
+                  "disabled": false,
                   "icon": "empty",
                   "key": "cases-bulk-action-status-open",
                   "name": "Open",

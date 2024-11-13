@@ -10,6 +10,5 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security APIs - Features', function () {
     loadTestFile(require.resolve('./deprecated_features'));
-    loadTestFile(require.resolve('./cases_feature_permissions'));
   });
 }

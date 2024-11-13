@@ -69,7 +69,7 @@ export const getV1 = (): KibanaFeatureConfig => {
         },
         ui: capabilities.all,
         replacedBy: {
-          default: [{ feature: FEATURE_ID_V2, privileges: ['all', 'create_comment'] }],
+          default: [{ feature: FEATURE_ID_V2, privileges: ['all'] }],
           minimal: [
             {
               feature: FEATURE_ID_V2,

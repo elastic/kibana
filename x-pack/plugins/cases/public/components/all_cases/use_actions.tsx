@@ -28,6 +28,7 @@ import { EditTagsFlyout } from '../actions/tags/edit_tags_flyout';
 import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
 import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
 import { useCopyIDAction } from '../actions/copy_id/use_copy_id_action';
+import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
 
 const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean }> = ({
   theCase,
@@ -37,6 +38,12 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
   const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const refreshCases = useRefreshCases();
+
+  const shouldDisable = useShouldDisableStatus();
+
+  const shouldDisableStatus = useMemo(() => {
+    return shouldDisable([theCase]);
+  }, [theCase, shouldDisable]);
 
   const deleteAction = useDeleteAction({
     isDisabled: false,
@@ -83,7 +90,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
       { id: 0, items: mainPanelItems, title: i18n.ACTIONS },
     ];
 
-    if (statusAction.canUpdateStatus) {
+    if (!shouldDisableStatus) {
       mainPanelItems.push({
         name: (
           <FormattedMessage
@@ -164,6 +171,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
     statusAction,
     tagsAction,
     theCase,
+    shouldDisableStatus,
   ]);
 
   return (

@@ -31,7 +31,6 @@ export const getApiTags = (owner: Owner): CasesApiTags => {
       SUGGEST_USER_PROFILES_API_TAG,
       BULK_GET_USER_PROFILES_API_TAG,
       GET_CONNECTORS_CONFIGURE_API_TAG,
-      create,
       read,
     ] as const,
     read: [

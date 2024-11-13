@@ -60,7 +60,7 @@ const StatusContextMenuComponent: React.FC<Props> = ({
   const panelItems = useMemo(
     () =>
       caseStatuses
-        .filter((status: CaseStatuses) => !shouldDisableStatus([{ status: currentStatus }], status))
+        .filter((_: CaseStatuses) => !shouldDisableStatus([{ status: currentStatus }]))
         .map((status: CaseStatuses) => (
           <EuiContextMenuItem
             data-test-subj={`case-view-status-dropdown-${status}`}

@@ -103,10 +103,7 @@ describe('StatusContextMenu', () => {
 
     wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).simulate('click');
 
-    expect(mockShouldDisableStatus).toHaveBeenCalledWith(
-      [{ status: CaseStatuses.open }],
-      expect.any(String)
-    );
+    expect(mockShouldDisableStatus).toHaveBeenCalledWith([{ status: CaseStatuses.open }]);
   });
 
   it('handles all statuses being disabled', async () => {
@@ -123,10 +120,7 @@ describe('StatusContextMenu', () => {
   });
 
   it('correctly evaluates each status option', async () => {
-    const mockShouldDisableStatus = jest
-      .fn()
-      .mockImplementation((_, status: CaseStatuses) => status === CaseStatuses.closed);
-    (useShouldDisableStatus as jest.Mock).mockReturnValue(mockShouldDisableStatus);
+    (useShouldDisableStatus as jest.Mock).mockReturnValue(false);
 
     const wrapper = mount(
       <TestProviders>
@@ -134,12 +128,8 @@ describe('StatusContextMenu', () => {
       </TestProviders>
     );
 
-    wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).simulate('click');
-
-    expect(mockShouldDisableStatus).toHaveBeenCalledTimes(3);
-
     expect(
-      wrapper.find(`[data-test-subj="case-view-status-dropdown-closed"]`).exists()
+      wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).exists()
     ).toBeFalsy();
   });
 });

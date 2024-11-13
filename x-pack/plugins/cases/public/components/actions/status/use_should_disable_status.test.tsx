@@ -27,19 +27,7 @@ describe('useShouldDisableStatus', () => {
     const { result } = renderHook(() => useShouldDisableStatus());
 
     const cases = [{ status: CaseStatuses.open }];
-    expect(result.current(cases, CaseStatuses.closed)).toBe(true);
-  });
-
-  it('should disable status when selected status matches current status (no-op)', () => {
-    mockUseUserPermissions.mockReturnValue({
-      canUpdate: true,
-      canReopenCase: true,
-    });
-
-    const { result } = renderHook(() => useShouldDisableStatus());
-
-    const cases = [{ status: CaseStatuses.open }];
-    expect(result.current(cases, CaseStatuses.open)).toBe(true);
+    expect(result.current(cases)).toBe(true);
   });
 
   it('should allow status change when user has all permissions', () => {
@@ -51,7 +39,7 @@ describe('useShouldDisableStatus', () => {
     const { result } = renderHook(() => useShouldDisableStatus());
 
     const cases = [{ status: CaseStatuses.open }];
-    expect(result.current(cases, CaseStatuses.closed)).toBe(false);
+    expect(result.current(cases)).toBe(false);
   });
 
   it('should only allow reopening when user can only reopen cases', () => {
@@ -64,10 +52,10 @@ describe('useShouldDisableStatus', () => {
 
     const cases = [{ status: CaseStatuses.closed }, { status: CaseStatuses.open }];
 
-    expect(result.current(cases, CaseStatuses.open)).toBe(true);
+    expect(result.current(cases)).toBe(false);
 
     const closedCases = [{ status: CaseStatuses.closed }];
-    expect(result.current(closedCases, CaseStatuses.open)).toBe(false);
+    expect(result.current(closedCases)).toBe(false);
   });
 
   it('should prevent reopening closed cases when user cannot reopen', () => {
@@ -79,11 +67,10 @@ describe('useShouldDisableStatus', () => {
     const { result } = renderHook(() => useShouldDisableStatus());
 
     const closedCases = [{ status: CaseStatuses.closed }];
-    expect(result.current(closedCases, CaseStatuses.open)).toBe(true);
-    expect(result.current(closedCases, CaseStatuses['in-progress'])).toBe(true);
+    expect(result.current(closedCases)).toBe(true);
 
     const openCases = [{ status: CaseStatuses.open }];
-    expect(result.current(openCases, CaseStatuses.closed)).toBe(false);
+    expect(result.current(openCases)).toBe(true);
   });
 
   it('should handle multiple selected cases correctly', () => {
@@ -96,9 +83,6 @@ describe('useShouldDisableStatus', () => {
 
     const mixedCases = [{ status: CaseStatuses.open }, { status: CaseStatuses.closed }];
 
-    expect(result.current(mixedCases, CaseStatuses.open)).toBe(true);
-    expect(result.current(mixedCases, CaseStatuses['in-progress'])).toBe(true);
-
-    expect(result.current(mixedCases, CaseStatuses.closed)).toBe(false);
+    expect(result.current(mixedCases)).toBe(true);
   });
 });

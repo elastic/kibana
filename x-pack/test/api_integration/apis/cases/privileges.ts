@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 import { APP_ID as CASES_APP_ID } from '@kbn/cases-plugin/common/constants';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import { CaseStatuses, UserCommentAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
 import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugin/common/constants';
 import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -187,7 +189,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await updateCaseStatus({
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
-          status: 'closed',
+          status: 'closed' as CaseStatuses,
           version: '2',
           expectedHttpCode: 200,
           auth: { user, space: null },
@@ -196,7 +198,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await updateCaseStatus({
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
-          status: 'open',
+          status: 'open' as CaseStatuses,
           version: '3',
           expectedHttpCode: 200,
           auth: { user, space: null },
@@ -214,14 +216,15 @@ export default ({ getService }: FtrProviderContext): void => {
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can add comments`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
+        const comment: UserCommentAttachmentPayload = {
+          comment: 'test',
+          owner,
+          type: AttachmentType.user,
+        };
         await createComment({
+          params: comment,
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
-          params: {
-            comment: 'test',
-            owner,
-            type: 'user',
-          },
           expectedHttpCode: 200,
           auth: { user, space: null },
         });

@@ -112,7 +112,6 @@ export class Authorization {
   }) {
     const uniqueOwners = Array.from(new Set(entities.map((entity) => entity.owner)));
     const operations = Array.isArray(operation) ? operation : [operation];
-
     try {
       await this._ensureAuthorized(uniqueOwners, operations);
     } catch (error) {
@@ -204,7 +203,6 @@ export class Authorization {
   private async _ensureAuthorized(owners: string[], operations: OperationDetails[]) {
     const { securityAuth } = this;
     const areAllOwnersAvailable = owners.every((owner) => this.featureCaseOwners.has(owner));
-
     if (securityAuth && this.shouldCheckAuthorization()) {
       const requiredPrivileges: string[] = operations.flatMap((operation) =>
         owners.map((owner) => securityAuth.actions.cases.get(owner, operation.name))
@@ -297,7 +295,6 @@ export class Authorization {
       const { hasAllRequested, username, privileges } = await checkPrivileges({
         kibana: [...requiredPrivileges.keys()],
       });
-
       return {
         hasAllRequested,
         username,

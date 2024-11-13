@@ -6,8 +6,12 @@
  */
 
 import { CASES_URL } from '@kbn/cases-plugin/common';
-import { Case } from '@kbn/cases-plugin/common/types/domain';
-import { CasePostRequest, CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
+import { Case, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import {
+  CasePostRequest,
+  CasesFindResponse,
+  CasePatchRequest,
+} from '@kbn/cases-plugin/common/types/api';
 import type SuperTest from 'supertest';
 import { ToolingLog } from '@kbn/tooling-log';
 import { User } from '../authentication/types';
@@ -96,17 +100,17 @@ export const updateCaseStatus = async ({
   supertest,
   caseId,
   version = '2',
-  status = 'open',
+  status = 'open' as CaseStatuses,
   expectedHttpCode = 204,
   auth = { user: superUser, space: null },
-}): {
+}: {
   supertest: SuperTest.Agent;
   caseId: string;
   version?: string;
-  status?: string;
+  status?: CaseStatuses;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-} => {
+}) => {
   const updateRequest: CasePatchRequest = {
     status,
     version,

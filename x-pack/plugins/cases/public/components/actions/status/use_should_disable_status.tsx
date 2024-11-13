@@ -10,43 +10,27 @@ import { CaseStatuses } from '../../../../common/types/domain';
 
 import { useUserPermissions } from '../../user_actions/use_user_permissions';
 
-const nonClosedCaseStatuses = [CaseStatuses.open, CaseStatuses['in-progress']];
-
 export const useShouldDisableStatus = () => {
   const { canUpdate, canReopenCase } = useUserPermissions();
 
   const shouldDisableStatusFn = useCallback(
-    (selectedCases: Array<Pick<CasesUI[number], 'status'>>, nextStatusOption: CaseStatuses) => {
+    (selectedCases: Array<Pick<CasesUI[number], 'status'>>) => {
       // Read Only + Disabled => Cannot do anything
       const missingAllUpdatePermissions = !canUpdate && !canReopenCase;
       if (missingAllUpdatePermissions) return true;
 
-      const noop = selectedCases.every((theCase) => theCase.status === nextStatusOption);
-      if (noop) return true;
-
       // All + Enabled reopen => can change status at any point in any way
       if (canUpdate && canReopenCase) return false;
 
-      // If any of the selected cases match, disable the option based on user permissions
-      return selectedCases.some((theCase) => {
-        const currentStatus = theCase.status;
-        // Read Only + Enabled => Can only reopen a case (pointless, but an option)
-        if (!canUpdate && canReopenCase) {
-          // Disable the status if any of the selected cases is 'open' or 'in-progress'
-          return currentStatus !== CaseStatuses.closed;
-        }
+      const selectedCasesContainsClosed = selectedCases.some(
+        (theCase) => theCase.status === CaseStatuses.closed
+      );
 
-        // All + Disabled reopen => Can change status, but once closed, case is closed for good for this user
-        if (canUpdate && !canReopenCase) {
-          // Disabel the status if any of the selected cases is 'closed'
-          return (
-            nonClosedCaseStatuses.includes(nextStatusOption) &&
-            currentStatus === CaseStatuses.closed
-          );
-        }
-
-        return true;
-      });
+      if (selectedCasesContainsClosed) {
+        return !canReopenCase;
+      } else {
+        return canUpdate;
+      }
     },
     [canReopenCase, canUpdate]
   );
