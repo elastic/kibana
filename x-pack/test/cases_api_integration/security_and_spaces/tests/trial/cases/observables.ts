@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 
+import { OBSERVABLE_TYPES_BUILTIN } from '@kbn/cases-plugin/common/constants';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   createCase,
@@ -63,7 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const newObservableData = {
           value: 'value',
-          typeKey: '0ad4bf8e-575f-49ad-87ea-8bcafd5173e4',
+          typeKey: OBSERVABLE_TYPES_BUILTIN[0].key,
           description: '',
         };
 
@@ -108,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const newObservableData = {
           value: '{"foo": "bar"}',
-          typeKey: '0ad4bf8e-575f-49ad-87ea-8bcafd5173e4',
+          typeKey: OBSERVABLE_TYPES_BUILTIN[0].key,
           description: '',
         };
 
