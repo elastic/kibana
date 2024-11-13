@@ -1461,7 +1461,6 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /test/api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /test/api_integration/config.js @elastic/appex-qa
 /test/api_integration/apis/index.ts @elastic/appex-qa
-/test/api_integration/apis/general/*.js @elastic/appex-qa
 /test/accessibility/services/index.ts @elastic/appex-qa
 /test/accessibility/services/a11y @elastic/appex-qa
 /test/accessibility/page_objects.ts @elastic/appex-qa
