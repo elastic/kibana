@@ -127,7 +127,7 @@ Before you upgrade to 8.16.0, review the breaking changes, then mitigate the imp
 [%collapsible]
 ====
 *Details* +
-During shutdown, {kib} now waits for all the ongoing requests to complete according to the `server.shutdownTimeout` setting. During that period, the incoming socket is closed and any new incoming requests are rejected. Before this update, new incoming requests received a response with the status code 503 and body `{"message": "{kib} is shutting down and not accepting new incoming requests"}`.
+During shutdown, {kib} now waits for all the ongoing requests to complete according to the `server.shutdownTimeout` setting. During that period, the incoming socket is closed and any new incoming requests are rejected. Before this update, new incoming requests received a response with the status code 503 and body `{"message": "Kibana is shutting down and not accepting new incoming requests"}`. For more information, refer to {kibana-pull}180986[#180986].
 ==== 
   
 [float]
