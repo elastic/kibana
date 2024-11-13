@@ -77,6 +77,10 @@ export function createRootWithSettings(
     pkg.version = customKibanaVersion;
   }
 
+  /*
+   * Most of these integration tests expect OSS to default to true, but FIPS
+   * requires the security plugin to be enabled
+   */
   let oss = true;
   if (getFips() === 1) {
     set(settings, 'xpack.security.experimental.fipsMode.enabled', true);

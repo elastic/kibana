@@ -77,23 +77,9 @@ describe('When using the FileHashTransform', () => {
     expect(() => fileHash.getFileHash()).toThrow('File hash generation not yet complete');
   });
 
-  if (getFips() !== 1) {
-    describe('legacy algorithms', function () {
-      it.each([['md5', '098f6bcd4621d373cade4e832627b4f6']] as Array<
-        [SupportedFileHashAlgorithm, string]
-      >)('should generate file hash using algorithm: %s', async (algorithm, expectedHash) => {
-        const fileHash = createFileHashTransform(algorithm);
-        await file.uploadContent(fileContent, undefined, {
-          transforms: [fileHash],
-        });
-
-        expect(fileHash.getFileHash()).toEqual({ algorithm, value: expectedHash });
-      });
-    });
-  }
-
-  describe('other algorithms', function () {
+  describe('algorithms', function () {
     it.each([
+      ...(getFips() !== 1 ? [['md5', '098f6bcd4621d373cade4e832627b4f6']] : []),
       ['sha1', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3'],
       ['sha256', '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08'],
       [
