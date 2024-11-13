@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -67,7 +67,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
 
   const getInitialOptions = () => {
     return allConnectors.map((conn, key) => {
-      const _append: JSX.Element[] = [];
+      const _append: React.ReactNode[] = [];
       if (conn.isTechPreview) {
         _append.push(
           <EuiBadge key={key + '-preview'} iconType="beaker" color="hollow">
@@ -113,8 +113,8 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
   ) => {
     const { _append, key, label, _prepend, serviceType } =
       option as EuiComboBoxOptionOption<OptionData> & {
-        _append: JSX.Element[];
-        _prepend: JSX.Element;
+        _append: React.ReactNode[];
+        _prepend: React.ReactNode;
         serviceType: string;
       };
     return (
@@ -140,55 +140,60 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
     );
   };
 
+  const onSelectedOptionChange = useCallback(
+    (selectedItem: Array<EuiComboBoxOptionOption<OptionData>>) => {
+      setSelectedOption(selectedItem);
+      if (selectedItem.length === 0) {
+        setSelectedConnector(null);
+        return;
+      }
+      const keySelected = Number(selectedItem[0].key);
+      setSelectedConnector({
+        ...connector,
+        ...allConnectors[keySelected],
+      });
+      mutate(allConnectors[keySelected].serviceType);
+    },
+    [allConnectors, connector, mutate]
+  );
+
   return (
-    <>
-      <EuiFormRow
-        label={i18n.translate('xpack.serverlessSearch.connectors.serviceTypeLabel', {
-          defaultMessage: 'Connector type',
-        })}
-        data-test-subj="serverlessSearchEditConnectorType"
+    <EuiFormRow
+      label={i18n.translate('xpack.serverlessSearch.connectors.serviceTypeLabel', {
+        defaultMessage: 'Connector type',
+      })}
+      data-test-subj="serverlessSearchEditConnectorType"
+      fullWidth
+    >
+      <EuiComboBox
+        aria-label={i18n.translate(
+          'xpack.serverlessSearch.connectors.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
+          { defaultMessage: 'Select a data source for your connector to use.' }
+        )}
+        // We only want to allow people to set the service type once to avoid weird conflicts
+        isDisabled={Boolean(connector.service_type) || isDisabled}
+        isLoading={isLoading}
+        data-test-subj="serverlessSearchEditConnectorTypeChoices"
+        prepend={
+          <EuiIcon
+            type={selectedConnector?.iconPath ?? `${assetBasePath}/connectors.svg`}
+            size="l"
+          />
+        }
+        singleSelection
         fullWidth
-      >
-        <EuiComboBox
-          aria-label={i18n.translate(
-            'xpack.serverlessSearch.connectors.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
-            { defaultMessage: 'Select a data source for your connector to use.' }
-          )}
-          // We only want to allow people to set the service type once to avoid weird conflicts
-          isDisabled={Boolean(connector.service_type) || isDisabled}
-          isLoading={isLoading}
-          data-test-subj="serverlessSearchEditConnectorTypeChoices"
-          prepend={
-            <EuiIcon
-              type={selectedConnector?.iconPath ?? `${assetBasePath}/connectors.svg`}
-              size="l"
-            />
-          }
-          singleSelection
-          fullWidth
-          placeholder={i18n.translate(
-            'xpack.serverlessSearch.connectors.chooseConnectorSelectable.placeholder.text',
-            { defaultMessage: 'Choose a data source' }
-          )}
-          options={initialOptions}
-          selectedOptions={selectedOption}
-          onChange={(selectedItem) => {
-            setSelectedOption(selectedItem);
-            if (selectedItem.length === 0) {
-              setSelectedConnector(null);
-              return;
-            }
-            const keySelected = Number(selectedItem[0].key);
-            setSelectedConnector({
-              ...connector,
-              ...allConnectors[keySelected],
-            });
-            mutate(allConnectors[keySelected].serviceType);
-          }}
-          renderOption={renderOption}
-          rowHeight={(euiTheme.base / 2) * 5}
-        />
-      </EuiFormRow>
-    </>
+        placeholder={i18n.translate(
+          'xpack.serverlessSearch.connectors.chooseConnectorSelectable.placeholder.text',
+          { defaultMessage: 'Choose a data source' }
+        )}
+        options={initialOptions}
+        selectedOptions={selectedOption}
+        onChange={(selectedItem) => {
+          onSelectedOptionChange(selectedItem);
+        }}
+        renderOption={renderOption}
+        rowHeight={(euiTheme.base / 2) * 5}
+      />
+    </EuiFormRow>
   );
 };
