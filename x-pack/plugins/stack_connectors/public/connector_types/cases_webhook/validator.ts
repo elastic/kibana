@@ -144,7 +144,7 @@ export const isUrlButCanBeEmpty =
   };
 
 export const validateCreateComment =
-  (message: string, fieldName) =>
+  (message: string, fieldName: string) =>
   (...args: Parameters<ValidationFunc>) => {
     const [{ value, formData }] = args;
     const otherFielValue = formData[fieldName];
