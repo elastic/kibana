@@ -19,7 +19,7 @@ export type RuleMigrationResources = Partial<
   Record<RuleMigrationResourceType, RuleMigrationResource[]>
 >;
 
-const MAX_RECURSION_DEPTH = 10;
+export const MAX_RECURSION_DEPTH = 10;
 
 export class RuleResourceRetriever {
   constructor(
@@ -37,7 +37,7 @@ export class RuleResourceRetriever {
     resourceIdentifier: QueryResourceIdentifier,
     it = 0
   ): Promise<RuleMigrationResources> => {
-    if (it > MAX_RECURSION_DEPTH) {
+    if (it >= MAX_RECURSION_DEPTH) {
       return {};
     }
 

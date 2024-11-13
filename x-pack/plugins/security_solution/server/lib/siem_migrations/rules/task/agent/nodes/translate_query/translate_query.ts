@@ -40,6 +40,7 @@ export const getTranslateQueryNode = ({
       const inlineQueryPrompt = getInlineQueryPrompt(state, resources);
       const stringParser = new StringOutputParser();
       query = await model.pipe(stringParser).invoke(inlineQueryPrompt);
+      logger.info(`Inline query prompt: ${query}`);
     }
 
     const prompt = getEsqlTranslationPrompt(state, query);
