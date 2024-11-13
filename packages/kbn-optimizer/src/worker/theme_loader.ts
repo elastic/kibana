@@ -9,7 +9,11 @@
 
 import { stringifyRequest, getOptions } from 'loader-utils';
 import webpack from 'webpack';
-import { FALLBACK_THEME_TAG, parseThemeTags } from '@kbn/core-ui-settings-common';
+import {
+  FALLBACK_THEME_TAG,
+  parseThemeTags,
+  hasNonDefaultThemeTags,
+} from '@kbn/core-ui-settings-common';
 
 // eslint-disable-next-line import/no-default-export
 export default function (this: webpack.loader.LoaderContext) {
@@ -18,6 +22,24 @@ export default function (this: webpack.loader.LoaderContext) {
   const options = getOptions(this);
   const bundleId = options.bundleId as string;
   const themeTags = parseThemeTags(options.themeTags);
+  const isFallbackNeeded = hasNonDefaultThemeTags(themeTags);
+
+  /**
+   * The following piece of code generates a `switch` statement that gets injected into the output
+   * bundle for all `.scss` file imports. The generated `switch` contains:
+   * - a `case` clause for each of the bundled theme tags,
+   * - an optional `default` clause for the theme fallback logic, included when some of the default
+   *   Kibana theme tags are omitted and the fallback logic might be needed. The fallback logic
+   *   should never have to run and is added as an extra precaution layer.
+   */
+
+  let defaultClause = '';
+  if (isFallbackNeeded) {
+    defaultClause = `
+    default:
+      console.error(new Error("SASS files in [${bundleId}] were not built for theme [" + window.__kbnThemeTag__ + "]. Styles were compiled using the [${FALLBACK_THEME_TAG}] theme instead to keep Kibana somewhat usable. Please adjust the advanced settings to make use of [${themeTags}] or make sure the KBN_OPTIMIZER_THEMES environment variable includes [" + window.__kbnThemeTag__ + "] in a comma-separated list of themes you want to compile. You can also set it to \'*\' to build all themes."));
+      return require(${stringifyRequest(this, `${this.resourcePath}?${FALLBACK_THEME_TAG}`)});`;
+  }
 
   return `
 switch (window.__kbnThemeTag__) {
@@ -28,8 +50,6 @@ ${themeTags
     return require(${stringifyRequest(this, `${this.resourcePath}?${tag}`)});`
   )
   .join('\n')}
-  default:
-    console.error(new Error("SASS files in [${bundleId}] were not built for theme [" + window.__kbnThemeTag__ + "]. Styles were compiled using the [${FALLBACK_THEME_TAG}] theme instead to keep Kibana somewhat usable. Please adjust the advanced settings to make use of [${themeTags}] or make sure the KBN_OPTIMIZER_THEMES environment variable includes [" + window.__kbnThemeTag__ + "] in a comma-separated list of themes you want to compile. You can also set it to '*' to build all themes."));
-    return require(${stringifyRequest(this, `${this.resourcePath}?${FALLBACK_THEME_TAG}`)});
+  ${defaultClause}
 }`;
 }
