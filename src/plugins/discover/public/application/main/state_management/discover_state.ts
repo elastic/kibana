@@ -219,7 +219,7 @@ export interface DiscoverStateContainer {
      * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
      * This is to prevent duplicate ids messing with our system
      */
-    updateAdHocDataViewId: () => Promise<DataView | undefined>;
+    updateAdHocDataViewId: (cleanCache?: boolean) => Promise<DataView | undefined>;
     /**
      * Updates the ES|QL query string
      */
@@ -324,7 +324,7 @@ export function getDiscoverStateContainer({
    * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
    * This is to prevent duplicate ids messing with our system
    */
-  const updateAdHocDataViewId = async () => {
+  const updateAdHocDataViewId = async (cleanCache = true) => {
     const prevDataView = internalStateContainer.getState().dataView;
     if (!prevDataView || prevDataView.isPersisted()) return;
 
@@ -332,8 +332,9 @@ export function getDiscoverStateContainer({
       ...prevDataView.toSpec(),
       id: uuidv4(),
     });
-
-    services.dataViews.clearInstanceCache(prevDataView.id);
+    if (cleanCache) {
+      services.dataViews.clearInstanceCache(prevDataView.id);
+    }
 
     updateFiltersReferences({
       prevDataView,
@@ -413,6 +414,7 @@ export function getDiscoverStateContainer({
   };
 
   const onDataViewEdited = async (editedDataView: DataView) => {
+    dataStateContainer.reset();
     if (editedDataView.isPersisted()) {
       // Clear the current data view from the cache and create a new instance
       // of it, ensuring we have a new object reference to trigger a re-render
@@ -421,7 +423,7 @@ export function getDiscoverStateContainer({
     } else {
       await updateAdHocDataViewId();
     }
-    loadDataViewList();
+    await loadDataViewList();
     addLog('[getDiscoverStateContainer] onDataViewEdited triggers data fetching');
     fetchData();
   };
