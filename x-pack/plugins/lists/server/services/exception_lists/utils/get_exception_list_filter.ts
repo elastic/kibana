@@ -20,6 +20,6 @@ export const getExceptionListFilter = ({
     .join(' OR ');
 
   if (filter != null) {
-    return `(${listTypesFilter}) AND ${filter}`;
+    return `(${listTypesFilter}) AND (${filter})`;
   } else return `(${listTypesFilter})`;
 };
