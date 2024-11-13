@@ -8,16 +8,15 @@
  */
 
 import React from 'react';
-import type { SecuritySolutionCellRenderFeature } from '@kbn/discover-shared-plugin/public';
+import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-plugin/public';
 import { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 
 export const createCellRendererAccessor = async (
-  cellRendererFeature?: SecuritySolutionCellRenderFeature
+  cellRendererFeature?: SecuritySolutionCellRendererFeature
 ) => {
   if (!cellRendererFeature) return undefined;
-  const cellRendererGetter = await cellRendererFeature.getRender();
+  const cellRendererGetter = await cellRendererFeature.getRenderer();
   function getCellRenderer(fieldName: string) {
-    if (!cellRendererFeature) return undefined;
     const CellRenderer = cellRendererGetter(fieldName);
     if (!CellRenderer) return undefined;
     return React.memo(function SecuritySolutionCellRenderer(props: DataGridCellValueElementProps) {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent, PropsWithChildren, useMemo } from 'react';
+import React, { FunctionComponent, PropsWithChildren } from 'react';
 import { CustomCellRenderer, DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { RootProfileProvider, SolutionType } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
@@ -23,11 +23,13 @@ interface SecurityRootProfileContext {
   ) => FunctionComponent<DataGridCellValueElementProps> | undefined;
 }
 
+const EmptyAppWrapper: FunctionComponent<PropsWithChildren<{}>> = ({ children }) => <>{children}</>;
+
 export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
   RootProfileProvider<SecurityRootProfileContext>
 > = (services: ProfileProviderServices) => {
   const { discoverFeaturesRegistry } = services;
-  const cellRendererFeature = discoverFeaturesRegistry.getById('security-solution-cell-render');
+  const cellRendererFeature = discoverFeaturesRegistry.getById('security-solution-cell-renderer');
   const appWrapperFeature = discoverFeaturesRegistry.getById('security-solution-app-wrapper');
   const reduxStoreInitFeature = discoverFeaturesRegistry.getById(
     'security-solution-redux-store-init'
@@ -37,11 +39,14 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
     profileId: 'security-root-profile',
     isExperimental: true,
     profile: {
-      getRenderAppWrapper: (PrevWrapper, params) =>
-        React.memo(({ children }) => {
-          const AppWrapper = useMemo(() => params.context.appWrapper ?? PrevWrapper, []);
-          return <AppWrapper>{children}</AppWrapper>;
-        }),
+      getRenderAppWrapper: (PrevWrapper, params) => {
+        const AppWrapper = params.context.appWrapper ?? EmptyAppWrapper;
+        return ({ children }) => (
+          <PrevWrapper>
+            <AppWrapper>{children}</AppWrapper>
+          </PrevWrapper>
+        );
+      },
       getCellRenderers:
         (prev, { context }) =>
         (params) => {

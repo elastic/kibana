@@ -8,14 +8,14 @@
  */
 
 import React from 'react';
-import type { SecuritySolutionCellRenderFeature } from '@kbn/discover-shared-plugin/public';
+import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-plugin/public';
 import { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { createCellRendererAccessor } from './get_cell_renderer_accessor';
 import { render } from '@testing-library/react';
 
-const cellRendererFeature: SecuritySolutionCellRenderFeature = {
-  id: 'security-solution-cell-render',
-  getRender: async () => (fieldName: string) => {
+const cellRendererFeature: SecuritySolutionCellRendererFeature = {
+  id: 'security-solution-cell-renderer',
+  getRenderer: async () => (fieldName: string) => {
     if (fieldName === 'host.name') {
       return (props: DataGridCellValueElementProps) => {
         return <div data-test-subj="cell-render-feature">{props.columnId}</div>;

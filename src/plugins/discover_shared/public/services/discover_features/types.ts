@@ -33,9 +33,9 @@ export interface ObservabilityLogsAIAssistantFeature {
 }
 
 /** ***************************** Security **********/
-export interface SecuritySolutionCellRenderFeature {
-  id: 'security-solution-cell-render';
-  getRender: () => Promise<
+export interface SecuritySolutionCellRendererFeature {
+  id: 'security-solution-cell-renderer';
+  getRenderer: () => Promise<
     (fieldName: string) => FunctionComponent<DataGridCellValueElementProps> | undefined
   >;
 }
@@ -58,7 +58,7 @@ export interface SecuritySolutionReduxStoreInitFeature {
 }
 
 export type SecuritySolutionFeature =
-  | SecuritySolutionCellRenderFeature
+  | SecuritySolutionCellRendererFeature
   | SecuritySolutionAppWrapperFeature
   | SecuritySolutionReduxStoreInitFeature;
 /** ****************************************************************************************/

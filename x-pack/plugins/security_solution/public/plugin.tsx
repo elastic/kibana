@@ -23,7 +23,7 @@ import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-action
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import type {
   SecuritySolutionAppWrapperFeature,
-  SecuritySolutionCellRenderFeature,
+  SecuritySolutionCellRendererFeature,
   SecuritySolutionReduxStoreInitFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
@@ -231,9 +231,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ) {
     const { discoverShared } = plugins;
     const discoverFeatureRegistry = discoverShared.features.registry;
-    const cellRendererFeature: SecuritySolutionCellRenderFeature = {
-      id: 'security-solution-cell-render',
-      getRender: async () => {
+    const cellRendererFeature: SecuritySolutionCellRendererFeature = {
+      id: 'security-solution-cell-renderer',
+      getRenderer: async () => {
         const { getCellRendererForGivenRecord } = await this.getLazyDiscoverSharedDeps();
         return getCellRendererForGivenRecord;
       },
@@ -263,7 +263,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const [coreStart, startPlugins] = await core.getStartServices();
 
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
-        // const services = await this.services.generateServices(coreStart, startPlugins);
 
         return this.getStoreForDiscover(coreStart, startPlugins, subPlugins);
       },

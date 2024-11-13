@@ -8,14 +8,14 @@
 import React, { useMemo } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import type { SecuritySolutionCellRenderFeature } from '@kbn/discover-shared-plugin/public';
+import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-plugin/public';
 import type { ColumnHeaderType } from '../../../common/types';
 import type { Maybe } from '../../../common/search_strategy';
 import { DefaultCellRenderer } from '../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { ONE_DISCOVER_SCOPE_ID } from '../constants';
 
 export type SecuritySolutionRowCellRendererGetter = Awaited<
-  ReturnType<SecuritySolutionCellRenderFeature['getRender']>
+  ReturnType<SecuritySolutionCellRendererFeature['getRenderer']>
 >;
 
 const ALLOWED_DISCOVER_RENDERED_FIELDS = ['host.name', 'user.name', 'source.ip', 'destination.ip'];
