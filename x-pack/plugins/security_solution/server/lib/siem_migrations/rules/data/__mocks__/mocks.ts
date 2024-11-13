@@ -7,14 +7,7 @@
 
 import type { RuleMigrationsDataRulesClient } from '../rule_migrations_data_rules_client';
 
-export const mockIndexName = 'mocked_siem_rule_migrations_index_name';
-export const mockInstall = jest.fn().mockResolvedValue(undefined);
-
-export const mockRuleMigrationsDataResourcesClient = {
-  upsert: jest.fn().mockResolvedValue(undefined),
-  get: jest.fn().mockResolvedValue(undefined),
-};
-
+// Rule migrations data rules client
 export const mockRuleMigrationsDataRulesClient = {
   create: jest.fn().mockResolvedValue(undefined),
   get: jest.fn().mockResolvedValue([]),
@@ -26,14 +19,20 @@ export const mockRuleMigrationsDataRulesClient = {
   getStats: jest.fn().mockResolvedValue(undefined),
   getAllStats: jest.fn().mockResolvedValue([]),
 } as unknown as RuleMigrationsDataRulesClient;
-
 export const MockRuleMigrationsDataRulesClient = jest
   .fn()
   .mockImplementation(() => mockRuleMigrationsDataRulesClient);
+
+// Rule migrations data resources client
+export const mockRuleMigrationsDataResourcesClient = {
+  upsert: jest.fn().mockResolvedValue(undefined),
+  get: jest.fn().mockResolvedValue(undefined),
+};
 export const MockRuleMigrationsDataResourcesClient = jest
   .fn()
   .mockImplementation(() => mockRuleMigrationsDataResourcesClient);
 
+// Rule migrations data client
 export const mockRuleMigrationsDataClient = {
   rules: mockRuleMigrationsDataRulesClient,
   resources: mockRuleMigrationsDataResourcesClient,
@@ -43,9 +42,14 @@ export const MockRuleMigrationsDataClient = jest
   .fn()
   .mockImplementation(() => mockRuleMigrationsDataClient);
 
+// Rule migrations data service
+export const mockIndexName = 'mocked_siem_rule_migrations_index_name';
+export const mockInstall = jest.fn().mockResolvedValue(undefined);
+export const mockCreateClient = jest.fn().mockReturnValue(mockRuleMigrationsDataClient);
+
 export const MockRuleMigrationsDataService = jest.fn().mockImplementation(() => ({
   createAdapter: jest.fn(),
   install: mockInstall,
-  createClient: jest.fn().mockReturnValue(mockRuleMigrationsDataClient),
+  createClient: mockCreateClient,
   createIndexNameProvider: jest.fn().mockResolvedValue(mockIndexName),
 }));

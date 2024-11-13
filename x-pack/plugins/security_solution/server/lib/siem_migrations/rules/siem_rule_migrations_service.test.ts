@@ -18,13 +18,12 @@ import { Subject } from 'rxjs';
 import {
   MockRuleMigrationsDataService,
   mockInstall,
-  mockCreateClient,
+  mockCreateClient as mockDataCreateClient,
 } from './data/__mocks__/mocks';
+import { mockCreateClient as mockTaskCreateClient, mockStopAll } from './task/__mocks__/mocks';
 
 jest.mock('./data/rule_migrations_data_service');
-jest.mock('./task/rule_migrations_task_service', () => ({
-  RuleMigrationsTaskService: jest.fn(),
-}));
+jest.mock('./task/rule_migrations_task_service');
 
 describe('SiemRuleMigrationsService', () => {
   let ruleMigrationsService: SiemRuleMigrationsService;
@@ -32,7 +31,7 @@ describe('SiemRuleMigrationsService', () => {
 
   const esClusterClient = elasticsearchServiceMock.createClusterClient();
   const currentUser = securityServiceMock.createMockAuthenticatedUser();
-  const logger = loggingSystemMock.createLogger();
+  const logger = loggingSystemMock.create();
   const pluginStop$ = new Subject<void>();
 
   beforeEach(() => {
@@ -41,7 +40,10 @@ describe('SiemRuleMigrationsService', () => {
   });
 
   it('should instantiate the rule migrations data stream adapter', () => {
-    expect(MockRuleMigrationsDataService).toHaveBeenCalledWith(logger, kibanaVersion);
+    expect(MockRuleMigrationsDataService).toHaveBeenCalledWith(
+      logger.get('siemRuleMigrations'),
+      kibanaVersion
+    );
   });
 
   describe('when setup is called', () => {
@@ -79,12 +81,20 @@ describe('SiemRuleMigrationsService', () => {
         ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
       });
 
-      it('should call installSpace', () => {
+      it('should create data client', () => {
         ruleMigrationsService.createClient(createClientParams);
-        expect(mockCreateClient).toHaveBeenCalledWith({
+        expect(mockDataCreateClient).toHaveBeenCalledWith({
           spaceId: createClientParams.spaceId,
           currentUser: createClientParams.currentUser,
-          esClient: esClusterClient.asScoped().asCurrentUser,
+          esClient: esClusterClient.asInternalUser,
+        });
+      });
+
+      it('should create task client', () => {
+        ruleMigrationsService.createClient(createClientParams);
+        expect(mockTaskCreateClient).toHaveBeenCalledWith({
+          currentUser: createClientParams.currentUser,
+          dataClient: mockDataCreateClient(),
         });
       });
 
@@ -93,6 +103,13 @@ describe('SiemRuleMigrationsService', () => {
 
         expect(client).toHaveProperty('data');
         expect(client).toHaveProperty('task');
+      });
+    });
+
+    describe('stop', () => {
+      it('should call taskService stopAll', () => {
+        ruleMigrationsService.stop();
+        expect(mockStopAll).toHaveBeenCalled();
       });
     });
   });

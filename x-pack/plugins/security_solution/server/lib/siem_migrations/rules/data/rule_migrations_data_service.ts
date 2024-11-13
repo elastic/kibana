@@ -10,10 +10,11 @@ import {
   ruleMigrationsFieldMap,
   ruleMigrationResourcesFieldMap,
 } from './rule_migrations_field_maps';
+import type { IndexNameProvider, IndexNameProviders } from './rule_migrations_data_client';
 import { RuleMigrationsDataClient } from './rule_migrations_data_client';
 
 const TOTAL_FIELDS_LIMIT = 2500;
-const INDEX_PATTERN = '.kibana-siem-rule-migrations';
+export const INDEX_PATTERN = '.kibana-siem-rule-migrations';
 
 export type AdapterId = 'rules' | 'resources';
 
@@ -44,8 +45,8 @@ export class RuleMigrationsDataService {
     return adapter;
   }
 
-  public install(params: Omit<InstallParams, 'logger'>) {
-    Promise.all([
+  public async install(params: Omit<InstallParams, 'logger'>): Promise<void> {
+    await Promise.all([
       this.adapters.rules.install({ ...params, logger: this.logger }),
       this.adapters.resources.install({ ...params, logger: this.logger }),
     ]).catch((err) => {
@@ -54,7 +55,7 @@ export class RuleMigrationsDataService {
   }
 
   public createClient({ spaceId, currentUser, esClient }: CreateClientParams) {
-    const indexNameProviders = {
+    const indexNameProviders: IndexNameProviders = {
       rules: this.createIndexNameProvider('rules', spaceId),
       resources: this.createIndexNameProvider('resources', spaceId),
     };
@@ -67,7 +68,7 @@ export class RuleMigrationsDataService {
     );
   }
 
-  private createIndexNameProvider(adapter: AdapterId, spaceId: string) {
+  private createIndexNameProvider(adapter: AdapterId, spaceId: string): IndexNameProvider {
     return async () => {
       await this.adapters[adapter].createIndex(spaceId); // This will resolve instantly when the index is already created
       return this.adapters[adapter].getIndexName(spaceId);

@@ -37,22 +37,22 @@ export interface SiemRuleMigrationsClient {
 }
 
 export class SiemRuleMigrationsService {
-  private rulesDataStream: RuleMigrationsDataService;
+  private dataService: RuleMigrationsDataService;
   private esClusterClient?: IClusterClient;
-  private taskRunner: RuleMigrationsTaskService;
+  private taskService: RuleMigrationsTaskService;
   private logger: Logger;
 
   constructor(logger: LoggerFactory, kibanaVersion: string) {
     this.logger = logger.get('siemRuleMigrations');
-    this.rulesDataStream = new RuleMigrationsDataService(this.logger, kibanaVersion);
-    this.taskRunner = new RuleMigrationsTaskService(this.logger);
+    this.dataService = new RuleMigrationsDataService(this.logger, kibanaVersion);
+    this.taskService = new RuleMigrationsTaskService(this.logger);
   }
 
   setup({ esClusterClient, ...params }: SiemRulesMigrationsSetupParams) {
     this.esClusterClient = esClusterClient;
     const esClient = esClusterClient.asInternalUser;
 
-    this.rulesDataStream.install({ ...params, esClient });
+    this.dataService.install({ ...params, esClient });
   }
 
   createClient({
@@ -66,13 +66,13 @@ export class SiemRuleMigrationsService {
     // TODO: change to `esClient = this.esClusterClient.asScoped(request).asCurrentUser;` when the API is made public
     const esClient = this.esClusterClient.asInternalUser;
 
-    const dataClient = this.rulesDataStream.createClient({ spaceId, currentUser, esClient });
-    const taskClient = this.taskRunner.createClient({ currentUser, dataClient });
+    const dataClient = this.dataService.createClient({ spaceId, currentUser, esClient });
+    const taskClient = this.taskService.createClient({ currentUser, dataClient });
 
     return { data: dataClient, task: taskClient };
   }
 
   stop() {
-    this.taskRunner.stopAll();
+    this.taskService.stopAll();
   }
 }

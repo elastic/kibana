@@ -5,27 +5,28 @@
  * 2.0.
  */
 
-import { RuleMigrationsDataService } from './rule_migrations_data_service';
+import { INDEX_PATTERN, RuleMigrationsDataService } from './rule_migrations_data_service';
 import { Subject } from 'rxjs';
-import type { InstallParams } from '@kbn/data-stream-adapter';
-import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
+import type { InstallParams } from '@kbn/index-adapter';
+import { IndexPatternAdapter } from '@kbn/index-adapter';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import type { IndexNameProviders } from './rule_migrations_data_client';
 
-jest.mock('@kbn/data-stream-adapter');
+jest.mock('@kbn/index-adapter');
 
-// This mock is required to have a way to await the data stream name promise
-const mockDataStreamNamePromise = jest.fn();
+// This mock is required to have a way to await the index pattern name promise
+let mockIndexNameProviders: IndexNameProviders;
 jest.mock('./rule_migrations_data_client', () => ({
-  RuleMigrationsDataClient: jest.fn((dataStreamNamePromise: Promise<string>) => {
-    mockDataStreamNamePromise.mockReturnValue(dataStreamNamePromise);
+  RuleMigrationsDataClient: jest.fn((indexNameProviders: IndexNameProviders) => {
+    mockIndexNameProviders = indexNameProviders;
   }),
 }));
 
-const MockedDataStreamSpacesAdapter = DataStreamSpacesAdapter as unknown as jest.MockedClass<
-  typeof DataStreamSpacesAdapter
+const MockedIndexPatternAdapter = IndexPatternAdapter as unknown as jest.MockedClass<
+  typeof IndexPatternAdapter
 >;
 
 const esClient = elasticsearchServiceMock.createStart().client.asInternalUser;
@@ -39,51 +40,57 @@ describe('SiemRuleMigrationsDataService', () => {
   });
 
   describe('constructor', () => {
-    it('should create DataStreamSpacesAdapter', () => {
+    it('should create IndexPatternAdapters', () => {
       new RuleMigrationsDataService(logger, kibanaVersion);
-      expect(MockedDataStreamSpacesAdapter).toHaveBeenCalledTimes(1);
+      expect(MockedIndexPatternAdapter).toHaveBeenCalledTimes(2);
     });
 
     it('should create component templates', () => {
       new RuleMigrationsDataService(logger, kibanaVersion);
-      const [dataStreamSpacesAdapter] = MockedDataStreamSpacesAdapter.mock.instances;
-      expect(dataStreamSpacesAdapter.setComponentTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ name: '.kibana.siem-rule-migrations' })
+      const [indexPatternAdapter] = MockedIndexPatternAdapter.mock.instances;
+      expect(indexPatternAdapter.setComponentTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: `${INDEX_PATTERN}-rules` })
+      );
+      expect(indexPatternAdapter.setComponentTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: `${INDEX_PATTERN}-resources` })
       );
     });
 
     it('should create index templates', () => {
       new RuleMigrationsDataService(logger, kibanaVersion);
-      const [dataStreamSpacesAdapter] = MockedDataStreamSpacesAdapter.mock.instances;
-      expect(dataStreamSpacesAdapter.setIndexTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ name: '.kibana.siem-rule-migrations' })
+      const [indexPatternAdapter] = MockedIndexPatternAdapter.mock.instances;
+      expect(indexPatternAdapter.setIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: `${INDEX_PATTERN}-rules` })
+      );
+      expect(indexPatternAdapter.setIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: `${INDEX_PATTERN}-resources` })
       );
     });
   });
 
   describe('install', () => {
-    it('should install data stream', async () => {
-      const dataStream = new RuleMigrationsDataService(logger, kibanaVersion);
+    it('should install index pattern', async () => {
+      const index = new RuleMigrationsDataService(logger, kibanaVersion);
       const params: Omit<InstallParams, 'logger'> = {
         esClient,
         pluginStop$: new Subject(),
       };
-      await dataStream.install(params);
-      const [dataStreamSpacesAdapter] = MockedDataStreamSpacesAdapter.mock.instances;
-      expect(dataStreamSpacesAdapter.install).toHaveBeenCalledWith(expect.objectContaining(params));
+      await index.install(params);
+      const [indexPatternAdapter] = MockedIndexPatternAdapter.mock.instances;
+      expect(indexPatternAdapter.install).toHaveBeenCalledWith(expect.objectContaining(params));
     });
 
     it('should log error', async () => {
-      const dataStream = new RuleMigrationsDataService(logger, kibanaVersion);
+      const index = new RuleMigrationsDataService(logger, kibanaVersion);
       const params: Omit<InstallParams, 'logger'> = {
         esClient,
         pluginStop$: new Subject(),
       };
-      const [dataStreamSpacesAdapter] = MockedDataStreamSpacesAdapter.mock.instances;
+      const [indexPatternAdapter] = MockedIndexPatternAdapter.mock.instances;
       const error = new Error('test-error');
-      (dataStreamSpacesAdapter.install as jest.Mock).mockRejectedValueOnce(error);
+      (indexPatternAdapter.install as jest.Mock).mockRejectedValueOnce(error);
 
-      await dataStream.install(params);
+      await index.install(params);
       expect(logger.error).toHaveBeenCalledWith(expect.any(String), error);
     });
   });
@@ -92,48 +99,28 @@ describe('SiemRuleMigrationsDataService', () => {
     const currentUser = securityServiceMock.createMockAuthenticatedUser();
     const createClientParams = { spaceId: 'space1', currentUser, esClient };
 
-    it('should install space data stream', async () => {
-      const dataStream = new RuleMigrationsDataService(logger, kibanaVersion);
+    it('should install space index pattern', async () => {
+      const index = new RuleMigrationsDataService(logger, kibanaVersion);
       const params: InstallParams = {
         esClient,
         logger: loggerMock.create(),
         pluginStop$: new Subject(),
       };
-      const [dataStreamSpacesAdapter] = MockedDataStreamSpacesAdapter.mock.instances;
-      (dataStreamSpacesAdapter.install as jest.Mock).mockResolvedValueOnce(undefined);
+      const [rulesIndexPatternAdapter, resourcesIndexPatternAdapter] =
+        MockedIndexPatternAdapter.mock.instances;
+      (rulesIndexPatternAdapter.install as jest.Mock).mockResolvedValueOnce(undefined);
 
-      await dataStream.install(params);
-      dataStream.createClient(createClientParams);
-      await mockDataStreamNamePromise();
+      await index.install(params);
+      index.createClient(createClientParams);
 
-      expect(dataStreamSpacesAdapter.getInstalledSpaceName).toHaveBeenCalledWith('space1');
-      expect(dataStreamSpacesAdapter.installSpace).toHaveBeenCalledWith('space1');
-    });
+      await mockIndexNameProviders.rules();
+      await mockIndexNameProviders.resources();
 
-    it('should not install space data stream if install not executed', async () => {
-      const dataStream = new RuleMigrationsDataService(logger, kibanaVersion);
-      await expect(async () => {
-        dataStream.createClient(createClientParams);
-        await mockDataStreamNamePromise();
-      }).rejects.toThrowError();
-    });
+      expect(rulesIndexPatternAdapter.createIndex).toHaveBeenCalledWith('space1');
+      expect(rulesIndexPatternAdapter.getIndexName).toHaveBeenCalledWith('space1');
 
-    it('should throw error if main install had error', async () => {
-      const dataStream = new RuleMigrationsDataService(logger, kibanaVersion);
-      const params: InstallParams = {
-        esClient,
-        logger: loggerMock.create(),
-        pluginStop$: new Subject(),
-      };
-      const [dataStreamSpacesAdapter] = MockedDataStreamSpacesAdapter.mock.instances;
-      const error = new Error('test-error');
-      (dataStreamSpacesAdapter.install as jest.Mock).mockRejectedValueOnce(error);
-      await dataStream.install(params);
-
-      await expect(async () => {
-        dataStream.createClient(createClientParams);
-        await mockDataStreamNamePromise();
-      }).rejects.toThrowError(error);
+      expect(resourcesIndexPatternAdapter.createIndex).toHaveBeenCalledWith('space1');
+      expect(resourcesIndexPatternAdapter.getIndexName).toHaveBeenCalledWith('space1');
     });
   });
 });
