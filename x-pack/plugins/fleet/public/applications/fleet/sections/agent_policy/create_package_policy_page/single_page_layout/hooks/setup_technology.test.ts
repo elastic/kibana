@@ -415,6 +415,19 @@ describe('useSetupTechnology', () => {
   });
 
   it('should revert the agent policy name to the original value when switching from agentless back to agent-based', async () => {
+    (useConfig as MockFn).mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'https://agentless.api.url',
+        },
+      },
+    } as any);
+    (useStartServices as MockFn).mockReturnValue({
+      cloud: {
+        isServerlessEnabled: true,
+      },
+    });
     const { result } = renderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
@@ -431,9 +444,9 @@ describe('useSetupTechnology', () => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
-    await waitFor(() => {
-      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
-    });
+    await waitFor(() =>
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS)
+    );
 
     await waitFor(() => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
