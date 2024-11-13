@@ -52,6 +52,10 @@ describe('discardPreviousRefinements', () => {
     it('resets the refinements', () => {
       expect(result.refinements).toEqual([]);
     });
+
+    it('increments the hallucination failures when hallucinations are detected', () => {
+      expect(result.hallucinationFailures).toBe(initialState.hallucinationFailures + 1);
+    });
   });
 
   it('increments the hallucination failures when hallucinations are detected', () => {

@@ -22,13 +22,17 @@ describe('parseCombinedOrThrow', () => {
 
   const invalidCombinedResponse = 'invalid json';
 
+  const defaultArgs = {
+    combinedResponse: validCombinedResponse,
+    generationAttempts: 0,
+    nodeName,
+    llmType,
+    logger: mockLogger,
+  };
+
   it('returns an Attack discovery for each insight in a valid combined response', () => {
     const discoveries = parseCombinedOrThrow({
-      combinedResponse: validCombinedResponse,
-      generationAttempts: 0,
-      nodeName,
-      llmType,
-      logger: mockLogger,
+      ...defaultArgs,
     });
 
     expect(discoveries).toHaveLength(5);
@@ -36,11 +40,7 @@ describe('parseCombinedOrThrow', () => {
 
   it('adds a timestamp to all discoveries in a valid response', () => {
     const discoveries = parseCombinedOrThrow({
-      combinedResponse: validCombinedResponse,
-      generationAttempts: 0,
-      nodeName,
-      llmType,
-      logger: mockLogger,
+      ...defaultArgs,
     });
 
     expect(discoveries.every((discovery) => discovery.timestamp != null)).toBe(true);
@@ -50,11 +50,8 @@ describe('parseCombinedOrThrow', () => {
     const withLeadingJson = '```json\n'.concat(validCombinedResponse);
 
     const discoveries = parseCombinedOrThrow({
+      ...defaultArgs,
       combinedResponse: withLeadingJson,
-      generationAttempts: 0,
-      nodeName,
-      llmType,
-      logger: mockLogger,
     });
 
     expect(discoveries).toHaveLength(5);
@@ -64,11 +61,8 @@ describe('parseCombinedOrThrow', () => {
     const generationAttempts = 0;
 
     parseCombinedOrThrow({
-      combinedResponse: validCombinedResponse,
+      ...defaultArgs,
       generationAttempts,
-      nodeName,
-      llmType,
-      logger: mockLogger,
     });
 
     expect((mockLogger.debug as jest.Mock).mock.calls[0][0]()).toBe(
@@ -80,11 +74,8 @@ describe('parseCombinedOrThrow', () => {
     const generationAttempts = 0;
 
     parseCombinedOrThrow({
-      combinedResponse: validCombinedResponse,
+      ...defaultArgs,
       generationAttempts,
-      nodeName,
-      llmType,
-      logger: mockLogger,
     });
 
     expect((mockLogger.debug as jest.Mock).mock.calls[1][0]()).toBe(
@@ -96,11 +87,8 @@ describe('parseCombinedOrThrow', () => {
     const generationAttempts = 0;
 
     parseCombinedOrThrow({
-      combinedResponse: validCombinedResponse,
+      ...defaultArgs,
       generationAttempts,
-      nodeName,
-      llmType,
-      logger: mockLogger,
     });
 
     expect((mockLogger.debug as jest.Mock).mock.calls[2][0]()).toBe(
@@ -111,11 +99,8 @@ describe('parseCombinedOrThrow', () => {
   it('throws the expected error when JSON parsing fails', () => {
     expect(() =>
       parseCombinedOrThrow({
+        ...defaultArgs,
         combinedResponse: invalidCombinedResponse,
-        generationAttempts: 0,
-        nodeName,
-        llmType,
-        logger: mockLogger,
       })
     ).toThrowError('Unexpected token \'i\', "invalid json" is not valid JSON');
   });
@@ -125,11 +110,8 @@ describe('parseCombinedOrThrow', () => {
 
     expect(() =>
       parseCombinedOrThrow({
+        ...defaultArgs,
         combinedResponse: invalidJson,
-        generationAttempts: 0,
-        nodeName,
-        llmType,
-        logger: mockLogger,
       })
     ).toThrowError('Expected array, received string');
   });

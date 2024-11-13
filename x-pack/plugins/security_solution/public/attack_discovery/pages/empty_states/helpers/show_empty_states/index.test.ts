@@ -20,6 +20,15 @@ jest.mock('../../../helpers', () => ({
   showWelcomePrompt: jest.fn().mockReturnValue(false),
 }));
 
+const defaultArgs = {
+  aiConnectorsCount: 0,
+  alertsContextCount: 0,
+  attackDiscoveriesCount: 0,
+  connectorId: undefined,
+  failureReason: null,
+  isLoading: false,
+};
+
 describe('showEmptyStates', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -29,12 +38,7 @@ describe('showEmptyStates', () => {
     (showWelcomePrompt as jest.Mock).mockReturnValue(true);
 
     const result = showEmptyStates({
-      aiConnectorsCount: 0,
-      alertsContextCount: 0,
-      attackDiscoveriesCount: 0,
-      connectorId: undefined,
-      failureReason: null,
-      isLoading: false,
+      ...defaultArgs,
     });
     expect(result).toBe(true);
   });
@@ -43,12 +47,9 @@ describe('showEmptyStates', () => {
     (showFailurePrompt as jest.Mock).mockReturnValue(true);
 
     const result = showEmptyStates({
-      aiConnectorsCount: 0,
-      alertsContextCount: 0,
-      attackDiscoveriesCount: 0,
+      ...defaultArgs,
       connectorId: 'test',
       failureReason: 'error',
-      isLoading: false,
     });
     expect(result).toBe(true);
   });
@@ -57,12 +58,8 @@ describe('showEmptyStates', () => {
     (showNoAlertsPrompt as jest.Mock).mockReturnValue(true);
 
     const result = showEmptyStates({
-      aiConnectorsCount: 0,
-      alertsContextCount: 0,
-      attackDiscoveriesCount: 0,
+      ...defaultArgs,
       connectorId: 'test',
-      failureReason: null,
-      isLoading: false,
     });
     expect(result).toBe(true);
   });
@@ -71,12 +68,7 @@ describe('showEmptyStates', () => {
     (showEmptyPrompt as jest.Mock).mockReturnValue(true);
 
     const result = showEmptyStates({
-      aiConnectorsCount: 0,
-      alertsContextCount: 0,
-      attackDiscoveriesCount: 0,
-      connectorId: undefined,
-      failureReason: null,
-      isLoading: false,
+      ...defaultArgs,
     });
     expect(result).toBe(true);
   });
@@ -88,12 +80,7 @@ describe('showEmptyStates', () => {
     (showEmptyPrompt as jest.Mock).mockReturnValue(false);
 
     const result = showEmptyStates({
-      aiConnectorsCount: 0,
-      alertsContextCount: 0,
-      attackDiscoveriesCount: 0,
-      connectorId: undefined,
-      failureReason: null,
-      isLoading: false,
+      ...defaultArgs,
     });
     expect(result).toBe(false);
   });
