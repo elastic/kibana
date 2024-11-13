@@ -25,7 +25,6 @@ export const waitUntilModelDeployed = async ({
       model_id: modelId,
     });
     const deploymentStats = statsRes.trained_model_stats[0]?.deployment_stats;
-    // @ts-expect-error deploymentStats.nodes not defined as array even if it is.
     if (!deploymentStats || deploymentStats.nodes.length === 0) {
       log.debug(`ML model [${modelId}] was not deployed - attempt ${i + 1} of ${maxRetries}`);
       await sleep(delay);

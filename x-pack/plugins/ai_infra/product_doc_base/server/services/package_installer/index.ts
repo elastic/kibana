@@ -6,4 +6,3 @@
  */
 
 export { PackageInstaller } from './package_installer';
-export { checkLicense } from './utils';
