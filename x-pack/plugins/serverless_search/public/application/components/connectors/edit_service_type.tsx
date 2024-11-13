@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -102,10 +102,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
 
   const initialOptions = getInitialOptions();
   const { euiTheme } = useEuiTheme();
-  const [selectedOption, setSelectedOption] = useState<Array<EuiComboBoxOptionOption<OptionData>>>(
-    []
-  );
-  const [selectedConnector, setSelectedConnector] = useState<Connector | null>(null);
+
   const renderOption = (
     option: EuiComboBoxOptionOption<OptionData>,
     searchValue: string,
@@ -142,19 +139,13 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
 
   const onSelectedOptionChange = useCallback(
     (selectedItem: Array<EuiComboBoxOptionOption<OptionData>>) => {
-      setSelectedOption(selectedItem);
       if (selectedItem.length === 0) {
-        setSelectedConnector(null);
         return;
       }
       const keySelected = Number(selectedItem[0].key);
-      setSelectedConnector({
-        ...connector,
-        ...allConnectors[keySelected],
-      });
       mutate(allConnectors[keySelected].serviceType);
     },
-    [allConnectors, connector, mutate]
+    [mutate, allConnectors]
   );
 
   return (
@@ -176,7 +167,12 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         data-test-subj="serverlessSearchEditConnectorTypeChoices"
         prepend={
           <EuiIcon
-            type={selectedConnector?.iconPath ?? `${assetBasePath}/connectors.svg`}
+            type={
+              connector.service_type
+                ? connectorTypes.find((conn) => conn.serviceType === connector.service_type)
+                    ?.iconPath ?? ''
+                : `${assetBasePath}/connectors.svg`
+            }
             size="l"
           />
         }
@@ -187,7 +183,9 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
           { defaultMessage: 'Choose a data source' }
         )}
         options={initialOptions}
-        selectedOptions={selectedOption}
+        selectedOptions={initialOptions.filter(
+          (option) => option.serviceType === connector.service_type
+        )}
         onChange={(selectedItem) => {
           onSelectedOptionChange(selectedItem);
         }}
