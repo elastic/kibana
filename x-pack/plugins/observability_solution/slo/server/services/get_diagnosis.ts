@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 export const MINIMUM_INDEX_PRIVILEGE_SET_EDITOR = [
   'write',
@@ -26,9 +26,9 @@ export const TOTAL_INDEX_PRIVILEGE_SET_VIEWER = ['read', 'read_cross_cluster'];
 
 export async function getGlobalDiagnosis(
   esClient: ElasticsearchClient,
-  licensing: LicensingApiRequestHandlerContext
+  licensing: LicensingPluginStart
 ) {
-  const licenseInfo = licensing.license.toJSON();
+  const licenseInfo = (await licensing.getLicense()).toJSON();
   const userWritePrivileges = await esClient.security.hasPrivileges({
     index: [
       {

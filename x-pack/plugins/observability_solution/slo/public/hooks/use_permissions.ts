@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { sloFeatureId } from '@kbn/observability-plugin/common';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from './use_kibana';
 import { useFetchSloGlobalDiagnosis } from './use_fetch_global_diagnosis';
 
 export function usePermissions() {
