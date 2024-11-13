@@ -161,6 +161,16 @@ export const RelatedCaseRt = rt.strict({
   totals: AttachmentTotalsRt,
 });
 
+export const SimilarityRt = rt.strict({
+  typeKey: rt.string,
+  value: rt.string,
+});
+
+export const SimilarCaseRt = rt.intersection([
+  CaseRt,
+  rt.strict({ similarities: rt.array(SimilarityRt) }),
+]);
+
 export type Case = rt.TypeOf<typeof CaseRt>;
 export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
@@ -168,3 +178,5 @@ export type CaseSettings = rt.TypeOf<typeof CaseSettingsRt>;
 export type RelatedCase = rt.TypeOf<typeof RelatedCaseRt>;
 export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;
 export type CaseBaseOptionalFields = rt.TypeOf<typeof CaseBaseOptionalFieldsRt>;
+export type SimilarCase = rt.TypeOf<typeof SimilarCaseRt>;
+export type SimilarCases = SimilarCase[];

@@ -41,6 +41,7 @@ import {
   CasesRt,
   CaseStatusRt,
   RelatedCaseRt,
+  SimilarCaseRt,
 } from '../../domain/case/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
@@ -394,16 +395,6 @@ export const CasesFindResponseRt = rt.intersection([
   CasesStatusResponseRt,
 ]);
 
-export const SimilarityRt = rt.strict({
-  typeKey: rt.string,
-  value: rt.string,
-});
-
-export const SimilarCaseRt = rt.intersection([
-  CaseRt,
-  rt.strict({ similarities: rt.array(SimilarityRt) }),
-]);
-
 export const CasesSimilarResponseRt = rt.strict({
   cases: rt.array(SimilarCaseRt),
   page: rt.number,
@@ -566,5 +557,3 @@ export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
 export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;
 export type SimilarCasesSearchRequest = rt.TypeOf<typeof SimilarCasesSearchRequestRt>;
 export type CasesSimilarResponse = rt.TypeOf<typeof CasesSimilarResponseRt>;
-export type SimilarCase = rt.TypeOf<typeof SimilarCaseRt>;
-export type SimilarCases = SimilarCase[];

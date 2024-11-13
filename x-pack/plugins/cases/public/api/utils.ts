@@ -12,10 +12,15 @@ import type {
   CaseResolveResponse,
   CasesFindResponse,
   CasesSimilarResponse,
+} from '../../common/types/api';
+import type {
+  Attachment,
+  Case,
+  Cases,
   SimilarCase,
   SimilarCases,
-} from '../../common/types/api';
-import type { Attachment, Case, Cases, UserActions } from '../../common/types/domain';
+  UserActions,
+} from '../../common/types/domain';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
