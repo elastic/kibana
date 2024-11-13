@@ -17,12 +17,32 @@ export type AbortableAsyncState<T> = (T extends Promise<infer TReturn>
   ? State<TReturn>
   : State<T>) & { refresh: () => void };
 
+export type AbortableAsyncStateOf<T extends AbortableAsyncState<any>> =
+  T extends AbortableAsyncState<infer TResponse> ? Awaited<TResponse> : never;
+
+interface UseAbortableAsyncOptions<T> {
+  clearValueOnNext?: boolean;
+  unsetValueOnError?: boolean;
+  defaultValue?: () => T;
+  onError?: (error: Error) => void;
+}
+
+export type UseAbortableAsync<
+  TAdditionalParameters extends Record<string, any> = {},
+  TAdditionalOptions extends Record<string, any> = {}
+> = <T>(
+  fn: ({}: { signal: AbortSignal } & TAdditionalParameters) => T | Promise<T>,
+  deps: any[],
+  options?: UseAbortableAsyncOptions<T> & TAdditionalOptions
+) => AbortableAsyncState<T>;
+
 export function useAbortableAsync<T>(
   fn: ({}: { signal: AbortSignal }) => T | Promise<T>,
   deps: any[],
-  options?: { clearValueOnNext?: boolean; defaultValue?: () => T }
+  options?: UseAbortableAsyncOptions<T>
 ): AbortableAsyncState<T> {
   const clearValueOnNext = options?.clearValueOnNext;
+  const unsetValueOnError = options?.unsetValueOnError;
 
   const controllerRef = useRef(new AbortController());
 
@@ -43,6 +63,15 @@ export function useAbortableAsync<T>(
       setError(undefined);
     }
 
+    function handleError(err: Error) {
+      setError(err);
+      if (unsetValueOnError) {
+        setValue(undefined);
+      }
+      setLoading(false);
+      options?.onError?.(err);
+    }
+
     try {
       const response = fn({ signal: controller.signal });
       if (isPromise(response)) {
@@ -52,12 +81,7 @@ export function useAbortableAsync<T>(
             setError(undefined);
             setValue(nextValue);
           })
-          .catch((err) => {
-            setValue(undefined);
-            if (!controller.signal.aborted) {
-              setError(err);
-            }
-          })
+          .catch(handleError)
           .finally(() => setLoading(false));
       } else {
         setError(undefined);
@@ -65,9 +89,7 @@ export function useAbortableAsync<T>(
         setLoading(false);
       }
     } catch (err) {
-      setValue(undefined);
-      setError(err);
-      setLoading(false);
+      handleError(err);
     }
 
     return () => {
