@@ -19,7 +19,7 @@ export class EsqlServerPlugin implements Plugin {
     plugins.contentManagement.favorites.registerFavoriteType('esql_query', {
       typeMetadataSchema: schema.object({
         queryString: schema.string(),
-        timeRan: schema.string(),
+        createdAt: schema.string(),
         status: schema.string(),
       }),
     });
