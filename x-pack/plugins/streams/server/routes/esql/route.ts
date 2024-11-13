@@ -39,6 +39,7 @@ export const executeEsqlRoute = createServerRoute({
     } = params;
 
     const response = await observabilityEsClient.esql(operationName, {
+      parseOutput: false,
       query,
       filter: {
         bool: {
@@ -52,7 +53,7 @@ export const executeEsqlRoute = createServerRoute({
       },
     });
 
-    return response;
+    return response as any;
   },
 });
 

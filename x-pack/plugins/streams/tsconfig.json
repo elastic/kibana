@@ -30,6 +30,7 @@
     "@kbn/features-plugin",
     "@kbn/server-route-repository-client",
     "@kbn/es-types",
-    "@kbn/observability-utils-server"
+    "@kbn/observability-utils-server",
+    "@kbn/observability-utils-common"
   ]
 }

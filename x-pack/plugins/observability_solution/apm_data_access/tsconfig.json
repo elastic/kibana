@@ -21,6 +21,7 @@
     "@kbn/core-http-server",
     "@kbn/security-plugin-types-server",
     "@kbn/utility-types",
-    "@kbn/elastic-agent-utils"
+    "@kbn/elastic-agent-utils",
+    "@kbn/observability-utils-common"
   ]
 }

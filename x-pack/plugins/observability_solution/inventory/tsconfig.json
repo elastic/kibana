@@ -52,9 +52,13 @@
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
     "@kbn/storybook",
-    "@kbn/zod",
     "@kbn/dashboard-plugin",
     "@kbn/deeplinks-analytics",
-    "@kbn/react-hooks"
+    "@kbn/controls-plugin",
+    "@kbn/securitysolution-io-ts-types",
+    "@kbn/react-hooks",
+    "@kbn/observability-utils-common",
+    "@kbn/observability-utils-browser",
+    "@kbn/observability-utils-server"
   ]
 }
