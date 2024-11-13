@@ -45,8 +45,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/177662
-    describe(' when data is generated', () => {
+    describe('when data is generated', () => {
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
       let body: ServiceIconMetadata;
       let status: number;
