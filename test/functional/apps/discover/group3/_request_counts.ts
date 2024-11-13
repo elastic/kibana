@@ -191,6 +191,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             value: 'jpg',
           });
         });
+
+        await expectSearches(type, 2, async () => {
+          await filterBar.removeFilter('extension');
+        });
       });
 
       it('should send 2 requests (documents + chart) when sorting', async () => {
