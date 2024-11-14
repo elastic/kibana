@@ -192,6 +192,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
 async function getAgentPolicyPermissions(
   supertest: SupertestWithoutAuthProviderType,
+  adminRoleAuthc,
+  internalHeaders,
   agentPolicyId: string,
   packagePolicyId: string
 ) {
@@ -199,7 +201,10 @@ async function getAgentPolicyPermissions(
     body: {
       item: { output_permissions: { [key: string]: Record<string, SecurityRoleDescriptor> } };
     };
-  } = await supertest.get(`/api/fleet/agent_policies/${agentPolicyId}/full`);
+  } = await supertest
+    .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
+    .set(adminRoleAuthc.apiKeyHeader)
+    .set(internalHeaders);
 
   return Object.values(res.body.item.output_permissions)[0][packagePolicyId];
 }
