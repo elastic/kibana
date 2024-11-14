@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
-import {
-  ENTITY_LAST_SEEN,
-  ENTITY_TYPE,
-  ENTITY_DISPLAY_NAME,
-} from '@kbn/observability-shared-plugin/common';
 import type { QueryDslQueryContainer, ScalarValue } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityInstance } from '@kbn/entities-schema';
 import {
+  ENTITY_DISPLAY_NAME,
+  ENTITY_LAST_SEEN,
+  ENTITY_TYPE,
+} from '@kbn/observability-shared-plugin/common';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import {
   ENTITIES_LATEST_ALIAS,
+  InventoryEntity,
   MAX_NUMBER_OF_ENTITIES,
   type EntityColumnIds,
-  InventoryEntity,
 } from '../../../common/entities';
 import { getBuiltinEntityDefinitionIdESQLWhereClause } from './query_helper';
 
