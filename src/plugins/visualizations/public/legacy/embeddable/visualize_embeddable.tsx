@@ -108,6 +108,9 @@ export class VisualizeEmbeddable
   private query?: Query;
   private filters?: Filter[];
   private searchSessionId?: string;
+  /**
+   * @deprecated https://github.com/elastic/kibana/pull/197802
+   **/
   private syncColors?: boolean;
   private syncTooltips?: boolean;
   private syncCursor?: boolean;

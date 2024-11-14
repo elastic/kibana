@@ -20,7 +20,6 @@ const getGenericEmbeddableState = (state?: Partial<EmbeddableInput>): Embeddable
     disabledActions: [],
     disableTriggers: false,
     enhancements: undefined,
-    syncColors: false,
     syncTooltips: false,
     syncCursor: true,
     viewMode: ViewMode.VIEW,

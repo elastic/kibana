@@ -268,7 +268,6 @@ describe('getInheritedInput', () => {
       timeslice: [number, number];
     };
     expect(embeddableInput.syncTooltips).toBe(false);
-    expect(embeddableInput.syncColors).toBe(false);
     expect(embeddableInput.syncCursor).toBe(true);
   });
 });
