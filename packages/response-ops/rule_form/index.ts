@@ -7,15 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/rule_definition';
-export * from './src/rule_actions';
-export * from './src/rule_details';
-export * from './src/rule_page';
-export * from './src/rule_form';
-export * from './src/utils';
 export * from './src/types';
-export * from './src/constants';
 export * from './src/rule_type_modal';
+
+export { RuleForm } from './src/rule_form';
 
 export {
   fetchUiConfig,
@@ -27,3 +22,11 @@ export {
   transformUpdateRuleBody,
   resolveRule,
 } from './src/common/apis';
+
+export { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE } from './src/constants';
+
+export {
+  RuleActionsNotifyWhen,
+  RuleActionsAlertsFilter,
+  RuleActionsAlertsFilterTimeframe,
+} from './src/rule_actions';

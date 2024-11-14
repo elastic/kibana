@@ -22,14 +22,12 @@ import {
 } from '@elastic/eui';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  RuleActions,
-  RuleDefinition,
-  RuleDetails,
-  RuleFormData,
-  RulePageFooter,
-  RulePageNameInput,
-} from '../..';
+import type { RuleFormData } from '../types';
+import { RuleActions } from '../rule_actions';
+import { RuleDefinition } from '../rule_definition';
+import { RuleDetails } from '../rule_details';
+import { RulePageFooter } from './rule_page_footer';
+import { RulePageNameInput } from './rule_page_name_input';
 import { useRuleFormState } from '../hooks';
 import {
   DISABLED_ACTIONS_WARNING_TITLE,
