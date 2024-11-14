@@ -16,7 +16,8 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
-import type { ObservablePatchType, Observable } from '../../../common/types/domain';
+import type { ObservablePatchType } from '../../../common/types/api';
+import type { Observable } from '../../../common/types/domain';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import * as i18n from './translations';
 import { fieldsConfig, normalizeValueType } from './fields_config';

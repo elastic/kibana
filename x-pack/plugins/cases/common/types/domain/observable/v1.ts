@@ -29,6 +29,3 @@ export const CaseObservableTypeRt = rt.strict({
 
 export type Observable = rt.TypeOf<typeof CaseObservableRt>;
 export type ObservableType = rt.TypeOf<typeof CaseObservableTypeRt>;
-
-export const ObservablePatch = CaseObservableBaseRt;
-export type ObservablePatchType = rt.TypeOf<typeof ObservablePatch>;

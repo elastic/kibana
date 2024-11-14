@@ -11,7 +11,7 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { EditObservableModal, type EditObservableModalProps } from './edit_observable_modal';
 import { type ObservableFormProps } from './observable_form';
-import type { ObservablePatchType } from '../../../common/types/domain';
+import type { ObservablePatchType } from '../../../common/types/api/observable/v1';
 
 jest.mock('./observable_form', () => ({
   ObservableForm: (props: ObservableFormProps) => (

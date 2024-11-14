@@ -6,11 +6,13 @@
  */
 
 import * as rt from 'io-ts';
-import { ObservablePatch } from '../../domain';
+import { CaseObservableBaseRt } from '../../domain/observable/v1';
 
 /**
  * Observables
  */
+export const ObservablePatch = CaseObservableBaseRt;
+export type ObservablePatchType = rt.TypeOf<typeof ObservablePatch>;
 
 export const AddObservableRequestRt = rt.strict({
   observable: ObservablePatch,

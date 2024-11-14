@@ -7,7 +7,8 @@
 
 import { EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody } from '@elastic/eui';
 import React, { type FC } from 'react';
-import type { Observable, ObservablePatchType } from '../../../common/types/domain/observable/v1';
+import type { ObservablePatchType } from '../../../common/types/api/observable/v1';
+import type { Observable } from '../../../common/types/domain/observable/v1';
 import { ObservableForm } from './observable_form';
 import * as i18n from './translations';
 

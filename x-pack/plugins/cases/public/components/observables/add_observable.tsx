@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 
-import type { ObservablePatchType } from '../../../common/types/domain/observable/v1';
+import type { ObservablePatchType } from '../../../common/types/api/observable/v1';
 import type { CaseUI } from '../../../common';
 import { useCasesToast } from '../../common/use_cases_toast';
 import { useCasesContext } from '../cases_context/use_cases_context';
