@@ -42,13 +42,16 @@ export function getLegacyURLConflictsMessage(
 
 export function isSearchContextIncompatibleWithDataViews(
   api: LensApi,
-  context: { type?: string } | undefined,
+  context: { type?: string; id?: string } | undefined,
   searchContext: MergedSearchContext,
   indexPatternRefs: IndexPatternRef[],
   indexPatterns: IndexPatternMap
 ) {
   return (
     context?.type !== 'canvas' &&
+    // SLO chart was relying on a bug in the previous system
+    // so we need to exclude it for now
+    context?.id !== 'sloErrorRateChart' &&
     !api.isTextBasedLanguage() &&
     searchContext.timeRange == null &&
     indexPatternRefs.some(({ id }) => {
