@@ -52,7 +52,9 @@ export class SiemRuleMigrationsService {
     this.esClusterClient = esClusterClient;
     const esClient = esClusterClient.asInternalUser;
 
-    this.dataService.install({ ...params, esClient });
+    this.dataService.install({ ...params, esClient }).catch((err) => {
+      this.logger.error('Error installing data service.', err);
+    });
   }
 
   createClient({

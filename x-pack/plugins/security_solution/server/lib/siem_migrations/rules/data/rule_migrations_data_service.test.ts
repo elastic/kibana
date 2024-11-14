@@ -79,20 +79,6 @@ describe('SiemRuleMigrationsDataService', () => {
       const [indexPatternAdapter] = MockedIndexPatternAdapter.mock.instances;
       expect(indexPatternAdapter.install).toHaveBeenCalledWith(expect.objectContaining(params));
     });
-
-    it('should log error', async () => {
-      const index = new RuleMigrationsDataService(logger, kibanaVersion);
-      const params: Omit<InstallParams, 'logger'> = {
-        esClient,
-        pluginStop$: new Subject(),
-      };
-      const [indexPatternAdapter] = MockedIndexPatternAdapter.mock.instances;
-      const error = new Error('test-error');
-      (indexPatternAdapter.install as jest.Mock).mockRejectedValueOnce(error);
-
-      await index.install(params);
-      expect(logger.error).toHaveBeenCalledWith(expect.any(String), error);
-    });
   });
 
   describe('createClient', () => {

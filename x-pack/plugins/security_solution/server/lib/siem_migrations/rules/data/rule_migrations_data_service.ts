@@ -49,9 +49,7 @@ export class RuleMigrationsDataService {
     await Promise.all([
       this.adapters.rules.install({ ...params, logger: this.logger }),
       this.adapters.resources.install({ ...params, logger: this.logger }),
-    ]).catch((err) => {
-      this.logger.error(`Error installing siem rule migrations index. ${err.message}`, err);
-    });
+    ]);
   }
 
   public createClient({ spaceId, currentUser, esClient }: CreateClientParams) {

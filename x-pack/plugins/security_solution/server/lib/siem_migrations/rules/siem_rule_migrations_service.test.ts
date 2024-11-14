@@ -21,6 +21,7 @@ import {
   mockCreateClient as mockDataCreateClient,
 } from './data/__mocks__/mocks';
 import { mockCreateClient as mockTaskCreateClient, mockStopAll } from './task/__mocks__/mocks';
+import { waitFor } from '@testing-library/dom';
 
 jest.mock('./data/rule_migrations_data_service');
 jest.mock('./task/rule_migrations_task_service');
@@ -31,19 +32,17 @@ describe('SiemRuleMigrationsService', () => {
 
   const esClusterClient = elasticsearchServiceMock.createClusterClient();
   const currentUser = securityServiceMock.createMockAuthenticatedUser();
-  const logger = loggingSystemMock.create();
+  const loggerFactory = loggingSystemMock.create();
+  const logger = loggerFactory.get('siemRuleMigrations');
   const pluginStop$ = new Subject<void>();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    ruleMigrationsService = new SiemRuleMigrationsService(logger, kibanaVersion);
+    ruleMigrationsService = new SiemRuleMigrationsService(loggerFactory, kibanaVersion);
   });
 
   it('should instantiate the rule migrations data stream adapter', () => {
-    expect(MockRuleMigrationsDataService).toHaveBeenCalledWith(
-      logger.get('siemRuleMigrations'),
-      kibanaVersion
-    );
+    expect(MockRuleMigrationsDataService).toHaveBeenCalledWith(logger, kibanaVersion);
   });
 
   describe('when setup is called', () => {
@@ -53,6 +52,16 @@ describe('SiemRuleMigrationsService', () => {
       expect(mockInstall).toHaveBeenCalledWith({
         esClient: esClusterClient.asInternalUser,
         pluginStop$,
+      });
+    });
+
+    it('should log error when data installation fails', async () => {
+      const error = 'Failed to install';
+      mockInstall.mockRejectedValueOnce(error);
+      ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
+
+      await waitFor(() => {
+        expect(logger.error).toHaveBeenCalledWith('Error installing data service.', error);
       });
     });
   });
