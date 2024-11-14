@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { size, isEmpty, isEqual, xorWith } from 'lodash';
 import {
   Background,
   Controls,
@@ -14,7 +15,8 @@ import {
   useEdgesState,
   useNodesState,
 } from '@xyflow/react';
-import type { Edge, Node } from '@xyflow/react';
+import type { Edge, FitViewOptions, Node, ReactFlowInstance } from '@xyflow/react';
+import { useGeneratedHtmlId } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
 import { SvgDefsMarker } from '../edge/styles';
 import {
@@ -33,9 +35,23 @@ import type { EdgeViewModel, NodeViewModel } from '../types';
 import '@xyflow/react/dist/style.css';
 
 export interface GraphProps extends CommonProps {
+  /**
+   * Array of node view models to be rendered in the graph.
+   */
   nodes: NodeViewModel[];
+  /**
+   * Array of edge view models to be rendered in the graph.
+   */
   edges: EdgeViewModel[];
+  /**
+   * Determines whether the graph is interactive (allows panning, zooming, etc.).
+   * When set to false, the graph is locked and user interactions are disabled, effectively putting it in view-only mode.
+   */
   interactive: boolean;
+  /**
+   * Determines whether the graph is locked. Nodes and edges are still interactive, but the graph itself is not.
+   */
+  isLocked?: boolean;
 }
 
 const nodeTypes = {
@@ -66,28 +82,47 @@ const edgeTypes = {
  *
  * @returns {JSX.Element} The rendered Graph component.
  */
-export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest }) => {
-  const layoutCalled = useRef(false);
-  const [isGraphLocked, setIsGraphLocked] = useState(interactive);
-  const { initialNodes, initialEdges } = useMemo(
-    () => processGraph(nodes, edges, isGraphLocked),
-    [nodes, edges, isGraphLocked]
-  );
+export const Graph: React.FC<GraphProps> = ({
+  nodes,
+  edges,
+  interactive,
+  isLocked = false,
+  ...rest
+}) => {
+  const backgroundId = useGeneratedHtmlId();
+  const fitViewRef = useRef<
+    ((fitViewOptions?: FitViewOptions<Node> | undefined) => Promise<boolean>) | null
+  >(null);
+  const currNodesRef = useRef<NodeViewModel[]>([]);
+  const currEdgesRef = useRef<EdgeViewModel[]>([]);
+  const [isGraphInteractive, setIsGraphInteractive] = useState(interactive);
+  const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
+  const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
 
-  const [nodesState, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edgesState, _setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  useEffect(() => {
+    // On nodes or edges changes reset the graph and re-layout
+    if (
+      !isArrayOfObjectsEqual(nodes, currNodesRef.current) ||
+      !isArrayOfObjectsEqual(edges, currEdgesRef.current)
+    ) {
+      const { initialNodes, initialEdges } = processGraph(nodes, edges, isGraphInteractive);
+      const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
 
-  if (!layoutCalled.current) {
-    const { nodes: layoutedNodes } = layoutGraph(nodesState, edgesState);
-    setNodes(layoutedNodes);
-    layoutCalled.current = true;
-  }
+      setNodes(layoutedNodes);
+      setEdges(initialEdges);
+      currNodesRef.current = nodes;
+      currEdgesRef.current = edges;
+      setTimeout(() => {
+        fitViewRef.current?.();
+      }, 30);
+    }
+  }, [nodes, edges, setNodes, setEdges, isGraphInteractive]);
 
   const onInteractiveStateChange = useCallback(
     (interactiveStatus: boolean): void => {
-      setIsGraphLocked(interactiveStatus);
-      setNodes((prevNodes) =>
-        prevNodes.map((node) => ({
+      setIsGraphInteractive(interactiveStatus);
+      setNodes((currNodes) =>
+        currNodes.map((node) => ({
           ...node,
           data: {
             ...node.data,
@@ -99,23 +134,29 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest
     [setNodes]
   );
 
+  const onInitCallback = useCallback(
+    (xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) => {
+      window.requestAnimationFrame(() => xyflow.fitView());
+      fitViewRef.current = xyflow.fitView;
+
+      // When the graph is not initialized as interactive, we need to fit the view on resize
+      if (!interactive) {
+        const resizeObserver = new ResizeObserver(() => {
+          xyflow.fitView();
+        });
+        resizeObserver.observe(document.querySelector('.react-flow') as Element);
+        return () => resizeObserver.disconnect();
+      }
+    },
+    [interactive]
+  );
+
   return (
     <div {...rest}>
       <SvgDefsMarker />
       <ReactFlow
         fitView={true}
-        onInit={(xyflow) => {
-          window.requestAnimationFrame(() => xyflow.fitView());
-
-          // When the graph is not initialized as interactive, we need to fit the view on resize
-          if (!interactive) {
-            const resizeObserver = new ResizeObserver(() => {
-              xyflow.fitView();
-            });
-            resizeObserver.observe(document.querySelector('.react-flow') as Element);
-            return () => resizeObserver.disconnect();
-          }
-        }}
+        onInit={onInitCallback}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         nodes={nodesState}
@@ -123,16 +164,17 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, interactive, ...rest
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         proOptions={{ hideAttribution: true }}
-        panOnDrag={isGraphLocked}
-        zoomOnScroll={isGraphLocked}
-        zoomOnPinch={isGraphLocked}
-        zoomOnDoubleClick={isGraphLocked}
-        preventScrolling={isGraphLocked}
-        nodesDraggable={interactive && isGraphLocked}
+        panOnDrag={isGraphInteractive && !isLocked}
+        zoomOnScroll={isGraphInteractive && !isLocked}
+        zoomOnPinch={isGraphInteractive && !isLocked}
+        zoomOnDoubleClick={isGraphInteractive && !isLocked}
+        preventScrolling={interactive}
+        nodesDraggable={interactive && isGraphInteractive && !isLocked}
         maxZoom={1.3}
+        minZoom={0.1}
       >
         {interactive && <Controls onInteractiveChange={onInteractiveStateChange} />}
-        <Background />
+        <Background id={backgroundId} />{' '}
       </ReactFlow>
     </div>
   );
@@ -173,32 +215,41 @@ const processGraph = (
     return node;
   });
 
-  const initialEdges: Array<Edge<EdgeViewModel>> = edgesModel.map((edgeData) => {
-    const isIn =
-      nodesById[edgeData.source].shape !== 'label' && nodesById[edgeData.target].shape === 'group';
-    const isInside =
-      nodesById[edgeData.source].shape === 'group' && nodesById[edgeData.target].shape === 'label';
-    const isOut =
-      nodesById[edgeData.source].shape === 'label' && nodesById[edgeData.target].shape === 'group';
-    const isOutside =
-      nodesById[edgeData.source].shape === 'group' && nodesById[edgeData.target].shape !== 'label';
+  const initialEdges: Array<Edge<EdgeViewModel>> = edgesModel
+    .filter((edgeData) => nodesById[edgeData.source] && nodesById[edgeData.target])
+    .map((edgeData) => {
+      const isIn =
+        nodesById[edgeData.source].shape !== 'label' &&
+        nodesById[edgeData.target].shape === 'group';
+      const isInside =
+        nodesById[edgeData.source].shape === 'group' &&
+        nodesById[edgeData.target].shape === 'label';
+      const isOut =
+        nodesById[edgeData.source].shape === 'label' &&
+        nodesById[edgeData.target].shape === 'group';
+      const isOutside =
+        nodesById[edgeData.source].shape === 'group' &&
+        nodesById[edgeData.target].shape !== 'label';
 
-    return {
-      id: edgeData.id,
-      type: 'default',
-      source: edgeData.source,
-      sourceHandle: isInside ? 'inside' : isOutside ? 'outside' : undefined,
-      target: edgeData.target,
-      targetHandle: isIn ? 'in' : isOut ? 'out' : undefined,
-      focusable: false,
-      selectable: false,
-      data: {
-        ...edgeData,
-        sourceShape: nodesById[edgeData.source].shape,
-        targetShape: nodesById[edgeData.target].shape,
-      },
-    };
-  });
+      return {
+        id: edgeData.id,
+        type: 'default',
+        source: edgeData.source,
+        sourceHandle: isInside ? 'inside' : isOutside ? 'outside' : undefined,
+        target: edgeData.target,
+        targetHandle: isIn ? 'in' : isOut ? 'out' : undefined,
+        focusable: false,
+        selectable: false,
+        data: {
+          ...edgeData,
+          sourceShape: nodesById[edgeData.source].shape,
+          targetShape: nodesById[edgeData.target].shape,
+        },
+      };
+    });
 
   return { initialNodes, initialEdges };
 };
+
+const isArrayOfObjectsEqual = (x: object[], y: object[]) =>
+  size(x) === size(y) && isEmpty(xorWith(x, y, isEqual));
