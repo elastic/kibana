@@ -1367,24 +1367,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -1958,24 +1951,17 @@ paths:
                   type: boolean
                 flapping:
                   additionalProperties: false
-                  description: >-
-                    When flapping detection is turned on, alerts that switch
-                    quickly between active and recovered states are identified
-                    as “flapping” and notifications are reduced.
+                  description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
-                      description: >-
-                        The minimum number of runs in which the threshold must
-                        be met.
+                      description: The minimum number of runs in which the threshold must be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
-                      description: >-
-                        The minimum number of times an alert must switch states
-                        in the look back window.
+                      description: The minimum number of times an alert must switch states in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -2293,24 +2279,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -2887,24 +2866,17 @@ paths:
                     - active
                 flapping:
                   additionalProperties: false
-                  description: >-
-                    When flapping detection is turned on, alerts that switch
-                    quickly between active and recovered states are identified
-                    as “flapping” and notifications are reduced.
+                  description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
-                      description: >-
-                        The minimum number of runs in which the threshold must
-                        be met.
+                      description: The minimum number of runs in which the threshold must be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
-                      description: >-
-                        The minimum number of times an alert must switch states
-                        in the look back window.
+                      description: The minimum number of times an alert must switch states in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -3194,24 +3166,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -4241,24 +4206,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -6708,14 +6666,9 @@ paths:
         - cases
   /api/cases/{caseId}/files:
     post:
-      description: >
-        Attach a file to a case. You must have `all` privileges for the
-        **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the case you're updating. The request must include:
-
+      description: |
+        Attach a file to a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. The request must include:
         - The `Content-Type: multipart/form-data` HTTP header.
-
         - The location of the file that is being uploaded.
       operationId: addCaseFileDefaultSpace
       parameters:
@@ -9015,6 +8968,7 @@ paths:
         - Security Detections API
   /api/detection_engine/signals/finalize_migration:
     post:
+      deprecated: true
       description: |
         Finalize successful migrations of detection alerts. This replaces the original index's alias with the successfully migrated index's alias.
         The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,
@@ -9069,6 +9023,7 @@ paths:
         - Security Detections API
   /api/detection_engine/signals/migration:
     delete:
+      deprecated: true
       description: |
         Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
         the migration process. A successful migration will result in both the old and new indices being present.
@@ -9126,6 +9081,7 @@ paths:
       tags:
         - Security Detections API
     post:
+      deprecated: true
       description: |
         Initiate a migration of detection alerts.
         Migrations are initiated per index. While the process is neither destructive nor interferes with existing data, it may be resource-intensive. As such, it is recommended that you plan your migrations accordingly.
@@ -9189,6 +9145,7 @@ paths:
         - Security Detections API
   /api/detection_engine/signals/migration_status:
     post:
+      deprecated: true
       description: Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
       operationId: ReadAlertsMigrationStatus
       parameters:
@@ -43715,9 +43672,7 @@ components:
         - $ref: '#/components/schemas/Cases_add_user_comment_request_properties'
       title: Add case comment request
     Cases_add_case_file_request:
-      description: >-
-        Defines the file that will be attached to the case. Optional parameters
-        will be generated automatically from the file metadata if not defined.
+      description: Defines the file that will be attached to the case. Optional parameters will be generated automatically from the file metadata if not defined.
       type: object
       properties:
         file:
@@ -43725,10 +43680,7 @@ components:
           format: binary
           type: string
         filename:
-          description: >-
-            The desired name of the file being attached to the case, it can be
-            different than the name of the file in the filesystem. **This should
-            not include the file extension.**
+          description: The desired name of the file being attached to the case, it can be different than the name of the file in the filesystem. **This should not include the file extension.**
           type: string
       required:
         - file
