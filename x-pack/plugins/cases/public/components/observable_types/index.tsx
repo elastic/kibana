@@ -40,7 +40,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
   observableTypes,
 }) => {
   const { permissions } = useCasesContext();
-  const canAddCustomFields = permissions.create && permissions.update;
+  const canAddObservableTypes = permissions.create && permissions.update;
   const [error, setError] = useState<boolean>(false);
 
   const onAddCustomField = useCallback(() => {
@@ -65,7 +65,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
     setError(false);
   }
 
-  return canAddCustomFields ? (
+  return canAddObservableTypes ? (
     <EuiDescribedFormGroup
       fullWidth
       title={
