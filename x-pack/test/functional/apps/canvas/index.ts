@@ -33,11 +33,15 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         await esNode.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
 
         // canvas application is only available when installation contains canvas workpads
-        await kibanaServer.importExport.load('x-pack/test/functional/fixtures/kbn_archiver/canvas/default');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+        );
       });
 
       after(async () => {
-        await kibanaServer.importExport.unload('x-pack/test/functional/fixtures/kbn_archiver/canvas/default');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+        );
         await security.testUser.restoreDefaults();
       });
 

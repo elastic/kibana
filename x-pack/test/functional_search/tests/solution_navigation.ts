@@ -31,11 +31,15 @@ export default function searchSolutionNavigation({
       await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
 
       // canvas application is only available when installation contains canvas workpads
-      await kibanaServer.importExport.load('x-pack/test/functional/fixtures/kbn_archiver/canvas/default');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('x-pack/test/functional/fixtures/kbn_archiver/canvas/default');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
 
       // Clean up space created
       await cleanUp();

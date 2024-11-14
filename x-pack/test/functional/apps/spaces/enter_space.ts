@@ -21,7 +21,9 @@ export default function enterSpaceFunctionalTests({
     this.tags('includeFirefox');
     before(async () => {
       // canvas application is only available when installation contains canvas workpads
-      await kibanaServer.importExport.load('x-pack/test/functional/fixtures/kbn_archiver/canvas/default');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
       await spacesService.create({
         id: 'another-space',
         name: 'Another Space',
@@ -47,7 +49,9 @@ export default function enterSpaceFunctionalTests({
       await PageObjects.security.forceLogout();
     });
     after(async () => {
-      await kibanaServer.importExport.unload('x-pack/test/functional/fixtures/kbn_archiver/canvas/default');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
       await spacesService.delete('another-space');
       await kibanaServer.savedObjects.cleanStandardList();
     });
