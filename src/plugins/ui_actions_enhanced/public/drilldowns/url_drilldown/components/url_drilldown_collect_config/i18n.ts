@@ -84,6 +84,13 @@ export const txtUrlTemplateEncodeDescription = i18n.translate(
   }
 );
 
+export const txtUrlTemplateOverflow = i18n.translate(
+  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.overflow',
+  {
+    defaultMessage: 'Text Overflow',
+  }
+);
+
 export const txtUrlTemplateOverflowTextWrap = i18n.translate(
   'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.overflowTextWrap',
   {
@@ -91,23 +98,9 @@ export const txtUrlTemplateOverflowTextWrap = i18n.translate(
   }
 );
 
-export const txtUrlTemplateOverflowTextWrapDescription = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.overflowTextWrapDescription',
-  {
-    defaultMessage: 'If enabled, text will wrap instead of being truncated',
-  }
-);
-
 export const txtUrlTemplateOverflowEllipsis = i18n.translate(
   'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.overflowEllipsis',
   {
-    defaultMessage: 'Truncate text with ellipsis',
-  }
-);
-
-export const txtUrlTemplateOverflowEllipsisDescription = i18n.translate(
-  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.overflowEllipsisDescription',
-  {
-    defaultMessage: 'If enabled, text will be truncated with ellipsis',
+    defaultMessage: 'Ellipsis',
   }
 );

@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiFormRow, EuiSpacer, EuiSwitch, EuiTextColor } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch, EuiTextColor } from '@elastic/eui';
 
 import {
   txtUrlTemplateEncodeDescription,
   txtUrlTemplateEncodeUrl,
   txtUrlTemplateOpenInNewTab,
+  txtUrlTemplateOverflow,
   txtUrlTemplateOverflowEllipsis,
-  txtUrlTemplateOverflowEllipsisDescription,
   txtUrlTemplateOverflowTextWrap,
-  txtUrlTemplateOverflowTextWrapDescription,
 } from './i18n';
 import { UrlDrilldownOptions } from '../../types';
 
@@ -30,6 +29,21 @@ export const UrlDrilldownOptionsComponent = ({
   options,
   onOptionChange,
 }: UrlDrilldownOptionsProps) => {
+  const [toggleCompressedIdSelected, setToggleCompressedIdSelected] = useState(`__1`);
+  const toggleButtonsCompressed = [
+    {
+      id: `__0`,
+      label: txtUrlTemplateOverflowEllipsis,
+    },
+    {
+      id: `__1`,
+      label: txtUrlTemplateOverflowTextWrap,
+    },
+  ];
+
+  const onChangeCompressed = (optionId: React.SetStateAction<string>) => {
+    setToggleCompressedIdSelected(optionId);
+  };
   return (
     <>
       <EuiFormRow>
@@ -60,51 +74,15 @@ export const UrlDrilldownOptionsComponent = ({
             data-test-subj="urlDrilldownEncodeUrl"
           />
           <EuiSpacer size="s" />
-          <EuiSwitch
-            compressed
-            id="overflowEllipsis"
-            name="overflowEllipsis"
-            label={
-              <>
-                {txtUrlTemplateOverflowEllipsis}
-                <EuiSpacer size={'s'} />
-                <EuiTextColor color="subdued">
-                  {txtUrlTemplateOverflowEllipsisDescription}
-                </EuiTextColor>
-              </>
-            }
-            checked={options.overflowEllipsis}
-            onChange={() =>
-              onOptionChange({
-                overflowEllipsis: !options.overflowEllipsis,
-                overflowTextWrap: !options.overflowTextWrap,
-              })
-            }
-            data-test-subj="urlDrilldownOverflowEllipsis"
-          />
-          <EuiSpacer size="s" />
-          <EuiSwitch
-            compressed
-            id="overflowTextWrap"
-            name="overflowTextWrap"
-            label={
-              <>
-                {txtUrlTemplateOverflowTextWrap}
-                <EuiSpacer size={'s'} />
-                <EuiTextColor color="subdued">
-                  {txtUrlTemplateOverflowTextWrapDescription}
-                </EuiTextColor>
-              </>
-            }
-            checked={options.overflowTextWrap}
-            onChange={() =>
-              onOptionChange({
-                overflowTextWrap: !options.overflowTextWrap,
-                overflowEllipsis: !options.overflowEllipsis,
-              })
-            }
-            data-test-subj="urlDrilldownOverflowTextWrap"
-          />
+          <EuiFormRow label={txtUrlTemplateOverflow}>
+            <EuiButtonGroup
+              legend={txtUrlTemplateOverflow}
+              options={toggleButtonsCompressed}
+              idSelected={toggleCompressedIdSelected}
+              onChange={(id) => onChangeCompressed(id)}
+              buttonSize="compressed"
+            />
+          </EuiFormRow>
         </div>
       </EuiFormRow>
     </>

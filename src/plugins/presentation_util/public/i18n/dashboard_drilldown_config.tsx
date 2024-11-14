@@ -26,13 +26,17 @@ export const dashboardDrilldownConfigStrings = {
       i18n.translate('presentationUtil.dashboardDrilldownConfig.components.openInNewTab', {
         defaultMessage: 'Open dashboard in new tab',
       }),
+    getOverflowLegend: () =>
+      i18n.translate('presentationUtil.dashboardDrilldownConfig.components.overflowLegend', {
+        defaultMessage: 'Text Overflow',
+      }),
     getOverflowTextWrap: () =>
       i18n.translate('presentationUtil.dashboardDrilldownConfig.components.overflowTextWrap', {
         defaultMessage: 'Wrap text',
       }),
     getOverflowEllipsis: () =>
       i18n.translate('presentationUtil.dashboardDrilldownConfig.components.overflowEllipsis', {
-        defaultMessage: 'Truncate text with ellipsis',
+        defaultMessage: 'Ellipsis',
       }),
   },
 };
