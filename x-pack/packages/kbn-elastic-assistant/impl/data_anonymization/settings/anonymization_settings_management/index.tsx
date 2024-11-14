@@ -44,7 +44,6 @@ import {
 } from '../../../assistant/settings/translations';
 
 export interface Props {
-  defaultPageSize?: number;
   modalMode?: boolean;
   onClose?: () => void;
 }
