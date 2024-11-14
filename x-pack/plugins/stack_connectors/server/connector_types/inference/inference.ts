@@ -97,11 +97,11 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * @signal abort signal
    */
   public async performApiCompletion({
-    input,
+    messages,
     signal,
   }: ChatCompleteParams & { signal?: AbortSignal }): Promise<ChatCompleteResponse> {
     const response = await this.performInferenceApi(
-      { inference_id: this.inferenceId, input, task_type: 'completion' },
+      { inference_id: this.inferenceId, input: '', task_type: 'completion' },
       false,
       signal
     );
@@ -199,11 +199,11 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   private async streamAPI({
-    input,
+    messages,
     signal,
   }: ChatCompleteParams & { signal?: AbortSignal }): Promise<StreamingResponse> {
     const response = await this.performInferenceApi(
-      { inference_id: this.inferenceId, input, task_type: this.taskType as InferenceTaskType },
+      { inference_id: this.inferenceId, input: '', task_type: this.taskType as InferenceTaskType },
       true,
       signal
     );
@@ -220,11 +220,11 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * @signal abort signal
    */
   public async performApiCompletionStream({
-    input,
+    messages,
     signal,
   }: ChatCompleteParams & { signal?: AbortSignal }): Promise<IncomingMessage> {
     const res = (await this.streamAPI({
-      input,
+      messages,
       signal,
     })) as unknown as IncomingMessage;
     return res;
