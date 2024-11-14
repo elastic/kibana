@@ -18,11 +18,12 @@ import type {
   ESQLCommand,
   ESQLList,
   ESQLLiteral,
+  ESQLParamLiteral,
   ESQLProperNode,
   ESQLTimeInterval,
 } from '../../../types';
 import * as generic from '../../generic';
-import { isColumn, isFunctionExpression } from '../../../ast/helpers';
+import { isColumn, isFunctionExpression, isParamLiteral } from '../../../ast/helpers';
 import type { EsqlQuery } from '../../../query';
 
 /**
@@ -58,18 +59,25 @@ export interface StatsCommandSummary {
   /**
    * Summary of the main arguments of the "STATS" command.
    */
-  aggregates: Record<string, StatsAggregatesSummary>;
+  aggregates: Record<string, StatsFieldSummary>;
 
   /**
    * Summary of the "BY" arguments of the "STATS" command.
    */
-  grouping: Record<string, ESQLColumn>;
+  grouping: Record<string, StatsFieldSummary>;
 
   /**
-   * De-duplicated list all of ES|QL-syntax formatted field names from the
-   * {@link aggregates} and {@link grouping} fields.
+   * A formatted list of field names which were newly created by the
+   * STATS command.
    */
-  fields: Set<string>;
+  newFields: Set<string>;
+
+  /**
+   * De-duplicated list all of field names, which were used to as-is or to
+   * construct new fields. The fields are correctly formatted according to
+   * ES|QL column formatting rules.
+   */
+  usedFields: Set<string>;
 }
 
 /**
@@ -77,7 +85,7 @@ export interface StatsCommandSummary {
  *
  *    STATS <aggregates> [ BY <grouping> ]
  */
-export interface StatsAggregatesSummary {
+export interface StatsFieldSummary {
   /**
    * STATS command argument AST node (as was parsed).
    */
@@ -89,10 +97,10 @@ export interface StatsAggregatesSummary {
   field: string;
 
   /**
-   * A `column` AST node, which represents the field name. If no column AST node
-   * was found, a new one "virtual" column node is created.
+   * A `column` or param AST node, which represents the field name. If no column
+   * AST node was found, a new one "virtual" column node is created.
    */
-  column: ESQLColumn;
+  column: ESQLColumn | ESQLParamLiteral;
 
   /**
    * The definition of the field, which is the right-hand side of the `=`
@@ -106,32 +114,50 @@ export interface StatsAggregatesSummary {
   terminals: Array<ESQLColumn | ESQLLiteral | ESQLList | ESQLTimeInterval>;
 
   /**
-   * Correctly formatted list of field names that were found in the {@link terminals}.
+   * A formatted list of field names which were used for new field
+   * construction. For example, in the below example, `x` and `y` are the
+   * existing "used" fields:
+   *
+   * ```
+   * STATS foo = agg(x) BY y, bar = x
+   * ```
    */
-  fields: string[];
+  usedFields: Set<string>;
 }
 
 const summarizeArgParts = (
   query: EsqlQuery,
   arg: ESQLProperNode
-): [column: ESQLColumn, definition: ESQLProperNode] => {
+): [field: string, column: ESQLColumn | ESQLParamLiteral, definition: ESQLProperNode] => {
+  if (isParamLiteral(arg)) {
+    return [LeafPrinter.param(arg), arg, arg];
+  }
+
+  if (isColumn(arg)) {
+    return [LeafPrinter.column(arg), arg, arg];
+  }
+
   if (isFunctionExpression(arg) && arg.name === '=' && isColumn(arg.args[0])) {
     const [column, definition] = singleItems(arg.args);
 
-    return [column as ESQLColumn, definition as ESQLProperNode];
+    return [
+      LeafPrinter.column(column as ESQLColumn),
+      column as ESQLColumn,
+      definition as ESQLProperNode,
+    ];
   }
 
   const name = [...query.src].slice(arg.location.min, arg.location.max + 1).join('');
   const args = [Builder.identifier({ name })];
   const column = Builder.expression.column({ args });
 
-  return [column, arg];
+  return [LeafPrinter.column(column), column, arg];
 };
 
-const summarizeArg = (query: EsqlQuery, arg: ESQLProperNode): StatsAggregatesSummary => {
-  const [column, definition] = summarizeArgParts(query, arg);
-  const terminals: StatsAggregatesSummary['terminals'] = [];
-  const fields: StatsAggregatesSummary['fields'] = [];
+const summarizeField = (query: EsqlQuery, arg: ESQLProperNode): StatsFieldSummary => {
+  const [field, column, definition] = summarizeArgParts(query, arg);
+  const terminals: StatsFieldSummary['terminals'] = [];
+  const usedFields: StatsFieldSummary['usedFields'] = new Set();
 
   Walker.walk(definition, {
     visitLiteral(node) {
@@ -139,7 +165,7 @@ const summarizeArg = (query: EsqlQuery, arg: ESQLProperNode): StatsAggregatesSum
     },
     visitColumn(node) {
       terminals.push(node);
-      fields.push(LeafPrinter.column(node));
+      usedFields.add(LeafPrinter.column(node));
     },
     visitListLiteral(node) {
       terminals.push(node);
@@ -149,13 +175,13 @@ const summarizeArg = (query: EsqlQuery, arg: ESQLProperNode): StatsAggregatesSum
     },
   });
 
-  const summary: StatsAggregatesSummary = {
+  const summary: StatsFieldSummary = {
     arg,
-    field: LeafPrinter.column(column),
+    field,
     column,
     definition,
     terminals,
-    fields,
+    usedFields,
   };
 
   return summary;
@@ -171,14 +197,16 @@ const summarizeArg = (query: EsqlQuery, arg: ESQLProperNode): StatsAggregatesSum
 export const summarizeCommand = (query: EsqlQuery, command: ESQLCommand): StatsCommandSummary => {
   const aggregates: StatsCommandSummary['aggregates'] = {};
   const grouping: StatsCommandSummary['grouping'] = {};
-  const fields: StatsCommandSummary['fields'] = new Set();
+  const newFields: StatsCommandSummary['newFields'] = new Set();
+  const usedFields: StatsCommandSummary['usedFields'] = new Set();
 
   // Process main arguments, the "aggregates" part of the command.
   new Visitor()
     .on('visitExpression', (ctx) => {
-      const summary = summarizeArg(query, ctx.node);
+      const summary = summarizeField(query, ctx.node);
       aggregates[summary.field] = summary;
-      for (const field of summary.fields) fields.add(field);
+      newFields.add(summary.field);
+      for (const field of summary.usedFields) usedFields.add(field);
     })
     .on('visitCommand', () => {})
     .on('visitStatsCommand', (ctx) => {
@@ -188,12 +216,12 @@ export const summarizeCommand = (query: EsqlQuery, command: ESQLCommand): StatsC
 
   // Process the "BY" arguments, the "grouping" part of the command.
   new Visitor()
-    .on('visitExpression', () => {})
-    .on('visitColumnExpression', (ctx) => {
-      const column = ctx.node;
-      const formatted = LeafPrinter.column(column);
-      grouping[formatted] = column;
-      fields.add(formatted);
+    .on('visitExpression', (ctx) => {
+      const node = ctx.node;
+      const summary = summarizeField(query, node);
+      newFields.add(summary.field);
+      for (const field of summary.usedFields) usedFields.add(field);
+      grouping[summary.field] = summary;
     })
     .on('visitCommandOption', (ctx) => {
       if (ctx.node.name !== 'by') return;
@@ -209,7 +237,8 @@ export const summarizeCommand = (query: EsqlQuery, command: ESQLCommand): StatsC
     command,
     aggregates,
     grouping,
-    fields,
+    newFields,
+    usedFields,
   };
 
   return summary;

@@ -1,0 +1,273 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Summary Transform Generator for 'Timeslices' and 'CalendarAligned' SLO generates the correct transform for a 7 days SLO 1`] = `
+Object {
+  "_meta": Object {
+    "managed": true,
+    "managed_by": "observability",
+    "version": 3.3,
+  },
+  "defer_validation": true,
+  "description": "Summarise the rollup data of SLO: irrelevant [id: irrelevant, revision: 1].",
+  "dest": Object {
+    "index": ".slo-observability.summary-v3.3",
+    "pipeline": ".slo-observability.summary.pipeline-irrelevant-1",
+  },
+  "frequency": "1m",
+  "pivot": Object {
+    "aggregations": Object {
+      "_totalSlicesInPeriod": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {},
+          "script": Object {
+            "source": "
+                if (false == true) {
+                  return Math.ceil(7 * 24 * 60 * 60 / 120);
+                } else {
+                  Date d = new Date(); 
+                  Instant instant = Instant.ofEpochMilli(d.getTime());
+                  LocalDateTime now = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+                  LocalDateTime startOfMonth = now
+                    .withDayOfMonth(1)
+                    .withHour(0)
+                    .withMinute(0)
+                    .withSecond(0);
+                  LocalDateTime startOfNextMonth = startOfMonth.plusMonths(1);
+                  double sliceDurationInMinutes = 120 / 60;
+                  
+                  return Math.ceil(Duration.between(startOfMonth, startOfNextMonth).toMinutes() / sliceDurationInMinutes);
+                }
+              ",
+          },
+        },
+      },
+      "errorBudgetConsumed": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "errorBudgetInitial": "errorBudgetInitial",
+            "sliValue": "sliValue",
+          },
+          "script": "if (params.sliValue == -1) { return 0 } else { return (1 - params.sliValue) / params.errorBudgetInitial }",
+        },
+      },
+      "errorBudgetInitial": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {},
+          "script": "1 - 0.98",
+        },
+      },
+      "errorBudgetRemaining": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "errorBudgetConsumed": "errorBudgetConsumed",
+          },
+          "script": "1 - params.errorBudgetConsumed",
+        },
+      },
+      "fiveMinuteBurnRate": Object {
+        "aggs": Object {
+          "goodEvents": Object {
+            "sum": Object {
+              "field": "slo.isGoodSlice",
+            },
+          },
+          "totalEvents": Object {
+            "value_count": Object {
+              "field": "slo.isGoodSlice",
+            },
+          },
+        },
+        "filter": Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "now-540s/m",
+              "lte": "now-240s/m",
+            },
+          },
+        },
+      },
+      "goodEvents": Object {
+        "sum": Object {
+          "field": "slo.isGoodSlice",
+        },
+      },
+      "latestSliTimestamp": Object {
+        "max": Object {
+          "field": "@timestamp",
+        },
+      },
+      "oneDayBurnRate": Object {
+        "aggs": Object {
+          "goodEvents": Object {
+            "sum": Object {
+              "field": "slo.isGoodSlice",
+            },
+          },
+          "totalEvents": Object {
+            "value_count": Object {
+              "field": "slo.isGoodSlice",
+            },
+          },
+        },
+        "filter": Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "now-86640s/m",
+              "lte": "now-240s/m",
+            },
+          },
+        },
+      },
+      "oneHourBurnRate": Object {
+        "aggs": Object {
+          "goodEvents": Object {
+            "sum": Object {
+              "field": "slo.isGoodSlice",
+            },
+          },
+          "totalEvents": Object {
+            "value_count": Object {
+              "field": "slo.isGoodSlice",
+            },
+          },
+        },
+        "filter": Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "now-3840s/m",
+              "lte": "now-240s/m",
+            },
+          },
+        },
+      },
+      "sliValue": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "goodEvents": "goodEvents",
+            "totalEvents": "totalEvents",
+            "totalSlicesInPeriod": "_totalSlicesInPeriod",
+          },
+          "script": "if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return 1 - (params.totalEvents - params.goodEvents) / params.totalSlicesInPeriod }",
+        },
+      },
+      "statusCode": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "errorBudgetRemaining": "errorBudgetRemaining",
+            "sliValue": "sliValue",
+          },
+          "script": "if (params.sliValue == -1) { return 0 } else if (params.sliValue >= 0.98) { return 4 } else if (params.errorBudgetRemaining > 0) { return 2 } else { return 1 }",
+        },
+      },
+      "totalEvents": Object {
+        "value_count": Object {
+          "field": "slo.isGoodSlice",
+        },
+      },
+    },
+    "group_by": Object {
+      "monitor.config_id": Object {
+        "terms": Object {
+          "field": "monitor.config_id",
+          "missing_bucket": true,
+        },
+      },
+      "monitor.name": Object {
+        "terms": Object {
+          "field": "monitor.name",
+          "missing_bucket": true,
+        },
+      },
+      "observer.geo.name": Object {
+        "terms": Object {
+          "field": "observer.geo.name",
+          "missing_bucket": true,
+        },
+      },
+      "observer.name": Object {
+        "terms": Object {
+          "field": "observer.name",
+          "missing_bucket": true,
+        },
+      },
+      "service.environment": Object {
+        "terms": Object {
+          "field": "service.environment",
+          "missing_bucket": true,
+        },
+      },
+      "service.name": Object {
+        "terms": Object {
+          "field": "service.name",
+          "missing_bucket": true,
+        },
+      },
+      "slo.id": Object {
+        "terms": Object {
+          "field": "slo.id",
+        },
+      },
+      "slo.instanceId": Object {
+        "terms": Object {
+          "field": "slo.instanceId",
+        },
+      },
+      "slo.revision": Object {
+        "terms": Object {
+          "field": "slo.revision",
+        },
+      },
+      "transaction.name": Object {
+        "terms": Object {
+          "field": "transaction.name",
+          "missing_bucket": true,
+        },
+      },
+      "transaction.type": Object {
+        "terms": Object {
+          "field": "transaction.type",
+          "missing_bucket": true,
+        },
+      },
+    },
+  },
+  "settings": Object {
+    "deduce_mappings": false,
+    "unattended": true,
+  },
+  "source": Object {
+    "index": ".slo-observability.sli-v3.3*",
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now/M",
+                "lte": "now/m",
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "slo.id": "irrelevant",
+            },
+          },
+          Object {
+            "term": Object {
+              "slo.revision": 1,
+            },
+          },
+        ],
+      },
+    },
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "65s",
+      "field": "event.ingested",
+    },
+  },
+  "transform_id": "slo-summary-irrelevant-1",
+}
+`;
