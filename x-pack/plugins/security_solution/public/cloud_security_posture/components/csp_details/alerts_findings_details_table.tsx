@@ -82,7 +82,7 @@ export const AlertsDetailsTable = memo(
     const { signalIndexName } = useSignalIndex();
     const { data } = useQueryAlerts({
       query: buildEntityAlertsQuery(fieldName, to, from, queryName, 500),
-      queryName: ALERTS_QUERY_NAMES.ALERTS_COUNT_BY_STATUS,
+      queryName: ALERTS_QUERY_NAMES.BY_RULE_BY_STATUS,
       indexName: signalIndexName,
     });
 
