@@ -29,6 +29,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.avg', {
         defaultMessage: 'AVG',
       }),
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -59,6 +60,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.count', {
         defaultMessage: 'COUNT',
       }),
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -92,6 +94,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.count_distinct', {
         defaultMessage: 'COUNT_DISTINCT',
       }),
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -125,6 +128,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.max', {
         defaultMessage: 'MAX',
       }),
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -155,6 +159,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.median', {
         defaultMessage: 'MEDIAN',
       }),
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -189,6 +194,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.median_absolute_deviation', {
         defaultMessage: 'MEDIAN_ABSOLUTE_DEVIATION',
       }),
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -225,6 +231,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.min', {
         defaultMessage: 'MIN',
       }),
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -255,6 +262,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.percentile', {
         defaultMessage: 'PERCENTILE',
       }),
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -290,6 +298,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.st_centroid_agg', {
         defaultMessage: 'ST_CENTROID_AGG',
       }),
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -323,6 +332,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.sum', {
         defaultMessage: 'SUM',
       }),
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -353,6 +363,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.top', {
         defaultMessage: 'TOP',
       }),
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -383,6 +394,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.values', {
         defaultMessage: 'VALUES',
       }),
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab
@@ -418,6 +430,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.weighted_avg', {
         defaultMessage: 'WEIGHTED_AVG',
       }),
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
