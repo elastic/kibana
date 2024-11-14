@@ -1,0 +1,106 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+
+/**
+ * A mock response from invoking the `attack-discovery` tool.
+ * This is a JSON string that represents the response from the tool
+ */
+export const getRawAttackDiscoveriesMock = () =>
+  '{\n  "insights": [\n    {\n      "alertIds": [\n        "cced5cec88026ccb68fc0c01c096d6330873ee80838fa367a24c5cd04b679df1",\n        "40a4242b163d2552ad24c208dc7ab754f3b2c9cd76fb961ea72391cb5f654580",\n        "42ac2ecf60173edff8ef10b32c3b706b866845e75e5107870d7f43f681c819dc",\n        "bd8204c37db970bf86c2713325652710d8e5ac2cd43a0f0f2234a65e8e5a0157",\n        "b7a073c94cccde9fc4164a1f5aba5169b3ef5e349797326f8b166314c8cdb60d"\n      ],\n      "detailsMarkdown": "- {{ user.name 1ee7566b-9b26-4f3e-8d2f-0eaafc40cd5d }} executed a suspicious process {{ process.name unix1 }} on {{ host.name 3abc855f-65b6-49b0-ac2f-123e34355b83 }}. The process was located at {{ file.path /Users/james/unix1 }} and had a hash of {{ file.hash.sha256 0b18d6880dc9670ab2b955914598c96fc3d0097dc40ea61157b8c79e75edf231 }}.\\n- The process {{ process.name unix1 }} attempted to access sensitive files such as {{ process.args /Users/james/library/Keychains/login.keychain-db }}.\\n- The process {{ process.name unix1 }} was executed with the command line {{ process.command_line /Users/james/unix1 /Users/james/library/Keychains/login.keychain-db TempTemp1234!! }}.\\n- The process {{ process.name unix1 }} was not trusted as indicated by the code signature status {{ process.code_signature.status code failed to satisfy specified code requirement(s) }}.\\n- Another process {{ process.name My Go Application.app }} was also detected on the same host, indicating potential lateral movement or additional malicious activity.",\n      "entitySummaryMarkdown": "{{ host.name 3abc855f-65b6-49b0-ac2f-123e34355b83 }} and {{ user.name 1ee7566b-9b26-4f3e-8d2f-0eaafc40cd5d }} were involved in the suspicious activity.",\n      "mitreAttackTactics": [\n        "Execution",\n        "Credential Access",\n        "Persistence"\n      ],\n      "summaryMarkdown": "A critical malware detection alert was triggered on {{ host.name 3abc855f-65b6-49b0-ac2f-123e34355b83 }} involving the user {{ user.name 1ee7566b-9b26-4f3e-8d2f-0eaafc40cd5d }}. The process {{ process.name unix1 }} was executed with suspicious arguments and attempted to access sensitive files.",\n      "title": "Critical Malware Detection on macOS Host"\n    },\n    {\n      "alertIds": [\n        "1b9c52673b184e6b9bd29b3378f90ec5e7b917c17018ce2d40188a065f145087",\n        "881c8cd24296c3efc066f894b2f60e28c86b6398e8d81fcdb0a21e2d4e6f37fb",\n        "6ae56534e1246b42afbb0658586bfe03717ee9853cc80d462b9f0aceb44194d3",\n        "94dda5ac846d122cf2e582ade68123f036b1b78c63752a30bcf8acdbbbba83ce",\n        "250f7967181328c67d1de251c606fd4a791fd81964f431e3d7d76149f531be00"\n      ],\n      "detailsMarkdown": "- {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }} executed a suspicious PowerShell script via Microsoft Office on {{ host.name 5e15d911-50a1-486a-a520-baa449451358 }}. The script was located at {{ file.path C:\\\\ProgramData\\\\WindowsAppPool\\\\AppPool.ps1 }}.\\n- The process {{ process.name powershell.exe }} was executed with the command line {{ process.command_line \\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\" -exec bypass -file C:\\\\ProgramData\\\\WindowsAppPool\\\\AppPool.ps1 }}.\\n- The parent process {{ process.parent.name wscript.exe }} was executed by {{ process.parent.command_line wscript C:\\\\ProgramData\\\\WindowsAppPool\\\\AppPool.vbs }}.\\n- The process {{ process.name powershell.exe }} was not trusted as indicated by the code signature status {{ process.code_signature.status trusted }}.\\n- The process {{ process.name powershell.exe }} was detected with a high integrity level, indicating potential privilege escalation.",\n      "entitySummaryMarkdown": "{{ host.name 5e15d911-50a1-486a-a520-baa449451358 }} and {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }} were involved in the suspicious activity.",\n      "mitreAttackTactics": [\n        "Initial Access",\n        "Execution",\n        "Persistence"\n      ],\n      "summaryMarkdown": "A critical malicious behavior detection alert was triggered on {{ host.name 5e15d911-50a1-486a-a520-baa449451358 }} involving the user {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }}. The process {{ process.name powershell.exe }} was executed with suspicious arguments and attempted to execute a PowerShell script.",\n      "title": "Suspicious PowerShell Execution via Microsoft Office"\n    },\n    {\n      "alertIds": [\n        "6cbbf7fb63ffed6e091ae21866043df699c839603ec573d3173b36e2d0e66ea3",\n        "e7b6f978336961522b0753ffe79cc4a2aa6e2c08c491657ade3eccdb58033852",\n        "d3ef244bda90960c091f516874a87b9cf01d206844c2e6ba324e3034472787f5"\n      ],\n      "detailsMarkdown": "- {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }} executed a suspicious PowerShell script via MsiExec on {{ host.name 2068fbbd-341a-477a-b06c-7097ddecd024 }}. The script was located at {{ file.path C:\\\\Users\\\\ADMINI~1\\\\AppData\\\\Local\\\\Temp\\\\2\\\\Package Installation Dir\\\\chch.ps1 }}.\\n- The process {{ process.name powershell.exe }} was executed with the command line {{ process.command_line \\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\" -ep bypass -file \\"C:\\\\Users\\\\ADMINI~1\\\\AppData\\\\Local\\\\Temp\\\\2\\\\Package Installation Dir\\\\chch.ps1\\" }}.\\n- The parent process {{ process.parent.name msiexec.exe }} was executed by {{ process.parent.command_line C:\\\\Windows\\\\system32\\\\msiexec.exe /V }}.\\n- The process {{ process.name powershell.exe }} was not trusted as indicated by the code signature status {{ process.code_signature.status trusted }}.\\n- The process {{ process.name powershell.exe }} was detected with a high integrity level, indicating potential privilege escalation.",\n      "entitySummaryMarkdown": "{{ host.name 2068fbbd-341a-477a-b06c-7097ddecd024 }} and {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }} were involved in the suspicious activity.",\n      "mitreAttackTactics": [\n        "Defense Evasion",\n        "Execution"\n      ],\n      "summaryMarkdown": "A critical malicious behavior detection alert was triggered on {{ host.name 2068fbbd-341a-477a-b06c-7097ddecd024 }} involving the user {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }}. The process {{ process.name powershell.exe }} was executed with suspicious arguments and attempted to execute a PowerShell script.",\n      "title": "Suspicious PowerShell Execution via MsiExec"\n    },\n    {\n      "alertIds": [\n        "8b1ccd0bfb927caeb5f9818098eebde9a091b99334c84bfffd36aa83db8b36ee",\n        "0ae1370d0c08d651a05421009ed8358d9037f3d6af0cf5f3417979489ca80f12",\n        "bed4a026232fb8e67f248771a99af722116556ace7ef9aaddefc082da4209c61",\n        "d28f2c32ae8e6bc33edfe51ace4621c0e7b826c087386c46ce9138be92baf3f9"\n      ],\n      "detailsMarkdown": "- {{ user.name 00468e82-e37f-4224-80c1-c62e594c74b1 }} executed a suspicious process {{ process.name unzip }} on {{ host.name b557bb12-8206-44b6-b2a5-dbcce5b1e65e }}. The process was located at {{ file.path /home/ubuntu/74ef6cc38f5a1a80148752b63c117e6846984debd2af806c65887195a8eccc56 }} and had a hash of {{ file.hash.sha256 74ef6cc38f5a1a80148752b63c117e6846984debd2af806c65887195a8eccc56 }}.\\n- The process {{ process.name unzip }} was executed with the command line {{ process.command_line unzip 9415656314.zip }}.\\n- The process {{ process.name unzip }} was detected with a high integrity level, indicating potential privilege escalation.\\n- Another process {{ process.name kdmtmpflush }} was also detected on the same host, indicating potential lateral movement or additional malicious activity.",\n      "entitySummaryMarkdown": "{{ host.name b557bb12-8206-44b6-b2a5-dbcce5b1e65e }} and {{ user.name 00468e82-e37f-4224-80c1-c62e594c74b1 }} were involved in the suspicious activity.",\n      "mitreAttackTactics": [\n        "Execution",\n        "Persistence"\n      ],\n      "summaryMarkdown": "A critical malware detection alert was triggered on {{ host.name b557bb12-8206-44b6-b2a5-dbcce5b1e65e }} involving the user {{ user.name 00468e82-e37f-4224-80c1-c62e594c74b1 }}. The process {{ process.name unzip }} was executed with suspicious arguments and attempted to extract a potentially malicious file.",\n      "title": "Suspicious File Extraction on Linux Host"\n    },\n    {\n      "alertIds": [\n        "15c3053659b3bccbcc2c75eb90963596bbba707496e6b8c4927b5dc3995e0e11",\n        "461fedbfddd0d8d42c11630d5cdb9a103fac05327dff5bcdbf51505f01ec39da",\n        "03ef2d6a825993d08f545cfa25e8dab765dd1f4688124e7d12d8d81a2f324464",\n        "bfd4f9a71c9ca6a8dc68a41ea96b5ca14380da9669fb62ccae06769ad931eef2"\n      ],\n      "detailsMarkdown": "- {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }} executed a suspicious process {{ process.name MsMpEng.exe }} on {{ host.name b808feb3-7ab3-4006-9c67-3cf7aeffe572 }}. The process was located at {{ file.path C:\\\\Windows\\\\MsMpEng.exe }} and had a hash of {{ file.hash.sha256 33bc14d231a4afaa18f06513766d5f69d8b88f1e697cd127d24fb4b72ad44c7a }}.\\n- The process {{ process.name MsMpEng.exe }} was executed with the command line {{ process.command_line \\"C:\\\\Windows\\\\MsMpEng.exe\\" }}.\\n- The parent process {{ process.parent.name d55f983c994caa160ec63a59f6b4250fe67fb3e8c43a388aec60a4a6978e9f1e.exe }} was executed by {{ process.parent.command_line \\"C:\\\\Users\\\\Administrator\\\\Desktop\\\\8813719803\\\\d55f983c994caa160ec63a59f6b4250fe67fb3e8c43a388aec60a4a6978e9f1e.exe\\" }}.\\n- The process {{ process.name MsMpEng.exe }} was not trusted as indicated by the code signature status {{ process.code_signature.status trusted }}.\\n- The process {{ process.name MsMpEng.exe }} was detected with a high integrity level, indicating potential privilege escalation.",\n      "entitySummaryMarkdown": "{{ host.name b808feb3-7ab3-4006-9c67-3cf7aeffe572 }} and {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }} were involved in the suspicious activity.",\n      "mitreAttackTactics": [\n        "Execution",\n        "Persistence"\n      ],\n      "summaryMarkdown": "A critical malware detection alert was triggered on {{ host.name b808feb3-7ab3-4006-9c67-3cf7aeffe572 }} involving the user {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }}. The process {{ process.name MsMpEng.exe }} was executed with suspicious arguments and attempted to execute a potentially malicious file.",\n      "title": "Suspicious Process Execution on Windows Host"\n    }\n  ]\n}';
+
+export const getParsedAttackDiscoveriesMock = (
+  attackDiscoveryTimestamp: string
+): AttackDiscovery[] => [
+  {
+    alertIds: [
+      'cced5cec88026ccb68fc0c01c096d6330873ee80838fa367a24c5cd04b679df1',
+      '40a4242b163d2552ad24c208dc7ab754f3b2c9cd76fb961ea72391cb5f654580',
+      '42ac2ecf60173edff8ef10b32c3b706b866845e75e5107870d7f43f681c819dc',
+      'bd8204c37db970bf86c2713325652710d8e5ac2cd43a0f0f2234a65e8e5a0157',
+      'b7a073c94cccde9fc4164a1f5aba5169b3ef5e349797326f8b166314c8cdb60d',
+    ],
+    detailsMarkdown:
+      '- {{ user.name 1ee7566b-9b26-4f3e-8d2f-0eaafc40cd5d }} executed a suspicious process {{ process.name unix1 }} on {{ host.name 3abc855f-65b6-49b0-ac2f-123e34355b83 }}. The process was located at {{ file.path /Users/james/unix1 }} and had a hash of {{ file.hash.sha256 0b18d6880dc9670ab2b955914598c96fc3d0097dc40ea61157b8c79e75edf231 }}.\n- The process {{ process.name unix1 }} attempted to access sensitive files such as {{ process.args /Users/james/library/Keychains/login.keychain-db }}.\n- The process {{ process.name unix1 }} was executed with the command line {{ process.command_line /Users/james/unix1 /Users/james/library/Keychains/login.keychain-db TempTemp1234!! }}.\n- The process {{ process.name unix1 }} was not trusted as indicated by the code signature status {{ process.code_signature.status code failed to satisfy specified code requirement(s) }}.\n- Another process {{ process.name My Go Application.app }} was also detected on the same host, indicating potential lateral movement or additional malicious activity.',
+    entitySummaryMarkdown:
+      '{{ host.name 3abc855f-65b6-49b0-ac2f-123e34355b83 }} and {{ user.name 1ee7566b-9b26-4f3e-8d2f-0eaafc40cd5d }} were involved in the suspicious activity.',
+    mitreAttackTactics: ['Execution', 'Credential Access', 'Persistence'],
+    summaryMarkdown:
+      'A critical malware detection alert was triggered on {{ host.name 3abc855f-65b6-49b0-ac2f-123e34355b83 }} involving the user {{ user.name 1ee7566b-9b26-4f3e-8d2f-0eaafc40cd5d }}. The process {{ process.name unix1 }} was executed with suspicious arguments and attempted to access sensitive files.',
+    title: 'Critical Malware Detection on macOS Host',
+    timestamp: attackDiscoveryTimestamp,
+  },
+  {
+    alertIds: [
+      '1b9c52673b184e6b9bd29b3378f90ec5e7b917c17018ce2d40188a065f145087',
+      '881c8cd24296c3efc066f894b2f60e28c86b6398e8d81fcdb0a21e2d4e6f37fb',
+      '6ae56534e1246b42afbb0658586bfe03717ee9853cc80d462b9f0aceb44194d3',
+      '94dda5ac846d122cf2e582ade68123f036b1b78c63752a30bcf8acdbbbba83ce',
+      '250f7967181328c67d1de251c606fd4a791fd81964f431e3d7d76149f531be00',
+    ],
+    detailsMarkdown:
+      '- {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }} executed a suspicious PowerShell script via Microsoft Office on {{ host.name 5e15d911-50a1-486a-a520-baa449451358 }}. The script was located at {{ file.path C:\\ProgramData\\WindowsAppPool\\AppPool.ps1 }}.\n- The process {{ process.name powershell.exe }} was executed with the command line {{ process.command_line "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -exec bypass -file C:\\ProgramData\\WindowsAppPool\\AppPool.ps1 }}.\n- The parent process {{ process.parent.name wscript.exe }} was executed by {{ process.parent.command_line wscript C:\\ProgramData\\WindowsAppPool\\AppPool.vbs }}.\n- The process {{ process.name powershell.exe }} was not trusted as indicated by the code signature status {{ process.code_signature.status trusted }}.\n- The process {{ process.name powershell.exe }} was detected with a high integrity level, indicating potential privilege escalation.',
+    entitySummaryMarkdown:
+      '{{ host.name 5e15d911-50a1-486a-a520-baa449451358 }} and {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }} were involved in the suspicious activity.',
+    mitreAttackTactics: ['Initial Access', 'Execution', 'Persistence'],
+    summaryMarkdown:
+      'A critical malicious behavior detection alert was triggered on {{ host.name 5e15d911-50a1-486a-a520-baa449451358 }} involving the user {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }}. The process {{ process.name powershell.exe }} was executed with suspicious arguments and attempted to execute a PowerShell script.',
+    title: 'Suspicious PowerShell Execution via Microsoft Office',
+    timestamp: attackDiscoveryTimestamp,
+  },
+  {
+    alertIds: [
+      '6cbbf7fb63ffed6e091ae21866043df699c839603ec573d3173b36e2d0e66ea3',
+      'e7b6f978336961522b0753ffe79cc4a2aa6e2c08c491657ade3eccdb58033852',
+      'd3ef244bda90960c091f516874a87b9cf01d206844c2e6ba324e3034472787f5',
+    ],
+    detailsMarkdown:
+      '- {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }} executed a suspicious PowerShell script via MsiExec on {{ host.name 2068fbbd-341a-477a-b06c-7097ddecd024 }}. The script was located at {{ file.path C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\2\\Package Installation Dir\\chch.ps1 }}.\n- The process {{ process.name powershell.exe }} was executed with the command line {{ process.command_line "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -ep bypass -file "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\2\\Package Installation Dir\\chch.ps1" }}.\n- The parent process {{ process.parent.name msiexec.exe }} was executed by {{ process.parent.command_line C:\\Windows\\system32\\msiexec.exe /V }}.\n- The process {{ process.name powershell.exe }} was not trusted as indicated by the code signature status {{ process.code_signature.status trusted }}.\n- The process {{ process.name powershell.exe }} was detected with a high integrity level, indicating potential privilege escalation.',
+    entitySummaryMarkdown:
+      '{{ host.name 2068fbbd-341a-477a-b06c-7097ddecd024 }} and {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }} were involved in the suspicious activity.',
+    mitreAttackTactics: ['Defense Evasion', 'Execution'],
+    summaryMarkdown:
+      'A critical malicious behavior detection alert was triggered on {{ host.name 2068fbbd-341a-477a-b06c-7097ddecd024 }} involving the user {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }}. The process {{ process.name powershell.exe }} was executed with suspicious arguments and attempted to execute a PowerShell script.',
+    title: 'Suspicious PowerShell Execution via MsiExec',
+    timestamp: attackDiscoveryTimestamp,
+  },
+  {
+    alertIds: [
+      '8b1ccd0bfb927caeb5f9818098eebde9a091b99334c84bfffd36aa83db8b36ee',
+      '0ae1370d0c08d651a05421009ed8358d9037f3d6af0cf5f3417979489ca80f12',
+      'bed4a026232fb8e67f248771a99af722116556ace7ef9aaddefc082da4209c61',
+      'd28f2c32ae8e6bc33edfe51ace4621c0e7b826c087386c46ce9138be92baf3f9',
+    ],
+    detailsMarkdown:
+      '- {{ user.name 00468e82-e37f-4224-80c1-c62e594c74b1 }} executed a suspicious process {{ process.name unzip }} on {{ host.name b557bb12-8206-44b6-b2a5-dbcce5b1e65e }}. The process was located at {{ file.path /home/ubuntu/74ef6cc38f5a1a80148752b63c117e6846984debd2af806c65887195a8eccc56 }} and had a hash of {{ file.hash.sha256 74ef6cc38f5a1a80148752b63c117e6846984debd2af806c65887195a8eccc56 }}.\n- The process {{ process.name unzip }} was executed with the command line {{ process.command_line unzip 9415656314.zip }}.\n- The process {{ process.name unzip }} was detected with a high integrity level, indicating potential privilege escalation.\n- Another process {{ process.name kdmtmpflush }} was also detected on the same host, indicating potential lateral movement or additional malicious activity.',
+    entitySummaryMarkdown:
+      '{{ host.name b557bb12-8206-44b6-b2a5-dbcce5b1e65e }} and {{ user.name 00468e82-e37f-4224-80c1-c62e594c74b1 }} were involved in the suspicious activity.',
+    mitreAttackTactics: ['Execution', 'Persistence'],
+    summaryMarkdown:
+      'A critical malware detection alert was triggered on {{ host.name b557bb12-8206-44b6-b2a5-dbcce5b1e65e }} involving the user {{ user.name 00468e82-e37f-4224-80c1-c62e594c74b1 }}. The process {{ process.name unzip }} was executed with suspicious arguments and attempted to extract a potentially malicious file.',
+    title: 'Suspicious File Extraction on Linux Host',
+    timestamp: attackDiscoveryTimestamp,
+  },
+  {
+    alertIds: [
+      '15c3053659b3bccbcc2c75eb90963596bbba707496e6b8c4927b5dc3995e0e11',
+      '461fedbfddd0d8d42c11630d5cdb9a103fac05327dff5bcdbf51505f01ec39da',
+      '03ef2d6a825993d08f545cfa25e8dab765dd1f4688124e7d12d8d81a2f324464',
+      'bfd4f9a71c9ca6a8dc68a41ea96b5ca14380da9669fb62ccae06769ad931eef2',
+    ],
+    detailsMarkdown:
+      '- {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }} executed a suspicious process {{ process.name MsMpEng.exe }} on {{ host.name b808feb3-7ab3-4006-9c67-3cf7aeffe572 }}. The process was located at {{ file.path C:\\Windows\\MsMpEng.exe }} and had a hash of {{ file.hash.sha256 33bc14d231a4afaa18f06513766d5f69d8b88f1e697cd127d24fb4b72ad44c7a }}.\n- The process {{ process.name MsMpEng.exe }} was executed with the command line {{ process.command_line "C:\\Windows\\MsMpEng.exe" }}.\n- The parent process {{ process.parent.name d55f983c994caa160ec63a59f6b4250fe67fb3e8c43a388aec60a4a6978e9f1e.exe }} was executed by {{ process.parent.command_line "C:\\Users\\Administrator\\Desktop\\8813719803\\d55f983c994caa160ec63a59f6b4250fe67fb3e8c43a388aec60a4a6978e9f1e.exe" }}.\n- The process {{ process.name MsMpEng.exe }} was not trusted as indicated by the code signature status {{ process.code_signature.status trusted }}.\n- The process {{ process.name MsMpEng.exe }} was detected with a high integrity level, indicating potential privilege escalation.',
+    entitySummaryMarkdown:
+      '{{ host.name b808feb3-7ab3-4006-9c67-3cf7aeffe572 }} and {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }} were involved in the suspicious activity.',
+    mitreAttackTactics: ['Execution', 'Persistence'],
+    summaryMarkdown:
+      'A critical malware detection alert was triggered on {{ host.name b808feb3-7ab3-4006-9c67-3cf7aeffe572 }} involving the user {{ user.name 37764a98-eeb5-459f-ab04-f8b70e8239cb }}. The process {{ process.name MsMpEng.exe }} was executed with suspicious arguments and attempted to execute a potentially malicious file.',
+    title: 'Suspicious Process Execution on Windows Host',
+    timestamp: attackDiscoveryTimestamp,
+  },
+];
