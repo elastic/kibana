@@ -54,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.expectConnectionDetails();
       });
 
-      it.skip('should show api key', async () => {
+      it('should show api key', async () => {
         await pageObjects.svlApiKeys.deleteAPIKeys();
         await svlSearchNavigation.navigateToIndexDetailPage(indexName);
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
