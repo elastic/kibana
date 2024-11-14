@@ -220,7 +220,7 @@ function buildCustomPalette(): PaletteDefinition {
   } as PaletteDefinition<unknown>;
 }
 
-export const palettes: Record<string, PaletteDefinition> = {
+export const buildPalettes = (): Record<string, PaletteDefinition> => ({
   default: {
     title: i18n.translate('charts.palettes.defaultPaletteLabel', { defaultMessage: 'Default' }),
     ...buildRoundRobinCategoricalWithMappedColors(),
@@ -266,4 +266,4 @@ export const palettes: Record<string, PaletteDefinition> = {
     ...buildRoundRobinCategoricalWithMappedColors('kibana_palette', createLegacyColorPalette(20)),
   },
   custom: buildCustomPalette() as PaletteDefinition<unknown>,
-};
+});

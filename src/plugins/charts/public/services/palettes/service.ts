@@ -25,8 +25,8 @@ export class PaletteService {
     return {
       getPalettes: async (): Promise<PaletteRegistry> => {
         if (!this.palettes) {
-          const { palettes } = await import('./palettes');
-          this.palettes = palettes;
+          const { buildPalettes } = await import('./palettes');
+          this.palettes = buildPalettes();
         }
         return {
           get: (name: string) => {
