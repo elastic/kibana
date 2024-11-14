@@ -10,14 +10,14 @@ import * as rt from 'io-ts';
 export const CaseObservableBaseRt = rt.strict({
   typeKey: rt.string,
   value: rt.string,
-  description: rt.union([rt.string, rt.undefined]),
+  description: rt.union([rt.string, rt.null]),
 });
 
 export const CaseObservableRt = rt.intersection([
   rt.strict({
-    id: rt.union([rt.string, rt.undefined]),
+    id: rt.union([rt.string, rt.null]),
     createdAt: rt.string,
-    updatedAt: rt.union([rt.string, rt.undefined]),
+    updatedAt: rt.union([rt.string, rt.null]),
   }),
   CaseObservableBaseRt,
 ]);
