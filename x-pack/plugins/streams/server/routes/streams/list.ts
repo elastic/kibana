@@ -51,20 +51,22 @@ interface ListStreamDefinition {
 
 function asTrees(definitions: Array<{ id: string[] }>) {
   const trees: ListStreamDefinition[] = [];
-  definitions.forEach((definition) => {
-    const path = definition.id[0].split('.');
+  const ids = definitions.map((definition) => definition.id[0]);
+
+  ids.sort((a, b) => a.split('.').length - b.split('.').length);
+
+  ids.forEach((id) => {
     let currentTree = trees;
-    path.forEach((_id, index) => {
-      const partialPath = path.slice(0, index + 1).join('.');
-      const existingNode = currentTree.find((node) => node.id === partialPath);
-      if (existingNode) {
-        currentTree = existingNode.children;
-      } else {
-        const newNode = { id: partialPath, children: [] };
-        currentTree.push(newNode);
-        currentTree = newNode.children;
-      }
-    });
+    let existingNode: ListStreamDefinition | undefined;
+    // traverse the tree following the prefix of the current id.
+    // once we reach the leaf, the current id is added as child - this works because the ids are sorted by depth
+    while ((existingNode = currentTree.find((node) => id.startsWith(node.id)))) {
+      currentTree = existingNode.children;
+    }
+    if (!existingNode) {
+      const newNode = { id, children: [] };
+      currentTree.push(newNode);
+    }
   });
   return trees;
 }

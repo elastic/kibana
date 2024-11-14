@@ -97,20 +97,30 @@ export async function listStreams({ scopedClusterClient }: ListStreamsParams) {
     sort: [{ id: 'asc' }],
   });
   const definitions = response.hits.hits.map((hit) => hit.fields as { id: string[] });
-  return definitions;
+  const hasAccess = await Promise.all(
+    definitions.map((definition) => checkReadAccess({ id: definition.id[0], scopedClusterClient }))
+  );
+  return definitions.filter((_, index) => hasAccess[index]);
 }
 
 interface ReadStreamParams extends BaseParams {
   id: string;
+  skipAccessCheck?: boolean;
 }
 
-export async function readStream({ id, scopedClusterClient }: ReadStreamParams) {
+export async function readStream({ id, scopedClusterClient, skipAccessCheck }: ReadStreamParams) {
   try {
     const response = await scopedClusterClient.asInternalUser.get<StreamDefinition>({
       id,
       index: STREAMS_INDEX,
     });
     const definition = response._source as StreamDefinition;
+    if (!skipAccessCheck) {
+      const hasAccess = await checkReadAccess({ id, scopedClusterClient });
+      if (!hasAccess) {
+        throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
+      }
+    }
     return {
       definition,
     };
@@ -130,7 +140,9 @@ export async function readAncestors({ id, scopedClusterClient }: ReadAncestorsPa
   const ancestorIds = getAncestors(id);
 
   return await Promise.all(
-    ancestorIds.map((ancestorId) => readStream({ scopedClusterClient, id: ancestorId }))
+    ancestorIds.map((ancestorId) =>
+      readStream({ scopedClusterClient, id: ancestorId, skipAccessCheck: true })
+    )
   );
 }
 
@@ -223,6 +235,21 @@ export async function checkStreamExists({ id, scopedClusterClient }: ReadStreamP
   }
 }
 
+interface CheckReadAccessParams extends BaseParams {
+  id: string;
+}
+
+export async function checkReadAccess({
+  id,
+  scopedClusterClient,
+}: CheckReadAccessParams): Promise<boolean> {
+  try {
+    return await scopedClusterClient.asCurrentUser.indices.exists({ index: id });
+  } catch (e) {
+    return false;
+  }
+}
+
 interface SyncStreamParams {
   scopedClusterClient: IScopedClusterClient;
   definition: StreamDefinition;
@@ -236,10 +263,11 @@ export async function syncStream({
   rootDefinition,
   logger,
 }: SyncStreamParams) {
+  const componentTemplate = generateLayer(definition.id, definition);
   await upsertComponent({
     esClient: scopedClusterClient.asCurrentUser,
     logger,
-    component: generateLayer(definition.id, definition),
+    component: componentTemplate,
   });
   await upsertIngestPipeline({
     esClient: scopedClusterClient.asCurrentUser,
@@ -282,5 +310,6 @@ export async function syncStream({
     esClient: scopedClusterClient.asCurrentUser,
     name: definition.id,
     logger,
+    mappings: componentTemplate.template.mappings?.properties,
   });
 }
