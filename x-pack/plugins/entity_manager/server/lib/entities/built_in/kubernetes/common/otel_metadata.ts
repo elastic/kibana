@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import { MetadataField } from '@kbn/entities-schema';
 import { globalMetadata } from './global_metadata';
 
-export const commonOtelMetadata = [
+export const commonOtelMetadata: MetadataField[] = [
   ...globalMetadata,
   {
     source: 'k8s.namespace.name',
     destination: 'k8s.namespace.name',
-    aggregation: 'terms',
+    aggregation: { type: 'terms', limit: 10 },
   },
   {
     source: 'k8s.cluster.name',
     destination: 'k8s.cluster.name',
-    aggregation: 'top_value',
+    aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
   },
 ];

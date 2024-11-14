@@ -35,12 +35,12 @@ export const builtInKubernetesClusterEcsEntityDefinition: EntityDefinition =
       {
         source: 'orchestrator.namespace',
         destination: 'orchestrator.namespace',
-        aggregation: 'terms',
+        aggregation: { type: 'terms', limit: 10 },
       },
       {
         source: 'orchestrator.cluster_ip',
         destination: 'orchestrator.cluster_id',
-        aggregation: 'top_value',
+        aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
       },
     ],
   });

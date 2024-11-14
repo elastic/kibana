@@ -8,7 +8,7 @@
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../../constants';
 import { commonOtelIndexPatterns } from '../common/otel_index_patterns';
-import { globalMetadata } from '../common/global_metadata';
+import { commonOtelMetadata } from '../common/otel_metadata';
 
 export const builtInKubernetesClusterSemConvEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
@@ -30,17 +30,5 @@ export const builtInKubernetesClusterSemConvEntityDefinition: EntityDefinition =
         frequency: '5m',
       },
     },
-    metadata: [
-      ...globalMetadata,
-      {
-        source: 'k8s.namespace.name',
-        destination: 'k8s.namespace.name',
-        aggregation: 'terms',
-      },
-      {
-        source: 'k8s.cluster.name',
-        destination: 'k8s.cluster.name',
-        aggregation: 'top_value',
-      },
-    ],
+    metadata: commonOtelMetadata,
   });

@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-export const globalMetadata = [
+import { MetadataField } from '@kbn/entities-schema';
+
+export const globalMetadata: MetadataField[] = [
   {
     source: '_index',
     destination: 'source_index',
+    aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
   },
   {
     source: 'data_stream.type',
     destination: 'source_data_stream.type',
+    aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
   },
   {
     source: 'data_stream.dataset',
     destination: 'source_data_stream.dataset',
+    aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
   },
 ];
