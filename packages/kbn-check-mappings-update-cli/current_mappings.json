@@ -1510,7 +1510,7 @@
         "type": "keyword"
       },
       "favoriteMetadata": {
-        "enabled": false,
+        "dynamic": false,
         "type": "object"
       },
       "type": {
