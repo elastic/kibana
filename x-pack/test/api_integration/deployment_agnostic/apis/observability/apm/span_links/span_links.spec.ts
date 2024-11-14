@@ -7,23 +7,24 @@
 import expect from '@kbn/expect';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Readable } from 'stream';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { generateSpanLinksData } from './data_generator';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const start = new Date('2022-01-01T00:00:00.000Z').getTime();
   const end = new Date('2022-01-01T00:15:00.000Z').getTime() - 1;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177520
-  registry.when('contains linked children', { config: 'basic', archives: [] }, () => {
+  describe('contains linked children', () => {
     let ids: ReturnType<typeof generateSpanLinksData>['ids'];
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
     before(async () => {
       const spanLinksData = generateSpanLinksData();
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
       ids = spanLinksData.ids;
 
