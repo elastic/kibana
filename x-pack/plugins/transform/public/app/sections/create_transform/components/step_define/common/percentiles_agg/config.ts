@@ -24,6 +24,12 @@ function validatePercentsInput(config: Partial<PercentilesAggConfig>): Validatio
     allValues.push(pendingValue);
   }
 
+  if (allValues.length === 0) {
+    return {
+      isValid: false,
+    };
+  }
+
   if (allValues.some((value) => isNaN(value))) {
     return {
       isValid: false,
