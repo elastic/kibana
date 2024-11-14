@@ -31,7 +31,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('space with no features disabled', () => {
+      const canvasDefaultArchive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
+
       before(async () => {
+        // we need to load the following in every situation as deleting
+        // a space deletes all of the associated saved objects
+        await kibanaServer.importExport.load(canvasDefaultArchive);
+
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -41,6 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
+        await kibanaServer.importExport.unload(canvasDefaultArchive);
       });
 
       it('shows canvas navlink', async () => {

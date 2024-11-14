@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const security = getService('security');
   const config = getService('config');
-  const kibanaServer = getService('kibanaServer');
   let esNode: EsArchiver;
 
   describe('Canvas', function canvasAppTestSuite() {
@@ -31,17 +30,9 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
           ? getService('remoteEsArchiver' as 'esArchiver')
           : getService('esArchiver');
         await esNode.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-
-        // canvas application is only available when installation contains canvas workpads
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
-        );
       });
 
       after(async () => {
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
-        );
         await security.testUser.restoreDefaults();
       });
 

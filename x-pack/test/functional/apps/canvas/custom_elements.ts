@@ -18,14 +18,21 @@ export default function canvasCustomElementTest({
   const retry = getService('retry');
   const { canvas } = getPageObjects(['canvas']);
   const find = getService('find');
+  const kibanaServer = getService('kibanaServer');
+  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
 
   describe('custom elements', function () {
     this.tags('skipFirefox');
 
     before(async () => {
+      await kibanaServer.importExport.load(archive);
       // load test workpad
       await canvas.goToListingPage();
       await canvas.loadFirstWorkpad('Test Workpad');
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(archive);
     });
 
     it('creates a custom element from an element when prompted', async () => {

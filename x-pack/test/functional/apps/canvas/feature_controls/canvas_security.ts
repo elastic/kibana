@@ -19,8 +19,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
+  const kibanaServer = getService('kibanaServer');
+  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
+
   describe('security feature controls', function () {
     this.tags(['skipFirefox']);
+
+    before(async () => kibanaServer.importExport.load(archive));
+
+    after(async () => await kibanaServer.importExport.unload(archive));
 
     describe('global canvas all privileges', () => {
       before(async () => {

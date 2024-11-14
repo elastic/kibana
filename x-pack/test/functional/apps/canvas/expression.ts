@@ -10,8 +10,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function canvasExpressionTest({ getService, getPageObjects }: FtrProviderContext) {
+  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
   const browser = getService('browser');
   const find = getService('find');
+  const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
   const { canvas } = getPageObjects(['canvas']);
   const retry = getService('retry');
@@ -22,9 +24,15 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
     this.tags('skipFirefox');
 
     before(async () => {
+      await kibanaServer.importExport.load(archive);
+
       // load test workpad
       await canvas.goToListingPage();
       await canvas.loadFirstWorkpad('Test Workpad');
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(archive);
     });
 
     it('updates when element is changed via side bar', async () => {
