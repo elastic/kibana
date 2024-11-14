@@ -8,7 +8,7 @@
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Owner } from '../../../common/constants/types';
-import { FileAttachmentPayloadRt, type Case } from '../../../common/types/domain';
+import { FileAttachmentMetadataPayloadRt, type Case } from '../../../common/types/domain';
 import type { CasesClient, CasesClientArgs } from '..';
 import type { AddFileArgs } from './types';
 
@@ -42,8 +42,7 @@ export const addFile = async (
   let createdFile;
 
   try {
-    decodeWithExcessOrThrow(FileAttachmentPayloadRt)({
-      file,
+    decodeWithExcessOrThrow(FileAttachmentMetadataPayloadRt)({
       filename,
       mimeType,
     });

@@ -34,6 +34,9 @@ export const postFileRoute = createCasesRoute({
     summary: 'Attach a file to a case',
     tags: ['oas-tag:cases'],
     body: {
+      // This is set to 10 GiB as an upper boundary on the size of the HTTP request body.
+      // The file service will throw 413 errors if the file size is larger than expected.
+      maxBytes: 10 * 1024 * 1024 * 1024,
       output: 'stream',
       parse: true,
       accepts: 'multipart/form-data',

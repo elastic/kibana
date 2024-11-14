@@ -37,8 +37,7 @@ export const AttachmentAttributesBasicRt = rt.strict({
   updated_by: rt.union([UserRt, rt.null]),
 });
 
-export const FileAttachmentPayloadRt = rt.strict({
-  file: rt.unknown,
+export const FileAttachmentMetadataPayloadRt = rt.strict({
   mimeType: mimeTypeString,
   filename: limitedStringSchema({ fieldName: 'filename', min: 1, max: MAX_FILENAME_LENGTH }),
 });
