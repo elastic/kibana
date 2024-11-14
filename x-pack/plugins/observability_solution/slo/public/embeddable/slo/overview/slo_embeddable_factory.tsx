@@ -165,10 +165,20 @@ export const getOverviewEmbeddableFactory = ({
               const kqlQuery = groupFilters?.kqlQuery ?? '';
               const groups = groupFilters?.groups ?? [];
               return (
-                <div css={style}>
+                <div
+                  css={css`
+                    width: 100%;
+                    padding: 5px 15px;
+                    overflow: scroll;
+
+                    .euiAccordion__buttonContent {
+                      min-width: 100px;
+                    }
+                  `}
+                >
                   <EuiFlexGroup data-test-subj="sloGroupOverviewPanel" data-shared-item="">
                     <EuiFlexItem
-                      css={`
+                      css={css`
                         margin-top: 20px;
                       `}
                     >
@@ -230,13 +240,3 @@ export const getOverviewEmbeddableFactory = ({
   };
   return factory;
 };
-
-const style = css`
-  width: 100%;
-  padding: 5px 15px;
-  overflow: scroll;
-
-  .euiAccordion__buttonContent {
-    min-width: 100px;
-  }
-`;
