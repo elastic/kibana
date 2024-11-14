@@ -99,9 +99,9 @@ export class EntityManagerServerPlugin
     request: KibanaRequest;
     coreStart: CoreStart;
   }) {
-    const clusterClient = coreStart.elasticsearch.client.asScoped(request);
+    const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
     const soClient = coreStart.savedObjects.getScopedClient(request);
-    return new EntityClient({ clusterClient, soClient, logger: this.logger });
+    return new EntityClient({ esClient, soClient, logger: this.logger });
   }
 
   public start(
