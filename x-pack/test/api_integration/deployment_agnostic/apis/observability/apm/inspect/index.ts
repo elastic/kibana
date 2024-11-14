@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('error_rate', () => {
-    loadTestFile(require.resolve('./service_apis.spec.ts'));
-    loadTestFile(require.resolve('./service_maps.spec.ts'));
+  describe('inspect', () => {
+    loadTestFile(require.resolve('./inspect.spec.ts'));
   });
 }
