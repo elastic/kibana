@@ -234,6 +234,14 @@ export const ENTRY_INDEX_NAME_INPUT_LABEL = i18n.translate(
   }
 );
 
+export const ENTRY_INDEX_NAME_INPUT_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryIndexNameInputDescription',
+  {
+    defaultMessage:
+      'Indices will only be available to select from this drop down list if they contain a semantic_text field. Please refer to the documentation for more information on configuring an index for use as a custom knowledge source.',
+  }
+);
+
 export const ENTRY_FIELD_INPUT_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryFieldInputLabel',
   {
@@ -370,5 +378,12 @@ export const MISSING_INDEX_TOOLTIP_CONTENT = i18n.translate(
   {
     defaultMessage:
       'The index assigned to this knowledge base entry is unavailable. Check the permissions on the configured index, or that the index has not been deleted. You can update the index to be used for this knowledge entry, or delete the entry entirely.',
+  }
+);
+
+export const SECURITY_LABS_NOT_FULLY_LOADED = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.securityLabsNotFullyLoadedTooltipContent',
+  {
+    defaultMessage: 'Security Labs content is not fully loaded. Click to reload.',
   }
 );

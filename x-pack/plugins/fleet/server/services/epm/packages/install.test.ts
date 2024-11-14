@@ -442,6 +442,24 @@ describe('install', () => {
 
       expect(response.status).toEqual('installed');
     });
+
+    it('should use streaming installation for the detection rules package', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'security_detection_engine',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeUndefined();
+
+      expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
+        expect.objectContaining({ useStreaming: true })
+      );
+    });
   });
 
   describe('upload', () => {

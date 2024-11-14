@@ -17,8 +17,10 @@ export const deleteEsIndicesRoute = (router: SecuritySolutionPluginRouter) => {
     .post({
       access: 'internal',
       path: RISK_SCORE_DELETE_INDICES,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

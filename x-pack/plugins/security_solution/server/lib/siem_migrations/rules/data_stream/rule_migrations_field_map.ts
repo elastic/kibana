@@ -11,6 +11,7 @@ import type { RuleMigration } from '../../../../../common/siem_migrations/model/
 export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigration>> = {
   '@timestamp': { type: 'date', required: false },
   migration_id: { type: 'keyword', required: true },
+  created_by: { type: 'keyword', required: true },
   status: { type: 'keyword', required: true },
   original_rule: { type: 'nested', required: true },
   'original_rule.vendor': { type: 'keyword', required: true },
@@ -28,7 +29,7 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigration>>
   'elastic_rule.severity': { type: 'keyword', required: false },
   'elastic_rule.prebuilt_rule_id': { type: 'keyword', required: false },
   'elastic_rule.id': { type: 'keyword', required: false },
-  translation_state: { type: 'keyword', required: false },
+  translation_result: { type: 'keyword', required: false },
   comments: { type: 'text', array: true, required: false },
   updated_at: { type: 'date', required: false },
   updated_by: { type: 'keyword', required: false },

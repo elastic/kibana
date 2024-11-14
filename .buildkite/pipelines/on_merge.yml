@@ -17,12 +17,12 @@ steps:
   - wait
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
-    label: Build Kibana Distribution and Plugins
+    label: Build Kibana Distribution
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-16
+      machineType: n2-standard-8
       preemptible: true
     key: build
     timeout_in_minutes: 60
@@ -39,7 +39,20 @@ steps:
       provider: gcp
       machineType: n2-highcpu-8
       preemptible: true
-    key: quick_checks
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/checks.sh
+    label: 'Checks'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -54,7 +67,6 @@ steps:
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
-    key: linting
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -69,8 +81,37 @@ steps:
       provider: gcp
       machineType: n2-standard-32
       preemptible: true
-    key: linting_with_types
-    timeout_in_minutes: 90
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/check_types.sh
+    label: 'Check Types'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: c4-standard-4
+      diskType: 'hyperdisk-balanced'
+      preemptible: true
+      spotZones: us-central1-a,us-central1-b,us-central1-c
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
+    label: 'Check OAS Snapshot'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
+    timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'
@@ -136,11 +177,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -156,11 +192,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -176,11 +207,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -196,11 +222,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -216,11 +237,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -236,11 +252,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 4
     retry:
@@ -256,11 +267,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -276,11 +282,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -296,11 +297,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -316,11 +312,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -336,11 +327,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -356,11 +342,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -376,11 +357,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -396,11 +372,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -416,11 +387,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -436,11 +402,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -456,11 +417,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -476,11 +432,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -495,14 +446,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 20
     retry:
@@ -517,14 +461,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     timeout_in_minutes: 60
     parallelism: 14
     retry:
@@ -535,58 +472,11 @@ steps:
   - command: '.buildkite/scripts/steps/functional/on_merge_unsupported_ftrs.sh'
     label: Trigger unsupported ftr tests
     timeout_in_minutes: 10
-    depends_on:
-      - build
-      - quick_checks
-      - linting
-      - linting_with_types
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-
-  - command: .buildkite/scripts/steps/checks.sh
-    label: 'Checks'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: true
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/check_types.sh
-    label: 'Check Types'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-4
-      preemptible: true
-    timeout_in_minutes: 70
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
-    label: 'Check OAS Snapshot'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      preemptible: true
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
 
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
     label: 'Build Storybooks'
@@ -598,6 +488,21 @@ steps:
       preemptible: true
     key: storybooks
     timeout_in_minutes: 80
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/openapi_publishing/publish_oas_docs.sh
+    label: 'Publish OAS docs to bump.sh'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true
+    timeout_in_minutes: 60
+    soft_fail: true
     retry:
       automatic:
         - exit_status: '-1'

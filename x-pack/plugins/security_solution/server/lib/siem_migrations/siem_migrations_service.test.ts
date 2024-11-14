@@ -8,9 +8,15 @@ import {
   loggingSystemMock,
   elasticsearchServiceMock,
   httpServerMock,
+  securityServiceMock,
 } from '@kbn/core/server/mocks';
 import { SiemMigrationsService } from './siem_migrations_service';
-import { MockSiemRuleMigrationsService, mockSetup, mockGetClient } from './rules/__mocks__/mocks';
+import {
+  MockSiemRuleMigrationsService,
+  mockSetup,
+  mockCreateClient,
+  mockStop,
+} from './rules/__mocks__/mocks';
 import type { ConfigType } from '../../config';
 
 jest.mock('./rules/siem_rule_migrations_service');
@@ -25,6 +31,7 @@ describe('SiemMigrationsService', () => {
   let siemMigrationsService: SiemMigrationsService;
   const kibanaVersion = '8.16.0';
 
+  const currentUser = securityServiceMock.createMockAuthenticatedUser();
   const esClusterClient = elasticsearchServiceMock.createClusterClient();
   const logger = loggingSystemMock.createLogger();
 
@@ -57,17 +64,22 @@ describe('SiemMigrationsService', () => {
       });
     });
 
-    describe('when createClient is called', () => {
+    describe('when createRulesClient is called', () => {
       it('should create rules client', async () => {
-        const request = httpServerMock.createKibanaRequest();
-        siemMigrationsService.createClient({ spaceId: 'default', request });
-        expect(mockGetClient).toHaveBeenCalledWith({ spaceId: 'default', request });
+        const createRulesClientParams = {
+          spaceId: 'default',
+          request: httpServerMock.createKibanaRequest(),
+          currentUser,
+        };
+        siemMigrationsService.createRulesClient(createRulesClientParams);
+        expect(mockCreateClient).toHaveBeenCalledWith(createRulesClientParams);
       });
     });
 
     describe('when stop is called', () => {
       it('should trigger the pluginStop subject', async () => {
         siemMigrationsService.stop();
+        expect(mockStop).toHaveBeenCalled();
         expect(mockReplaySubject$.next).toHaveBeenCalled();
         expect(mockReplaySubject$.complete).toHaveBeenCalled();
       });

@@ -28,6 +28,7 @@ import { TemplateDeserialized } from '../../../../../../../common';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../../constants';
 import { useIlmLocator } from '../../../../../services/use_ilm_locator';
 import { allowAutoCreateRadioIds } from '../../../../../../../common/constants';
+import { indexModeLabels } from '../../../../../lib/index_mode_labels';
 
 interface Props {
   templateDetails: TemplateDeserialized;
@@ -53,6 +54,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
     composedOf,
     order,
     indexPatterns = [],
+    indexMode,
     ilmPolicy,
     _meta,
     _kbnMeta: { isLegacy, hasDatastream },
@@ -220,6 +222,17 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                 </EuiDescriptionListDescription>
               </>
             )}
+
+            {/* Index mode */}
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.idxMgmt.templateDetails.stepReview.summaryTab.indexModeLabel"
+                defaultMessage="Index mode"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {indexModeLabels[indexMode]}
+            </EuiDescriptionListDescription>
 
             {/* Allow auto create */}
             {isLegacy !== true &&

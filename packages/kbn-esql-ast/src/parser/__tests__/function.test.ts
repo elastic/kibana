@@ -8,6 +8,7 @@
  */
 
 import { parse } from '..';
+import { EsqlQuery } from '../../query';
 import { Walker } from '../../walker';
 
 describe('function AST nodes', () => {
@@ -64,6 +65,103 @@ describe('function AST nodes', () => {
                   value: 3,
                 },
               ],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('parses out function name as identifier node', () => {
+      const query = 'ROW fn(1, 2, 3)';
+      const { ast, errors } = parse(query);
+
+      expect(errors.length).toBe(0);
+      expect(ast).toMatchObject([
+        {
+          type: 'command',
+          name: 'row',
+          args: [
+            {
+              type: 'function',
+              name: 'fn',
+              operator: {
+                type: 'identifier',
+                name: 'fn',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('parses out function name as named param', () => {
+      const query = 'ROW ?insert_here(1, 2, 3)';
+      const { ast, errors } = parse(query);
+
+      expect(errors.length).toBe(0);
+      expect(ast).toMatchObject([
+        {
+          type: 'command',
+          name: 'row',
+          args: [
+            {
+              type: 'function',
+              name: '?insert_here',
+              operator: {
+                type: 'literal',
+                literalType: 'param',
+                paramType: 'named',
+                value: 'insert_here',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('parses out function name as unnamed param', () => {
+      const query = 'ROW ?(1, 2, 3)';
+      const { ast, errors } = parse(query);
+
+      expect(errors.length).toBe(0);
+      expect(ast).toMatchObject([
+        {
+          type: 'command',
+          name: 'row',
+          args: [
+            {
+              type: 'function',
+              name: '?',
+              operator: {
+                type: 'literal',
+                literalType: 'param',
+                paramType: 'unnamed',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('parses out function name as positional param', () => {
+      const query = 'ROW ?30035(1, 2, 3)';
+      const { ast, errors } = parse(query);
+
+      expect(errors.length).toBe(0);
+      expect(ast).toMatchObject([
+        {
+          type: 'command',
+          name: 'row',
+          args: [
+            {
+              type: 'function',
+              name: '?30035',
+              operator: {
+                type: 'literal',
+                literalType: 'param',
+                paramType: 'positional',
+                value: 30035,
+              },
             },
           ],
         },
@@ -224,5 +322,88 @@ describe('function AST nodes', () => {
         args: [expect.any(Object), expect.any(Object)],
       });
     });
+  });
+});
+
+describe('location', () => {
+  const getFunctionTexts = (src: string) => {
+    const query = EsqlQuery.fromSrc(src);
+    const functions = Walker.matchAll(query.ast, { type: 'function' });
+    const texts: string[] = functions.map((fn) => {
+      return [...src].slice(fn.location.min, fn.location.max + 1).join('');
+    });
+
+    return texts;
+  };
+
+  it('correctly cuts out function source texts', () => {
+    const texts = getFunctionTexts(
+      'FROM index | LIMIT 1 | STATS agg() | LIMIT 2 | STATS max(a, b, c), max2(d.e)'
+    );
+
+    expect(texts).toEqual(['agg()', 'max(a, b, c)', 'max2(d.e)']);
+  });
+
+  it('functions in binary expressions', () => {
+    const texts = getFunctionTexts('FROM index | STATS foo = agg(f1) + agg(f2), a.b = agg(f3)');
+
+    expect(texts).toEqual([
+      'foo = agg(f1) + agg(f2)',
+      'agg(f1) + agg(f2)',
+      'agg(f1)',
+      'agg(f2)',
+      'a.b = agg(f3)',
+      'agg(f3)',
+    ]);
+  });
+
+  it('with the simplest comment after function name identifier', () => {
+    const texts1 = getFunctionTexts('FROM index | STATS agg/* */(1)');
+    expect(texts1).toEqual(['agg/* */(1)']);
+
+    const texts2 = getFunctionTexts('FROM index | STATS agg/* A */(a)');
+    expect(texts2).toEqual(['agg/* A */(a)']);
+
+    const texts3 = getFunctionTexts('FROM index | STATS agg /* A */ (*)');
+    expect(texts3).toEqual(['agg /* A */ (*)']);
+  });
+
+  it('with the simplest emoji comment after function name identifier', () => {
+    const texts = getFunctionTexts('FROM index | STATS agg/* 😎 */(*)');
+    expect(texts).toEqual(['agg/* 😎 */(*)']);
+  });
+
+  it('with the simplest emoji comment after function name identifier, followed by another arg', () => {
+    const texts = getFunctionTexts('FROM index | STATS agg/* 😎 */(*), abc');
+    expect(texts).toEqual(['agg/* 😎 */(*)']);
+  });
+
+  it('simple emoji comment twice', () => {
+    const texts = getFunctionTexts('FROM index | STATS agg/* 😎 */(*), max/* 😎 */(*)');
+    expect(texts).toEqual(['agg/* 😎 */(*)', 'max/* 😎 */(*)']);
+  });
+
+  it('with comment and emoji after function name identifier', () => {
+    const texts = getFunctionTexts('FROM index | STATS agg /* haha 😅 */ (*)');
+
+    expect(texts).toEqual(['agg /* haha 😅 */ (*)']);
+  });
+
+  it('with comment inside argument list', () => {
+    const texts = getFunctionTexts('FROM index | STATS agg  ( /* haha 😅 */ )');
+
+    expect(texts).toEqual(['agg  ( /* haha 😅 */ )']);
+  });
+
+  it('with emoji and comment in argument lists', () => {
+    const texts = getFunctionTexts(
+      'FROM index | STATS agg( /* haha 😅 */ max(foo), bar, baz), test( /* asdf */ * /* asdf */)'
+    );
+
+    expect(texts).toEqual([
+      'agg( /* haha 😅 */ max(foo), bar, baz)',
+      'max(foo)',
+      'test( /* asdf */ * /* asdf */)',
+    ]);
   });
 });

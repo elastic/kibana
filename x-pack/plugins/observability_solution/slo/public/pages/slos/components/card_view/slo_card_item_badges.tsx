@@ -10,6 +10,7 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
+import { SloIndicatorTypeBadge } from '../badges/slo_indicator_type_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { BurnRateRuleParams } from '../../../../typings';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
@@ -45,6 +46,11 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
     [onStateChange]
   );
 
+  const isRemote = !!slo.remote;
+
+  // in this case, there is more space to display tags
+  const numberOfTagsToDisplay = !isRemote || (rules ?? []).length > 0 ? 2 : 1;
+
   return (
     <Container
       onClick={(evt) => {
@@ -57,13 +63,14 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
         ) : (
           <>
             <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} viewMode="compact" />
+            <SloIndicatorTypeBadge slo={slo} color="default" />
             <SLOCardItemInstanceBadge slo={slo} />
             <SloRulesBadge rules={rules} onClick={handleCreateRule} isRemote={!!slo.remote} />
             <SloTimeWindowBadge slo={slo} color="default" />
             <SloRemoteBadge slo={slo} />
             <SloTagsList
               tags={slo.tags}
-              numberOfTagsToDisplay={1}
+              numberOfTagsToDisplay={numberOfTagsToDisplay}
               color="default"
               ignoreEmpty
               onClick={onTagClick}

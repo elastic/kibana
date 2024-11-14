@@ -193,13 +193,10 @@ export const ChartsFilter = memo<ChartsFilterProps>(
         >
           {(list, search) => {
             return (
-              <div
-                style={{ width: 300 }}
-                data-test-subj={getTestId(`${filterName}-filter-popoverList`)}
-              >
+              <div style={{ width: 300 }} data-test-subj={getTestId(`${filterName}-popoverList`)}>
                 {isSearchable && (
                   <EuiPopoverTitle
-                    data-test-subj={getTestId(`${filterName}-filter-search`)}
+                    data-test-subj={getTestId(`${filterName}-search`)}
                     paddingSize="s"
                   >
                     {search}

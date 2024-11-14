@@ -3,7 +3,7 @@
 .linksPanelEditor {
   .linkEditor {
     @include euiFlyout;
-    max-inline-size: $euiSizeXXL * 18; // 40px * 18 = 720px
+    max-inline-size: $euiSizeXS * 125; // 4px * 125 = 500px
 
     &.in {
       animation: euiFlyoutOpenAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
@@ -59,6 +59,9 @@
   }
 
   .links_hoverActions {
+    background-color: $euiColorEmptyShade;
+    position: absolute;
+    right: $euiSizeL;
     opacity: 0;
     visibility: hidden;
     transition: visibility $euiAnimSpeedNormal, opacity $euiAnimSpeedNormal;

@@ -33,8 +33,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Setting the timerange to fit the data and open the flyout for a specific alert
       await alertsPage.navigateToAlertsPage(
         `${alertsPage.getAbsoluteTimerangeFilter(
-          '2024-10-13T00:00:00.000Z',
-          '2024-10-14T00:00:00.000Z'
+          '2024-09-01T00:00:00.000Z',
+          '2024-09-02T00:00:00.000Z'
         )}&${alertsPage.getFlyoutFilter(
           '589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1'
         )}`

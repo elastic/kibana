@@ -30,7 +30,7 @@ const createPackages$ = () =>
       if (error) {
         throw error;
       }
-      return data?.response ?? [];
+      return data?.items ?? [];
     }),
     shareReplay(1)
   );
@@ -86,7 +86,7 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
     shareReplay(1)
   );
 
-  let packages$: undefined | Observable<GetPackagesResponse['response']>;
+  let packages$: undefined | Observable<GetPackagesResponse['items']>;
 
   const getPackages$ = () => {
     if (!packages$) {

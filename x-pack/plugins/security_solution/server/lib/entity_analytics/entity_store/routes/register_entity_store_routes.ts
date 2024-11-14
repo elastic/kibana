@@ -12,6 +12,7 @@ import { listEntitiesRoute } from './entities/list';
 import { getEntityEngineRoute } from './get';
 import { initEntityEngineRoute } from './init';
 import { listEntityEnginesRoute } from './list';
+import { entityStoreInternalPrivilegesRoute } from './privileges';
 import { startEntityEngineRoute } from './start';
 import { stopEntityEngineRoute } from './stop';
 
@@ -29,4 +30,5 @@ export const registerEntityStoreRoutes = ({
   listEntityEnginesRoute(router, logger);
   listEntitiesRoute(router, logger);
   applyDataViewIndicesEntityEngineRoute(router, logger);
+  entityStoreInternalPrivilegesRoute(router, logger, getStartServices);
 };

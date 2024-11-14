@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { maintenanceWindowStatusV1 } from '..';
+import { maintenanceWindowStatus as maintenanceWindowStatusV1 } from '../constants/v1';
 import { maintenanceWindowCategoryIdsSchemaV1 } from '../../shared';
 import { rRuleResponseSchemaV1 } from '../../../r_rule';
 import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
