@@ -309,16 +309,9 @@ export const optionsSchema = schema.object({
     defaultValue: DEFAULT_DASHBOARD_OPTIONS.useMargins,
     meta: { description: 'Show margins between panels in the dashboard layout.' },
   }),
-  /**
-   * @deprecated https://github.com/elastic/kibana/pull/197802
-   **/
   syncColors: schema.boolean({
     defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncColors,
-    meta: {
-      deprecated: true,
-      description:
-        'Previously used to synchronize legacy colors between related panels in the dashboard.',
-    },
+    meta: { description: 'Synchronize colors between related panels in the dashboard.' },
   }),
   syncTooltips: schema.boolean({
     defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncTooltips,

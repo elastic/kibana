@@ -49,9 +49,6 @@ export interface IExpressionLoaderParams {
   onRenderError?: RenderErrorHandlerFnType;
   searchSessionId?: string;
   renderMode?: RenderMode;
-  /**
-   * @deprecated https://github.com/elastic/kibana/pull/197802
-   **/
   syncColors?: boolean;
   syncCursor?: boolean;
   syncTooltips?: boolean;

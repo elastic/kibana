@@ -38,9 +38,6 @@ export const input = createSlice({
     setSearchSessionId(state, action: PayloadAction<EmbeddableInput['searchSessionId']>) {
       state.searchSessionId = action.payload;
     },
-    /**
-     * @deprecated https://github.com/elastic/kibana/pull/197802
-     **/
     setSyncColors(state, action: PayloadAction<EmbeddableInput['syncColors']>) {
       state.syncColors = action.payload;
     },

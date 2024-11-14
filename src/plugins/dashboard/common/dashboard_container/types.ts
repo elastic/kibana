@@ -64,9 +64,6 @@ export interface DashboardContainerInput extends EmbeddableInput {
   hidePanelTitles: DashboardOptions['hidePanelTitles'];
   syncTooltips: DashboardOptions['syncTooltips'];
   useMargins: DashboardOptions['useMargins'];
-  /**
-   * @deprecated https://github.com/elastic/kibana/pull/197802
-   **/
   syncColors: DashboardOptions['syncColors'];
   syncCursor: DashboardOptions['syncCursor'];
 
