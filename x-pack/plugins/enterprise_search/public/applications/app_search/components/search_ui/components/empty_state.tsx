@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SEARCH_UI_DOCS_URL } from '../../../routes';
+import { docLinks } from '../../../../shared/doc_links';
 
 export const EmptyState: React.FC = () => (
   <EuiEmptyPrompt
@@ -31,7 +31,7 @@ export const EmptyState: React.FC = () => (
       </p>
     }
     actions={
-      <EuiButton size="s" target="_blank" iconType="popout" href={SEARCH_UI_DOCS_URL}>
+      <EuiButton size="s" target="_blank" iconType="popout" href={docLinks.appSearchSearchUI}>
         {i18n.translate('xpack.enterpriseSearch.appSearch.engine.searchUI.empty.buttonLabel', {
           defaultMessage: 'Read the Search UI guide',
         })}

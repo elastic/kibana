@@ -16,6 +16,7 @@
       "dataViews",
       "dataViewEditor",
       "embeddable",
+      "fieldFormats",
       "controls",
       "inspector",
       "navigation",

@@ -8,8 +8,8 @@
  */
 
 import { parse } from '@kbn/esql-ast';
-import { getExpressionType, shouldBeQuotedSource } from './helpers';
-import type { SupportedDataType } from '../definitions/types';
+import { getBracketsToClose, getExpressionType, shouldBeQuotedSource } from './helpers';
+import { SupportedDataType } from '../definitions/types';
 import { setTestFunctions } from './test_functions';
 
 describe('shouldBeQuotedSource', () => {
@@ -56,6 +56,10 @@ describe('getExpressionType', () => {
     const { root } = parse(`FROM index | EVAL ${expression}`);
     return root.commands[1].args[0];
   };
+
+  test('empty expression', () => {
+    expect(getExpressionType(getASTForExpression(''))).toBe('unknown');
+  });
 
   describe('literal expressions', () => {
     const cases: Array<{ expression: string; expectedType: SupportedDataType }> = [
@@ -289,6 +293,19 @@ describe('getExpressionType', () => {
     it('supports COUNT(*)', () => {
       expect(getExpressionType(getASTForExpression('COUNT(*)'))).toBe<SupportedDataType>('long');
     });
+
+    it('accounts for the "any" parameter type', () => {
+      setTestFunctions([
+        {
+          type: 'eval',
+          name: 'test',
+          description: 'Test function',
+          supportedCommands: ['eval'],
+          signatures: [{ params: [{ name: 'arg', type: 'any' }], returnType: 'keyword' }],
+        },
+      ]);
+      expect(getExpressionType(getASTForExpression('test(1)'))).toBe('keyword');
+    });
   });
 
   describe('lists', () => {
@@ -322,5 +339,18 @@ describe('getExpressionType', () => {
         expect(getExpressionType(ast)).toBe(expectedType);
       }
     );
+  });
+});
+
+describe('getBracketsToClose', () => {
+  it('returns the number of brackets to close', () => {
+    expect(getBracketsToClose('foo(bar(baz')).toEqual([')', ')']);
+    expect(getBracketsToClose('foo(bar[baz')).toEqual([']', ')']);
+    expect(getBracketsToClose('foo(bar[baz"bap')).toEqual(['"', ']', ')']);
+    expect(
+      getBracketsToClose(
+        'from a | eval case(integerField < 0, "negative", integerField > 0, "positive", '
+      )
+    ).toEqual([')']);
   });
 });

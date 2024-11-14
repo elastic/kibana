@@ -148,8 +148,8 @@ export class ServerlessSearchPlugin
     const { serverless, management, indexManagement, security } = services;
     serverless.setProjectHome(services.searchIndices.startRoute);
 
-    const navigationTree$ = of(navigationTree());
-    serverless.initNavigation('search', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
+    const navigationTree$ = of(navigationTree(core.application));
+    serverless.initNavigation('es', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
     const extendCardNavDefinitions = serverless.getNavigationCards(
       security.authz.isRoleManagementEnabled()

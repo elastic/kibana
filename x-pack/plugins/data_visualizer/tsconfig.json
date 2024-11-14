@@ -86,7 +86,6 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/presentation-containers",
     "@kbn/react-kibana-mount",
-    "@kbn/visualizations-plugin",
     "@kbn/core-ui-settings-browser"
   ],
   "exclude": [

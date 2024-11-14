@@ -47,10 +47,38 @@ describe('Alert events', () => {
       expect(wrapper.text()).toBe('added an alert from Awesome rule');
     });
 
-    it('does NOT render the link when the rule id is null', async () => {
+    it('renders the link when onClick is provided but href is not valid', async () => {
       const wrapper = mount(
         <TestProviders>
-          <SingleAlertCommentEvent {...props} ruleId={null} />
+          <SingleAlertCommentEvent {...props} getRuleDetailsHref={undefined} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
+      ).toBeTruthy();
+    });
+
+    it('renders the link when href is valid but onClick is not available', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <SingleAlertCommentEvent {...props} onRuleDetailsClick={undefined} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
+      ).toBeTruthy();
+    });
+
+    it('does NOT render the link when the href and onclick are invalid but it shows the rule name', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <SingleAlertCommentEvent
+            {...props}
+            getRuleDetailsHref={undefined}
+            onRuleDetailsClick={undefined}
+          />
         </TestProviders>
       );
 
@@ -61,10 +89,10 @@ describe('Alert events', () => {
       expect(wrapper.text()).toBe('added an alert from Awesome rule');
     });
 
-    it('does NOT render the link when the href is invalid but it shows the rule name', async () => {
+    it('does NOT render the link when the rule id is null', async () => {
       const wrapper = mount(
         <TestProviders>
-          <SingleAlertCommentEvent {...props} getRuleDetailsHref={undefined} />
+          <SingleAlertCommentEvent {...props} ruleId={null} />
         </TestProviders>
       );
 
@@ -131,9 +159,28 @@ describe('Alert events', () => {
       expect(result.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Awesome rule');
     });
 
-    it('does NOT render the link when the rule id is null', async () => {
+    it('renders the link when onClick is provided but href is not valid', async () => {
       const result = appMock.render(
-        <MultipleAlertsCommentEvent {...props} totalAlerts={2} ruleId={null} />
+        <MultipleAlertsCommentEvent {...props} totalAlerts={2} getRuleDetailsHref={undefined} />
+      );
+      expect(result.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Awesome rule');
+    });
+
+    it('renders the link when href is valid but onClick is not available', async () => {
+      const result = appMock.render(
+        <MultipleAlertsCommentEvent {...props} totalAlerts={2} onRuleDetailsClick={undefined} />
+      );
+      expect(result.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Awesome rule');
+    });
+
+    it('does NOT render the link when the href and onclick are invalid but it shows the rule name', async () => {
+      const result = appMock.render(
+        <MultipleAlertsCommentEvent
+          {...props}
+          totalAlerts={2}
+          getRuleDetailsHref={undefined}
+          onRuleDetailsClick={undefined}
+        />
       );
 
       expect(result.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
@@ -142,9 +189,9 @@ describe('Alert events', () => {
       expect(result.queryByTestId('alert-rule-link-action-id-1')).toBeFalsy();
     });
 
-    it('does NOT render the link when the href is invalid but it shows the rule name', async () => {
+    it('does NOT render the link when the rule id is null', async () => {
       const result = appMock.render(
-        <MultipleAlertsCommentEvent {...props} totalAlerts={2} getRuleDetailsHref={undefined} />
+        <MultipleAlertsCommentEvent {...props} totalAlerts={2} ruleId={null} />
       );
 
       expect(result.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(

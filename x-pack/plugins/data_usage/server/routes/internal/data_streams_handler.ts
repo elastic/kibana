@@ -5,27 +5,11 @@
  * 2.0.
  */
 
-import { type ElasticsearchClient, RequestHandler } from '@kbn/core/server';
+import { RequestHandler } from '@kbn/core/server';
 import { DataUsageRequestHandlerContext } from '../../types';
 import { errorHandler } from '../error_handler';
 import { DataUsageService } from '../../services';
-
-export interface MeteringStats {
-  name: string;
-  num_docs: number;
-  size_in_bytes: number;
-}
-
-interface MeteringStatsResponse {
-  datastreams: MeteringStats[];
-}
-
-const getMeteringStats = (client: ElasticsearchClient) => {
-  return client.transport.request<MeteringStatsResponse>({
-    method: 'GET',
-    path: '/_metering/stats',
-  });
-};
+import { getMeteringStats } from '../../utils/get_metering_stats';
 
 export const getDataStreamsHandler = (
   dataUsageService: DataUsageService
@@ -41,12 +25,15 @@ export const getDataStreamsHandler = (
         core.elasticsearch.client.asSecondaryAuthUser
       );
 
-      const body = meteringStats
-        .sort((a, b) => b.size_in_bytes - a.size_in_bytes)
-        .map((stat) => ({
-          name: stat.name,
-          storageSizeBytes: stat.size_in_bytes ?? 0,
-        }));
+      const body =
+        meteringStats && !!meteringStats.length
+          ? meteringStats
+              .sort((a, b) => b.size_in_bytes - a.size_in_bytes)
+              .map((stat) => ({
+                name: stat.name,
+                storageSizeBytes: stat.size_in_bytes ?? 0,
+              }))
+          : [];
 
       return response.ok({
         body,

@@ -234,6 +234,14 @@ export const ENTRY_INDEX_NAME_INPUT_LABEL = i18n.translate(
   }
 );
 
+export const ENTRY_INDEX_NAME_INPUT_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryIndexNameInputDescription',
+  {
+    defaultMessage:
+      'Indices will only be available to select from this drop down list if they contain a semantic_text field. Please refer to the documentation for more information on configuring an index for use as a custom knowledge source.',
+  }
+);
+
 export const ENTRY_FIELD_INPUT_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryFieldInputLabel',
   {

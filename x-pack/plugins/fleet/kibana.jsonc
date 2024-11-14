@@ -29,7 +29,8 @@
       "uiActions",
       "dashboard",
       "fieldsMetadata",
-      "logsDataAccess"
+      "logsDataAccess",
+      "spaces"
     ],
     "optionalPlugins": [
       "features",
@@ -40,7 +41,6 @@
       "telemetry",
       "discover",
       "ingestPipelines",
-      "spaces",
       "guidedOnboarding",
       "integrationAssistant"
     ],
