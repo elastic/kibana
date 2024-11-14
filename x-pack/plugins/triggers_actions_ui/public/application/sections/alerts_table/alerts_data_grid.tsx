@@ -364,33 +364,14 @@ const BaseDataGrid = typedMemo(<AC extends AdditionalContext>(props: AlertsDataG
     clearSelection();
   }, [clearSelection, refreshQueries]);
 
-    const toolbarVisibilityArgs = useMemo(() => {
-      return {
-        bulkActions,
-        alertsCount,
-        rowSelection: bulkActionsState.rowSelection,
-        alerts,
-        isLoading,
-        columnIds: columns.map((column) => column.id),
-        onToggleColumn,
-        onResetColumns,
-        browserFields,
-        additionalToolbarControls,
-        setIsBulkActionsLoading,
-        clearSelection,
-        refresh,
-        fieldsBrowserOptions,
-        alertsQuerySnapshot,
-        showInspectButton,
-        toolbarVisibilityProp,
-      };
-    }, [
+  const toolbarVisibilityArgs = useMemo(() => {
+    return {
       bulkActions,
       alertsCount,
-      bulkActionsState.rowSelection,
+      rowSelection: bulkActionsState.rowSelection,
       alerts,
       isLoading,
-      columns,
+      columnIds: columns.map((column) => column.id),
       onToggleColumn,
       onResetColumns,
       browserFields,
@@ -402,7 +383,26 @@ const BaseDataGrid = typedMemo(<AC extends AdditionalContext>(props: AlertsDataG
       alertsQuerySnapshot,
       showInspectButton,
       toolbarVisibilityProp,
-    ]);
+    };
+  }, [
+    bulkActions,
+    alertsCount,
+    bulkActionsState.rowSelection,
+    alerts,
+    isLoading,
+    columns,
+    onToggleColumn,
+    onResetColumns,
+    browserFields,
+    additionalToolbarControls,
+    setIsBulkActionsLoading,
+    clearSelection,
+    refresh,
+    fieldsBrowserOptions,
+    alertsQuerySnapshot,
+    showInspectButton,
+    toolbarVisibilityProp,
+  ]);
 
   const toolbarVisibility = useGetToolbarVisibility(toolbarVisibilityArgs);
 
