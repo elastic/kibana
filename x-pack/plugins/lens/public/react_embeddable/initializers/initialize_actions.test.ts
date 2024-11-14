@@ -117,7 +117,7 @@ describe('Dashboard actions', () => {
       expect(api.canViewUnderlyingData$.getValue()).toBe(true);
     });
 
-    it('should disable the "explore in discover" capability for ES|QL chart types', async () => {
+    it('should expose the "explore in discover" capability for ES|QL chart types', async () => {
       const api = setupActionsApi(
         createEmptyLensState('lnsXY', faker.lorem.words(), faker.lorem.text(), {
           esql: 'FROM index',
@@ -125,7 +125,7 @@ describe('Dashboard actions', () => {
         visualizationContextMockOverrides
       );
       api.loadViewUnderlyingData();
-      expect(api.canViewUnderlyingData$.getValue()).toBe(false);
+      expect(api.canViewUnderlyingData$.getValue()).toBe(true);
     });
   });
 });

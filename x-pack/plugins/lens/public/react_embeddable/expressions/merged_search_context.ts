@@ -20,7 +20,7 @@ import { nonNullable } from '../../utils';
 export interface MergedSearchContext {
   now: number;
   timeRange: TimeRange | undefined;
-  query: Query[];
+  query: Array<Query | AggregateQuery>;
   filters: Filter[];
   disableWarningToasts: boolean;
 }
@@ -61,9 +61,7 @@ export function getMergedSearchContext(
   const context = {
     now: data.nowProvider.get().getTime(),
     timeRange: timeRangeToRender,
-    query: isOfAggregateQueryType(attributes.state.query)
-      ? []
-      : [attributes.state.query].filter(nonNullable),
+    query: [attributes.state.query].filter(nonNullable),
     filters: injectFilterReferences(attributes.state.filters || [], attributes.references),
     disableWarningToasts: true,
   };

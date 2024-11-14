@@ -23,6 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const monacoEditor = getService('monacoEditor');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const filterBarService = getService('filterBar');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
@@ -136,6 +138,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await filterBarService.hasFilter('geo.src', 'AF')).to.be.ok();
       expect(await filterBarService.getFiltersLabel()).to.contain('Lens context (lucene)');
       expect(await queryBar.getQueryString()).to.be('request.keyword : "/apm"');
+
+      await browser.closeCurrentWindow();
+      await browser.switchToWindow(dashboardWindowHandle);
+    });
+
+    it('should bring both dashboard context and visualization context to discover for Lens ES|QL panels', async () => {
+      // clear out the dashboard
+      await dashboard.switchToEditMode();
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.removePanel();
+
+      // Create a new panel
+      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+      await dashboardAddPanel.expectEditorMenuClosed();
+
+      const ESQL_QUERY = 'from logs* | stats maxB = max(bytes)';
+      // Configure the ES|QL chart
+      await monacoEditor.setCodeEditorValue(ESQL_QUERY);
+      await testSubjects.click('ESQLEditor-run-query-button');
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.click('applyFlyoutButton');
+
+      // Save the dashboard
+      await dashboard.clickQuickSave();
+      await dashboard.clickCancelOutOfEditMode();
+
+      // check if it works correctly
+      await dashboardPanelActions.clickPanelAction(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
+
+      const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverWindowHandle);
+
+      // wait to discover to load
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+
+      // now check that all queries and filters are correctly transferred
+      const discoverQuery = await monacoEditor.getCodeEditorValue();
+      expect(discoverQuery).to.equal(ESQL_QUERY);
+      // Filters and queries should not be carried over.
+      // There's currently a bug but in this test will check only the right thing
 
       await browser.closeCurrentWindow();
       await browser.switchToWindow(dashboardWindowHandle);

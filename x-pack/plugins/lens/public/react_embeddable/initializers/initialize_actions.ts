@@ -7,7 +7,14 @@
 
 import { Capabilities } from '@kbn/core-capabilities-common';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { EsQueryConfig, ExecutionContextSearch, Filter, Query, TimeRange } from '@kbn/es-query';
+import {
+  AggregateQuery,
+  EsQueryConfig,
+  Filter,
+  Query,
+  TimeRange,
+  isOfQueryType,
+} from '@kbn/es-query';
 import {
   PublishingSubject,
   StateComparators,
@@ -16,6 +23,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { partition } from 'lodash';
 import { Visualization } from '../..';
 import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
@@ -59,7 +67,7 @@ function getViewUnderlyingDataArgs({
     navLinks: Capabilities['navLinks'];
     discover: Capabilities['discover'];
   };
-  query: ExecutionContextSearch['query'];
+  query: Array<Query | AggregateQuery>;
   filters: Filter[];
   timeRange: TimeRange;
   esQueryConfig: EsQueryConfig;
@@ -79,15 +87,20 @@ function getViewUnderlyingDataArgs({
     return;
   }
   const luceneOrKuery: Query[] = [];
+  const aggregateQueries: AggregateQuery[] = [];
 
   if (Array.isArray(query)) {
-    query.forEach((q) => {
-      luceneOrKuery.push(q);
-    });
+    const [kqlOrLuceneQueries, esqlQueries] = partition(query, isOfQueryType);
+    if (kqlOrLuceneQueries.length) {
+      luceneOrKuery.push(...kqlOrLuceneQueries);
+    }
+    if (esqlQueries.length) {
+      aggregateQueries.push(...esqlQueries);
+    }
   }
 
   const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
-    luceneOrKuery.length > 0 ? luceneOrKuery : (query as Query),
+    luceneOrKuery.length > 0 ? luceneOrKuery : aggregateQueries[0],
     filters,
     meta,
     Object.values(dataViews),
@@ -100,7 +113,7 @@ function getViewUnderlyingDataArgs({
     dataViewSpec,
     timeRange,
     filters: newFilters,
-    query: newQuery,
+    query: aggregateQueries.length > 0 ? aggregateQueries[0] : newQuery,
     columns: meta.columns,
   };
 }
@@ -135,10 +148,6 @@ function loadViewUnderlyingDataArgs(
     !activeVisualization ||
     !activeVisualizationState
   ) {
-    return;
-  }
-
-  if (isTextBasedLanguage(state)) {
     return;
   }
 

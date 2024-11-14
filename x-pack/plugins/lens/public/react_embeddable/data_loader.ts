@@ -270,7 +270,13 @@ export function loadEmbeddableData(
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change
     // make sure to debounce one tick to make the refresh work
-    internalApi.attributes$.pipe(waitUntilChanged()).subscribe(() => reload('attributes')),
+    internalApi.attributes$.pipe(waitUntilChanged()).subscribe(() => {
+      // the ES|QL query may have changed, so recompute the args for view underlying data
+      if (api.isTextBasedLanguage()) {
+        api.loadViewUnderlyingData();
+      }
+      reload('attributes');
+    }),
     api.savedObjectId.pipe(waitUntilChanged()).subscribe(() => reload('savedObjectId')),
     internalApi.overrides$.pipe(waitUntilChanged()).subscribe(() => reload('overrides')),
     internalApi.disableTriggers$
