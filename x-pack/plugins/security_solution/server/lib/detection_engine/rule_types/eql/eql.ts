@@ -208,9 +208,6 @@ export const eqlExecutor = async ({
         } else {
           newSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
         }
-        // once partitioned, we pass in the sequence alerts to check for suppression
-        // and then filter out the suppressable sequence alerts and the building
-        // block alerts associated with the suppressable sequence alerts.
       } else {
         throw new Error(
           'eql query response should have either `sequences` or `events` but had neither'

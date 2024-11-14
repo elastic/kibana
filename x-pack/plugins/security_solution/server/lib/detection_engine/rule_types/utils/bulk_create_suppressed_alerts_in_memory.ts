@@ -59,7 +59,6 @@ export interface BulkCreateSuppressedAlertsParams
     | 'alertTimestampOverride'
   > {
   enrichedEvents: SignalSourceHit[];
-  buildingBlockAlerts?: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
   toReturn: SearchAfterAndBulkCreateReturnType;
   experimentalFeatures: ExperimentalFeatures;
   mergeSourceAndFields?: boolean;

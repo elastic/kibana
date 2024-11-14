@@ -34,6 +34,7 @@ export const partitionMissingFieldsEvents = <
       (event as SignalSourceHit)?._source || (event as { event: SignalSourceHit })?.event?._source;
 
     const fields = mergeSourceAndFields ? { ...sourceFields, ...eventFields } : eventFields;
+
     const hasMissingFields = Object.keys(pick(fields, suppressedBy)).length < suppressedBy.length;
 
     return !hasMissingFields;

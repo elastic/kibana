@@ -180,7 +180,6 @@ export const buildAlertGroupFromSequence = ({
     }
   );
 
-  // sequence alert guaranteed to be first
   return { shellAlert: sequenceAlert, buildingBlocks: wrappedBuildingBlocks };
 };
 
