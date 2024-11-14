@@ -935,7 +935,7 @@ expect.eql = function eql(actual, expected) {
   // to determine equivalence.
   } else if (isRegExp(actual) && isRegExp(expected)) {
     return regExpEquiv(actual, expected);
-  // If both are Sets, they should be treated equal if the have the same
+  // If both are Sets, they should be treated equal if they have the same
   // entries, independent of the ordering
   } else if (actual instanceof Set && expected instanceof Set) {
     return actual.size === expected.size && actual.difference(expected).size === 0;
