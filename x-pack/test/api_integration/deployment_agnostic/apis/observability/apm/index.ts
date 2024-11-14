@@ -12,6 +12,7 @@ export default function apmApiIntegrationTests({
 }: DeploymentAgnosticFtrProviderContext) {
   describe('APM', function () {
     loadTestFile(require.resolve('./agent_explorer'));
+    loadTestFile(require.resolve('./errors'));
     loadTestFile(require.resolve('./alerts'));
     loadTestFile(require.resolve('./mobile'));
     loadTestFile(require.resolve('./custom_dashboards'));
@@ -26,5 +27,6 @@ export default function apmApiIntegrationTests({
     loadTestFile(require.resolve('./observability_overview'));
     loadTestFile(require.resolve('./latency'));
     loadTestFile(require.resolve('./infrastructure'));
+    loadTestFile(require.resolve('./service_groups'));
   });
 }

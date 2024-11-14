@@ -10,6 +10,7 @@
 import { uniq, uniqBy } from 'lodash';
 import type {
   AstProviderFn,
+  ESQLAst,
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandOption,
@@ -151,13 +152,15 @@ export async function suggest(
   astProvider: AstProviderFn,
   resourceRetriever?: ESQLCallbacks
 ): Promise<SuggestionRawDefinition[]> {
+  // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
-
   const correctedQuery = correctQuerySyntax(innerText, context);
-
   const { ast } = await astProvider(correctedQuery);
-
   const astContext = getAstContext(innerText, ast, offset);
+
+  // But we also need the full ast for the full query
+  const correctedFullQuery = correctQuerySyntax(fullText, context);
+  const { ast: fullAst } = await astProvider(correctedFullQuery);
 
   if (astContext.type === 'comment') {
     return [];
@@ -216,7 +219,8 @@ export async function suggest(
       getFieldsMap,
       getPolicies,
       getPolicyMetadata,
-      resourceRetriever?.getPreferences
+      resourceRetriever?.getPreferences,
+      fullAst
     );
   }
   if (astContext.type === 'setting') {
@@ -394,7 +398,8 @@ async function getSuggestionsWithinCommandExpression(
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
   getPolicyMetadata: GetPolicyMetadataFn,
-  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
+  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
+  fullAst?: ESQLAst
 ) {
   const commandDef = getCommandDefinition(command.name);
 
@@ -413,7 +418,8 @@ async function getSuggestionsWithinCommandExpression(
       () => findNewVariable(anyVariables),
       (expression: ESQLAstItem | undefined) =>
         getExpressionType(expression, references.fields, references.variables),
-      getPreferences
+      getPreferences,
+      fullAst
     );
   } else {
     // The deprecated path.
@@ -1173,19 +1179,21 @@ async function getFunctionArgsSuggestions(
     );
 
     // Functions
-    suggestions.push(
-      ...getFunctionSuggestions({
-        command: command.name,
-        option: option?.name,
-        returnTypes: canBeBooleanCondition
-          ? ['any']
-          : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
-        ignored: fnToIgnore,
-      }).map((suggestion) => ({
-        ...suggestion,
-        text: addCommaIf(shouldAddComma, suggestion.text),
-      }))
-    );
+    if (typesToSuggestNext.every((d) => !d.fieldsOnly)) {
+      suggestions.push(
+        ...getFunctionSuggestions({
+          command: command.name,
+          option: option?.name,
+          returnTypes: canBeBooleanCondition
+            ? ['any']
+            : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
+          ignored: fnToIgnore,
+        }).map((suggestion) => ({
+          ...suggestion,
+          text: addCommaIf(shouldAddComma, suggestion.text),
+        }))
+      );
+    }
     // could also be in stats (bucket) but our autocomplete is not great yet
     if (
       (getTypesFromParamDefs(typesToSuggestNext).includes('date') &&
