@@ -38,7 +38,7 @@ export const EXTERNAL_REFERENCE_REF_NAME = 'externalReferenceId';
 /**
  * The name of the licensing feature to notify for feature usage with the licensing plugin
  */
-export const LICENSING_CASE_ASSIGNMENT_FEATURE = 'Cases user assignment';
+export const LICENSING_CASE_ASSIGNMENT_FEATURE = 'Cases user usage';
 
 /**
  * The name of the licensing feature to notify for cases feature usage with the licensing plugin
