@@ -40,11 +40,6 @@ interface EmbeddableMapProps {
 const EmbeddableMapRatioHolder = styled.div.attrs(() => ({
   className: 'siemEmbeddable__map',
 }))<EmbeddableMapProps>`
-  .embPanel {
-    border: none;
-    box-shadow: none;
-  }
-
   .mapToolbarOverlay__button {
     display: none;
   }
