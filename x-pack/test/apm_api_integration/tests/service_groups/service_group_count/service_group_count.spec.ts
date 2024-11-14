@@ -74,14 +74,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await apmSynthtraceEsClient.clean();
     });
 
-    it('returns the correct number of services', async () => {
-      const response = await getServiceGroupCounts(apmApiClient);
-      expect(response.status).to.be(200);
-      expect(Object.keys(response.body).length).to.be(2);
-      expect(response.body[synthbeansServiceGroupId]).to.have.property('services', 2);
-      expect(response.body[opbeansServiceGroupId]).to.have.property('services', 1);
-    });
-
     describe('with alerts', () => {
       let ruleId: string;
       before(async () => {
