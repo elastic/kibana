@@ -20,7 +20,7 @@ import { ReportingCore } from '..';
 import { deprecations } from '../lib/deprecations';
 
 const REPORTING_USER_ROLE_NAME = 'reporting_user';
-const getKibanaPrivilegesDocumentationUrl = (branch: string) => {
+const getDocumentationUrl = (branch: string) => {
   // TODO: remove when docs support "main"
   const docBranch = branch === 'main' ? 'master' : branch;
   return `https://www.elastic.co/guide/en/kibana/${docBranch}/kibana-privileges.html`;
@@ -137,9 +137,7 @@ async function getUsersDeprecations(
       correctiveActions: { manualSteps: strings.manualSteps(reportingUsers.join(', ')) },
       level: 'warning',
       deprecationType: 'feature',
-      documentationUrl: getKibanaPrivilegesDocumentationUrl(
-        reportingCore.getKibanaPackageInfo().branch
-      ),
+      documentationUrl: getDocumentationUrl(reportingCore.getKibanaPackageInfo().branch),
     },
   ];
 }
@@ -235,9 +233,7 @@ async function getRoleMappingsDeprecations(
       },
       level: 'warning',
       deprecationType: 'feature',
-      documentationUrl: getKibanaPrivilegesDocumentationUrl(
-        reportingCore.getKibanaPackageInfo().branch
-      ),
+      documentationUrl: getDocumentationUrl(reportingCore.getKibanaPackageInfo().branch),
     },
   ];
 }
