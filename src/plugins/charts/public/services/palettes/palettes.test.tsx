@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { palettes } from './palettes';
+import { buildPalettes } from './palettes';
 import { euiPaletteColorBlind, euiPaletteColorBlindBehindText } from '@elastic/eui';
 
 describe('palettes', () => {
+  const palettes = buildPalettes();
+
   describe('default palette', () => {
     describe('syncColors: false', () => {
       it('should return different colors based on behind text flag', () => {
