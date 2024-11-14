@@ -1248,9 +1248,10 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/accessibility/apps/group3/stack_monitoring.ts @elastic/stack-monitoring
 
 # Fleet
-/x-pack/test_serverless/api_integration/test_suites/security/fleet @elastic/fleet
-/x-pack/test/fleet_packages @elastic/fleet
+/x-pack/test/api_integration/services/fleet_and_agents.ts @elastic/fleet
 /x-pack/test/fleet_api_integration @elastic/fleet
+/x-pack/test/fleet_packages @elastic/fleet
+/test/api_integration/apis/custom_integration/*.ts @elastic/fleet
 /x-pack/test/fleet_cypress @elastic/fleet
 /x-pack/test/fleet_functional @elastic/fleet
 /src/dev/build/tasks/bundle_fleet_packages.ts @elastic/fleet @elastic/kibana-operations
