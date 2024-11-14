@@ -16,6 +16,7 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 
 import { AddExceptionFlyout } from '.';
+import { initialState as exceptionItemsInitialState, createExceptionItemsReducer } from './reducer';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
@@ -153,65 +154,123 @@ describe('When the add exception modal is opened', () => {
         expect(wrapper.find('ExceptionsAddToRulesOrLists').exists()).toBeFalsy();
       });
 
-      it('should show a warning callout if wildcard is used', async () => {
-        mockUseFetchIndex.mockImplementation(() => [
-          false,
-          {
-            indexPatterns: stubIndexPattern,
-          },
-        ]);
+      describe('warning callouts', () => {
+        let mountWrapper: ReactWrapper;
+        beforeEach(() => {
+          mockUseFetchIndex.mockImplementation(() => [
+            false,
+            {
+              indexPatterns: stubIndexPattern,
+            },
+          ]);
 
-        const mountWrapper = mount(
-          <TestProviders>
-            <AddExceptionFlyout
-              rules={[
+          mountWrapper = mount(
+            <TestProviders>
+              <AddExceptionFlyout
+                rules={[
+                  {
+                    ...getRulesSchemaMock(),
+                    index: ['filebeat-*'],
+                    exceptions_list: [
+                      {
+                        id: 'endpoint_list',
+                        list_id: 'endpoint_list',
+                        namespace_type: 'agnostic',
+                        type: 'endpoint',
+                      },
+                    ],
+                  } as Rule,
+                ]}
+                isBulkAction={false}
+                alertData={undefined}
+                isAlertDataLoading={undefined}
+                alertStatus={undefined}
+                isEndpointItem
+                showAlertCloseOptions
+                onCancel={jest.fn()}
+                onConfirm={jest.fn()}
+              />
+            </TestProviders>
+          );
+        });
+
+        it('should show a warning callout if wildcard is used', async () => {
+          const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+          await waitFor(() =>
+            callProps.onChange({
+              exceptionItems: [
                 {
-                  ...getRulesSchemaMock(),
-                  index: ['filebeat-*'],
-                  exceptions_list: [
+                  ...getExceptionListItemSchemaMock(),
+                  entries: [
                     {
-                      id: 'endpoint_list',
-                      list_id: 'endpoint_list',
-                      namespace_type: 'agnostic',
-                      type: 'endpoint',
+                      field: 'event.category',
+                      operator: 'included',
+                      type: 'match',
+                      value: 'wildcardvalue*?',
                     },
                   ],
-                } as Rule,
-              ]}
-              isBulkAction={false}
-              alertData={undefined}
-              isAlertDataLoading={undefined}
-              alertStatus={undefined}
-              isEndpointItem
-              showAlertCloseOptions
-              onCancel={jest.fn()}
-              onConfirm={jest.fn()}
-            />
-          </TestProviders>
-        );
-        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
-        await waitFor(() =>
-          callProps.onChange({
-            exceptionItems: [
-              {
-                ...getExceptionListItemSchemaMock(),
-                entries: [
-                  {
-                    field: 'event.category',
-                    operator: 'included',
-                    type: 'match',
-                    value: 'wildcardvalue*?',
-                  },
-                ],
-              },
-            ],
-          })
-        );
+                },
+              ],
+            })
+          );
 
-        mountWrapper.update();
-        expect(
-          mountWrapper.find('[data-test-subj="wildcardWithWrongOperatorCallout"]').exists()
-        ).toBeTruthy();
+          mountWrapper.update();
+          expect(
+            mountWrapper.find('[data-test-subj="wildcardWithWrongOperatorCallout"]').exists()
+          ).toBeTruthy();
+        });
+
+        it('should show a warning callout if there is a partial code signature entry with only subject_name', async () => {
+          const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+          await waitFor(() =>
+            callProps.onChange({
+              exceptionItems: [
+                {
+                  ...getExceptionListItemSchemaMock(),
+                  entries: [
+                    {
+                      field: 'process.code_signature.subject_name',
+                      operator: 'included',
+                      type: 'match',
+                      value: 'asdf',
+                    },
+                  ],
+                },
+              ],
+            })
+          );
+
+          mountWrapper.update();
+          expect(
+            mountWrapper.find('[data-test-subj="partialCodeSignatureCallout"]').exists()
+          ).toBeTruthy();
+        });
+
+        it('should show a warning callout if there is a partial code signature entry with only trusted field', async () => {
+          const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+          await waitFor(() =>
+            callProps.onChange({
+              exceptionItems: [
+                {
+                  ...getExceptionListItemSchemaMock(),
+                  entries: [
+                    {
+                      field: 'process.code_signature.trusted',
+                      operator: 'included',
+                      type: 'match',
+                      value: 'true',
+                    },
+                  ],
+                },
+              ],
+            })
+          );
+
+          mountWrapper.update();
+          expect(
+            mountWrapper.find('[data-test-subj="partialCodeSignatureCallout"]').exists()
+          ).toBeTruthy();
+        });
       });
     });
 
@@ -959,6 +1018,17 @@ describe('When the add exception modal is opened', () => {
           wrapper.find('[data-test-subj="addToListsRadioOption"] input').getDOMNode()
         ).toBeEnabled();
       });
+    });
+  });
+  describe('the reducer', () => {
+    it('should update partialCodeSignatureWarningExists, when warning is true', () => {
+      const updatedState = createExceptionItemsReducer();
+      expect(
+        updatedState(exceptionItemsInitialState, {
+          type: 'setPartialCodeSignature',
+          warningExists: true,
+        })
+      ).toEqual({ ...exceptionItemsInitialState, partialCodeSignatureWarningExists: true });
     });
   });
 });

@@ -6,36 +6,23 @@
  */
 
 import React from 'react';
-import {
-  AGENT_NAME,
-  CLOUD_PROVIDER,
-  ENTITY_TYPE,
-  ENTITY_TYPES,
-} from '@kbn/observability-shared-plugin/common';
 import { type CloudProvider, CloudProviderIcon, AgentIcon } from '@kbn/custom-icons';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import type { AgentName } from '@kbn/elastic-agent-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { Entity } from '../../../common/entities';
+import { castArray } from 'lodash';
+import type { InventoryEntity } from '../../../common/entities';
+import { isBuiltinEntityOfType } from '../../../common/utils/entity_type_guards';
 
 interface EntityIconProps {
-  entity: Entity;
+  entity: InventoryEntity;
 }
 
-type NotNullableCloudProvider = Exclude<CloudProvider, null>;
-
-const getSingleValue = <T,>(value?: T | T[] | null): T | undefined => {
-  return value == null ? undefined : Array.isArray(value) ? value[0] : value;
-};
-
 export function EntityIcon({ entity }: EntityIconProps) {
-  const entityType = entity[ENTITY_TYPE];
   const defaultIconSize = euiThemeVars.euiSizeL;
 
-  if (entityType === ENTITY_TYPES.HOST || entityType === ENTITY_TYPES.CONTAINER) {
-    const cloudProvider = getSingleValue(
-      entity[CLOUD_PROVIDER] as NotNullableCloudProvider | NotNullableCloudProvider[]
-    );
+  if (isBuiltinEntityOfType('host', entity) || isBuiltinEntityOfType('container', entity)) {
+    const cloudProvider = castArray(entity.cloud?.provider)[0];
+
     return (
       <EuiFlexGroup
         style={{ width: defaultIconSize, height: defaultIconSize }}
@@ -44,7 +31,7 @@ export function EntityIcon({ entity }: EntityIconProps) {
       >
         <EuiFlexItem grow={false}>
           <CloudProviderIcon
-            cloudProvider={cloudProvider}
+            cloudProvider={cloudProvider as CloudProvider | undefined}
             size="m"
             title={cloudProvider}
             role="presentation"
@@ -54,12 +41,11 @@ export function EntityIcon({ entity }: EntityIconProps) {
     );
   }
 
-  if (entityType === ENTITY_TYPES.SERVICE) {
-    const agentName = getSingleValue(entity[AGENT_NAME] as AgentName | AgentName[]);
-    return <AgentIcon agentName={agentName} role="presentation" />;
+  if (isBuiltinEntityOfType('service', entity)) {
+    return <AgentIcon agentName={castArray(entity.agent?.name)[0]} role="presentation" />;
   }
 
-  if (entityType.startsWith('kubernetes')) {
+  if (entity.entityType.startsWith('kubernetes')) {
     return <EuiIcon type="logoKubernetes" size="l" />;
   }
 
