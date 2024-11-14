@@ -39,6 +39,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     let testFleetPolicyID: string;
     let editorUser: RoleCredentials;
+    let locations: PrivateLocation[] = [];
     const testPolicyName = 'Fleet test server policy' + Date.now();
 
     let _httpMonitorJson: HTTPFields;
@@ -76,7 +77,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('add a test private location', async () => {
-      await testPrivateLocations.setTestLocations([testFleetPolicyID]);
+      locations = await testPrivateLocations.setTestLocations([testFleetPolicyID]);
 
       const apiResponse = await supertestAPI
         .get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS)
@@ -90,7 +91,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: testFleetPolicyID,
           isServiceManaged: false,
           isInvalid: false,
-          label: 'Test private location 0',
+          label: locations[0].label,
           geo: {
             lat: 0,
             lon: 0,
@@ -108,7 +109,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const location = {
         id: 'invalidLocation',
-        label: 'Test private location 0',
+        label: locations[0].label,
         isServiceManaged: false,
         geo: {
           lat: 0,
@@ -128,7 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(apiResponse.body).eql({
         statusCode: 400,
         error: 'Bad Request',
-        message: `Invalid locations specified. Private Location(s) 'invalidLocation' not found. Available private locations are 'Test private location 0'`,
+        message: `Invalid locations specified. Private Location(s) 'invalidLocation' not found. Available private locations are '${locations[0].label}'`,
       });
 
       const apiGetResponse = await supertestAPI
@@ -148,7 +149,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       newMonitor.locations.push({
         id: testFleetPolicyID,
         agentPolicyId: testFleetPolicyID,
-        label: 'Test private location 0',
+        label: locations[0].label,
         isServiceManaged: false,
         geo: {
           lat: 0,
@@ -179,23 +180,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         getTestSyntheticsPolicy({
           name: httpMonitorJson.name,
           id: newMonitorId,
-          location: { id: testFleetPolicyID },
+          location: { id: testFleetPolicyID, name: locations[0].label },
         })
       );
     });
 
     let testFleetPolicyID2: string;
+    let newLocations = [];
 
     it('edits a monitor with additional private location', async () => {
       const resPolicy = await testPrivateLocations.addFleetPolicy(testPolicyName + 1);
       testFleetPolicyID2 = resPolicy.body.item.id;
 
-      await testPrivateLocations.setTestLocations([testFleetPolicyID, testFleetPolicyID2]);
+      newLocations = await testPrivateLocations.setTestLocations([
+        testFleetPolicyID,
+        testFleetPolicyID2,
+      ]);
 
       httpMonitorJson.locations.push({
         id: testFleetPolicyID2,
         agentPolicyId: testFleetPolicyID2,
-        label: 'Test private location ' + 1,
+        label: newLocations[1].label,
         isServiceManaged: false,
         geo: {
           lat: 0,
@@ -239,7 +244,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         getTestSyntheticsPolicy({
           name: httpMonitorJson.name,
           id: newMonitorId,
-          location: { id: testFleetPolicyID },
+          location: { id: testFleetPolicyID, name: locations[0].label },
         })
       );
 
@@ -255,7 +260,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: httpMonitorJson.name,
           id: newMonitorId,
           location: {
-            name: 'Test private location 1',
+            name: newLocations[1].label,
             id: testFleetPolicyID2,
           },
         })
@@ -290,7 +295,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         getTestSyntheticsPolicy({
           name: httpMonitorJson.name,
           id: newMonitorId,
-          location: { id: testFleetPolicyID },
+          location: { id: testFleetPolicyID, name: locations[0].label },
         })
       );
 
@@ -420,7 +425,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         locations: [
           {
             id: testFleetPolicyID,
-            label: 'Test private location 0',
+            label: locations[0].label,
             isServiceManaged: false,
           },
         ],
@@ -452,7 +457,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           getTestSyntheticsPolicy({
             name: monitor.name,
             id: monitorId,
-            location: { id: testFleetPolicyID },
+            location: { id: testFleetPolicyID, name: locations[0].label },
             isTLSEnabled: true,
           })
         );
@@ -469,7 +474,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         locations: [
           {
             id: testFleetPolicyID,
-            label: 'Test private location 0',
+            label: locations[0].label,
             isServiceManaged: false,
           },
         ],
@@ -501,7 +506,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           getTestSyntheticsPolicy({
             name: monitor.name,
             id: monitorId,
-            location: { id: testFleetPolicyID },
+            location: { id: testFleetPolicyID, name: locations[0].label },
           })
         );
       } finally {
@@ -519,7 +524,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         locations: [
           {
             id: testFleetPolicyID,
-            label: 'Test private location 0',
+            label: locations[0].label,
             isServiceManaged: false,
           },
         ],

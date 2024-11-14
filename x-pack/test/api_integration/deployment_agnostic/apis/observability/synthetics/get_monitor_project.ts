@@ -11,6 +11,7 @@ import {
   LegacyProjectMonitorsRequest,
   ProjectMonitor,
   ProjectMonitorMetaData,
+  PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -31,31 +32,51 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let icmpProjectMonitors: LegacyProjectMonitorsRequest;
     let testPolicyId = '';
     let editorUser: RoleCredentials;
+    let testPrivateLocations: PrivateLocation[] = [];
 
-    const testPrivateLocations = new PrivateLocationTestService(getService);
+    const testPrivateLocationsService = new PrivateLocationTestService(getService);
 
-    const setUniqueIds = (request: LegacyProjectMonitorsRequest) => {
+    const setUniqueIds = (
+      request: LegacyProjectMonitorsRequest,
+      privateLocations: PrivateLocation[] = []
+    ) => {
       return {
         ...request,
-        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuidv4() })),
+        monitors: request.monitors.map((monitor) => ({
+          ...monitor,
+          id: uuidv4(),
+          privateLocations: privateLocations.map((location) => location.label),
+        })),
       };
     };
 
     before(async () => {
-      await testPrivateLocations.installSyntheticsPackage();
+      await testPrivateLocationsService.installSyntheticsPackage();
 
       const testPolicyName = 'Fleet test server policy' + Date.now();
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
+      const apiResponse = await testPrivateLocationsService.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
-      await testPrivateLocations.setTestLocations([testPolicyId]);
+      testPrivateLocations = await testPrivateLocationsService.setTestLocations([testPolicyId]);
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
     });
 
     beforeEach(() => {
-      projectMonitors = setUniqueIds(getFixtureJson('project_browser_monitor'));
-      httpProjectMonitors = setUniqueIds(getFixtureJson('project_http_monitor'));
-      tcpProjectMonitors = setUniqueIds(getFixtureJson('project_tcp_monitor'));
-      icmpProjectMonitors = setUniqueIds(getFixtureJson('project_icmp_monitor'));
+      projectMonitors = setUniqueIds(
+        getFixtureJson('project_browser_monitor'),
+        testPrivateLocations
+      );
+      httpProjectMonitors = setUniqueIds(
+        getFixtureJson('project_http_monitor'),
+        testPrivateLocations
+      );
+      tcpProjectMonitors = setUniqueIds(
+        getFixtureJson('project_tcp_monitor'),
+        testPrivateLocations
+      );
+      icmpProjectMonitors = setUniqueIds(
+        getFixtureJson('project_icmp_monitor'),
+        testPrivateLocations
+      );
     });
 
     it('project monitors - fetches all monitors - browser', async () => {

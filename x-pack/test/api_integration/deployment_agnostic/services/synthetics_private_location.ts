@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { privateLocationsSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
-import { privateLocationsSavedObjectId } from '@kbn/synthetics-plugin/server/saved_objects/private_locations';
+import { RetryService } from '@kbn/ftr-common-functional-services';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { privateLocationSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
 import { SyntheticsPrivateLocations } from '@kbn/synthetics-plugin/common/runtime_types';
 import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
@@ -15,12 +16,11 @@ export const INSTALLED_VERSION = '1.1.1';
 
 export class PrivateLocationTestService {
   private supertestWithAuth: ReturnType<typeof KibanaSupertestProvider>;
-  private readonly getService: DeploymentAgnosticFtrProviderContext['getService'];
+  private readonly retry: RetryService;
 
   constructor(getService: DeploymentAgnosticFtrProviderContext['getService']) {
-    this.supertest = getService('supertestWithoutAuth');
     this.supertestWithAuth = getService('supertest');
-    this.getService = getService;
+    this.retry = getService('retry');
   }
 
   async installSyntheticsPackage() {
@@ -49,23 +49,23 @@ export class PrivateLocationTestService {
   }
 
   async addFleetPolicy(name: string) {
-    return this.supertestWithAuth
-      .post('/api/fleet/agent_policies?sys_monitoring=true')
-      .set('kbn-xsrf', 'true')
-      .send({
-        name,
-        description: '',
-        namespace: 'default',
-        monitoring_enabled: [],
-      })
-      .expect(200);
+    return await this.retry.try(async () => {
+      const response = await this.supertestWithAuth
+        .post('/api/fleet/agent_policies?sys_monitoring=true')
+        .set('kbn-xsrf', 'true')
+        .send({
+          name,
+          description: '',
+          namespace: 'default',
+          monitoring_enabled: [],
+        });
+      return response;
+    });
   }
 
   async setTestLocations(testFleetPolicyIds: string[]) {
-    const server = this.getService('kibanaServer');
-
     const locations: SyntheticsPrivateLocations = testFleetPolicyIds.map((id, index) => ({
-      label: 'Test private location ' + index,
+      label: `Test private location ${id}`,
       agentPolicyId: id,
       id,
       geo: {
@@ -75,14 +75,20 @@ export class PrivateLocationTestService {
       isServiceManaged: false,
     }));
 
-    await server.savedObjects.create({
-      type: privateLocationsSavedObjectName,
-      id: privateLocationsSavedObjectId,
-      attributes: {
-        locations,
-      },
-      overwrite: true,
-    });
+    await this.supertestWithAuth
+      .post(`/api/saved_objects/_bulk_create`)
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .set('kbn-xsrf', 'true')
+      .send(
+        locations.map((location) => ({
+          type: privateLocationSavedObjectName,
+          id: location.id,
+          attributes: location,
+          initialNamespaces: ['*'],
+        }))
+      )
+      .expect(200);
+
     return locations;
   }
 }

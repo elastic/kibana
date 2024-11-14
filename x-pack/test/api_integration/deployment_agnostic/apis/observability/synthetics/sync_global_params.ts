@@ -42,6 +42,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     let newMonitorId: string;
     let newHttpMonitorId: string;
+    let privateLocations = [];
 
     let editorUser: RoleCredentials;
 
@@ -75,7 +76,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('add a test private location', async () => {
-      await testPrivateLocations.setTestLocations([testFleetPolicyID]);
+      privateLocations = await testPrivateLocations.setTestLocations([testFleetPolicyID]);
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
@@ -102,7 +103,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: testFleetPolicyID,
           isInvalid: false,
           isServiceManaged: false,
-          label: 'Test private location 0',
+          label: locations[0].label,
           geo: {
             lat: 0,
             lon: 0,
@@ -120,7 +121,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const pvtLoc = {
         id: testFleetPolicyID,
         agentPolicyId: testFleetPolicyID,
-        label: 'Test private location 0',
+        label: privateLocations[0].label,
         isServiceManaged: false,
         geo: {
           lat: 0,
@@ -232,7 +233,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const pvtLoc = {
         id: testFleetPolicyID,
         agentPolicyId: testFleetPolicyID,
-        label: 'Test private location 0',
+        label: locations[0].label,
         isServiceManaged: false,
         geo: {
           lat: 0,

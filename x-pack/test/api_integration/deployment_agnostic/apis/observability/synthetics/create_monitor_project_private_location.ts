@@ -27,9 +27,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const monitorTestService = new SyntheticsMonitorTestService(getService);
 
-    let testPolicyId = '';
-    const testPolicyName = 'Fleet test server policy' + Date.now();
-    const testPrivateLocations = new PrivateLocationTestService(getService);
+    let testPolicyId;
+    let testPrivateLocationName: string;
+    const testPolicyName = `Fleet test server policy ${uuidv4()}`;
+    const testPrivateLocationsService = new PrivateLocationTestService(getService);
 
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
       return {
@@ -39,17 +40,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
-      await testPrivateLocations.installSyntheticsPackage();
+      await testPrivateLocationsService.installSyntheticsPackage();
 
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
+      const apiResponse = await testPrivateLocationsService.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
-      await testPrivateLocations.setTestLocations([testPolicyId]);
+      const testPrivateLocations = await testPrivateLocationsService.setTestLocations([
+        testPolicyId,
+      ]);
+      testPrivateLocationName = testPrivateLocations[0].label;
     });
 
     after(async () => {
@@ -108,7 +113,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const secondMonitor = {
         ...projectMonitors.monitors[0],
         id: 'test-id-2',
-        privateLocations: ['Test private location 0'],
+        privateLocations: [testPrivateLocationName],
       };
       const testMonitors = [projectMonitors.monitors[0], secondMonitor];
       const { body, status: status0 } = await monitorTestService.addProjectMonitors(
@@ -139,7 +144,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(editedBodyError.updatedMonitors.length).eql(1);
       expect(editedBodyError.failedMonitors.length).eql(1);
       expect(editedBodyError.failedMonitors[0].details).eql(
-        `Invalid locations specified. Private Location(s) 'Test private location 8' not found. Available private locations are 'Test private location 0'`
+        `Invalid locations specified. Private Location(s) 'Test private location 8' not found. Available private locations are '${testPrivateLocationName}'`
       );
       expect(editedBodyError.failedMonitors[0].reason).eql(
         "Couldn't save or update monitor because of an invalid configuration."

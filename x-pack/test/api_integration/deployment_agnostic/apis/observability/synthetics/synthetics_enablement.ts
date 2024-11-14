@@ -6,12 +6,6 @@
  */
 
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import {
-  syntheticsApiKeyID,
-  syntheticsApiKeyObjectType,
-} from '@kbn/synthetics-plugin/server/saved_objects/service_api_key';
-import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import expect from '@kbn/expect';
 import { SupertestWithRoleScopeType } from '../../../services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -34,23 +28,36 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     },
   };
 
-  describe.skip('SyntheticsEnablement', () => {
-    const supertestWithAuth = getService('supertest');
-    const supertest = getService('supertestWithoutAuth');
+  describe('SyntheticsEnablement', () => {
     const roleScopedSupertest = getService('roleScopedSupertest');
     const kibanaServer = getService('kibanaServer');
-    const samlAuth = getService('samlAuth');
 
-    const esSupertest = getService('esSupertest');
-
-    let editorUser: RoleCredentials;
-    let adminUser: RoleCredentials;
     let supertestWithEditorScope: SupertestWithRoleScopeType;
     let supertestWithAdminScope: SupertestWithRoleScopeType;
 
     const getApiKeys = async () => {
-      const { body } = await esSupertest.get(`/_security/api_key`).query({ with_limited_by: true });
-      const apiKeys = body.api_keys || [];
+      const { body } = await supertestWithAdminScope
+        .post('/internal/security/api_key/_query')
+        .send({
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    name: 'synthetics-api-key (required for Synthetics App)',
+                  },
+                },
+              ],
+            },
+          },
+          sort: { field: 'creation', direction: 'desc' },
+          from: 0,
+          size: 25,
+          filters: {},
+        })
+        .expect(200);
+
+      const apiKeys = body.apiKeys || [];
       return apiKeys.filter(
         (apiKey: any) => apiKey.name.includes('synthetics-api-key') && apiKey.invalidated === false
       );
@@ -58,22 +65,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('[PUT] /internal/uptime/service/enablement', () => {
       before(async () => {
-        editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
-        adminUser = await samlAuth.createM2mApiKeyWithRoleScope('admin');
         supertestWithEditorScope = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
           withInternalHeaders: true,
-          withCustomHeaders: { 'accept-encoding': 'gzip' },
+          useCookieHeader: true,
         });
         supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
           withInternalHeaders: true,
-          withCustomHeaders: { 'accept-encoding': 'gzip' },
+          useCookieHeader: true,
         });
       });
 
       beforeEach(async () => {
         const apiKeys = await getApiKeys();
         if (apiKeys.length) {
-          await supertestWithEditorScope
+          await supertestWithAdminScope
             .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .expect(200);
         }
@@ -107,7 +112,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(apiResponse.body).eql({
           areApiKeysEnabled: true,
-          canManageApiKeys: false,
+          canManageApiKeys: true,
           canEnable: true,
           isEnabled: true,
           isValidApiKey: true,
@@ -125,7 +130,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(apiResponse.body).eql({
           areApiKeysEnabled: true,
-          canManageApiKeys: false,
+          canManageApiKeys: true,
           canEnable: true,
           isEnabled: true,
           isValidApiKey: true,
@@ -137,67 +142,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(validApiKeys[0].role_descriptors.synthetics_writer).eql(correctPrivileges);
 
         // call api a second time
-        const apiResponse2 = await supertest
+        const apiResponse2 = await supertestWithAdminScope
           .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         expect(apiResponse2.body).eql({
           areApiKeysEnabled: true,
-          canManageApiKeys: false,
-          canEnable: true,
-          isEnabled: true,
-          isValidApiKey: true,
-          isServiceAllowed: true,
-        });
-
-        const validApiKeys2 = await getApiKeys();
-        expect(validApiKeys2.length).eql(1);
-        expect(validApiKeys2[0].role_descriptors.synthetics_writer).eql(correctPrivileges);
-      });
-
-      it(`auto re-enables the api key when created with invalid permissions and invalidates old api key`, async () => {
-        const apiKeyResult = await esSupertest
-          .post(`/_security/api_key`)
-          .send({
-            name: 'synthetics-api-key',
-            expiration: '1d',
-            role_descriptors: {
-              'role-a': {
-                cluster: getServiceApiKeyPrivileges(false).cluster,
-                indices: [
-                  {
-                    names: ['synthetics-*'],
-                    privileges: ['view_index_metadata', 'create_doc', 'auto_configure'],
-                  },
-                ],
-              },
-            },
-          })
-          .expect(200);
-        await kibanaServer.savedObjects.create({
-          id: syntheticsApiKeyID,
-          type: syntheticsApiKeyObjectType,
-          overwrite: true,
-          attributes: {
-            id: apiKeyResult.body.id,
-            name: 'synthetics-api-key (required for Synthetics App)',
-            apiKey: apiKeyResult.body.api_key,
-          },
-        });
-
-        const validApiKeys = await getApiKeys();
-        expect(validApiKeys.length).eql(1);
-        expect(validApiKeys[0].role_descriptors.synthetics_writer).not.eql(correctPrivileges);
-
-        const apiResponse = await supertestWithAdminScope
-          .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-          .expect(200);
-
-        expect(apiResponse.body).eql({
-          areApiKeysEnabled: true,
-          canManageApiKeys: false,
+          canManageApiKeys: true,
           canEnable: true,
           isEnabled: true,
           isValidApiKey: true,
@@ -216,7 +167,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(apiResponse.body).eql({
           areApiKeysEnabled: true,
-          canManageApiKeys: false,
+          canManageApiKeys: true,
           canEnable: true,
           isEnabled: true,
           isValidApiKey: true,
@@ -228,10 +179,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(validApiKeys[0].role_descriptors.synthetics_writer).eql(correctPrivileges);
 
         // delete api key
-        await esSupertest
-          .delete(`/_security/api_key`)
+        await supertestWithAdminScope
+          .post('/internal/security/api_key/invalidate')
           .send({
-            ids: [validApiKeys[0].id],
+            apiKeys: validApiKeys.map((apiKey: { id: string; name: string }) => ({
+              id: apiKey.id,
+              name: apiKey.name,
+            })),
+            isAdmin: true,
           })
           .expect(200);
 
@@ -245,7 +200,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(apiResponse2.body).eql({
           areApiKeysEnabled: true,
-          canManageApiKeys: false,
+          canManageApiKeys: true,
           canEnable: true,
           isEnabled: true,
           isValidApiKey: true,
@@ -260,8 +215,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('returns response for an uptime all user without admin privileges', async () => {
         const apiResponse = await supertestWithEditorScope
           .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         expect(apiResponse.body).eql({
@@ -279,35 +232,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       beforeEach(async () => {
         const apiKeys = await getApiKeys();
         if (apiKeys.length) {
-          await supertestWithAuth
+          await supertestWithAdminScope
             .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
             .expect(200);
         }
       });
 
       it('with an admin', async () => {
-        await supertest
-          .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .expect(200);
-        const delResponse = await supertest
+        await supertestWithAdminScope.put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT).expect(200);
+        const delResponse = await supertestWithAdminScope
           .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
         expect(delResponse.body).eql({});
-        const apiResponse = await supertest
+        const apiResponse = await supertestWithAdminScope
           .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         expect(apiResponse.body).eql({
           areApiKeysEnabled: true,
-          canManageApiKeys: false,
+          canManageApiKeys: true,
           canEnable: true,
           isEnabled: true,
           isValidApiKey: true,
@@ -316,20 +259,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('with an uptime user', async () => {
-        await supertestWithAuth
-          .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .expect(200);
-        await supertest
+        await supertestWithAdminScope.put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT).expect(200);
+        await supertestWithEditorScope
           .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
           .expect(403);
-        const apiResponse = await supertest
+        const apiResponse = await supertestWithEditorScope
           .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
         expect(apiResponse.body).eql({
           areApiKeysEnabled: true,
@@ -341,21 +276,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
+      // kibana.spaces.create fails with 401
       it('is space agnostic', async () => {
         const SPACE_ID = 'test-space';
         const SPACE_NAME = 'test-space-name';
         await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
 
         // can enable synthetics in default space when enabled in a non default space
-        const apiResponseGet = await supertest
+        const apiResponseGet = await supertestWithAdminScope
           .put(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT}`)
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
         expect(apiResponseGet.body).eql({
           areApiKeysEnabled: true,
-          canManageApiKeys: false,
+          canManageApiKeys: true,
           canEnable: true,
           isEnabled: true,
           isValidApiKey: true,

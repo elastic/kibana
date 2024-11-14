@@ -7,7 +7,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
+import {
+  ConfigKey,
+  ProjectMonitorsRequest,
+  PrivateLocation,
+} from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
@@ -44,6 +48,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let icmpProjectMonitors: ProjectMonitorsRequest;
     let editorUser: RoleCredentials;
     let viewerUser: RoleCredentials;
+    let privateLocations: PrivateLocation[] = [];
 
     let testPolicyId = '';
     const testPolicyName = 'Fleet test server policy' + Date.now();
@@ -93,7 +98,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
-      await testPrivateLocations.setTestLocations([testPolicyId]);
+      privateLocations = await testPrivateLocations.setTestLocations([testPolicyId]);
       await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
         .set(editorUser.apiKeyHeader)
@@ -108,18 +113,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(200);
     });
 
-    beforeEach(() => {
+    beforeEach(async () => {
+      await kibanaServer.savedObjects.clean({
+        types: ['synthetics-monitor', 'ingest-package-policies'],
+      });
+      const formatLocations = (monitors: ProjectMonitorsRequest['monitors']) => {
+        return monitors.map((monitor) => {
+          return {
+            ...monitor,
+            privateLocations: privateLocations.map((location) => location.label),
+          };
+        });
+      };
       projectMonitors = setUniqueIds({
-        monitors: getFixtureJson('project_browser_monitor').monitors,
+        monitors: formatLocations(getFixtureJson('project_browser_monitor').monitors),
       });
       httpProjectMonitors = setUniqueIds({
-        monitors: getFixtureJson('project_http_monitor').monitors,
+        monitors: formatLocations(getFixtureJson('project_http_monitor').monitors),
       });
       tcpProjectMonitors = setUniqueIds({
-        monitors: getFixtureJson('project_tcp_monitor').monitors,
+        monitors: formatLocations(getFixtureJson('project_tcp_monitor').monitors),
       });
       icmpProjectMonitors = setUniqueIds({
-        monitors: getFixtureJson('project_icmp_monitor').monitors,
+        monitors: formatLocations(getFixtureJson('project_icmp_monitor').monitors),
       });
     });
 
@@ -137,20 +153,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .send(projectMonitors)
         .expect(404);
     });
-
-    // KEEP TEST IN STATEFUL
-    // it.only('project monitors - returns forbidden if no access to public locations', async () => {
-    //   const project = `test-project-${uuidv4()}`;
-
-    //   await monitorTestService.generateProjectAPIKey(false, editorUser);
-    //   const response = await monitorTestService.addProjectMonitors(
-    //     project,
-    //     projectMonitors.monitors,
-    //     editorUser
-    //   );
-    //   expect(response.status).to.eql(403);
-    //   expect(response.body.message).to.eql(ELASTIC_MANAGED_LOCATIONS_DISABLED);
-    // });
 
     it('project monitors - handles browser monitors', async () => {
       const successfulMonitors = [projectMonitors.monitors[0]];
@@ -219,6 +221,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               id: 'dev',
               isServiceManaged: true,
               label: 'Dev Service',
+            },
+            {
+              geo: {
+                lat: 0,
+                lon: 0,
+              },
+              id: testPolicyId,
+              agentPolicyId: testPolicyId,
+              isServiceManaged: false,
+              label: privateLocations[0].label,
             },
           ],
           name: 'check if title is present',
@@ -410,6 +422,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 isServiceManaged: true,
                 label: 'Dev Service',
               },
+              {
+                geo: {
+                  lat: 0,
+                  lon: 0,
+                },
+                id: testPolicyId,
+                agentPolicyId: testPolicyId,
+                isServiceManaged: false,
+                label: privateLocations[0].label,
+              },
             ],
             max_redirects: '0',
             name: monitor.name,
@@ -539,6 +561,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 isServiceManaged: true,
                 label: 'Dev Service',
               },
+              {
+                geo: {
+                  lat: 0,
+                  lon: 0,
+                },
+                id: testPolicyId,
+                agentPolicyId: testPolicyId,
+                isServiceManaged: false,
+                label: privateLocations[0].label,
+              },
             ],
             name: monitor.name,
             namespace: 'default',
@@ -666,7 +698,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 id: testPolicyId,
                 agentPolicyId: testPolicyId,
                 isServiceManaged: false,
-                label: 'Test private location 0',
+                label: privateLocations[0].label,
               },
             ],
             name: monitor.name,
@@ -797,6 +829,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 id: projectMonitors.monitors[0].id,
                 locations: ['dev'],
+                privateLocations: privateLocations.map((location) => location.label),
                 name: 'check if title is present',
                 params: {},
                 playwrightOptions: {
@@ -828,7 +861,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    // KEEP TEST IN STATEFUL
     it('project monitors - saves space as data stream namespace', async () => {
       const project = `test-project-${uuidv4()}`;
       const SPACE_ID = `test-space-${uuidv4()}`;
@@ -863,7 +895,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    // KEEP TEST IN STATEFUL
     it('project monitors - browser - handles custom namespace', async () => {
       const project = `test-project-${uuidv4()}`;
       const SPACE_ID = `test-space-${uuidv4()}`;
@@ -899,7 +930,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    // KEEP TEST IN STATEFUL
     it('project monitors - lightweight - handles custom namespace', async () => {
       const project = `test-project-${uuidv4()}`;
       const SPACE_ID = `test-space-${uuidv4()}`;
@@ -937,7 +967,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    // KEEP TEST IN STATEFUL
     it('project monitors - browser - handles custom namespace errors', async () => {
       const project = `test-project-${uuidv4()}`;
       const SPACE_ID = `test-space-${uuidv4()}`;
@@ -969,7 +998,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    // KEEP TEST IN STATEFUL
     it('project monitors - lightweight - handles custom namespace errors', async () => {
       const project = `test-project-${uuidv4()}`;
       const SPACE_ID = `test-space-${uuidv4()}`;
@@ -1001,7 +1029,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    // KEEP TEST IN STATEFUL
     it('project monitors - handles editing with spaces', async () => {
       const project = `test-project-${uuidv4()}`;
       const SPACE_ID = `test-space-${uuidv4()}`;
@@ -1207,14 +1234,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    // keep test in stateful
     it('project monitors - cannot update project monitors with read only privileges', async () => {
       const project = `test-project-${uuidv4()}`;
 
       const secondMonitor = {
         ...projectMonitors.monitors[0],
         id: 'test-id-2',
-        privateLocations: ['Test private location 0'],
+        privateLocations: [privateLocations[0].label],
       };
       const testMonitors = [projectMonitors.monitors[0], secondMonitor];
       await supertest
@@ -1293,7 +1319,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .send({
             ...projectMonitors,
             monitors: [
-              { ...projectMonitors.monitors[0], privateLocations: ['Test private location 0'] },
+              { ...projectMonitors.monitors[0], privateLocations: [privateLocations[0].label] },
             ],
           })
           .expect(200);
@@ -1317,7 +1343,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
         );
         expect(packagePolicy.name).eql(
-          `${projectMonitors.monitors[0].id}-${project}-default-Test private location 0`
+          `${projectMonitors.monitors[0].id}-${project}-default-${privateLocations[0].label}`
         );
         expect(packagePolicy.policy_id).eql(testPolicyId);
 
@@ -1328,12 +1354,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           packagePolicy,
           getTestProjectSyntheticsPolicy({
             inputs: {},
-            name: 'check if title is present-Test private location 0',
+            name: `check if title is present-${privateLocations[0].label}`,
             id,
             configId,
             projectId: project,
             locationId: testPolicyId,
-            locationName: 'Test private location 0',
+            locationName: privateLocations[0].label,
           })
         );
       } finally {
@@ -1362,7 +1388,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               {
                 ...httpProjectMonitors.monitors[1],
                 'check.request.body': '${testGlobalParam}',
-                privateLocations: ['Test private location 0'],
+                privateLocations: [privateLocations[0].label],
               },
             ],
           })
@@ -1387,7 +1413,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
         );
         expect(packagePolicy.name).eql(
-          `${httpProjectMonitors.monitors[1].id}-${project}-default-Test private location 0`
+          `${httpProjectMonitors.monitors[1].id}-${project}-default-${privateLocations[0].label}`
         );
         expect(packagePolicy.policy_id).eql(testPolicyId);
 
@@ -1402,7 +1428,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             id,
             configId,
             projectId: project,
-            locationName: 'Test private location 0',
+            locationName: privateLocations[0].label,
             locationId: testPolicyId,
           })
         );
@@ -1421,7 +1447,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const monitorRequest = {
         monitors: [
-          { ...httpProjectMonitors.monitors[1], privateLocations: ['Test private location 0'] },
+          { ...httpProjectMonitors.monitors[1], privateLocations: [privateLocations[0].label] },
         ],
       };
       try {
@@ -1494,7 +1520,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: [
-              { ...projectMonitors.monitors[0], privateLocations: ['Test private location 0'] },
+              { ...projectMonitors.monitors[0], privateLocations: [privateLocations[0].label] },
             ],
           })
           .expect(200);
@@ -1527,12 +1553,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           packagePolicy,
           getTestProjectSyntheticsPolicy({
             inputs: {},
-            name: 'check if title is present-Test private location 0',
+            name: `check if title is present-${privateLocations[0].label}`,
             id,
             configId,
             projectId: project,
             locationId: testPolicyId,
-            locationName: 'Test private location 0',
+            locationName: privateLocations[0].label,
           })
         );
 
@@ -1582,7 +1608,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             monitors: [
               {
                 ...projectMonitors.monitors[0],
-                privateLocations: ['Test private location 0'],
+                privateLocations: [privateLocations[0].label],
               },
             ],
           });
@@ -1614,12 +1640,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           packagePolicy,
           getTestProjectSyntheticsPolicy({
             inputs: {},
-            name: 'check if title is present-Test private location 0',
+            name: `check if title is present-${privateLocations[0].label}`,
             id,
             configId,
             projectId: project,
             locationId: testPolicyId,
-            locationName: 'Test private location 0',
+            locationName: privateLocations[0].label,
           })
         );
 
@@ -1634,7 +1660,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               {
                 ...projectMonitors.monitors[0],
                 namespace: 'custom_namespace',
-                privateLocations: ['Test private location 0'],
+                privateLocations: [privateLocations[0].label],
                 enabled: false,
               },
             ],
@@ -1656,12 +1682,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           packagePolicy2,
           getTestProjectSyntheticsPolicy({
             inputs: { enabled: { value: false, type: 'bool' } },
-            name: 'check if title is present-Test private location 0',
+            name: `check if title is present-${privateLocations[0].label}`,
             id: id2,
             configId: configId2,
             projectId: project,
             locationId: testPolicyId,
-            locationName: 'Test private location 0',
+            locationName: privateLocations[0].label,
             namespace: 'custom_namespace',
           })
         );
@@ -1686,7 +1712,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: [
-              { ...projectMonitors.monitors[0], privateLocations: ['Test private location 0'] },
+              { ...projectMonitors.monitors[0], privateLocations: [privateLocations[0].label] },
             ],
           });
 
@@ -1713,7 +1739,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               isServiceManaged: true,
             },
             {
-              label: 'Test private location 0',
+              label: privateLocations[0].label,
               isServiceManaged: false,
               agentPolicyId: testPolicyId,
               id: testPolicyId,
@@ -1816,6 +1842,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 hash: 'ekrjelkjrelkjre',
                 id: projectMonitors.monitors[0].id,
                 locations: ['dev'],
+                privateLocations: [privateLocations[0].label],
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
@@ -1952,6 +1979,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 hash: 'ekrjelkjrelkjre',
                 id: httpProjectMonitors.monitors[1].id,
                 locations: ['does not exist'],
+                privateLocations: [privateLocations[0].label],
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
@@ -2006,7 +2034,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           createdMonitors: [],
           failedMonitors: [
             {
-              details: `Invalid locations specified. Private Location(s) 'does not exist' not found. Available private locations are 'Test private location 0'`,
+              details: `Invalid locations specified. Private Location(s) 'does not exist' not found. Available private locations are '${privateLocations[0].label}'`,
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {

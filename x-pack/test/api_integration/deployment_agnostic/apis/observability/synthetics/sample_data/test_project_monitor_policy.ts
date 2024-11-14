@@ -46,7 +46,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
 ): PackagePolicy => ({
   id: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
   version: 'WzEzMDksMV0=',
-  name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
+  name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-${locationName}`,
   namespace: namespace || undefined,
   package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
   enabled: true,
@@ -128,7 +128,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             location_name: {
               type: 'text',
-              value: '"Test private location 0"',
+              value: `"${locationName}"`,
             },
             max_redirects: {
               type: 'integer',

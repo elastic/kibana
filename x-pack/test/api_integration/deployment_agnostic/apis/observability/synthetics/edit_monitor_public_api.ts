@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
@@ -194,9 +195,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const updates: any = {};
 
     it('can change name of monitor', async () => {
-      updates.name = 'updated name';
+      updates.name = `updated name ${uuidv4()}`;
       const monitor = {
-        name: 'updated name',
+        name: updates.name,
       };
       const { body: result } = await editMonitorAPI(monitorId, monitor);
 
@@ -213,12 +214,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('prevents duplicate name of monitor', async () => {
+      const name = `test name ${uuidv4()}`;
       const monitor = {
+        name,
         type: 'http',
         locations: ['dev'],
         url: 'https://www.google.com',
       };
-      const { body: result, rawBody } = await addMonitorAPI(monitor);
+      // create one monitor with one name
+      await addMonitorAPI(monitor);
+      // create another monitor with a different name
+      const { body: result, rawBody } = await addMonitorAPI({
+        ...monitor,
+        name: 'test name',
+      });
       const newMonitorId = rawBody.id;
 
       expect(result).eql(
@@ -226,14 +235,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...defaultFields,
           ...monitor,
           locations: [localLoc],
-          name: 'https://www.google.com',
+          name: 'test name',
         })
       );
 
       const editResult = await editMonitorAPI(
         newMonitorId,
         {
-          name: 'updated name',
+          name,
         },
         400
       );
@@ -241,8 +250,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(editResult).eql({
         statusCode: 400,
         error: 'Bad Request',
-        message: 'Monitor name must be unique, "updated name" already exists.',
-        attributes: { details: 'Monitor name must be unique, "updated name" already exists.' },
+        message: `Monitor name must be unique, "${name}" already exists.`,
+        attributes: {
+          details: `Monitor name must be unique, "${name}" already exists.`,
+        },
       });
     });
 
@@ -269,16 +280,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           locations: [localLoc, pvtLoc],
         })
       );
+    });
 
-      const { body: result2 } = await editMonitorAPI(monitorId, {
-        locations: [pvtLoc],
-      });
+    it('can remove managed location from existing monitor', async () => {
+      const monitor = {
+        locations: [],
+        private_locations: [pvtLoc.id],
+      };
+
+      const { body: result } = await editMonitorAPI(monitorId, monitor);
+
+      expect(result).eql(
+        omitMonitorKeys({
+          ...defaultFields,
+          ...updates,
+          revision: 4,
+          url: 'https://www.google.com',
+          locations: [pvtLoc],
+        })
+      );
+
+      const monitorUpdate = {
+        locations: [localLoc.id],
+        private_locations: [pvtLoc.id],
+      };
+
+      const { body: result2 } = await editMonitorAPI(monitorId, monitorUpdate);
 
       expect(result2).eql(
         omitMonitorKeys({
           ...defaultFields,
           ...updates,
-          revision: 4,
+          revision: 5,
           url: 'https://www.google.com',
           locations: [localLoc, pvtLoc],
         })
@@ -296,7 +329,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...updates,
-          revision: 5,
+          revision: 6,
           url: 'https://www.google.com',
           locations: [localLoc],
         })

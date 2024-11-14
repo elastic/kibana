@@ -208,7 +208,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         name: 'test-monitor-name',
         origin: 'ui',
         'run_from.id': location.id,
-        'run_from.geo.name': 'Test private location 0',
+        'run_from.geo.name': location.label,
         enabled: true,
         urls: 'https://nextjs-test-synthetics.vercel.app/api/users',
         schedule: '@every 5m',

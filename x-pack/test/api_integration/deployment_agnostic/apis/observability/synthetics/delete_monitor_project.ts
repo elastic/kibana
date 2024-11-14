@@ -6,7 +6,11 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
+import {
+  ConfigKey,
+  ProjectMonitorsRequest,
+  PrivateLocation,
+} from '@kbn/synthetics-plugin/common/runtime_types';
 import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/delete_monitor_project';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -27,28 +31,36 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     let projectMonitors: ProjectMonitorsRequest;
     let editorUser: RoleCredentials;
+    let testPrivateLocations: PrivateLocation[] = [];
 
     let testPolicyId = '';
-    const testPrivateLocations = new PrivateLocationTestService(getService);
+    const testPrivateLocationsService = new PrivateLocationTestService(getService);
 
-    const setUniqueIds = (request: ProjectMonitorsRequest) => {
+    const setUniqueIds = (
+      request: ProjectMonitorsRequest,
+      privateLocations: PrivateLocation[] = []
+    ) => {
       return {
         ...request,
+        privateLocations: privateLocations.map((location) => location.label),
         monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuidv4() })),
       };
     };
 
     before(async () => {
-      await testPrivateLocations.installSyntheticsPackage();
+      await testPrivateLocationsService.installSyntheticsPackage();
       const testPolicyName = 'Fleet test server policy' + Date.now();
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
+      const apiResponse = await testPrivateLocationsService.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
-      await testPrivateLocations.setTestLocations([testPolicyId]);
+      testPrivateLocations = await testPrivateLocationsService.setTestLocations([testPolicyId]);
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
     });
 
     beforeEach(() => {
-      projectMonitors = setUniqueIds(getFixtureJson('project_browser_monitor'));
+      projectMonitors = setUniqueIds(
+        getFixtureJson('project_browser_monitor'),
+        testPrivateLocations
+      );
     });
 
     it('only allows 250 requests at a time', async () => {
@@ -409,7 +421,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('deletes integration policies when project monitors are deleted', async () => {
       const monitors = [
-        { ...projectMonitors.monitors[0], privateLocations: ['Test private location 0'] },
+        { ...projectMonitors.monitors[0], privateLocations: [testPrivateLocations[0].label] },
       ];
       const project = 'test-brower-suite';
 
@@ -494,74 +506,5 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200);
       }
     });
-
-    // KEEP TEST IN STATEFUL
-    // it('returns 403 when a user without fleet permissions attempts to delete a project monitor with a private location', async () => {
-    //   const project = 'test-brower-suite';
-    //   const secondMonitor = {
-    //     ...projectMonitors.monitors[0],
-    //     id: 'test-id-2',
-    //     privateLocations: ['Test private location 0'],
-    //   };
-    //   const testMonitors = [projectMonitors.monitors[0], secondMonitor];
-    //   const monitorsToDelete = testMonitors.map((monitor) => monitor.id);
-    //   const username = 'admin';
-    //   const roleName = 'uptime read only';
-    //   const password = `${username} - password`;
-    //   try {
-    //     await security.role.create(roleName, {
-    //       kibana: [
-    //         {
-    //           feature: {
-    //             uptime: ['all'],
-    //           },
-    //           spaces: ['*'],
-    //         },
-    //       ],
-    //     });
-    //     await security.user.create(username, {
-    //       password,
-    //       roles: [roleName],
-    //       full_name: 'a kibana user',
-    //     });
-
-    //     await supertest
-    //       .put(
-    //         SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-    //       )
-    //       .set('kbn-xsrf', 'true')
-    //       .send({ monitors: testMonitors })
-    //       .expect(200);
-
-    //     const savedObjectsResponse = await supertest
-    //       .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-    //       .query({
-    //         filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
-    //       })
-    //       .set('kbn-xsrf', 'true')
-    //       .expect(200);
-    //     const { total } = savedObjectsResponse.body;
-    //     expect(total).to.eql(2);
-
-    //     await supertestWithoutAuth
-    //       .delete(
-    //         SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
-    //       )
-    //       .set('kbn-xsrf', 'true')
-    //       .auth(username, password)
-    //       .send({ monitors: monitorsToDelete })
-    //       .expect(200);
-    //   } finally {
-    //     await supertest
-    //       .delete(
-    //         SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
-    //       )
-    //       .set('kbn-xsrf', 'true')
-    //       .send({ monitors: monitorsToDelete })
-    //       .expect(200);
-    //     await security.user.delete(username);
-    //     await security.role.delete(roleName);
-    //   }
-    // });
   });
 }
