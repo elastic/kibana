@@ -15,7 +15,7 @@ import { SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 
 export interface SLORepository {
-  checkIfSLOExists(slo: SLODefinition): Promise<boolean>;
+  exists(id: string): Promise<boolean>;
   create(slo: SLODefinition): Promise<SLODefinition>;
   update(slo: SLODefinition): Promise<SLODefinition>;
   findAllByIds(ids: string[]): Promise<SLODefinition[]>;
@@ -31,11 +31,11 @@ export interface SLORepository {
 export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
 
-  async checkIfSLOExists(slo: SLODefinition) {
+  async exists(id: string) {
     const findResponse = await this.soClient.find<StoredSLODefinition>({
       type: SO_SLO_TYPE,
       perPage: 0,
-      filter: `slo.attributes.id:(${slo.id})`,
+      filter: `slo.attributes.id:(${id})`,
     });
 
     return findResponse.total > 0;

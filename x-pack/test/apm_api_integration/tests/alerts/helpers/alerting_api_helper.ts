@@ -11,13 +11,11 @@ import pRetry from 'p-retry';
 import type { Agent as SuperTestAgent } from 'supertest';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
-import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
-import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
-import { ApmApiClient } from '../../../common/config';
-
-export const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-*';
-export const APM_ACTION_VARIABLE_INDEX = 'apm-index-connector-test';
+import {
+  APM_ACTION_VARIABLE_INDEX,
+  APM_ALERTS_INDEX,
+} from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
 
 export async function createApmRule<T extends ApmRuleType>({
   supertest,
@@ -51,59 +49,6 @@ export async function createApmRule<T extends ApmRuleType>({
   } catch (error: any) {
     throw new Error(`[Rule] Creating a rule failed: ${error}`);
   }
-}
-
-function getTimerange() {
-  return {
-    start: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    end: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-  };
-}
-
-export async function fetchServiceInventoryAlertCounts(apmApiClient: ApmApiClient) {
-  const timerange = getTimerange();
-  const serviceInventoryResponse = await apmApiClient.readUser({
-    endpoint: 'GET /internal/apm/services',
-    params: {
-      query: {
-        ...timerange,
-        environment: 'ENVIRONMENT_ALL',
-        kuery: '',
-        probability: 1,
-        documentType: ApmDocumentType.ServiceTransactionMetric,
-        rollupInterval: RollupInterval.SixtyMinutes,
-        useDurationSummary: true,
-      },
-    },
-  });
-
-  return serviceInventoryResponse.body.items.reduce<Record<string, number>>((acc, item) => {
-    return { ...acc, [item.serviceName]: item.alertsCount ?? 0 };
-  }, {});
-}
-
-export async function fetchServiceTabAlertCount({
-  apmApiClient,
-  serviceName,
-}: {
-  apmApiClient: ApmApiClient;
-  serviceName: string;
-}) {
-  const timerange = getTimerange();
-  const alertsCountReponse = await apmApiClient.readUser({
-    endpoint: 'GET /internal/apm/services/{serviceName}/alerts_count',
-    params: {
-      path: {
-        serviceName,
-      },
-      query: {
-        ...timerange,
-        environment: 'ENVIRONMENT_ALL',
-      },
-    },
-  });
-
-  return alertsCountReponse.body.alertsCount;
 }
 
 export async function runRuleSoon({
@@ -159,71 +104,6 @@ export async function deleteApmRules(supertest: SuperTestAgent) {
   );
 }
 
-export function deleteApmAlerts(es: Client) {
-  return es.deleteByQuery({
-    index: APM_ALERTS_INDEX,
-    conflicts: 'proceed',
-    query: { match_all: {} },
-  });
-}
-
-export async function clearKibanaApmEventLog(es: Client) {
-  return es.deleteByQuery({
-    index: '.kibana-event-log-*',
-    query: { term: { 'kibana.alert.rule.consumer': 'apm' } },
-  });
-}
-
-export type ApmAlertFields = ParsedTechnicalFields & ObservabilityApmAlert;
-
-export async function createIndexConnector({
-  supertest,
-  name,
-}: {
-  supertest: SuperTestAgent;
-  name: string;
-}) {
-  const { body } = await supertest
-    .post(`/api/actions/connector`)
-    .set('kbn-xsrf', 'foo')
-    .send({
-      name,
-      config: {
-        index: APM_ACTION_VARIABLE_INDEX,
-        refresh: true,
-      },
-      connector_type_id: '.index',
-    });
-
-  return body.id as string;
-}
-
-export function getIndexAction({
-  actionId,
-  actionVariables,
-}: {
-  actionId: string;
-  actionVariables: Array<{ name: string }>;
-}) {
-  return {
-    group: 'threshold_met',
-    id: actionId,
-    params: {
-      documents: [
-        actionVariables.reduce<Record<string, string>>((acc, actionVariable) => {
-          acc[actionVariable.name] = `{{context.${actionVariable.name}}}`;
-          return acc;
-        }, {}),
-      ],
-    },
-    frequency: {
-      notify_when: 'onActionGroupChange',
-      throttle: null,
-      summary: false,
-    },
-  };
-}
-
 export async function deleteAllActionConnectors({
   supertest,
   es,
@@ -240,6 +120,23 @@ export async function deleteAllActionConnectors({
     })
   );
 }
+
+export function deleteApmAlerts(es: Client) {
+  return es.deleteByQuery({
+    index: APM_ALERTS_INDEX,
+    conflicts: 'proceed',
+    query: { match_all: {} },
+  });
+}
+
+export async function clearKibanaApmEventLog(es: Client) {
+  return es.deleteByQuery({
+    index: '.kibana-event-log-*',
+    query: { term: { 'kibana.alert.rule.consumer': 'apm' } },
+  });
+}
+
+export type ApmAlertFields = ParsedTechnicalFields & ObservabilityApmAlert;
 
 async function deleteActionConnector({
   supertest,
