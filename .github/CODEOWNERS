@@ -1258,7 +1258,10 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test_serverless/**/test_suites/**/fleet/ @elastic/fleet
 
 # APM
-/x-pack/test/functional/apps/apm/  @elastic/obs-ux-infra_services-team
+/x-pack/test/stack_functional_integration/apps/apm @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+/x-pack/test/common/services/apm_synthtrace_kibana_client.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+/test/api_integration/apis/ui_metric/*.ts @elastic/obs-ux-infra_services-team
+/x-pack/test/functional/apps/apm/ @elastic/obs-ux-infra_services-team
 /x-pack/test/apm_api_integration/ @elastic/obs-ux-infra_services-team
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
 /packages/kbn-utility-types/src/dot.ts @dgieselaar
