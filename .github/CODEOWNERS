@@ -1352,6 +1352,11 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 
 # Maps
 #CC# /x-pack/plugins/maps/ @elastic/kibana-gis
+/x-pack/test/upgrade/services/maps_upgrade_services.ts @elastic/kibana-gis
+/x-pack/test/stack_functional_integration/apps/maps @elastic/kibana-gis
+/x-pack/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-gis
+/x-pack/test/functional/page_objects/gis_page.ts @elastic/kibana-gis
+/x-pack/test/upgrade/apps/maps @elastic/kibana-gis
 /x-pack/test/api_integration/apis/maps/ @elastic/kibana-gis
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
