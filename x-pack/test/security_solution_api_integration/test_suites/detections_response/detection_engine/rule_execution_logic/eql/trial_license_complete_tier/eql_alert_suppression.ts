@@ -10,7 +10,10 @@ import { v4 as uuidv4 } from 'uuid';
 import sortBy from 'lodash/sortBy';
 import partition from 'lodash/partition';
 
-import { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  DetectionAlert,
+  EqlRuleCreateProps,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
@@ -24,6 +27,8 @@ import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_U
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import {
   createRule,
   deleteAllRules,
@@ -63,6 +68,10 @@ export default ({ getService }: FtrProviderContext) => {
     index: 'ecs_compliant',
     log,
   });
+
+  const partitionSequenceBuildingBlocks = (
+    alerts: Array<SearchHit<DetectionAlert & RiskEnrichmentFields>>
+  ) => partition(alerts, (alert) => alert?._source?.['kibana.alert.building_block_type'] == null);
 
   // NOTE: Add to second quality gate after feature is GA
   describe('@ess @serverless Alert Suppression for EQL rules', () => {
@@ -1838,10 +1847,7 @@ export default ({ getService }: FtrProviderContext) => {
         // we expect one created alert and one suppressed alert
         // and two building block alerts, let's confirm that
         expect(previewAlerts.length).toEqual(3);
-        const [sequenceAlert, buildingBlockAlerts] = partition(
-          previewAlerts,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
-        );
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
         expect(buildingBlockAlerts.length).toEqual(2);
         expect(sequenceAlert.length).toEqual(1);
 
@@ -1993,10 +1999,8 @@ export default ({ getService }: FtrProviderContext) => {
         // we expect two sequence alerts
         // each sequence alert having two building block alerts
         expect(previewAlerts.length).toEqual(6);
-        const [sequenceAlerts, buildingBlockAlerts] = partition(
-          previewAlerts,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
-        );
+        const [sequenceAlerts, buildingBlockAlerts] =
+          partitionSequenceBuildingBlocks(previewAlerts);
         expect(buildingBlockAlerts.length).toEqual(4);
         expect(sequenceAlerts.length).toEqual(2);
 
@@ -2100,10 +2104,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
         // we expect one alert and one suppressed alert
         // and two building block alerts per shell alert, let's confirm that
-        const [sequenceAlerts, buildingBlockAlerts] = partition(
-          previewAlerts,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
-        );
+        const [sequenceAlerts, buildingBlockAlerts] =
+          partitionSequenceBuildingBlocks(previewAlerts);
         expect(buildingBlockAlerts.length).toEqual(6);
         expect(sequenceAlerts.length).toEqual(3);
         const [suppressedSequenceAlerts] = partition(
@@ -2174,10 +2176,7 @@ export default ({ getService }: FtrProviderContext) => {
         // we expect one alert and two suppressed alerts
         // and two building block alerts, let's confirm that
         expect(previewAlerts.length).toEqual(6);
-        const [sequenceAlert, buildingBlockAlerts] = partition(
-          previewAlerts,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
-        );
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
         const [suppressedSequenceAlerts] = partition(
           sequenceAlert,
           (alert) => (alert?._source?.['kibana.alert.suppression.docs_count'] as number) >= 0
@@ -2250,10 +2249,7 @@ export default ({ getService }: FtrProviderContext) => {
         // we expect one alert and two suppressed alerts
         // and two building block alerts, let's confirm that
         expect(previewAlerts.length).toEqual(3);
-        const [sequenceAlert, buildingBlockAlerts] = partition(
-          previewAlerts,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
-        );
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
         const [suppressedSequenceAlerts] = partition(
           sequenceAlert,
           (alert) => (alert?._source?.['kibana.alert.suppression.docs_count'] as number) >= 0
@@ -2339,10 +2335,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(previewAlerts.length).toEqual(9);
-        const [sequenceAlert, buildingBlockAlerts] = partition(
-          previewAlerts,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
-        );
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
         const [suppressedSequenceAlerts] = partition(
           sequenceAlert,
           (alert) => (alert?._source?.['kibana.alert.suppression.docs_count'] as number) >= 0
@@ -2411,10 +2404,7 @@ export default ({ getService }: FtrProviderContext) => {
         // we expect one alert and two suppressed alerts
         // and two building block alerts, let's confirm that
         expect(previewAlerts.length).toEqual(3);
-        const [sequenceAlert, buildingBlockAlerts] = partition(
-          previewAlerts,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
-        );
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
         expect(buildingBlockAlerts.length).toEqual(2);
         expect(sequenceAlert.length).toEqual(1);
 
@@ -2498,10 +2488,7 @@ export default ({ getService }: FtrProviderContext) => {
         // we expect one alert and two suppressed alerts
         // and two building block alerts, let's confirm that
         expect(previewAlerts.length).toEqual(3);
-        const [sequenceAlert, buildingBlockAlerts] = partition(
-          previewAlerts,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
-        );
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
         expect(buildingBlockAlerts.length).toEqual(2);
         expect(sequenceAlert.length).toEqual(1);
 
@@ -2559,10 +2546,7 @@ export default ({ getService }: FtrProviderContext) => {
           previewId,
           sort: [ALERT_ORIGINAL_TIME],
         });
-        const [sequenceAlert] = partition(
-          previewAlerts,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
-        );
+        const [sequenceAlert] = partitionSequenceBuildingBlocks(previewAlerts);
         expect(previewAlerts.length).toEqual(3); // one sequence, two building block
         expect(sequenceAlert[0]._source).toEqual({
           ...sequenceAlert[0]._source,
@@ -2657,10 +2641,7 @@ export default ({ getService }: FtrProviderContext) => {
           size: 100,
           sort: [ALERT_SUPPRESSION_START], // sorting on null fields was preventing the alerts from yielding
         });
-        const [sequenceAlert] = partition(
-          previewAlerts,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
-        );
+        const [sequenceAlert] = partitionSequenceBuildingBlocks(previewAlerts);
 
         // for sequence alerts if neither of the fields are there, we cannot suppress
         expect(sequenceAlert.length).toEqual(4);
@@ -2803,10 +2784,7 @@ export default ({ getService }: FtrProviderContext) => {
           previewId,
           size: 100,
         });
-        const [sequenceAlert] = partition(
-          previewAlerts,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
-        );
+        const [sequenceAlert] = partitionSequenceBuildingBlocks(previewAlerts);
 
         // for sequence alerts if neither of the fields are there, we cannot suppress
         const [suppressedSequenceAlerts] = partition(
@@ -2880,10 +2858,7 @@ export default ({ getService }: FtrProviderContext) => {
           previewId,
           sort: ['host.name', ALERT_ORIGINAL_TIME],
         });
-        const [sequenceAlert, buildingBlockAlerts] = partition(
-          previewAlerts,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
-        );
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(previewAlerts);
 
         expect(buildingBlockAlerts.length).toEqual(2);
         expect(sequenceAlert.length).toEqual(1);
@@ -2936,9 +2911,8 @@ export default ({ getService }: FtrProviderContext) => {
         const alerts = await getOpenAlerts(supertest, log, es, createdRule);
 
         expect(alerts.hits.hits.length).toEqual(3);
-        const [sequenceAlert, buildingBlockAlerts] = partition(
-          alerts.hits.hits,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
+          alerts.hits.hits
         );
         expect(buildingBlockAlerts.length).toEqual(2);
         expect(sequenceAlert.length).toEqual(1);
@@ -2987,10 +2961,7 @@ export default ({ getService }: FtrProviderContext) => {
           afterTimestamp
         );
 
-        const [sequenceAlert2] = partition(
-          secondAlerts.hits.hits,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
-        );
+        const [sequenceAlert2] = partitionSequenceBuildingBlocks(secondAlerts.hits.hits);
 
         expect(sequenceAlert2.length).toEqual(1);
         expect(sequenceAlert2[0]._source).toEqual({
@@ -3047,9 +3018,8 @@ export default ({ getService }: FtrProviderContext) => {
         const alerts = await getOpenAlerts(supertest, log, es, createdRule);
 
         expect(alerts.hits.hits.length).toEqual(3);
-        const [sequenceAlert, buildingBlockAlerts] = partition(
-          alerts.hits.hits,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
+          alerts.hits.hits
         );
         expect(buildingBlockAlerts.length).toEqual(2);
         expect(sequenceAlert.length).toEqual(1);
@@ -3095,10 +3065,7 @@ export default ({ getService }: FtrProviderContext) => {
           afterTimestamp
         );
 
-        const [sequenceAlert2] = partition(
-          secondAlerts.hits.hits,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
-        );
+        const [sequenceAlert2] = partitionSequenceBuildingBlocks(secondAlerts.hits.hits);
 
         expect(sequenceAlert2.length).toEqual(2);
         expect(sequenceAlert2[0]._source).toEqual({
@@ -3185,9 +3152,8 @@ export default ({ getService }: FtrProviderContext) => {
         // we expect one shell alert
         // and three building block alerts
         expect(alerts.hits.hits.length).toEqual(4);
-        const [sequenceAlert, buildingBlockAlerts] = partition(
-          alerts.hits.hits,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
+          alerts.hits.hits
         );
         expect(buildingBlockAlerts.length).toEqual(3);
         expect(sequenceAlert.length).toEqual(1);
@@ -3244,9 +3210,8 @@ export default ({ getService }: FtrProviderContext) => {
         // we expect one shell alert
         // and three building block alerts
         expect(alerts.hits.hits.length).toEqual(4);
-        const [sequenceAlert, buildingBlockAlerts] = partition(
-          alerts.hits.hits,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
+        const [sequenceAlert, buildingBlockAlerts] = partitionSequenceBuildingBlocks(
+          alerts.hits.hits
         );
         expect(buildingBlockAlerts.length).toEqual(3);
         expect(sequenceAlert.length).toEqual(1);
@@ -3296,9 +3261,8 @@ export default ({ getService }: FtrProviderContext) => {
           afterTimestamp2
         );
 
-        const [sequenceAlert2, buildingBlockAlerts2] = partition(
-          secondAlerts.hits.hits,
-          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
+        const [sequenceAlert2, buildingBlockAlerts2] = partitionSequenceBuildingBlocks(
+          secondAlerts.hits.hits
         );
 
         // two sequence alerts because the second one happened
