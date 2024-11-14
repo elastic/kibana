@@ -10,6 +10,7 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  MAX_CUSTOM_OBSERVABLE_TYPES,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
   MAX_TAGS_PER_TEMPLATE,
@@ -97,8 +98,11 @@ export const CustomFieldsConfigurationRt = limitedArraySchema({
   fieldName: 'customFields',
 });
 
-export const ObservableTypesConfigurationRt = rt.array(
-  rt.strict({
+export const ObservableTypesConfigurationRt = limitedArraySchema({
+  min: 0,
+  max: MAX_CUSTOM_OBSERVABLE_TYPES,
+  fieldName: 'observableTypes',
+  codec: rt.strict({
     key: regexStringRt({
       codec: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_OBSERVABLE_TYPE_KEY_LENGTH }),
       pattern: '^[a-z0-9_-]+$',
@@ -109,8 +113,8 @@ export const ObservableTypesConfigurationRt = rt.array(
       min: 1,
       max: MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
     }),
-  })
-);
+  }),
+});
 
 export const TemplateConfigurationRt = rt.intersection([
   rt.strict({

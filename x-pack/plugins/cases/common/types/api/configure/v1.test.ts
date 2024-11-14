@@ -14,6 +14,7 @@ import {
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  MAX_CUSTOM_OBSERVABLE_TYPES,
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
@@ -974,28 +975,28 @@ describe('configure', () => {
       ];
 
       const result = ObservableTypesConfigurationRt.decode(validData);
-      expect(PathReporter.report(result)).toContain('No errors!');
+      expect(PathReporter.report(result).join()).toContain('No errors!');
     });
 
     it('should invalidate an observable types configuration with an invalid key', () => {
       const invalidData = [{ key: 'Invalid Key!', label: 'Observable Label 1' }];
 
       const result = ObservableTypesConfigurationRt.decode(invalidData);
-      expect(PathReporter.report(result)).not.toContain('No errors!');
+      expect(PathReporter.report(result).join()).not.toContain('No errors!');
     });
 
     it('should invalidate an observable types configuration with a missing label', () => {
       const invalidData = [{ key: 'observable_key_1' }];
 
       const result = ObservableTypesConfigurationRt.decode(invalidData);
-      expect(PathReporter.report(result)).not.toContain('No errors!');
+      expect(PathReporter.report(result).join()).not.toContain('No errors!');
     });
 
     it('should invalidate an observable types configuration with an empty array', () => {
       const invalidData: unknown[] = [];
 
       const result = ObservableTypesConfigurationRt.decode(invalidData);
-      expect(PathReporter.report(result)).toContain('No errors!');
+      expect(PathReporter.report(result).join()).toContain('No errors!');
     });
 
     it('should invalidate an observable types configuration with a label exceeding max length', () => {
@@ -1004,14 +1005,24 @@ describe('configure', () => {
       ];
 
       const result = ObservableTypesConfigurationRt.decode(invalidData);
-      expect(PathReporter.report(result)).not.toContain('No errors!');
+      expect(PathReporter.report(result).join()).not.toContain('No errors!');
     });
 
     it('should invalidate an observable types configuration with a key exceeding max length', () => {
       const invalidData = [{ key: 'a'.repeat(MAX_OBSERVABLE_TYPE_KEY_LENGTH + 1), label: 'label' }];
 
       const result = ObservableTypesConfigurationRt.decode(invalidData);
-      expect(PathReporter.report(result)).not.toContain('No errors!');
+      expect(PathReporter.report(result).join()).not.toContain('No errors!');
+    });
+
+    it('should invalidate an observable types configuration with observableTypes count exceeding max', () => {
+      const invalidData = new Array(MAX_CUSTOM_OBSERVABLE_TYPES + 1).fill({
+        key: 'a'.repeat(MAX_OBSERVABLE_TYPE_KEY_LENGTH),
+        label: 'label',
+      });
+
+      const result = ObservableTypesConfigurationRt.decode(invalidData);
+      expect(PathReporter.report(result).join()).not.toContain('No errors!');
     });
   });
 });

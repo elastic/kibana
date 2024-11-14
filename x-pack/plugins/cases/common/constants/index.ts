@@ -268,6 +268,8 @@ export const MAX_OBSERVABLE_TYPE_KEY_LENGTH = 36;
 
 export const MAX_OBSERVABLE_TYPE_LABEL_LENGTH = 50;
 
+export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
+
 export const OBSERVABLE_TYPE_EMAIL = {
   label: 'Email',
   key: 'observable-type-email',
