@@ -15,7 +15,7 @@ import { documentationService } from '../../../../services/documentation';
 import { FormSchema, FIELD_TYPES, fieldValidators } from '../../shared_imports';
 import { ComboBoxOption } from '../../types';
 import { STORED_SOURCE_OPTION, SYNTHETIC_SOURCE_OPTION } from './source_field_section';
-import { IndexMode } from "@kbn/index-management-plugin/common/types/data_streams";
+import { IndexMode } from '../../../../../../common/types/data_streams';
 
 const { isJsonField } = fieldValidators;
 
