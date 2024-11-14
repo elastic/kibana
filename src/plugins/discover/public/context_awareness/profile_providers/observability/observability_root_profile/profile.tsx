@@ -9,12 +9,15 @@
 
 import { RootProfileProvider, SolutionType } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
+import { createGetAppMenu } from './accessors';
 
 export const createObservabilityRootProfileProvider = (
-  _services: ProfileProviderServices
+  services: ProfileProviderServices
 ): RootProfileProvider => ({
   profileId: 'observability-root-profile',
-  profile: {},
+  profile: {
+    getAppMenu: createGetAppMenu(services),
+  },
   resolve: (params) => {
     if (params.solutionNavId === SolutionType.Observability) {
       return { isMatch: true, context: { solutionType: SolutionType.Observability } };
