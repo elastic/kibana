@@ -54,12 +54,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.expectConnectionDetails();
       });
 
-      it('should show api key', async () => {
-        await pageObjects.svlApiKeys.deleteAPIKeys();
-        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
-        await pageObjects.svlApiKeys.expectAPIKeyAvailable();
-        const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
-        await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
+      describe('API key details', () => {
+        it('should show api key', async () => {
+          await pageObjects.svlApiKeys.deleteAPIKeys();
+          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+          await pageObjects.svlApiKeys.expectAPIKeyAvailable();
+          const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
+          await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
+        });
       });
 
       it('should have quick stats', async () => {
