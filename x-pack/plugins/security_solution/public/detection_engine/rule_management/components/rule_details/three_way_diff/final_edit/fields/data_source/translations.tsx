@@ -7,8 +7,22 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const RESET_DEFAULT_INDEX = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.resetDefaultIndicesButton',
+export const INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.indexPatterns.label',
+  {
+    defaultMessage: 'Index patterns',
+  }
+);
+
+export const DATA_VIEW = i18n.translate(
+  'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.dataViewSelector.name',
+  {
+    defaultMessage: 'Data view',
+  }
+);
+
+export const RESET_TO_DEFAULT_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.ruleManagement.threeWayDiff.finalEdit.indexPatterns.resetToDefault',
   {
     defaultMessage: 'Reset to default index patterns',
   }

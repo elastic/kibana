@@ -5,27 +5,33 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import type { CoreSetup } from '@kbn/core/public';
-import { createOverviewPanelAction } from './create_overview_panel_action';
-import { createAddErrorBudgetPanelAction } from './create_error_budget_action';
+import { UiActionsPublicSetup } from '@kbn/ui-actions-plugin/public/plugin';
+import { SLOPublicPluginsStart } from '..';
+import { SLORepositoryClient } from '../types';
 import { createAddAlertsPanelAction } from './create_alerts_panel_action';
-import { SloPublicPluginsStart, SloPublicStart, SloPublicPluginsSetup } from '..';
 import { createBurnRatePanelAction } from './create_burn_rate_panel_action';
+import { createAddErrorBudgetPanelAction } from './create_error_budget_action';
+import { createOverviewPanelAction } from './create_overview_panel_action';
 
 export function registerSloUiActions(
-  core: CoreSetup<SloPublicPluginsStart, SloPublicStart>,
-  pluginsSetup: SloPublicPluginsSetup,
-  pluginsStart: SloPublicPluginsStart
+  uiActions: UiActionsPublicSetup,
+  coreStart: CoreStart,
+  pluginsStart: SLOPublicPluginsStart,
+  sloClient: SLORepositoryClient
 ) {
-  const { uiActions } = pluginsSetup;
   const { serverless, cloud } = pluginsStart;
 
   // Initialize actions
-  const addOverviewPanelAction = createOverviewPanelAction(core.getStartServices);
-  const addErrorBudgetPanelAction = createAddErrorBudgetPanelAction(core.getStartServices);
-  const addAlertsPanelAction = createAddAlertsPanelAction(core.getStartServices);
-  const addBurnRatePanelAction = createBurnRatePanelAction(core.getStartServices);
+  const addOverviewPanelAction = createOverviewPanelAction(coreStart, pluginsStart, sloClient);
+  const addErrorBudgetPanelAction = createAddErrorBudgetPanelAction(
+    coreStart,
+    pluginsStart,
+    sloClient
+  );
+  const addAlertsPanelAction = createAddAlertsPanelAction(coreStart, pluginsStart, sloClient);
+  const addBurnRatePanelAction = createBurnRatePanelAction(coreStart, pluginsStart, sloClient);
 
   // Assign triggers
   // Only register these actions in stateful kibana, and the serverless observability project
