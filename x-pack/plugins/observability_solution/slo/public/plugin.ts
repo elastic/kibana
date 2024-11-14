@@ -186,7 +186,7 @@ export class SloPlugin
       plugins: pluginsStart,
       isServerless: !!pluginsStart.serverless,
       experimentalFeatures: this.experimentalFeatures,
-    })
+    });
 
     pluginsStart.discoverShared.features.registry.register({
       id: 'observability-create-slo',
