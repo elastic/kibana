@@ -52,8 +52,6 @@ describe('apm_user deprecation', () => {
         .fn()
         .mockResolvedValue({ dungeon_master: { roles: ['apm_user'] } });
 
-      // reportingCore = await createMockReportingCore(createMockConfigSchema());
-
       expect(await getDeprecationsInfo(context, core, { logger, security })).toMatchSnapshot();
     });
   });

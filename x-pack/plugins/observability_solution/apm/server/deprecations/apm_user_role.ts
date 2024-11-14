@@ -66,7 +66,7 @@ async function getUsersDeprecations(
       }),
       i18n.translate('xpack.apm.deprecations.apmUser.manualStepTwo', {
         defaultMessage:
-          `Remove the "{apmUserRoleName}" role from all users and add the built-in "viewer" roles.` +
+          `Remove the "{apmUserRoleName}" role from all users and add the built-in "viewer" role.` +
           ` The affected users are: {usersRoles}.`,
         values: { apmUserRoleName: APM_USER_ROLE_NAME, usersRoles },
       }),
@@ -138,7 +138,7 @@ async function getRoleMappingsDeprecations(
       }),
       i18n.translate('xpack.apm.deprecations.apmUserRoleMappings.manualStepFive', {
         defaultMessage:
-          `Remove the "{apmUserRoleName}" role from all role mappings and add the built-in "viewer" roles.` +
+          `Remove the "{apmUserRoleName}" role from all role mappings and add the built-in "viewer" role.` +
           ` The affected role mappings are: {roleMappings}.`,
         values: { apmUserRoleName: APM_USER_ROLE_NAME, roleMappings },
       }),

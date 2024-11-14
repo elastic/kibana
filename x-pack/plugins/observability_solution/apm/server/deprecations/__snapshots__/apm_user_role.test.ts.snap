@@ -6,7 +6,7 @@ Array [
     "correctiveActions": Object {
       "manualSteps": Array [
         "Go to Management > Security > Roles to find roles with the \\"apm_user\\" role.",
-        "Remove the \\"apm_user\\" role from all role mappings and add the built-in \\"viewer\\" roles. The affected role mappings are: dungeon_master[apm_user].",
+        "Remove the \\"apm_user\\" role from all role mappings and add the built-in \\"viewer\\" role. The affected role mappings are: dungeon_master[apm_user].",
       ],
     },
     "deprecationType": "feature",
@@ -24,7 +24,7 @@ Array [
     "correctiveActions": Object {
       "manualSteps": Array [
         "Go to Management > Security > Users to find users with the \\"apm_user\\" role.",
-        "Remove the \\"apm_user\\" role from all users and add the built-in \\"viewer\\" roles. The affected users are: reportron[apm_user].",
+        "Remove the \\"apm_user\\" role from all users and add the built-in \\"viewer\\" role. The affected users are: reportron[apm_user].",
       ],
     },
     "deprecationType": "feature",
