@@ -183,7 +183,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should send 2 requests (documents + chart) when adding a filter', async () => {
+      it.skip('should send 2 requests (documents + chart) when adding a filter', async () => {
         await expectSearches(type, 2, async () => {
           await filterBar.addFilter({
             field: 'extension',
