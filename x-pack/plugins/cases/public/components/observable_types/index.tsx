@@ -11,7 +11,6 @@ import {
   EuiPanel,
   EuiDescribedFormGroup,
   EuiSpacer,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -19,7 +18,6 @@ import {
 import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import type { ObservableTypesConfiguration } from '../../../common/types/domain';
-import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import { ObservableTypesList } from './observable_types_list';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 
@@ -44,14 +42,9 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
   const [error, setError] = useState<boolean>(false);
 
   const onAddCustomField = useCallback(() => {
-    if (observableTypes.length === MAX_CUSTOM_FIELDS_PER_CASE && !error) {
-      setError(true);
-      return;
-    }
-
     handleAddObservableType();
     setError(false);
-  }, [handleAddObservableType, setError, observableTypes, error]);
+  }, [handleAddObservableType, setError]);
 
   const onEditCustomField = useCallback(
     (key: string) => {
@@ -60,10 +53,6 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
     },
     [setError, handleEditObservableType]
   );
-
-  if (observableTypes.length < MAX_CUSTOM_FIELDS_PER_CASE && error) {
-    setError(false);
-  }
 
   return canAddObservableTypes ? (
     <EuiDescribedFormGroup
@@ -87,15 +76,6 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
               onDeleteObservableType={handleDeleteObservableType}
               onEditObservableType={onEditCustomField}
             />
-            {error ? (
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiText color="danger">
-                    {i18n.MAX_OBSERVABLE_TYPES_LIMIT(MAX_CUSTOM_FIELDS_PER_CASE)}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : null}
           </>
         ) : null}
         <EuiSpacer size="m" />

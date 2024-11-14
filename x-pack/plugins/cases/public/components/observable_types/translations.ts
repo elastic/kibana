@@ -25,12 +25,6 @@ export const ADD_OBSERVABLE_TYPE = i18n.translate('xpack.cases.observableTypes.a
   defaultMessage: 'Add observable type',
 });
 
-export const MAX_OBSERVABLE_TYPES_LIMIT = (maxObservableTypes: number) =>
-  i18n.translate('xpack.cases.observableTypes.limit', {
-    values: { maxObservableTypes },
-    defaultMessage: 'Maximum number of {maxObservableTypes } observable types reached.',
-  });
-
 export const OBSERVABLE_TYPE_LABEL = i18n.translate('xpack.cases.observableTypes.fieldLabel', {
   defaultMessage: 'Observable type label',
 });
