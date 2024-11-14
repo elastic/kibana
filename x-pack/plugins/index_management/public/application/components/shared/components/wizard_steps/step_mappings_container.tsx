@@ -16,7 +16,7 @@ import { StepMappings } from './step_mappings';
 
 interface Props {
   esDocsBase: string;
-  getTemplateData: (wizardContent: WizardContent) => TemplateDeserialized;
+  getTemplateData?: (wizardContent: WizardContent) => TemplateDeserialized;
 }
 
 export const StepMappingsContainer: React.FunctionComponent<Props> = ({
@@ -31,9 +31,13 @@ export const StepMappingsContainer: React.FunctionComponent<Props> = ({
 
   const { getData } = Forms.useMultiContentContext<WizardContent>();
 
-  const wizardContent = getData();
-  // Build the current template object, providing the wizard content data
-  const template = getTemplateData(wizardContent);
+  let indexMode;
+  if (getTemplateData) {
+    const wizardContent = getData();
+    // Build the current template object, providing the wizard content data
+    const template = getTemplateData(wizardContent);
+    indexMode = template?.indexMode;
+  }
 
   return (
     <StepMappings
@@ -42,7 +46,7 @@ export const StepMappingsContainer: React.FunctionComponent<Props> = ({
       indexSettings={getSingleContentData('settings')}
       esDocsBase={esDocsBase}
       esNodesPlugins={esNodesPlugins ?? []}
-      indexMode={template?.indexMode}
+      indexMode={indexMode}
     />
   );
 };
