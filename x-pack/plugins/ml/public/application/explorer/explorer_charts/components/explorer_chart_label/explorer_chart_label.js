@@ -19,7 +19,7 @@ export function ExplorerChartLabel({
   detectorLabel,
   entityFields,
   infoTooltip,
-  mode,
+  isEmbeddable,
   wrapLabel = false,
   onSelectEntity,
 }) {
@@ -53,7 +53,7 @@ export function ExplorerChartLabel({
         <ExplorerChartLabelBadge entity={entity} />
         {onSelectEntity !== undefined && (
           <EntityFilter
-            mode={mode}
+            isEmbeddable={isEmbeddable}
             onFilter={applyFilter}
             influencerFieldName={entity.fieldName}
             influencerFieldValue={entity.fieldValue}
@@ -94,6 +94,7 @@ export function ExplorerChartLabel({
 }
 ExplorerChartLabel.propTypes = {
   detectorLabel: PropTypes.object.isRequired,
+  isEmbeddable: PropTypes.boolean,
   entityFields: PropTypes.arrayOf(ExplorerChartLabelBadge.propTypes.entity),
   infoTooltip: PropTypes.object.isRequired,
   wrapLabel: PropTypes.bool,

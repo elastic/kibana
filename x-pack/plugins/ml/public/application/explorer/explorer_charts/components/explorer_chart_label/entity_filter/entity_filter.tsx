@@ -22,13 +22,13 @@ interface EntityFilterProps {
   }) => void;
   influencerFieldName: string;
   influencerFieldValue: string;
-  mode?: string;
+  isEmbeddable?: boolean;
 }
 export const EntityFilter: FC<EntityFilterProps> = ({
   onFilter,
   influencerFieldName,
   influencerFieldValue,
-  mode,
+  isEmbeddable,
 }) => {
   return (
     <React.Fragment>
@@ -59,7 +59,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
       </EuiToolTip>
       <EuiToolTip
         content={
-          mode ? (
+          isEmbeddable ? (
             <FormattedMessage
               id="xpack.ml.entityFilter.filterOutTooltip"
               defaultMessage={'Filter out'}
