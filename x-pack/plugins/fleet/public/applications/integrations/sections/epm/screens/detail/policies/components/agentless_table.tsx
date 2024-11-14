@@ -200,6 +200,7 @@ export const AgentlessPackagePoliciesTable = ({
                         setFlyoutPackagePolicy(packagePolicy);
                         setFlyoutAgentPolicy(agentPolicy);
                       },
+                      'data-test-subj': 'agentlessStatusBadge',
                       onClickAriaLabel: i18n.translate(
                         'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusAriaLabel',
                         {

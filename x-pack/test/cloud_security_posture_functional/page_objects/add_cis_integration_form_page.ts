@@ -511,8 +511,8 @@ export function AddCisIntegrationFormPageProvider({
     return await integration.getVisibleText();
   };
 
-  const getFirstCspmIntegrationPageAgent = async () => {
-    const agent = await testSubjects.find('agentPolicyNameLink');
+  const getFirstCspmIntegrationPageAgentStatus = async () => {
+    const agent = await testSubjects.find('agentlessStatusBadge');
     // this is assuming that the agent was just created therefor should be the first element
     return await agent.getVisibleText();
   };
@@ -568,7 +568,7 @@ export function AddCisIntegrationFormPageProvider({
     testSubjectIds,
     inputIntegrationName,
     getFirstCspmIntegrationPageIntegration,
-    getFirstCspmIntegrationPageAgent,
+    getFirstCspmIntegrationPageAgentStatus,
     getAgentBasedPolicyValue,
     showSuccessfulToast,
     showSetupTechnologyComponent,

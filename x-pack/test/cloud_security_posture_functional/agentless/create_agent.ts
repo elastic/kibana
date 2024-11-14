@@ -68,9 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await cisIntegration.getFirstCspmIntegrationPageIntegration()).to.be(
         integrationPolicyName
       );
-      expect(await cisIntegration.getFirstCspmIntegrationPageAgent()).to.be(
-        `Agentless policy for ${integrationPolicyName}`
-      );
+      expect(await cisIntegration.getFirstCspmIntegrationPageAgentStatus()).to.be('Pending');
     });
 
     it(`should show setup technology selector in edit mode`, async () => {
@@ -146,15 +144,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(true);
 
-      const agentPolicyName = await cisIntegration.getAgentBasedPolicyValue();
-
       await cisIntegration.navigateToIntegrationCspList();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await cisIntegration.getFirstCspmIntegrationPageIntegration()).to.be(
         integrationPolicyName
       );
-      expect(await cisIntegration.getFirstCspmIntegrationPageAgent()).to.be(agentPolicyName);
+      expect(await cisIntegration.getFirstCspmIntegrationPageAgentStatus()).to.be('Pending');
     });
   });
 }
