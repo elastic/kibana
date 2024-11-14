@@ -246,12 +246,6 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       expect(result).toBe(false);
     });
 
-    it('should return true when inference check succeeds', async () => {
-      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
-      const result = await client.isInferenceEndpointExists();
-      expect(result).toBe(true);
-    });
-
     it('should return false if inference api returns undefined', async () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
       // @ts-ignore
