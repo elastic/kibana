@@ -28,6 +28,7 @@ import {
   getAuthWithSuperUser,
   deleteAllCaseItems,
   superUserSpace1Auth,
+  deleteAllFiles,
 } from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
@@ -43,6 +44,13 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('happy path', () => {
+      afterEach(async () => {
+        await deleteAllFiles({
+          supertest,
+          auth: authSpace1,
+        });
+      });
+
       it('should post a file in space1', async () => {
         const postedCase = await createCase(supertest, caseRequest, 200, authSpace1);
         const patchedCase = await createFileAttachment({

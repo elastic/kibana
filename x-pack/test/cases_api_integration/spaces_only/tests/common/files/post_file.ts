@@ -17,16 +17,22 @@ import {
   removeServerGeneratedPropertiesFromSavedObject,
   getAuthWithSuperUser,
   deleteAllCaseItems,
+  deleteAllFiles,
 } from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
+  // const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
 
   describe('post_file', () => {
     afterEach(async () => {
+      await deleteAllFiles({
+        supertest: supertestWithoutAuth,
+        auth: authSpace1,
+      });
       await deleteAllCaseItems(es);
     });
 
