@@ -75,7 +75,7 @@ export interface SingleMetricViewerProps {
    */
   lastRefresh?: number;
   onRenderComplete?: () => void;
-  onError?: (error: Error) => void;
+  onError?: (error?: Error) => void;
   onForecastIdChange?: (forecastId: string | undefined) => void;
   uuid: string;
 }
@@ -133,7 +133,6 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
       if (errorEncounteredStatusCode.current !== undefined) {
         errorEncounteredStatusCode.current = undefined;
         // Calling onError to clear any previous error
-        // @ts-expect-error Expected 1 arguments, but got 0.
         onError?.();
       }
     },
