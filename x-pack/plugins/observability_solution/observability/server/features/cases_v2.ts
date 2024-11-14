@@ -10,7 +10,7 @@ import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/s
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { CasesUiCapabilities, CasesApiTags } from '@kbn/cases-plugin/common';
-import { casesFeatureIdV2, observabilityFeatureId } from '../../common';
+import { casesFeatureIdV2, casesFeatureId, observabilityFeatureId } from '../../common';
 
 export const getCasesFeatureV2 = (
   casesCapabilities: CasesUiCapabilities,
@@ -23,13 +23,13 @@ export const getCasesFeatureV2 = (
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.observability,
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-  app: [casesFeatureIdV2, 'kibana'],
+  app: [casesFeatureIdV2, casesFeatureId, 'kibana'],
   catalogue: [observabilityFeatureId],
   cases: [observabilityFeatureId],
   privileges: {
     all: {
       api: casesApiTags.all,
-      app: [casesFeatureIdV2, 'kibana'],
+      app: [casesFeatureIdV2, casesFeatureId, 'kibana'],
       catalogue: [observabilityFeatureId],
       cases: {
         create: [observabilityFeatureId],
@@ -45,7 +45,7 @@ export const getCasesFeatureV2 = (
     },
     read: {
       api: casesApiTags.read,
-      app: [casesFeatureIdV2, 'kibana'],
+      app: [casesFeatureIdV2, casesFeatureId, 'kibana'],
       catalogue: [observabilityFeatureId],
       cases: {
         read: [observabilityFeatureId],
@@ -125,6 +125,7 @@ export const getCasesFeatureV2 = (
           groupType: 'independent',
           privileges: [
             {
+              api: casesApiTags.createComment,
               id: 'create_comment',
               name: i18n.translate(
                 'xpack.observability.featureRegistry.addCommentsSubFeatureDetails',

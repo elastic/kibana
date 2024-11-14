@@ -53,7 +53,7 @@ export const getV1 = (): KibanaFeatureConfig => {
     cases: [APP_ID],
     privileges: {
       all: {
-        api: apiTags.all,
+        api: [...apiTags.all, ...apiTags.createComment],
         cases: {
           create: [APP_ID],
           read: [APP_ID],

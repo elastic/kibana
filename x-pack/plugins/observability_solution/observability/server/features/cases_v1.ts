@@ -42,7 +42,7 @@ export const getCasesFeature = (
   cases: [observabilityFeatureId],
   privileges: {
     all: {
-      api: casesApiTags.all,
+      api: [...casesApiTags.all, ...casesApiTags.createComment],
       app: [casesFeatureId, 'kibana'],
       catalogue: [observabilityFeatureId],
       cases: {

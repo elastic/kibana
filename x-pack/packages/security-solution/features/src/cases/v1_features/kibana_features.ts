@@ -50,7 +50,7 @@ export const getCasesBaseKibanaFeature = ({
     cases: [APP_ID],
     privileges: {
       all: {
-        api: apiTags.all,
+        api: [...apiTags.all, ...apiTags.createComment],
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
