@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ContextWithProfileId } from '../../../../profile_service';
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
 import {
   DataSourceCategory,
@@ -19,7 +20,10 @@ import { createResolve } from './create_resolve';
 describe('createResolve', () => {
   const VALID_INDEX_PATTERN = 'valid';
   const INVALID_INDEX_PATTERN = 'invalid';
-  const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Observability };
+  const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
+    profileId: 'root-profile',
+    solutionType: SolutionType.Observability,
+  };
   const RESOLUTION_MATCH = {
     isMatch: true,
     context: { category: DataSourceCategory.Logs },
@@ -61,19 +65,19 @@ describe('createResolve', () => {
     expect(
       resolve({
         ...params,
-        rootContext: { solutionType: SolutionType.Default },
+        rootContext: { profileId: 'other-root-profile', solutionType: SolutionType.Default },
       })
     ).toEqual(RESOLUTION_MISMATCH);
     expect(
       resolve({
         ...params,
-        rootContext: { solutionType: SolutionType.Search },
+        rootContext: { profileId: 'other-root-profile', solutionType: SolutionType.Search },
       })
     ).toEqual(RESOLUTION_MISMATCH);
     expect(
       resolve({
         ...params,
-        rootContext: { solutionType: SolutionType.Security },
+        rootContext: { profileId: 'other-root-profile', solutionType: SolutionType.Security },
       })
     ).toEqual(RESOLUTION_MISMATCH);
   });

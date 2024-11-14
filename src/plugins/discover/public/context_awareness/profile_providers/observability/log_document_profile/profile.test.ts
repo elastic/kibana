@@ -19,13 +19,20 @@ import {
 } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
 import { createObservabilityLogDocumentProfileProvider } from './profile';
+import { ContextWithProfileId } from '../../../profile_service';
 
 const mockServices = createContextAwarenessMocks().profileProviderServices;
 
 describe('logDocumentProfileProvider', () => {
   const logDocumentProfileProvider = createObservabilityLogDocumentProfileProvider(mockServices);
-  const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Observability };
-  const DATA_SOURCE_CONTEXT: DataSourceContext = { category: DataSourceCategory.Logs };
+  const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
+    profileId: 'root-profile',
+    solutionType: SolutionType.Observability,
+  };
+  const DATA_SOURCE_CONTEXT: ContextWithProfileId<DataSourceContext> = {
+    profileId: 'data-source-profile',
+    category: DataSourceCategory.Logs,
+  };
   const RESOLUTION_MATCH = {
     isMatch: true,
     context: {
@@ -116,19 +123,22 @@ describe('logDocumentProfileProvider', () => {
     expect(
       logDocumentProfileProvider.resolve({
         ...params,
-        rootContext: { solutionType: SolutionType.Default },
+        rootContext: { profileId: 'other-data-source-profile', solutionType: SolutionType.Default },
       })
     ).toEqual(RESOLUTION_MISMATCH);
     expect(
       logDocumentProfileProvider.resolve({
         ...params,
-        rootContext: { solutionType: SolutionType.Search },
+        rootContext: { profileId: 'other-data-source-profile', solutionType: SolutionType.Search },
       })
     ).toEqual(RESOLUTION_MISMATCH);
     expect(
       logDocumentProfileProvider.resolve({
         ...params,
-        rootContext: { solutionType: SolutionType.Security },
+        rootContext: {
+          profileId: 'other-data-source-profile',
+          solutionType: SolutionType.Security,
+        },
       })
     ).toEqual(RESOLUTION_MISMATCH);
   });

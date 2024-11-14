@@ -13,8 +13,12 @@ import { DataSourceCategory, RootContext, SolutionType } from '../../../../profi
 import { createContextAwarenessMocks } from '../../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from '../profile';
 import { createKubernetesContainerLogsDataSourceProfileProvider } from './kubernetes_container_logs';
+import { ContextWithProfileId } from '../../../../profile_service';
 
-const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Observability };
+const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
+  profileId: 'root-profile',
+  solutionType: SolutionType.Observability,
+};
 const { profileProviderServices } = createContextAwarenessMocks();
 const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(profileProviderServices);
 const dataSourceProfileProvider = createKubernetesContainerLogsDataSourceProfileProvider(

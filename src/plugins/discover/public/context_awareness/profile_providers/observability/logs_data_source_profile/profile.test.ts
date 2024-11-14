@@ -21,6 +21,7 @@ import { createContextAwarenessMocks } from '../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from './profile';
 import { DataGridDensity } from '@kbn/unified-data-table';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
+import type { ContextWithProfileId } from '../../../profile_service';
 
 const mockServices = createContextAwarenessMocks().profileProviderServices;
 
@@ -29,7 +30,10 @@ describe('logsDataSourceProfileProvider', () => {
   const VALID_INDEX_PATTERN = 'logs-nginx.access-*';
   const MIXED_INDEX_PATTERN = 'logs-nginx.access-*,metrics-*';
   const INVALID_INDEX_PATTERN = 'my_source-access-*';
-  const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Observability };
+  const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
+    profileId: 'root-profile',
+    solutionType: SolutionType.Observability,
+  };
   const RESOLUTION_MATCH = {
     isMatch: true,
     context: { category: DataSourceCategory.Logs },
@@ -103,19 +107,19 @@ describe('logsDataSourceProfileProvider', () => {
     expect(
       logsDataSourceProfileProvider.resolve({
         ...params,
-        rootContext: { solutionType: SolutionType.Default },
+        rootContext: { profileId: 'other-root-profile', solutionType: SolutionType.Default },
       })
     ).toEqual(RESOLUTION_MISMATCH);
     expect(
       logsDataSourceProfileProvider.resolve({
         ...params,
-        rootContext: { solutionType: SolutionType.Search },
+        rootContext: { profileId: 'other-root-profile', solutionType: SolutionType.Search },
       })
     ).toEqual(RESOLUTION_MISMATCH);
     expect(
       logsDataSourceProfileProvider.resolve({
         ...params,
-        rootContext: { solutionType: SolutionType.Security },
+        rootContext: { profileId: 'other-root-profile', solutionType: SolutionType.Security },
       })
     ).toEqual(RESOLUTION_MISMATCH);
   });
