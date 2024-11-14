@@ -130,8 +130,12 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
 
   useEffect(
     function resetErrorOnJobChange() {
-      errorEncounteredStatusCode.current = undefined;
+      if (errorEncounteredStatusCode.current !== undefined) {
+        errorEncounteredStatusCode.current = undefined;
+        onError?.(undefined);
+      }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedJobId]
   );
 
@@ -148,7 +152,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
             errorEncounteredStatusCode.current = undefined;
           } catch (e) {
             const error = extractErrorProperties(e);
-            // Could get 404 because job has been deleted
+            // Could get 404 because job has been deleted and also avoid infinite refetches on any error
             errorEncounteredStatusCode.current = error.statusCode;
             if (onError) {
               onError(
