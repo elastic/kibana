@@ -1367,24 +1367,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -1958,24 +1951,17 @@ paths:
                   type: boolean
                 flapping:
                   additionalProperties: false
-                  description: >-
-                    When flapping detection is turned on, alerts that switch
-                    quickly between active and recovered states are identified
-                    as “flapping” and notifications are reduced.
+                  description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
-                      description: >-
-                        The minimum number of runs in which the threshold must
-                        be met.
+                      description: The minimum number of runs in which the threshold must be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
-                      description: >-
-                        The minimum number of times an alert must switch states
-                        in the look back window.
+                      description: The minimum number of times an alert must switch states in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -2293,24 +2279,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -2887,24 +2866,17 @@ paths:
                     - active
                 flapping:
                   additionalProperties: false
-                  description: >-
-                    When flapping detection is turned on, alerts that switch
-                    quickly between active and recovered states are identified
-                    as “flapping” and notifications are reduced.
+                  description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
-                      description: >-
-                        The minimum number of runs in which the threshold must
-                        be met.
+                      description: The minimum number of runs in which the threshold must be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
-                      description: >-
-                        The minimum number of times an alert must switch states
-                        in the look back window.
+                      description: The minimum number of times an alert must switch states in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -3194,24 +3166,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -4241,24 +4206,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
