@@ -31,7 +31,7 @@ export const observabilityAIAssistantFtrConfigs = {
         __dirname,
         '../../../../test/analytics/plugins/analytics_ftr_helpers'
       ),
-      'xpack.observabilityAIAssistant.modelId': SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
+      'xpack.observabilityAIAssistant.modelId': SUPPORTED_TRAINED_MODELS.TINY_ELSER.name, // TODO: Remove
     },
   },
 };
