@@ -5,11 +5,16 @@
  * 2.0.
  */
 import { ValidationError } from '@kbn/config-schema';
+import { Logger } from '@kbn/logging';
 import { MetricTypes } from '../../common/rest_types';
 import { AutoOpsError } from './errors';
-import { autoOpsAPIService } from './autoops_api';
+import { AutoOpsAPIService } from './autoops_api';
 
 export class DataUsageService {
+  private readonly logger: Logger;
+  constructor(logger: Logger) {
+    this.logger = logger;
+  }
   async getMetrics({
     from,
     to,
@@ -22,6 +27,7 @@ export class DataUsageService {
     dataStreams: string[];
   }) {
     try {
+      const autoOpsAPIService = new AutoOpsAPIService(this.logger);
       const response = await autoOpsAPIService.autoOpsUsageMetricsAPI({
         from,
         to,

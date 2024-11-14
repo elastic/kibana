@@ -9,6 +9,7 @@ import https from 'https';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import apm from 'elastic-apm-node';
 
+import { Logger } from '@kbn/logging';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import { LogMeta } from '@kbn/core/server';
@@ -25,8 +26,11 @@ const AGENT_CREATION_FAILED_ERROR = 'AutoOps API could not create the autoops ag
 const AUTO_OPS_AGENT_CREATION_PREFIX = '[AutoOps API] Creating autoops agent failed';
 const AUTO_OPS_MISSING_CONFIG_ERROR = 'Missing autoops configuration';
 export class AutoOpsAPIService {
+  private logger: Logger;
+  constructor(logger: Logger) {
+    this.logger = logger;
+  }
   public async autoOpsUsageMetricsAPI(requestBody: UsageMetricsRequestBody) {
-    const logger = appContextService.getLogger().get();
     const traceId = apm.currentTransaction?.traceparent;
     const withRequestIdMessage = (message: string) => `${message} [Request Id: ${traceId}]`;
 
@@ -38,11 +42,11 @@ export class AutoOpsAPIService {
 
     const autoopsConfig = appContextService.getConfig()?.autoops;
     if (!autoopsConfig) {
-      logger.error(`[AutoOps API] ${AUTO_OPS_MISSING_CONFIG_ERROR}`, errorMetadata);
+      this.logger.error(`[AutoOps API] ${AUTO_OPS_MISSING_CONFIG_ERROR}`, errorMetadata);
       throw new AutoOpsError(AUTO_OPS_MISSING_CONFIG_ERROR);
     }
 
-    logger.debug(
+    this.logger.debug(
       `[AutoOps API] Creating autoops agent with TLS cert: ${
         autoopsConfig?.api?.tls?.certificate ? '[REDACTED]' : 'undefined'
       } and TLS key: ${autoopsConfig?.api?.tls?.key ? '[REDACTED]' : 'undefined'}
@@ -72,7 +76,7 @@ export class AutoOpsAPIService {
 
     const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
 
-    logger.debug(
+    this.logger.debug(
       `[AutoOps API] Creating autoops agent with request config ${requestConfigDebugStatus}`
     );
     const errorMetadataWithRequestConfig: LogMeta = {
@@ -88,7 +92,7 @@ export class AutoOpsAPIService {
     const response = await axios<UsageMetricsAutoOpsResponseSchemaBody>(requestConfig).catch(
       (error: Error | AxiosError) => {
         if (!axios.isAxiosError(error)) {
-          logger.error(
+          this.logger.error(
             `${AUTO_OPS_AGENT_CREATION_PREFIX} with an error ${error} ${requestConfigDebugStatus}`,
             errorMetadataWithRequestConfig
           );
@@ -99,7 +103,7 @@ export class AutoOpsAPIService {
 
         if (error.response) {
           // The request was made and the server responded with a status code and error data
-          logger.error(
+          this.logger.error(
             `${AUTO_OPS_AGENT_CREATION_PREFIX} because the AutoOps API responded with a status code that falls out of the range of 2xx: ${JSON.stringify(
               error.response.status
             )}} ${JSON.stringify(error.response.data)}} ${requestConfigDebugStatus}`,
@@ -117,14 +121,14 @@ export class AutoOpsAPIService {
           throw new AutoOpsError(withRequestIdMessage(AGENT_CREATION_FAILED_ERROR));
         } else if (error.request) {
           // The request was made but no response was received
-          logger.error(
+          this.logger.error(
             `${AUTO_OPS_AGENT_CREATION_PREFIX} while sending the request to the AutoOps API: ${errorLogCodeCause} ${requestConfigDebugStatus}`,
             errorMetadataWithRequestConfig
           );
           throw new Error(withRequestIdMessage(`no response received from the AutoOps API`));
         } else {
           // Something happened in setting up the request that triggered an Error
-          logger.error(
+          this.logger.error(
             `${AUTO_OPS_AGENT_CREATION_PREFIX} to be created ${errorLogCodeCause} ${requestConfigDebugStatus}`,
             errorMetadataWithRequestConfig
           );
@@ -135,7 +139,7 @@ export class AutoOpsAPIService {
 
     const validatedResponse = UsageMetricsAutoOpsResponseSchema.body().validate(response.data);
 
-    logger.debug(`[AutoOps API] Successfully created an autoops agent ${response}`);
+    this.logger.debug(`[AutoOps API] Successfully created an autoops agent ${response}`);
     return validatedResponse;
   }
 
@@ -176,5 +180,3 @@ export class AutoOpsAPIService {
     return error.cause;
   };
 }
-
-export const autoOpsAPIService = new AutoOpsAPIService();

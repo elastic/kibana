@@ -60,7 +60,7 @@ export const getUsageMetricsHandler = (
         );
       }
 
-      const dataUsageService = new DataUsageService();
+      const dataUsageService = new DataUsageService(logger);
       const metrics = await dataUsageService.getMetrics({
         from,
         to,
