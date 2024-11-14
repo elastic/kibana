@@ -16,6 +16,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
@@ -58,6 +59,7 @@ class ModalRef implements OverlayRef {
 interface StartDeps {
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
   analytics: AnalyticsServiceStart;
   targetDomElement: Element;
 }
@@ -67,7 +69,13 @@ export class ModalService {
   private activeModal: ModalRef | null = null;
   private targetDomElement: Element | null = null;
 
-  public start({ analytics, i18n, theme, targetDomElement }: StartDeps): OverlayModalStart {
+  public start({
+    analytics,
+    i18n,
+    theme,
+    userProfile,
+    targetDomElement,
+  }: StartDeps): OverlayModalStart {
     this.targetDomElement = targetDomElement;
 
     return {
@@ -90,7 +98,12 @@ export class ModalService {
         this.activeModal = modal;
 
         render(
-          <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
+          <KibanaRenderContextProvider
+            analytics={analytics}
+            i18n={i18n}
+            theme={theme}
+            userProfile={userProfile}
+          >
             <EuiModal {...options} onClose={() => modal.close()}>
               <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
             </EuiModal>
@@ -150,7 +163,12 @@ export class ModalService {
           };
 
           render(
-            <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
+            <KibanaRenderContextProvider
+              analytics={analytics}
+              i18n={i18n}
+              theme={theme}
+              userProfile={userProfile}
+            >
               <EuiConfirmModal {...props} />
             </KibanaRenderContextProvider>,
             targetDomElement

@@ -14,6 +14,7 @@ import { ReplaySubject, first, tap } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { FatalErrorInfo, FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
@@ -25,6 +26,7 @@ export interface FatalErrorsServiceSetupDeps {
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceSetup;
+  userProfile: UserProfileService;
   injectedMetadata: InternalInjectedMetadataSetup;
 }
 
@@ -89,7 +91,13 @@ export class FatalErrorsService {
     return fatalErrors;
   }
 
-  private renderError({ analytics, i18n, theme, injectedMetadata }: FatalErrorsServiceSetupDeps) {
+  private renderError({
+    analytics,
+    i18n,
+    theme,
+    userProfile,
+    injectedMetadata,
+  }: FatalErrorsServiceSetupDeps) {
     // delete all content in the rootDomElement
     this.rootDomElement.textContent = '';
 
@@ -102,6 +110,7 @@ export class FatalErrorsService {
         analytics={analytics}
         i18n={i18n}
         theme={theme}
+        userProfile={userProfile}
         globalStyles={true}
       >
         <FatalErrorsScreen

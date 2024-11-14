@@ -39,6 +39,16 @@ Array [
           },
         }
       }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
+        }
+      }
     >
       <EuiFlyout
         onClose={[Function]}
@@ -156,6 +166,35 @@ Array [
           },
         }
       }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+            ],
+          },
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
+        }
+      }
     >
       <EuiFlyout
         onClose={[Function]}
@@ -264,6 +303,35 @@ Array [
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+            ],
+          },
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >

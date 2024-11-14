@@ -10,10 +10,12 @@
 import React, { type FC, type PropsWithChildren } from 'react';
 import { CoreTheme } from '@kbn/core-theme-browser/src/types';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { Observable } from 'rxjs';
 
 interface CoreThemeProviderProps {
   theme$: Observable<CoreTheme>;
+  userProfile: UserProfileService;
   globalStyles?: boolean;
 }
 
@@ -24,8 +26,11 @@ interface CoreThemeProviderProps {
  */
 export const CoreThemeProvider: FC<PropsWithChildren<CoreThemeProviderProps>> = ({
   theme$,
+  userProfile,
   globalStyles,
   children,
 }) => (
-  <KibanaThemeProvider {...{ theme: { theme$ }, globalStyles }}>{children}</KibanaThemeProvider>
+  <KibanaThemeProvider {...{ theme: { theme$ }, userProfile, globalStyles }}>
+    {children}
+  </KibanaThemeProvider>
 );
