@@ -140,9 +140,9 @@ export class DashboardPanelActionsService extends FtrService {
     }
   }
 
-  async clickInlineEdit() {
+  async clickInlineEdit(wrapper?: WebElementWrapper) {
     this.log.debug('clickInlineEditAction');
-    await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ);
+    await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForTopNavToBeVisible();
   }
