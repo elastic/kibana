@@ -35,7 +35,7 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { isLoading, mutateAsync: postObservables } = usePostObservable(caseData.id);
   const refreshCaseViewPage = useRefreshCaseViewPage();
-  const { isObservablesEnabled } = useCasesFeatures();
+  const { observablesAuthorized: isObservablesEnabled } = useCasesFeatures();
 
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);
