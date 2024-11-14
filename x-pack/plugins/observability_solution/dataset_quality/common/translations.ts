@@ -93,12 +93,9 @@ export const flyoutSummaryText = i18n.translate('xpack.datasetQuality.flyoutSumm
   defaultMessage: 'Summary',
 });
 
-export const overviewDegradedDocsText = i18n.translate(
-  'xpack.datasetQuality.flyout.degradedDocsTitle',
-  {
-    defaultMessage: 'Degraded docs',
-  }
-);
+export const overviewTrendsDocsText = i18n.translate('xpack.datasetQuality.flyout.trendDocsTitle', {
+  defaultMessage: 'Document trends',
+});
 
 export const flyoutDegradedDocsTrendText = i18n.translate(
   'xpack.datasetQuality.flyoutDegradedDocsViz',
@@ -107,11 +104,26 @@ export const flyoutDegradedDocsTrendText = i18n.translate(
   }
 );
 
+export const flyoutFailedDocsTrendText = i18n.translate(
+  'xpack.datasetQuality.flyoutFailedDocsViz',
+  {
+    defaultMessage: 'Failed documents trend',
+  }
+);
+
 export const flyoutDegradedDocsPercentageText = i18n.translate(
   'xpack.datasetQuality.flyoutDegradedDocsPercentage',
   {
     defaultMessage: 'Degraded docs %',
     description: 'Tooltip label for the percentage of degraded documents chart.',
+  }
+);
+
+export const flyoutFailedDocsPercentageText = i18n.translate(
+  'xpack.datasetQuality.flyoutFailedDocsPercentage',
+  {
+    defaultMessage: 'Failed docs %',
+    description: 'Tooltip label for the percentage of failed documents chart.',
   }
 );
 
@@ -316,6 +328,13 @@ export const overviewPanelDatasetQualityIndicatorDegradedDocs = i18n.translate(
   'xpack.datasetQuality.details.overviewPanel.datasetQuality.degradedDocs',
   {
     defaultMessage: 'Degraded docs',
+  }
+);
+
+export const overviewPanelDatasetQualityIndicatorFailedDocs = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.datasetQuality.failedDocs',
+  {
+    defaultMessage: 'Failed docs',
   }
 );
 
