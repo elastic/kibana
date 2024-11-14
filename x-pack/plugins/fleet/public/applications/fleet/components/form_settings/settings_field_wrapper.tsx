@@ -13,12 +13,15 @@ import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
 import type { SettingsConfig } from '../../../../../common/settings/types';
 import { useAgentPolicyFormContext } from '../../sections/agent_policy/components/agent_policy_form';
 
-export const convertValue = (value: string, type: keyof typeof ZodFirstPartyTypeKind): any => {
+export const convertValue = (
+  value: string | boolean,
+  type: keyof typeof ZodFirstPartyTypeKind
+): any => {
   if (type === ZodFirstPartyTypeKind.ZodNumber) {
     if (value === '') {
       return 0;
     }
-    return parseInt(value, 10);
+    return parseInt(value as string, 10);
   }
   return value;
 };
@@ -48,7 +51,8 @@ export const SettingsFieldWrapper: React.FC<{
   const coercedSchema = settingsConfig.schema as z.ZodString;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = convertValue(e.target.value, typeName);
+    const value = typeName === ZodFirstPartyTypeKind.ZodBoolean ? e.target.checked : e.target.value;
+    const newValue = convertValue(value, typeName);
     const validationError = validateSchema(coercedSchema, newValue);
 
     if (validationError) {

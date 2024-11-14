@@ -185,6 +185,17 @@ export interface FullAgentPolicy {
       uninstall_token_hash: string;
       signing_key: string;
     };
+    logging?: {
+      level?: string;
+      to_files?: boolean;
+      files?: {
+        rotateeverybytes?: number;
+        keepfiles?: number;
+      };
+    };
+    limits?: {
+      go_max_procs?: number;
+    };
   };
   secret_references?: PolicySecretReference[];
   signed?: {

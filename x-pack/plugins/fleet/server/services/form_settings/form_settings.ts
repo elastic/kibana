@@ -85,12 +85,12 @@ export function _getSettingsValuesForAgentPolicy(
 ) {
   const settingsValues: { [k: string]: any } = {};
   settings.forEach((setting) => {
-    if (!setting.api_field) {
+    if (!setting.api_field || setting.hidden) {
       return;
     }
 
     const val = agentPolicy.advanced_settings?.[setting.api_field.name];
-    if (val) {
+    if (val !== undefined) {
       settingsValues[setting.name] = val;
     }
   });
