@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AddObservableRequestRt } from './v1';
+import { AddObservableRequestRt, UpdateObservableRequestRt } from './v1';
 
 describe('AddObservableRequestRT', () => {
   it('has expected attributes in request', () => {
@@ -18,6 +18,25 @@ describe('AddObservableRequestRT', () => {
     };
 
     const query = AddObservableRequestRt.decode(defaultRequest);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: defaultRequest,
+    });
+  });
+});
+
+describe('UpdateObservableRequestRT', () => {
+  it('has expected attributes in request', () => {
+    const defaultRequest = {
+      observable: {
+        description: undefined,
+        typeKey: 'ef528526-2af9-4345-9b78-046512c5bbd6',
+        value: 'email@example.com',
+      },
+    };
+
+    const query = UpdateObservableRequestRt.decode(defaultRequest);
 
     expect(query).toStrictEqual({
       _tag: 'Right',
