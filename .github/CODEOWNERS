@@ -1611,7 +1611,6 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /test/functional/page_objects/management/*.ts @elastic/kibana-management
 /test/functional/page_objects/embedded_console.ts @elastic/kibana-management
 /test/functional/page_objects/console_page.ts @elastic/kibana-management
-/test/functional/fixtures/es_archiver/alias/* @elastic/kibana-management # used here test/functional/apps/management/data_views/_handle_alias.ts
 /test/functional/firefox/console.config.ts @elastic/kibana-management
 /test/functional/apps/management @elastic/kibana-management
 /test/functional/apps/saved_objects_management @elastic/kibana-management
