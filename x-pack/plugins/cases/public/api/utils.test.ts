@@ -16,6 +16,8 @@ import {
   persistableStateAttachment,
   caseUserActionsWithRegisteredAttachments,
   caseUserActionsWithRegisteredAttachmentsSnake,
+  similarCasesSnake,
+  similarCasesCamel,
 } from '../containers/mock';
 import {
   convertAllCasesToCamel,
@@ -27,6 +29,7 @@ import {
   convertAttachmentsToCamelCase,
   convertAttachmentToCamelCase,
   convertUserActionsToCamelCase,
+  convertSimilarCasesToCamel,
 } from './utils';
 
 describe('utils', () => {
@@ -118,6 +121,12 @@ describe('utils', () => {
       expect(convertUserActionsToCamelCase(caseUserActionsWithRegisteredAttachmentsSnake)).toEqual(
         caseUserActionsWithRegisteredAttachments
       );
+    });
+  });
+
+  describe('convertSimilarCasesToCamel', () => {
+    it('convert similar cases to camel case', () => {
+      expect(convertSimilarCasesToCamel(similarCasesSnake)).toEqual(similarCasesCamel);
     });
   });
 });
