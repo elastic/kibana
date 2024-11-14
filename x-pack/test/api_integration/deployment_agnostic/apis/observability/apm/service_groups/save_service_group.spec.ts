@@ -5,20 +5,19 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { ApmApiError } from '../../common/apm_api_supertest';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { expectToReject } from '../../common/utils/expect_to_reject';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { ApmApiError } from '../../../../../../apm_api_integration/common/apm_api_supertest';
+import { expectToReject } from '../../../../../../apm_api_integration/common/utils/expect_to_reject';
 import {
   createServiceGroupApi,
   deleteAllServiceGroups,
   getServiceGroupsApi,
 } from './service_groups_api_methods';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
 
-  registry.when('Service group create', { config: 'basic', archives: [] }, () => {
+  describe('Service group create', () => {
     afterEach(async () => {
       await deleteAllServiceGroups(apmApiClient);
     });
