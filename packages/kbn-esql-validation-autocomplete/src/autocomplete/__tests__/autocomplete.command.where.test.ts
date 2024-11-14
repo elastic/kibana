@@ -39,7 +39,7 @@ describe('WHERE <expression>', () => {
           .map((name) => `${name} `)
           .map(attachTriggerCommand),
         attachTriggerCommand('var0 '),
-        ...allEvalFns,
+        ...allEvalFns.filter((fn) => fn.label !== 'QSTR'),
       ],
       {
         callbacks: {
