@@ -18,6 +18,7 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
+import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-rendering-browser';
 import { AppWrapper } from './app_containers';
 
 interface StartServices {
@@ -32,8 +33,6 @@ export interface StartDeps extends StartServices {
   overlays: OverlayStart;
   targetDomElement: HTMLDivElement;
 }
-
-export const APP_FIXED_VIEWPORT_ID = 'app-fixed-viewport';
 
 /**
  * Renders all Core UI in a single React tree.

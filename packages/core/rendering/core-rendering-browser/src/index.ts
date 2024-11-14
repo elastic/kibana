@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useAppFixedViewport } from './use_app_fixed_viewport';
+export { APP_FIXED_VIEWPORT_ID, useAppFixedViewport } from './use_app_fixed_viewport';

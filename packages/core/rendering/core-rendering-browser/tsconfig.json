@@ -12,9 +12,7 @@
     "**/*.ts",
     "**/*.tsx",
   ],
-  "kbn_references": [
-    "@kbn/core-rendering-browser-internal"
-  ],
+  "kbn_references": [],
   "exclude": [
     "target/**/*",
   ]

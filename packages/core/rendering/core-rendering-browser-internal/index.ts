@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { APP_FIXED_VIEWPORT_ID, RenderingService } from './src';
+export { RenderingService } from './src';
