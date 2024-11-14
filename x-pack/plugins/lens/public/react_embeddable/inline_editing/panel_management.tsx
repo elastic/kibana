@@ -20,11 +20,9 @@ export function setupPanelManagement(
   uuid: string,
   parentApi: unknown,
   {
-    canBeCreatedInline,
     isNewlyCreated$,
     setAsCreated,
   }: {
-    canBeCreatedInline: boolean;
     isNewlyCreated$: PublishingSubject<boolean>;
     setAsCreated: () => void;
   }
@@ -32,7 +30,7 @@ export function setupPanelManagement(
   const isEditing$ = new BehaviorSubject(false);
 
   return {
-    isEditingEnabled: () => !canBeCreatedInline,
+    isEditingEnabled: () => true,
     isNewPanel: () => isNewlyCreated$.getValue(),
     onStopEditing: (isCancel: boolean = false, state: LensRuntimeState | undefined) => {
       isEditing$.next(false);

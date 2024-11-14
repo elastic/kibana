@@ -100,7 +100,6 @@ export function initializeEditApi(
     };
 
   const panelManagementApi = setupPanelManagement(uuid, parentApi, {
-    canBeCreatedInline: internalApi.isNewlyCreated$.getValue(),
     isNewlyCreated$: internalApi.isNewlyCreated$,
     setAsCreated: internalApi.setAsCreated,
   });

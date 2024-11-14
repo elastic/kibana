@@ -57,7 +57,6 @@ export async function executeEditEmbeddableAction({
   const uuid = generateId();
   const isNewlyCreated$ = new BehaviorSubject<boolean>(false);
   const panelManagementApi = setupPanelManagement(uuid, container, {
-    canBeCreatedInline: false, // this is the edit action
     isNewlyCreated$,
     setAsCreated: () => isNewlyCreated$.next(false),
   });
