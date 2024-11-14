@@ -95,7 +95,8 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
      * in the useBulkActions hook.
      */
     const showBulkActions =
-      (permissions.update || permissions.delete || permissions.reopen) && selectedCases.length > 0;
+      (permissions.update || permissions.delete || permissions.reopenCase) &&
+      selectedCases.length > 0;
 
     const visibleCases =
       pagination?.pageSize && totalCases > pagination.pageSize ? pagination.pageSize : totalCases;
