@@ -39,7 +39,7 @@ export const favoritesSavedObjectType: SavedObjectsType = {
       userId: { type: 'keyword' },
       type: { type: 'keyword' },
       favoriteIds: { type: 'keyword' },
-      favoriteMetadata: { type: 'object', enabled: false },
+      favoriteMetadata: { type: 'object', dynamic: false },
     },
   },
   modelVersions: {
@@ -76,7 +76,7 @@ export const favoritesSavedObjectType: SavedObjectsType = {
         {
           type: 'mappings_addition',
           addedMappings: {
-            favoriteMetadata: { type: 'object', enabled: false },
+            favoriteMetadata: { type: 'object', dynamic: false },
           },
         },
       ],
