@@ -104,7 +104,7 @@ export const useViewInLogPatternAnalysisAction = (dataViewId?: string): TableIte
       return (
         <TableActionButton
           dataTestSubjPostfix="LogPatternAnalysis"
-          iconType="logstashQueue"
+          iconType="logPatternAnalysis"
           isDisabled={isDisabled}
           label={viewInLogPatternAnalysisMessage}
           tooltipText={
