@@ -32,7 +32,7 @@ export function useExportCSV(enableExportCSV?: boolean) {
   const { data: runtimeFieldsResponse } = useGetAgentStatusRuntimeFieldQuery({
     enabled: enableExportCSV,
   });
-  const runtimeFields = runtimeFieldsResponse?.data ? runtimeFieldsResponse.data : 'emit("")';
+  const runtimeFields = runtimeFieldsResponse ? runtimeFieldsResponse : 'emit("")';
 
   const getJobParams = (
     agents: Agent[] | string,

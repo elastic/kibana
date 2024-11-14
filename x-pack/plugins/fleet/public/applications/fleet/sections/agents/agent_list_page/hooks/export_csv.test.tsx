@@ -16,7 +16,7 @@ import { useExportCSV } from './export_csv';
 
 jest.mock('../../../../../../hooks', () => ({
   useGetAgentStatusRuntimeFieldQuery: jest.fn().mockReturnValue({
-    data: { data: 'emit("offline")' },
+    data: 'emit("offline")',
     isLoading: false,
   }),
   useKibanaVersion: jest.fn().mockReturnValue('9.0.0'),
