@@ -44,7 +44,9 @@ export class AutoOpsAPIService {
     }
 
     logger.debug(
-      `[AutoOps API] Creating autoops agent with TLS cert: ${
+      `[AutoOps API] Creating autoops agent with request URL: ${
+        autoopsConfig.api?.url
+      } and TLS cert: ${
         autoopsConfig?.api?.tls?.certificate ? '[REDACTED]' : 'undefined'
       } and TLS key: ${autoopsConfig?.api?.tls?.key ? '[REDACTED]' : 'undefined'}`
     );
