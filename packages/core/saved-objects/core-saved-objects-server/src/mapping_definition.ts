@@ -12,6 +12,7 @@ import type {
   MappingProperty as EsMappingProperty,
   MappingPropertyBase as EsMappingPropertyBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { NodeEventHandler } from 'rxjs/internal/observable/fromEvent';
 
 /**
  * Describe a saved object type mapping.
@@ -82,4 +83,15 @@ export type SavedObjectsFieldMapping = EsMappingProperty &
      * to avoid type failures on all code using accessing them via `SavedObjectsFieldMapping.properties`.
      */
     properties?: Record<EsPropertyName, EsMappingProperty>;
+
+    /**
+     * @note Do not explicitly set `enabled`. Either use `dynamic: false` for
+     * objects or exclude this field from your mappings entirely.
+     */
+    enabled?: never;
+    /**
+     * @note Do not explicitly set `index`. Either use `dynamic: false` for
+     * objects or exclude this field from your mappings entirely.
+     */
+    index?: never;
   };
