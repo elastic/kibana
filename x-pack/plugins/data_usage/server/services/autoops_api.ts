@@ -63,7 +63,6 @@ export class AutoOpsAPIService {
         rejectUnauthorized: tlsConfig.rejectUnauthorized,
         cert: tlsConfig.certificate,
         key: tlsConfig.key,
-        ca: tlsConfig.certificateAuthorities,
       }),
     };
 

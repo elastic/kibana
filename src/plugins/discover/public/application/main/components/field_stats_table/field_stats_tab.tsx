@@ -9,9 +9,10 @@
 
 import React from 'react';
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
-import { FieldStatisticsTable, type FieldStatisticsTableProps } from './field_stats_table';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { FieldStatisticsTable, type FieldStatisticsTableProps } from './field_stats_table';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query' | 'filters'>> =
   React.memo((props) => {
@@ -20,8 +21,13 @@ export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query
       data: services.data,
     });
     const additionalFieldGroups = useAdditionalFieldGroups();
+    const isEsql = useIsEsqlMode();
 
-    if (!services.dataVisualizer) return null;
+    // Quit early if we know it's in ES|QL mode
+    if (isEsql && services.dataVisualizer?.FieldStatsUnavailableMessage) {
+      return <services.dataVisualizer.FieldStatsUnavailableMessage />;
+    }
+
     return (
       <FieldStatisticsTable
         dataView={props.dataView}

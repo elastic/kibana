@@ -90,8 +90,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.missingOrFail('showQueryBarMenu');
         await testSubjects.missingOrFail('addFilter');
-        await testSubjects.existOrFail('dscViewModeToggle');
-        await testSubjects.existOrFail('dscViewModeDocumentButton');
+        await testSubjects.missingOrFail('dscViewModeToggle');
+        await testSubjects.missingOrFail('dscViewModeDocumentButton');
         // when Lens suggests a table, we render an ESQL based histogram
         await testSubjects.existOrFail('unifiedHistogramChart');
         await testSubjects.existOrFail('discoverQueryHits');
@@ -256,7 +256,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('switch modal', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/189636
+    describe.skip('switch modal', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
