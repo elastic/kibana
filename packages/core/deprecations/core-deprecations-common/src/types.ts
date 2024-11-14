@@ -121,7 +121,7 @@ export type DeprecationsDetails =
 /**
  * @public
  */
-export type DomainDeprecationDetails = DeprecationsDetails & {
+export type DomainDeprecationDetails<ExtendedDetails = DeprecationsDetails> = ExtendedDetails & {
   domainId: string;
 };
 

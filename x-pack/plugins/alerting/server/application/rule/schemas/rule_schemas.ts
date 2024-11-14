@@ -64,12 +64,14 @@ export const ruleExecutionStatusSchema = schema.object({
   ),
 });
 
+const outcome = schema.oneOf([
+  schema.literal(ruleLastRunOutcomeValues.SUCCEEDED),
+  schema.literal(ruleLastRunOutcomeValues.WARNING),
+  schema.literal(ruleLastRunOutcomeValues.FAILED),
+]);
+
 export const ruleLastRunSchema = schema.object({
-  outcome: schema.oneOf([
-    schema.literal(ruleLastRunOutcomeValues.SUCCEEDED),
-    schema.literal(ruleLastRunOutcomeValues.WARNING),
-    schema.literal(ruleLastRunOutcomeValues.FAILED),
-  ]),
+  outcome,
   outcomeOrder: schema.maybe(schema.number()),
   warning: schema.maybe(
     schema.nullable(
@@ -105,7 +107,7 @@ export const monitoringSchema = schema.object({
         success: schema.boolean(),
         timestamp: schema.number(),
         duration: schema.maybe(schema.number()),
-        outcome: schema.maybe(ruleLastRunSchema),
+        outcome: schema.maybe(outcome),
       })
     ),
     calculated_metrics: schema.object({

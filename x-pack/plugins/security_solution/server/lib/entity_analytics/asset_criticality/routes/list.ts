@@ -28,8 +28,10 @@ export const assetCriticalityPublicListRoute = (
     .get({
       access: 'public',
       path: ASSET_CRITICALITY_PUBLIC_LIST_URL,
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(

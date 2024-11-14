@@ -15,7 +15,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./apm_api_integration/service_maps/service_maps'));
     loadTestFile(require.resolve('./apm_api_integration/traces/critical_path'));
     loadTestFile(require.resolve('./cases'));
-    loadTestFile(require.resolve('./slos'));
     loadTestFile(require.resolve('./synthetics'));
     loadTestFile(require.resolve('./dataset_quality_api_integration'));
   });

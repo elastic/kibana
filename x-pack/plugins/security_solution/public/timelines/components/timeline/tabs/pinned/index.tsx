@@ -21,7 +21,6 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../../containers';
-import { defaultHeaders } from '../../body/column_headers/default_headers';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
@@ -37,6 +36,8 @@ import { useTimelineControlColumn } from '../shared/use_timeline_control_columns
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { NotesFlyout } from '../../properties/notes_flyout';
+import { NotesEventTypes, DocumentEventTypes } from '../../../../../common/lib/telemetry';
+import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 
 interface PinnedFilter {
   bool: {
@@ -111,7 +112,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   }, [pinnedEventIds]);
 
   const timelineQueryFields = useMemo(() => {
-    const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
+    const columnsHeader = isEmpty(columns) ? defaultUdtHeaders : columns;
     const columnFields = columnsHeader.map((c) => c.id);
 
     return [...columnFields, ...requiredFieldsForActions];
@@ -138,7 +139,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       fields: timelineQueryFields,
       limit: itemsPerPage,
       filterQuery,
-      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
       skip: filterQuery === '',
       startDate: '',
       sort: timelineQuerySortField,
@@ -146,8 +147,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     });
 
   const { openFlyout } = useExpandableFlyoutApi();
-  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesEnabled'
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
   );
 
   const {
@@ -168,7 +169,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
       const indexName = selectedPatterns.join(',');
-      if (eventId && securitySolutionNotesEnabled) {
+      if (eventId && !securitySolutionNotesDisabled) {
         openFlyout({
           right: {
             id: DocumentDetailsRightPanelKey,
@@ -190,10 +191,10 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
             },
           },
         });
-        telemetry.reportOpenNoteInExpandableFlyoutClicked({
+        telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
           location: timelineId,
         });
-        telemetry.reportDetailsFlyoutOpened({
+        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
           location: timelineId,
           panel: 'left',
         });
@@ -206,7 +207,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     },
     [
       openFlyout,
-      securitySolutionNotesEnabled,
+      securitySolutionNotesDisabled,
       selectedPatterns,
       telemetry,
       timelineId,

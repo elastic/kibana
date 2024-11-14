@@ -70,7 +70,7 @@ interface FlyoutHeaderPanelProps {
 export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
   ({ timelineId, openToggleRef }) => {
     const dispatch = useDispatch();
-    const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
+    const { browserFields, sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
     const { cases, uiSettings } = useKibana().services;
     const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
     const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
@@ -88,13 +88,21 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
         combineQueries({
           config: esQueryConfig,
           dataProviders,
-          indexPattern,
+          indexPattern: sourcererDataView,
           browserFields,
           filters: filters ? filters : [],
           kqlQuery: kqlQueryObj,
           kqlMode,
         }),
-      [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQueryObj]
+      [
+        browserFields,
+        dataProviders,
+        esQueryConfig,
+        filters,
+        kqlMode,
+        kqlQueryObj,
+        sourcererDataView,
+      ]
     );
     const isInspectDisabled = !isDataInTimeline || combinedQueries?.filterQuery === undefined;
 

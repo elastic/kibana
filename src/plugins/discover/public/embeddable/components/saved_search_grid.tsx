@@ -85,10 +85,10 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       getRenderCustomToolbarWithElements({
         leftSide:
           typeof props.totalHitCount === 'number' ? (
-            <TotalDocuments totalHitCount={props.totalHitCount} />
+            <TotalDocuments totalHitCount={props.totalHitCount} isEsqlMode={props.isPlainRecord} />
           ) : undefined,
       }),
-    [props.totalHitCount]
+    [props.totalHitCount, props.isPlainRecord]
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');

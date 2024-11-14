@@ -36,6 +36,7 @@ import {
   CustomFieldConfigurationWithoutTypeRt,
   TextCustomFieldConfigurationRt,
   ToggleCustomFieldConfigurationRt,
+  NumberCustomFieldConfigurationRt,
   TemplateConfigurationRt,
 } from './v1';
 
@@ -77,6 +78,12 @@ describe('configure', () => {
             key: 'toggle_custom_field',
             label: 'Toggle custom field',
             type: CustomFieldTypes.TOGGLE,
+            required: false,
+          },
+          {
+            key: 'number_custom_field',
+            label: 'Number custom field',
+            type: CustomFieldTypes.NUMBER,
             required: false,
           },
         ],
@@ -509,6 +516,93 @@ describe('configure', () => {
           })
         )[0]
       ).toContain('Invalid value "foobar" supplied');
+    });
+  });
+
+  describe('NumberCustomFieldConfigurationRt', () => {
+    const defaultRequest = {
+      key: 'my_number_custom_field',
+      label: 'Number Custom Field',
+      type: CustomFieldTypes.NUMBER,
+      required: true,
+    };
+
+    it('has expected attributes in request', () => {
+      const query = NumberCustomFieldConfigurationRt.decode(defaultRequest);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+
+    it('has expected attributes in request with defaultValue', () => {
+      const query = NumberCustomFieldConfigurationRt.decode({
+        ...defaultRequest,
+        defaultValue: 1,
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, defaultValue: 1 },
+      });
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = NumberCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+
+    it('defaultValue fails if the type is string', () => {
+      expect(
+        PathReporter.report(
+          NumberCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            defaultValue: 'string',
+          })
+        )[0]
+      ).toContain('Invalid value "string" supplied');
+    });
+
+    it('defaultValue fails if the type is boolean', () => {
+      expect(
+        PathReporter.report(
+          NumberCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            defaultValue: false,
+          })
+        )[0]
+      ).toContain('Invalid value false supplied');
+    });
+
+    it(`throws an error if the default value is more than  ${Number.MAX_SAFE_INTEGER}`, () => {
+      expect(
+        PathReporter.report(
+          NumberCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            defaultValue: Number.MAX_SAFE_INTEGER + 1,
+          })
+        )[0]
+      ).toContain(
+        'The defaultValue field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.'
+      );
+    });
+
+    it(`throws an error if the default value is less than ${Number.MIN_SAFE_INTEGER}`, () => {
+      expect(
+        PathReporter.report(
+          NumberCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            defaultValue: Number.MIN_SAFE_INTEGER - 1,
+          })
+        )[0]
+      ).toContain(
+        'The defaultValue field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.'
+      );
     });
   });
 

@@ -17,6 +17,8 @@ import {
   TaskManagerConfig,
 } from '../config';
 import { TaskCost } from '../task';
+import { getMsearchStatusCode } from './msearch_error';
+import { getBulkUpdateStatusCode } from './bulk_update_error';
 
 const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
@@ -160,7 +162,14 @@ export function countErrors(errors$: Observable<Error>, countInterval: number): 
         (e) =>
           SavedObjectsErrorHelpers.isTooManyRequestsError(e) ||
           SavedObjectsErrorHelpers.isEsUnavailableError(e) ||
-          isEsCannotExecuteScriptError(e)
+          SavedObjectsErrorHelpers.isGeneralError(e) ||
+          isEsCannotExecuteScriptError(e) ||
+          getMsearchStatusCode(e) === 429 ||
+          getMsearchStatusCode(e) === 500 ||
+          getMsearchStatusCode(e) === 503 ||
+          getBulkUpdateStatusCode(e) === 429 ||
+          getBulkUpdateStatusCode(e) === 500 ||
+          getBulkUpdateStatusCode(e) === 503
       )
     )
   ).pipe(

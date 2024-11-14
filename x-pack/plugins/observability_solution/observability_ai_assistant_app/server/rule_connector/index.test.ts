@@ -91,6 +91,7 @@ describe('observabilityAIAssistant rule_connector', () => {
           getFunctionClient: async () => ({
             getFunctions: () => [],
             getInstructions: () => [],
+            getAdhocInstructions: () => [],
           }),
         },
         context: {

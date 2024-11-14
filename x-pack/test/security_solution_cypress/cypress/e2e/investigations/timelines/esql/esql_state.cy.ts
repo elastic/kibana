@@ -25,7 +25,7 @@ import {
   goToEsqlTab,
   openActiveTimeline,
   addNameAndDescriptionToTimeline,
-  saveTimeline,
+  addNameToTimelineAndSave,
 } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { getTimeline } from '../../../../objects/timeline';
@@ -35,7 +35,25 @@ const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 
 const mockTimeline = getTimeline();
-// FAILURE introduced by the fix for 8.11.4 related to the default empty string and fix for the infinite loop on the esql tab
+const esqlQuery = 'from auditbeat-* | limit 5';
+
+const TIMELINE_REQ_WITH_SAVED_SEARCH = 'TIMELINE_REQ_WITH_SAVED_SEARCH';
+const TIMELINE_PATCH_REQ = 'TIMELINE_PATCH_REQ';
+
+const handleIntercepts = () => {
+  cy.intercept('PATCH', '/api/timeline', (req) => {
+    if (Object.hasOwn(req.body, 'timeline') && req.body.timeline.savedSearchId === null) {
+      req.alias = TIMELINE_PATCH_REQ;
+    }
+  });
+  cy.intercept('PATCH', '/api/timeline', (req) => {
+    if (Object.hasOwn(req.body, 'timeline') && req.body.timeline.savedSearchId !== null) {
+      req.alias = TIMELINE_REQ_WITH_SAVED_SEARCH;
+    }
+  });
+};
+
+// Flaky: https://github.com/elastic/kibana/issues/180755
 describe.skip(
   'Timeline Discover ESQL State',
   {
@@ -50,33 +68,29 @@ describe.skip(
         win.onbeforeunload = null;
       });
       goToEsqlTab();
+      addDiscoverEsqlQuery(esqlQuery);
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
+      handleIntercepts();
     });
     it('should not allow the dataview to be changed', () => {
       cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('not.exist');
     });
-    it('should remember esql query when navigating away and back to discover ', () => {
-      const esqlQuery = 'from auditbeat-* | limit 5';
-      addDiscoverEsqlQuery(esqlQuery);
+    it.skip('should remember esql query when navigating away and back to discover ', () => {
       submitDiscoverSearchBar();
-      addNameAndDescriptionToTimeline(mockTimeline);
-      saveTimeline();
+      addNameToTimelineAndSave(mockTimeline.title);
+      cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
       closeTimeline();
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
       openActiveTimeline();
       goToEsqlTab();
-
       verifyDiscoverEsqlQuery(esqlQuery);
     });
     it('should remember columns when navigating away and back to discover ', () => {
-      const esqlQuery = 'from auditbeat-* | limit 5';
-      addDiscoverEsqlQuery(esqlQuery);
       submitDiscoverSearchBar();
-      addNameAndDescriptionToTimeline(mockTimeline);
       addFieldToTable('host.name');
       addFieldToTable('user.name');
-      saveTimeline();
+      addNameAndDescriptionToTimeline(mockTimeline);
       closeTimeline();
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);

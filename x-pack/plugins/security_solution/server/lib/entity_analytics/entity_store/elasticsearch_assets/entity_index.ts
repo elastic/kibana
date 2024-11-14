@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EntityType } from '../../../../../common/api/entity_analytics';
 import { getEntitiesIndexName } from '../utils';
+import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 
 interface Options {
   entityType: EntityType;
@@ -17,18 +18,13 @@ interface Options {
 }
 
 export const createEntityIndex = async ({ entityType, esClient, namespace, logger }: Options) => {
-  try {
-    await esClient.indices.create({
+  await createOrUpdateIndex({
+    esClient,
+    logger,
+    options: {
       index: getEntitiesIndexName(entityType, namespace),
-      body: {},
-    });
-  } catch (e) {
-    if (e.meta.body.error.type === 'resource_already_exists_exception') {
-      logger.debug(`Index for ${entityType} already exists, skipping creation.`);
-    } else {
-      throw e;
-    }
-  }
+    },
+  });
 };
 
 export const deleteEntityIndex = ({ entityType, esClient, namespace }: Options) =>

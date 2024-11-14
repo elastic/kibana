@@ -9,7 +9,11 @@ import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { SearchRow } from './search_row';
-import { ASSOCIATED_NOT_SELECT_TEST_ID, SEARCH_BAR_TEST_ID, USER_SELECT_TEST_ID } from './test_ids';
+import {
+  ASSOCIATED_NOT_SELECT_TEST_ID,
+  SEARCH_BAR_TEST_ID,
+  CREATED_BY_SELECT_TEST_ID,
+} from './test_ids';
 import { AssociatedFilter } from '../../../common/notes/constants';
 import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
 import { TestProviders } from '../../common/mock';
@@ -43,7 +47,7 @@ describe('SearchRow', () => {
     );
 
     expect(getByTestId(SEARCH_BAR_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(USER_SELECT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CREATED_BY_SELECT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ASSOCIATED_NOT_SELECT_TEST_ID)).toBeInTheDocument();
   });
 

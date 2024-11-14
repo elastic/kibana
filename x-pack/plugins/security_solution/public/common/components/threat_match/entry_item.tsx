@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { FieldComponent } from '@kbn/securitysolution-autocomplete';
+import { EsFieldSelector } from '@kbn/securitysolution-autocomplete';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { FormattedEntry, Entry } from './types';
 import * as i18n from './translations';
@@ -57,7 +57,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
 
   const renderFieldInput = useMemo(() => {
     const comboBox = (
-      <FieldComponent
+      <EsFieldSelector
         placeholder={i18n.FIELD_PLACEHOLDER}
         indexPattern={indexPattern}
         selectedField={entry.field}
@@ -87,7 +87,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
 
   const renderThreatFieldInput = useMemo(() => {
     const comboBox = (
-      <FieldComponent
+      <EsFieldSelector
         placeholder={i18n.FIELD_PLACEHOLDER}
         indexPattern={threatIndexPatterns}
         selectedField={entry.value}

@@ -550,7 +550,7 @@ export const mockGlobalState: State = {
       direction: 'desc' as const,
     },
     filter: '',
-    userFilter: '',
+    createdByFilter: '',
     associatedFilter: AssociatedFilter.all,
     search: '',
     selectedIds: [],

@@ -15,6 +15,8 @@ describe('getUnitedEntityDefinition', () => {
       namespace: 'test',
       fieldHistoryLength: 10,
       indexPatterns,
+      syncDelay: '1m',
+      frequency: '1m',
     });
 
     it('mapping', () => {
@@ -30,10 +32,10 @@ describe('getUnitedEntityDefinition', () => {
             "entity.name": Object {
               "fields": Object {
                 "text": Object {
-                  "type": "keyword",
+                  "type": "match_only_text",
                 },
               },
-              "type": "text",
+              "type": "keyword",
             },
             "entity.source": Object {
               "type": "keyword",
@@ -57,9 +59,19 @@ describe('getUnitedEntityDefinition', () => {
               "type": "keyword",
             },
             "host.name": Object {
+              "fields": Object {
+                "text": Object {
+                  "type": "match_only_text",
+                },
+              },
               "type": "keyword",
             },
             "host.os.name": Object {
+              "fields": Object {
+                "text": Object {
+                  "type": "match_only_text",
+                },
+              },
               "type": "keyword",
             },
             "host.os.type": Object {
@@ -172,6 +184,10 @@ describe('getUnitedEntityDefinition', () => {
           ],
           "latest": Object {
             "lookbackPeriod": "24h",
+            "settings": Object {
+              "frequency": "1m",
+              "syncDelay": "1m",
+            },
             "timestampField": "@timestamp",
           },
           "managed": true,
@@ -312,6 +328,8 @@ describe('getUnitedEntityDefinition', () => {
       namespace: 'test',
       fieldHistoryLength: 10,
       indexPatterns,
+      syncDelay: '1m',
+      frequency: '1m',
     });
 
     it('mapping', () => {
@@ -327,10 +345,10 @@ describe('getUnitedEntityDefinition', () => {
             "entity.name": Object {
               "fields": Object {
                 "text": Object {
-                  "type": "keyword",
+                  "type": "match_only_text",
                 },
               },
-              "type": "text",
+              "type": "keyword",
             },
             "entity.source": Object {
               "type": "keyword",
@@ -342,6 +360,11 @@ describe('getUnitedEntityDefinition', () => {
               "type": "keyword",
             },
             "user.full_name": Object {
+              "fields": Object {
+                "text": Object {
+                  "type": "match_only_text",
+                },
+              },
               "type": "keyword",
             },
             "user.hash": Object {
@@ -351,6 +374,11 @@ describe('getUnitedEntityDefinition', () => {
               "type": "keyword",
             },
             "user.name": Object {
+              "fields": Object {
+                "text": Object {
+                  "type": "match_only_text",
+                },
+              },
               "type": "keyword",
             },
             "user.risk.calculated_level": Object {
@@ -445,6 +473,10 @@ describe('getUnitedEntityDefinition', () => {
           ],
           "latest": Object {
             "lookbackPeriod": "24h",
+            "settings": Object {
+              "frequency": "1m",
+              "syncDelay": "1m",
+            },
             "timestampField": "@timestamp",
           },
           "managed": true,

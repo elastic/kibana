@@ -42,6 +42,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_ISOLATE_HOST,
   DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_NOTES_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_NOTES_VALUE,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel';
 import {
   closeFlyout,
@@ -95,9 +97,8 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
 
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_TITLE).should('have.text', 'Assignees');
 
-    // TODO uncomment when the securitySolutionNotesEnabled feature flag is removed
-    // cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_NOTES_TITLE).should('have.text', 'Notes');
-    // cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_NOTES_VALUE).should('have.text', '0');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_NOTES_TITLE).should('have.text', 'Notes');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_NOTES_VALUE).should('exist');
 
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE)
       .should('be.visible')
