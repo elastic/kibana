@@ -13,6 +13,7 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
@@ -44,6 +45,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   request,
   size,
   systemPrompt,
+  telemetry,
+  telemetryParams,
   traceOptions,
   responseLanguage = 'English',
 }) => {
@@ -108,6 +111,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     replacements,
     request,
     size,
+    telemetry,
   };
 
   const tools: StructuredTool[] = assistantTools.flatMap(
@@ -150,7 +154,17 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       });
 
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
-
+  const telemetryTracer = telemetryParams
+    ? new TelemetryTracer(
+        {
+          elasticTools: assistantTools.map(({ name }) => name),
+          totalTools: tools.length,
+          telemetry,
+          telemetryParams,
+        },
+        logger
+      )
+    : undefined;
   const assistantGraph = getDefaultAssistantGraph({
     agentRunnable,
     dataClients,
@@ -177,6 +191,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       logger,
       onLlmResponse,
       request,
+      telemetryTracer,
       traceOptions,
     });
   }
@@ -186,6 +201,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     assistantGraph,
     inputs,
     onLlmResponse,
+    telemetryTracer,
     traceOptions,
   });
 

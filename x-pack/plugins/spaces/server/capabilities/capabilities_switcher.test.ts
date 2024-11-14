@@ -66,7 +66,7 @@ const features = [
     category: { id: 'securitySolution' },
   },
   {
-    // feature 4 intentionally delcares the same items as feature 3
+    // feature 4 intentionally declares the same items as feature 3
     id: 'feature_4',
     name: 'Feature 4',
     app: ['feature3', 'feature3_app'],
@@ -86,6 +86,32 @@ const features = [
       },
     },
     category: { id: 'observability' },
+  },
+  {
+    deprecated: { notice: 'It was a mistake.' },
+    id: 'deprecated_feature',
+    name: 'Deprecated Feature',
+    // Expose the same `app` and `catalogue` entries as `feature_2` to make sure they are disabled
+    // when `feature_2` is disabled even if the deprecated feature isn't explicitly disabled.
+    app: ['feature2'],
+    catalogue: ['feature2Entry'],
+    category: { id: 'deprecated', label: 'deprecated' },
+    privileges: {
+      all: {
+        savedObject: { all: [], read: [] },
+        ui: ['ui_deprecated_all'],
+        app: ['feature2'],
+        catalogue: ['feature2Entry'],
+        replacedBy: [{ feature: 'feature_2', privileges: ['all'] }],
+      },
+      read: {
+        savedObject: { all: [], read: [] },
+        ui: ['ui_deprecated_read'],
+        app: ['feature2'],
+        catalogue: ['feature2Entry'],
+        replacedBy: [{ feature: 'feature_2', privileges: ['all'] }],
+      },
+    },
   },
 ] as unknown as KibanaFeature[];
 
@@ -366,14 +392,12 @@ describe('capabilitiesSwitcher', () => {
       {
         space.solution = 'oblt';
 
-        // It should disable enterpriseSearch and securitySolution features
-        // which correspond to feature_1 and feature_3
+        // It should disable securitySolution features
+        // which corresponds to feature_3
         const result = await switcher(request, capabilities, false);
 
         const expectedCapabilities = buildCapabilities();
 
-        expectedCapabilities.feature_1.bar = false;
-        expectedCapabilities.feature_1.foo = false;
         expectedCapabilities.feature_3.bar = false;
         expectedCapabilities.feature_3.foo = false;
 

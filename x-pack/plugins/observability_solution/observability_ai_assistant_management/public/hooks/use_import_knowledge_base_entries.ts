@@ -30,7 +30,7 @@ export function useImportKnowledgeBaseEntries() {
         Omit<
           KnowledgeBaseEntry,
           '@timestamp' | 'confidence' | 'is_correction' | 'public' | 'labels'
-        >
+        > & { title: string }
       >;
     }
   >(

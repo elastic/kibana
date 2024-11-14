@@ -7,11 +7,13 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { USER } from '../../services/ml/security_common';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const esArchiver = getService('esArchiver');
   const aiops = getService('aiops');
+  const cases = getService('cases');
 
   // aiops lives in the ML UI so we need some related services.
   const ml = getService('ml');
@@ -26,6 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.testResources.deleteDataViewByTitle('ft_ecommerce');
+      await cases.api.deleteAllCases();
     });
 
     it(`loads the change point detection page`, async () => {
@@ -107,6 +110,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         applyTimeRange: true,
         maxSeries: 1,
       });
+    });
+
+    it('attaches change point charts to a case', async () => {
+      await ml.navigation.navigateToMl();
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await aiops.changePointDetectionPage.navigateToDataViewSelection();
+      await ml.jobSourceSelection.selectSourceForChangePointDetection('ft_ecommerce');
+      await aiops.changePointDetectionPage.assertChangePointDetectionPageExists();
+
+      await aiops.changePointDetectionPage.clickUseFullDataButton();
+      await aiops.changePointDetectionPage.selectMetricField(0, 'products.discount_amount');
+
+      const caseParams = {
+        title: 'ML Change Point Detection case',
+        description: 'Case with a change point detection attachment',
+        tag: 'ml_change_point_detection',
+        reporter: USER.ML_POWERUSER,
+      };
+
+      await aiops.changePointDetectionPage.attachChartsToCases(0, caseParams);
+      await ml.cases.assertCaseWithChangePointDetectionChartsAttachment(caseParams);
     });
   });
 }

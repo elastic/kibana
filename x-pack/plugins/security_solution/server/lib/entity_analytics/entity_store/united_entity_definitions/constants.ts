@@ -15,10 +15,10 @@ export const BASE_ENTITY_INDEX_MAPPING: MappingProperties = {
     type: 'keyword',
   },
   'entity.name': {
-    type: 'text',
+    type: 'keyword',
     fields: {
       text: {
-        type: 'keyword',
+        type: 'match_only_text',
       },
     },
   },

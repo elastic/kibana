@@ -14,6 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const testIndexName = `index-ftr-test-${Math.random()}`;
   describe('Index Details ', function () {
+    this.tags(['skipSvlSearch']);
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.svlCommonPage.loginAsAdmin();
@@ -34,7 +35,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.expectIndexToExist(testIndexName);
     });
     describe('can view index details', function () {
-      this.tags(['skipSvlSearch']);
       it('index with no documents', async () => {
         await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
         await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();

@@ -21,7 +21,7 @@ import {
 import pRetry from 'p-retry';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { StructuredTool } from '@langchain/core/tools';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { AnalyticsServiceSetup, ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
@@ -138,10 +138,31 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     try {
       const esClient = await this.options.elasticsearchClientPromise;
 
-      return !!(await esClient.inference.get({
+      const inferenceExists = !!(await esClient.inference.get({
         inference_id: ASSISTANT_ELSER_INFERENCE_ID,
         task_type: 'sparse_embedding',
       }));
+      if (!inferenceExists) {
+        return false;
+      }
+      const elserId = await this.options.getElserId();
+      const getResponse = await esClient.ml.getTrainedModelsStats({
+        model_id: elserId,
+      });
+
+      // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
+      const isReadyESS = (stats: MlTrainedModelStats) =>
+        stats.deployment_stats?.state === 'started' &&
+        stats.deployment_stats?.allocation_status.state === 'fully_allocated';
+
+      const isReadyServerless = (stats: MlTrainedModelStats) =>
+        (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[])?.some(
+          (node) => node.routing_state.routing_state === 'started'
+        );
+
+      return getResponse.trained_model_stats?.some(
+        (stats) => isReadyESS(stats) || isReadyServerless(stats)
+      );
     } catch (error) {
       this.options.logger.debug(
         `Error checking if Inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} exists: ${error}`
@@ -346,6 +367,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
           })
         : undefined;
+    // Intentionally no telemetry here - this path only used to install security docs
+    // Plans to make this function private in a different PR so no user entry ever is created in this path
     this.options.logger.debug(`created: ${created?.data.hits.hits.length ?? '0'}`);
     this.options.logger.debug(() => `errors: ${JSON.stringify(errors, null, 2)}`);
 
@@ -549,10 +572,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public createKnowledgeBaseEntry = async ({
     knowledgeBaseEntry,
+    telemetry,
     global = false,
   }: {
     knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
     global?: boolean;
+    telemetry: AnalyticsServiceSetup;
   }): Promise<KnowledgeBaseEntryResponse | null> => {
     const authenticatedUser = this.options.currentUser;
 
@@ -579,6 +604,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       user: authenticatedUser,
       knowledgeBaseEntry,
       global,
+      telemetry,
     });
   };
 

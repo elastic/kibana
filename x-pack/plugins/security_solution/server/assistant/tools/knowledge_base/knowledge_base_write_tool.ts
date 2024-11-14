@@ -11,10 +11,12 @@ import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-
 import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import { DocumentEntryType } from '@kbn/elastic-assistant-common';
 import type { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { APP_UI_ID } from '../../../../common';
 
 export interface KnowledgeBaseWriteToolParams extends AssistantToolParams {
   kbDataClient: AIAssistantKnowledgeBaseDataClient;
+  telemetry: AnalyticsServiceSetup;
 }
 
 const toolDetails = {
@@ -33,7 +35,7 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { kbDataClient, logger } = params as KnowledgeBaseWriteToolParams;
+    const { telemetry, kbDataClient, logger } = params as KnowledgeBaseWriteToolParams;
     if (kbDataClient == null) return null;
 
     return new DynamicStructuredTool({
@@ -66,7 +68,7 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
         };
 
         logger.debug(() => `knowledgeBaseEntry\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`);
-        const resp = await kbDataClient.createKnowledgeBaseEntry({ knowledgeBaseEntry });
+        const resp = await kbDataClient.createKnowledgeBaseEntry({ knowledgeBaseEntry, telemetry });
 
         if (resp == null) {
           return "I'm sorry, but I was unable to add this entry to your knowledge base.";

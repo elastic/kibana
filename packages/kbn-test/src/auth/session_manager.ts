@@ -17,7 +17,7 @@ import {
   getSecurityProfile,
   Session,
 } from './saml_auth';
-import { Role, User } from './types';
+import { GetSessionByRole, Role, User } from './types';
 
 export interface HostOptions {
   protocol: 'http' | 'https';
@@ -38,6 +38,10 @@ export interface SamlSessionManagerOptions {
 export interface SupportedRoles {
   sourcePath: string;
   roles: string[];
+}
+
+export interface GetCookieOptions {
+  forceNewSession: boolean;
 }
 
 /**
@@ -115,24 +119,32 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
     }
   };
 
-  private getSessionByRole = async (role: string) => {
-    if (this.sessionCache.has(role)) {
+  private getSessionByRole = async (options: GetSessionByRole): Promise<Session> => {
+    const { role, forceNewSession } = options;
+
+    // Validate role before creating SAML session
+    this.validateRole(role);
+
+    // Check if session is cached and not forced to create the new one
+    if (!forceNewSession && this.sessionCache.has(role)) {
       return this.sessionCache.get(role)!;
     }
 
-    // Validate role before creating SAML session
-    if (this.supportedRoles && !this.supportedRoles.roles.includes(role)) {
-      throw new Error(
-        `Role '${role}' is not in the supported list: ${this.supportedRoles.roles.join(
-          ', '
-        )}. Add role descriptor in ${this.supportedRoles.sourcePath} to enable it for testing`
-      );
+    const session = await this.createSessionForRole(role);
+    this.sessionCache.set(role, session);
+
+    if (forceNewSession) {
+      this.log.debug(`Session for role '${role}' was force updated.`);
     }
 
+    return session;
+  };
+
+  private createSessionForRole = async (role: string): Promise<Session> => {
     let session: Session;
 
     if (this.isCloud) {
-      this.log.debug(`new cloud SAML authentication with '${role}' role`);
+      this.log.debug(`Creating new cloud SAML session for role '${role}'`);
       const kbnVersion = await this.kbnClient.version.get();
       const { email, password } = this.getCloudUserByRole(role);
       session = await createCloudSAMLSession({
@@ -143,7 +155,7 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
         log: this.log,
       });
     } else {
-      this.log.debug(`new fake SAML authentication with '${role}' role`);
+      this.log.debug(`Creating new local SAML session for role '${role}'`);
       session = await createLocalSAMLSession({
         username: `elastic_${role}`,
         email: `elastic_${role}@elastic.co`,
@@ -154,27 +166,38 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
       });
     }
 
-    this.sessionCache.set(role, session);
     return session;
   };
 
-  async getApiCredentialsForRole(role: string) {
-    const session = await this.getSessionByRole(role);
+  private validateRole = (role: string): void => {
+    if (this.supportedRoles && !this.supportedRoles.roles.includes(role)) {
+      throw new Error(
+        `Role '${role}' is not in the supported list: ${this.supportedRoles.roles.join(
+          ', '
+        )}. Add role descriptor in ${this.supportedRoles.sourcePath} to enable it for testing`
+      );
+    }
+  };
+
+  async getApiCredentialsForRole(role: string, options?: GetCookieOptions) {
+    const { forceNewSession } = options || { forceNewSession: false };
+    const session = await this.getSessionByRole({ role, forceNewSession });
     return { Cookie: `sid=${session.getCookieValue()}` };
   }
 
-  async getInteractiveUserSessionCookieWithRoleScope(role: string) {
-    const session = await this.getSessionByRole(role);
+  async getInteractiveUserSessionCookieWithRoleScope(role: string, options?: GetCookieOptions) {
+    const { forceNewSession } = options || { forceNewSession: false };
+    const session = await this.getSessionByRole({ role, forceNewSession });
     return session.getCookieValue();
   }
 
   async getEmail(role: string) {
-    const session = await this.getSessionByRole(role);
+    const session = await this.getSessionByRole({ role, forceNewSession: false });
     return session.email;
   }
 
   async getUserData(role: string) {
-    const { cookie } = await this.getSessionByRole(role);
+    const { cookie } = await this.getSessionByRole({ role, forceNewSession: false });
     const profileData = await getSecurityProfile({ kbnHost: this.kbnHost, cookie, log: this.log });
     return profileData;
   }

@@ -164,26 +164,31 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
     isRefetching: kbStatus?.is_setup_in_progress,
   });
 
+  const resetStateAndCloseFlyout = useCallback(() => {
+    setOriginalEntry(undefined);
+    setSelectedEntry(undefined);
+    setDuplicateKBItem(null);
+    closeFlyout();
+  }, [closeFlyout]);
+
   // Flyout Save/Cancel Actions
   const onSaveConfirmed = useCallback(async () => {
     if (isKnowledgeBaseEntryResponse(selectedEntry)) {
       await updateEntries([selectedEntry]);
-      closeFlyout();
+      resetStateAndCloseFlyout();
     } else if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
       if (originalEntry) {
         setDuplicateKBItem(selectedEntry);
         return;
       }
       await createEntry(selectedEntry);
-      closeFlyout();
+      resetStateAndCloseFlyout();
     }
-  }, [selectedEntry, originalEntry, updateEntries, closeFlyout, createEntry]);
+  }, [selectedEntry, updateEntries, resetStateAndCloseFlyout, originalEntry, createEntry]);
 
   const onSaveCancelled = useCallback(() => {
-    setOriginalEntry(undefined);
-    setSelectedEntry(undefined);
-    closeFlyout();
-  }, [closeFlyout]);
+    resetStateAndCloseFlyout();
+  }, [resetStateAndCloseFlyout]);
 
   const { value: existingIndices } = useAsync(() => {
     const indices: string[] = [];
@@ -321,10 +326,9 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   const handleDuplicateEntry = useCallback(async () => {
     if (duplicateKBItem) {
       await createEntry(duplicateKBItem);
-      closeFlyout();
-      setDuplicateKBItem(null);
+      resetStateAndCloseFlyout();
     }
-  }, [closeFlyout, createEntry, duplicateKBItem]);
+  }, [createEntry, duplicateKBItem, resetStateAndCloseFlyout]);
 
   return (
     <>
