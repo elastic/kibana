@@ -264,6 +264,10 @@ export const CASES_CONNECTOR_TIME_WINDOW_REGEX = '^[1-9][0-9]*[d,w]$';
  */
 export const OWNER_FIELD = 'owner';
 
+export const MAX_OBSERVABLE_TYPE_KEY_LENGTH = 36;
+
+export const MAX_OBSERVABLE_TYPE_LABEL_LENGTH = 50;
+
 export const OBSERVABLE_TYPE_EMAIL = {
   label: 'Email',
   key: 'observable-type-email',

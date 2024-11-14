@@ -16,6 +16,8 @@ import {
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
+  MAX_OBSERVABLE_TYPE_KEY_LENGTH,
+  MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
   MAX_TAGS_PER_CASE,
   MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATES_LENGTH,
@@ -38,6 +40,7 @@ import {
   ToggleCustomFieldConfigurationRt,
   NumberCustomFieldConfigurationRt,
   TemplateConfigurationRt,
+  ObservableTypesConfigurationRt,
 } from './v1';
 
 describe('configure', () => {
@@ -960,6 +963,55 @@ describe('configure', () => {
           `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
         );
       });
+    });
+  });
+
+  describe('ObservableTypesConfigurationRt', () => {
+    it('should validate a correct observable types configuration', () => {
+      const validData = [
+        { key: 'observable_key_1', label: 'Observable Label 1' },
+        { key: 'observable_key_2', label: 'Observable Label 2' },
+      ];
+
+      const result = ObservableTypesConfigurationRt.decode(validData);
+      expect(PathReporter.report(result)).toContain('No errors!');
+    });
+
+    it('should invalidate an observable types configuration with an invalid key', () => {
+      const invalidData = [{ key: 'Invalid Key!', label: 'Observable Label 1' }];
+
+      const result = ObservableTypesConfigurationRt.decode(invalidData);
+      expect(PathReporter.report(result)).not.toContain('No errors!');
+    });
+
+    it('should invalidate an observable types configuration with a missing label', () => {
+      const invalidData = [{ key: 'observable_key_1' }];
+
+      const result = ObservableTypesConfigurationRt.decode(invalidData);
+      expect(PathReporter.report(result)).not.toContain('No errors!');
+    });
+
+    it('should invalidate an observable types configuration with an empty array', () => {
+      const invalidData: unknown[] = [];
+
+      const result = ObservableTypesConfigurationRt.decode(invalidData);
+      expect(PathReporter.report(result)).toContain('No errors!');
+    });
+
+    it('should invalidate an observable types configuration with a label exceeding max length', () => {
+      const invalidData = [
+        { key: 'observable_key_1', label: 'a'.repeat(MAX_OBSERVABLE_TYPE_LABEL_LENGTH + 1) },
+      ];
+
+      const result = ObservableTypesConfigurationRt.decode(invalidData);
+      expect(PathReporter.report(result)).not.toContain('No errors!');
+    });
+
+    it('should invalidate an observable types configuration with a key exceeding max length', () => {
+      const invalidData = [{ key: 'a'.repeat(MAX_OBSERVABLE_TYPE_KEY_LENGTH + 1), label: 'label' }];
+
+      const result = ObservableTypesConfigurationRt.decode(invalidData);
+      expect(PathReporter.report(result)).not.toContain('No errors!');
     });
   });
 });

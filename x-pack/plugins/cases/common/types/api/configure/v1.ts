@@ -10,6 +10,8 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  MAX_OBSERVABLE_TYPE_KEY_LENGTH,
+  MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
   MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATES_LENGTH,
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
@@ -24,11 +26,7 @@ import {
   CustomFieldNumberTypeRt,
 } from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
-import {
-  ConfigurationBasicWithoutOwnerRt,
-  ClosureTypeRt,
-  ObservableTypesConfigurationRt,
-} from '../../domain/configure/v1';
+import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseBaseOptionalFieldsRequestRt } from '../case/v1';
 import {
@@ -98,6 +96,21 @@ export const CustomFieldsConfigurationRt = limitedArraySchema({
   max: MAX_CUSTOM_FIELDS_PER_CASE,
   fieldName: 'customFields',
 });
+
+export const ObservableTypesConfigurationRt = rt.array(
+  rt.strict({
+    key: regexStringRt({
+      codec: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_OBSERVABLE_TYPE_KEY_LENGTH }),
+      pattern: '^[a-z0-9_-]+$',
+      message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
+    }),
+    label: limitedStringSchema({
+      fieldName: 'label',
+      min: 1,
+      max: MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
+    }),
+  })
+);
 
 export const TemplateConfigurationRt = rt.intersection([
   rt.strict({
