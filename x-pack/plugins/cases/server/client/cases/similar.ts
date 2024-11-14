@@ -134,7 +134,9 @@ export const similar = async (
     const res = {
       cases: cases.saved_objects.map((so) => ({
         ...flattenCaseSavedObject({ savedObject: so }),
-        similarities: getSimilarities(retrievedCase, so, availableObservableTypesSet),
+        similarities: {
+          observables: getSimilarities(retrievedCase, so, availableObservableTypesSet),
+        },
       })),
       page: cases.page,
       per_page: cases.per_page,
