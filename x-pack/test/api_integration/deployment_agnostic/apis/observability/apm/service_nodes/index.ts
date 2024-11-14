@@ -8,8 +8,7 @@
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('error_rate', () => {
-    loadTestFile(require.resolve('./service_apis.spec.ts'));
-    loadTestFile(require.resolve('./service_maps.spec.ts'));
+  describe('service_nodes', () => {
+    loadTestFile(require.resolve('./get_service_nodes.spec.ts'));
   });
 }
