@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { of, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { TaskPollingLifecycle, claimAvailableTasks, TaskLifecycleEvent } from './polling_lifecycle';
 import { createInitialMiddleware } from './lib/middleware';

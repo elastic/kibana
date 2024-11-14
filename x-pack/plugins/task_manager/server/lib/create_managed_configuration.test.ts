@@ -21,6 +21,7 @@ import {
   CLAIM_STRATEGY_MGET,
   TaskManagerConfig,
   DEFAULT_CAPACITY,
+  DEFAULT_POLL_INTERVAL,
 } from '../config';
 import { MsearchError } from './msearch_error';
 import { BulkUpdateError } from './bulk_update_error';
@@ -324,14 +325,17 @@ describe('createManagedConfiguration()', () => {
   });
 
   describe('pollInterval configuration', () => {
-    function setupScenario(startingPollInterval: number) {
+    function setupScenario(
+      startingPollInterval: number,
+      claimStrategy: string = CLAIM_STRATEGY_UPDATE_BY_QUERY
+    ) {
       const errors$ = new Subject<Error>();
       const utilization$ = new BehaviorSubject<number>(100);
       const errorCheck$ = countErrors(errors$, ADJUST_THROUGHPUT_INTERVAL);
       const subscription = jest.fn();
       const pollIntervalConfiguration$ = errorCheck$.pipe(
         withLatestFrom(utilization$),
-        createPollIntervalScan(logger, startingPollInterval, CLAIM_STRATEGY_UPDATE_BY_QUERY),
+        createPollIntervalScan(logger, startingPollInterval, claimStrategy),
         startWith(startingPollInterval),
         distinctUntilChanged()
       );
@@ -346,122 +350,212 @@ describe('createManagedConfiguration()', () => {
 
     afterEach(() => clock.restore());
 
-    test('should increase configuration at the next interval when an error is emitted', async () => {
-      const { subscription, errors$ } = setupScenario(100);
-      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
-      expect(subscription).toHaveBeenCalledTimes(1);
-      clock.tick(1);
-      expect(subscription).toHaveBeenCalledTimes(2);
-      expect(subscription).toHaveBeenNthCalledWith(2, 120);
-    });
+    describe('default claim strategy', () => {
+      test('should increase configuration at the next interval when an error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(100);
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 120);
+      });
 
-    test('should increase configuration at the next interval when a 500 error is emitted', async () => {
-      const { subscription, errors$ } = setupScenario(100);
-      errors$.next(SavedObjectsErrorHelpers.decorateGeneralError(new Error('a'), 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
-      expect(subscription).toHaveBeenCalledTimes(1);
-      clock.tick(1);
-      expect(subscription).toHaveBeenCalledTimes(2);
-      expect(subscription).toHaveBeenNthCalledWith(2, 120);
-    });
+      test('should increase configuration at the next interval when a 500 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(100);
+        errors$.next(SavedObjectsErrorHelpers.decorateGeneralError(new Error('a'), 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 120);
+      });
 
-    test('should increase configuration at the next interval when a 503 error is emitted', async () => {
-      const { subscription, errors$ } = setupScenario(100);
-      errors$.next(SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
-      expect(subscription).toHaveBeenCalledTimes(1);
-      clock.tick(1);
-      expect(subscription).toHaveBeenCalledTimes(2);
-      expect(subscription).toHaveBeenNthCalledWith(2, 120);
-    });
+      test('should increase configuration at the next interval when a 503 error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(100);
+        errors$.next(SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 120);
+      });
 
-    test('should log a warning when the configuration changes from the starting value', async () => {
-      const { errors$ } = setupScenario(100);
-      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
-      );
-    });
-
-    test('should log a warning when an issue occurred in the calculating of the increased poll interval', async () => {
-      const { errors$ } = setupScenario(NaN);
-      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-      expect(logger.error).toHaveBeenCalledWith(
-        'Poll interval configuration had an issue calculating the new poll interval: Math.min(Math.ceil(NaN * 1.2), Math.max(60000, NaN)) = NaN, will keep the poll interval unchanged (NaN)'
-      );
-    });
-
-    test('should log a warning when an issue occurred in the calculating of the decreased poll interval', async () => {
-      setupScenario(NaN);
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-      expect(logger.error).toHaveBeenCalledWith(
-        'Poll interval configuration had an issue calculating the new poll interval: Math.max(NaN, Math.floor(NaN * 0.95)) = NaN, will keep the poll interval unchanged (NaN)'
-      );
-    });
-
-    test('should decrease configuration back to normal incrementally after an error is emitted', async () => {
-      const { subscription, errors$ } = setupScenario(100);
-      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
-      clock.tick(ADJUST_THROUGHPUT_INTERVAL * 10);
-      expect(subscription).toHaveBeenNthCalledWith(2, 120);
-      expect(subscription).toHaveBeenNthCalledWith(3, 114);
-      // 108.3 -> 108 from Math.floor
-      expect(subscription).toHaveBeenNthCalledWith(4, 108);
-      expect(subscription).toHaveBeenNthCalledWith(5, 102);
-      // 96.9 -> 100 from Math.max with the starting value
-      expect(subscription).toHaveBeenNthCalledWith(6, 100);
-      // No new calls due to value not changing and usage of distinctUntilChanged()
-      expect(subscription).toHaveBeenCalledTimes(6);
-    });
-
-    test('should increase configuration when errors keep emitting', async () => {
-      const { subscription, errors$ } = setupScenario(100);
-      for (let i = 0; i < 3; i++) {
+      test('should log a warning when the configuration changes from the starting value', async () => {
+        const { errors$ } = setupScenario(100);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-      }
-      expect(subscription).toHaveBeenNthCalledWith(2, 120);
-      expect(subscription).toHaveBeenNthCalledWith(3, 144);
-      // 172.8 -> 173 from Math.ceil
-      expect(subscription).toHaveBeenNthCalledWith(4, 173);
-    });
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+        );
+      });
 
-    test('should limit the upper bound to 60s by default', async () => {
-      const { subscription, errors$ } = setupScenario(3000);
-      for (let i = 0; i < 18; i++) {
+      test('should log a warning when an issue occurred in the calculating of the increased poll interval', async () => {
+        const { errors$ } = setupScenario(NaN);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-      }
-      expect(subscription).toHaveBeenNthCalledWith(2, 3600);
-      expect(subscription).toHaveBeenNthCalledWith(3, 4320);
-      expect(subscription).toHaveBeenNthCalledWith(4, 5184);
-      expect(subscription).toHaveBeenNthCalledWith(5, 6221);
-      expect(subscription).toHaveBeenNthCalledWith(6, 7466);
-      expect(subscription).toHaveBeenNthCalledWith(7, 8960);
-      expect(subscription).toHaveBeenNthCalledWith(8, 10752);
-      expect(subscription).toHaveBeenNthCalledWith(9, 12903);
-      expect(subscription).toHaveBeenNthCalledWith(10, 15484);
-      expect(subscription).toHaveBeenNthCalledWith(11, 18581);
-      expect(subscription).toHaveBeenNthCalledWith(12, 22298);
-      expect(subscription).toHaveBeenNthCalledWith(13, 26758);
-      expect(subscription).toHaveBeenNthCalledWith(14, 32110);
-      expect(subscription).toHaveBeenNthCalledWith(15, 38532);
-      expect(subscription).toHaveBeenNthCalledWith(16, 46239);
-      expect(subscription).toHaveBeenNthCalledWith(17, 55487);
-      expect(subscription).toHaveBeenNthCalledWith(18, 60000);
+        expect(logger.error).toHaveBeenCalledWith(
+          'Poll interval configuration had an issue calculating the new poll interval: Math.min(Math.ceil(NaN * 1.2), Math.max(60000, NaN)) = NaN, will keep the poll interval unchanged (NaN)'
+        );
+      });
+
+      test('should log a warning when an issue occurred in the calculating of the decreased poll interval', async () => {
+        setupScenario(NaN);
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+        expect(logger.error).toHaveBeenCalledWith(
+          'Poll interval configuration had an issue calculating the new poll interval: Math.max(NaN, Math.floor(NaN * 0.95)) = NaN, will keep the poll interval unchanged (NaN)'
+        );
+      });
+
+      test('should decrease configuration back to normal incrementally after an error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(100);
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL * 10);
+        expect(subscription).toHaveBeenNthCalledWith(2, 120);
+        expect(subscription).toHaveBeenNthCalledWith(3, 114);
+        // 108.3 -> 108 from Math.floor
+        expect(subscription).toHaveBeenNthCalledWith(4, 108);
+        expect(subscription).toHaveBeenNthCalledWith(5, 102);
+        // 96.9 -> 100 from Math.max with the starting value
+        expect(subscription).toHaveBeenNthCalledWith(6, 100);
+        // No new calls due to value not changing and usage of distinctUntilChanged()
+        expect(subscription).toHaveBeenCalledTimes(6);
+      });
+
+      test('should increase configuration when errors keep emitting', async () => {
+        const { subscription, errors$ } = setupScenario(100);
+        for (let i = 0; i < 3; i++) {
+          errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+          clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+        }
+        expect(subscription).toHaveBeenNthCalledWith(2, 120);
+        expect(subscription).toHaveBeenNthCalledWith(3, 144);
+        // 172.8 -> 173 from Math.ceil
+        expect(subscription).toHaveBeenNthCalledWith(4, 173);
+      });
+
+      test('should limit the upper bound to 60s by default', async () => {
+        const { subscription, errors$ } = setupScenario(3000);
+        for (let i = 0; i < 18; i++) {
+          errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+          clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+        }
+        expect(subscription).toHaveBeenNthCalledWith(2, 3600);
+        expect(subscription).toHaveBeenNthCalledWith(3, 4320);
+        expect(subscription).toHaveBeenNthCalledWith(4, 5184);
+        expect(subscription).toHaveBeenNthCalledWith(5, 6221);
+        expect(subscription).toHaveBeenNthCalledWith(6, 7466);
+        expect(subscription).toHaveBeenNthCalledWith(7, 8960);
+        expect(subscription).toHaveBeenNthCalledWith(8, 10752);
+        expect(subscription).toHaveBeenNthCalledWith(9, 12903);
+        expect(subscription).toHaveBeenNthCalledWith(10, 15484);
+        expect(subscription).toHaveBeenNthCalledWith(11, 18581);
+        expect(subscription).toHaveBeenNthCalledWith(12, 22298);
+        expect(subscription).toHaveBeenNthCalledWith(13, 26758);
+        expect(subscription).toHaveBeenNthCalledWith(14, 32110);
+        expect(subscription).toHaveBeenNthCalledWith(15, 38532);
+        expect(subscription).toHaveBeenNthCalledWith(16, 46239);
+        expect(subscription).toHaveBeenNthCalledWith(17, 55487);
+        expect(subscription).toHaveBeenNthCalledWith(18, 60000);
+      });
+
+      test('should not adjust poll interval dynamically if initial value is > 60s', async () => {
+        const { subscription, errors$ } = setupScenario(65000);
+        for (let i = 0; i < 5; i++) {
+          errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+          clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+        }
+        expect(subscription).toHaveBeenCalledTimes(1);
+        expect(subscription).toHaveBeenNthCalledWith(1, 65000);
+      });
     });
 
-    test('should not adjust poll interval dynamically if initial value is > 60s', async () => {
-      const { subscription, errors$ } = setupScenario(65000);
-      for (let i = 0; i < 5; i++) {
+    describe('mget claim strategy', () => {
+      test('should increase configuration at the next interval when an error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(100, CLAIM_STRATEGY_MGET);
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL - 1);
+        expect(subscription).toHaveBeenCalledTimes(1);
+        clock.tick(1);
+        expect(subscription).toHaveBeenCalledTimes(2);
+        expect(subscription).toHaveBeenNthCalledWith(2, 120);
+      });
+
+      test('should log a warning when the configuration changes from the starting value', async () => {
+        const { errors$ } = setupScenario(100, CLAIM_STRATEGY_MGET);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-      }
-      expect(subscription).toHaveBeenCalledTimes(1);
-      expect(subscription).toHaveBeenNthCalledWith(1, 65000);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+        );
+      });
+
+      test('should decrease configuration back to normal incrementally after an error is emitted', async () => {
+        const { subscription, errors$ } = setupScenario(DEFAULT_POLL_INTERVAL, CLAIM_STRATEGY_MGET);
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL * 10);
+        expect(subscription).toHaveBeenNthCalledWith(2, 3600);
+        expect(subscription).toHaveBeenNthCalledWith(3, 3420);
+        expect(subscription).toHaveBeenNthCalledWith(4, 3249);
+        expect(subscription).toHaveBeenNthCalledWith(5, 3086);
+        expect(subscription).toHaveBeenNthCalledWith(6, 3000);
+        // No new calls due to value not changing and usage of distinctUntilChanged()
+        expect(subscription).toHaveBeenCalledTimes(6);
+      });
+
+      test('should decrease configuration after error and reset to initial poll interval when poll interval < default and TM utilization > 25%', async () => {
+        const { subscription, errors$ } = setupScenario(2800, CLAIM_STRATEGY_MGET);
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL * 10);
+        expect(subscription).toHaveBeenNthCalledWith(2, 3360);
+        expect(subscription).toHaveBeenNthCalledWith(3, 3192);
+        expect(subscription).toHaveBeenNthCalledWith(4, 3032);
+        expect(subscription).toHaveBeenNthCalledWith(5, 2800);
+        // No new calls due to value not changing and usage of distinctUntilChanged()
+        expect(subscription).toHaveBeenCalledTimes(5);
+      });
+
+      test('should decrease configuration after error and reset to default poll interval when poll interval < default and TM utilization > 25%', async () => {
+        const { subscription, errors$, utilization$ } = setupScenario(2800, CLAIM_STRATEGY_MGET);
+        errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+        for (let i = 0; i < 10; i++) {
+          utilization$.next(20);
+          clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+        }
+        expect(subscription).toHaveBeenNthCalledWith(2, 3360);
+        expect(subscription).toHaveBeenNthCalledWith(3, 3192);
+        expect(subscription).toHaveBeenNthCalledWith(4, 3032);
+        expect(subscription).toHaveBeenNthCalledWith(5, 3000);
+        // No new calls due to value not changing and usage of distinctUntilChanged()
+        expect(subscription).toHaveBeenCalledTimes(5);
+      });
+
+      test('should change configuration based on TM utilization', async () => {
+        const { subscription, utilization$ } = setupScenario(500, CLAIM_STRATEGY_MGET);
+        for (let i = 0; i < 5; i++) {
+          if (i % 2 === 0) {
+            utilization$.next(20);
+          } else {
+            utilization$.next(100);
+          }
+          clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+        }
+        expect(subscription).toHaveBeenNthCalledWith(2, 3000);
+        expect(subscription).toHaveBeenNthCalledWith(3, 500);
+        expect(subscription).toHaveBeenNthCalledWith(4, 3000);
+        expect(subscription).toHaveBeenNthCalledWith(5, 500);
+        expect(subscription).toHaveBeenNthCalledWith(6, 3000);
+        expect(subscription).toHaveBeenCalledTimes(6);
+      });
+
+      test('should log a warning when the configuration changes from the starting value based on TM utilization', async () => {
+        const { utilization$ } = setupScenario(100, CLAIM_STRATEGY_MGET);
+        utilization$.next(20);
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Poll interval configuration is temporarily increased after a decrease in the task load.'
+        );
+      });
     });
   });
 });
