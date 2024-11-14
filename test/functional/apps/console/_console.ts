@@ -265,7 +265,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Reset it back to the original height
       await browser.setWindowSize(1300, 1100);
     });
-    
+
     it('Shows OK when status code is 200 but body is empty', async () => {
       await PageObjects.console.clearEditorText();
 
