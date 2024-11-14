@@ -115,7 +115,7 @@ export const getTimeSpanFilter = () => ({
 
 export const getQueryFilters = (query: string) => ({
   query_string: {
-    query: `${query}*`,
+    query: `${query}`,
     fields: [
       'monitor.name.text',
       'tags',

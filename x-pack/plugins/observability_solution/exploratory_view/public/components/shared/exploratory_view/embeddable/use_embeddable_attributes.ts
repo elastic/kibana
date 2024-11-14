@@ -41,7 +41,8 @@ export const useEmbeddableAttributes = ({
         const lensAttributes = new SingleMetricLensAttributes(
           layerConfigs,
           reportType,
-          lensFormulaHelper!
+          lensFormulaHelper!,
+          dslFilters
         );
         return lensAttributes?.getJSON('lnsLegacyMetric');
       } else if (reportType === ReportTypes.HEATMAP) {
