@@ -113,6 +113,16 @@ describe('findMaintenanceWindowsRoute', () => {
       }
     `);
 
+    expect(config.security).toMatchInlineSnapshot(`
+      Object {
+        "authz": Object {
+          "requiredPrivileges": Array [
+            "read-maintenance-window",
+          ],
+        },
+      }
+    `);
+
     await handler(context, req, res);
 
     expect(maintenanceWindowClient.find).toHaveBeenCalledWith({ page: 1, perPage: 3 });

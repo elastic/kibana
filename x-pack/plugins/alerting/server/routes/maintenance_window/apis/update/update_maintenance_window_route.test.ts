@@ -71,6 +71,16 @@ describe('updateMaintenanceWindowRoute', () => {
       }
     `);
 
+    expect(config.security).toMatchInlineSnapshot(`
+      Object {
+        "authz": Object {
+          "requiredPrivileges": Array [
+            "write-maintenance-window",
+          ],
+        },
+      }
+    `);
+
     await handler(context, req, res);
 
     expect(maintenanceWindowClient.update).toHaveBeenLastCalledWith({
