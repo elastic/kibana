@@ -75,8 +75,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('Autocompletion works', async () => {
           await observability.alerts.common.typeInQueryBar('kibana.alert.s');
-          await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.start-');
-          await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.status-');
+          await retry.try(async () => {
+            await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.start-');
+            await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.status-');
+          });
         });
 
         it('Invalid input should not break the page', async () => {
