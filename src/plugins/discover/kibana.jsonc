@@ -15,6 +15,7 @@
       "charts",
       "data",
       "dataViews",
+      "discoverShared",
       "embeddable",
       "inspector",
       "fieldFormats",
@@ -30,7 +31,7 @@
       "unifiedDocViewer",
       "unifiedSearch",
       "unifiedHistogram",
-      "contentManagement"
+      "contentManagement",
     ],
     "optionalPlugins": [
       "dataVisualizer",
@@ -46,7 +47,7 @@
       "observabilityAIAssistant",
       "aiops",
       "fieldsMetadata",
-      "logsDataAccess"
+      "logsDataAccess",
     ],
     "requiredBundles": [
       "kibanaUtils",
