@@ -23,10 +23,12 @@ export default function apmApiIntegrationTests({
     loadTestFile(require.resolve('./correlations'));
     loadTestFile(require.resolve('./entities'));
     loadTestFile(require.resolve('./cold_start'));
+    loadTestFile(require.resolve('./services'));
     loadTestFile(require.resolve('./historical_data'));
     loadTestFile(require.resolve('./observability_overview'));
     loadTestFile(require.resolve('./latency'));
     loadTestFile(require.resolve('./infrastructure'));
+    loadTestFile(require.resolve('./inspect'));
     loadTestFile(require.resolve('./service_groups'));
   });
 }
