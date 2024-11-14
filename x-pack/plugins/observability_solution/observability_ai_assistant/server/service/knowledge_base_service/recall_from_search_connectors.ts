@@ -204,16 +204,8 @@ async function getConnectorIndices(
   logger: Logger
 ) {
   // improve performance by running this in parallel with the `uiSettingsClient` request
-  const responsePromise = esClient.asInternalUser.transport
-    .request<{
-      results?: Array<{ index_name: string }>;
-    }>({
-      method: 'GET',
-      path: '_connector',
-      querystring: {
-        filter_path: 'results.index_name',
-      },
-    })
+  const responsePromise = esClient.asInternalUser.connector
+    .list({ filter_path: 'results.index_name' })
     .catch((e) => {
       logger.warn(`Failed to fetch connector indices due to ${e.message}`);
       return { results: [] };
