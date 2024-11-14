@@ -33,13 +33,9 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
   if (aggType === Aggregators.P95 || aggType === Aggregators.P99) operation = 'percentile';
   if (aggType === Aggregators.COUNT) operation = 'count';
 
-  let sourceField = field;
-
-  if (aggType === Aggregators.COUNT) {
-    sourceField = '___records___';
+  if (field) {
+    operationArgs.push(field);
   }
-
-  operationArgs.push(sourceField || '');
 
   if (aggType === Aggregators.P95) {
     operationArgs.push('percentile=95');
@@ -53,8 +49,8 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
 
   return {
     operation,
-    operationWithField: operation + '(' + operationArgs.join(', ') + ')',
-    sourceField: sourceField || '',
+    operationWithField: `${operation}(${operationArgs.join(', ')})`,
+    sourceField: field || '',
   };
 };
 

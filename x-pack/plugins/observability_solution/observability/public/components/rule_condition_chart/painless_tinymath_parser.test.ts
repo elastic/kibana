@@ -310,9 +310,9 @@ describe('PainlessTinyMathParser', () => {
           sourceField: 'system.cpu.cores',
         },
         E: {
-          operationWithField: 'count(___records___)',
+          operationWithField: 'count()',
           operation: 'count',
-          sourceField: '___records___',
+          sourceField: '',
         },
         F: {
           operationWithField: 'sum(system.cpu.total.pct)',
@@ -354,9 +354,9 @@ describe('PainlessTinyMathParser', () => {
           sourceField: 'system.cpu.cores',
         },
         E: {
-          operationWithField: 'count(___records___)',
+          operationWithField: 'count()',
           operation: 'count',
-          sourceField: '___records___',
+          sourceField: '',
         },
         F: {
           operationWithField: 'sum(system.cpu.total.pct)',

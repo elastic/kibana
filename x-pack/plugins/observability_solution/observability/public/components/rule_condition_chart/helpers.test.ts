@@ -65,14 +65,14 @@ const useCases = [
   [
     {
       aggType: Aggregators.COUNT,
-      field: 'system.cpu.user.pct',
-      filter: '',
+      field: '',
+      filter: 'system.cpu.user.pct: *',
       name: '',
     },
     {
       operation: 'count',
-      operationWithField: 'count(___records___)',
-      sourceField: '___records___',
+      operationWithField: `count(kql='system.cpu.user.pct: *')`,
+      sourceField: '',
     },
   ],
   [
