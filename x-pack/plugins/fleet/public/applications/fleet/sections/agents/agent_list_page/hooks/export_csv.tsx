@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { EsQuerySortValue, SearchSourceFields } from '@kbn/data-plugin/common';
@@ -16,7 +16,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 import {
-  sendGetAgentStatusRuntimeField,
+  useGetAgentStatusRuntimeFieldQuery,
   useKibanaVersion,
   useStartServices,
 } from '../../../../../../hooks';
@@ -29,20 +29,10 @@ export function useExportCSV(enableExportCSV?: boolean) {
   const startServices = useStartServices();
   const { notifications, http, uiSettings } = startServices;
   const kibanaVersion = useKibanaVersion();
-  const [runtimeFields, setRuntimeFields] = useState<string>('emit("online")');
-
-  useEffect(() => {
-    const getRuntimeFields = async () => {
-      const resp = await sendGetAgentStatusRuntimeField();
-      if (resp.data) {
-        setRuntimeFields(resp.data);
-      }
-    };
-    if (!enableExportCSV) {
-      return;
-    }
-    getRuntimeFields();
-  }, [enableExportCSV]);
+  const { data: runtimeFieldsResponse } = useGetAgentStatusRuntimeFieldQuery({
+    enabled: enableExportCSV,
+  });
+  const runtimeFields = runtimeFieldsResponse?.data ? runtimeFieldsResponse.data : 'emit("")';
 
   const getJobParams = (
     agents: Agent[] | string,

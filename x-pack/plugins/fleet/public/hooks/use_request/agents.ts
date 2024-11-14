@@ -358,3 +358,9 @@ export function sendGetAgentStatusRuntimeField() {
     version: API_VERSIONS.internal.v1,
   });
 }
+
+export function useGetAgentStatusRuntimeFieldQuery(options: Partial<{ enabled: boolean }> = {}) {
+  return useQuery(['status_runtime_field'], () => sendGetAgentStatusRuntimeField(), {
+    enabled: options.enabled,
+  });
+}
