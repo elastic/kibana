@@ -32,6 +32,7 @@ export interface DataUsageServerStart {}
 
 interface DataUsageApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
+  logFactory: LoggerFactory;
 }
 
 export type DataUsageRequestHandlerContext = CustomRequestHandlerContext<{

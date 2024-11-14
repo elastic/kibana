@@ -7,13 +7,9 @@
 import { ValidationError } from '@kbn/config-schema';
 import { MetricTypes } from '../../common/rest_types';
 import { AutoOpsError } from './errors';
-import { appContextService } from './app_context';
 import { autoOpsAPIService } from './autoops_api';
 
 export class DataUsageService {
-  getLogger(routeName: string) {
-    return appContextService.getLogger().get(routeName);
-  }
   async getMetrics({
     from,
     to,

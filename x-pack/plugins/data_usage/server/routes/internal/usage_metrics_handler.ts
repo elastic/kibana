@@ -13,7 +13,6 @@ import {
   UsageMetricsResponseSchemaBody,
 } from '../../../common/rest_types';
 import { DataUsageRequestHandlerContext } from '../../types';
-import { DataUsageService } from '../../services';
 
 import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../utils';
@@ -21,14 +20,17 @@ import { CustomHttpRequestError } from '../../utils';
 const formatStringParams = <T extends string>(value: T | T[]): T[] | MetricTypes[] =>
   typeof value === 'string' ? [value] : value;
 
-export const getUsageMetricsHandler = (
-  dataUsageService: DataUsageService
-): RequestHandler<never, unknown, UsageMetricsRequestBody, DataUsageRequestHandlerContext> => {
-  const logger = dataUsageService.getLogger('usageMetricsRoute');
-
+export const getUsageMetricsHandler = (): RequestHandler<
+  never,
+  unknown,
+  UsageMetricsRequestBody,
+  DataUsageRequestHandlerContext
+> => {
   return async (context, request, response) => {
     try {
       const core = await context.core;
+      const logger = (await context.dataUsage).logFactory.get('usageMetricsRoute');
+
       const esClient = core.elasticsearch.client.asCurrentUser;
 
       logger.debug(`Retrieving usage metrics`);

@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
+import type { LoggerFactory } from '@kbn/logging';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { DataUsageConfigType, createConfig } from './config';
 import type {
@@ -20,7 +20,6 @@ import type {
 } from './types';
 import { registerDataUsageRoutes } from './routes';
 import { PLUGIN_ID } from '../common';
-import { DataUsageService } from './services';
 import { appContextService } from './services/app_context';
 
 export class DataUsagePlugin
@@ -32,7 +31,7 @@ export class DataUsagePlugin
       DataUsageStartDependencies
     >
 {
-  private readonly logger: Logger;
+  private readonly logger: LoggerFactory;
   private dataUsageContext: DataUsageContext;
 
   private config$: Observable<DataUsageConfigType>;
@@ -48,13 +47,11 @@ export class DataUsagePlugin
     this.kibanaVersion = context.env.packageInfo.version;
     this.kibanaBranch = context.env.packageInfo.branch;
     this.kibanaInstanceId = context.env.instanceUuid;
-    this.logger = context.logger.get();
+    this.logger = context.logger;
     this.configInitialValue = context.config.get();
     const serverConfig = createConfig(context);
 
-    this.logger = context.logger.get();
-
-    this.logger.debug('data usage plugin initialized');
+    this.logger.get().debug('data usage plugin initialized');
 
     this.dataUsageContext = {
       config$: context.config.create<DataUsageConfigType>(),
@@ -69,9 +66,8 @@ export class DataUsagePlugin
     };
   }
   setup(coreSetup: CoreSetup, pluginsSetup: DataUsageSetupDependencies): DataUsageServerSetup {
-    this.logger.debug('data usage plugin setup');
+    this.logger.get().debug('data usage plugin setup');
     this.cloud = pluginsSetup.cloud;
-    const dataUsageService = new DataUsageService();
 
     pluginsSetup.features.registerElasticsearchFeature({
       id: PLUGIN_ID,
@@ -86,7 +82,7 @@ export class DataUsagePlugin
       ],
     });
     const router = coreSetup.http.createRouter<DataUsageRequestHandlerContext>();
-    registerDataUsageRoutes(router, dataUsageService);
+    registerDataUsageRoutes(router);
 
     return {};
   }
@@ -99,13 +95,13 @@ export class DataUsagePlugin
       kibanaBranch: this.kibanaBranch,
       kibanaInstanceId: this.kibanaInstanceId,
       cloud: this.cloud,
-      logFactory: this.dataUsageContext.logFactory,
+      logFactory: this.logger,
       serverConfig: this.dataUsageContext.serverConfig,
     });
     return {};
   }
 
   public stop() {
-    this.logger.debug('Stopping data usage plugin');
+    this.logger.get().debug('Stopping data usage plugin');
   }
 }
