@@ -8,6 +8,7 @@
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { createKnowledgeBaseEntry } from './create_knowledge_base_entry';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
 import { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
 import {
@@ -19,6 +20,8 @@ import { authenticatedUser } from '../../__mocks__/user';
 jest.mock('./get_knowledge_base_entry', () => ({
   getKnowledgeBaseEntry: jest.fn(),
 }));
+
+const telemetry = coreMock.createSetup().analytics;
 
 describe('createKnowledgeBaseEntry', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -60,6 +63,7 @@ describe('createKnowledgeBaseEntry', () => {
       user: authenticatedUser,
       knowledgeBaseEntry,
       logger,
+      telemetry,
     });
     expect(esClient.create).toHaveBeenCalledWith({
       body: {
@@ -111,6 +115,7 @@ describe('createKnowledgeBaseEntry', () => {
       user: authenticatedUser,
       knowledgeBaseEntry,
       logger,
+      telemetry,
     });
     expect(esClient.create).toHaveBeenCalledWith({
       body: {
@@ -160,6 +165,7 @@ describe('createKnowledgeBaseEntry', () => {
         user: authenticatedUser,
         knowledgeBaseEntry,
         logger,
+        telemetry,
       })
     ).rejects.toThrowError('Test error');
   });

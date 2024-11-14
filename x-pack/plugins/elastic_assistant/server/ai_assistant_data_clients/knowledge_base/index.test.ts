@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  coreMock,
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
@@ -36,6 +37,7 @@ const mockUser1 = authenticatedUser;
 
 const mockedPRetry = pRetry as jest.MockedFunction<typeof pRetry>;
 mockedPRetry.mockResolvedValue({});
+const telemetry = coreMock.createSetup().analytics;
 
 describe('AIAssistantKnowledgeBaseDataClient', () => {
   let mockOptions: KnowledgeBaseDataClientParams;
@@ -405,7 +407,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
       mockOptions.currentUser = mockUser1;
 
-      const result = await client.createKnowledgeBaseEntry({ knowledgeBaseEntry });
+      const result = await client.createKnowledgeBaseEntry({ telemetry, knowledgeBaseEntry });
       expect(result).toEqual(getKnowledgeBaseEntryMock());
     });
 
@@ -413,9 +415,9 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
       mockOptions.currentUser = null;
 
-      await expect(client.createKnowledgeBaseEntry({ knowledgeBaseEntry })).rejects.toThrow(
-        'Authenticated user not found!'
-      );
+      await expect(
+        client.createKnowledgeBaseEntry({ telemetry, knowledgeBaseEntry })
+      ).rejects.toThrow('Authenticated user not found!');
     });
 
     it('should throw error if user lacks privileges to create global entries', async () => {
@@ -424,7 +426,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       mockOptions.manageGlobalKnowledgeBaseAIAssistant = false;
 
       await expect(
-        client.createKnowledgeBaseEntry({ knowledgeBaseEntry, global: true })
+        client.createKnowledgeBaseEntry({ telemetry, knowledgeBaseEntry, global: true })
       ).rejects.toThrow('User lacks privileges to create global knowledge base entries');
     });
   });
