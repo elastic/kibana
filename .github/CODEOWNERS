@@ -2028,7 +2028,6 @@ x-pack/plugins/observability_solution/observability_shared/public/components/pro
 
 # Shared UX
 /test/functional/page_objects/files_management.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200017#discussion_r1840477291
-/test/interpreter_functional @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199767/files/9eb7f6e32e7645ffde6e5e8eaae72bf7f15a6f70#r1838041461
 /test/accessibility/apps/home.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077237
 /test/api_integration/apis/home/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077065
 /test/functional/apps/home @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840075278
