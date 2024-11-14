@@ -35,22 +35,21 @@ import { SeverityBadge } from '../../../common/components/severity_badge';
 import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 
-interface CspAlertsField {
+type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
+
+interface ContextualFlyoutAlertsField {
   _id: string[];
   _index: string[];
   'kibana.alert.rule.uuid': string[];
   'kibana.alert.reason': string[];
-  'kibana.alert.severity': Array<'low' | 'medium' | 'high' | 'critical'>;
+  'kibana.alert.severity': AlertSeverity[];
   'kibana.alert.rule.name': string[];
 }
 
 interface AlertsDetailsFields {
-  fields: CspAlertsField;
+  fields: ContextualFlyoutAlertsField;
 }
 
-/**
- * Insights view displayed in the document details expandable flyout left section
- */
 export const AlertsDetailsTable = memo(
   ({ fieldName, queryName }: { fieldName: 'host.name' | 'user.name'; queryName: string }) => {
     useEffect(() => {
@@ -148,7 +147,7 @@ export const AlertsDetailsTable = memo(
         field: 'fields',
         name: '',
         width: '5%',
-        render: (field: CspAlertsField) => (
+        render: (field: ContextualFlyoutAlertsField) => (
           <EuiLink
             onClick={() =>
               handleOnEventAlertDetailPanelOpened(field._id[0], field._index[0], tableId)
@@ -160,7 +159,7 @@ export const AlertsDetailsTable = memo(
       },
       {
         field: 'fields',
-        render: (field: CspAlertsField) => (
+        render: (field: ContextualFlyoutAlertsField) => (
           <EuiText size="s">{field['kibana.alert.rule.name'][0]}</EuiText>
         ),
         name: i18n.translate(
@@ -173,10 +172,10 @@ export const AlertsDetailsTable = memo(
       },
       {
         field: 'fields',
-        render: (field: CspAlertsField) => (
+        render: (field: ContextualFlyoutAlertsField) => (
           <EuiText size="s">
             <SeverityBadge
-              value={field['kibana.alert.severity'][0] as 'low' | 'medium' | 'high' | 'critical'}
+              value={field['kibana.alert.severity'][0] as AlertSeverity}
               data-test-subj="severityPropertyValue"
             />
           </EuiText>
@@ -191,7 +190,7 @@ export const AlertsDetailsTable = memo(
       },
       {
         field: 'fields',
-        render: (field: CspAlertsField) => (
+        render: (field: ContextualFlyoutAlertsField) => (
           <EuiText size="s">{field['kibana.alert.reason'][0]}</EuiText>
         ),
         name: i18n.translate(
@@ -206,7 +205,7 @@ export const AlertsDetailsTable = memo(
 
     const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
 
-    const openHostInAlerts = useCallback(
+    const openAlertsInAlertsPage = useCallback(
       () =>
         openAlertsPageWithFilters(
           [
@@ -232,11 +231,12 @@ export const AlertsDetailsTable = memo(
     return (
       <>
         <EuiPanel hasShadow={false}>
-          <EuiLink onClick={() => openHostInAlerts()}>
+          <EuiLink onClick={() => openAlertsInAlertsPage()}>
             <h1 data-test-subj={'securitySolutionFlyoutInsightsAlertsCount'}>
               {i18n.translate('xpack.securitySolution.flyout.left.insights.alerts.tableTitle', {
                 defaultMessage: 'Alerts ',
               })}
+              <EuiIcon type={'popout'} />
             </h1>
           </EuiLink>
 

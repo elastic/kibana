@@ -36,9 +36,6 @@ const mockAlertsData: ParsedAlertsData = {
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
 jest.mock('../../../entity_analytics/api/hooks/use_risk_score');
-// jest.mock(
-//   '../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data'
-// );
 jest.mock('@kbn/expandable-flyout');
 
 describe('AlertsPreview', () => {
