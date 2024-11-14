@@ -6,9 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { from, map } from 'rxjs';
+import { map } from 'rxjs';
 import {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -45,8 +46,12 @@ export class StreamsAppPlugin
     pluginsSetup: StreamsAppSetupDependencies
   ): StreamsAppPublicSetup {
     pluginsSetup.observabilityShared.navigation.registerSections(
-      from(coreSetup.getStartServices()).pipe(
-        map(([coreStart, pluginsStart]) => {
+      pluginsSetup.streams.status$.pipe(
+        map(({ status }) => {
+          if (status !== 'enabled') {
+            return [];
+          }
+
           return [
             {
               label: '',
@@ -78,17 +83,35 @@ export class StreamsAppPlugin
       euiIconType: 'logoObservability',
       appRoute: '/app/streams',
       category: DEFAULT_APP_CATEGORIES.observability,
-      visibleIn: ['sideNav'],
       order: 8001,
-      deepLinks: [
-        {
-          id: 'streams',
-          title: i18n.translate('xpack.streams.streamsAppDeepLinkTitle', {
-            defaultMessage: 'Streams',
-          }),
-          path: '/',
-        },
-      ],
+      updater$: pluginsSetup.streams.status$.pipe(
+        map(({ status }): AppUpdater => {
+          return (app) => {
+            if (status !== 'enabled') {
+              return {
+                visibleIn: [],
+                deepLinks: [],
+              };
+            }
+
+            return {
+              visibleIn: ['sideNav', 'globalSearch'],
+              deepLinks:
+                status === 'enabled'
+                  ? [
+                      {
+                        id: 'streams',
+                        title: i18n.translate('xpack.streams.streamsAppDeepLinkTitle', {
+                          defaultMessage: 'Streams',
+                        }),
+                        path: '/',
+                      },
+                    ]
+                  : [],
+            };
+          };
+        })
+      ),
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services
         const [{ renderApp }, [coreStart, pluginsStart]] = await Promise.all([
