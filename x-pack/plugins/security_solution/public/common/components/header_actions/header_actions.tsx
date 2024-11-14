@@ -10,9 +10,9 @@ import { EuiButtonIcon, EuiToolTip, EuiCheckbox } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
+import { isFullScreen } from '../../../timelines/components/timeline/helpers';
 import type { HeaderActionProps } from '../../../../common/types';
 import { TimelineId } from '../../../../common/types';
-import { isFullScreen } from '../../../timelines/components/timeline/body/column_headers';
 import { isActiveTimeline } from '../../../helpers';
 import { getColumnHeader } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { timelineActions } from '../../../timelines/store';

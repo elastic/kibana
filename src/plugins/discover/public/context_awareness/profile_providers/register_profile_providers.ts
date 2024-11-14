@@ -27,6 +27,7 @@ import {
   ProfileProviderServices,
 } from './profile_provider_services';
 import type { DiscoverServices } from '../../build_services';
+import { createObservabilityRootProfileProvider } from './observability/observability_root_profile';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
@@ -86,8 +87,8 @@ export const registerProfileProviders = async ({
  * @param options Register enabled profile providers options
  */
 export const registerEnabledProfileProviders = <
-  TProvider extends BaseProfileProvider<{}>,
-  TService extends BaseProfileService<TProvider, {}>
+  TProvider extends BaseProfileProvider<{}, {}>,
+  TService extends BaseProfileService<TProvider>
 >({
   profileService,
   providers: availableProviders,
@@ -122,6 +123,7 @@ const createRootProfileProviders = (providerServices: ProfileProviderServices) =
   createExampleRootProfileProvider(),
   createExampleSolutionViewRootProfileProvider(),
   createSecurityRootProfileProvider(providerServices),
+  createObservabilityRootProfileProvider(providerServices),
 ];
 
 /**

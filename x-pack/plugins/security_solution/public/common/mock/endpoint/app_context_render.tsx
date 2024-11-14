@@ -283,7 +283,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <AppRootProvider
       store={store}
       history={history}

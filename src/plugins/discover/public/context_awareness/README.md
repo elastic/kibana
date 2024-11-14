@@ -44,6 +44,8 @@ The merging order for profiles is based on the context level hierarchy (`root` >
 The following diagram illustrates the extension point merging process:
 ![image](./docs/merged_accessors.png)
 
+Additionally, extension point implementations are passed an `accessorParams` argument as the second argument after `prev`. This object contains additional parameters that may be useful to extension point implementations, primarily the current `context` object. This is most useful in situations where consumers want to [customize the `context` object](#custom-context-objects) with properties specific to their profile, such as state stores and asynchronously initialized services.
+
 Definitions for composable profiles and the merging routine are located in the [`composable_profile.ts`](./composable_profile.ts) file.
 
 ### Supporting services
@@ -266,7 +268,8 @@ export const createSecurityRootProfileProvider = (): RootProfileProvider => ({
     getCellRenderers: (prev) => (params) => ({
       ...prev(params),
       foo: function FooComponent() {
-        // Since the app wrapper implementation wrapped Discover with a React context provider, we can now access its values from within our extension point implementations
+        // Since the app wrapper implementation wrapped Discover with a React context provider,
+        // we can now access its values from within our extension point implementations
         const { setFlyoutOpen } = useContext(flyoutContext);
 
         return <button onClick={() => setFlyoutOpen(true)}>Click me to open a flyout!</button>;
@@ -282,6 +285,51 @@ export const createSecurityRootProfileProvider = (): RootProfileProvider => ({
     }
 
     return { isMatch: false };
+  },
+});
+```
+
+## Custom `context` objects
+
+By default the `context` object returned from each profile provider's `resolve` method conforms to a standard interface specific to their profile's context level. However, in some situations it may be useful for consumers to extend this object with properties specific to their profile implementation. To support this, profile providers can define a strongly typed `context` interface that extends the default interface, and allows passing properties through to their profile's extension point implementations. One potential use case for this is instantiating state stores or asynchronously initialized services, then accessing them within a `getRenderAppWrapper` implementation to pass to a React context provider:
+
+```tsx
+// The profile provider interfaces accept a custom context object type param
+type SecurityRootProfileProvider = RootProfileProvider<{ stateStore: SecurityStateStore }>;
+
+export const createSecurityRootProfileProvider = (
+  services: ProfileProviderServices
+): SecurityRootProfileProvider => ({
+  profileId: 'security-root-profile',
+  profile: {
+    getRenderAppWrapper:
+      (PrevWrapper, { context }) =>
+      ({ children }) =>
+        (
+          <PrevWrapper>
+            // Custom props can be accessed from the context object available in `accessorParams`
+            <SecurityStateProvider stateStore={context.stateStore}>
+              {children}
+            </SecurityStateProvider>
+          </PrevWrapper>
+        ),
+  },
+  resolve: async (params) => {
+    if (params.solutionNavId !== SolutionType.Security) {
+      return { isMatch: false };
+    }
+
+    // Perform async service initialization within the `resolve` method
+    const stateStore = await initializeSecurityStateStore(services);
+
+    return {
+      isMatch: true,
+      context: {
+        solutionType: SolutionType.Security,
+        // Include the custom service in the returned context object
+        stateStore,
+      },
+    };
   },
 });
 ```
@@ -335,9 +383,12 @@ export const createSecurityLogsDataSourceProfileProivder = (
       // Completely remove a specific extension point implementation
       getDocViewer: undefined,
       // Modify the result of an existing extension point implementation
-      getCellRenderers: (prev) => (params) => {
+      getCellRenderers: (prev, accessorParams) => (params) => {
         // Retrieve and execute the base implementation
-        const baseImpl = logsDataSourceProfileProvider.profile.getCellRenderers?.(prev);
+        const baseImpl = logsDataSourceProfileProvider.profile.getCellRenderers?.(
+          prev,
+          accessorParams
+        );
         const baseRenderers = baseImpl?.(params);
 
         // Return the modified result

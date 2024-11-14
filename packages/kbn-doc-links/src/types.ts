@@ -314,6 +314,7 @@ export interface DocLinks {
     readonly autocompleteSuggestions: string;
     readonly secureSavedObject: string;
     readonly xpackSecurity: string;
+    readonly dashboardImportExport: string;
   };
   readonly upgradeAssistant: {
     readonly overview: string;

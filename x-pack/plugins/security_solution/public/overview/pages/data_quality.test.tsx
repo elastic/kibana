@@ -8,6 +8,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import type { HttpFetchOptions } from '@kbn/core-http-browser';
 
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import { TestProviders } from '../../common/mock';
@@ -22,7 +23,17 @@ jest.mock('../../common/lib/kibana', () => {
 
   const mockKibanaServices = {
     get: () => ({
-      http: { fetch: jest.fn() },
+      http: {
+        fetch: jest.fn().mockImplementation((path: string, options: HttpFetchOptions) => {
+          if (
+            path.startsWith('/internal/ecs_data_quality_dashboard/results_latest') &&
+            options.method === 'GET'
+          ) {
+            return Promise.resolve([]);
+          }
+          return Promise.resolve();
+        }),
+      },
     }),
   };
 

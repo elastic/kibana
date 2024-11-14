@@ -263,11 +263,11 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         }
       });
 
-      // invoke the invalidate task
-      await runInvalidateTask();
-
       // pending API key should now be deleted because backfill is done
       await retry.try(async () => {
+        // invoke the invalidate task
+        await runInvalidateTask();
+
         const results = await getApiKeysPendingInvalidation();
         expect(results.length).to.eql(0);
         return results;

@@ -39,7 +39,8 @@ export function SynthtraceProvider({ getService }: DeploymentAgnosticFtrProvider
   return {
     apmSynthtraceKibanaClient,
     createLogsSynthtraceEsClient: () => getLogsSynthtraceEsClient(client),
-    async createApmSynthtraceEsClient(packageVersion: string) {
+    async createApmSynthtraceEsClient() {
+      const packageVersion = (await apmSynthtraceKibanaClient.installApmPackage()).version;
       return getApmSynthtraceEsClient({ client, packageVersion });
     },
   };

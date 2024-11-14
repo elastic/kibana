@@ -28,6 +28,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
         withInternalHeaders: true,
+        useCookieHeader: true,
       });
     });
 
