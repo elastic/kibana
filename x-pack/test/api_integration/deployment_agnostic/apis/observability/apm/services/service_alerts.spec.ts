@@ -8,23 +8,25 @@ import expect from '@kbn/expect';
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createApmRule, runRuleSoon, ApmAlertFields } from '../alerts/helpers/alerting_api_helper';
-import { waitForActiveRule } from '../alerts/helpers/wait_for_active_rule';
-import { cleanupRuleAndAlertState } from '../alerts/helpers/cleanup_rule_and_alert_state';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import {
+  APM_ACTION_VARIABLE_INDEX,
+  APM_ALERTS_INDEX,
+  ApmAlertFields,
+} from '../alerts/helpers/alerting_helper';
 
-export default function ServiceAlerts({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const supertest = getService('supertest');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
-  const es = getService('es');
+export default function ServiceAlerts({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const alertingApi = getService('alertingApi');
+  const samlAuth = getService('samlAuth');
+  const synthtrace = getService('synthtrace');
+
   const dayInMs = 24 * 60 * 60 * 1000;
   const start = Date.now() - dayInMs;
   const end = Date.now() + dayInMs;
   const goService = 'synth-go';
-  const logger = getService('log');
 
   async function getServiceAlerts({
     serviceName,
@@ -46,27 +48,33 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
     });
   }
 
-  function createRule() {
-    return createApmRule({
-      supertest,
-      name: `Latency threshold | ${goService}`,
-      params: {
-        serviceName: goService,
-        transactionType: undefined,
-        windowSize: 5,
-        windowUnit: 'h',
-        threshold: 100,
-        aggregationType: AggregationType.Avg,
-        environment: 'testing',
-        groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
-      },
-      ruleTypeId: ApmRuleType.TransactionDuration,
-    });
-  }
+  describe('Service alerts', () => {
+    let roleAuthc: RoleCredentials;
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177512
-  registry.when('Service alerts', { config: 'basic', archives: [] }, () => {
+    function createRule() {
+      return alertingApi.createRule({
+        name: `Latency threshold | ${goService}`,
+        params: {
+          serviceName: goService,
+          transactionType: undefined,
+          windowSize: 5,
+          windowUnit: 'h',
+          threshold: 100,
+          aggregationType: AggregationType.Avg,
+          environment: 'testing',
+          groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
+        },
+        ruleTypeId: ApmRuleType.TransactionDuration,
+        roleAuthc,
+        consumer: 'apm',
+      });
+    }
+
     before(async () => {
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+
       const synthServices = [
         apm
           .service({ name: goService, environment: 'testing', agentName: 'go' })
@@ -115,6 +123,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
 
     after(async () => {
       await apmSynthtraceEsClient.clean();
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('with alerts', () => {
@@ -124,20 +133,35 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
       before(async () => {
         const createdRule = await createRule();
         ruleId = createdRule.id;
-        alerts = await waitForAlertsForRule({ es, ruleId });
+        alerts = (
+          await alertingApi.waitForDocumentInIndex({
+            indexName: APM_ALERTS_INDEX,
+            ruleId,
+          })
+        ).hits.hits.map((hit) => hit._source) as ApmAlertFields[];
       });
 
       after(async () => {
-        await cleanupRuleAndAlertState({ es, supertest, logger });
+        await alertingApi.cleanUpAlerts({
+          roleAuthc,
+          ruleId,
+          alertIndexName: APM_ALERTS_INDEX,
+          connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+          consumer: 'apm',
+        });
       });
 
       it('checks if rule is active', async () => {
-        const ruleStatus = await waitForActiveRule({ ruleId, supertest });
+        const ruleStatus = await alertingApi.waitForRuleStatus({
+          roleAuthc,
+          ruleId,
+          expectedStatus: 'active',
+        });
         expect(ruleStatus).to.be('active');
       });
 
       it('should successfully run the rule', async () => {
-        const response = await runRuleSoon({ ruleId, supertest });
+        const response = await alertingApi.runRule(roleAuthc, ruleId);
         expect(response.status).to.be(204);
       });
 
