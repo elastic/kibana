@@ -12,7 +12,6 @@ import type {
   MappingProperty as EsMappingProperty,
   MappingPropertyBase as EsMappingPropertyBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { NodeEventHandler } from 'rxjs/internal/observable/fromEvent';
 
 /**
  * Describe a saved object type mapping.
