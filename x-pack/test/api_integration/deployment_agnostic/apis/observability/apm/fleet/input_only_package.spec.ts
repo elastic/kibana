@@ -13,27 +13,28 @@ import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import pRetry from 'p-retry';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { getBettertest } from '../../common/bettertest';
+import {
+  RoleCredentials,
+  InternalRequestHeader,
+  SupertestWithoutAuthProviderType,
+} from '@kbn/ftr-common-functional-services';
+import type { ApmApiClient } from '../../../../services/apm_api';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   createAgentPolicy,
   createPackagePolicy,
   deleteAgentPolicyAndPackagePolicyByName,
   setupFleet,
 } from './helpers';
-import { ApmApiClient } from '../../common/config';
 
-export default function ApiTest(ftrProviderContext: FtrProviderContext) {
-  const { getService } = ftrProviderContext;
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const supertest = getService('supertest');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const log = getService('log');
-  const bettertest = getBettertest(supertest);
   const config = getService('config');
-  const synthtraceKibanaClient = getService('synthtraceKibanaClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const synthtrace = getService('synthtrace');
+  const samlAuth = getService('samlAuth');
 
   const API_KEY_NAME = 'apm_api_key_testing';
   const APM_AGENT_POLICY_NAME = 'apm_agent_policy_testing';
@@ -75,59 +76,71 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     api_key: string;
   }) {
     const esClient = createEsClientWithApiKey({ id, apiKey });
-    const kibanaVersion = await synthtraceKibanaClient.fetchLatestApmPackageVersion();
+    const apmSynthtraceKibanaClient = await synthtrace.apmSynthtraceKibanaClient;
+    const latestVersion = await apmSynthtraceKibanaClient.fetchLatestApmPackageVersion();
     return new ApmSynthtraceEsClient({
       client: esClient,
       logger: createLogger(LogLevel.info),
-      version: kibanaVersion,
+      version: latestVersion,
       refreshAfterIndex: true,
     });
   }
 
   // FLAKY: https://github.com/elastic/kibana/issues/177384
-  registry.when('APM package policy', { config: 'basic', archives: [] }, () => {
-    async function getAgentPolicyPermissions(agentPolicyId: string, packagePolicyId: string) {
-      const res = await bettertest<{
-        item: { output_permissions: { [key: string]: Record<string, SecurityRoleDescriptor> } };
-      }>({
-        pathname: `/api/fleet/agent_policies/${agentPolicyId}/full`,
-        method: 'get',
-      });
-
-      return Object.values(res.body.item.output_permissions)[0][packagePolicyId];
-    }
-
+  describe('APM Fleet input only package', () => {
     describe('input only package', () => {
       let agentPolicyId: string;
       let packagePolicyId: string;
       let permissions: SecurityRoleDescriptor;
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+      let adminRoleAuthc: RoleCredentials;
+      let internalHeaders: InternalRequestHeader;
 
       async function cleanAll() {
         try {
           await apmSynthtraceEsClient.clean();
           await es.security.invalidateApiKey({ name: API_KEY_NAME });
           await deleteAgentPolicyAndPackagePolicyByName({
-            bettertest,
+            supertest: supertestWithoutAuth,
+            adminRoleAuthc,
+            internalHeaders,
             agentPolicyName: APM_AGENT_POLICY_NAME,
             packagePolicyName: APM_PACKAGE_POLICY_NAME,
           });
         } catch (e) {
+          console.log(e);
           log.info('Nothing to clean');
         }
       }
 
       before(async () => {
+        adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+        internalHeaders = samlAuth.getInternalRequestHeader();
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         await cleanAll();
 
-        await setupFleet(bettertest);
-        agentPolicyId = await createAgentPolicy({ bettertest, name: APM_AGENT_POLICY_NAME });
+        await setupFleet(supertestWithoutAuth, adminRoleAuthc, internalHeaders);
+        agentPolicyId = await createAgentPolicy({
+          supertest: supertestWithoutAuth,
+          adminRoleAuthc,
+          internalHeaders,
+          name: APM_AGENT_POLICY_NAME,
+        });
         packagePolicyId = await createPackagePolicy({
-          bettertest,
+          supertest: supertestWithoutAuth,
+          adminRoleAuthc,
+          internalHeaders,
           agentPolicyId,
           name: APM_PACKAGE_POLICY_NAME,
         });
 
-        permissions = await getAgentPolicyPermissions(agentPolicyId, packagePolicyId);
+        permissions = await getAgentPolicyPermissions(
+          supertestWithoutAuth,
+          adminRoleAuthc,
+          internalHeaders,
+          agentPolicyId,
+          packagePolicyId
+        );
       });
 
       after(async () => {
@@ -175,6 +188,20 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
     });
   });
+}
+
+async function getAgentPolicyPermissions(
+  supertest: SupertestWithoutAuthProviderType,
+  agentPolicyId: string,
+  packagePolicyId: string
+) {
+  const res: {
+    body: {
+      item: { output_permissions: { [key: string]: Record<string, SecurityRoleDescriptor> } };
+    };
+  } = await supertest.get(`/api/fleet/agent_policies/${agentPolicyId}/full`);
+
+  return Object.values(res.body.item.output_permissions)[0][packagePolicyId];
 }
 
 function getApmServices(apmApiClient: ApmApiClient, start: string, end: string) {

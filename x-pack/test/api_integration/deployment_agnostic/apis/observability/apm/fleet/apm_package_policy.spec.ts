@@ -21,7 +21,7 @@ import {
   APM_AGENT_CONFIGURATION_INDEX,
   APM_SOURCE_MAP_INDEX,
 } from '@kbn/apm-plugin/server/routes/settings/apm_indices/apm_system_index_constants';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   createAgentPolicy,
   createPackagePolicy,
@@ -30,13 +30,11 @@ import {
   getPackagePolicy,
   setupFleet,
 } from './helpers';
-import { getBettertest } from '../../common/bettertest';
-import { expectToReject } from '../../common/utils/expect_to_reject';
+import { getBettertest } from '../../../../../../apm_api_integration/common/bettertest';
+import { expectToReject } from '../../../../../../apm_api_integration/common/utils/expect_to_reject';
 
-export default function ApiTest(ftrProviderContext: FtrProviderContext) {
-  const { getService } = ftrProviderContext;
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
   const supertest = getService('supertest');
   const es = getService('es');
   const bettertest = getBettertest(supertest);
@@ -108,7 +106,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     return res.total as number;
   }
 
-  registry.when('APM package policy', { config: 'basic', archives: [] }, () => {
+  describe('APM package policy', () => {
     let apmPackagePolicy: PackagePolicy;
     let agentPolicyId: string;
     let packagePolicyId: string;

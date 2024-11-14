@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../apm_api_integration/common/ftr_provider_context';
 import {
   createAgentPolicy,
   createPackagePolicy,
@@ -14,7 +14,7 @@ import {
   deletePackagePolicy,
   setupFleet,
 } from './helpers';
-import { getBettertest } from '../../common/bettertest';
+import { getBettertest } from '../../../../../../apm_api_integration/common/bettertest';
 
 export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const { getService } = ftrProviderContext;
