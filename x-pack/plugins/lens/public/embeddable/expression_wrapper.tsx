@@ -33,6 +33,9 @@ export interface ExpressionWrapperProps {
   ) => void;
   onRender$: () => void;
   renderMode?: RenderMode;
+  /**
+   * @deprecated https://github.com/elastic/kibana/pull/197802
+   **/
   syncColors?: boolean;
   syncTooltips?: boolean;
   syncCursor?: boolean;

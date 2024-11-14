@@ -57,7 +57,9 @@ export type EmbeddableInput = {
   searchSessionId?: string;
 
   /**
-   * Flag whether colors should be synced with other panels
+   * Flag whether legacy colors should be synced with other panels
+   *
+   * @deprecated https://github.com/elastic/kibana/pull/197802
    */
   syncColors?: boolean;
 

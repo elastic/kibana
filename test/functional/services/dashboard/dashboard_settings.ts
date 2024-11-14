@@ -77,12 +77,6 @@ export function DashboardSettingsProvider({ getService }: FtrProviderContext) {
       await testSubjects.setEuiSwitch('dashboardPanelTitlesCheckbox', status);
     }
 
-    public async toggleSyncColors(value: boolean) {
-      const status = value ? 'check' : 'uncheck';
-      log.debug(`toggleSyncColors::${status}`);
-      await testSubjects.setEuiSwitch('dashboardSyncColorsCheckbox', status);
-    }
-
     public async toggleSyncCursor(value: boolean) {
       const status = value ? 'check' : 'uncheck';
       log.debug(`toggleSyncCursor::${status}`);
