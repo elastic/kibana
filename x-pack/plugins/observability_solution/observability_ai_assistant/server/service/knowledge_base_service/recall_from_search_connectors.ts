@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import { isEmpty, orderBy } from 'lodash';
+import { isEmpty, orderBy, compact } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import { CoreSetup } from '@kbn/core-lifecycle-server';
 import { firstValueFrom } from 'rxjs';
@@ -220,7 +220,8 @@ async function getConnectorIndices(
   }
 
   const response = await responsePromise;
-  const connectorIndices = response.results?.map((result) => result.index_name);
+
+  const connectorIndices = compact(response.results?.map((result) => result.index_name));
 
   // preserve backwards compatibility with 8.14 (may not be needed in the future)
   if (isEmpty(connectorIndices)) {
