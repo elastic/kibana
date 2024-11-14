@@ -132,7 +132,9 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
     function resetErrorOnJobChange() {
       if (errorEncounteredStatusCode.current !== undefined) {
         errorEncounteredStatusCode.current = undefined;
-        onError?.(undefined);
+        // Calling onError to clear any previous error
+        // @ts-expect-error Expected 1 arguments, but got 0.
+        onError?.();
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
