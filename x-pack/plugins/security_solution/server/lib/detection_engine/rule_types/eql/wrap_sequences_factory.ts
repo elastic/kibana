@@ -39,31 +39,24 @@ export const wrapSequencesFactory =
     intendedTimestamp: Date | undefined;
   }): WrapSequences =>
   (sequences, buildReasonMessage) =>
-    sequences.reduce(
-      (
-        acc: Array<
-          | WrappedFieldsLatest<EqlShellFieldsLatest>
-          | WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>
-        >,
-        sequence
-      ) => {
-        const alerts = buildAlertGroupFromSequence({
-          ruleExecutionLogger,
-          sequence,
-          completeRule,
-          mergeStrategy,
-          spaceId,
-          buildReasonMessage,
-          indicesToQuery,
-          alertTimestampOverride,
-          publicBaseUrl,
-          intendedTimestamp,
-        });
+    sequences.reduce<
+      Array<
+        | WrappedFieldsLatest<EqlShellFieldsLatest>
+        | WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>
+      >
+    >((acc, sequence) => {
+      const alerts = buildAlertGroupFromSequence({
+        ruleExecutionLogger,
+        sequence,
+        completeRule,
+        mergeStrategy,
+        spaceId,
+        buildReasonMessage,
+        indicesToQuery,
+        alertTimestampOverride,
+        publicBaseUrl,
+        intendedTimestamp,
+      });
 
-        return [...acc, ...alerts] as Array<
-          | WrappedFieldsLatest<EqlShellFieldsLatest>
-          | WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>
-        >;
-      },
-      []
-    );
+      return [...acc, ...alerts];
+    }, []);
