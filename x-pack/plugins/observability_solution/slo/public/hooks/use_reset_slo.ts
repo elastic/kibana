@@ -7,23 +7,27 @@
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useKibana } from '../utils/kibana_react';
+import { ResetSLOResponse } from '@kbn/slo-schema';
+import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
+import { usePluginContext } from './use_plugin_context';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useResetSlo() {
   const {
-    http,
     notifications: { toasts },
   } = useKibana().services;
   const queryClient = useQueryClient();
+  const { sloClient } = usePluginContext();
 
-  return useMutation<string, ServerError, { id: string; name: string }>(
+  return useMutation<ResetSLOResponse, ServerError, { id: string; name: string }>(
     ['resetSlo'],
     ({ id, name }) => {
       try {
-        return http.post(`/api/observability/slos/${id}/_reset`);
+        return sloClient.fetch('POST /api/observability/slos/{id}/_reset 2023-10-31', {
+          params: { path: { id } },
+        });
       } catch (error) {
         return Promise.reject(
           i18n.translate('xpack.slo.slo.reset.errorMessage', {

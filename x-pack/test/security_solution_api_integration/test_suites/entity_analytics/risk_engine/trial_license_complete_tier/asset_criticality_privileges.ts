@@ -104,6 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               },
             },
+            kibana: {},
           });
         });
         it('returns has_all_required false for user without asset criticality index read', async () => {
@@ -118,6 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               },
             },
+            kibana: {},
           });
         });
         it('returns has_all_required false for user without asset criticality index write', async () => {
@@ -132,6 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               },
             },
+            kibana: {},
           });
         });
       });
@@ -157,6 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
+          kibana: {},
         });
       });
 
@@ -175,6 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
+          kibana: {},
         });
       });
     });

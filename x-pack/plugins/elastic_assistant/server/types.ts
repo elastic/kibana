@@ -126,7 +126,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getCurrentUser: () => AuthenticatedUser | null;
   getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
   getAIAssistantKnowledgeBaseDataClient: (
-    params: GetAIAssistantKnowledgeBaseDataClientParams
+    params?: GetAIAssistantKnowledgeBaseDataClientParams
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
@@ -233,4 +233,5 @@ export interface AssistantToolParams {
     ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
   >;
   size?: number;
+  telemetry?: AnalyticsServiceSetup;
 }

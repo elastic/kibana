@@ -8,6 +8,7 @@
 import React from 'react';
 import type { UpgradeableEqlFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { DataSourceEditForm } from './fields/data_source';
+import { AlertSuppressionEditForm } from './fields/alert_suppression';
 
 interface EqlRuleFieldEditProps {
   fieldName: UpgradeableEqlFields;
@@ -17,6 +18,8 @@ export function EqlRuleFieldEdit({ fieldName }: EqlRuleFieldEditProps) {
   switch (fieldName) {
     case 'data_source':
       return <DataSourceEditForm />;
+    case 'alert_suppression':
+      return <AlertSuppressionEditForm />;
     default:
       return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
   }

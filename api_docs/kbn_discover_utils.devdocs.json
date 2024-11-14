@@ -2401,7 +2401,7 @@
                 "section": "def-public.TopNavMenuData",
                 "text": "TopNavMenuData"
               },
-              ", \"isLoading\" | \"description\" | \"label\" | \"href\" | \"tooltip\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
+              ", \"label\" | \"description\" | \"href\" | \"tooltip\" | \"isLoading\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
               {
                 "pluginId": "@kbn/discover-utils",
                 "scope": "common",
@@ -2493,7 +2493,7 @@
                 "section": "def-public.TopNavMenuData",
                 "text": "TopNavMenuData"
               },
-              ", \"isLoading\" | \"description\" | \"label\" | \"href\" | \"tooltip\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
+              ", \"label\" | \"description\" | \"href\" | \"tooltip\" | \"isLoading\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
               {
                 "pluginId": "@kbn/discover-utils",
                 "scope": "common",
@@ -2585,7 +2585,7 @@
                 "section": "def-public.TopNavMenuData",
                 "text": "TopNavMenuData"
               },
-              ", \"isLoading\" | \"description\" | \"label\" | \"href\" | \"tooltip\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
+              ", \"label\" | \"description\" | \"href\" | \"tooltip\" | \"isLoading\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
               {
                 "pluginId": "@kbn/discover-utils",
                 "scope": "common",
@@ -2873,7 +2873,7 @@
                 "section": "def-public.TopNavMenuData",
                 "text": "TopNavMenuData"
               },
-              ", \"isLoading\" | \"description\" | \"label\" | \"href\" | \"tooltip\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
+              ", \"label\" | \"description\" | \"href\" | \"tooltip\" | \"isLoading\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
               {
                 "pluginId": "@kbn/discover-utils",
                 "scope": "common",
@@ -2945,7 +2945,7 @@
                 "section": "def-public.TopNavMenuData",
                 "text": "TopNavMenuData"
               },
-              ", \"isLoading\" | \"description\" | \"label\" | \"href\" | \"tooltip\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
+              ", \"label\" | \"description\" | \"href\" | \"tooltip\" | \"isLoading\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
               {
                 "pluginId": "@kbn/discover-utils",
                 "scope": "common",
@@ -4161,7 +4161,7 @@
             "section": "def-public.TopNavMenuData",
             "text": "TopNavMenuData"
           },
-          ", \"isLoading\" | \"description\" | \"label\" | \"href\" | \"tooltip\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
+          ", \"label\" | \"description\" | \"href\" | \"tooltip\" | \"isLoading\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
           {
             "pluginId": "@kbn/discover-utils",
             "scope": "common",
@@ -4200,7 +4200,7 @@
             "section": "def-public.TopNavMenuData",
             "text": "TopNavMenuData"
           },
-          ", \"isLoading\" | \"description\" | \"label\" | \"href\" | \"tooltip\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
+          ", \"label\" | \"description\" | \"href\" | \"tooltip\" | \"isLoading\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
           {
             "pluginId": "@kbn/discover-utils",
             "scope": "common",

@@ -5,6 +5,8 @@
     "@elastic/obs-ai-assistant",
     "@elastic/security-solution"
   ],
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "dataUsage",
     "server": true,
