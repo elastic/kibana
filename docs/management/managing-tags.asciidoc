@@ -5,7 +5,8 @@
 Use tags to categorize your saved objects,
 then filter for related objects based on shared tags.
 
-To get started, open the main menu, and then click *Stack Management > Tags*.
+To get started, go to the *Tags* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 [role="screenshot"]
 image::images/tags/tag-management-section.png[Tags management]
@@ -15,8 +16,8 @@ image::images/tags/tag-management-section.png[Tags management]
 
 To create tags, you must meet the minimum requirements.
 
-* Access to *Tags* requires the `Tag Management` Kibana privilege. To add the privilege, open the main menu,
-and then click *Stack Management > Roles*.
+* Access to *Tags* requires the `Tag Management` Kibana privilege. To add the privilege, go to the *Roles* page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 * The `read` privilege allows you to assign tags to the saved objects for which you have write permission.
 * The `write` privilege enables you to create, edit, and delete tags.
 

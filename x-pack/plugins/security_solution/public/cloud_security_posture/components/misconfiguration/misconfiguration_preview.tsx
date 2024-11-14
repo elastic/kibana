@@ -12,18 +12,17 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
-import { hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
+import { hasVulnerabilitiesData, statusColors } from '@kbn/cloud-security-posture';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
@@ -51,7 +50,7 @@ export const getFindingsStats = (passedFindingsStats: number, failedFindingsStat
         }
       ),
       count: passedFindingsStats,
-      color: euiThemeVars.euiColorSuccess,
+      color: statusColors.passed,
     },
     {
       key: i18n.translate(
@@ -61,7 +60,7 @@ export const getFindingsStats = (passedFindingsStats: number, failedFindingsStat
         }
       ),
       count: failedFindingsStats,
-      color: euiThemeVars.euiColorVis9,
+      color: statusColors.failed,
     },
   ];
 };
@@ -70,14 +69,10 @@ const MisconfigurationPreviewScore = ({
   passedFindings,
   failedFindings,
   euiTheme,
-  numberOfPassedFindings,
-  numberOfFailedFindings,
 }: {
   passedFindings: number;
   failedFindings: number;
   euiTheme: EuiThemeComputed<{}>;
-  numberOfPassedFindings?: number;
-  numberOfFailedFindings?: number;
 }) => {
   return (
     <EuiFlexItem>

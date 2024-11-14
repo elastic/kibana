@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import Boom from '@hapi/boom';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
@@ -80,6 +81,12 @@ const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
     const {
       elasticsearch: { client },
     } = await context.core;
+
+    const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
+    if (!hasPrivileges) {
+      throw Boom.forbidden('Insufficient permissions to create shipper API key');
+    }
+
     const { encoded: apiKeyEncoded } = await createShipperApiKey(client.asCurrentUser, 'otel logs');
 
     return { apiKeyEncoded };

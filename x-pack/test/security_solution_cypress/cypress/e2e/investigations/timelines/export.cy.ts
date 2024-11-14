@@ -21,9 +21,9 @@ import { TIMELINE_CHECKBOX } from '../../../screens/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { expectedExportedTimeline } from '../../../objects/timeline';
 import { closeToast } from '../../../tasks/common/toast';
+import { getFullname } from '../../../tasks/common';
 
-// FLAKY: https://github.com/elastic/kibana/issues/187550
-describe.skip('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
+describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteTimelines();
@@ -42,13 +42,22 @@ describe.skip('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
     visit(TIMELINES_URL);
   });
 
+  /**
+   *  TODO: Good candidate for converting to a jest Test
+   *  https://github.com/elastic/kibana/issues/195612
+   */
   it('should export custom timeline(s)', function () {
     cy.log('Export a custom timeline via timeline actions');
 
     exportTimeline(this.timelineId1);
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
-      cy.wrap(response?.body).should('eql', expectedExportedTimeline(this.timelineResponse1));
+      getFullname('admin').then((username) => {
+        cy.wrap(response?.body).should(
+          'eql',
+          expectedExportedTimeline(this.timelineResponse1, username as string)
+        );
+      });
     });
     closeToast();
 
@@ -58,8 +67,15 @@ describe.skip('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
     exportSelectedTimelines();
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
-      cy.wrap(response?.body).should('eql', expectedExportedTimeline(this.timelineResponse1));
+
+      getFullname('admin').then((username) => {
+        cy.wrap(response?.body).should(
+          'eql',
+          expectedExportedTimeline(this.timelineResponse1, username as string)
+        );
+      });
     });
+
     closeToast();
 
     cy.log('Export all custom timelines via bulk actions');
@@ -77,8 +93,17 @@ describe.skip('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
       const timelines = response?.body?.split('\n');
-      assert.deepEqual(JSON.parse(timelines[0]), expectedExportedTimeline(this.timelineResponse2));
-      assert.deepEqual(JSON.parse(timelines[1]), expectedExportedTimeline(this.timelineResponse1));
+
+      getFullname('admin').then((username) => {
+        assert.deepEqual(
+          JSON.parse(timelines[0]),
+          expectedExportedTimeline(this.timelineResponse2, username as string)
+        );
+        assert.deepEqual(
+          JSON.parse(timelines[1]),
+          expectedExportedTimeline(this.timelineResponse1, username as string)
+        );
+      });
     });
   });
 });

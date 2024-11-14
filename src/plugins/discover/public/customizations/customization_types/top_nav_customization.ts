@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TopNavMenuData, TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
-
 export interface TopNavDefaultItem {
   disabled?: boolean;
-  order?: number;
 }
 
 export interface TopNavDefaultMenu {
@@ -23,24 +20,12 @@ export interface TopNavDefaultMenu {
   saveItem?: TopNavDefaultItem;
 }
 
-export interface TopNavMenuItem {
-  data: TopNavMenuData;
-  order: number;
-}
-
 export interface TopNavDefaultBadges {
   unsavedChangesBadge?: TopNavDefaultItem;
-}
-
-export interface TopNavBadge {
-  data: TopNavMenuBadgeProps;
-  order: number;
 }
 
 export interface TopNavCustomization {
   id: 'top_nav';
   defaultMenu?: TopNavDefaultMenu;
-  getMenuItems?: () => TopNavMenuItem[];
   defaultBadges?: TopNavDefaultBadges;
-  getBadges?: () => TopNavBadge[];
 }

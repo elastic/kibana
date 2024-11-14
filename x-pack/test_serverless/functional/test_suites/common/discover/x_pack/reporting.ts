@@ -58,7 +58,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return res;
   };
 
-  describe('Discover CSV Export', () => {
+  describe('Discover CSV Export', function () {
+    // see details: https://github.com/elastic/kibana/issues/197957
+    this.tags(['failsOnMKI']);
     describe('Check Available', () => {
       before(async () => {
         await PageObjects.svlCommonPage.loginAsAdmin();

@@ -10,6 +10,7 @@ export { INGEST_SAVED_OBJECT_INDEX, FLEET_SETUP_LOCK_TYPE } from './saved_object
 export * from './routes';
 export * from './agent';
 export * from './agent_policy';
+export * from './agentless';
 export * from './package_policy';
 export * from './epm';
 export * from './output';

@@ -40,6 +40,13 @@ export function registerCategorizationRoutes(
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because the privileges are not defined yet.',
+          },
+        },
         validate: {
           request: {
             body: buildRouteValidationWithZod(CategorizationRequestBody),
@@ -99,7 +106,9 @@ export function registerCategorizationRoutes(
             };
 
             const graph = await getCategorizationGraph({ client, model });
-            const results = await graph.invoke(parameters, options);
+            const results = await graph
+              .withConfig({ runName: 'Categorization' })
+              .invoke(parameters, options);
 
             return res.ok({ body: CategorizationResponse.parse(results) });
           } catch (err) {

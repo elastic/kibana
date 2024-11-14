@@ -12,7 +12,7 @@ import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { mockTimelineData, TestProviders } from '../../../../../common/mock';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { defaultUdtHeaders } from '../default_headers';
+import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';

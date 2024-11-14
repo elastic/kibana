@@ -98,6 +98,9 @@ export function registerAnnotationAPIs({
       validate: {
         body: unknowns,
       },
+      options: {
+        access: 'public',
+      },
     },
     wrapRouteHandler(t.type({ body: createAnnotationRt }), ({ data, client }) => {
       return client.create(data.body);
@@ -109,6 +112,9 @@ export function registerAnnotationAPIs({
       path: '/api/observability/annotation/{id}',
       validate: {
         body: unknowns,
+      },
+      options: {
+        access: 'public',
       },
     },
     wrapRouteHandler(t.type({ body: updateAnnotationRt }), ({ data, client }) => {
@@ -122,6 +128,9 @@ export function registerAnnotationAPIs({
       validate: {
         params: unknowns,
       },
+      options: {
+        access: 'public',
+      },
     },
     wrapRouteHandler(t.type({ params: deleteAnnotationRt }), ({ data, client }) => {
       return client.delete(data.params);
@@ -133,6 +142,9 @@ export function registerAnnotationAPIs({
       path: '/api/observability/annotation/{id}',
       validate: {
         params: unknowns,
+      },
+      options: {
+        access: 'public',
       },
     },
     wrapRouteHandler(t.type({ params: getAnnotationByIdRt }), ({ data, client }) => {
@@ -146,6 +158,9 @@ export function registerAnnotationAPIs({
       validate: {
         query: unknowns,
       },
+      options: {
+        access: 'public',
+      },
     },
     wrapRouteHandler(t.type({ query: findAnnotationRt }), ({ data, client }) => {
       return client.find(data.query);
@@ -157,6 +172,9 @@ export function registerAnnotationAPIs({
       path: '/api/observability/annotation/permissions',
       validate: {
         query: unknowns,
+      },
+      options: {
+        access: 'public',
       },
     },
     wrapRouteHandler(t.type({}), ({ client }) => {

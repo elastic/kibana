@@ -13,10 +13,7 @@ export interface GetEnrollmentAPIKeysRequest {
   query: ListWithKuery;
 }
 
-export type GetEnrollmentAPIKeysResponse = ListResult<EnrollmentAPIKey> & {
-  // deprecated in 8.x
-  list?: EnrollmentAPIKey[];
-};
+export type GetEnrollmentAPIKeysResponse = ListResult<EnrollmentAPIKey>;
 
 export interface GetOneEnrollmentAPIKeyRequest {
   params: {

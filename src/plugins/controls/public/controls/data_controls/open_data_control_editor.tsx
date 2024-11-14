@@ -97,6 +97,9 @@ export const openDataControlEditor = <
       }
     ),
     {
+      size: 'm',
+      maxWidth: 500,
+      paddingSize: 'm',
       onClose: () => closeOverlay(overlay),
     }
   );

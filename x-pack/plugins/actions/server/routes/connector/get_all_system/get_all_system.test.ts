@@ -8,7 +8,7 @@
 import { getAllConnectorsIncludingSystemRoute } from './get_all_system';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../lib/license_state.mock';
-import { mockHandlerArguments } from '../../legacy/_mock_handler_arguments';
+import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 

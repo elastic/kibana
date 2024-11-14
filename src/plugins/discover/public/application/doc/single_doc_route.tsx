@@ -19,6 +19,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDataView } from '../../hooks/use_data_view';
 import { DocHistoryLocationState } from './locator';
+import { useRootProfile } from '../../context_awareness';
 
 export interface DocUrlParams {
   dataViewId: string;
@@ -53,6 +54,8 @@ export const SingleDocRoute = () => {
     index: locationState?.dataViewSpec || decodeURIComponent(dataViewId),
   });
 
+  const rootProfileState = useRootProfile();
+
   if (error) {
     return (
       <EuiEmptyPrompt
@@ -75,7 +78,7 @@ export const SingleDocRoute = () => {
     );
   }
 
-  if (!dataView) {
+  if (!dataView || rootProfileState.rootProfileLoading) {
     return <LoadingIndicator />;
   }
 
@@ -94,5 +97,9 @@ export const SingleDocRoute = () => {
     );
   }
 
-  return <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />;
+  return (
+    <rootProfileState.AppWrapper>
+      <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />
+    </rootProfileState.AppWrapper>
+  );
 };

@@ -9,18 +9,21 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { MetricTypes } from '../../../common/rest_types';
 import { ChartPanel } from './chart_panel';
 import { UsageMetricsResponseSchemaBody } from '../../../common/rest_types';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 interface ChartsProps {
   data: UsageMetricsResponseSchemaBody;
+  'data-test-subj'?: string;
 }
 
-export const Charts: React.FC<ChartsProps> = ({ data }) => {
+export const Charts: React.FC<ChartsProps> = ({ data, 'data-test-subj': dataTestSubj }) => {
+  const getTestId = useTestIdGenerator(dataTestSubj);
   const [popoverOpen, setPopoverOpen] = useState<string | null>(null);
   const togglePopover = useCallback((streamName: string | null) => {
     setPopoverOpen((prev) => (prev === streamName ? null : streamName));
   }, []);
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" data-test-subj={getTestId('charts')}>
       {Object.entries(data.metrics).map(([metricType, series], idx) => (
         <ChartPanel
           key={metricType}

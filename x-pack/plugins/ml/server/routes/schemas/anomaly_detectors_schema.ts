@@ -211,7 +211,10 @@ export const updateModelSnapshotBodySchema = schema.object({
   retain: schema.maybe(schema.boolean()),
 });
 
-export const forecastAnomalyDetector = schema.object({ duration: schema.any() });
+export const forecastAnomalyDetector = schema.object({
+  duration: schema.any(),
+  expires_in: schema.maybe(schema.any()),
+});
 
 export const forceQuerySchema = schema.object({
   force: schema.maybe(schema.boolean()),

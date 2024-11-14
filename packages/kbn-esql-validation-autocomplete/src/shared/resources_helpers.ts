@@ -36,7 +36,7 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
   const getFields = async () => {
     const metadata = await getEcsMetadata();
     if (!cacheFields.size && queryText) {
-      const fieldsOfType = await resourceRetriever?.getFieldsFor?.({ query: queryText });
+      const fieldsOfType = await resourceRetriever?.getColumnsFor?.({ query: queryText });
       const fieldsWithMetadata = enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
       for (const field of fieldsWithMetadata || []) {
         cacheFields.set(field.name, field);

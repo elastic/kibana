@@ -224,20 +224,21 @@ export const ruleExecutionStatusSchema = schema.object({
   ),
 });
 
+export const outcome = schema.oneOf(
+  [
+    schema.literal(ruleLastRunOutcomeValuesV1.SUCCEEDED),
+    schema.literal(ruleLastRunOutcomeValuesV1.WARNING),
+    schema.literal(ruleLastRunOutcomeValuesV1.FAILED),
+  ],
+  {
+    meta: {
+      description: 'Outcome of last run of the rule. Value could be succeeded, warning or failed.',
+    },
+  }
+);
+
 export const ruleLastRunSchema = schema.object({
-  outcome: schema.oneOf(
-    [
-      schema.literal(ruleLastRunOutcomeValuesV1.SUCCEEDED),
-      schema.literal(ruleLastRunOutcomeValuesV1.WARNING),
-      schema.literal(ruleLastRunOutcomeValuesV1.FAILED),
-    ],
-    {
-      meta: {
-        description:
-          'Outcome of last run of the rule. Value could be succeeded, warning or failed.',
-      },
-    }
-  ),
+  outcome,
   outcome_order: schema.maybe(
     schema.number({
       meta: {
@@ -334,7 +335,7 @@ export const monitoringSchema = schema.object(
             duration: schema.maybe(
               schema.number({ meta: { description: 'Duration of the rule run.' } })
             ),
-            outcome: schema.maybe(ruleLastRunSchema),
+            outcome: schema.maybe(outcome),
           }),
           { meta: { description: 'History of the rule run.' } }
         ),

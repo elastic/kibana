@@ -1026,7 +1026,9 @@ module.exports = {
      */
     {
       files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
+      plugins: ['testing-library'],
       rules: {
+        'testing-library/await-async-utils': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
         'import/order': [
           'warn',
@@ -1955,6 +1957,16 @@ module.exports = {
     },
 
     /**
+     * Cloud Security Team overrides
+     */
+    {
+      files: ['x-pack/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
+      plugins: ['testing-library'],
+      rules: {
+        'testing-library/await-async-utils': 'error',
+      },
+    },
+    /**
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
      */
     {
@@ -1976,6 +1988,31 @@ module.exports = {
       ],
       rules: {
         'max-classes-per-file': 'off',
+      },
+    },
+    {
+      files: [
+        // logsShared depends on o11y/private plugins, but platform plugins depend on it
+        'x-pack/plugins/observability_solution/logs_shared/**',
+
+        // TODO @kibana/operations
+        'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
+        'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
+        'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
+
+        // @kbn/osquery-plugin could be categorised as Security, but @kbn/infra-plugin (observability) depends on it!
+        'x-pack/plugins/osquery/**',
+
+        // For now, we keep the exception to let tests depend on anythying.
+        // Ideally, we need to classify the solution specific ones to reduce CI times
+        'test/**',
+        'x-pack/test_serverless/**',
+        'x-pack/test/**',
+        'x-pack/test/plugin_functional/plugins/resolver_test/**',
+      ],
+      rules: {
+        '@kbn/imports/no_group_crossing_manifests': 'warn',
+        '@kbn/imports/no_group_crossing_imports': 'warn',
       },
     },
   ],

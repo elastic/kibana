@@ -37,7 +37,7 @@ import { timelineDefaults } from '../../store/defaults';
 
 import {
   defaultColumnHeaderType,
-  defaultHeaders,
+  defaultUdtHeaders,
 } from '../timeline/body/column_headers/default_headers';
 
 import type { OpenTimelineResult, TimelineErrorCallback } from './types';
@@ -49,7 +49,6 @@ import {
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
 import { resolveTimeline } from '../../containers/api';
-import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
 import { timelineActions } from '../../store';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
@@ -238,13 +237,10 @@ export const getTimelineStatus = (
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResponse,
   duplicate: boolean,
-  timelineType?: TimelineType,
-  unifiedComponentsInTimelineDisabled?: boolean
+  timelineType?: TimelineType
 ): TimelineModel => {
   const isTemplate = timeline.timelineType === TimelineTypeEnum.template;
-  const defaultHeadersValue = !unifiedComponentsInTimelineDisabled
-    ? defaultUdtHeaders
-    : defaultHeaders;
+  const defaultHeadersValue = defaultUdtHeaders;
 
   const timelineEntries = {
     ...timeline,
@@ -294,18 +290,12 @@ export const defaultTimelineToTimelineModel = (
 export const formatTimelineResponseToModel = (
   timelineToOpen: TimelineResponse,
   duplicate: boolean = false,
-  timelineType?: TimelineType,
-  unifiedComponentsInTimelineDisabled?: boolean
+  timelineType?: TimelineType
 ): { notes: Note[] | null | undefined; timeline: TimelineModel } => {
   const { notes, ...timelineModel } = timelineToOpen;
   return {
     notes,
-    timeline: defaultTimelineToTimelineModel(
-      timelineModel,
-      duplicate,
-      timelineType,
-      unifiedComponentsInTimelineDisabled
-    ),
+    timeline: defaultTimelineToTimelineModel(timelineModel, duplicate, timelineType),
   };
 };
 
@@ -319,11 +309,6 @@ export interface QueryTimelineById {
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   savedSearchId?: string;
-  /*
-   * Below feature flag will be removed once
-   * unified components have been fully migrated
-   * */
-  unifiedComponentsInTimelineDisabled?: boolean;
 }
 
 export const useQueryTimelineById = () => {
@@ -347,7 +332,6 @@ export const useQueryTimelineById = () => {
     onOpenTimeline,
     openTimeline = true,
     savedSearchId,
-    unifiedComponentsInTimelineDisabled = false,
   }: QueryTimelineById) => {
     updateIsLoading({ id: TimelineId.active, isLoading: true });
     if (timelineId == null) {
@@ -359,14 +343,14 @@ export const useQueryTimelineById = () => {
         to: DEFAULT_TO_MOMENT.toISOString(),
         timeline: {
           ...timelineDefaults,
-          columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
+          columns: defaultUdtHeaders,
           id: TimelineId.active,
           activeTab: activeTimelineTab,
           show: openTimeline,
           initialized: true,
           savedSearchId: savedSearchId ?? null,
           excludedRowRendererIds:
-            !unifiedComponentsInTimelineDisabled && timelineType !== TimelineTypeEnum.template
+            timelineType !== TimelineTypeEnum.template
               ? timelineDefaults.excludedRowRendererIds
               : [],
         },
@@ -384,8 +368,7 @@ export const useQueryTimelineById = () => {
           const { timeline, notes } = formatTimelineResponseToModel(
             timelineToOpen,
             duplicate,
-            timelineType,
-            unifiedComponentsInTimelineDisabled
+            timelineType
           );
 
           if (onOpenTimeline != null) {
