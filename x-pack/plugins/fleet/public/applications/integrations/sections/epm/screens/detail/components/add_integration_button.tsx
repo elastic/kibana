@@ -14,7 +14,7 @@ interface AddIntegrationButtonProps {
   userCanInstallPackages?: boolean;
   missingSecurityConfiguration: boolean;
   packageName: string;
-  href: string;
+  href: string | undefined;
   onClick: Function;
 }
 

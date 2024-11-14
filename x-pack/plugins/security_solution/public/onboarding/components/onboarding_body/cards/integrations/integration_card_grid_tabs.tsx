@@ -94,11 +94,16 @@ const UIExtensionsContextProvider = lazy(async () => ({
     .then((pkg) => pkg.UIExtensionsContextProvider),
 }));
 
+const CreatePackagePolicyPage = lazy(async () => ({
+  default: await import('@kbn/fleet-plugin/public')
+    .then((module) => module.CreatePackagePolicyPage())
+    .then((pkg) => pkg.CreatePackagePolicyPage),
+}));
+
 export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGridTabsProps>(
   ({ installedIntegrationsCount, isAgentRequired, useAvailablePackages }) => {
     const { spaceId } = useOnboardingContext();
     const startServices = useKibana().services;
-    const { state: routerState } = useLocation();
     const scrollElement = useRef<HTMLDivElement>(null);
     const [toggleIdSelected, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
       spaceId,
@@ -117,9 +122,19 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     );
 
     const [isModalVisible, setIsModalVisible] = useState(false);
-
-    const closeModal = () => setIsModalVisible(false);
-    const showModal = () => setIsModalVisible(true);
+    const [modalView, setModalView] = useState<'overview' | 'configure-integration' | 'add-agent'>(
+      'overview'
+    );
+    const onAddElasticDefendClicked = useCallback(() => {
+      setModalView('configure-integration');
+    }, []);
+    const closeModal = useCallback(() => {
+      setIsModalVisible(false);
+      setModalView('overview');
+    }, []);
+    const showModal = useCallback(() => setIsModalVisible(true), []);
+    const ref = useRef<HTMLDivElement | null>(null);
+    let bottomBar;
     const modalTitleId = useGeneratedHtmlId();
     const {
       filteredCards,
@@ -133,7 +148,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     });
 
     const selectedTab = useMemo(() => INTEGRATION_TABS_BY_ID[toggleIdSelected], [toggleIdSelected]);
-
+    console.log('=ref===', ref);
     const onSearchTermChanged = useCallback(
       (searchQuery: string) => {
         setSearchTerm(searchQuery);
@@ -172,7 +187,6 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
       setSelectedSubCategory,
       toggleIdSelected,
     ]);
-    console.log('routerState---', routerState);
     const list: IntegrationCardItem[] = useIntegrationCardList({
       integrationsList: filteredCards,
       featuredCardIds: selectedTab.featuredCardIds,
@@ -262,15 +276,21 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
               `}
               maxWidth="90%"
             >
-              <EuiModalHeader>
-                <EuiModalHeaderTitle id={modalTitleId}>Modal title</EuiModalHeaderTitle>
-              </EuiModalHeader>
+              {modalView !== 'overview' && (
+                <EuiModalHeader>"Step indicator placeholder"</EuiModalHeader>
+              )}
               <EuiModalBody>
                 <UIExtensionsContextProvider values={{}}>
                   <FleetStatusProvider>
                     <PackageInstallProvider startServices={startServices}>
                       <IntegrationsStateContextProvider>
-                        <Detail routesEnabled={false} />
+                        {modalView === 'overview' && (
+                          <Detail
+                            routesEnabled={false}
+                            onAddElasticDefendClicked={onAddElasticDefendClicked}
+                          />
+                        )}
+                        {modalView === 'configure-integration' && <CreatePackagePolicyPage />}
                       </IntegrationsStateContextProvider>
                     </PackageInstallProvider>
                   </FleetStatusProvider>

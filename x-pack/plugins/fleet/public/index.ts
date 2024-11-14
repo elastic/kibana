@@ -108,3 +108,7 @@ export const FleetStatusProvider = () => {
 export const UIExtensionsContextProvider = () => {
   return import('./hooks/use_ui_extension');
 };
+
+export const CreatePackagePolicyPage = () => {
+  return import('./applications/fleet/sections/agent_policy/create_package_policy_page');
+};

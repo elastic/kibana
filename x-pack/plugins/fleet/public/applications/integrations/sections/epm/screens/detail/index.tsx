@@ -130,7 +130,13 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
   return null;
 }
 
-export function Detail({ routesEnabled = true }: { routesEnabled?: boolean }) {
+export function Detail({
+  routesEnabled = true,
+  onAddElasticDefendClicked,
+}: {
+  routesEnabled?: boolean;
+  onAddElasticDefendClicked?: () => void;
+}) {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const {
     getFromIntegrations,
@@ -260,7 +266,7 @@ export function Detail({ routesEnabled = true }: { routesEnabled?: boolean }) {
   }, [packageInfoLatestPrereleaseData?.item.version]);
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
-    useIsFirstTimeAgentUserQuery(authz);
+    useIsFirstTimeAgentUserQuery();
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(pkgName);
 
   // Refresh package info when status change
@@ -403,66 +409,70 @@ export function Detail({ routesEnabled = true }: { routesEnabled?: boolean }) {
     [integrationInfo, isLoading, packageInfo, href, queryParams]
   );
 
-  const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
-    (ev) => {
-      ev.preventDefault();
-      // The object below, given to `createHref` is explicitly accessing keys of `location` in order
-      // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
-      const currentPath = history.createHref({
-        pathname,
-        search,
-        hash,
-      });
+  // const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
+  //   (ev) => {
+  //     ev.preventDefault();
+  //     // The object below, given to `createHref` is explicitly accessing keys of `location` in order
+  //     // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
+  //     const currentPath = history.createHref({
+  //       pathname,
+  //       search,
+  //       hash,
+  //     });
 
-      const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
-        agentPolicyId: agentPolicyIdFromContext,
-        currentPath,
-        integration,
-        isCloud,
-        isExperimentalAddIntegrationPageEnabled,
-        isFirstTimeAgentUser,
-        isGuidedOnboardingActive,
-        pkgkey,
-      });
+  //     const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
+  //       agentPolicyId: agentPolicyIdFromContext,
+  //       currentPath,
+  //       integration,
+  //       isCloud,
+  //       isExperimentalAddIntegrationPageEnabled,
+  //       isFirstTimeAgentUser,
+  //       isGuidedOnboardingActive,
+  //       pkgkey,
+  //     });
 
-      /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
-       ** to redirect back to the onboarding page after adding an integration
-       */
-      const navigateOptions: InstallPkgRouteOptions =
-        onboardingAppId && onboardingLink
-          ? [
-              defaultNavigateOptions[0],
-              {
-                ...defaultNavigateOptions[1],
-                state: {
-                  ...(defaultNavigateOptions[1]?.state ?? {}),
-                  onCancelNavigateTo: [onboardingAppId, { path: onboardingLink }],
-                  onCancelUrl: onboardingLink,
-                  onSaveNavigateTo: [onboardingAppId, { path: onboardingLink }],
-                },
-              },
-            ]
-          : defaultNavigateOptions;
+  //     /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
+  //      ** to redirect back to the onboarding page after adding an integration
+  //      */
+  //     const navigateOptions: InstallPkgRouteOptions =
+  //       onboardingAppId && onboardingLink
+  //         ? [
+  //             defaultNavigateOptions[0],
+  //             {
+  //               ...defaultNavigateOptions[1],
+  //               state: {
+  //                 ...(defaultNavigateOptions[1]?.state ?? {}),
+  //                 onCancelNavigateTo: [onboardingAppId, { path: onboardingLink }],
+  //                 onCancelUrl: onboardingLink,
+  //                 onSaveNavigateTo: [onboardingAppId, { path: onboardingLink }],
+  //               },
+  //             },
+  //           ]
+  //         : defaultNavigateOptions;
 
-      services.application.navigateToApp(...navigateOptions);
-    },
-    [
-      agentPolicyIdFromContext,
-      hash,
-      history,
-      integration,
-      isCloud,
-      isExperimentalAddIntegrationPageEnabled,
-      isFirstTimeAgentUser,
-      isGuidedOnboardingActive,
-      onboardingAppId,
-      onboardingLink,
-      pathname,
-      pkgkey,
-      search,
-      services.application,
-    ]
-  );
+  //     services.application.navigateToApp(...navigateOptions);
+  //   },
+  //   [
+  //     agentPolicyIdFromContext,
+  //     hash,
+  //     history,
+  //     integration,
+  //     isCloud,
+  //     isExperimentalAddIntegrationPageEnabled,
+  //     isFirstTimeAgentUser,
+  //     isGuidedOnboardingActive,
+  //     onboardingAppId,
+  //     onboardingLink,
+  //     pathname,
+  //     pkgkey,
+  //     search,
+  //     services.application,
+  //   ]
+  // );
+
+  const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(() => {
+    !routesEnabled && onAddElasticDefendClicked?.();
+  }, [routesEnabled, onAddElasticDefendClicked]);
 
   const showVersionSelect = useMemo(
     () =>
@@ -566,13 +576,14 @@ export function Detail({ routesEnabled = true }: { routesEnabled?: boolean }) {
                         >
                           <AddIntegrationButton
                             userCanInstallPackages={userCanInstallPackages}
-                            href={getHref('add_integration_to_policy', {
-                              pkgkey,
-                              ...(integration ? { integration } : {}),
-                              ...(agentPolicyIdFromContext
-                                ? { agentPolicyId: agentPolicyIdFromContext }
-                                : {}),
-                            })}
+                            // show href only when routsEnabled is true
+                            // href={getHref('add_integration_to_policy', {
+                            //   pkgkey,
+                            //   ...(integration ? { integration } : {}),
+                            //   ...(agentPolicyIdFromContext
+                            //     ? { agentPolicyId: agentPolicyIdFromContext }
+                            //     : {}),
+                            // })}
                             missingSecurityConfiguration={missingSecurityConfiguration}
                             packageName={integrationInfo?.title || packageInfo.title}
                             onClick={handleAddIntegrationPolicyClick}

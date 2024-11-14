@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, Suspense } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, Suspense, forwardRef } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -20,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiPortal,
   EuiSpacer,
   EuiSteps,
 } from '@elastic/eui';
@@ -76,6 +77,8 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 
 import { packageHasAtLeastOneSecret } from '../utils';
 
+import { useIntegrationsStateContext } from '../../../../../integrations/hooks';
+
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
 import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
 import { PostInstallCloudFormationModal } from './components/cloud_security_posture/post_install_cloud_formation_modal';
@@ -111,6 +114,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   } = useConfig();
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const { params } = useRouteMatch<AddToPolicyParams>();
+  const { pkgkey: pkgKeyContext } = useIntegrationsStateContext();
+  const pkgkey = params.pkgkey || pkgKeyContext;
+
   const fleetStatus = useFleetStatus();
   const { docLinks } = useStartServices();
   const spaceSettings = useSpaceSettingsContext();
@@ -130,7 +136,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     queryParamsPolicyId ? SelectedPolicyTab.EXISTING : SelectedPolicyTab.NEW
   );
 
-  const { pkgName, pkgVersion } = splitPkgKey(params.pkgkey);
+  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
   const {
     data: packageInfoData,
@@ -230,7 +236,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const { cancelClickHandler, cancelUrl } = useCancelAddPackagePolicy({
     from,
-    pkgkey: params.pkgkey,
+    pkgkey,
     agentPolicyId: agentPolicyIds[0],
   });
   useEffect(() => {
@@ -602,7 +608,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             <StepsWithLessPadding steps={steps} />
             <EuiSpacer size="xl" />
             <EuiSpacer size="xl" />
-            <CustomEuiBottomBar data-test-subj="integrationsBottomBar">
+            {/* Only show render button bar in portal when enableRouts is false*/}
+            <CustomEuiBottomBar
+              data-test-subj="integrationsBottomBar"
+              usePortal={false}
+              position="sticky"
+            >
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
                   {packageInfo && (formState === 'INVALID' || hasAgentPolicyError) ? (
