@@ -5,23 +5,14 @@
  * 2.0.
  */
 import { ValidationError } from '@kbn/config-schema';
-import { AppContextService } from './app_context';
-import { AutoOpsAPIService } from './autoops_api';
-import type { DataUsageContext } from '../types';
 import { MetricTypes } from '../../common/rest_types';
 import { AutoOpsError } from './errors';
+import { appContextService } from './app_context';
+import { autoOpsAPIService } from './autoops_api';
 
 export class DataUsageService {
-  private appContextService: AppContextService;
-  private autoOpsAPIService: AutoOpsAPIService;
-
-  constructor(dataUsageContext: DataUsageContext) {
-    this.appContextService = new AppContextService(dataUsageContext);
-    this.autoOpsAPIService = new AutoOpsAPIService(this.appContextService);
-  }
-
   getLogger(routeName: string) {
-    return this.appContextService.getLogger().get(routeName);
+    return appContextService.getLogger().get(routeName);
   }
   async getMetrics({
     from,
@@ -35,7 +26,7 @@ export class DataUsageService {
     dataStreams: string[];
   }) {
     try {
-      const response = await this.autoOpsAPIService.autoOpsUsageMetricsAPI({
+      const response = await autoOpsAPIService.autoOpsUsageMetricsAPI({
         from,
         to,
         metricTypes,

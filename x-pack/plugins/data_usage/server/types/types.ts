@@ -20,7 +20,7 @@ import { DataUsageConfigType } from '../config';
 
 export interface DataUsageSetupDependencies {
   features: FeaturesPluginSetup;
-  cloud?: CloudSetup;
+  cloud: CloudSetup;
 }
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/

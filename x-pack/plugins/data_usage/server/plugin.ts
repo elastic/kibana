@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { DataUsageConfigType, createConfig } from './config';
 import type {
   DataUsageContext,
@@ -19,6 +21,7 @@ import type {
 import { registerDataUsageRoutes } from './routes';
 import { PLUGIN_ID } from '../common';
 import { DataUsageService } from './services';
+import { appContextService } from './services/app_context';
 
 export class DataUsagePlugin
   implements
@@ -32,7 +35,21 @@ export class DataUsagePlugin
   private readonly logger: Logger;
   private dataUsageContext: DataUsageContext;
 
+  private config$: Observable<DataUsageConfigType>;
+  private configInitialValue: DataUsageConfigType;
+  private cloud?: CloudSetup;
+
+  private kibanaVersion: DataUsageContext['kibanaVersion'];
+  private kibanaBranch: DataUsageContext['kibanaBranch'];
+  private kibanaInstanceId: DataUsageContext['kibanaInstanceId'];
+
   constructor(context: PluginInitializerContext<DataUsageConfigType>) {
+    this.config$ = context.config.create<DataUsageConfigType>();
+    this.kibanaVersion = context.env.packageInfo.version;
+    this.kibanaBranch = context.env.packageInfo.branch;
+    this.kibanaInstanceId = context.env.instanceUuid;
+    this.logger = context.logger.get();
+    this.configInitialValue = context.config.get();
     const serverConfig = createConfig(context);
 
     this.logger = context.logger.get();
@@ -53,8 +70,8 @@ export class DataUsagePlugin
   }
   setup(coreSetup: CoreSetup, pluginsSetup: DataUsageSetupDependencies): DataUsageServerSetup {
     this.logger.debug('data usage plugin setup');
-    this.dataUsageContext.cloud = pluginsSetup.cloud;
-    const dataUsageService = new DataUsageService(this.dataUsageContext);
+    this.cloud = pluginsSetup.cloud;
+    const dataUsageService = new DataUsageService();
 
     pluginsSetup.features.registerElasticsearchFeature({
       id: PLUGIN_ID,
@@ -75,6 +92,16 @@ export class DataUsagePlugin
   }
 
   start(_coreStart: CoreStart, _pluginsStart: DataUsageStartDependencies): DataUsageServerStart {
+    appContextService.start({
+      configInitialValue: this.configInitialValue,
+      config$: this.config$,
+      kibanaVersion: this.kibanaVersion,
+      kibanaBranch: this.kibanaBranch,
+      kibanaInstanceId: this.kibanaInstanceId,
+      cloud: this.cloud,
+      logFactory: this.dataUsageContext.logFactory,
+      serverConfig: this.dataUsageContext.serverConfig,
+    });
     return {};
   }
 

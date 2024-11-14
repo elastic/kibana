@@ -17,17 +17,16 @@ import {
   UsageMetricsAutoOpsResponseSchemaBody,
   UsageMetricsRequestBody,
 } from '../../common/rest_types';
-import { AppContextService } from './app_context';
 import { AutoOpsConfig } from '../types';
 import { AutoOpsError } from './errors';
+import { appContextService } from './app_context';
 
 const AGENT_CREATION_FAILED_ERROR = 'AutoOps API could not create the autoops agent';
 const AUTO_OPS_AGENT_CREATION_PREFIX = '[AutoOps API] Creating autoops agent failed';
 const AUTO_OPS_MISSING_CONFIG_ERROR = 'Missing autoops configuration';
 export class AutoOpsAPIService {
-  constructor(private appContextService: AppContextService) {}
   public async autoOpsUsageMetricsAPI(requestBody: UsageMetricsRequestBody) {
-    const logger = this.appContextService.getLogger().get();
+    const logger = appContextService.getLogger().get();
     const traceId = apm.currentTransaction?.traceparent;
     const withRequestIdMessage = (message: string) => `${message} [Request Id: ${traceId}]`;
 
@@ -37,7 +36,7 @@ export class AutoOpsAPIService {
       },
     };
 
-    const autoopsConfig = this.appContextService.getConfig()?.autoops;
+    const autoopsConfig = appContextService.getConfig()?.autoops;
     if (!autoopsConfig) {
       logger.error(`[AutoOps API] ${AUTO_OPS_MISSING_CONFIG_ERROR}`, errorMetadata);
       throw new AutoOpsError(AUTO_OPS_MISSING_CONFIG_ERROR);
@@ -50,7 +49,7 @@ export class AutoOpsAPIService {
       and TLS ca: ${autoopsConfig?.api?.tls?.ca ? '[REDACTED]' : 'undefined'}`
     );
     const tlsConfig = this.createTlsConfig(autoopsConfig);
-    const cloudSetup = this.appContextService.getCloud();
+    const cloudSetup = appContextService.getCloud();
 
     const requestConfig: AxiosRequestConfig = {
       url: `${autoopsConfig.api?.url}/monitoring/serverless/v1/projects/${cloudSetup?.serverless.projectId}/metrics`,
@@ -68,7 +67,7 @@ export class AutoOpsAPIService {
     };
 
     if (!cloudSetup?.isServerlessEnabled) {
-      requestConfig.data.stack_version = this.appContextService.getKibanaVersion();
+      requestConfig.data.stack_version = appContextService.getKibanaVersion();
     }
 
     const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
@@ -177,3 +176,5 @@ export class AutoOpsAPIService {
     return error.cause;
   };
 }
+
+export const autoOpsAPIService = new AutoOpsAPIService();
