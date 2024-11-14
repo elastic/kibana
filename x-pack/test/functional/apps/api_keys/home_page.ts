@@ -420,7 +420,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe.only('querying API keys', function () {
+    describe('querying API keys', function () {
       before(async () => {
         await clearAllApiKeys(es, log);
         await security.testUser.setRoles(['kibana_admin', 'test_api_keys']);
@@ -478,7 +478,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       after(async () => {
         await security.testUser.restoreDefaults();
-        // await clearAllApiKeys(es, log);
+        await clearAllApiKeys(es, log);
       });
 
       it('active/expired filter buttons work as expected', async () => {
@@ -491,14 +491,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await pageObjects.apiKeys.doesApiKeyExist('my api key')).to.be(false);
       });
 
-      it.only('api key type filter buttons work as expected', async () => {
+      it('api key type filter buttons work as expected', async () => {
         await pageObjects.apiKeys.clickTypeFilters('personal');
+        await pageObjects.common.sleep(1000);
         await ensureApiKeysExist(['test_api_key']);
+        expect(await pageObjects.apiKeys.doesApiKeyExist('test_cross_cluster')).to.be(false);
+
+        await pageObjects.apiKeys.clickTypeFilters('cross_cluster');
+        await pageObjects.common.sleep(1000);
+        await ensureApiKeysExist(['test_cross_cluster']);
         expect(await pageObjects.apiKeys.doesApiKeyExist('test_api_key')).to.be(false);
 
-        await pageObjects.apiKeys.clickExpiryFilters('expired');
-        await ensureApiKeysExist(['test_api_key']);
-        expect(await pageObjects.apiKeys.doesApiKeyExist('my api key')).to.be(false);
+        await pageObjects.apiKeys.clickTypeFilters('managed');
+        await pageObjects.common.sleep(1000);
+        await ensureApiKeysExist(['my api key', 'Alerting: Managed']);
+        expect(await pageObjects.apiKeys.doesApiKeyExist('test_api_key')).to.be(false);
+
+        // reset filters by simulate click on the active filter
+        await pageObjects.apiKeys.clickTypeFilters('managed');
       });
     });
   });
