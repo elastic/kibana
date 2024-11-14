@@ -43,7 +43,7 @@ export async function invokeChatCompleteWithFunctionRequest({
   scopes?: AssistantScope[];
 }) {
   const { body } = await observabilityAIAssistantAPIClient
-    .editorUser({
+    .editor({
       endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
       params: {
         body: {

@@ -41,7 +41,7 @@ export class DataUsageService {
         metricTypes,
         dataStreams,
       });
-      return response.data;
+      return response;
     } catch (error) {
       if (error instanceof ValidationError) {
         throw new AutoOpsError(error.message);

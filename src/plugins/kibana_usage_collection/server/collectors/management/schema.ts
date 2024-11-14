@@ -578,10 +578,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'metrics:allowCheckingForFailedShards': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmDefaultServiceEnvironment': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },

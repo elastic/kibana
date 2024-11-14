@@ -19,7 +19,7 @@ import { SourcererScopeName } from '../../sourcerer/store/model';
 import { appActions } from '../../common/store/app';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
-import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
+import { defaultUdtHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../store/defaults';
 
 export interface UseCreateTimelineParams {

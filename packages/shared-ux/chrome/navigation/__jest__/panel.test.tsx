@@ -21,6 +21,7 @@ import { renderNavigation } from './utils';
 describe('Panel', () => {
   test('should render group as panel opener', async () => {
     const navigationTree: NavigationTreeDefinitionUI = {
+      id: 'es',
       body: [
         {
           id: 'root',
@@ -60,6 +61,7 @@ describe('Panel', () => {
 
   test('should not render group if all children are hidden', async () => {
     const navigationTree: NavigationTreeDefinitionUI = {
+      id: 'es',
       body: [
         {
           id: 'root',
@@ -146,6 +148,7 @@ describe('Panel', () => {
       ]);
 
       const navTree: NavigationTreeDefinitionUI = {
+        id: 'es',
         body: [
           {
             id: 'root',
@@ -196,6 +199,7 @@ describe('Panel', () => {
   describe('auto generated content', () => {
     test('should rendre block groups with title', async () => {
       const navTree: NavigationTreeDefinitionUI = {
+        id: 'es',
         body: [
           {
             id: 'root',
@@ -262,6 +266,7 @@ describe('Panel', () => {
 
     test('should rendre block groups without title', async () => {
       const navTree: NavigationTreeDefinitionUI = {
+        id: 'es',
         body: [
           {
             id: 'root',
@@ -327,6 +332,7 @@ describe('Panel', () => {
 
     test('should rendre accordion groups', async () => {
       const navTree: NavigationTreeDefinitionUI = {
+        id: 'es',
         body: [
           {
             id: 'root',

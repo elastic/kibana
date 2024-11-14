@@ -33,7 +33,7 @@ import { getField } from '../../../../helpers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
-import { defaultUdtHeaders } from '../../../../timelines/components/timeline/unified_components/default_headers';
+import { defaultUdtHeaders } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 
 interface UseInvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;

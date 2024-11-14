@@ -915,6 +915,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         }
       });
     },
+    async getChartTypeFromChartSwitcher() {
+      const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
+      return await chartSwitcher.getVisibleText();
+    },
 
     async openChartSwitchPopover(layerIndex = 0) {
       if (await testSubjects.exists('lnsChartSwitchList', { timeout: 50 })) {
