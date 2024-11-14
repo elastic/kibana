@@ -6,14 +6,22 @@
  */
 
 import sinon from 'sinon';
-import { Subject } from 'rxjs';
+import { Subject, startWith, distinctUntilChanged, BehaviorSubject, withLatestFrom } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
-  createManagedConfiguration,
   ADJUST_THROUGHPUT_INTERVAL,
+  calculateStartingCapacity,
+  countErrors,
+  createCapacityScan,
+  createPollIntervalScan,
 } from './create_managed_configuration';
 import { mockLogger } from '../test_utils';
-import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET, TaskManagerConfig } from '../config';
+import {
+  CLAIM_STRATEGY_UPDATE_BY_QUERY,
+  CLAIM_STRATEGY_MGET,
+  TaskManagerConfig,
+  DEFAULT_CAPACITY,
+} from '../config';
 
 describe('createManagedConfiguration()', () => {
   let clock: sinon.SinonFakeTimers;
@@ -26,123 +34,66 @@ describe('createManagedConfiguration()', () => {
 
   afterEach(() => clock.restore());
 
-  test('returns observables with initialized values', async () => {
-    const capacitySubscription = jest.fn();
-    const pollIntervalSubscription = jest.fn();
-    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
-      logger,
-      errors$: new Subject<Error>(),
-      config: {
-        capacity: 20,
-        poll_interval: 2,
-      } as TaskManagerConfig,
-    });
-    capacityConfiguration$.subscribe(capacitySubscription);
-    pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
-    expect(capacitySubscription).toHaveBeenCalledTimes(1);
-    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 20);
-    expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
-    expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
-  });
-
   test('uses max_workers config as capacity if only max workers is defined', async () => {
-    const capacitySubscription = jest.fn();
-    const pollIntervalSubscription = jest.fn();
-    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
-      logger,
-      errors$: new Subject<Error>(),
-      config: {
+    const capacity = calculateStartingCapacity(
+      {
         max_workers: 10,
         poll_interval: 2,
       } as TaskManagerConfig,
-    });
-    capacityConfiguration$.subscribe(capacitySubscription);
-    pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
-    expect(capacitySubscription).toHaveBeenCalledTimes(1);
-    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 10);
-    expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
-    expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
+      logger,
+      DEFAULT_CAPACITY
+    );
+    expect(capacity).toBe(10);
   });
 
   test('uses max_workers config as capacity but does not exceed MAX_CAPACITY', async () => {
-    const capacitySubscription = jest.fn();
-    const pollIntervalSubscription = jest.fn();
-    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
-      logger,
-      errors$: new Subject<Error>(),
-      config: {
+    const capacity = calculateStartingCapacity(
+      {
         max_workers: 1000,
         poll_interval: 2,
       } as TaskManagerConfig,
-    });
-    capacityConfiguration$.subscribe(capacitySubscription);
-    pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
-    expect(capacitySubscription).toHaveBeenCalledTimes(1);
-    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 50);
-    expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
-    expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
+      logger,
+      DEFAULT_CAPACITY
+    );
+    expect(capacity).toBe(50);
   });
 
   test('uses provided defaultCapacity if neither capacity nor max_workers is defined', async () => {
-    const capacitySubscription = jest.fn();
-    const pollIntervalSubscription = jest.fn();
-    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
-      defaultCapacity: 500,
-      logger,
-      errors$: new Subject<Error>(),
-      config: {
+    const capacity = calculateStartingCapacity(
+      {
         poll_interval: 2,
       } as TaskManagerConfig,
-    });
-    capacityConfiguration$.subscribe(capacitySubscription);
-    pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
-    expect(capacitySubscription).toHaveBeenCalledTimes(1);
-    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 500);
-    expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
-    expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
+      logger,
+      500
+    );
+    expect(capacity).toBe(500);
   });
 
   test('logs warning and uses capacity config if both capacity and max_workers is defined', async () => {
-    const capacitySubscription = jest.fn();
-    const pollIntervalSubscription = jest.fn();
-    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
-      logger,
-      errors$: new Subject<Error>(),
-      config: {
+    const capacity = calculateStartingCapacity(
+      {
         capacity: 30,
         max_workers: 10,
         poll_interval: 2,
       } as TaskManagerConfig,
-    });
-    capacityConfiguration$.subscribe(capacitySubscription);
-    pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
-    expect(capacitySubscription).toHaveBeenCalledTimes(1);
-    expect(capacitySubscription).toHaveBeenNthCalledWith(1, 30);
-    expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
-    expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
+      logger,
+      500
+    );
+    expect(capacity).toBe(30);
     expect(logger.warn).toHaveBeenCalledWith(
       `Both \"xpack.task_manager.capacity\" and \"xpack.task_manager.max_workers\" configs are set, max_workers will be ignored in favor of capacity and the setting should be removed.`
     );
   });
 
   test(`skips errors that aren't about too many requests`, async () => {
-    const capacitySubscription = jest.fn();
-    const pollIntervalSubscription = jest.fn();
+    const errorSubscription = jest.fn();
     const errors$ = new Subject<Error>();
-    const { capacityConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
-      errors$,
-      logger,
-      config: {
-        capacity: 10,
-        poll_interval: 100,
-      } as TaskManagerConfig,
-    });
-    capacityConfiguration$.subscribe(capacitySubscription);
-    pollIntervalConfiguration$.subscribe(pollIntervalSubscription);
+    const errorCheck$ = countErrors(errors$, ADJUST_THROUGHPUT_INTERVAL);
+    errorCheck$.subscribe(errorSubscription);
+
     errors$.next(new Error('foo'));
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-    expect(capacitySubscription).toHaveBeenCalledTimes(1);
-    expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
+    expect(errorSubscription).toHaveBeenCalledTimes(1);
   });
 
   describe('capacity configuration', () => {
@@ -151,16 +102,21 @@ describe('createManagedConfiguration()', () => {
       claimStrategy: string = CLAIM_STRATEGY_UPDATE_BY_QUERY
     ) {
       const errors$ = new Subject<Error>();
+      const errorCheck$ = countErrors(errors$, ADJUST_THROUGHPUT_INTERVAL);
       const subscription = jest.fn();
-      const { capacityConfiguration$ } = createManagedConfiguration({
-        errors$,
-        logger,
-        config: {
-          capacity: startingCapacity,
-          poll_interval: 1,
-          claim_strategy: claimStrategy,
-        } as TaskManagerConfig,
-      });
+      const capacityConfiguration$ = errorCheck$.pipe(
+        createCapacityScan(
+          {
+            capacity: startingCapacity,
+            poll_interval: 1,
+            claim_strategy: claimStrategy,
+          } as TaskManagerConfig,
+          logger,
+          startingCapacity
+        ),
+        startWith(startingCapacity),
+        distinctUntilChanged()
+      );
       capacityConfiguration$.subscribe(subscription);
       return { subscription, errors$ };
     }
@@ -297,17 +253,17 @@ describe('createManagedConfiguration()', () => {
   describe('pollInterval configuration', () => {
     function setupScenario(startingPollInterval: number) {
       const errors$ = new Subject<Error>();
+      const utilization$ = new BehaviorSubject<number>(100);
+      const errorCheck$ = countErrors(errors$, ADJUST_THROUGHPUT_INTERVAL);
       const subscription = jest.fn();
-      const { pollIntervalConfiguration$ } = createManagedConfiguration({
-        logger,
-        errors$,
-        config: {
-          poll_interval: startingPollInterval,
-          capacity: 20,
-        } as TaskManagerConfig,
-      });
+      const pollIntervalConfiguration$ = errorCheck$.pipe(
+        withLatestFrom(utilization$),
+        createPollIntervalScan(logger, startingPollInterval, CLAIM_STRATEGY_UPDATE_BY_QUERY),
+        startWith(startingPollInterval),
+        distinctUntilChanged()
+      );
       pollIntervalConfiguration$.subscribe(subscription);
-      return { subscription, errors$ };
+      return { subscription, errors$, utilization$ };
     }
 
     beforeEach(() => {
