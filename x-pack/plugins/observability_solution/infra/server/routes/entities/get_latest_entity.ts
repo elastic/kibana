@@ -8,7 +8,7 @@
 import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
 import { type EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import { ENTITY_TYPE, SOURCE_DATA_STREAM_TYPE } from '@kbn/observability-shared-plugin/common';
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 
 const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   type: '*',
