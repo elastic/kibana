@@ -56,7 +56,12 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   async function deleteConfiguration(configuration: any) {
     return apmApiClient.writeUser({
       endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
-      params: { body: { service: configuration.service } },
+      params: {
+        query: {
+          serviceName: configuration.service.name,
+          serviceEnvironment: configuration.service.environment,
+        },
+      },
     });
   }
 

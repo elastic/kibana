@@ -172,8 +172,9 @@ export default function ({ getService }: APMFtrContextProvider) {
           await apmApiClient.slsUser({
             endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
             params: {
-              body: {
-                service: {},
+              query: {
+                serviceName: '',
+                serviceEnvironment: '',
               },
             },
             roleAuthc,

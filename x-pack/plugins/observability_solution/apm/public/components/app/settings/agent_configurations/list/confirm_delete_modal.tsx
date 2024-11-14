@@ -66,11 +66,9 @@ async function deleteConfig(config: Config, toasts: NotificationsStart['toasts']
     await callApmApi('DELETE /api/apm/settings/agent-configuration 2023-10-31', {
       signal: null,
       params: {
-        body: {
-          service: {
-            name: config.service.name,
-            environment: config.service.environment,
-          },
+        query: {
+          serviceName: config.service.name,
+          serviceEnvironment: config.service.environment,
         },
       },
     });

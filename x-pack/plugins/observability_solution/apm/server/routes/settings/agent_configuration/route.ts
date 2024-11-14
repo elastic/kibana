@@ -102,16 +102,22 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
     tags: ['access:apm', 'access:apm_settings_write'],
     access: 'public',
   },
-  params: t.type({
-    body: t.type({
-      service: serviceRt,
-    }),
+  params: t.partial({
+    query: t.intersection([
+      t.partial({ serviceName: t.string }),
+      t.partial({ serviceEnvironment: t.string }),
+    ]),
   }),
   handler: async (resources): Promise<{ result: string }> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
     const { params, logger, core, telemetryUsageCounter } = resources;
-    const { service } = params.body;
+    const { serviceName, serviceEnvironment } = params.query;
+    const service = {
+      name: serviceName ? decodeURIComponent(serviceName) : null,
+      environment: serviceEnvironment ? decodeURIComponent(serviceEnvironment) : null,
+    };
+
     const apmIndices = await resources.getApmIndices();
     const [internalESClient, apmEventClient] = await Promise.all([
       createInternalESClientWithResources(resources),
