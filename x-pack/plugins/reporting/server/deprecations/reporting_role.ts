@@ -18,9 +18,13 @@ import type {
 } from '@kbn/core/server';
 import { ReportingCore } from '..';
 import { deprecations } from '../lib/deprecations';
-import { getKibanaPrivilegesDocumentationUrl } from '../utils/get_kibana_privileges_doc_url';
 
 const REPORTING_USER_ROLE_NAME = 'reporting_user';
+const getKibanaPrivilegesDocumentationUrl = (branch: string) => {
+  // TODO: remove when docs support "main"
+  const docBranch = branch === 'main' ? 'master' : branch;
+  return `https://www.elastic.co/guide/en/kibana/${docBranch}/kibana-privileges.html`;
+};
 
 interface ExtraDependencies {
   reportingCore: ReportingCore;

@@ -9,64 +9,63 @@ import {
   SecurityGetRoleMappingResponse,
   SecurityGetUserResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { i18n } from '@kbn/i18n';
 import type {
+  CoreSetup,
   DeprecationsDetails,
   DocLinksServiceSetup,
   ElasticsearchClient,
   GetDeprecationsContext,
 } from '@kbn/core/server';
-import { ReportingCore } from '..';
+import { i18n } from '@kbn/i18n';
+import type { DeprecationApmDeps } from '.';
 import { deprecations } from '../lib/deprecations';
-import { getKibanaPrivilegesDocumentationUrl } from '../utils/get_kibana_privileges_doc_url';
 
 const APM_USER_ROLE_NAME = 'apm_user';
-
-interface ExtraDependencies {
-  reportingCore: ReportingCore;
-}
+const getKibanaPrivilegesDocumentationUrl = (branch: string) => {
+  const docBranch = branch === 'main' ? 'master' : branch;
+  return `https://www.elastic.co/guide/en/kibana/${docBranch}/kibana-privileges.html`;
+};
 
 export async function getDeprecationsInfo(
   { esClient }: GetDeprecationsContext,
-  { reportingCore }: ExtraDependencies
+  core: CoreSetup,
+  apmDeps: DeprecationApmDeps
 ) {
   const client = esClient.asCurrentUser;
-  const { security, docLinks } = reportingCore.getPluginSetupDeps();
+  const { docLinks } = core;
+  const { security } = apmDeps;
 
   // Nothing to do if security is disabled
   if (!security?.license.isEnabled()) {
     return [];
   }
 
-  const deprecatedRoles = [APM_USER_ROLE_NAME];
-
   return [
-    ...(await getUsersDeprecations(client, reportingCore, deprecatedRoles, docLinks)),
-    ...(await getRoleMappingsDeprecations(client, reportingCore, deprecatedRoles, docLinks)),
+    ...(await getUsersDeprecations(client, apmDeps, docLinks)),
+    ...(await getRoleMappingsDeprecations(client, apmDeps, docLinks)),
   ];
 }
 
 async function getUsersDeprecations(
   client: ElasticsearchClient,
-  reportingCore: ReportingCore,
-  deprecatedRoles: string[],
+  apmDeps: DeprecationApmDeps,
   docLinks: DocLinksServiceSetup
 ): Promise<DeprecationsDetails[]> {
   const strings = {
-    title: i18n.translate('xpack.reporting.deprecations.apmUser.title', {
+    title: i18n.translate('xpack.apm.deprecations.apmUser.title', {
       defaultMessage: `The "{apmUserRoleName}" role has been removed: check user roles`,
       values: { apmUserRoleName: APM_USER_ROLE_NAME },
     }),
-    message: i18n.translate('xpack.reporting.deprecations.apmUser.description', {
+    message: i18n.translate('xpack.apm.deprecations.apmUser.description', {
       defaultMessage: `The "{apmUserRoleName}" has been removed and this cluster has users with the removed role.`,
       values: { apmUserRoleName: APM_USER_ROLE_NAME },
     }),
     manualSteps: (usersRoles: string) => [
-      i18n.translate('xpack.reporting.deprecations.apmUser.manualStepOne', {
+      i18n.translate('xpack.apm.deprecations.apmUser.manualStepOne', {
         defaultMessage: `Go to Management > Security > Users to find users with the "{apmUserRoleName}" role.`,
         values: { apmUserRoleName: APM_USER_ROLE_NAME },
       }),
-      i18n.translate('xpack.reporting.deprecations.apmUser.manualStepTwo', {
+      i18n.translate('xpack.apm.deprecations.apmUser.manualStepTwo', {
         defaultMessage:
           `Remove the "{apmUserRoleName}" role from all users and add the built-in "viewer" roles.` +
           ` The affected users are: {usersRoles}.`,
@@ -79,7 +78,7 @@ async function getUsersDeprecations(
   try {
     users = await client.security.getUser();
   } catch (err) {
-    const { logger } = reportingCore.getPluginSetupDeps();
+    const { logger } = apmDeps;
     if (deprecations.getErrorStatusCode(err) === 403) {
       logger.warn(
         `Failed to retrieve users when checking for deprecations:` +
@@ -96,7 +95,7 @@ async function getUsersDeprecations(
 
   const reportingUsers = Object.entries(users).reduce((userSet, current) => {
     const [userName, user] = current;
-    const foundRole = user.roles.find((role) => deprecatedRoles.includes(role));
+    const foundRole = user.roles.find(hasApmUserRole);
     if (foundRole) {
       userSet.push(`${userName}[${foundRole}]`);
     }
@@ -114,34 +113,31 @@ async function getUsersDeprecations(
       correctiveActions: { manualSteps: strings.manualSteps(reportingUsers.join(', ')) },
       level: 'critical',
       deprecationType: 'feature',
-      documentationUrl: getKibanaPrivilegesDocumentationUrl(
-        reportingCore.getKibanaPackageInfo().branch
-      ),
+      documentationUrl: getKibanaPrivilegesDocumentationUrl(apmDeps.branch),
     },
   ];
 }
 
 async function getRoleMappingsDeprecations(
   client: ElasticsearchClient,
-  reportingCore: ReportingCore,
-  deprecatedRoles: string[],
+  apmDeps: DeprecationApmDeps,
   docLinks: DocLinksServiceSetup
 ): Promise<DeprecationsDetails[]> {
   const strings = {
-    title: i18n.translate('xpack.reporting.deprecations.apmUserRoleMappings.title', {
+    title: i18n.translate('xpack.apm.deprecations.apmUserRoleMappings.title', {
       defaultMessage: `The "{apmUserRoleName}" role has been removed: check role mappings`,
       values: { apmUserRoleName: APM_USER_ROLE_NAME },
     }),
-    message: i18n.translate('xpack.reporting.deprecations.apmUser.description', {
+    message: i18n.translate('xpack.apm.deprecations.apmUser.description', {
       defaultMessage: `The "{apmUserRoleName}" role has been removed.`,
       values: { apmUserRoleName: APM_USER_ROLE_NAME },
     }),
     manualSteps: (roleMappings: string) => [
-      i18n.translate('xpack.reporting.deprecations.apmUser.manualStepOne', {
+      i18n.translate('xpack.apm.deprecations.apmUser.manualStepOne', {
         defaultMessage: `Go to Management > Security > Roles to find roles with the "{apmUserRoleName}" role.`,
         values: { apmUserRoleName: APM_USER_ROLE_NAME },
       }),
-      i18n.translate('xpack.reporting.deprecations.apmUserRoleMappings.manualStepFive', {
+      i18n.translate('xpack.apm.deprecations.apmUserRoleMappings.manualStepFive', {
         defaultMessage:
           `Remove the "{apmUserRoleName}" role from all role mappings and add the built-in "viewer" roles.` +
           ` The affected role mappings are: {roleMappings}.`,
@@ -154,7 +150,7 @@ async function getRoleMappingsDeprecations(
   try {
     roleMappings = await client.security.getRoleMapping();
   } catch (err) {
-    const { logger } = reportingCore.getPluginSetupDeps();
+    const { logger } = apmDeps;
     if (deprecations.getErrorStatusCode(err) === 403) {
       logger.warn(
         `Failed to retrieve role mappings when checking for deprecations:` +
@@ -172,7 +168,7 @@ async function getRoleMappingsDeprecations(
   const roleMappingsWithReportingRole: string[] = Object.entries(roleMappings).reduce(
     (roleSet, current) => {
       const [roleName, role] = current;
-      const foundMapping = role.roles?.find((roll) => deprecatedRoles.includes(roll));
+      const foundMapping = role.roles?.find(hasApmUserRole);
       if (foundMapping) {
         roleSet.push(`${roleName}[${foundMapping}]`);
       }
@@ -194,9 +190,9 @@ async function getRoleMappingsDeprecations(
       },
       level: 'critical',
       deprecationType: 'feature',
-      documentationUrl: getKibanaPrivilegesDocumentationUrl(
-        reportingCore.getKibanaPackageInfo().branch
-      ),
+      documentationUrl: getKibanaPrivilegesDocumentationUrl(apmDeps.branch),
     },
   ];
 }
+
+const hasApmUserRole = (role: string) => role === APM_USER_ROLE_NAME;
