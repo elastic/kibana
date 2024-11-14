@@ -52,47 +52,54 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
         expect(status).to.be(200);
 
+        // filtering the array for unique index templates because they get duplicated across different index patterns
         const uniqueTemplateNames = uniq(
           body.indexTemplatesByIndexPattern.flatMap(({ indexTemplates }) => {
             return indexTemplates?.map(({ templateName }) => templateName);
           })
         );
 
-        const apmTemplateNames = uniqueTemplateNames.filter((templateName) =>
-          apmIndexTemplatesPatterns.some((pattern) => templateName.includes(pattern))
+        // filter only APM releated indices
+        const apmTemplateNames = uniqueTemplateNames.filter(
+          (templateName) =>
+            templateName.endsWith('@template') &&
+            apmIndexTemplatesPatterns.some((pattern) => templateName.includes(pattern))
         );
 
-        expect(apmTemplateNames).to.eql([
-          'logs-apm.error@template',
+        // sort alphabeticaly before comparing because an order is different between testing environments
+        const sortedApmTemplates = apmTemplateNames.sort();
+
+        expect(sortedApmTemplates).to.eql([
           'logs-apm.app@template',
+          'logs-apm.error@template',
           'logs-otel@template',
-          'metrics-apm.service_transaction.1m@template',
-          'metrics-apm.transaction.10m@template',
-          'metrics-apm.service_summary.10m@template',
-          'metrics-apm.internal@template',
-          'metrics-apm.service_destination.1m@template',
-          'metrics-apm.service_summary.60m@template',
-          'metrics-apm.service_summary.1m@template',
-          'metrics-apm.transaction.1m@template',
-          'metrics-apm.service_destination.60m@template',
-          'metrics-apm.service_transaction.60m@template',
-          'metrics-apm.service_destination.10m@template',
-          'metrics-apm.service_transaction.10m@template',
-          'metrics-apm.transaction.60m@template',
           'metrics-apm.app@template',
+          'metrics-apm.internal@template',
+          'metrics-apm.service_destination.10m@template',
+          'metrics-apm.service_destination.1m@template',
+          'metrics-apm.service_destination.60m@template',
+          'metrics-apm.service_summary.10m@template',
+          'metrics-apm.service_summary.1m@template',
+          'metrics-apm.service_summary.60m@template',
+          'metrics-apm.service_transaction.10m@template',
+          'metrics-apm.service_transaction.1m@template',
+          'metrics-apm.service_transaction.60m@template',
+          'metrics-apm.transaction.10m@template',
+          'metrics-apm.transaction.1m@template',
+          'metrics-apm.transaction.60m@template',
           'metrics-otel@template',
-          'metrics-service_transaction.10m.otel@template',
-          'metrics-transaction.10m.otel@template',
-          'metrics-service_summary.1m.otel@template',
-          'metrics-service_transaction.60m.otel@template',
-          'metrics-service_summary.60m.otel@template',
           'metrics-service_summary.10m.otel@template',
+          'metrics-service_summary.1m.otel@template',
+          'metrics-service_summary.60m.otel@template',
+          'metrics-service_transaction.10m.otel@template',
+          'metrics-service_transaction.1m.otel@template',
+          'metrics-service_transaction.60m.otel@template',
+          'metrics-transaction.10m.otel@template',
           'metrics-transaction.1m.otel@template',
           'metrics-transaction.60m.otel@template',
-          'metrics-service_transaction.1m.otel@template',
           'traces-apm.rum@template',
-          'traces-apm@template',
           'traces-apm.sampled@template',
+          'traces-apm@template',
           'traces-otel@template',
         ]);
       });
