@@ -47,7 +47,10 @@ export const getLazyWithContextProviders =
     experimentalFeatures,
     sloClient,
   }: Props) =>
-  (LazyComponent: React.LazyExoticComponent<any>, options?: Options): React.FunctionComponent => {
+  <TElement extends React.ComponentType<any>>(
+    LazyComponent: React.LazyExoticComponent<TElement>,
+    options?: Options
+  ): React.FunctionComponent<React.ComponentProps<TElement>> => {
     const { spinnerSize = 'xl' } = options ?? {};
     const queryClient = new QueryClient();
     return (props) => (
