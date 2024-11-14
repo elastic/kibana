@@ -9,7 +9,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
+import type { IRouter, RequestHandler, RouteAuthz, StartServicesAccessor } from '@kbn/core/server';
 import { VersionedRouteValidation } from '@kbn/core-http-server';
 import { INITIAL_REST_VERSION_INTERNAL as version } from '../../constants';
 import { IndexPatternsFetcher } from '../../fetcher';
@@ -217,17 +217,13 @@ export const registerFieldForWildcard = (
   isRollupsEnabled: () => boolean
 ) => {
   const configuredHandler = handler(isRollupsEnabled);
+  const authz: RouteAuthz = { enabled: false, reason: 'Authorization provided by Elasticsearch' };
 
   // handler
   router.versioned.put({ path, access }).addVersion(
     {
       version,
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'Authorization provided by Elasticsearch',
-        },
-      },
+      security: { authz },
       validate,
     },
     configuredHandler
@@ -235,12 +231,7 @@ export const registerFieldForWildcard = (
   router.versioned.post({ path, access }).addVersion(
     {
       version,
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'Authorization provided by Elasticsearch',
-        },
-      },
+      security: { authz },
       validate,
     },
     configuredHandler
@@ -248,12 +239,7 @@ export const registerFieldForWildcard = (
   router.versioned.get({ path, access }).addVersion(
     {
       version,
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'Authorization provided by Elasticsearch',
-        },
-      },
+      security: { authz },
       validate: { request: { query: querySchema }, response: validate.response },
     },
     configuredHandler
