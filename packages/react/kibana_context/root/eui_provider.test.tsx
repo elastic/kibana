@@ -11,7 +11,6 @@ import type { ReactWrapper } from 'enzyme';
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
-import * as Rx from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 
 import { useEuiTheme } from '@elastic/eui';
@@ -30,7 +29,6 @@ describe('KibanaEuiProvider', () => {
   beforeEach(() => {
     euiTheme = undefined;
     userProfile = userProfileServiceMock.createStart();
-    jest.spyOn(userProfile, 'getUserProfile$').mockImplementation(() => Rx.of(null));
     consoleWarnMock = jest.spyOn(global.console, 'warn').mockImplementation(() => {});
   });
 

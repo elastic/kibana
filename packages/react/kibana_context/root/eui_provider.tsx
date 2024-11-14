@@ -21,7 +21,10 @@ import {
   DEFAULT_THEME_CONFIG,
 } from '@kbn/react-kibana-context-common';
 import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
+
+interface IUserProfile {
+  getUserProfile$: () => Rx.Observable<Record<string, unknown> | null>;
+}
 
 interface UserSettings {
   contrastMode: 'high' | 'standard';
@@ -32,7 +35,7 @@ interface UserSettings {
  */
 export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modify' | 'colorMode'> {
   theme: ThemeServiceStart;
-  userProfile: UserProfileService;
+  userProfile: IUserProfile;
   globalStyles?: boolean;
 }
 
