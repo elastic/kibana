@@ -16,6 +16,12 @@ export function registerApiLogsRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{engineName}/api_logs',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),

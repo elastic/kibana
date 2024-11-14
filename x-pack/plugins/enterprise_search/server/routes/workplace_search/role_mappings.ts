@@ -23,6 +23,12 @@ export function registerOrgEnableRoleMappingsRoute({
   router.post(
     {
       path: '/internal/workplace_search/org/role_mappings/enable_role_based_access',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -38,6 +44,12 @@ export function registerOrgRoleMappingsRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/role_mappings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -48,6 +60,12 @@ export function registerOrgRoleMappingsRoute({
   router.post(
     {
       path: '/internal/workplace_search/org/role_mappings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object(roleMappingBaseSchema),
       },
@@ -65,6 +83,12 @@ export function registerOrgRoleMappingRoute({
   router.put(
     {
       path: '/internal/workplace_search/org/role_mappings/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object(roleMappingBaseSchema),
         params: schema.object({
@@ -80,6 +104,12 @@ export function registerOrgRoleMappingRoute({
   router.delete(
     {
       path: '/internal/workplace_search/org/role_mappings/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -99,6 +129,12 @@ export function registerOrgUserRoute({
   router.post(
     {
       path: '/internal/workplace_search/org/single_user_role_mapping',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           roleMapping: schema.object({

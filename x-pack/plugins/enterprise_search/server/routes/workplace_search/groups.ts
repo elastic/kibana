@@ -13,6 +13,12 @@ export function registerGroupsRoute({ router, enterpriseSearchRequestHandler }: 
   router.get(
     {
       path: '/internal/workplace_search/groups',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -23,6 +29,12 @@ export function registerGroupsRoute({ router, enterpriseSearchRequestHandler }: 
   router.post(
     {
       path: '/internal/workplace_search/groups',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           group_name: schema.string(),
@@ -42,6 +54,12 @@ export function registerSearchGroupsRoute({
   router.post(
     {
       path: '/internal/workplace_search/groups/search',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           page: schema.object({
@@ -65,6 +83,12 @@ export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: R
   router.get(
     {
       path: '/internal/workplace_search/groups/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -79,6 +103,12 @@ export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: R
   router.put(
     {
       path: '/internal/workplace_search/groups/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -98,6 +128,12 @@ export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: R
   router.delete(
     {
       path: '/internal/workplace_search/groups/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -117,6 +153,12 @@ export function registerGroupUsersRoute({
   router.get(
     {
       path: '/internal/workplace_search/groups/{id}/group_users',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -136,6 +178,12 @@ export function registerShareGroupRoute({
   router.post(
     {
       path: '/internal/workplace_search/groups/{id}/share',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -158,6 +206,12 @@ export function registerBoostsGroupRoute({
   router.put(
     {
       path: '/internal/workplace_search/groups/{id}/boosts',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),

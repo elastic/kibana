@@ -38,6 +38,12 @@ export function registerCredentialsRoutes({
   router.get(
     {
       path: '/internal/app_search/credentials',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           'page[current]': schema.number(),
@@ -52,6 +58,12 @@ export function registerCredentialsRoutes({
   router.post(
     {
       path: '/internal/app_search/credentials',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: tokenSchema,
       },
@@ -65,6 +77,12 @@ export function registerCredentialsRoutes({
   router.get(
     {
       path: '/internal/app_search/credentials/details',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -76,6 +94,12 @@ export function registerCredentialsRoutes({
   router.put(
     {
       path: '/internal/app_search/credentials/{name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -90,6 +114,12 @@ export function registerCredentialsRoutes({
   router.delete(
     {
       path: '/internal/app_search/credentials/{name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),

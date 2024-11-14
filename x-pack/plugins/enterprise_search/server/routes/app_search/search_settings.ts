@@ -18,6 +18,12 @@ export function registerSearchSettingsRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{engineName}/search_settings/details',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -32,6 +38,12 @@ export function registerSearchSettingsRoutes({
   router.post(
     {
       path: '/internal/app_search/engines/{engineName}/search_settings/reset',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),

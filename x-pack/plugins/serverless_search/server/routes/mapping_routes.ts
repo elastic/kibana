@@ -13,6 +13,12 @@ export const registerMappingRoutes = ({ logger, router }: RouteDependencies) => 
   router.get(
     {
       path: '/internal/serverless_search/mappings/{index_name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           index_name: schema.string(),

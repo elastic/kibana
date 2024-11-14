@@ -16,6 +16,12 @@ export function registerSourceEnginesRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{name}/source_engines',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -34,6 +40,12 @@ export function registerSourceEnginesRoutes({
   router.post(
     {
       path: '/internal/app_search/engines/{name}/source_engines/bulk_create',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -52,6 +64,12 @@ export function registerSourceEnginesRoutes({
   router.delete(
     {
       path: '/internal/app_search/engines/{name}/source_engines/{source_engine_name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),

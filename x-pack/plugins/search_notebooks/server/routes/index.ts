@@ -16,6 +16,12 @@ export function defineRoutes({ config, notebooksCache, logger, router }: RouteDe
   router.get(
     {
       path: '/internal/search_notebooks/notebooks',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           list: schema.maybe(schema.string()),
@@ -44,6 +50,12 @@ export function defineRoutes({ config, notebooksCache, logger, router }: RouteDe
   router.get(
     {
       path: '/internal/search_notebooks/notebooks/{notebookId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           notebookId: schema.string(),

@@ -18,6 +18,12 @@ export function registerOrgSettingsRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/settings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -33,6 +39,12 @@ export function registerOrgSettingsCustomizeRoute({
   router.put(
     {
       path: '/internal/workplace_search/org/settings/customize',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -52,6 +64,12 @@ export function registerOrgSettingsUploadImagesRoute({
   router.put(
     {
       path: '/internal/workplace_search/org/settings/upload_images',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           logo: schema.maybe(schema.nullable(schema.string())),
@@ -77,6 +95,12 @@ export function registerOrgSettingsOauthApplicationRoute({
   router.put(
     {
       path: '/internal/workplace_search/org/settings/oauth_application',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           oauth_application: schema.object({
