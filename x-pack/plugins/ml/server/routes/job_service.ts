@@ -43,8 +43,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/force_start_datafeeds`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canStartStopDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canStartStopDatafeed'],
+        },
       },
       summary: 'Starts datafeeds',
       description: 'Starts one or more datafeeds.',
@@ -77,8 +79,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/stop_datafeeds`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canStartStopDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canStartStopDatafeed'],
+        },
       },
       summary: 'Stops datafeeds',
       description: 'Stops one or more datafeeds.',
@@ -111,8 +115,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/delete_jobs`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canDeleteJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canDeleteJob'],
+        },
       },
       summary: 'Deletes jobs',
       description: 'Deletes an existing anomaly detection job.',
@@ -149,8 +155,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/close_jobs`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCloseJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCloseJob'],
+        },
       },
       summary: 'Closes jobs',
       description: 'Closes one or more anomaly detection jobs.',
@@ -183,8 +191,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/reset_jobs`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canResetJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canResetJob'],
+        },
       },
       summary: 'Resets jobs',
       description: 'Resets one or more anomaly detection jobs.',
@@ -217,8 +227,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/force_stop_and_close_job`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCloseJob', 'access:ml:canStartStopDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCloseJob', 'ml:canStartStopDatafeed'],
+        },
       },
       summary: 'Force stops and closes job',
       description:
@@ -252,8 +264,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs_summary`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Jobs summary',
       description:
@@ -287,8 +301,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs_with_geo`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Jobs with geo',
       description:
@@ -320,8 +336,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs_with_time_range`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Jobs with time range',
       description: "Creates a list of jobs with data about the job's time range.",
@@ -349,8 +367,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/job_for_cloning`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get job for cloning',
       description: 'Get the job configuration with auto generated fields excluded for cloning',
@@ -383,8 +403,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Create jobs list',
       description: 'Creates a list of jobs.',
@@ -420,8 +442,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/groups`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get all groups',
       description: 'Returns array of group objects with job ids listed for each group.',
@@ -449,8 +473,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/update_groups`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canUpdateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canUpdateJob'],
+        },
       },
       summary: 'Update job groups',
       description: 'Updates the groups property of an anomaly detection job.',
@@ -483,8 +509,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/blocking_jobs_tasks`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get blocking job tasks',
       description: 'Gets the ids of deleting, resetting or reverting anomaly detection jobs.',
@@ -512,8 +540,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs_exist`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Check if jobs exist',
       description:
@@ -547,8 +577,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_caps/{indexPattern}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get new job capabilities',
       description: 'Retrieve the capabilities of fields for indices',
@@ -587,8 +619,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_line_chart`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Get job line chart data',
       description: 'Returns line chart data for anomaly detection job',
@@ -646,8 +680,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_population_chart`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Get job population chart data',
       description: 'Returns population chart data for anomaly detection job',
@@ -703,8 +739,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/all_jobs_and_group_ids`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get all job and group IDs',
       description: 'Returns a list of all job IDs and all group IDs',
@@ -732,8 +770,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/look_back_progress`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Get lookback progress',
       description: 'Returns current progress of anomaly detection job',
@@ -766,8 +806,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_validation`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Get categorization field examples',
       description: 'Returns examples of categorization field',
@@ -823,8 +865,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/top_categories`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get top categories',
       description: 'Returns list of top categories',
@@ -866,8 +910,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/datafeed_preview`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canPreviewDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canPreviewDatafeed'],
+        },
       },
       summary: 'Get datafeed preview',
       description: 'Returns a preview of the datafeed search',
@@ -914,8 +960,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/revert_model_snapshot`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob', 'access:ml:canStartStopDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob', 'ml:canStartStopDatafeed'],
+        },
       },
       summary: 'Revert model snapshot',
       description:
@@ -957,8 +1005,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/bulk_create`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canPreviewDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canPreviewDatafeed'],
+        },
       },
       summary: 'Bulk create jobs and datafeeds',
       description: 'Bulk create jobs and datafeeds.',

@@ -12,7 +12,7 @@ import {
   AlertConsumers,
   SLO_RULE_TYPE_IDS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
 import { ActiveAlerts } from './active_alerts';
 
