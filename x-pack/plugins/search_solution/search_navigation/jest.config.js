@@ -7,7 +7,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
+  rootDir: '../../../..',
   roots: ['<rootDir>/x-pack/plugins/search_solution/search_navigation'],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/search_solution/search_navigation',

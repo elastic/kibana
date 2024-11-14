@@ -10,6 +10,14 @@
     "server/**/*",
     "../../../../typings/**/*"
   ],
-  "kbn_references": ["@kbn/core", "@kbn/navigation-plugin", "@kbn/config-schema"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/i18n",
+    "@kbn/core-chrome-browser",
+    "@kbn/shared-ux-page-solution-nav",
+    "@kbn/logging",
+    "@kbn/serverless",
+  ],
   "exclude": ["target/**/*"]
 }

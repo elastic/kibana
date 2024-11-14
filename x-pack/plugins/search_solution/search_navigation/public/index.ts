@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import { SearchNavigationPlugin } from './plugin';
 
-// This exports static code and TypeScript types,
-// as well as, Kibana Platform `plugin()` initializer.
-export function plugin() {
-  return new SearchNavigationPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new SearchNavigationPlugin(initializerContext);
 }
-export type { SearchNavigationPluginSetup, SearchNavigationPluginStart } from './types';
+
+export type {
+  SearchNavigationPluginSetup,
+  SearchNavigationPluginStart,
+  ClassicNavItem,
+  ClassicNavItemDeepLink,
+} from './types';
