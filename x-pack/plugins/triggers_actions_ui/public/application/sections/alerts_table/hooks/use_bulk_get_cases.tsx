@@ -32,7 +32,7 @@ export interface UseBulkGetCasesQueryParams {
 
 export const useBulkGetCasesQuery = (
   { caseIds }: UseBulkGetCasesQueryParams,
-  options?: QueryOptionsOverrides<typeof bulkGetCases>
+  options?: Pick<QueryOptionsOverrides<typeof bulkGetCases>, 'enabled'>
 ) => {
   const {
     http,
