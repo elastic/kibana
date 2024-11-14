@@ -126,7 +126,6 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       // page just transitioned back to visible state from hidden state caused by user interaction
       if (userInvokedPageVisibilityChange.current && !document.hidden) {
         await fetchRequiredData(space.id!).finally(() => setFetchingDataDeps(false));
-        userInvokedPageVisibilityChange.current = null;
       }
     }
 
