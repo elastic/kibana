@@ -94,6 +94,11 @@ export const EntitiesList: React.FC = () => {
     inspect: data?.inspect ?? null,
   });
 
+  // Reset the active page when the search criteria changes
+  useEffect(() => {
+    setActivePage(0);
+  }, [sorting, limit, filter]);
+
   const columns = useEntitiesListColumns();
 
   // Force a refetch when "refresh" button is clicked.
@@ -112,7 +117,7 @@ export const EntitiesList: React.FC = () => {
   return (
     <PaginatedTable
       id={ENTITIES_LIST_TABLE_ID}
-      activePage={(data?.page ?? 1) - 1}
+      activePage={activePage}
       columns={columns}
       headerCount={data?.total ?? 0}
       titleSize="s"

@@ -52,6 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when managing a single entry', () => {
       const knowledgeBaseEntry = {
         id: 'my-doc-id-1',
+        title: 'My title',
         text: 'My content',
       };
       it('returns 200 on create', async () => {
@@ -156,14 +157,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const knowledgeBaseEntries = [
         {
           id: 'my_doc_a',
+          title: 'My title a',
           text: 'My content a',
         },
         {
           id: 'my_doc_b',
+          title: 'My title b',
           text: 'My content b',
         },
         {
           id: 'my_doc_c',
+          title: 'My title c',
           text: 'My content c',
         },
       ];

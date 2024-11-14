@@ -17,7 +17,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('returns empty object when successful', async () => {
       await createKnowledgeBaseModel(ml);
       const res = await observabilityAIAssistantAPIClient
-        .editorUser({
+        .editor({
           endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
         })
         .expect(200);
@@ -27,7 +27,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     it('returns bad request if model cannot be installed', async () => {
       await observabilityAIAssistantAPIClient
-        .editorUser({
+        .editor({
           endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
         })
         .expect(400);

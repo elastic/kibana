@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { max } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { FlyoutHeader, FlyoutTitle } from '@kbn/security-solution-common';
 import type { UserItem } from '../../../../common/search_strategy';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { getUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
@@ -18,6 +17,8 @@ import type { ManagedUserData } from './types';
 
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
+import { FlyoutHeader } from '../../shared/components/flyout_header';
+import { FlyoutTitle } from '../../shared/components/flyout_title';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 
 interface UserPanelHeaderProps {

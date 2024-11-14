@@ -300,7 +300,8 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
  *  --header "Accept: application/x-tar" \
  *  --header "Content-Type: text/tab-separated-values" \
  *  --header "kbn-xsrf: true" \
- *  --data $'system\tregistry\nproduct_service\tcustom\t/path/to/access.log\ncheckout_service\tcustom\t/path/to/access.log' \
+ *  --header "x-elastic-internal-origin: Kibana" \
+ *  --data $'system\tregistry\twebserver01\nproduct_service\tcustom\t/path/to/access.log\ncheckout_service\tcustom\t/path/to/access.log' \
  *  --output - | tar -tvf -
  * ```
  */
@@ -392,9 +393,16 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
   },
 });
 
+interface InstalledSystemIntegrationMetadata {
+  hostname: string;
+}
+
+type RegistryIntegrationMetadata = InstalledSystemIntegrationMetadata;
+
 export interface RegistryIntegrationToInstall {
   pkgName: string;
   installSource: 'registry';
+  metadata?: RegistryIntegrationMetadata;
 }
 export interface CustomIntegrationToInstall {
   pkgName: string;
@@ -426,6 +434,7 @@ async function ensureInstalledIntegrations(
           dataStreams:
             packageInfo.data_streams?.map(({ type, dataset }) => ({ type, dataset })) ?? [],
           kibanaAssets: pkg.installed_kibana,
+          metadata: integration.metadata,
         };
       }
 
@@ -448,6 +457,16 @@ async function ensureInstalledIntegrations(
                   id: `filestream-${pkgName}`,
                   data_stream: dataStream,
                   paths: integration.logFilePaths,
+                  processors: [
+                    {
+                      add_fields: {
+                        target: 'service',
+                        fields: {
+                          name: pkgName,
+                        },
+                      },
+                    },
+                  ],
                 },
               ],
             },
@@ -482,7 +501,8 @@ async function ensureInstalledIntegrations(
  * Example input:
  *
  * ```text
- * system registry
+ * system registry hostname
+ * nginx registry
  * product_service custom /path/to/access.log
  * product_service custom /path/to/error.log
  * checkout_service custom /path/to/access.log
@@ -495,40 +515,53 @@ function parseIntegrationsTSV(tsv: string) {
       .trim()
       .split('\n')
       .map((line) => line.split('\t', 3))
-      .reduce<Record<string, IntegrationToInstall>>(
-        (acc, [pkgName, installSource, logFilePath]) => {
-          const key = `${pkgName}-${installSource}`;
-          if (installSource === 'registry') {
-            if (logFilePath) {
-              throw new Error(`Integration '${pkgName}' does not support a file path`);
-            }
-            acc[key] = {
-              pkgName,
-              installSource,
-            };
-            return acc;
-          } else if (installSource === 'custom') {
-            if (!logFilePath) {
-              throw new Error(`Missing file path for integration: ${pkgName}`);
-            }
-            // Append file path if integration is already in the list
-            const existing = acc[key];
-            if (existing && existing.installSource === 'custom') {
-              existing.logFilePaths.push(logFilePath);
-              return acc;
-            }
-            acc[key] = {
-              pkgName,
-              installSource,
-              logFilePaths: [logFilePath],
-            };
+      .reduce<Record<string, IntegrationToInstall>>((acc, [pkgName, installSource, parameter]) => {
+        const key = `${pkgName}-${installSource}`;
+        if (installSource === 'registry') {
+          const metadata = parseRegistryIntegrationMetadata(pkgName, parameter);
+
+          acc[key] = {
+            pkgName,
+            installSource,
+            metadata,
+          };
+          return acc;
+        } else if (installSource === 'custom') {
+          if (!parameter) {
+            throw new Error(`Missing file path for integration: ${pkgName}`);
+          }
+          // Append file path if integration is already in the list
+          const existing = acc[key];
+          if (existing && existing.installSource === 'custom') {
+            existing.logFilePaths.push(parameter);
             return acc;
           }
-          throw new Error(`Invalid install source: ${installSource}`);
-        },
-        {}
-      )
+          acc[key] = {
+            pkgName,
+            installSource,
+            logFilePaths: [parameter],
+          };
+          return acc;
+        }
+        throw new Error(`Invalid install source: ${installSource}`);
+      }, {})
   );
+}
+
+function parseRegistryIntegrationMetadata(
+  pkgName: string,
+  parameter: string
+): RegistryIntegrationMetadata | undefined {
+  switch (pkgName) {
+    case 'system':
+      if (!parameter) {
+        throw new Error('Missing hostname for System integration');
+      }
+
+      return { hostname: parameter };
+    default:
+      return undefined;
+  }
 }
 
 const generateAgentConfigTar = ({

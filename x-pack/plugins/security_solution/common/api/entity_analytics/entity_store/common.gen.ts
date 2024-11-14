@@ -36,6 +36,7 @@ export const EngineDescriptor = z.object({
   status: EngineStatus,
   filter: z.string().optional(),
   fieldHistoryLength: z.number().int(),
+  error: z.object({}).optional(),
 });
 
 export type InspectQuery = z.infer<typeof InspectQuery>;

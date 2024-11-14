@@ -18,10 +18,8 @@ import React, { useCallback } from 'react';
 import * as i18n from './translations';
 import theGif from './overview.gif';
 
-const VIDEO_CONTENT_WIDTH = 250;
-// TODO before removing assistantKnowledgeBaseByDefault feature flag
-// update the VIDEO_PAGE to the correct URL
-const VIDEO_PAGE = `https://videos.elastic.co/watch/BrDaDBAAvdygvemFKNAkBW`;
+const VIDEO_CONTENT_WIDTH = 330;
+export const VIDEO_PAGE = `https://ela.st/seckb`;
 
 const VideoComponent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const openVideoInNewTab = useCallback(() => {

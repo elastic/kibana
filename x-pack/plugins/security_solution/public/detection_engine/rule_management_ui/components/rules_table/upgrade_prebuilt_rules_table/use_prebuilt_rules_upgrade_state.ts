@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 import type {
   RulesUpgradeState,
   FieldsUpgradeState,
@@ -33,9 +33,7 @@ interface UseRulesUpgradeStateResult {
 export function usePrebuiltRulesUpgradeState(
   ruleUpgradeInfos: RuleUpgradeInfoForReview[]
 ): UseRulesUpgradeStateResult {
-  const isPrebuiltRulesCustomizationEnabled = useIsExperimentalFeatureEnabled(
-    'prebuiltRulesCustomizationEnabled'
-  );
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
   const [rulesResolvedConflicts, setRulesResolvedConflicts] = useState<RulesResolvedConflicts>({});
 
   const setRuleFieldResolvedValue = useCallback(

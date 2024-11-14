@@ -14,29 +14,19 @@ import { GraphPreviewContainer } from './graph_preview_container';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
 import { useGraphPreview } from '../hooks/use_graph_preview';
 import { useFetchGraphData } from '../hooks/use_fetch_graph_data';
-
 import {
   EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '@kbn/security-solution-common';
+} from '../../../shared/components/test_ids';
 
 jest.mock('../hooks/use_graph_preview');
 jest.mock('../hooks/use_fetch_graph_data', () => ({
   useFetchGraphData: jest.fn(),
 }));
 const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
-
-const mockUseUiSetting = jest.fn().mockReturnValue([false]);
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...original,
-    useUiSetting$: () => mockUseUiSetting(),
-  };
-});
 
 const mockGraph = () => <div data-test-subj={GRAPH_PREVIEW_TEST_ID} />;
 
@@ -65,7 +55,11 @@ describe('<GraphPreviewContainer />', () => {
       data: { nodes: [], edges: [] },
     });
 
+    const timestamp = new Date().toISOString();
+
     (useGraphPreview as jest.Mock).mockReturnValue({
+      timestamp,
+      eventIds: [],
       isAuditLog: true,
     });
 
@@ -88,9 +82,23 @@ describe('<GraphPreviewContainer />', () => {
     expect(
       getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).toBeInTheDocument();
+    expect(mockUseFetchGraphData).toHaveBeenCalled();
+    expect(mockUseFetchGraphData.mock.calls[0][0]).toEqual({
+      req: {
+        query: {
+          eventIds: [],
+          start: `${timestamp}||-30m`,
+          end: `${timestamp}||+30m`,
+        },
+      },
+      options: {
+        enabled: true,
+        refetchOnWindowFocus: false,
+      },
+    });
   });
 
-  it('should render error message and text in header', () => {
+  it('should not render when graph data is not available', () => {
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
@@ -101,10 +109,10 @@ describe('<GraphPreviewContainer />', () => {
       isAuditLog: false,
     });
 
-    const { getByTestId } = renderGraphPreview();
+    const { queryByTestId } = renderGraphPreview();
 
     expect(
-      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
+      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
   });
 });

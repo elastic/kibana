@@ -535,17 +535,6 @@ describe('autocomplete.suggest', () => {
         { triggerCharacter: ' ' }
       );
       await assertSuggestions('from a | eval a = 1 year /', [',', '| ', 'IS NOT NULL', 'IS NULL']);
-      await assertSuggestions('from a | eval a = 1 day + 2 /', [',', '| ']);
-      await assertSuggestions(
-        'from a | eval 1 day + 2 /',
-        [
-          ...dateSuggestions,
-          ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-            'integer',
-          ]),
-        ],
-        { triggerCharacter: ' ' }
-      );
       await assertSuggestions(
         'from a | eval var0=date_trunc(/)',
         [

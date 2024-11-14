@@ -10,9 +10,8 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ChatCompleteAPI } from '../common/chat_complete';
+import { ChatCompleteAPI, OutputAPI } from '@kbn/inference-common';
 import { InferenceConnector } from '../common/connectors';
-import { OutputAPI } from '../common/output';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 

@@ -24,7 +24,10 @@ import {
 import { FindingsBaseEsQuery, showErrorToast } from '@kbn/cloud-security-posture';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
-import { VULNERABILITY_FIELDS } from '../../../common/constants';
+import {
+  CDR_VULNERABILITY_DATA_TABLE_RUNTIME_MAPPING_FIELDS,
+  VULNERABILITY_FIELDS,
+} from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { getCaseInsensitiveSortScript } from '../utils/custom_sort_script';
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
@@ -54,22 +57,18 @@ const getMultiFieldsSort = (sort: string[][]) => {
 };
 
 const getRuntimeMappingsFromSort = (sort: string[][]) => {
-  return sort.reduce((acc, [field]) => {
-    // TODO: Add proper type for all fields available in the field selector
-    const type: RuntimePrimitiveTypes =
-      field === VULNERABILITY_FIELDS.SCORE_BASE
-        ? 'double'
-        : field === '@timestamp'
-        ? 'date'
-        : 'keyword';
+  return sort
+    .filter(([field]) => CDR_VULNERABILITY_DATA_TABLE_RUNTIME_MAPPING_FIELDS.includes(field))
+    .reduce((acc, [field]) => {
+      const type: RuntimePrimitiveTypes = 'keyword';
 
-    return {
-      ...acc,
-      [field]: {
-        type,
-      },
-    };
-  }, {});
+      return {
+        ...acc,
+        [field]: {
+          type,
+        },
+      };
+    }, {});
 };
 
 export const getVulnerabilitiesQuery = (

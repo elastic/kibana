@@ -1319,6 +1319,36 @@ describe('Agent policy', () => {
     });
   });
 
+  describe('copy', () => {
+    let soClient: ReturnType<typeof savedObjectsClientMock.create>;
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+
+    beforeEach(() => {
+      soClient = getSavedObjectMock({ revision: 1, package_policies: ['package-1'] });
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    });
+
+    it('should throw error for agent policy which has managed package policy', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+          is_managed: true,
+        },
+      ] as any);
+      try {
+        await agentPolicyService.copy(soClient, esClient, 'mocked', {
+          name: 'copy mocked',
+        });
+      } catch (e) {
+        expect(e.message).toEqual(
+          new PackagePolicyRestrictionRelatedError(
+            `Cannot copy an agent policy mocked that contains managed package policies`
+          ).message
+        );
+      }
+    });
+  });
+
   describe('deployPolicy', () => {
     beforeEach(() => {
       mockedGetFullAgentPolicy.mockReset();

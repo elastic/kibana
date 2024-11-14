@@ -43,7 +43,6 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
       spaceId: useSpaceAwareness ? getCurrentNamespace(soClient) : undefined,
     });
     const body: GetEnrollmentAPIKeysResponse = {
-      list: items, // deprecated
       items,
       total,
       page,

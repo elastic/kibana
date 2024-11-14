@@ -51,7 +51,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      await es.deleteByQuery({ index: alertAsDataIndex, query: { match_all: {} } });
+      await es.deleteByQuery({
+        index: alertAsDataIndex,
+        query: { match_all: {} },
+        ignore_unavailable: true,
+      });
     });
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -1493,6 +1497,10 @@ instanceStateValue: true
                         _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
                         kibana: {
                           alert: {
+                            action_group: 'default',
+                            flapping_history: expectExpect.any(Array),
+                            maintenance_window_ids: [],
+                            severity_improving: false,
                             rule: {
                               parameters: {
                                 index: '.kibana-alerting-test-data',
@@ -1500,7 +1508,10 @@ instanceStateValue: true
                               },
                               category: 'Test: Always Firing Alert As Data',
                               consumer: 'alertsFixture',
-                              execution: { uuid: expectExpect.any(String) },
+                              execution: {
+                                uuid: expectExpect.any(String),
+                                timestamp: expectExpect.any(String),
+                              },
                               name: 'abc',
                               producer: 'alertsFixture',
                               revision: 0,
@@ -1530,6 +1541,10 @@ instanceStateValue: true
                         _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
                         kibana: {
                           alert: {
+                            action_group: 'default',
+                            flapping_history: expectExpect.any(Array),
+                            maintenance_window_ids: [],
+                            severity_improving: false,
                             rule: {
                               parameters: {
                                 index: '.kibana-alerting-test-data',
@@ -1537,7 +1552,10 @@ instanceStateValue: true
                               },
                               category: 'Test: Always Firing Alert As Data',
                               consumer: 'alertsFixture',
-                              execution: { uuid: expectExpect.any(String) },
+                              execution: {
+                                timestamp: expectExpect.any(String),
+                                uuid: expectExpect.any(String),
+                              },
                               name: 'abc',
                               producer: 'alertsFixture',
                               revision: 0,
@@ -1583,6 +1601,10 @@ instanceStateValue: true
                         _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
                         kibana: {
                           alert: {
+                            action_group: 'default',
+                            flapping_history: expectExpect.any(Array),
+                            maintenance_window_ids: [],
+                            previous_action_group: 'default',
                             rule: {
                               parameters: {
                                 index: '.kibana-alerting-test-data',
@@ -1590,7 +1612,10 @@ instanceStateValue: true
                               },
                               category: 'Test: Always Firing Alert As Data',
                               consumer: 'alertsFixture',
-                              execution: { uuid: expectExpect.any(String) },
+                              execution: {
+                                timestamp: expectExpect.any(String),
+                                uuid: expectExpect.any(String),
+                              },
                               name: 'abc',
                               producer: 'alertsFixture',
                               revision: 0,
@@ -1620,6 +1645,10 @@ instanceStateValue: true
                         _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
                         kibana: {
                           alert: {
+                            action_group: 'default',
+                            flapping_history: expectExpect.any(Array),
+                            maintenance_window_ids: [],
+                            previous_action_group: 'default',
                             rule: {
                               parameters: {
                                 index: '.kibana-alerting-test-data',
@@ -1627,7 +1656,10 @@ instanceStateValue: true
                               },
                               category: 'Test: Always Firing Alert As Data',
                               consumer: 'alertsFixture',
-                              execution: { uuid: expectExpect.any(String) },
+                              execution: {
+                                timestamp: expectExpect.any(String),
+                                uuid: expectExpect.any(String),
+                              },
                               name: 'abc',
                               producer: 'alertsFixture',
                               revision: 0,
@@ -1721,6 +1753,10 @@ instanceStateValue: true
                   _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
                   kibana: {
                     alert: {
+                      action_group: 'default',
+                      flapping_history: expectExpect.any(Array),
+                      maintenance_window_ids: [],
+                      severity_improving: false,
                       rule: {
                         parameters: {
                           index: '.kibana-alerting-test-data',
@@ -1728,7 +1764,10 @@ instanceStateValue: true
                         },
                         category: 'Test: Always Firing Alert As Data',
                         consumer: 'alertsFixture',
-                        execution: { uuid: expectExpect.any(String) },
+                        execution: {
+                          uuid: expectExpect.any(String),
+                          timestamp: expectExpect.any(String),
+                        },
                         name: 'abc',
                         producer: 'alertsFixture',
                         revision: 0,
@@ -1758,6 +1797,10 @@ instanceStateValue: true
                   _index: '.internal.alerts-observability.test.alerts.alerts-default-000001',
                   kibana: {
                     alert: {
+                      action_group: 'default',
+                      flapping_history: expectExpect.any(Array),
+                      maintenance_window_ids: [],
+                      severity_improving: false,
                       rule: {
                         parameters: {
                           index: '.kibana-alerting-test-data',
@@ -1765,7 +1808,10 @@ instanceStateValue: true
                         },
                         category: 'Test: Always Firing Alert As Data',
                         consumer: 'alertsFixture',
-                        execution: { uuid: expectExpect.any(String) },
+                        execution: {
+                          uuid: expectExpect.any(String),
+                          timestamp: expectExpect.any(String),
+                        },
                         name: 'abc',
                         producer: 'alertsFixture',
                         revision: 0,
@@ -1901,7 +1947,7 @@ instanceStateValue: true
          */
         const response = await alertUtils.createAlwaysFiringSystemAction({
           reference,
-          overwrites: { schedule: { interval: '1s' } },
+          overwrites: { schedule: { interval: '1m' } },
         });
 
         expect(response.status).to.eql(200);

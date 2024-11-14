@@ -17,6 +17,7 @@ import type {
   NavigationTreeDefinition,
   SolutionNavigationDefinitions,
   CloudLinks,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
@@ -86,9 +87,9 @@ export class ProjectNavigationService {
   private readonly solutionNavDefinitions$ = new BehaviorSubject<SolutionNavigationDefinitions>({});
   // As the active definition **id** and the definitions are set independently, one before the other without
   // any guarantee of order, we need to store the next active definition id in a separate BehaviorSubject
-  private readonly nextSolutionNavDefinitionId$ = new BehaviorSubject<string | null>(null);
+  private readonly nextSolutionNavDefinitionId$ = new BehaviorSubject<SolutionId | null>(null);
   // The active solution navigation definition id that has been initiated and is currently active
-  private readonly activeSolutionNavDefinitionId$ = new BehaviorSubject<string | null>(null);
+  private readonly activeSolutionNavDefinitionId$ = new BehaviorSubject<SolutionId | null>(null);
   private readonly location$ = new BehaviorSubject<Location>(createLocation('/'));
   private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
   private cloudLinks$ = new BehaviorSubject<CloudLinks>({});
@@ -138,7 +139,7 @@ export class ProjectNavigationService {
         return this.projectName$.asObservable();
       },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
-        id: string,
+        id: SolutionId,
         navTreeDefinition$: Observable<NavigationTreeDefinition<LinkId>>
       ) => {
         this.initNavigation(id, navTreeDefinition$);
@@ -202,7 +203,7 @@ export class ProjectNavigationService {
    * @param id Id for the navigation tree definition
    * @param navTreeDefinition$ The navigation tree definition
    */
-  private initNavigation(id: string, navTreeDefinition$: Observable<NavigationTreeDefinition>) {
+  private initNavigation(id: SolutionId, navTreeDefinition$: Observable<NavigationTreeDefinition>) {
     if (this.activeSolutionNavDefinitionId$.getValue() === id) return;
 
     if (this.navigationChangeSubscription) {
@@ -220,7 +221,7 @@ export class ProjectNavigationService {
       .pipe(
         takeUntil(this.stop$),
         map(([def, deepLinksMap, cloudLinks]) => {
-          return parseNavigationTree(def, {
+          return parseNavigationTree(id, def, {
             deepLinks: deepLinksMap,
             cloudLinks,
           });
@@ -382,7 +383,7 @@ export class ProjectNavigationService {
     this.projectHome$.next(homeHref);
   }
 
-  private changeActiveSolutionNavigation(id: string | null) {
+  private changeActiveSolutionNavigation(id: SolutionId | null) {
     if (this.nextSolutionNavDefinitionId$.getValue() === id) return;
     this.nextSolutionNavDefinitionId$.next(id);
   }
@@ -400,7 +401,7 @@ export class ProjectNavigationService {
         if (!definitions[id]) return null;
 
         // We strip out the sideNavComponent from the definition as it should only be used internally
-        const { sideNavComponent, ...definition } = definitions[id];
+        const { sideNavComponent, ...definition } = definitions[id]!;
         return definition;
       })
     );

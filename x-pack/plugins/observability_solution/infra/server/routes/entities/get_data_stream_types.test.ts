@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { type EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import { type InfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { getDataStreamTypes } from './get_data_stream_types';
@@ -74,7 +74,7 @@ describe('getDataStreamTypes', () => {
   it('should return metrics and entity source_data_stream types when entityCentriExperienceEnabled is true and has entity data', async () => {
     (getHasMetricsData as jest.Mock).mockResolvedValue(true);
     (getLatestEntity as jest.Mock).mockResolvedValue({
-      'source_data_stream.type': ['logs', 'metrics'],
+      sourceDataStreamType: ['logs', 'metrics'],
     });
 
     const params = {
@@ -118,7 +118,7 @@ describe('getDataStreamTypes', () => {
   it('should return entity source_data_stream types when has no metrics', async () => {
     (getHasMetricsData as jest.Mock).mockResolvedValue(false);
     (getLatestEntity as jest.Mock).mockResolvedValue({
-      'source_data_stream.type': ['logs', 'traces'],
+      sourceDataStreamType: ['logs', 'traces'],
     });
 
     const params = {

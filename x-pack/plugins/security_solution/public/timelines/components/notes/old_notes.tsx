@@ -111,7 +111,7 @@ interface NotesTabContentProps {
 }
 
 /**
- * Renders the "old" notes tab content. This should be removed when we remove the securitySolutionNotesEnabled feature flag
+ * Renders the "old" notes tab content. This should be removed when we remove the securitySolutionNotesDisabled feature flag
  */
 export const OldNotes: React.FC<NotesTabContentProps> = React.memo(({ timelineId }) => {
   const dispatch = useDispatch();
