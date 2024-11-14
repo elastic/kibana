@@ -61,7 +61,6 @@ import {
 } from '../../../../shared_imports';
 import type { FormHook, FieldHook } from '../../../../shared_imports';
 import { schema } from './schema';
-import { getTermsAggregationFields } from './utils';
 import { useExperimentalFeatureFieldsTransform } from './use_experimental_feature_fields_transform';
 import * as i18n from './translations';
 import {
@@ -78,7 +77,7 @@ import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelectorField } from '../data_view_selector_field';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { NewTermsFields } from '../new_terms_fields';
+import { NewTermsFieldsEdit } from '../../../rule_creation/components/new_terms_fields_edit';
 import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
@@ -94,6 +93,7 @@ import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_r
 import { AlertSuppressionEdit } from '../../../rule_creation/components/alert_suppression_edit';
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
+import { useTermsAggregationFields } from '../../../../common/hooks/use_terms_aggregation_fields';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -256,19 +256,21 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     () => (indexPattern.fields as FieldSpec[]).filter((field) => field.aggregatable === true),
     [indexPattern.fields]
   );
-  const termsAggregationFields = useMemo(
-    /**
-     * Typecasting to FieldSpec because fields is
-     * typed as DataViewFieldBase[] which does not have
-     * the 'aggregatable' property, however the type is incorrect
-     *
-     * fields does contain elements with the aggregatable property.
-     * We will need to determine where these types are defined and
-     * figure out where the discrepency is.
-     */
-    () => getTermsAggregationFields(indexPattern.fields as FieldSpec[]),
-    [indexPattern.fields]
-  );
+  // const termsAggregationFields = useMemo(
+  //   /**
+  //    * Typecasting to FieldSpec because fields is
+  //    * typed as DataViewFieldBase[] which does not have
+  //    * the 'aggregatable' property, however the type is incorrect
+  //    *
+  //    * fields does contain elements with the aggregatable property.
+  //    * We will need to determine where these types are defined and
+  //    * figure out where the discrepency is.
+  //    */
+  //   () => getTermsAggregationFields(indexPattern.fields as FieldSpec[]),
+  //   [indexPattern.fields]
+  // );
+
+  const termsAggregationFields = useTermsAggregationFields(indexPattern.fields);
 
   const [threatIndexPatternsLoading, { indexPatterns: threatIndexPatterns }] =
     useFetchIndex(threatIndex);
@@ -925,7 +927,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             <>
               <UseField
                 path="newTermsFields"
-                component={NewTermsFields}
+                component={NewTermsFieldsEdit}
                 componentProps={{
                   browserFields: termsAggregationFields,
                 }}

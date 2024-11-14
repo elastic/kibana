@@ -19,9 +19,9 @@ interface NewTermsFieldsProps {
 
 const FIELD_COMBO_BOX_WIDTH = 410;
 
-const fieldDescribedByIds = 'detectionEngineStepDefineRuleNewTermsField';
+const fieldDescribedByIds = 'newTermsFieldEdit';
 
-export const NewTermsFieldsComponent: React.FC<NewTermsFieldsProps> = ({
+export const NewTermsFieldsEditComponent: React.FC<NewTermsFieldsProps> = ({
   browserFields,
   field,
 }: NewTermsFieldsProps) => {
@@ -39,4 +39,4 @@ export const NewTermsFieldsComponent: React.FC<NewTermsFieldsProps> = ({
   return <Field field={field} idAria={fieldDescribedByIds} euiFieldProps={fieldEuiFieldProps} />;
 };
 
-export const NewTermsFields = React.memo(NewTermsFieldsComponent);
+export const NewTermsFieldsEdit = React.memo(NewTermsFieldsEditComponent);

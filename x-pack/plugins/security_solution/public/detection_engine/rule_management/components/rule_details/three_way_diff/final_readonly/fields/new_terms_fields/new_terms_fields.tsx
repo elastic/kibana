@@ -16,6 +16,10 @@ interface NewTermsFieldsReadOnlyProps {
 }
 
 export function NewTermsFieldsReadOnly({ newTermsFields }: NewTermsFieldsReadOnlyProps) {
+  if (!newTermsFields.length) {
+    return null;
+  }
+
   return (
     <EuiDescriptionList
       listItems={[
