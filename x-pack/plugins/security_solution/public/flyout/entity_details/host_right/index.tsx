@@ -135,13 +135,8 @@ export const HostPanel = ({
     from,
   });
 
-  const alertsOpenCount = alertsData?.open?.total || 0;
-
-  const alertsAcknowledgedCount = alertsData?.acknowledged?.total || 0;
-
-  const alertsCount = alertsOpenCount + alertsAcknowledgedCount;
-
-  const hasNonClosedAlerts = alertsCount;
+  const hasNonClosedAlerts =
+    (alertsData?.acknowledged?.total || 0) + (alertsData?.open?.total || 0) > 0;
 
   useQueryInspector({
     deleteQuery,

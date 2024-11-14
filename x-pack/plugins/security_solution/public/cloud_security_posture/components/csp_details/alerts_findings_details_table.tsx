@@ -41,9 +41,9 @@ interface ResultAlertsField {
   _id: string[];
   _index: string[];
   'kibana.alert.rule.uuid': string[];
-  'kibana.alert.reason': string[];
   'kibana.alert.severity': AlertSeverity[];
   'kibana.alert.rule.name': string[];
+  'kibana.alert.workflow_status': string[];
 }
 
 interface ContextualFlyoutAlertsField {
@@ -51,8 +51,8 @@ interface ContextualFlyoutAlertsField {
   index: string;
   ruleUuid: string;
   ruleName: string;
-  reason: string;
   severity: AlertSeverity;
+  status: string;
 }
 
 interface AlertsDetailsFields {
@@ -100,10 +100,10 @@ export const AlertsDetailsTable = memo(
         return {
           id: item.fields?._id?.[0],
           index: item.fields?._index?.[0],
-          reason: item.fields?.['kibana.alert.reason']?.[0],
           ruleName: item.fields?.['kibana.alert.rule.name']?.[0],
           ruleUuid: item.fields?.['kibana.alert.rule.uuid']?.[0],
           severity: item.fields?.['kibana.alert.severity']?.[0],
+          status: item.fields?.['kibana.alert.workflow_status']?.[0],
         };
       }
     );
@@ -178,7 +178,7 @@ export const AlertsDetailsTable = memo(
             defaultMessage: 'Rule',
           }
         ),
-        width: '35%',
+        width: '55%',
       },
       {
         field: 'severity',
@@ -196,15 +196,15 @@ export const AlertsDetailsTable = memo(
         width: '20%',
       },
       {
-        field: 'reason',
-        render: (reason: string) => <EuiText size="s">{reason}</EuiText>,
+        field: 'status',
+        render: (status: string) => <EuiText size="s">{capitalize(status)}</EuiText>,
         name: i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.alerts.table.reasonColumnName',
+          'xpack.securitySolution.flyout.left.insights.alerts.table.statusColumnName',
           {
-            defaultMessage: 'Reason',
+            defaultMessage: 'Status',
           }
         ),
-        width: '40%',
+        width: '20%',
       },
     ];
 

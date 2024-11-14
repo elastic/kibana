@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
-// import type { FlyoutPanels } from '@kbn/expandable-flyout/src/store/state';
 import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { MisconfigurationFindingsDetailsTable } from './misconfiguration_findings_details_table';
 import { VulnerabilitiesFindingsDetailsTable } from './vulnerabilities_findings_details_table';
@@ -155,7 +154,6 @@ export const InsightsTabCsp = memo(
         ) : activeInsightsId === CspInsightLeftPanelSubTab.VULNERABILITIES ? (
           <VulnerabilitiesFindingsDetailsTable queryName={name} />
         ) : (
-          // <div>{'ALERTS HERE'}</div> //AlertsDetailsTable
           <AlertsDetailsTable fieldName={fieldName} queryName={name} />
         )}
       </>

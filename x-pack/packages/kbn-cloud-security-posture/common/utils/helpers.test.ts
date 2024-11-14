@@ -193,9 +193,9 @@ describe('test helper methods', () => {
           '_id',
           '_index',
           'kibana.alert.rule.uuid',
-          'kibana.alert.reason',
           'kibana.alert.severity',
           'kibana.alert.rule.name',
+          'kibana.alert.workflow_status',
         ],
         query: {
           bool: {

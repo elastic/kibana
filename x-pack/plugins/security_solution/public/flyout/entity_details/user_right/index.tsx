@@ -127,13 +127,8 @@ export const UserPanel = ({
     from,
   });
 
-  const alertsOpenCount = alertsData?.open?.total || 0;
-
-  const alertsAcknowledgedCount = alertsData?.acknowledged?.total || 0;
-
-  const alertsCount = alertsOpenCount + alertsAcknowledgedCount;
-
-  const hasNonClosedAlerts = alertsCount > 0;
+  const hasNonClosedAlerts =
+    (alertsData?.acknowledged?.total || 0) + (alertsData?.open?.total || 0) > 0;
 
   useQueryInspector({
     deleteQuery,
