@@ -323,7 +323,7 @@ describe('createOpIdGenerator', () => {
     {
       input: {
         method: 'get',
-        path: '/api/my/resource/{path*}',
+        path: '/api/my/resource/{path}',
       },
       output: 'get-my-resource-path',
     },
