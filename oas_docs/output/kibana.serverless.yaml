@@ -1018,14 +1018,24 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: >-
+                      When flapping detection is turned on, alerts that switch
+                      quickly between active and recovered states are identified
+                      as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: >-
+                          The minimum number of runs in which the threshold must
+                          be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: >-
+                          The minimum number of times an alert must switch
+                          states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -1600,14 +1610,24 @@ paths:
                   type: boolean
                 flapping:
                   additionalProperties: false
+                  description: >-
+                    When flapping detection is turned on, alerts that switch
+                    quickly between active and recovered states are identified
+                    as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
+                      description: >-
+                        The minimum number of runs in which the threshold must
+                        be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
+                      description: >-
+                        The minimum number of times an alert must switch states
+                        in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -1925,14 +1945,24 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: >-
+                      When flapping detection is turned on, alerts that switch
+                      quickly between active and recovered states are identified
+                      as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: >-
+                          The minimum number of runs in which the threshold must
+                          be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: >-
+                          The minimum number of times an alert must switch
+                          states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -2510,14 +2540,24 @@ paths:
                     - active
                 flapping:
                   additionalProperties: false
+                  description: >-
+                    When flapping detection is turned on, alerts that switch
+                    quickly between active and recovered states are identified
+                    as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
+                      description: >-
+                        The minimum number of runs in which the threshold must
+                        be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
+                      description: >-
+                        The minimum number of times an alert must switch states
+                        in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -2807,14 +2847,24 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: >-
+                      When flapping detection is turned on, alerts that switch
+                      quickly between active and recovered states are identified
+                      as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: >-
+                          The minimum number of runs in which the threshold must
+                          be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: >-
+                          The minimum number of times an alert must switch
+                          states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -3852,14 +3902,24 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: >-
+                      When flapping detection is turned on, alerts that switch
+                      quickly between active and recovered states are identified
+                      as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: >-
+                          The minimum number of runs in which the threshold must
+                          be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: >-
+                          The minimum number of times an alert must switch
+                          states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -16693,14 +16753,10 @@ paths:
                       type: object
                       properties:
                         active:
-                          description: >-
-                            When false, the enrollment API key is revoked and
-                            cannot be used for enrolling Elastic Agents.
+                          description: When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.
                           type: boolean
                         api_key:
-                          description: >-
-                            The enrollment API key (token) used for enrolling
-                            Elastic Agents.
+                          description: The enrollment API key (token) used for enrolling Elastic Agents.
                           type: string
                         api_key_id:
                           description: The ID of the API key in the Security API.
@@ -16713,9 +16769,7 @@ paths:
                           description: The name of the enrollment API key.
                           type: string
                         policy_id:
-                          description: >-
-                            The ID of the agent policy the Elastic Agent will be
-                            enrolled in.
+                          description: The ID of the agent policy the Elastic Agent will be enrolled in.
                           type: string
                       required:
                         - id
