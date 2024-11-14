@@ -2023,6 +2023,7 @@ x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
 
 # Shared UX
+/test/functional/page_objects/files_management.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200017#discussion_r1840477291
 /test/interpreter_functional @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199767/files/9eb7f6e32e7645ffde6e5e8eaae72bf7f15a6f70#r1838041461
 /test/accessibility/apps/home.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077237
 /test/api_integration/apis/home/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077065
@@ -2037,7 +2038,6 @@ x-pack/plugins/observability_solution/observability_shared/public/components/pro
 /x-pack/test/functional_solution_sidenav/index.ts @elastic/appex-sharedux
 /x-pack/test/functional_cloud @elastic/appex-sharedux
 /x-pack/test/functional/services/user_menu.js @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270
-/x-pack/test/functional/services/ace_editor.js @elastic/appex-sharedux
 /x-pack/test/functional/page_objects/reporting_page.ts @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/**/config.ts @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/**/index.ts @elastic/appex-sharedux
