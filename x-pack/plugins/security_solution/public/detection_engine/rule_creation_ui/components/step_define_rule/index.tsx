@@ -22,7 +22,6 @@ import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
@@ -110,7 +109,6 @@ export interface StepDefineRuleProps extends RuleStepProps {
   isQueryBarValid: boolean;
   setIsQueryBarValid: (valid: boolean) => void;
   setIsThreatQueryBarValid: (valid: boolean) => void;
-  ruleType: Type;
   index: string[];
   threatIndex: string[];
   alertSuppressionFields?: string[];
@@ -163,7 +161,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   isUpdateView = false,
   queryBarSavedId,
   queryBarTitle,
-  ruleType,
   setIsQueryBarValid,
   setIsThreatQueryBarValid,
   shouldLoadQueryDynamically,
@@ -171,6 +168,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   threatIndicesConfig,
   thresholdFields,
 }) => {
+  const [{ ruleType }] = useFormData<DefineStepRule>({
+    form,
+    watch: ['ruleType'],
+  });
+
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
@@ -211,13 +213,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         setFieldValue('queryBar', timelineQueryBar);
       };
       if (timelineQueryBar.query.language === 'eql') {
+        setPersistentEqlQuery(timelineQueryBar);
         setRuleTypeCallback('eql', setQuery);
-        setFieldValue('eqlOptions', eqlOptions ?? {});
+        setOptionsSelected((prevOptions) => ({
+          ...prevOptions,
+          ...(eqlOptions != null ? eqlOptions : {}),
+        }));
       } else {
         setQuery();
       }
     },
-    [setFieldValue, setRuleTypeCallback]
+    [setFieldValue, setRuleTypeCallback, setOptionsSelected, setPersistentEqlQuery]
   );
 
   const { onOpenTimeline, loading: timelineQueryLoading } =
@@ -271,7 +277,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setThreatIndexModified(!isEqual(threatIndex, threatIndicesConfig));
   }, [threatIndex, threatIndicesConfig]);
 
-  usePersistentQuery({ form, ruleTypePath: 'ruleType', queryPath: 'queryBar' });
+  const { setPersistentEqlQuery } = usePersistentQuery({
+    form,
+    ruleTypePath: 'ruleType',
+    queryPath: 'queryBar',
+  });
   usePersistentAlertSuppressionState({ form });
 
   // if saved query failed to load:
@@ -606,12 +616,18 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             component={SelectRuleType}
             componentProps={selectRuleTypeProps}
           />
-          <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
+          <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType) && !isEsqlRule(ruleType)} fullWidth>
             <>
-              <StyledVisibleContainer isVisible={!isEsqlRule(ruleType)}>
-                <EuiSpacer size="s" />
-                {DataSource}
-              </StyledVisibleContainer>
+              <EuiSpacer size="s" />
+              {DataSource}
+            </>
+          </RuleTypeEuiFormRow>
+          <RuleTypeEuiFormRow
+            $isVisible={!isMlRule(ruleType)}
+            fullWidth
+            data-test-subj="defineRuleFormStepQueryEditor"
+          >
+            <>
               <EuiSpacer size="s" />
               {isEqlRule(ruleType) ? (
                 <>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { FieldHook } from '../../../../shared_imports';
@@ -33,14 +33,25 @@ interface UsePersistentQueryParams {
   queryPath: string;
 }
 
+interface UsePersistentQueryResult {
+  setPersistentQuery: (value: FieldValueQueryBar) => void;
+  setPersistentEqlQuery: (value: FieldValueQueryBar) => void;
+  setPersistentEsqlQuery: (value: FieldValueQueryBar) => void;
+}
+
 /**
- * Persists query when switching between different rule types using different queries (kuery, EQL, ES|QL).
+ * Persists query when switching between different rule types using different queries (kuery and ES|QL).
+ *
+ * When the user changes rule type to or from "threat_match" this will modify the
+ * default "Custom query" string to either:
+ *   * from '' to '*:*' if the type is switched to "threat_match"
+ *   * from '*:*' back to '' if the type is switched back from "threat_match" to another one
  */
 export function usePersistentQuery({
   form,
   ruleTypePath,
   queryPath,
-}: UsePersistentQueryParams): void {
+}: UsePersistentQueryParams): UsePersistentQueryResult {
   const [{ [ruleTypePath]: ruleType, [queryPath]: currentQuery }] = useFormData({
     form,
     watch: [ruleTypePath, queryPath],
@@ -55,13 +66,25 @@ export function usePersistentQuery({
       return;
     }
 
-    if (currentQuery?.query?.language === EQL_QUERY_LANGUAGE) {
-      eqlQueryRef.current = currentQuery;
-    } else if (currentQuery?.query?.language === ESQL_QUERY_LANGIAGE) {
-      esqlQueryRef.current = currentQuery;
-    } else {
-      queryRef.current = currentQuery;
+    if (isEqlRule(ruleType)) {
+      eqlQueryRef.current =
+        currentQuery?.query?.language === EQL_QUERY_LANGUAGE ? currentQuery : eqlQueryRef.current;
+
+      return;
     }
+
+    if (isEsqlRule(ruleType)) {
+      esqlQueryRef.current =
+        currentQuery?.query?.language === ESQL_QUERY_LANGIAGE ? currentQuery : esqlQueryRef.current;
+
+      return;
+    }
+
+    if ([EQL_QUERY_LANGUAGE, ESQL_QUERY_LANGIAGE].includes(currentQuery?.query?.language)) {
+      return;
+    }
+
+    queryRef.current = currentQuery;
   }, [ruleType, currentQuery]);
 
   useEffect(() => {
@@ -71,15 +94,14 @@ export function usePersistentQuery({
 
     const queryField = form.getFields()[queryPath] as FieldHook<FieldValueQueryBar>;
 
-    if (isEqlRule(ruleType) && queryField.value?.query?.language !== EQL_QUERY_LANGUAGE) {
+    if (isEqlRule(ruleType)) {
       queryField.reset({
         defaultValue: eqlQueryRef.current,
       });
-
       return;
     }
 
-    if (isEsqlRule(ruleType) && queryField.value?.query?.language !== ESQL_QUERY_LANGIAGE) {
+    if (isEsqlRule(ruleType)) {
       queryField.reset({
         defaultValue: esqlQueryRef.current,
       });
@@ -106,8 +128,17 @@ export function usePersistentQuery({
 
     if (isEqlRule(previousRuleType) || isEsqlRule(previousRuleType)) {
       queryField.reset({
-        defaultValue: queryRef.current ?? DEFAULT_KQL_QUERY_FIELD_VALUE,
+        defaultValue: queryRef.current,
       });
     }
   }, [queryPath, ruleType, previousRuleType, form]);
+
+  return useMemo(
+    () => ({
+      setPersistentQuery: (value: FieldValueQueryBar) => (queryRef.current = value),
+      setPersistentEqlQuery: (value: FieldValueQueryBar) => (eqlQueryRef.current = value),
+      setPersistentEsqlQuery: (value: FieldValueQueryBar) => (esqlQueryRef.current = value),
+    }),
+    [queryRef]
+  );
 }
