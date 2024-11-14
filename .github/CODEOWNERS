@@ -1137,7 +1137,7 @@ src/plugins/discover/public/context_awareness/profile_providers/security @elasti
 /test/api_integration/apis/event_annotations @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/test_suites/common/visualizations/ @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
-/packages/kbn-monaco/src/esql @elastic/kibana-esql
+packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 # ESQL
 /test/api_integration/apis/esql/*.ts @elastic/kibana-esql
