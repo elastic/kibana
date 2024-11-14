@@ -111,7 +111,7 @@ export const isReturnType = (str: string | FunctionParameterType): str is Functi
   (dataTypes.includes(str as SupportedDataType) || str === 'unknown' || str === 'any');
 
 export interface FunctionDefinition {
-  type: 'builtin' | 'agg' | 'eval';
+  type: 'builtin' | 'agg' | 'eval' | 'operator';
   ignoreAsSuggestion?: boolean;
   name: string;
   alias?: string[];

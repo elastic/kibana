@@ -283,7 +283,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
 
 function printGeneratedFunctionsFile(
   functionDefinitions: FunctionDefinition[],
-  functionsType: 'aggregation' | 'scalar'
+  functionsType: 'aggregation' | 'scalar' | 'operators'
 ) {
   /**
    * Deals with asciidoc internal cross-references in the function descriptions
@@ -406,13 +406,17 @@ import { isLiteralItem } from '../../shared/helpers';`
 
   const scalarFunctionDefinitions: FunctionDefinition[] = [];
   const aggFunctionDefinitions: FunctionDefinition[] = [];
+  const operatorDefinitions: FunctionDefinition[] = [];
+
   for (const ESDefinition of ESFunctionDefinitions) {
     if (aliases.has(ESDefinition.name) || excludedFunctions.has(ESDefinition.name)) {
       continue;
     }
 
     const functionDefinition = getFunctionDefinition(ESDefinition);
-
+    if (functionDefinition.type === 'operator') {
+      operatorDefinitions.push(functionDefinition);
+    }
     if (functionDefinition.type === 'eval') {
       scalarFunctionDefinitions.push(functionDefinition);
     } else if (functionDefinition.type === 'agg') {
@@ -429,5 +433,9 @@ import { isLiteralItem } from '../../shared/helpers';`
   await writeFile(
     join(__dirname, '../src/definitions/generated/aggregation_functions.ts'),
     printGeneratedFunctionsFile(aggFunctionDefinitions, 'aggregation')
+  );
+  await writeFile(
+    join(__dirname, '../src/definitions/generated/operators.ts'),
+    printGeneratedFunctionsFile(operatorDefinitions, 'operators')
   );
 })();
