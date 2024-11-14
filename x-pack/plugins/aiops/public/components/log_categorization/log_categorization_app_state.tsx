@@ -60,17 +60,22 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
     showFrozenDataTierChoice,
   };
 
+  const CasesContext = appContextValue.cases?.ui.getCasesContext() ?? React.Fragment;
+  const casesPermissions = appContextValue.cases?.helpers.canUseCases();
+
   return (
     <AiopsAppContext.Provider value={appContextValue}>
-      <UrlStateProvider>
-        <DataSourceContext.Provider value={{ dataView, savedSearch }}>
-          <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-            <DatePickerContextProvider {...datePickerDeps}>
-              <LogCategorizationPage />
-            </DatePickerContextProvider>
-          </StorageContextProvider>
-        </DataSourceContext.Provider>
-      </UrlStateProvider>
+      <CasesContext owner={[]} permissions={casesPermissions!}>
+        <UrlStateProvider>
+          <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+              <DatePickerContextProvider {...datePickerDeps}>
+                <LogCategorizationPage />
+              </DatePickerContextProvider>
+            </StorageContextProvider>
+          </DataSourceContext.Provider>
+        </UrlStateProvider>
+      </CasesContext>
     </AiopsAppContext.Provider>
   );
 };
