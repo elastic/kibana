@@ -377,7 +377,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const saveChanges = useCallback(async () => {
     startTransaction({ name: SINGLE_RULE_ACTIONS.SAVE });
     const localDefineStepData: DefineStepRule = defineFieldsTransform({
-      ...defineStepForm.getFormData(),
+      ...defineStepData,
       eqlOptions: eqlOptionsSelected,
     });
     const updatedRule = await updateRule({
@@ -400,7 +400,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   }, [
     aboutStepData,
     actionsStepData,
-    defineStepForm,
+    defineStepData,
     defineFieldsTransform,
     eqlOptionsSelected,
     addSuccess,
