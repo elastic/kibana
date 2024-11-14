@@ -17,7 +17,7 @@ import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '../../hooks/use_kibana';
 import { CreateSloBtn } from './components/common/create_slo_btn';
 import { FeedbackButton } from './components/common/feedback_button';
 import { SloList } from './components/slo_list';

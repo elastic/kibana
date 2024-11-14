@@ -17,11 +17,12 @@ import {
 } from './tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, lens, discover, header } = getPageObjects([
+  const { common, lens, discover, header, timePicker } = getPageObjects([
     'common',
     'lens',
     'discover',
     'header',
+    'timePicker',
   ]);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -65,6 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await es.indices.delete({ index: [logsdbIndex] });
     });
 
@@ -72,7 +74,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await common.navigateToApp('lens');
         await lens.switchDataPanelIndexPattern(logsdbDataView);
-        await lens.goToTimeRange();
       });
 
       afterEach(async () => {
