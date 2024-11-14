@@ -140,7 +140,6 @@ export const CaseRt = rt.intersection([
   rt.exact(
     rt.partial({
       comments: rt.array(AttachmentRt),
-      observables: rt.array(CaseObservableRt),
     })
   ),
 ]);
