@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import sortBy from 'lodash/sortBy';
 import { deserializeGeoipDatabase, type GeoipDatabaseFromES } from './serialization';
 import { API_BASE_PATH } from '../../../../common/constants';
 import { RouteDependencies } from '../../../types';
@@ -21,9 +22,9 @@ export const registerListDatabaseRoute = ({
         databases: GeoipDatabaseFromES[];
       };
 
-      const geoipDatabases = data.databases;
+      const body = sortBy(data.databases.map(deserializeGeoipDatabase), 'name');
 
-      return res.ok({ body: geoipDatabases.map(deserializeGeoipDatabase) });
+      return res.ok({ body });
     } catch (error) {
       const esErrorResponse = handleEsError({ error, response: res });
       if (esErrorResponse.status === 404) {

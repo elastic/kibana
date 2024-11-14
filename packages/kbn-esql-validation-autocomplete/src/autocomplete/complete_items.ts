@@ -10,84 +10,22 @@
 import { i18n } from '@kbn/i18n';
 import type { ItemKind, SuggestionRawDefinition } from './types';
 import { builtinFunctions } from '../definitions/builtin';
-import { getAllCommands } from '../shared/helpers';
 import {
-  getSuggestionBuiltinDefinition,
+  getOperatorSuggestion,
   getSuggestionCommandDefinition,
   TRIGGER_SUGGESTION_COMMAND,
-  buildConstantsDefinitions,
 } from './factories';
-import { FunctionParameterType, FunctionReturnType } from '../definitions/types';
-import { getTestFunctions } from '../shared/test_functions';
+import { CommandDefinition } from '../definitions/types';
 
 export function getAssignmentDefinitionCompletitionItem() {
   const assignFn = builtinFunctions.find(({ name }) => name === '=')!;
-  return getSuggestionBuiltinDefinition(assignFn);
+  return getOperatorSuggestion(assignFn);
 }
 
-export const getNextTokenForNot = (
-  command: string,
-  option: string | undefined,
-  argType: string
-): SuggestionRawDefinition[] => {
-  const compatibleFunctions = builtinFunctions.filter(
-    ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion }) =>
-      !ignoreAsSuggestion &&
-      !/not_/.test(name) &&
-      (option ? supportedOptions?.includes(option) : supportedCommands.includes(command))
-  );
-  if (argType === 'string' || argType === 'any') {
-    // suggest IS, LIKE, RLIKE and TRUE/FALSE
-    return compatibleFunctions
-      .filter(({ name }) => name === 'like' || name === 'rlike' || name === 'in')
-      .map(getSuggestionBuiltinDefinition);
-  }
-  if (argType === 'boolean') {
-    // suggest IS, NOT and TRUE/FALSE
-    return [
-      ...compatibleFunctions
-        .filter(({ name }) => name === 'in')
-        .map(getSuggestionBuiltinDefinition),
-      ...buildConstantsDefinitions(['true', 'false']),
-    ];
-  }
-  return [];
-};
-
-export const getBuiltinCompatibleFunctionDefinition = (
-  command: string,
-  option: string | undefined,
-  argType: FunctionParameterType,
-  returnTypes?: FunctionReturnType[],
-  { skipAssign, commandsToInclude }: { skipAssign?: boolean; commandsToInclude?: string[] } = {}
-): SuggestionRawDefinition[] => {
-  const compatibleFunctions = [...builtinFunctions, ...getTestFunctions()].filter(
-    ({ name, supportedCommands, supportedOptions, signatures, ignoreAsSuggestion }) =>
-      (command === 'where' && commandsToInclude ? commandsToInclude.indexOf(name) > -1 : true) &&
-      !ignoreAsSuggestion &&
-      !/not_/.test(name) &&
-      (!skipAssign || name !== '=') &&
-      (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
-      signatures.some(
-        ({ params }) =>
-          !params.length || params.some((pArg) => pArg.type === argType || pArg.type === 'any')
-      )
-  );
-  if (!returnTypes) {
-    return compatibleFunctions.map(getSuggestionBuiltinDefinition);
-  }
-  return compatibleFunctions
-    .filter((mathDefinition) =>
-      mathDefinition.signatures.some(
-        (signature) => returnTypes[0] === 'any' || returnTypes.includes(signature.returnType)
-      )
-    )
-    .map(getSuggestionBuiltinDefinition);
-};
-
-export const commandAutocompleteDefinitions: SuggestionRawDefinition[] = getAllCommands()
-  .filter(({ hidden }) => !hidden)
-  .map(getSuggestionCommandDefinition);
+export const getCommandAutocompleteDefinitions = (
+  commands: Array<CommandDefinition<string>>
+): SuggestionRawDefinition[] =>
+  commands.filter(({ hidden }) => !hidden).map(getSuggestionCommandDefinition);
 
 function buildCharCompleteItem(
   label: string,

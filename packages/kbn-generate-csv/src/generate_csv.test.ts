@@ -47,7 +47,7 @@ const getMockConfig = (opts: Partial<CsvConfigType> = {}): CsvConfigType => ({
   maxSizeBytes: 180000,
   useByteOrderMarkEncoding: false,
   scroll: { size: 500, duration: '30s', strategy: 'pit' },
-  enablePanelActionDownload: true,
+  enablePanelActionDownload: false,
   maxConcurrentShardRequests: 5,
   ...opts,
 });

@@ -36,7 +36,6 @@ import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../../common/constants';
-import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type {
   ControlColumnProps,
   OnRowSelected,
@@ -44,7 +43,7 @@ import type {
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../common/types';
-import type { RowRenderer } from '../../../../common/types/timeline';
+import type { RowRenderer, SortColumnTimeline as Sort } from '../../../../common/types/timeline';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -180,9 +179,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const {
     browserFields,
     dataViewId,
-    indexPattern,
-    sourcererDataView,
     selectedPatterns,
+    sourcererDataView,
     dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(sourcererScope);
@@ -271,12 +269,12 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         dataProviders: [],
         filters: globalFilters,
         from: start,
-        indexPattern,
+        indexPattern: sourcererDataView,
         kqlMode: 'filter',
         kqlQuery: query,
         to: end,
       }),
-    [esQueryConfig, browserFields, globalFilters, start, indexPattern, query, end]
+    [esQueryConfig, browserFields, globalFilters, start, sourcererDataView, query, end]
   );
 
   const canQueryTimeline = useMemo(
@@ -318,7 +316,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       id: tableId,
       indexNames: indexNames ?? selectedPatterns,
       limit: itemsPerPage,
-      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
       skip: !canQueryTimeline,
       sort: sortField,
       startDate: start,

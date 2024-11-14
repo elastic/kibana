@@ -34,10 +34,15 @@ registerCypressGrep();
 import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
 import { login } from '@kbn/security-solution-plugin/public/management/cypress/tasks/login';
 
+import type { LoadedRoleAndUser } from '@kbn/test-suites-serverless/shared/lib';
 import type { ServerlessRoleName } from './roles';
 
 import { waitUntil } from '../tasks/wait_until';
 import { isCloudServerless, isServerless } from '../tasks/serverless';
+
+export interface LoadUserAndRoleCyTaskOptions {
+  name: ServerlessRoleName;
+}
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -49,6 +54,12 @@ declare global {
     }
 
     interface Chainable {
+      task(
+        name: 'loadUserAndRole',
+        arg: LoadUserAndRoleCyTaskOptions,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<LoadedRoleAndUser>;
+
       getBySel(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
 
       getBySelContains(

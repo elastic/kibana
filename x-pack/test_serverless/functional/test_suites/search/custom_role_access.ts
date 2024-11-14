@@ -53,6 +53,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       if (roleAuthc) {
         await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       }
+      // delete custom role
+      await samlAuth.deleteCustomRole();
     });
 
     it('should have limited navigation menu', async () => {

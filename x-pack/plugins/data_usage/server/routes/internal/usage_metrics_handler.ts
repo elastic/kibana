@@ -6,7 +6,6 @@
  */
 
 import { RequestHandler } from '@kbn/core/server';
-import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   MetricTypes,
   UsageMetricsAutoOpsResponseSchemaBody,
@@ -35,6 +34,8 @@ export const getUsageMetricsHandler = (
       logger.debug(`Retrieving usage metrics`);
       const { from, to, metricTypes, dataStreams: requestDsNames } = request.body;
 
+      // redundant check as we don't allow making requests via UI without data streams,
+      // but it's here to make sure the request body is validated before requesting metrics from auto-ops
       if (!requestDsNames?.length) {
         return errorHandler(
           logger,
@@ -42,12 +43,22 @@ export const getUsageMetricsHandler = (
           new CustomHttpRequestError('[request body.dataStreams]: no data streams selected', 400)
         );
       }
+      let dataStreamsResponse;
 
-      const { data_streams: dataStreamsResponse }: IndicesGetDataStreamResponse =
-        await esClient.indices.getDataStream({
+      try {
+        // Attempt to fetch data streams
+        const { data_streams: dataStreams } = await esClient.indices.getDataStream({
           name: requestDsNames,
           expand_wildcards: 'all',
         });
+        dataStreamsResponse = dataStreams;
+      } catch (error) {
+        return errorHandler(
+          logger,
+          response,
+          new CustomHttpRequestError('Failed to retrieve data streams', 400)
+        );
+      }
       const metrics = await dataUsageService.getMetrics({
         from,
         to,
@@ -67,7 +78,7 @@ export const getUsageMetricsHandler = (
   };
 };
 
-function transformMetricsData(
+export function transformMetricsData(
   data: UsageMetricsAutoOpsResponseSchemaBody
 ): UsageMetricsResponseSchemaBody {
   return {

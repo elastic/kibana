@@ -45,6 +45,7 @@ export class SecuritySolutionServerlessPlugin
       SecuritySolutionServerlessPluginStartDeps
     >
 {
+  private kibanaVersion: string;
   private config: ServerlessSecurityConfig;
   private cloudSecurityUsageReportingTask: SecurityUsageReportingTask | undefined;
   private endpointUsageReportingTask: SecurityUsageReportingTask | undefined;
@@ -53,10 +54,14 @@ export class SecuritySolutionServerlessPlugin
   private readonly usageReportingService: UsageReportingService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.config = this.initializerContext.config.get<ServerlessSecurityConfig>();
     this.logger = this.initializerContext.logger.get();
 
-    this.usageReportingService = new UsageReportingService(this.config.usageApi);
+    this.usageReportingService = new UsageReportingService(
+      this.config.usageApi,
+      this.kibanaVersion
+    );
 
     const productTypesStr = JSON.stringify(this.config.productTypes, null, 2);
     this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);

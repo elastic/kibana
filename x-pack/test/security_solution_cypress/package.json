@@ -19,6 +19,7 @@
     "cypress:investigations:run:ess": "yarn cypress:ess --spec './cypress/e2e/investigations/**/*.cy.ts'",
     "cypress:explore:run:ess": "yarn cypress:ess --spec './cypress/e2e/explore/**/*.cy.ts'",
     "cypress:changed-specs-only:ess": "yarn cypress:ess --changed-specs-only --env burn=5",
+    "cypress:cloud_security_posture:run:ess": "yarn cypress:ess --spec './cypress/e2e/cloud_security_posture/**/*.cy.ts'",
     "cypress:burn:ess": "yarn cypress:ess --env burn=5",
     "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-security-solution/cypress/results/mochawesome*.json > ../../../target/kibana-security-solution/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-security-solution/cypress/results/output.json --reportDir ../../../target/kibana-security-solution/cypress/results && yarn junit:transform && mkdir -p ../../../target/junit && cp ../../../target/kibana-security-solution/cypress/results/*.xml ../../../target/junit/",
     "junit:transform": "node ../../plugins/security_solution/scripts/junit_transformer --pathPattern '../../../target/kibana-security-solution/cypress/results/*.xml' --rootDirectory ../../../ --reportName 'Security Solution Cypress' --writeInPlace",
@@ -35,6 +36,7 @@
     "cypress:investigations:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/investigations/**/*.cy.ts'",
     "cypress:explore:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/explore/**/*.cy.ts'",
     "cypress:changed-specs-only:serverless": "yarn cypress:serverless --changed-specs-only --env burn=5",
+    "cypress:cloud_security_posture:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/cloud_security_posture/**/*.cy.ts'",
     "cypress:burn:serverless": "yarn cypress:serverless --env burn=2",
     "cypress:qa:serverless": "TZ=UTC NODE_OPTIONS=--openssl-legacy-provider node ../../plugins/security_solution/scripts/start_cypress_parallel_serverless --config-file ../../test/security_solution_cypress/cypress/cypress_ci_serverless_qa.config.ts",
     "cypress:open:qa:serverless": "yarn cypress:qa:serverless open",
@@ -45,6 +47,7 @@
     "cypress:run:qa:serverless:rule_management:prebuilt_rules": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/prebuilt_rules/**/*.cy.ts'",
     "cypress:run:qa:serverless:detection_engine": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/detection_engine/!(exceptions)/**/*.cy.ts'",
     "cypress:run:qa:serverless:detection_engine:exceptions": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/detection_engine/exceptions/**/*.cy.ts'",
-    "cypress:run:qa:serverless:ai_assistant": "yarn cypress:qa:serverless --spec './cypress/e2e/ai_assistant/**/*.cy.ts'"
+    "cypress:run:qa:serverless:ai_assistant": "yarn cypress:qa:serverless --spec './cypress/e2e/ai_assistant/**/*.cy.ts'",
+    "cypress:run:qa:serverless:cloud_security_posture": "yarn cypress:qa:serverless --spec './cypress/e2e/cloud_security_posture/**/*.cy.ts"
   }
 }

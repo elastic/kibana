@@ -29,7 +29,7 @@ describe('UsageItem', () => {
 
   describe('index', () => {
     const item: InferenceUsageInfo = {
-      label: 'index-1',
+      id: 'index-1',
       type: 'Index',
     };
 
@@ -44,16 +44,16 @@ describe('UsageItem', () => {
 
     it('opens index in a new tab', () => {
       fireEvent.click(screen.getByRole('button'));
-      expect(mockNavigateToApp).toHaveBeenCalledWith('enterprise_search', {
+      expect(mockNavigateToApp).toHaveBeenCalledWith('enterpriseSearchContent', {
         openInNewTab: true,
-        path: 'content/search_indices/index-1',
+        path: 'search_indices/index-1',
       });
     });
   });
 
   describe('pipeline', () => {
     const item: InferenceUsageInfo = {
-      label: 'pipeline-1',
+      id: 'pipeline-1',
       type: 'Pipeline',
     };
 

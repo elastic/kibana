@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { TagAttributes } from '../../../common/types';
 import type { TagsPluginRouter } from '../../types';
 import { tagSavedObjectTypeName } from '../../../common/constants';
-import { TagAttributes } from '../../../common/types';
 import { savedObjectToTag } from '../../services/tags';
 import { addConnectionCount } from '../lib';
 

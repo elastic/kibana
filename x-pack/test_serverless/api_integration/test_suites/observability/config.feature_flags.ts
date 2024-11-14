@@ -21,14 +21,12 @@ export default createTestConfig({
   services,
   // add feature flags
   kbnServerArgs: [
-    '--xpack.infra.enabled=true',
-    '--xpack.security.roleManagementEnabled=true', // enables custom roles
-    `--xpack.spaces.maxSpaces=100`, // enables spaces UI capabilities
+    '--xpack.security.roleManagementEnabled=true', // needed to check composite feautures in /observability/platform_security/authorization.ts
   ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
-  esServerArgs: ['xpack.ml.dfa.enabled=false', 'xpack.security.authc.native_roles.enabled=true'],
+  esServerArgs: ['xpack.ml.dfa.enabled=false'],
 });

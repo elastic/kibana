@@ -51,7 +51,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const caseTitle =
           'case created in security solution from my dashboard with lens visualization';
 
-        await dashboardPanelActions.clickContextMenuItem(ADD_TO_CASE_DATA_TEST_SUBJ);
+        await dashboardPanelActions.clickPanelAction(ADD_TO_CASE_DATA_TEST_SUBJ);
 
         await retry.waitFor('wait for the modal to open', async () => {
           return (
@@ -108,7 +108,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.click('edit-unsaved-New-Dashboard');
         }
 
-        await dashboardPanelActions.clickContextMenuItem(ADD_TO_CASE_DATA_TEST_SUBJ);
+        await dashboardPanelActions.clickPanelAction(ADD_TO_CASE_DATA_TEST_SUBJ);
 
         // verify that solution filter is not visible
         await testSubjects.missingOrFail('options-filter-popover-button-owner');

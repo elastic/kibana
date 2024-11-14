@@ -80,6 +80,7 @@
     "@kbn/content-management-favorites-public",
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-mount-utils-browser",
+    "@kbn/visualization-utils",
   ],
   "exclude": ["target/**/*"]
 }

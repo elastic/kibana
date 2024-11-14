@@ -155,7 +155,7 @@ server.versioned.versionResolution: newest
 server.versioned.strictClientVersionCheck: false
 
 # Enforce single "default" space and disable feature visibility controls
-xpack.spaces.maxSpaces: 1
+xpack.spaces.maxSpaces: 100
 xpack.spaces.allowFeatureVisibility: false
 xpack.spaces.allowSolutionVisibility: false
 
@@ -207,7 +207,6 @@ uiSettings:
     labs:dashboard:deferBelowFold: false
 
 # Task Manager
-xpack.task_manager.claim_strategy: mget
 xpack.task_manager.allow_reading_invalid_state: false
 xpack.task_manager.request_timeouts.update_by_query: 60000
 xpack.task_manager.metrics_reset_interval: 120000
