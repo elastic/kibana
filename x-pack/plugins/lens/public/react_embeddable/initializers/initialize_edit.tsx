@@ -100,7 +100,9 @@ export function initializeEditApi(
     };
 
   const panelManagementApi = setupPanelManagement(uuid, parentApi, {
-    canBeCreatedInline: isTextBasedLanguage(initialState),
+    canBeCreatedInline: internalApi.isNewlyCreated$.getValue(),
+    isNewlyCreated$: internalApi.isNewlyCreated$,
+    setAsCreated: internalApi.setAsCreated,
   });
 
   const updateState = (newState: Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>) => {

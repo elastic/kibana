@@ -7,6 +7,7 @@
 
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { BehaviorSubject } from 'rxjs';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import { LensRuntimeState } from '../types';
 
 export interface PanelManagementApi {
@@ -18,13 +19,20 @@ export interface PanelManagementApi {
 export function setupPanelManagement(
   uuid: string,
   parentApi: unknown,
-  { canBeCreatedInline }: { canBeCreatedInline: boolean }
+  {
+    canBeCreatedInline,
+    isNewlyCreated$,
+    setAsCreated,
+  }: {
+    canBeCreatedInline: boolean;
+    isNewlyCreated$: PublishingSubject<boolean>;
+    setAsCreated: () => void;
+  }
 ): PanelManagementApi {
   const isEditing$ = new BehaviorSubject(false);
-  const isNewlyCreated$ = new BehaviorSubject(canBeCreatedInline);
 
   return {
-    isEditingEnabled: () => !isEditing$.getValue(),
+    isEditingEnabled: () => !canBeCreatedInline,
     isNewPanel: () => isNewlyCreated$.getValue(),
     onStopEditing: (isCancel: boolean = false, state: LensRuntimeState | undefined) => {
       isEditing$.next(false);
@@ -33,7 +41,7 @@ export function setupPanelManagement(
           parentApi?.removePanel(uuid);
         }
       }
-      isNewlyCreated$.next(false);
+      setAsCreated();
     },
   };
 }

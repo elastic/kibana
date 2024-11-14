@@ -391,6 +391,8 @@ export type LensInternalApi = Simplify<
       disableTriggers$: PublishingSubject<LensPanelProps['disableTriggers']>;
       dataLoading$: PublishingSubject<boolean | undefined>;
       hasRenderCompleted$: PublishingSubject<boolean>;
+      isNewlyCreated$: PublishingSubject<boolean>;
+      setAsCreated: () => void;
       dispatchRenderStart: () => void;
       dispatchRenderComplete: () => void;
       dispatchError: () => void;
