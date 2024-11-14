@@ -53,7 +53,7 @@ export class AutoOpsAPIService {
     const cloudSetup = this.appContextService.getCloud();
 
     const requestConfig: AxiosRequestConfig = {
-      url: `${autoopsConfig.api?.url}/monitoring/serverless/v1/projects/${cloudSetup?.serverless.projectId}/metrics/`,
+      url: `${autoopsConfig.api?.url}/monitoring/serverless/v1/projects/${cloudSetup?.serverless.projectId}/metrics`,
       data: requestBody,
       method: 'POST',
       headers: {
