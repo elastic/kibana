@@ -12,6 +12,7 @@ import {
   isOfAggregateQueryType,
   type Query,
   type TimeRange,
+  ExecutionContextSearch,
 } from '@kbn/es-query';
 import { PublishingSubject, apiPublishesTimeslice } from '@kbn/presentation-publishing';
 import type { LensRuntimeState } from '../types';
@@ -75,4 +76,16 @@ export function getMergedSearchContext(
     context.filters.unshift(...filters.filter(({ meta }) => !meta.disabled));
   }
   return context;
+}
+
+export function getExecutionSearchContext(
+  searchContext: MergedSearchContext
+): ExecutionContextSearch {
+  if (!isOfAggregateQueryType(searchContext.query[0])) {
+    return searchContext as ExecutionContextSearch;
+  }
+  return {
+    ...searchContext,
+    query: [],
+  };
 }

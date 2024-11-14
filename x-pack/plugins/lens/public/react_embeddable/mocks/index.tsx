@@ -291,6 +291,7 @@ const LensInternalApiMock: LensInternalApi = {
   renderCount$: new BehaviorSubject<number>(0),
   messages$: new BehaviorSubject<UserMessage[]>([]),
   validationMessages$: new BehaviorSubject<UserMessage[]>([]),
+  isNewlyCreated$: new BehaviorSubject<boolean>(true),
   updateAttributes: jest.fn(),
   updateOverrides: jest.fn(),
   dispatchRenderStart: jest.fn(),
@@ -303,6 +304,7 @@ const LensInternalApiMock: LensInternalApi = {
   resetAllMessages: jest.fn(),
   dispatchError: jest.fn(),
   updateValidationMessages: jest.fn(),
+  setAsCreated: jest.fn(),
 };
 
 export function getLensInternalApiMock(overrides: Partial<LensInternalApi> = {}): LensInternalApi {

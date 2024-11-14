@@ -39,7 +39,7 @@ import {
   getSearchContextIncompatibleMessage,
   isSearchContextIncompatibleWithDataViews,
 } from '../user_messages/checks';
-import type { MergedSearchContext } from './merged_search_context';
+import { getExecutionSearchContext, type MergedSearchContext } from './merged_search_context';
 
 interface GetExpressionRendererPropsParams {
   searchContext: MergedSearchContext;
@@ -188,7 +188,8 @@ export async function getExpressionRendererParams(
       onRender$: onRender,
       handleEvent,
       onData$: onData,
-      searchContext,
+      // Remove ES|QL query from it
+      searchContext: getExecutionSearchContext(searchContext),
       interactive: !disableTriggers,
       executionContext: getExecutionContext(),
       lensInspector: {
