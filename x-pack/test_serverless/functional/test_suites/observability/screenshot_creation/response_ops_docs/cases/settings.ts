@@ -68,11 +68,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       await retry.waitFor('dropdown-connectors exist', async () => {
         return await testSubjects.exists('dropdown-connectors');
       });
-      await testSubjects.click('dropdown-connectors');
-      await retry.waitFor('dropdown-connector-add-connector exist', async () => {
-        return await testSubjects.exists('dropdown-connector-add-connector');
-      });
-      await testSubjects.click('dropdown-connector-add-connector');
+      await testSubjects.click('add-new-connector');
       await svlCommonScreenshots.takeScreenshot(
         'observability-cases-add-connector',
         screenshotDirectories
