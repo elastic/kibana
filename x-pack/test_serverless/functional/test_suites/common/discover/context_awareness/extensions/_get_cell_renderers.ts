@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('ES|QL mode', () => {
       describe('root profile', () => {
-        it('should render custom @timestamp', async () => {
+        it('should not render custom @timestamp', async () => {
           const state = kbnRison.encode({
             dataSource: { type: 'esql' },
             query: { esql: 'from my-example-* | sort @timestamp desc' },
@@ -35,15 +35,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             ensureCurrentUrl: false,
           });
           await discover.waitUntilSearchingHasFinished();
-          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
-          expect(timestamps).to.have.length(6);
-          expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:30:00.000Z');
-          expect(await timestamps[5].getVisibleText()).to.be('2024-06-10T14:00:00.000Z');
+          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp', 2500);
+          expect(timestamps).to.have.length(0);
         });
       });
 
       describe('data source profile', () => {
-        it('should render custom @timestamp but not custom log.level', async () => {
+        it('should not render custom @timestamp or log.level', async () => {
           const state = kbnRison.encode({
             dataSource: { type: 'esql' },
             query: { esql: 'from my-example-* | sort @timestamp desc' },
@@ -54,15 +52,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await discover.waitUntilSearchingHasFinished();
           await unifiedFieldList.clickFieldListItemAdd('@timestamp');
           await unifiedFieldList.clickFieldListItemAdd('log.level');
-          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
-          expect(timestamps).to.have.length(6);
-          expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:30:00.000Z');
-          expect(await timestamps[5].getVisibleText()).to.be('2024-06-10T14:00:00.000Z');
+          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp', 2500);
+          expect(timestamps).to.have.length(0);
           const logLevels = await testSubjects.findAll('exampleDataSourceProfileLogLevel', 2500);
           expect(logLevels).to.have.length(0);
         });
 
-        it('should render custom @timestamp and custom log.level', async () => {
+        it('should not render custom @timestamp but should render custom log.level', async () => {
           const state = kbnRison.encode({
             dataSource: { type: 'esql' },
             query: { esql: 'from my-example-logs | sort @timestamp desc' },
@@ -73,10 +69,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await discover.waitUntilSearchingHasFinished();
           await unifiedFieldList.clickFieldListItemAdd('@timestamp');
           await unifiedFieldList.clickFieldListItemAdd('log.level');
-          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
-          expect(timestamps).to.have.length(3);
-          expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:00:00.000Z');
-          expect(await timestamps[2].getVisibleText()).to.be('2024-06-10T14:00:00.000Z');
+          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp', 2500);
+          expect(timestamps).to.have.length(0);
           const logLevels = await testSubjects.findAll('exampleDataSourceProfileLogLevel');
           expect(logLevels).to.have.length(3);
           expect(await logLevels[0].getVisibleText()).to.be('Debug');
@@ -87,21 +81,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       describe('root profile', () => {
-        it('should render custom @timestamp', async () => {
+        it('should not render custom @timestamp', async () => {
           await common.navigateToActualUrl('discover', undefined, {
             ensureCurrentUrl: false,
           });
           await dataViews.switchTo('my-example-*');
           await discover.waitUntilSearchingHasFinished();
-          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
-          expect(timestamps).to.have.length(6);
-          expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:30:00.000Z');
-          expect(await timestamps[5].getVisibleText()).to.be('2024-06-10T14:00:00.000Z');
+          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp', 2500);
+          expect(timestamps).to.have.length(0);
         });
       });
 
       describe('data source profile', () => {
-        it('should render custom @timestamp but not custom log.level', async () => {
+        it('should not render custom @timestamp or log.level', async () => {
           await common.navigateToActualUrl('discover', undefined, {
             ensureCurrentUrl: false,
           });
@@ -109,15 +101,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await discover.waitUntilSearchingHasFinished();
           await unifiedFieldList.clickFieldListItemAdd('@timestamp');
           await unifiedFieldList.clickFieldListItemAdd('log.level');
-          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
-          expect(timestamps).to.have.length(6);
-          expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:30:00.000Z');
-          expect(await timestamps[5].getVisibleText()).to.be('2024-06-10T14:00:00.000Z');
+          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp', 2500);
+          expect(timestamps).to.have.length(0);
           const logLevels = await testSubjects.findAll('exampleDataSourceProfileLogLevel', 2500);
           expect(logLevels).to.have.length(0);
         });
 
-        it('should render custom @timestamp and custom log.level', async () => {
+        it('should not render custom @timestamp but should render custom log.level', async () => {
           await common.navigateToActualUrl('discover', undefined, {
             ensureCurrentUrl: false,
           });
@@ -125,10 +115,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await discover.waitUntilSearchingHasFinished();
           await unifiedFieldList.clickFieldListItemAdd('@timestamp');
           await unifiedFieldList.clickFieldListItemAdd('log.level');
-          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
-          expect(timestamps).to.have.length(3);
-          expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:00:00.000Z');
-          expect(await timestamps[2].getVisibleText()).to.be('2024-06-10T14:00:00.000Z');
+          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp', 2500);
+          expect(timestamps).to.have.length(0);
           const logLevels = await testSubjects.findAll('exampleDataSourceProfileLogLevel');
           expect(logLevels).to.have.length(3);
           expect(await logLevels[0].getVisibleText()).to.be('Debug');
