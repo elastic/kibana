@@ -1107,7 +1107,6 @@ src/plugins/discover/public/context_awareness/profile_providers/security @elasti
 /x-pack/test/functional/apps/managed_content @elastic/kibana-visualizations
 /test/functional/services/visualizations @elastic/kibana-visualizations
 /test/functional/services/renderable.ts @elastic/kibana-visualizations
-/test/functional/services/inspector.ts @elastic/kibana-visualizations # Assigned per https://github.com/elastic/kibana/pull/28509
 /test/functional/page_objects/vega_chart_page.ts @elastic/kibana-visualizations
 /test/functional/page_objects/visual_builder_page.ts @elastic/kibana-visualizations
 /test/functional/page_objects/visualize_*.ts @elastic/kibana-visualizations
