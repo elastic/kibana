@@ -114,7 +114,6 @@ export const OverviewGrid = memo(() => {
     return acc;
   }, [monitorsSortedByStatus]);
 
-  const listRef: React.LegacyRef<FixedSizeList<ListItem[][]>> | undefined = React.createRef();
   useEffect(() => {
     dispatch(refreshOverviewTrends.get());
   }, [dispatch, lastRefresh]);
@@ -165,50 +164,52 @@ export const OverviewGrid = memo(() => {
                   minimumBatchSize={MIN_BATCH_SIZE}
                   threshold={LIST_THRESHOLD}
                 >
-                  {({ onItemsRendered }) => (
-                    <FixedSizeList
-                      // pad computed height to avoid clipping last row's drop shadow
-                      height={listHeight + 16}
-                      width={width}
-                      onItemsRendered={onItemsRendered}
-                      itemSize={ITEM_HEIGHT}
-                      itemCount={listItems.length}
-                      itemData={listItems}
-                      ref={listRef}
-                    >
-                      {({
-                        index: listIndex,
-                        style,
-                        data: listData,
-                      }: React.PropsWithChildren<ListChildComponentProps<ListItem[][]>>) => {
-                        setCurrentIndex(listIndex);
-                        return (
-                          <EuiFlexGroup
-                            data-test-subj={`overview-grid-row-${listIndex}`}
-                            gutterSize="m"
-                            style={{ ...style }}
-                          >
-                            {listData[listIndex].map((_, idx) => (
-                              <EuiFlexItem
-                                data-test-subj="syntheticsOverviewGridItem"
-                                key={listIndex * ROW_COUNT + idx}
-                              >
-                                <MetricItem
-                                  monitor={monitorsSortedByStatus[listIndex * ROW_COUNT + idx]}
-                                  onClick={setFlyoutConfigCallback}
-                                />
-                              </EuiFlexItem>
-                            ))}
-                            {listData[listIndex].length % ROW_COUNT !== 0 &&
-                              // Adds empty items to fill out row
-                              Array.from({
-                                length: ROW_COUNT - listData[listIndex].length,
-                              }).map((_, idx) => <EuiFlexItem key={idx} />)}
-                          </EuiFlexGroup>
-                        );
-                      }}
-                    </FixedSizeList>
-                  )}
+                  {({ onItemsRendered, ref }) => {
+                    return (
+                      <FixedSizeList
+                        // pad computed height to avoid clipping last row's drop shadow
+                        height={listHeight + 16}
+                        width={width}
+                        onItemsRendered={onItemsRendered}
+                        itemSize={ITEM_HEIGHT}
+                        itemCount={listItems.length}
+                        itemData={listItems}
+                        ref={ref}
+                      >
+                        {({
+                          index: listIndex,
+                          style,
+                          data: listData,
+                        }: React.PropsWithChildren<ListChildComponentProps<ListItem[][]>>) => {
+                          setCurrentIndex(listIndex);
+                          return (
+                            <EuiFlexGroup
+                              data-test-subj={`overview-grid-row-${listIndex}`}
+                              gutterSize="m"
+                              style={{ ...style }}
+                            >
+                              {listData[listIndex].map((_, idx) => (
+                                <EuiFlexItem
+                                  data-test-subj="syntheticsOverviewGridItem"
+                                  key={listIndex * ROW_COUNT + idx}
+                                >
+                                  <MetricItem
+                                    monitor={monitorsSortedByStatus[listIndex * ROW_COUNT + idx]}
+                                    onClick={setFlyoutConfigCallback}
+                                  />
+                                </EuiFlexItem>
+                              ))}
+                              {listData[listIndex].length % ROW_COUNT !== 0 &&
+                                // Adds empty items to fill out row
+                                Array.from({
+                                  length: ROW_COUNT - listData[listIndex].length,
+                                }).map((_, idx) => <EuiFlexItem key={idx} />)}
+                            </EuiFlexGroup>
+                          );
+                        }}
+                      </FixedSizeList>
+                    );
+                  }}
                 </InfiniteLoader>
               )}
             </EuiAutoSizer>
@@ -239,7 +240,6 @@ export const OverviewGrid = memo(() => {
                       data-test-subj="syntheticsOverviewGridButton"
                       onClick={() => {
                         window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-                        listRef.current?.scrollToItem(0);
                       }}
                       iconType="sortUp"
                       iconSide="right"

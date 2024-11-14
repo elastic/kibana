@@ -66,9 +66,6 @@ export const OverviewAlerts = () => {
   const filters = useMonitorFilters({ forAlerts: true });
 
   const { locations } = useGetUrlParams();
-
-  const monitorIds = useMonitorQueryIds();
-
   const queryFilters = useMonitorQueryFilters();
 
   return (
@@ -96,7 +93,6 @@ export const OverviewAlerts = () => {
                 selectedMetricField: RECORDS_FIELD,
                 reportDefinitions: {
                   'kibana.alert.rule.rule_type_id': [SYNTHETICS_STATUS_RULE, SYNTHETICS_TLS_RULE],
-                  'monitor.id': monitorIds,
                   ...(locations?.length ? { 'observer.geo.name': locations } : {}),
                 },
                 filters: [
@@ -124,7 +120,6 @@ export const OverviewAlerts = () => {
                 },
                 reportDefinitions: {
                   'kibana.alert.rule.rule_type_id': [SYNTHETICS_STATUS_RULE, SYNTHETICS_TLS_RULE],
-                  'monitor.id': monitorIds,
                   ...(locations?.length ? { 'observer.geo.name': locations } : {}),
                 },
                 dataType: 'alerts',
