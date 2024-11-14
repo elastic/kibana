@@ -550,10 +550,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 // we can now augment and enrich
                 // the sub alerts (if any) the same as we would
                 // any other newAlert
-                let enrichedAlerts = newAlerts.reduce((acc, newAlert) => {
-                  const { subAlerts, ...everything } = newAlert;
-                  return [...acc, everything, ...(subAlerts ?? [])];
-                }, [] as typeof newAlerts);
+                let enrichedAlerts = newAlerts.some((newAlert) => newAlert.subAlerts != null)
+                  ? newAlerts.flatMap((newAlert) => {
+                      const { subAlerts, ...everything } = newAlert;
+                      return [everything, ...(subAlerts ?? [])];
+                    })
+                  : newAlerts;
 
                 if (enrichAlerts) {
                   try {
