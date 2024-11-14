@@ -66,7 +66,13 @@ export class ActionInternal<Context extends object = object>
 
   public async isCompatible(context: Context): Promise<boolean> {
     if (!this.definition.isCompatible) return true;
-    return await this.definition.isCompatible(context);
+    try {
+      return await this.definition.isCompatible(context);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      return false;
+    }
   }
 
   public async getHref(context: Context): Promise<string | undefined> {
