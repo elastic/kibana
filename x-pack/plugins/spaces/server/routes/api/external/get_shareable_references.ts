@@ -17,9 +17,18 @@ export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
   router.post(
     {
       path: '/api/spaces/_get_shareable_references',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route delegates authorization to the spaces service via a scoped spaces client',
+        },
+      },
       options: {
         access: isServerless ? 'internal' : 'public',
-        description: `Get shareable references`,
+        summary: `Get shareable references`,
+        tags: ['oas-tag:spaces'],
+        description: 'Collect references and space contexts for saved objects.',
       },
       validate: {
         body: schema.object({

@@ -34,7 +34,8 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless @skipInServerlessMKI patch_rules_bulk', () => {
+  // TODO: https://github.com/elastic/kibana/issues/193184 Delete this file and clean up the code
+  describe.skip('@ess @serverless @skipInServerlessMKI patch_rules_bulk', () => {
     describe('patch rules bulk', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
@@ -351,7 +352,8 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
       });
 
-      it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
+      // Unskip: https://github.com/elastic/kibana/issues/195921
+      it('@skipInServerlessMKI throws an error if rule has external rule source and non-customizable fields are changed', async () => {
         // Install base prebuilt detection rule
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
           createRuleAssetSavedObject({ rule_id: 'rule-1', author: ['elastic'] }),

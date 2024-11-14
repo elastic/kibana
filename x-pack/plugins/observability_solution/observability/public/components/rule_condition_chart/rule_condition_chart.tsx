@@ -68,6 +68,7 @@ export interface RuleConditionChartExpressions {
   timeSize?: number;
   timeUnit?: TimeUnitChar;
   equation?: string;
+  label?: string;
 }
 export interface RuleConditionChartProps {
   metricExpression: RuleConditionChartExpressions;
@@ -108,6 +109,7 @@ export function RuleConditionChart({
     threshold,
     comparator,
     equation,
+    label,
     warningComparator,
     warningThreshold,
   } = metricExpression;
@@ -332,7 +334,7 @@ export function RuleConditionChart({
     const baseLayer = {
       type: 'formula',
       value: formula,
-      label: formula,
+      label: label ?? formula,
       groupBy,
       format: {
         id: formatId,
@@ -409,6 +411,7 @@ export function RuleConditionChart({
     comparator,
     dataView,
     equation,
+    label,
     searchConfiguration,
     formula,
     formulaAsync.value,

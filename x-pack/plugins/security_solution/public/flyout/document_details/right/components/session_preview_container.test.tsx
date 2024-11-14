@@ -19,7 +19,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '@kbn/security-solution-common';
+} from '../../../shared/components/test_ids';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 
 jest.mock('../hooks/use_session_preview');
@@ -40,7 +40,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 
 const NO_DATA_MESSAGE =
-  'You can only view Linux session details if you’ve enabled the Include session data setting in your Elastic Defend integration policy. Refer to Enable Session View dataExternal link(opens in a new tab or window) for more information.';
+  'You can only view Linux session details if you’ve enabled the Include session data setting in your Elastic Defend integration policy. Refer to Enable Session View data(external, opens in a new tab or window) for more information.';
 
 const UPSELL_TEXT = 'This feature requires an Enterprise subscription';
 

@@ -12,6 +12,7 @@ import { Result, resultMetaData, resultToField } from '@kbn/search-index-documen
 
 import { EuiSpacer } from '@elastic/eui';
 
+import { reorderFieldsInImportance } from '@kbn/search-index-documents';
 import { RecentDocsActionMessage } from './recent_docs_action_message';
 import { useDeleteDocument } from '../../hooks/api/use_delete_document';
 
@@ -32,7 +33,7 @@ export const DocumentList = ({ indexName, docs, mappingProperties }: DocumentLis
         return (
           <React.Fragment key={doc._id}>
             <Result
-              fields={resultToField(doc, mappingProperties)}
+              fields={reorderFieldsInImportance(resultToField(doc, mappingProperties))}
               metaData={resultMetaData(doc)}
               onDocumentDelete={() => {
                 mutate({ id: doc._id! });

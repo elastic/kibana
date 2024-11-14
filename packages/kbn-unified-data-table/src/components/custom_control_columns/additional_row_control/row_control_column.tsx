@@ -37,28 +37,43 @@ export const RowControlCell = ({
         label,
         onClick,
         tooltipContent,
+        ...extraProps
       }) => {
-        return (
-          <EuiToolTip
-            content={tooltipContent ?? label}
-            delay="long"
-            anchorClassName="unifiedDataTable__rowControl"
-          >
-            <EuiButtonIcon
-              data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
-              disabled={disabled}
-              iconSize="s"
-              iconType={iconType}
-              color={color ?? 'text'}
-              aria-label={label}
-              onClick={() => {
-                if (record) {
-                  onClick?.({ record, rowIndex });
-                }
-              }}
-            />
-          </EuiToolTip>
+        const classNameProp = Boolean(tooltipContent)
+          ? {}
+          : { className: 'unifiedDataTable__rowControl' };
+
+        const control = (
+          <EuiButtonIcon
+            aria-label={label}
+            color={color ?? 'text'}
+            data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
+            disabled={disabled}
+            iconSize="s"
+            iconType={iconType}
+            onClick={() => {
+              if (record && onClick) {
+                onClick({ record, rowIndex });
+              }
+            }}
+            {...classNameProp}
+            {...extraProps}
+          />
         );
+
+        if (tooltipContent) {
+          return (
+            <EuiToolTip
+              anchorClassName="unifiedDataTable__rowControl"
+              content={tooltipContent}
+              delay="long"
+            >
+              {control}
+            </EuiToolTip>
+          );
+        }
+
+        return control;
       },
     [props.columnId, record, rowIndex]
   );

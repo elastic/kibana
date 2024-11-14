@@ -32,11 +32,11 @@ import {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
-import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
+import { registerMigrateKnowledgeBaseEntriesTask } from './service/task_manager_definitions/register_migrate_knowledge_base_entries_task';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -115,7 +115,8 @@ export class ObservabilityAIAssistantPlugin
     }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
 
     // Using once to make sure the same model ID is used during service init and Knowledge base setup
-    const getModelId = once(async () => {
+    const getSearchConnectorModelId = once(async () => {
+      // TODO: Remove this once the modelId is removed from the config
       const configModelId = this.config.modelId;
       if (configModelId) {
         return configModelId;
@@ -157,13 +158,19 @@ export class ObservabilityAIAssistantPlugin
     const service = (this.service = new ObservabilityAIAssistantService({
       logger: this.logger.get('service'),
       core,
-      taskManager: plugins.taskManager,
-      getModelId,
+      getSearchConnectorModelId,
+      enableKnowledgeBase: this.config.enableKnowledgeBase,
     }));
 
-    service.register(registerFunctions);
+    registerMigrateKnowledgeBaseEntriesTask({
+      core,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(`Failed to register migrate knowledge base entries task: ${error}`);
+    });
 
-    addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
+    service.register(registerFunctions);
 
     registerServerRoutes({
       core,

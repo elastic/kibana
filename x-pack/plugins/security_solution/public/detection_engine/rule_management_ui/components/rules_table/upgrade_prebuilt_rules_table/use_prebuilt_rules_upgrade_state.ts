@@ -6,18 +6,19 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
+import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 import type {
   RulesUpgradeState,
   FieldsUpgradeState,
   SetRuleFieldResolvedValueFn,
 } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { FieldUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
-import type { FieldsDiff } from '../../../../../../common/api/detection_engine';
 import {
-  ThreeWayDiffConflict,
+  type FieldsDiff,
   type DiffableAllFields,
   type DiffableRule,
   type RuleUpgradeInfoForReview,
+  ThreeWayDiffConflict,
 } from '../../../../../../common/api/detection_engine';
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 
@@ -32,7 +33,9 @@ interface UseRulesUpgradeStateResult {
 export function usePrebuiltRulesUpgradeState(
   ruleUpgradeInfos: RuleUpgradeInfoForReview[]
 ): UseRulesUpgradeStateResult {
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
   const [rulesResolvedConflicts, setRulesResolvedConflicts] = useState<RulesResolvedConflicts>({});
+
   const setRuleFieldResolvedValue = useCallback(
     (...[params]: Parameters<SetRuleFieldResolvedValueFn>) => {
       setRulesResolvedConflicts((prevRulesResolvedConflicts) => ({
@@ -45,6 +48,7 @@ export function usePrebuiltRulesUpgradeState(
     },
     []
   );
+
   const rulesUpgradeState = useMemo(() => {
     const state: RulesUpgradeState = {};
 
@@ -59,16 +63,17 @@ export function usePrebuiltRulesUpgradeState(
           ruleUpgradeInfo.diff.fields,
           rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
         ),
-        hasUnresolvedConflicts:
-          getUnacceptedConflictsCount(
-            ruleUpgradeInfo.diff.fields,
-            rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
-          ) > 0,
+        hasUnresolvedConflicts: isPrebuiltRulesCustomizationEnabled
+          ? getUnacceptedConflictsCount(
+              ruleUpgradeInfo.diff.fields,
+              rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
+            ) > 0
+          : false,
       };
     }
 
     return state;
-  }, [ruleUpgradeInfos, rulesResolvedConflicts]);
+  }, [ruleUpgradeInfos, rulesResolvedConflicts, isPrebuiltRulesCustomizationEnabled]);
 
   return {
     rulesUpgradeState,
@@ -88,7 +93,7 @@ function calcFinalDiffableRule(
 }
 
 /**
- * Assembles a `DiffableRule` from rule fields diff `merge_value`s.
+ * Assembles a `DiffableRule` from rule fields diff `merged_version`s.
  */
 function convertRuleFieldsDiffToDiffable(
   ruleFieldsDiff: FieldsDiff<Record<string, unknown>>

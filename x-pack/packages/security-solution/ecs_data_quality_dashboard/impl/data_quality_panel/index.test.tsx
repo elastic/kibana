@@ -12,7 +12,7 @@ import React from 'react';
 
 import { TestExternalProviders } from './mock/test_providers/test_providers';
 import { mockUseResultsRollup } from './mock/use_results_rollup/mock_use_results_rollup';
-import { getCheckState } from './stub/get_check_state';
+import { getCheckStateStub } from './stub/get_check_state_stub';
 import * as useResultsRollup from './hooks/use_results_rollup';
 import * as useIndicesCheck from './hooks/use_indices_check';
 import { DataQualityPanel } from '.';
@@ -38,7 +38,7 @@ jest.spyOn(useResultsRollup, 'useResultsRollup').mockImplementation(() => mockUs
 jest.spyOn(useIndicesCheck, 'useIndicesCheck').mockImplementation(() => ({
   checkIndex: jest.fn(),
   checkState: {
-    ...getCheckState('auditbeat-*'),
+    ...getCheckStateStub('auditbeat-*'),
   },
 }));
 
@@ -67,6 +67,8 @@ describe('DataQualityPanel', () => {
           setLastChecked={jest.fn()}
           baseTheme={DARK_THEME}
           toasts={toasts}
+          defaultStartTime={'now-7d'}
+          defaultEndTime={'now'}
         />
       </TestExternalProviders>
     );

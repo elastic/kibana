@@ -32,7 +32,7 @@ export function useCreateKnowledgeBaseUserInstruction() {
           signal: null,
           params: {
             body: {
-              id: entry.doc_id,
+              id: entry.id,
               text: entry.text,
               public: entry.public,
             },
@@ -62,7 +62,7 @@ export function useCreateKnowledgeBaseUserInstruction() {
             'xpack.observabilityAiAssistantManagement.kb.addUserInstruction.errorNotification',
             {
               defaultMessage: 'Something went wrong while creating {name}',
-              values: { name: entry.doc_id },
+              values: { name: entry.id },
             }
           ),
         });

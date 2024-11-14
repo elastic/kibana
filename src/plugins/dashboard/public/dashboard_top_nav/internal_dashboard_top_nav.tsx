@@ -33,7 +33,6 @@ import {
   dashboardManagedBadge,
   getDashboardBreadcrumb,
   getDashboardTitle,
-  leaveConfirmStrings,
   unsavedChangesBadgeStrings,
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
@@ -48,7 +47,6 @@ import { getDashboardRecentlyAccessedService } from '../services/dashboard_recen
 import {
   coreServices,
   dataService,
-  embeddableService,
   navigationService,
   serverlessService,
 } from '../services/kibana_services';
@@ -124,13 +122,6 @@ export function InternalDashboardTopNav({
   }, [title, viewMode]);
 
   /**
-   * Manage chrome visibility when dashboard is embedded.
-   */
-  useEffect(() => {
-    if (!embedSettings) coreServices.chrome.setIsVisible(viewMode !== 'print');
-  }, [embedSettings, viewMode]);
-
-  /**
    * populate recently accessed, and set is chrome visible.
    */
   useEffect(() => {
@@ -189,7 +180,10 @@ export function InternalDashboardTopNav({
             },
           },
           ...dashboardTitleBreadcrumbs,
-        ])
+        ]),
+        {
+          project: { value: dashboardTitleBreadcrumbs },
+        }
       );
     }
   }, [redirectTo, dashboardTitle, dashboardApi, viewMode, customLeadingBreadCrumbs]);
@@ -199,16 +193,6 @@ export function InternalDashboardTopNav({
    */
   useEffect(() => {
     onAppLeave((actions) => {
-      if (
-        viewMode === 'edit' &&
-        hasUnsavedChanges &&
-        !embeddableService.getStateTransfer().isTransferInProgress
-      ) {
-        return actions.confirm(
-          leaveConfirmStrings.getLeaveSubtitle(),
-          leaveConfirmStrings.getLeaveTitle()
-        );
-      }
       return actions.default();
     });
     return () => {

@@ -16,8 +16,12 @@ import {
   getIsAlertsBySeverityData,
   getSeverityColor,
 } from '../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
+import { FormattedCount } from '../../../../common/components/formatted_number';
+import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
+import { getDataProvider } from '../../../../common/components/event_details/use_action_cell_data_provider';
 
 const ENTITY_ALERT_COUNT_ID = 'entity-alert-count';
+const SEVERITIES = ['unknown', 'low', 'medium', 'high', 'critical'];
 
 interface AlertCountInsightProps {
   /**
@@ -39,7 +43,7 @@ interface AlertCountInsightProps {
 }
 
 /*
- * Displays a distribution bar with the count of critical alerts for a given entity
+ * Displays a distribution bar with the total alert count for a given entity
  */
 export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
   name,
@@ -56,21 +60,26 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
     uniqueQueryId,
     signalIndexName: null,
   });
+  const dataProviders = useMemo(
+    () => [getDataProvider(fieldName, `timeline-indicator-${fieldName}-${name}`, name)],
+    [fieldName, name]
+  );
 
   const data = useMemo(() => (getIsAlertsBySeverityData(items) ? items : []), [items]);
 
-  const alertStats = useMemo(() => {
-    return data.map((item) => ({
-      key: item.key,
-      count: item.value,
-      color: getSeverityColor(item.key),
-    }));
-  }, [data]);
-
-  const count = useMemo(
-    () => data.filter((item) => item.key === 'critical')[0]?.value ?? 0,
+  const alertStats = useMemo(
+    () =>
+      data
+        .map((item) => ({
+          key: item.key,
+          count: item.value,
+          color: getSeverityColor(item.key),
+        }))
+        .sort((a, b) => SEVERITIES.indexOf(a.key) - SEVERITIES.indexOf(b.key)),
     [data]
   );
+
+  const totalAlertCount = useMemo(() => data.reduce((acc, item) => acc + item.value, 0), [data]);
 
   if (!isLoading && items.length === 0) return null;
 
@@ -87,7 +96,17 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
             />
           }
           stats={alertStats}
-          count={count}
+          count={
+            <div data-test-subj={`${dataTestSubj}-count`}>
+              <InvestigateInTimelineButton
+                asEmptyButton={true}
+                dataProviders={dataProviders}
+                flush={'both'}
+              >
+                <FormattedCount count={totalAlertCount} />
+              </InvestigateInTimelineButton>
+            </div>
+          }
           direction={direction}
           data-test-subj={`${dataTestSubj}-distribution-bar`}
         />

@@ -33,13 +33,13 @@ const formatLabel = (label: string, props: Props) => {
 const EnhancedExtendedTemplate = compose<ExtendedTemplateProps, Props>(
   lifecycle<Props, {}>({
     componentWillMount() {
-      const label = get(this.props.argValue, 'chain.0.arguments.label.0', '');
+      const label = get(this.props.argValue, 'chain.0.arguments.label.0', '') as string;
       if (label) {
         this.props.setLabel(formatLabel(label, this.props));
       }
     },
     componentDidUpdate(prevProps) {
-      const newLabel = get(this.props.argValue, 'chain.0.arguments.label.0', '');
+      const newLabel = get(this.props.argValue, 'chain.0.arguments.label.0', '') as string;
       if (newLabel && prevProps.label !== formatLabel(newLabel, this.props)) {
         this.props.setLabel(formatLabel(newLabel, this.props));
       }

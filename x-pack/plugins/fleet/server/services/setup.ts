@@ -36,7 +36,10 @@ import { downloadSourceService } from './download_source';
 
 import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
-import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
+import {
+  ensureFleetEventIngestedPipelineIsInstalled,
+  ensureFleetFinalPipelineIsInstalled,
+} from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
 import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
@@ -53,6 +56,10 @@ import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
 import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
 import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './setup/fleet_server_policies_enrollment_keys';
 import { ensureSpaceSettings } from './preconfiguration/space_settings';
+import {
+  ensureDeleteUnenrolledAgentsSetting,
+  getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig,
+} from './preconfiguration/delete_unenrolled_agent_setting';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -195,6 +202,12 @@ async function createSetupSideEffects(
   logger.debug('Setting up Space settings');
   await ensureSpaceSettings(appContextService.getConfig()?.spaceSettings ?? []);
 
+  logger.debug('Setting up delete unenrolled agents setting');
+  await ensureDeleteUnenrolledAgentsSetting(
+    soClient,
+    getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig(appContextService.getConfig())
+  );
+
   logger.debug('Setting up Fleet outputs');
   await Promise.all([
     ensurePreconfiguredOutputs(
@@ -326,6 +339,7 @@ export async function ensureFleetGlobalEsAssets(
   const globalAssetsRes = await Promise.all([
     ensureDefaultComponentTemplates(esClient, logger), // returns an array
     ensureFleetFinalPipelineIsInstalled(esClient, logger),
+    ensureFleetEventIngestedPipelineIsInstalled(esClient, logger),
   ]);
   const assetResults = globalAssetsRes.flat();
   if (assetResults.some((asset) => asset.isCreated)) {

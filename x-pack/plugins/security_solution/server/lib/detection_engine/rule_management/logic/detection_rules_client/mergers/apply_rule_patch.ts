@@ -85,6 +85,8 @@ export const applyRulePatch = async ({
     from: rulePatch.from ?? existingRule.from,
     license: rulePatch.license ?? existingRule.license,
     output_index: rulePatch.output_index ?? existingRule.output_index,
+    alias_purpose: rulePatch.alias_purpose ?? existingRule.alias_purpose,
+    alias_target_id: rulePatch.alias_target_id ?? existingRule.alias_target_id,
     timeline_id: rulePatch.timeline_id ?? existingRule.timeline_id,
     timeline_title: rulePatch.timeline_title ?? existingRule.timeline_title,
     meta: rulePatch.meta ?? existingRule.meta,

@@ -13,7 +13,7 @@
           "\nA page to display when Kibana has no data, prompting a person to add integrations or create a new data view."
         ],
         "signature": [
-          "({ onDataViewCreated, onESQLNavigationComplete, noDataConfig, allowAdHocDataView, showPlainSpinner, }: ",
+          "({ onDataViewCreated, noDataConfig, allowAdHocDataView, onTryESQL, onESQLNavigationComplete, showPlainSpinner, }: ",
           "KibanaNoDataPageProps",
           ") => React.JSX.Element | null"
         ],
@@ -26,7 +26,7 @@
             "id": "def-public.KibanaNoDataPage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onDataViewCreated,\n  onESQLNavigationComplete,\n  noDataConfig,\n  allowAdHocDataView,\n  showPlainSpinner,\n}",
+            "label": "{\n  onDataViewCreated,\n  noDataConfig,\n  allowAdHocDataView,\n  onTryESQL,\n  onESQLNavigationComplete,\n  showPlainSpinner,\n}",
             "description": [],
             "signature": [
               "KibanaNoDataPageProps"

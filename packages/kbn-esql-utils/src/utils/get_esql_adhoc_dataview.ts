@@ -44,7 +44,7 @@ export async function getESQLAdHocDataview(
 
   dataView.timeFieldName = timeField;
 
-  // If the indexPattern is empty string means that the user used either the ROW or META FUNCTIONS / SHOW INFO commands
+  // If the indexPattern is empty string means that the user used either the ROW, SHOW INFO commands
   // we don't want to add the @timestamp field in this case https://github.com/elastic/kibana/issues/163417
   if (!timeField && indexPattern && dataView?.fields?.getByName?.('@timestamp')?.type === 'date') {
     dataView.timeFieldName = '@timestamp';

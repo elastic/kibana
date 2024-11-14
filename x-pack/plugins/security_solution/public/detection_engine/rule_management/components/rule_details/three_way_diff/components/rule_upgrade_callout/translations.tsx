@@ -13,7 +13,7 @@ export const RULE_HAS_NON_SOLVABLE_CONFLICTS = (count: number) =>
     {
       values: { count },
       defaultMessage:
-        '{count} of the fields has a unsolved conflict. Please review and modify accordingly.',
+        '{count} of the fields {count, plural, one {has} other {have}} an unsolved conflict. Please review and modify accordingly.',
     }
   );
 
@@ -31,7 +31,7 @@ export const RULE_HAS_SOLVABLE_CONFLICTS = (count: number) =>
     {
       values: { count },
       defaultMessage:
-        '{count} of the fields has an update conflict, please review the suggested update being updating.',
+        '{count} of the fields {count, plural, one {has} other {have}} an update conflict, please review the suggested update being updating.',
     }
   );
 

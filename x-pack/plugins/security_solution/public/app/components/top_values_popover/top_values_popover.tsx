@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiWrappingPopover } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { StatefulTopN } from '../../../common/components/top_n';
 import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
 import { useSourcererDataView } from '../../../sourcerer/containers';
@@ -16,7 +16,7 @@ import { useKibana } from '../../../common/lib/kibana';
 
 export const TopValuesPopover = React.memo(() => {
   const { pathname } = useLocation();
-  const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
+  const { browserFields, sourcererDataView } = useSourcererDataView(getScopeFromPath(pathname));
   const {
     services: { topValuesPopover },
   } = useKibana();
@@ -44,7 +44,7 @@ export const TopValuesPopover = React.memo(() => {
         showLegend
         scopeId={data.scopeId}
         toggleTopN={onClose}
-        indexPattern={indexPattern}
+        dataViewSpec={sourcererDataView}
         browserFields={browserFields}
       />
     </EuiWrappingPopover>

@@ -395,6 +395,7 @@ export interface RuleDefinitionProps<Params extends RuleTypeParams = RuleTypePar
   onEditRule: () => Promise<void>;
   hideEditButton?: boolean;
   filteredRuleTypes?: string[];
+  useNewRuleForm?: boolean;
 }
 
 export enum Percentiles {
@@ -504,7 +505,7 @@ export type AlertsTableProps = {
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   renderCellPopover?: ReturnType<GetRenderCellPopover>;
   fieldFormats: FieldFormatsStart;
-} & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
+} & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions' | 'height'>>;
 
 export type SetFlyoutAlert = (alertId: string) => void;
 

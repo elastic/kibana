@@ -23,14 +23,19 @@ export const buildFrameworkRequest = async (
   const coreContext = await context.core;
   const savedObjectsClient = coreContext.savedObjects.client;
   const user = coreContext.security.authc.getCurrentUser();
+  const uiSettings = coreContext.uiSettings;
 
   return set<FrameworkRequest>(
-    'user',
-    user,
-    set<KibanaRequest & { context: RequestHandlerContext }>(
-      'context.core.savedObjects.client',
-      savedObjectsClient,
-      request
+    'context.core.uiSettings',
+    uiSettings,
+    set<FrameworkRequest>(
+      'user',
+      user,
+      set<KibanaRequest & { context: RequestHandlerContext }>(
+        'context.core.savedObjects.client',
+        savedObjectsClient,
+        request
+      )
     )
   );
 };

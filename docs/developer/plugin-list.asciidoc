@@ -744,7 +744,7 @@ Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant_management/README.md[observabilityAiAssistantManagement]
-|The observabilityAiAssistantManagement plugin manages the Ai Assistant for Observability management section.
+|The observabilityAiAssistantManagement plugin manages the Ai Assistant for Observability and Search management section.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_logs_explorer/README.md[observabilityLogsExplorer]
@@ -895,6 +895,10 @@ routes, etc.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/stack_connectors/README.md[stackConnectors]
 |The stack_connectors plugin provides connector types shipped with Kibana, built on top of the framework provided in the actions plugin.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/streams/README.md[streams]
+|This plugin provides an interface to manage streams
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/synthetics/README.md[synthetics]

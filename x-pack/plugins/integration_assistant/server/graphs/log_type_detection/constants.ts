@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export const EX_ANSWER_LOG_TYPE = {
-  log_type: 'structured',
-  header: true,
+import { SamplesFormat } from '../../../common';
+
+export const EX_ANSWER_LOG_TYPE: SamplesFormat = {
+  name: 'csv',
+  header: false,
+  columns: ['ip', 'timestamp', 'request', 'status', '', 'bytes'],
 };

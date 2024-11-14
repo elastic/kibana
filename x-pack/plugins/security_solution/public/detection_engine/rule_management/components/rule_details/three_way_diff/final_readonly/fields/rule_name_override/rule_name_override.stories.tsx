@@ -11,6 +11,7 @@ import { RuleNameOverrideReadOnly } from './rule_name_override';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { mockCustomQueryRule } from '../../storybook/mocks';
+import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: RuleNameOverrideReadOnly,
@@ -24,7 +25,9 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FieldReadOnly fieldName="rule_name_override" finalDiffableRule={args.finalDiffableRule} />
+    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
+      <FieldReadOnly fieldName="rule_name_override" />
+    </ThreeWayDiffStorybookProviders>
   );
 };
 

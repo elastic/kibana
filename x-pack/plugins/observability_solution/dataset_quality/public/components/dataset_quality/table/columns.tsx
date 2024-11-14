@@ -276,7 +276,10 @@ export const getDatasetQualityTableColumns = ({
       field: 'degradedDocs.percentage',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
-        <DatasetQualityIndicator isLoading={loadingDegradedStats} dataStreamStat={dataStreamStat} />
+        <DatasetQualityIndicator
+          isLoading={loadingDegradedStats}
+          quality={dataStreamStat.quality}
+        />
       ),
       width: '140px',
     },

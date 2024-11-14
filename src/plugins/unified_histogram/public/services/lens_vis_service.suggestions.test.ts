@@ -254,6 +254,37 @@ describe('LensVisService suggestions', () => {
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
   });
 
+  test('should return histogramSuggestion even if suggestions returned by the api', async () => {
+    const lensVis = await getLensVisMock({
+      filters: [],
+      query: { esql: 'from the-data-view | limit 100' },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      timeRange: {
+        from: '2023-09-03T08:00:00.000Z',
+        to: '2023-09-04T08:56:28.274Z',
+      },
+      breakdownField: undefined,
+      columns: [
+        {
+          id: 'var0',
+          name: 'var0',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      isPlainRecord: true,
+      allSuggestions: allSuggestionsMock,
+      hasHistogramSuggestionForESQL: true,
+    });
+
+    expect(lensVis.currentSuggestionContext?.type).toBe(
+      UnifiedHistogramSuggestionType.histogramForESQL
+    );
+    expect(lensVis.currentSuggestionContext?.suggestion).toBeDefined();
+  });
+
   test('should return histogramSuggestion if no suggestions returned by the api with a geo point breakdown field correctly', async () => {
     const lensVis = await getLensVisMock({
       filters: [],

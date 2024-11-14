@@ -14,7 +14,7 @@ import useMount from 'react-use/lib/useMount';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggParam, IAggConfig, IFieldParamType, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { IAggConfig, IFieldParamType, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
@@ -47,7 +47,7 @@ function FieldParamEditor({
     : [];
 
   const onChange = (options: EuiComboBoxOptionOption[]) => {
-    const selectedOption: DataViewField = get(options, '0.target');
+    const selectedOption: DataViewField | undefined = get(options, '0.target');
     if (!(aggParam.required && !selectedOption)) {
       setValue(selectedOption);
     }
@@ -158,9 +158,8 @@ function getFieldTypesString(agg: IAggConfig) {
 }
 
 function getFieldTypes(agg: IAggConfig) {
-  const param =
-    get(agg, 'type.params', []).find((p: AggParam) => p.name === 'field') ||
-    ({} as IFieldParamType);
+  const param = (get(agg, 'type.params', []).find((p) => p.name === 'field') ||
+    {}) as IFieldParamType;
   return parseCommaSeparatedList(param.filterFieldTypes || []);
 }
 

@@ -1,0 +1,16 @@
+summary: Dashboard privileges in a space
+description: Grant access to dashboard features in a Marketing space.
+value:
+  description: Grant dashboard access in the Marketing space.
+  metadata:
+    version: 1
+  elasticsearch:
+    cluster: []
+    indices: []
+  kibana:
+    - base: []
+      feature:
+        dashboard:
+          - read
+      spaces:
+        - marketing

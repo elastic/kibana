@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getAstAndSyntaxErrors as parse } from '..';
+import { parse } from '..';
 
 describe('commands', () => {
   describe('correctly formatted, basic usage', () => {
@@ -23,24 +23,6 @@ describe('commands', () => {
             {
               type: 'function',
               name: 'info',
-            },
-          ],
-        },
-      ]);
-    });
-
-    it('META', () => {
-      const query = 'META functions';
-      const { ast } = parse(query);
-
-      expect(ast).toMatchObject([
-        {
-          type: 'command',
-          name: 'meta',
-          args: [
-            {
-              type: 'function',
-              name: 'functions',
             },
           ],
         },

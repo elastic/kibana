@@ -48,9 +48,9 @@ interface AutocompleteFieldMatchProps {
   selectedField: DataViewFieldBase | undefined;
   selectedValue: string | undefined;
   indexPattern: DataViewBase | undefined;
-  isLoading: boolean;
-  isDisabled: boolean;
-  isClearable: boolean;
+  isLoading?: boolean;
+  isDisabled?: boolean;
+  isClearable?: boolean;
   isRequired?: boolean;
   fieldInputWidth?: number;
   rowLabel?: string;
@@ -68,7 +68,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   selectedField,
   selectedValue,
   indexPattern,
-  isLoading,
+  isLoading = false,
   isDisabled = false,
   isClearable = false,
   isRequired = false,

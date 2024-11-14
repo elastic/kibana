@@ -34,7 +34,6 @@ export const HISTOGRAM_BAR_TARGET_ID = 'histogram:barTarget';
 export const HISTOGRAM_MAX_BARS_ID = 'histogram:maxBars';
 export const HISTORY_LIMIT_ID = 'history:limit';
 export const META_FIELDS_ID = 'metaFields';
-export const METRICS_ALLOW_CHECKING_FOR_FAILED_SHARDS_ID = 'metrics:allowCheckingForFailedShards';
 export const METRICS_ALLOW_STRING_INDICES_ID = 'metrics:allowStringIndices';
 export const METRICS_MAX_BUCKETS_ID = 'metrics:max_buckets';
 export const QUERY_ALLOW_LEADING_WILDCARDS_ID = 'query:allowLeadingWildcards';
@@ -83,7 +82,6 @@ export const DISCOVER_SAMPLE_SIZE_ID = 'discover:sampleSize';
 export const DISCOVER_SEARCH_FIELDS_FROM_SOURCE_ID = 'discover:searchFieldsFromSource';
 export const DISCOVER_SEARCH_ON_PAGE_LOAD_ID = 'discover:searchOnPageLoad';
 export const DISCOVER_SHOW_FIELD_STATISTICS_ID = 'discover:showFieldStatistics';
-export const DISCOVER_SHOW_LEGACY_FIELD_TOP_VALUES_ID = 'discover:showLegacyFieldTopValues';
 export const DISCOVER_SHOW_MULTI_FIELDS_ID = 'discover:showMultiFields';
 export const DISCOVER_SORT_DEFAULT_ORDER_ID = 'discover:sort:defaultOrder';
 export const DOC_TABLE_HIDE_TIME_COLUMNS_ID = 'doc_table:hideTimeColumn';
@@ -122,10 +120,6 @@ export const OBSERVABILITY_APM_TRACE_EXPLORER_TAB_ID = 'observability:apmTraceEx
 export const OBSERVABILITY_ENABLE_AWS_LAMBDA_METRICS_ID = 'observability:enableAwsLambdaMetrics';
 export const OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID =
   'observability:enableComparisonByDefault';
-export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID =
-  'observability:enableInfrastructureHostsView';
-export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_CONTAINER_ASSET_VIEW_ID =
-  'observability:enableInfrastructureContainerAssetView';
 export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID =
   'observability:enableInfrastructureAssetCustomDashboards';
 export const OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID = 'observability:enableInspectEsQueries';

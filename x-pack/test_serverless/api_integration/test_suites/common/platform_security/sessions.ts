@@ -10,7 +10,6 @@ import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integrati
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
   const samlAuth = getService('samlAuth');
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
@@ -26,16 +25,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('route access', () => {
-      describe('disabled', () => {
-        it('invalidate', async () => {
-          const { body, status } = await supertestViewerWithCookieCredentials
-            .post('/api/security/session/_invalidate')
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ match: 'all' });
-          svlCommonApi.assertApiNotFound(body, status);
-        });
-      });
-
       describe('internal', () => {
         it('get session info', async () => {
           let body: any;
@@ -83,6 +72,45 @@ export default function ({ getService }: FtrProviderContext) {
             .set(samlAuth.getInternalRequestHeader()));
           // expect redirect
           expect(status).toBe(302);
+        });
+
+        it('invalidate', async () => {
+          const supertestAdmin = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+            useCookieHeader: true,
+          });
+
+          let body: any;
+          let status: number;
+
+          ({ body, status } = await supertestViewerWithCookieCredentials
+            .post('/api/security/session/_invalidate')
+            .set(samlAuth.getCommonRequestHeader()));
+          // expect a rejection because we're not using the internal header
+          expect(body).toEqual({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: expect.stringContaining(
+              'method [post] exists but is not available with the current configuration'
+            ),
+          });
+          expect(status).toBe(400);
+
+          ({ body, status } = await supertestViewerWithCookieCredentials
+            .post('/api/security/session/_invalidate')
+            .set(samlAuth.getInternalRequestHeader()));
+          // expect forbidden because the viewer does not have privilege to invalidate a session
+          expect(status).toBe(403);
+
+          ({ body, status } = await supertestAdmin
+            .post('/api/security/session/_invalidate')
+            .set(samlAuth.getInternalRequestHeader()));
+          // expect 400 due to no body, admin has privilege, but the request body is missing
+          expect(status).toBe(400);
+          expect(body).toEqual({
+            error: 'Bad Request',
+            message: '[request body]: expected a plain object value, but found [null] instead.',
+            statusCode: 400,
+          });
         });
       });
     });

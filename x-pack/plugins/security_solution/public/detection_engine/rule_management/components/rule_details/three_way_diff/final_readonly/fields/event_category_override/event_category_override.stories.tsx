@@ -11,6 +11,7 @@ import { EventCategoryOverrideReadOnly } from './event_category_override';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { mockEqlRule } from '../../storybook/mocks';
+import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: EventCategoryOverrideReadOnly,
@@ -24,7 +25,9 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FieldReadOnly fieldName="event_category_override" finalDiffableRule={args.finalDiffableRule} />
+    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
+      <FieldReadOnly fieldName="event_category_override" />
+    </ThreeWayDiffStorybookProviders>
   );
 };
 

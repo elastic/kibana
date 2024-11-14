@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { TelemetryEvent } from '../../types';
-import { TelemetryEventTypes } from '../../constants';
+import type { EntityAnalyticsTelemetryEvent } from './types';
+import { EntityEventTypes } from './types';
 
-export const entityClickedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.EntityDetailsClicked,
+export const entityClickedEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.EntityDetailsClicked,
   schema: {
     entity: {
       type: 'keyword',
@@ -21,8 +21,8 @@ export const entityClickedEvent: TelemetryEvent = {
   },
 };
 
-export const entityAlertsClickedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.EntityAlertsClicked,
+export const entityAlertsClickedEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.EntityAlertsClicked,
   schema: {
     entity: {
       type: 'keyword',
@@ -34,8 +34,8 @@ export const entityAlertsClickedEvent: TelemetryEvent = {
   },
 };
 
-export const entityRiskFilteredEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.EntityRiskFiltered,
+export const entityRiskFilteredEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.EntityRiskFiltered,
   schema: {
     entity: {
       type: 'keyword',
@@ -54,8 +54,8 @@ export const entityRiskFilteredEvent: TelemetryEvent = {
   },
 };
 
-export const toggleRiskSummaryClickedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.ToggleRiskSummaryClicked,
+export const toggleRiskSummaryClickedEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.ToggleRiskSummaryClicked,
   schema: {
     entity: {
       type: 'keyword',
@@ -74,8 +74,8 @@ export const toggleRiskSummaryClickedEvent: TelemetryEvent = {
   },
 };
 
-export const RiskInputsExpandedFlyoutOpenedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.RiskInputsExpandedFlyoutOpened,
+export const RiskInputsExpandedFlyoutOpenedEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.RiskInputsExpandedFlyoutOpened,
   schema: {
     entity: {
       type: 'keyword',
@@ -87,8 +87,8 @@ export const RiskInputsExpandedFlyoutOpenedEvent: TelemetryEvent = {
   },
 };
 
-export const addRiskInputToTimelineClickedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.AddRiskInputToTimelineClicked,
+export const addRiskInputToTimelineClickedEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.AddRiskInputToTimelineClicked,
   schema: {
     quantity: {
       type: 'integer',
@@ -100,8 +100,8 @@ export const addRiskInputToTimelineClickedEvent: TelemetryEvent = {
   },
 };
 
-export const assetCriticalityFileSelectedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.AssetCriticalityFileSelected,
+export const assetCriticalityFileSelectedEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.AssetCriticalityFileSelected,
   schema: {
     valid: {
       type: 'boolean',
@@ -131,8 +131,8 @@ export const assetCriticalityFileSelectedEvent: TelemetryEvent = {
   },
 };
 
-export const assetCriticalityCsvPreviewGeneratedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.AssetCriticalityCsvPreviewGenerated,
+export const assetCriticalityCsvPreviewGeneratedEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.AssetCriticalityCsvPreviewGenerated,
   schema: {
     file: {
       properties: {
@@ -198,8 +198,8 @@ export const assetCriticalityCsvPreviewGeneratedEvent: TelemetryEvent = {
   },
 };
 
-export const assetCriticalityCsvImportedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.AssetCriticalityCsvImported,
+export const assetCriticalityCsvImportedEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.AssetCriticalityCsvImported,
   schema: {
     file: {
       properties: {
@@ -214,3 +214,113 @@ export const assetCriticalityCsvImportedEvent: TelemetryEvent = {
     },
   },
 };
+
+export const entityStoreInitEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.EntityStoreDashboardInitButtonClicked,
+  schema: {
+    timestamp: {
+      type: 'date',
+      _meta: {
+        description: 'Timestamp of the event',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const entityStoreEnablementEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.EntityStoreEnablementToggleClicked,
+  schema: {
+    timestamp: {
+      type: 'date',
+      _meta: {
+        description: 'Timestamp of the event',
+        optional: false,
+      },
+    },
+    action: {
+      type: 'keyword',
+      _meta: {
+        description: 'Event toggle action',
+        optional: false,
+      },
+    },
+  },
+};
+
+const mlJobUpdateEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.MLJobUpdate,
+  schema: {
+    jobId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Job id',
+        optional: false,
+      },
+    },
+    isElasticJob: {
+      type: 'boolean',
+      _meta: {
+        description: 'If true the job is one of the pre-configure security solution modules',
+        optional: false,
+      },
+    },
+    moduleId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Module id',
+        optional: true,
+      },
+    },
+    status: {
+      type: 'keyword',
+      _meta: {
+        description: 'It describes what has changed in the job.',
+        optional: false,
+      },
+    },
+    errorMessage: {
+      type: 'text',
+      _meta: {
+        description: 'Error message',
+        optional: true,
+      },
+    },
+  },
+};
+
+const anomaliesCountClickedEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.AnomaliesCountClicked,
+  schema: {
+    jobId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Job id',
+        optional: false,
+      },
+    },
+    count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of anomalies',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const entityTelemetryEvents = [
+  entityClickedEvent,
+  entityAlertsClickedEvent,
+  entityRiskFilteredEvent,
+  assetCriticalityCsvPreviewGeneratedEvent,
+  assetCriticalityFileSelectedEvent,
+  assetCriticalityCsvImportedEvent,
+  entityStoreEnablementEvent,
+  entityStoreInitEvent,
+  toggleRiskSummaryClickedEvent,
+  RiskInputsExpandedFlyoutOpenedEvent,
+  addRiskInputToTimelineClickedEvent,
+  mlJobUpdateEvent,
+  anomaliesCountClickedEvent,
+];

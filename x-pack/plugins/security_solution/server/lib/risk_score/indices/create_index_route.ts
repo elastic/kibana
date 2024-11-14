@@ -19,8 +19,10 @@ export const createEsIndexRoute = (router: SecuritySolutionPluginRouter, logger:
     .put({
       access: 'internal',
       path: RISK_SCORE_CREATE_INDEX,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

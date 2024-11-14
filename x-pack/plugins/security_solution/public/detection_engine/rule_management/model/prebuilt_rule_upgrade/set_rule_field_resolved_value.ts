@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { DiffableAllFields, RuleObjectId } from '../../../../../common/api/detection_engine';
+import type {
+  DiffableAllFields,
+  RuleSignatureId,
+} from '../../../../../common/api/detection_engine';
 
 export type SetRuleFieldResolvedValueFn<
   FieldName extends keyof DiffableAllFields = keyof DiffableAllFields
 > = (params: {
-  ruleId: RuleObjectId;
+  ruleId: RuleSignatureId;
   fieldName: FieldName;
   resolvedValue: DiffableAllFields[FieldName];
 }) => void;

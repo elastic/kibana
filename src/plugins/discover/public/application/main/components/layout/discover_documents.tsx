@@ -515,6 +515,7 @@ function DiscoverDocumentsComponent({
                 additionalFieldGroups={additionalFieldGroups}
                 dataGridDensityState={density}
                 onUpdateDataGridDensity={onUpdateDensity}
+                onUpdateESQLQuery={stateContainer.actions.updateESQLQuery}
                 query={query}
                 cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
                 cellActionsMetadata={cellActionsMetadata}

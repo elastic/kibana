@@ -30,7 +30,10 @@ export {
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
   isESQLColumnSortable,
+  isESQLColumnGroupable,
+  isESQLFieldGroupable,
   TextBasedLanguages,
+  queryCannotBeSampled,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

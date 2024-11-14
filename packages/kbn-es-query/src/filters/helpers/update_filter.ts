@@ -17,7 +17,7 @@ export const updateFilter = (
   operator?: FilterMeta,
   params?: Filter['meta']['params'],
   fieldType?: string
-) => {
+): Filter => {
   if (!field || !operator) {
     return updateField(filter, field);
   }
@@ -35,7 +35,7 @@ export const updateFilter = (
   return updateWithIsOperator(filter, operator, params, fieldType);
 };
 
-function updateField(filter: Filter, field?: string) {
+function updateField(filter: Filter, field?: string): Filter {
   return {
     ...filter,
     meta: {
@@ -48,7 +48,7 @@ function updateField(filter: Filter, field?: string) {
       type: undefined,
     },
     query: undefined,
-  };
+  } as Filter; // need the casting because `field` shouldn't be there
 }
 
 function updateWithExistsOperator(filter: Filter, operator?: FilterMeta) {
@@ -104,7 +104,7 @@ function updateWithRangeOperator(
   operator: FilterMeta,
   rawParams: Filter['meta']['params'] | undefined,
   field: string
-) {
+): Filter {
   if (isRangeFilterParams(rawParams)) {
     const { from, to } = rawParams;
     const params = {
@@ -148,7 +148,7 @@ function updateWithRangeOperator(
         },
       },
     };
-    return updatedFilter;
+    return updatedFilter as Filter; // need the casting because it doesn't like the types of `params.gte|lt`
   }
 }
 

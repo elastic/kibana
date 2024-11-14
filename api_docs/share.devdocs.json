@@ -905,7 +905,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/top_nav/get_top_nav_links.tsx"
+                "path": "src/plugins/discover/public/application/main/components/top_nav/app_menu_actions/get_share.tsx"
               }
             ]
           },
@@ -1415,6 +1415,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.ShareMenuItemV2.warnings",
+            "type": "Array",
+            "tags": [],
+            "label": "warnings",
+            "description": [],
+            "signature": [
+              "{ title: string; message: string; }[] | undefined"
             ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,

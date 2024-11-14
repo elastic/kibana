@@ -31,7 +31,7 @@ jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../../sourcerer/containers');
 
 const NO_DATA_MESSAGE =
-  'You can only view Linux session details if you’ve enabled the Include session data setting in your Elastic Defend integration policy. Refer to Enable Session View dataExternal link(opens in a new tab or window) for more information.';
+  'You can only view Linux session details if you’ve enabled the Include session data setting in your Elastic Defend integration policy. Refer to Enable Session View data(external, opens in a new tab or window) for more information.';
 
 const UPSELL_TEXT = 'This feature requires an Enterprise subscription';
 
@@ -88,8 +88,7 @@ describe('<SessionView />', () => {
       loading: false,
       indicesExist: true,
       selectedPatterns: ['index'],
-      indexPattern: { fields: [], title: '' },
-      sourcererDataView: undefined,
+      sourcererDataView: {},
     });
   });
   it('renders session view correctly', () => {

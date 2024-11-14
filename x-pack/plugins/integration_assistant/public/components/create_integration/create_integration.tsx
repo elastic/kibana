@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { Redirect, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Services } from '../../services';
 import { TelemetryContextProvider } from './telemetry';
@@ -33,7 +33,7 @@ const CreateIntegrationRouter = React.memo(() => {
   const { canUseIntegrationAssistant, canUseIntegrationUpload } = useRoutesAuthorization();
   const isAvailable = useIsAvailable();
   return (
-    <Switch>
+    <Routes>
       {isAvailable && canUseIntegrationAssistant && (
         <Route path={PagePath[Page.assistant]} exact component={CreateIntegrationAssistant} />
       )}
@@ -44,7 +44,7 @@ const CreateIntegrationRouter = React.memo(() => {
       <Route path={PagePath[Page.landing]} exact component={CreateIntegrationLanding} />
 
       <Route render={() => <Redirect to={PagePath[Page.landing]} />} />
-    </Switch>
+    </Routes>
   );
 });
 CreateIntegrationRouter.displayName = 'CreateIntegrationRouter';

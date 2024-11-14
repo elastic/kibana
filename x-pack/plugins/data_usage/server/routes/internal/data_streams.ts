@@ -7,31 +7,29 @@
 
 import { DataStreamsResponseSchema } from '../../../common/rest_types';
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '../../../common';
-import { DataUsageContext, DataUsageRouter } from '../../types';
-
+import { DataUsageRouter } from '../../types';
+import { DataUsageService } from '../../services';
 import { getDataStreamsHandler } from './data_streams_handler';
 
 export const registerDataStreamsRoute = (
   router: DataUsageRouter,
-  dataUsageContext: DataUsageContext
+  dataUsageService: DataUsageService
 ) => {
-  if (dataUsageContext.serverConfig.enabled) {
-    router.versioned
-      .get({
-        access: 'internal',
-        path: DATA_USAGE_DATA_STREAMS_API_ROUTE,
-      })
-      .addVersion(
-        {
-          version: '1',
-          validate: {
-            request: {},
-            response: {
-              200: DataStreamsResponseSchema,
-            },
+  router.versioned
+    .get({
+      access: 'internal',
+      path: DATA_USAGE_DATA_STREAMS_API_ROUTE,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {},
+          response: {
+            200: DataStreamsResponseSchema,
           },
         },
-        getDataStreamsHandler(dataUsageContext)
-      );
-  }
+      },
+      getDataStreamsHandler(dataUsageService)
+    );
 };

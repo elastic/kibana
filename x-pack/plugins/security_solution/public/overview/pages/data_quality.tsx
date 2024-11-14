@@ -28,9 +28,10 @@ import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../commo
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as i18n from './translations';
-import type {
-  ReportDataQualityCheckAllCompletedParams,
-  ReportDataQualityIndexCheckedParams,
+import {
+  type ReportDataQualityCheckAllCompletedParams,
+  type ReportDataQualityIndexCheckedParams,
+  DataQualityEventTypes,
 } from '../../common/lib/telemetry';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
@@ -118,14 +119,14 @@ const DataQualityComponent: React.FC = () => {
 
   const reportDataQualityIndexChecked = useCallback(
     (params: ReportDataQualityIndexCheckedParams) => {
-      telemetry.reportDataQualityIndexChecked(params);
+      telemetry.reportEvent(DataQualityEventTypes.DataQualityIndexChecked, params);
     },
     [telemetry]
   );
 
   const reportDataQualityCheckAllCompleted = useCallback(
     (params: ReportDataQualityCheckAllCompletedParams) => {
-      telemetry.reportDataQualityCheckAllCompleted(params);
+      telemetry.reportEvent(DataQualityEventTypes.DataQualityCheckAllCompleted, params);
     },
     [telemetry]
   );
@@ -171,6 +172,8 @@ const DataQualityComponent: React.FC = () => {
             startDate={startDate}
             theme={theme}
             toasts={toasts}
+            defaultStartTime={DEFAULT_START_TIME}
+            defaultEndTime={DEFAULT_END_TIME}
           />
         </SecuritySolutionPageWrapper>
       ) : (

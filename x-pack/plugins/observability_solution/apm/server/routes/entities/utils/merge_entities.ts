@@ -6,9 +6,9 @@
  */
 
 import { compact, uniq } from 'lodash';
+import { EntityDataStreamType } from '@kbn/observability-shared-plugin/common';
 import type { EntityLatestServiceRaw } from '../types';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import type { EntityDataStreamType } from '../../../../common/entities/types';
 
 export interface MergedServiceEntity {
   serviceName: string;
@@ -40,7 +40,7 @@ function mergeFunc(entity: EntityLatestServiceRaw, existingEntity?: MergedServic
   const commonEntityFields = {
     serviceName: entity.service.name,
     agentName: entity.agent.name[0],
-    lastSeenTimestamp: entity.entity.lastSeenTimestamp,
+    lastSeenTimestamp: entity.entity.last_seen_timestamp,
   };
 
   if (!existingEntity) {

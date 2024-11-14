@@ -57,6 +57,7 @@ export interface MonitorSummaryStatusRule {
   locationId: string;
   monitorType: string;
   monitorName: string;
+  serviceName?: string;
   locationName: string;
   locationNames: string;
   monitorUrlLabel: string;
@@ -68,5 +69,7 @@ export interface MonitorSummaryStatusRule {
   };
   stateId?: string;
   lastErrorMessage?: string;
+  lastErrorStack?: string | null;
   timestamp: string;
+  labels?: Record<string, string>;
 }

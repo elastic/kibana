@@ -24,7 +24,6 @@ import type { EndpointAppContext } from '../../types';
 import {
   eventsIndexPattern,
   SUGGESTIONS_INTERNAL_ROUTE,
-  SUGGESTIONS_ROUTE,
 } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
@@ -40,30 +39,14 @@ export function registerEndpointSuggestionsRoutes(
 ) {
   router.versioned
     .post({
-      access: 'public',
-      path: SUGGESTIONS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: EndpointSuggestionsSchema,
-        },
-      },
-      withEndpointAuthz(
-        { any: ['canWriteEventFilters'] },
-        endpointContext.logFactory.get('endpointSuggestions'),
-        getEndpointSuggestionsRequestHandler(config$, getLogger(endpointContext))
-      )
-    );
-
-  router.versioned
-    .post({
       access: 'internal',
       path: SUGGESTIONS_INTERNAL_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {

@@ -58,22 +58,31 @@ export async function generateChatTitle({
   state,
   model,
 }: GenerateChatTitleParams): Promise<Partial<AgentState>> {
-  logger.debug(
-    () => `${NodeType.GENERATE_CHAT_TITLE}: Node state:\n${JSON.stringify(state, null, 2)}`
-  );
+  try {
+    logger.debug(
+      () => `${NodeType.GENERATE_CHAT_TITLE}: Node state:\n${JSON.stringify(state, null, 2)}`
+    );
 
-  const outputParser = new StringOutputParser();
-  const graph = GENERATE_CHAT_TITLE_PROMPT(state.responseLanguage, state.llmType)
-    .pipe(model)
-    .pipe(outputParser);
+    const outputParser = new StringOutputParser();
+    const graph = GENERATE_CHAT_TITLE_PROMPT(state.responseLanguage, state.llmType)
+      .pipe(model)
+      .pipe(outputParser);
 
-  const chatTitle = await graph.invoke({
-    input: JSON.stringify(state.input, null, 2),
-  });
-  logger.debug(`chatTitle: ${chatTitle}`);
+    const chatTitle = await graph.invoke({
+      input: JSON.stringify(state.input, null, 2),
+    });
+    logger.debug(`chatTitle: ${chatTitle}`);
 
-  return {
-    chatTitle,
-    lastNode: NodeType.GENERATE_CHAT_TITLE,
-  };
+    return {
+      chatTitle,
+      lastNode: NodeType.GENERATE_CHAT_TITLE,
+    };
+  } catch (e) {
+    return {
+      // generate a chat title if there is an error in order to complete the graph
+      // limit title to 60 characters
+      chatTitle: (e.name ?? e.message ?? e.toString()).slice(0, 60),
+      lastNode: NodeType.GENERATE_CHAT_TITLE,
+    };
+  }
 }

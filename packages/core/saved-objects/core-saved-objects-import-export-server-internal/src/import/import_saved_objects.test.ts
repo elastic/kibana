@@ -19,6 +19,7 @@ import {
 } from './import_saved_objects.test.mock';
 
 import { Readable } from 'stream';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   SavedObjectsImportFailure,
@@ -40,8 +41,10 @@ import {
 import type { ImportStateMap } from './lib';
 
 describe('#importSavedObjectsFromStream', () => {
+  let logger: MockedLogger;
   beforeEach(() => {
     jest.clearAllMocks();
+    logger = loggerMock.create();
     // mock empty output of each of these mocked modules so the import doesn't throw an error
     mockCollectSavedObjects.mockResolvedValue({
       errors: [],
@@ -72,7 +75,6 @@ describe('#importSavedObjectsFromStream', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
-
   const setupOptions = ({
     createNewCopies = false,
     getTypeImpl = (type: string) =>
@@ -102,6 +104,7 @@ describe('#importSavedObjectsFromStream', () => {
       createNewCopies,
       importHooks,
       managed,
+      log: logger,
     };
   };
   const createObject = ({

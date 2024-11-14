@@ -42,11 +42,11 @@ describe('SaveTimelineCallout', () => {
 
     expect(getByTestId(SAVE_TIMELINE_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(SAVE_TIMELINE_BUTTON_TEST_ID)).toHaveStyle('background-color: #BD271E');
-    expect(getByTestId(SAVE_TIMELINE_BUTTON_TEST_ID)).toHaveTextContent('Save timeline');
+    expect(getByTestId(SAVE_TIMELINE_BUTTON_TEST_ID)).toHaveTextContent('Save Timeline');
     expect(getByTestId(SAVE_TIMELINE_CALLOUT_TEST_ID)).toBeInTheDocument();
-    expect(getAllByText('Save timeline')).toHaveLength(2);
+    expect(getAllByText('Save Timeline')).toHaveLength(2);
     expect(
-      getByText('You need to save your timeline before creating notes for it.')
+      getByText('You must save this Timeline before attaching notes to it.')
     ).toBeInTheDocument();
   });
 });

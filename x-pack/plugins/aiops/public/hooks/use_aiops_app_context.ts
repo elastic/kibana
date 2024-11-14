@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createContext, useContext } from 'react';
+import { createContext, type FC, useContext } from 'react';
 
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -28,6 +28,8 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { FieldStatsFlyoutProviderProps } from '@kbn/ml-field-stats-flyout/field_stats_flyout_provider';
+import type { UseFieldStatsTrigger } from '@kbn/ml-field-stats-flyout/use_field_stats_trigger';
 
 /**
  * AIOps app context value to be provided via React context.
@@ -91,7 +93,7 @@ export interface AiopsAppContextValue {
   /**
    * Used to create deep links to other plugins.
    */
-  share: SharePluginStart;
+  share?: SharePluginStart;
   /**
    * Used to create lens embeddables.
    */
@@ -104,6 +106,13 @@ export interface AiopsAppContextValue {
    * Internationalisation service
    */
   i18n: CoreStart['i18n'];
+  /**
+   * Deps for unified fields stats.
+   */
+  fieldStats?: {
+    useFieldStatsTrigger: UseFieldStatsTrigger;
+    FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps>;
+  };
   embeddable?: EmbeddableStart;
   cases?: CasesPublicStart;
   isServerless?: boolean;

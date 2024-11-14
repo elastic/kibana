@@ -14,8 +14,10 @@ import { getInfraEsClient } from './get_infra_es_client';
 import { getKibanaClient } from './get_kibana_client';
 import { getServiceUrls } from './get_service_urls';
 import { RunOptions } from './parse_run_cli_flags';
-import { getAssetsEsClient } from './get_assets_es_client';
 import { getSyntheticsEsClient } from './get_synthetics_es_client';
+import { getOtelSynthtraceEsClient } from './get_otel_es_client';
+import { getEntitiesEsClient } from './get_entities_es_client';
+import { getEntitiesKibanaClient } from './get_entites_kibana_client';
 
 export async function bootstrap(runOptions: RunOptions) {
   const logger = createLogger(runOptions.logLevel);
@@ -57,13 +59,23 @@ export async function bootstrap(runOptions: RunOptions) {
     concurrency: runOptions.concurrency,
   });
 
-  const assetsEsClient = getAssetsEsClient({
+  const entitiesEsClient = getEntitiesEsClient({
     target: esUrl,
     logger,
     concurrency: runOptions.concurrency,
   });
 
+  const entitiesKibanaClient = getEntitiesKibanaClient({
+    target: kibanaUrl,
+    logger,
+  });
+
   const syntheticsEsClient = getSyntheticsEsClient({
+    target: esUrl,
+    logger,
+    concurrency: runOptions.concurrency,
+  });
+  const otelEsClient = getOtelSynthtraceEsClient({
     target: esUrl,
     logger,
     concurrency: runOptions.concurrency,
@@ -73,8 +85,9 @@ export async function bootstrap(runOptions: RunOptions) {
     await apmEsClient.clean();
     await logsEsClient.clean();
     await infraEsClient.clean();
-    await assetsEsClient.clean();
+    await entitiesEsClient.clean();
     await syntheticsEsClient.clean();
+    await otelEsClient.clean();
   }
 
   return {
@@ -82,10 +95,12 @@ export async function bootstrap(runOptions: RunOptions) {
     apmEsClient,
     logsEsClient,
     infraEsClient,
-    assetsEsClient,
+    entitiesEsClient,
     syntheticsEsClient,
+    otelEsClient,
     version,
     kibanaUrl,
     esUrl,
+    entitiesKibanaClient,
   };
 }
