@@ -53,7 +53,10 @@ export class AutocompleteInfo {
       case ENTITIES.INDICES:
         const includeAliases = true;
         const collaborator = this.mapping;
-        return () => this.alias.getIndices(includeAliases, collaborator);
+        return () => [
+          ...this.alias.getIndices(includeAliases, collaborator),
+          ...this.dataStream.getDataStreams(),
+        ];
       case ENTITIES.FIELDS:
         return this.mapping.getMappings(
           context.indices,

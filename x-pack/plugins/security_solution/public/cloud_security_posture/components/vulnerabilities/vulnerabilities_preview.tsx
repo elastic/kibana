@@ -12,7 +12,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import {
   buildEntityFlyoutPreviewQuery,
   getAbbreviatedNumber,
@@ -25,6 +24,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { HostDetailsPanelKey } from '../../../flyout/entity_details/host_details_left';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
@@ -149,8 +149,8 @@ export const VulnerabilitiesPreview = ({
             callback: goToEntityInsightTab,
             tooltip: (
               <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.misconfiguration.misconfigurationTooltip"
-                defaultMessage="Show all misconfiguration findings"
+                id="xpack.securitySolution.flyout.right.insights.vulnerabilities.vulnerabilitiesTooltip"
+                defaultMessage="Show all vulnerabilities findings"
               />
             ),
           }
