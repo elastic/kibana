@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dirname, resolve } from 'path';
-
 import Joi from 'joi';
-import type { CustomHelpers } from 'joi';
-
-// valid pattern for ID
-// enforced camel-case identifiers for consistency
-const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
 
 const maybeRequireKeys = (keys: string[], schemas: Record<string, Joi.Schema>) => {
   if (!keys.length) {
@@ -66,14 +59,6 @@ const dockerServerSchema = () =>
       args: Joi.array().items(Joi.string()).optional(),
     })
     .default();
-
-const defaultRelativeToConfigPath = (path: string) => {
-  const makeDefault = (parent: any, helpers: CustomHelpers) => {
-    helpers.schema.description(`<config.js directory>/${path}`);
-    return resolve(dirname(helpers.prefs.context!.path), path);
-  };
-  return makeDefault;
-};
 
 export const schema = Joi.object()
   .keys({
@@ -153,42 +138,12 @@ export const schema = Joi.object()
       })
       .default(),
 
-    // settings for the saved objects svc
-    // esArchiver: Joi.object()
-    //   .keys({
-    //     baseDirectory: Joi.string().optional(),
-    //   })
-    //   .default(),
-
-    // settings for the saved objects svc
-    // kbnArchiver: Joi.object()
-    //   .keys({
-    //     directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/kbn_archiver')),
-    //   })
-    //   .default(),
-
     // settings for the kibanaServer.uiSettings module
     uiSettings: Joi.object()
       .keys({
         defaults: Joi.object().unknown(true),
       })
       .default(),
-
-    // settings for the security service if there is no defaultRole defined, then default to superuser role.
-    // security: Joi.object()
-    //   .keys({
-    //     roles: Joi.object().default(),
-    //     remoteEsRoles: Joi.object(),
-    //     defaultRoles: Joi.array()
-    //       .items(Joi.string())
-    //       .when('$primary', {
-    //         is: true,
-    //         then: Joi.array().min(1),
-    //       })
-    //       .default(['superuser']),
-    //     disableTestUser: Joi.boolean(),
-    //   })
-    //   .default(),
 
     dockerServers: Joi.object().pattern(Joi.string(), dockerServerSchema()).default(),
   })
