@@ -16,7 +16,9 @@ export default ({ getService }: FtrProviderContext) => {
   let testStart: number;
 
   describe('GET notifications count', () => {
-    testStart = Date.now();
+    before(async () => {
+      testStart = Date.now();
+    });
 
     describe('when no ML entities present', () => {
       it('return a default response', async () => {
@@ -27,9 +29,9 @@ export default ({ getService }: FtrProviderContext) => {
           .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
-        expect(body.info).to.eql(0);
-        expect(body.warning).to.eql(0);
-        expect(body.error).to.eql(0);
+        expect(body.info).to.eql(0, `Expecting info count to be 0, got ${body.info}`);
+        expect(body.warning).to.eql(0, `Expecting warning count to be 0, got ${body.warning}`);
+        expect(body.error).to.eql(0, `Expecting error count to be 0, got ${body.error}`);
       });
     });
 
@@ -58,9 +60,9 @@ export default ({ getService }: FtrProviderContext) => {
           .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
-        expect(body.info).to.eql(1);
-        expect(body.warning).to.eql(0);
-        expect(body.error).to.eql(0);
+        expect(body.info).to.eql(1, `Expecting info count to be 1, got ${body.info}`);
+        expect(body.warning).to.eql(0, `Expecting warning count to be 0, got ${body.warning}`);
+        expect(body.error).to.eql(0, `Expecting error count to be 0, got ${body.error}`);
       });
 
       it('returns an error for unauthorized user', async () => {
