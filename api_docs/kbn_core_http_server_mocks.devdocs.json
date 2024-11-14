@@ -337,8 +337,8 @@
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouterDeprecatedRouteDetails",
-            "text": "RouterDeprecatedRouteDetails"
+            "section": "def-server.RouterDeprecatedApiDetails",
+            "text": "RouterDeprecatedApiDetails"
           },
           "[], [], unknown>; } & Omit<",
           {
@@ -632,20 +632,20 @@
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouterDeprecatedRouteDetails",
-            "text": "RouterDeprecatedRouteDetails"
+            "section": "def-server.RouterDeprecatedApiDetails",
+            "text": "RouterDeprecatedApiDetails"
           },
           "[], [], unknown>; registerOnPostValidation: jest.MockInstance<void, [cb: (req: ",
           "CoreKibanaRequest",
-          "<unknown, unknown, unknown, any>, metadata: { deprecated: ",
+          "<unknown, unknown, unknown, any>, metadata: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteDeprecationInfo",
-            "text": "RouteDeprecationInfo"
+            "section": "def-server.PostValidationMetadata",
+            "text": "PostValidationMetadata"
           },
-          "; }) => void], unknown>; registerRouterAfterListening: jest.MockInstance<void, [router: ",
+          ") => void], unknown>; registerRouterAfterListening: jest.MockInstance<void, [router: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -666,8 +666,8 @@
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouterDeprecatedRouteDetails",
-            "text": "RouterDeprecatedRouteDetails"
+            "section": "def-server.RouterDeprecatedApiDetails",
+            "text": "RouterDeprecatedApiDetails"
           },
           "[], [], unknown>; } & Omit<",
           "InternalHttpServiceSetup",

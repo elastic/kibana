@@ -8,21 +8,6 @@
     .embPanel__title {
       margin-bottom: $euiSizeXS;
     }
-
-    .embPanel__optionsMenuButton {
-      border-radius: $euiBorderRadius;
-    }
-
-    .canvas-isFullscreen & {
-      .embPanel__optionsMenuButton {
-        opacity: 0;
-      }
-
-      &:focus .embPanel__optionsMenuButton,
-      &:hover .embPanel__optionsMenuButton {
-        opacity: 1;
-      }
-    }
   }
 
   .embPanel__hoverActionsLeft, .embPanel__hoverActions > .embPanel--dragHandle {

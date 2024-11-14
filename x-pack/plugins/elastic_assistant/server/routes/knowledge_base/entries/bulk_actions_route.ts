@@ -155,7 +155,6 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
 
           // Perform license, authenticated user and FF checks
           const checkResponse = performChecks({
-            capability: 'assistantKnowledgeBaseByDefault',
             context: ctx,
             request,
             response,
@@ -187,9 +186,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           // subscribing to completed$, because it handles both cases when request was completed and aborted.
           // when route is finished by timeout, aborted$ is not getting fired
           request.events.completed$.subscribe(() => abortController.abort());
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient({
-            v2KnowledgeBaseEnabled: true,
-          });
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
           const spaceId = ctx.elasticAssistant.getSpaceId();
           const authenticatedUser = checkResponse.currentUser;
           const userFilter = getKBUserFilter(authenticatedUser);
@@ -288,8 +285,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
                 global: entry.users != null && entry.users.length === 0,
               })
             ),
-            getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) =>
-              getUpdateScript({ entry, isPatch: true }),
+            getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) => getUpdateScript({ entry }),
             authenticatedUser,
           });
           const created =

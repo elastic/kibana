@@ -17,7 +17,7 @@ import {
 describe(
   'Agent Policy Settings - Complete',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@serverlessQA'],
     env: {
       ftrConfig: {
         productTypes: [
