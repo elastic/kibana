@@ -25,7 +25,7 @@ export const ResultFields: React.FC<Props> = ({ documentId, fields, isExpanded }
   return (
     <EuiTable
       aria-label={i18n.translate('searchIndexDocuments.resultFields.tableLabel', {
-        defaultMessage: 'Fields for the document with id {documentId}',
+        defaultMessage: 'Fields for the document with ID {documentId}',
         values: { documentId },
       })}
     >
