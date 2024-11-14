@@ -53,6 +53,7 @@ export class DataUsagePlugin
   }
   setup(coreSetup: CoreSetup, pluginsSetup: DataUsageSetupDependencies): DataUsageServerSetup {
     this.logger.debug('data usage plugin setup');
+    this.dataUsageContext.cloud = pluginsSetup.cloud;
     const dataUsageService = new DataUsageService(this.dataUsageContext);
 
     pluginsSetup.features.registerElasticsearchFeature({
