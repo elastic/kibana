@@ -7444,13 +7444,15 @@ paths:
             enum:
               - '2023-10-31'
             type: string
-        - in: query
+        - description: The page number to return.
+          in: query
           name: page
           required: false
           schema:
             default: 1
             type: number
-        - in: query
+        - description: The number of dashboards to display on each page.
+          in: query
           name: perPage
           required: false
           schema:
@@ -7552,9 +7554,10 @@ paths:
                 required:
                   - items
                   - total
-      summary: Get a list of dashboards.
+      summary: Get a list of dashboards
       tags:
         - Dashboards
+      x-state: Technical Preview
   /api/dashboards/dashboard/{id}:
     delete:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -7575,15 +7578,17 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: A unique identifier for the dashboard.
+          in: path
           name: id
           required: true
           schema:
             type: string
       responses: {}
-      summary: Delete a dashboard.
+      summary: Delete a dashboard
       tags:
         - Dashboards
+      x-state: Technical Preview
     get:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: get-dashboards-dashboard-id
@@ -7596,7 +7601,8 @@ paths:
             enum:
               - '2023-10-31'
             type: string
-        - in: path
+        - description: A unique identifier for the dashboard.
+          in: path
           name: id
           required: true
           schema:
@@ -8050,9 +8056,10 @@ paths:
                 required:
                   - item
                   - meta
-      summary: Get a dashboard.
+      summary: Get a dashboard
       tags:
         - Dashboards
+      x-state: Technical Preview
     post:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: post-dashboards-dashboard-id
@@ -8072,7 +8079,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: A unique identifier for the dashboard.
+          in: path
           name: id
           required: false
           schema:
@@ -8892,6 +8900,7 @@ paths:
       summary: Create a dashboard
       tags:
         - Dashboards
+      x-state: Technical Preview
     put:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: put-dashboards-dashboard-id
@@ -8911,7 +8920,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: A unique identifier for the dashboard.
+          in: path
           name: id
           required: true
           schema:
@@ -9724,9 +9734,10 @@ paths:
                       - references
                 required:
                   - item
-      summary: Update an existing dashboard.
+      summary: Update an existing dashboard
       tags:
         - Dashboards
+      x-state: Technical Preview
   /api/data_views:
     get:
       operationId: getAllDataViewsDefault
@@ -61691,6 +61702,21 @@ components:
       scheme: basic
       type: http
 x-topics:
+  - title: Kibana spaces
+    content: |
+      Spaces enable you to organize your dashboards and other saved objects into meaningful categories.
+      You can use the default space or create your own spaces.
+
+      To run APIs in non-default spaces, you must add `s/{space_id}/` to the path.
+      For example:
+
+      ```
+      curl -X GET "http://localhost:5601/s/marketing/api/data_views"
+      ```
+
+      If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
+
+      To learn more, check out [Spaces](https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html).
   - title: Kibana spaces
     content: |
       Spaces enable you to organize your dashboards and other saved objects into meaningful categories.

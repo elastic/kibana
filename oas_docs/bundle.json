@@ -5662,6 +5662,7 @@
             }
           },
           {
+            "description": "The page number to return.",
             "in": "query",
             "name": "page",
             "required": false,
@@ -5671,6 +5672,7 @@
             }
           },
           {
+            "description": "The number of dashboards to display on each page.",
             "in": "query",
             "name": "perPage",
             "required": false,
@@ -5819,10 +5821,11 @@
             }
           }
         },
-        "summary": "Get a list of dashboards.",
+        "summary": "Get a list of dashboards",
         "tags": [
           "Dashboards"
-        ]
+        ],
+        "x-state": "Technical Preview"
       }
     },
     "/api/dashboards/dashboard/{id}": {
@@ -5853,6 +5856,7 @@
             }
           },
           {
+            "description": "A unique identifier for the dashboard.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -5862,10 +5866,11 @@
           }
         ],
         "responses": {},
-        "summary": "Delete a dashboard.",
+        "summary": "Delete a dashboard",
         "tags": [
           "Dashboards"
-        ]
+        ],
+        "x-state": "Technical Preview"
       },
       "get": {
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.",
@@ -5884,6 +5889,7 @@
             }
           },
           {
+            "description": "A unique identifier for the dashboard.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -6520,10 +6526,11 @@
             }
           }
         },
-        "summary": "Get a dashboard.",
+        "summary": "Get a dashboard",
         "tags": [
           "Dashboards"
-        ]
+        ],
+        "x-state": "Technical Preview"
       },
       "post": {
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.",
@@ -6552,6 +6559,7 @@
             }
           },
           {
+            "description": "A unique identifier for the dashboard.",
             "in": "path",
             "name": "id",
             "required": false,
@@ -7697,7 +7705,8 @@
         "summary": "Create a dashboard",
         "tags": [
           "Dashboards"
-        ]
+        ],
+        "x-state": "Technical Preview"
       },
       "put": {
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.",
@@ -7726,6 +7735,7 @@
             }
           },
           {
+            "description": "A unique identifier for the dashboard.",
             "in": "path",
             "name": "id",
             "required": true,
@@ -8862,10 +8872,11 @@
             }
           }
         },
-        "summary": "Update an existing dashboard.",
+        "summary": "Update an existing dashboard",
         "tags": [
           "Dashboards"
-        ]
+        ],
+        "x-state": "Technical Preview"
       }
     },
     "/api/fleet/agent_download_sources": {

@@ -5213,13 +5213,15 @@ paths:
             enum:
               - '2023-10-31'
             type: string
-        - in: query
+        - description: The page number to return.
+          in: query
           name: page
           required: false
           schema:
             default: 1
             type: number
-        - in: query
+        - description: The number of dashboards to display on each page.
+          in: query
           name: perPage
           required: false
           schema:
@@ -5321,9 +5323,10 @@ paths:
                 required:
                   - items
                   - total
-      summary: Get a list of dashboards.
+      summary: Get a list of dashboards
       tags:
         - Dashboards
+      x-state: Technical Preview
       x-beta: true
   /api/dashboards/dashboard/{id}:
     delete:
@@ -5345,15 +5348,17 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: A unique identifier for the dashboard.
+          in: path
           name: id
           required: true
           schema:
             type: string
       responses: {}
-      summary: Delete a dashboard.
+      summary: Delete a dashboard
       tags:
         - Dashboards
+      x-state: Technical Preview
       x-beta: true
     get:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -5367,7 +5372,8 @@ paths:
             enum:
               - '2023-10-31'
             type: string
-        - in: path
+        - description: A unique identifier for the dashboard.
+          in: path
           name: id
           required: true
           schema:
@@ -5821,9 +5827,10 @@ paths:
                 required:
                   - item
                   - meta
-      summary: Get a dashboard.
+      summary: Get a dashboard
       tags:
         - Dashboards
+      x-state: Technical Preview
       x-beta: true
     post:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -5844,7 +5851,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: A unique identifier for the dashboard.
+          in: path
           name: id
           required: false
           schema:
@@ -6664,6 +6672,7 @@ paths:
       summary: Create a dashboard
       tags:
         - Dashboards
+      x-state: Technical Preview
       x-beta: true
     put:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -6684,7 +6693,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: A unique identifier for the dashboard.
+          in: path
           name: id
           required: true
           schema:
@@ -7497,9 +7507,10 @@ paths:
                       - references
                 required:
                   - item
-      summary: Update an existing dashboard.
+      summary: Update an existing dashboard
       tags:
         - Dashboards
+      x-state: Technical Preview
       x-beta: true
   /api/data_views:
     get:
