@@ -30,7 +30,8 @@
       "share",
       "kibanaUtils",
       "alerting",
-      "spaces"
+      "spaces",
+      "timelines"
     ],
     "optionalPlugins": [
       "usageCollection"

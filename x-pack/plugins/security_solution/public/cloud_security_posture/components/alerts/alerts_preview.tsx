@@ -209,8 +209,8 @@ export const AlertsPreview = ({
             callback: goToEntityInsightTab,
             tooltip: (
               <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.misconfiguration.misconfigurationTooltip"
-                defaultMessage="Show all misconfiguration findings"
+                id="xpack.securitySolution.flyout.right.insights.alerts.alertsTooltip"
+                defaultMessage="Show all alerts"
               />
             ),
           }

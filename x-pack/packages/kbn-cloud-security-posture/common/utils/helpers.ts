@@ -5,7 +5,9 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+
 import { i18n } from '@kbn/i18n';
+import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '@kbn/securitysolution-data-table/common/types';
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
 
 export const defaultErrorMessage = i18n.translate('xpack.csp.common.utils.helpers.unknownError', {
@@ -110,7 +112,7 @@ export const buildEntityAlertsQuery = (
           },
           {
             terms: {
-              'kibana.alert.workflow_status': ['open', 'acknowledged'],
+              'kibana.alert.workflow_status': [FILTER_OPEN, FILTER_ACKNOWLEDGED],
             },
           },
         ],
