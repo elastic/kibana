@@ -98,7 +98,8 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/discover-contextual-components",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
+    "@kbn/discover-shared-plugin"
   ],
   "exclude": [
     "target/**/*"
