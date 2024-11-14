@@ -16,9 +16,9 @@ import type { TimelineItem } from '../../../../common/search_strategy';
 import { getAlertsDefaultModel } from '../../components/alerts_table/default_config';
 import type { State } from '../../../common/store';
 import { RowAction } from '../../../common/components/control_columns/row_action';
-import type { SecurityAlertsTableProp } from '../../components/alerts_table/types';
+import type { GetSecurityAlertsTableProp } from '../../components/alerts_table/types';
 
-export const ActionsCellComponent: SecurityAlertsTableProp<'renderActionsCell'> = ({
+export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell'> = ({
   tableType = TableId.alertsOnAlertsPage,
   rowIndex,
   isDetails,

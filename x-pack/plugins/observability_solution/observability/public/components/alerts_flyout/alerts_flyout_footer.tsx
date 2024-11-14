@@ -11,12 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
-import { ObservabilityAlertsTableProp } from '../alerts_table/types';
+import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 import { useKibana } from '../../utils/kibana_react';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
 
 export type AlertsFlyoutFooterProps = Pick<
-  ComponentProps<ObservabilityAlertsTableProp<'renderFlyoutFooter'>>,
+  ComponentProps<GetObservabilityAlertsTableProp<'renderFlyoutFooter'>>,
   'alert' | 'tableId' | 'observabilityRuleTypeRegistry'
 >;
 

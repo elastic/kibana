@@ -13,7 +13,7 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { getFormattedSeverityScore, getSeverityColor } from '@kbn/ml-anomaly-utils';
 import { EuiHealth } from '@elastic/eui';
-import type { Alert, AlertsTableProp } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { Alert, GetAlertsTableProp } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import {
   alertFieldNameMap,
@@ -41,7 +41,7 @@ const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   return '--';
 };
 
-export const AlertsTableCellValue: AlertsTableProp<'renderCellValue'> = ({
+export const AlertsTableCellValue: GetAlertsTableProp<'renderCellValue'> = ({
   columnId,
   alert,
   fieldFormats,

@@ -9,13 +9,13 @@ import { EuiPanel, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AlertFieldsTable, ScrollableFlyoutTabbedContent } from '@kbn/alerts-ui-shared';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
-import { ObservabilityAlertsTableProp } from '../alerts_table/types';
+import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 import { AlertOverview } from '../alert_overview/alert_overview';
 
 type TabId = 'overview' | 'table';
 
 export type AlertsFlyoutBodyProps = Pick<
-  ComponentProps<ObservabilityAlertsTableProp<'renderFlyoutBody'>>,
+  ComponentProps<GetObservabilityAlertsTableProp<'renderFlyoutBody'>>,
   'alert' | 'tableId' | 'observabilityRuleTypeRegistry'
 >;
 

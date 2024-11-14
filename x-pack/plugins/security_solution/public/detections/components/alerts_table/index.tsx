@@ -33,7 +33,7 @@ import { getBulkActionsByTableType } from '../../hooks/trigger_actions_alert_tab
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type {
   SecurityAlertsTableContext,
-  SecurityAlertsTableProp,
+  GetSecurityAlertsTableProp,
   SecurityAlertsTableProps,
 } from './types';
 import { ActionsCell } from '../../hooks/trigger_actions_alert_table/actions_cell';
@@ -141,7 +141,7 @@ interface DetectionEngineAlertTableProps
   onRuleChange?: () => void;
 }
 
-const initialSort: SecurityAlertsTableProp<'initialSort'> = [
+const initialSort: GetSecurityAlertsTableProp<'initialSort'> = [
   {
     '@timestamp': {
       order: 'desc',
@@ -288,7 +288,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   const { onLoad } = useFetchNotes();
   const [tableContext, setTableContext] = useState<RenderContext<SecurityAlertsTableContext>>();
 
-  const onUpdate: SecurityAlertsTableProp<'onUpdate'> = useCallback(
+  const onUpdate: GetSecurityAlertsTableProp<'onUpdate'> = useCallback(
     (context) => {
       onLoad(context.alerts);
       setTableContext(context);

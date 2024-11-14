@@ -7,10 +7,10 @@
 import React, { ComponentProps } from 'react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { ObservabilityAlertsTableProp } from '../alerts_table/types';
+import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 
 export type AlertsFlyoutHeaderProps = Pick<
-  ComponentProps<ObservabilityAlertsTableProp<'renderFlyoutHeader'>>,
+  ComponentProps<GetObservabilityAlertsTableProp<'renderFlyoutHeader'>>,
   'alert'
 >;
 

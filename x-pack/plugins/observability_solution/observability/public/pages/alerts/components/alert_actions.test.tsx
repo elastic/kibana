@@ -25,7 +25,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import type { ObservabilityAlertsTableProp } from '../../../components/alerts_table/types';
+import type { GetObservabilityAlertsTableProp } from '../../../components/alerts_table/types';
 
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -125,7 +125,7 @@ describe('ObservabilityActions component', () => {
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       openAlertInFlyout: jest.fn(),
       refresh,
-    } as unknown as ComponentProps<ObservabilityAlertsTableProp<'renderActionsCell'>>;
+    } as unknown as ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>;
 
     const wrapper = mountWithIntl(
       <Router history={createMemoryHistory()}>

@@ -6,18 +6,21 @@
  */
 
 import React, { PropsWithChildren, createContext, useContext } from 'react';
+import { typedMemo } from '../utils';
 import { AdditionalContext, RenderContext } from '../../../../types';
 
 const AlertsTableContext = createContext({});
 
-export const AlertsTableContextProvider = <AC extends AdditionalContext = AdditionalContext>({
-  children,
-  value,
-}: PropsWithChildren<{
-  value: RenderContext<AC>;
-}>) => {
-  return <AlertsTableContext.Provider value={value}>{children}</AlertsTableContext.Provider>;
-};
+export const AlertsTableContextProvider = typedMemo(
+  <AC extends AdditionalContext = AdditionalContext>({
+    children,
+    value,
+  }: PropsWithChildren<{
+    value: RenderContext<AC>;
+  }>) => {
+    return <AlertsTableContext.Provider value={value}>{children}</AlertsTableContext.Provider>;
+  }
+);
 
 export const useAlertsTableContext = <AC extends AdditionalContext = AdditionalContext>() => {
   return useContext(AlertsTableContext) as RenderContext<AC>;

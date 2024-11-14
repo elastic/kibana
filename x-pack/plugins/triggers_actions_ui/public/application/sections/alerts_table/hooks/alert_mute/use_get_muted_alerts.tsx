@@ -45,17 +45,11 @@ export const useGetMutedAlertsQuery = (
     context: AlertsQueryContext,
     queryKey: triggersActionsUiQueriesKeys.mutedAlerts(ruleIds),
     queryFn: ({ signal }) => getMutedAlerts({ http, signal, ids: ruleIds }),
-    onError: (error) => {
-      const serverError = error as ServerError;
-      if ((serverError as ServerError).name !== 'AbortError') {
-        toasts.addError(
-          serverError.body && serverError.body.message
-            ? new Error(serverError.body.message)
-            : serverError,
-          {
-            title: ERROR_TITLE,
-          }
-        );
+    onError: (error: ServerError) => {
+      if (error.name !== 'AbortError') {
+        toasts.addError(error.body?.message ? new Error(error.body.message) : error, {
+          title: ERROR_TITLE,
+        });
       }
     },
     enabled: ruleIds.length > 0 && enabled !== false,

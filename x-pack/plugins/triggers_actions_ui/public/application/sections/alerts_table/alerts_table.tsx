@@ -38,7 +38,6 @@ import {
 } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useCombinedQueries } from '@kbn/react-query-utils';
 import type { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
@@ -353,8 +352,6 @@ const AlertsTableContent = typedForwardRef(
       { enabled: isMaintenanceWindowColumnEnabled(columns), context: AlertsQueryContext }
     );
 
-    const queries = useCombinedQueries(casesQuery, maintenanceWindowsQuery, mutedAlertsQuery);
-
     const refresh = useCallback(() => {
       if (queryParams.pageIndex !== 0) {
         // Refetch from the first page
@@ -441,7 +438,11 @@ const AlertsTableContent = typedForwardRef(
 
           refresh,
 
-          isLoading: isLoadingAlerts || queries.isFetching,
+          isLoading:
+            isLoadingAlerts ||
+            casesQuery.isFetching ||
+            maintenanceWindowsQuery.isFetching ||
+            mutedAlertsQuery.isFetching,
 
           isLoadingAlerts,
           alerts,
@@ -483,7 +484,6 @@ const AlertsTableContent = typedForwardRef(
         id,
         refresh,
         isLoadingAlerts,
-        queries.isFetching,
         alerts,
         alertsCount,
         ecsAlertsData,

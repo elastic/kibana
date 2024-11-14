@@ -16,7 +16,7 @@ import {
 import type { ViewSelection } from '@kbn/securitysolution-data-table';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { getTelemetryEvent } from '@kbn/grouping/src/telemetry/const';
-import type { SecurityAlertsTableProp } from '../../components/alerts_table/types';
+import type { GetSecurityAlertsTableProp } from '../../components/alerts_table/types';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
@@ -33,7 +33,7 @@ const { changeViewMode } = dataTableActions;
 const AdditionalToolbarControlsComponent = ({
   tableType,
 }: Pick<
-  ComponentProps<SecurityAlertsTableProp<'renderAdditionalToolbarControls'>>,
+  ComponentProps<GetSecurityAlertsTableProp<'renderAdditionalToolbarControls'>>,
   'tableType'
 >) => {
   const dispatch = useDispatch();

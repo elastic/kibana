@@ -44,6 +44,7 @@ describe('CasesCell', () => {
     maintenanceWindows: maintenanceWindowsMap,
     columnId: 'kibana.alert.case_ids',
     showAlertStatusWithFlapping: false,
+    // Assertion used to avoid defining all the (numerous) context properties
   } as CellComponentProps;
 
   let appMockRender: AppMockRenderer;

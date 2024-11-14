@@ -22,17 +22,16 @@ import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import type { EventNonEcsData } from '../../../../common/typings';
-import { ObservabilityAlertsTableProp } from '../../../components/alerts_table/types';
+import type { GetObservabilityAlertsTableProp } from '../../../components/alerts_table/types';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../../common/locators/paths';
 import { useKibana } from '../../../utils/kibana_react';
 import { parseAlert } from '../helpers/parse_alert';
 import { observabilityFeatureId } from '../../..';
-import type { ConfigSchema } from '../../../plugin';
 import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/alert_details';
 
 // eslint-disable-next-line react/function-component-definition
-export const AlertActions: ObservabilityAlertsTableProp<'renderActionsCell'> = ({
+export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> = ({
   config,
   observabilityRuleTypeRegistry,
   ...customActionsProps

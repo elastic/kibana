@@ -11,7 +11,7 @@ import { isEqual } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import { useMemo, useCallback } from 'react';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import type { SecurityAlertsTableProp } from '../../components/alerts_table/types';
+import type { GetSecurityAlertsTableProp } from '../../components/alerts_table/types';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
@@ -61,7 +61,7 @@ function getFiltersForDSLQuery(datafeedQuery: QueryDslQueryContainer): Filter[] 
 }
 
 export const getBulkActionsByTableType =
-  (tableId: TableId): SecurityAlertsTableProp<'getBulkActions'> =>
+  (tableId: TableId): GetSecurityAlertsTableProp<'getBulkActions'> =>
   (query, refresh) => {
     const { from, to } = useGlobalTime();
     const filters = useMemo(() => {

@@ -104,7 +104,7 @@ export { Threshold } from './components/custom_threshold/components/threshold';
 
 export { ObservabilityAlertsTable } from './components/alerts_table/alerts_table';
 export type {
-  ObservabilityAlertsTableProp,
+  GetObservabilityAlertsTableProp,
   ObservabilityAlertsTableContext,
   ObservabilityAlertsTableProps,
 } from './components/alerts_table/types';

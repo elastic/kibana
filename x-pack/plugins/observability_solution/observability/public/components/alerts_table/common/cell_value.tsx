@@ -24,15 +24,13 @@ import {
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
 import { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { EventNonEcsData } from '../../../../common/typings';
-import type { ObservabilityRuleTypeRegistry } from '../../..';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../../alert_severity_badge';
 import { AlertStatusIndicator } from '../../alert_status_indicator';
 import { parseAlert } from '../../../pages/alerts/helpers/parse_alert';
 import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
-import { ObservabilityAlertsTableProp } from '../types';
+import { GetObservabilityAlertsTableProp } from '../types';
 
 const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
@@ -53,20 +51,13 @@ const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   return '--';
 };
 
-interface GetRenderCellValueParams {
-  columnId: string;
-  data?: EventNonEcsData[];
-  setFlyoutAlert?: (alertId: string) => void;
-  observabilityRuleTypeRegistry?: ObservabilityRuleTypeRegistry;
-}
-
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
 // eslint-disable-next-line react/function-component-definition
-export const AlertsTableCellValue: ObservabilityAlertsTableProp<'renderCellValue'> = ({
+export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellValue'> = ({
   columnId,
   alert,
   openAlertInFlyout,

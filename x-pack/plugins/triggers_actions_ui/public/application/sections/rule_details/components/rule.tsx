@@ -54,6 +54,7 @@ export type RuleComponentProps = {
 const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
 const ALERT_LIST_TAB = 'rule_alert_list';
 
+// We don't want to show the Feature column in the rule page
 const alertsTableColumns = [defaultAlertsTableColumns[0], ...defaultAlertsTableColumns.slice(2)];
 
 export function RuleComponent({

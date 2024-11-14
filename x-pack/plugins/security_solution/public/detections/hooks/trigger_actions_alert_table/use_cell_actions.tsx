@@ -19,7 +19,7 @@ import { useGetFieldSpec } from '../../../common/hooks/use_get_field_spec';
 import { useDataViewId } from '../../../common/hooks/use_data_view_id';
 import type {
   SecurityAlertsTableContext,
-  SecurityAlertsTableProp,
+  GetSecurityAlertsTableProp,
 } from '../../components/alerts_table/types';
 
 export const useCellActionsOptions = (
@@ -110,7 +110,7 @@ export const useCellActionsOptions = (
     disabledActionTypes,
   });
 
-  return useMemo<SecurityAlertsTableProp<'cellActionsOptions'>>(() => {
+  return useMemo<GetSecurityAlertsTableProp<'cellActionsOptions'>>(() => {
     return {
       getCellActionsForColumn: (_columnId: string, columnIndex: number) => {
         if (cellActions.length === 0) return [];

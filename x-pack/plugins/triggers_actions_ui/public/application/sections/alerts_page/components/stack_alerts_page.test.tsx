@@ -49,6 +49,6 @@ describe('StackAlertsPage', () => {
     mockLoadRuleTypes.mockResolvedValue([]);
     appMockRender.render(<StackAlertsPage />);
 
-    expect(screen.findByTestId('noPermissionPrompt')).toBeInTheDocument();
+    expect(await screen.findByTestId('noPermissionPrompt')).toBeInTheDocument();
   });
 });

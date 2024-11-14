@@ -99,7 +99,6 @@ export interface SecurityAlertsTableContext {
 }
 
 export type SecurityAlertsTableProps = AlertsTablePropsWithRef<SecurityAlertsTableContext>;
-export type SecurityAlertsTableProp<PropKey extends keyof SecurityAlertsTableProps> = NonNullable<
-  SecurityAlertsTableProps[PropKey]
->;
+export type GetSecurityAlertsTableProp<PropKey extends keyof SecurityAlertsTableProps> =
+  NonNullable<SecurityAlertsTableProps[PropKey]>;
 export type { SelectedAlertWithLegacyFormats } from '@kbn/triggers-actions-ui-plugin/public/types';

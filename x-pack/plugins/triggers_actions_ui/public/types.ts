@@ -528,7 +528,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
 /**
  * A utility type to extract the type of a prop from `AlertsTableProps`, excluding `undefined`.
  */
-export type AlertsTableProp<Key extends keyof AlertsTableProps> = NonNullable<
+export type GetAlertsTableProp<Key extends keyof AlertsTableProps> = NonNullable<
   AlertsTableProps[Key]
 >;
 

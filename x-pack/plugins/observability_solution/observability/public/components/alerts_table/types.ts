@@ -18,7 +18,7 @@ export interface ObservabilityAlertsTableContext {
 
 export type ObservabilityAlertsTableProps =
   AlertsTablePropsWithRef<ObservabilityAlertsTableContext> & LazyLoadProps;
-export type ObservabilityAlertsTableProp<PropKey extends keyof ObservabilityAlertsTableProps> =
+export type GetObservabilityAlertsTableProp<PropKey extends keyof ObservabilityAlertsTableProps> =
   NonNullable<ObservabilityAlertsTableProps[PropKey]>;
 
 export interface BucketItem {
