@@ -50,32 +50,13 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   );
                 },
               },
-            },
-            {
-              title: CONNECTORS_LABEL,
-              link: 'serverlessConnectors',
-            },
-            {
-              title: WEB_CRAWLERS_LABEL,
-              link: 'serverlessWebCrawlers',
-            },
-          ],
-        },
-        {
-          id: 'build',
-          title: i18n.translate('xpack.serverlessSearch.nav.build', {
-            defaultMessage: 'Build',
-          }),
-          spaceBefore: 'm',
-          children: [
-            {
-              id: 'dev_tools',
-              title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
-                defaultMessage: 'Dev Tools',
-              }),
-              link: 'dev_tools',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+              {
+                title: CONNECTORS_LABEL,
+                link: 'serverlessConnectors',
+              },
+              {
+                title: WEB_CRAWLERS_LABEL,
+                link: 'serverlessWebCrawlers',
               },
             ],
           },
