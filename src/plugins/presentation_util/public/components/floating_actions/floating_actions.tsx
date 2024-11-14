@@ -34,6 +34,10 @@ export interface FloatingActionsProps {
   disabledActions?: EmbeddableInput['disabledActions'];
 }
 
+export type FloatingActionItem = AnyApiAction & {
+  MenuItem: React.FC<{ context: unknown }>;
+};
+
 export const FloatingActions: FC<FloatingActionsProps> = ({
   children,
   viewMode,
@@ -42,9 +46,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   className = '',
   disabledActions,
 }) => {
-  const [floatingActions, setFloatingActions] = useState<
-    Array<AnyApiAction & { MenuItem: React.FC<{ context: unknown }> }>
-  >([]);
+  const [floatingActions, setFloatingActions] = useState<FloatingActionItem[]>([]);
 
   useEffect(() => {
     if (!api) return;
@@ -55,9 +57,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       trigger: panelHoverTrigger,
     };
 
-    const getActions: () => Promise<
-      Array<AnyApiAction & { MenuItem: React.FC<{ context: unknown }> }>
-    > = async () => {
+    const getActions: () => Promise<FloatingActionItem[]> = async () => {
       const actions = (
         await uiActionsService.getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context)
       )
@@ -65,7 +65,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
           return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
         })
         .sort((a, b) => (a.order || 0) - (b.order || 0));
-      return actions as Array<AnyApiAction & { MenuItem: React.FC<{ context: unknown }> }>;
+      return actions as FloatingActionItem[];
     };
 
     const subscriptions = new Subscription();
@@ -83,7 +83,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
             }
           >;
         }
-        return newActions as Array<AnyApiAction & { MenuItem: React.FC<{ context: unknown }> }>;
+        return newActions as FloatingActionItem[];
       });
     };
 
