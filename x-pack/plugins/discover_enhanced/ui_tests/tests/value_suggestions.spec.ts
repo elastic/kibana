@@ -22,6 +22,7 @@ test.describe('Discover app - value suggestions', () => {
 
   test.afterAll(async ({ kbnClient }) => {
     await kbnClient.uiSettings.unset('doc_table:legacy');
+    await kbnClient.uiSettings.unset('defaultIndex');
     await kbnClient.savedObjects.cleanStandardList();
   });
 
