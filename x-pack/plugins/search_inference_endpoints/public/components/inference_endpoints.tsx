@@ -22,7 +22,7 @@ export const InferenceEndpoints: React.FC = () => {
   return (
     <>
       {inferenceEndpoints.length > 0 && <InferenceEndpointsHeader />}
-      <EuiPageTemplate.Section className="eui-yScroll">
+      <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
         {inferenceEndpoints.length === 0 ? (
           <AddEmptyPrompt />
         ) : (
