@@ -1,5 +1,10 @@
 {
   "type": "shared-common",
   "id": "@kbn/search-errors",
-  "owner": "@elastic/kibana-data-discovery"
+  "owner": [
+    "@elastic/kibana-data-discovery"
+  ],
+  // FIXME? many platform plugins depend on it (for EsError, isEsError, renderSearchError, ...)
+  "group": "platform",
+  "visibility": "shared"
 }

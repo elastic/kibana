@@ -1,5 +1,10 @@
 {
   "type": "shared-browser",
   "id": "@kbn/search-response-warnings",
-  "owner": "@elastic/kibana-data-discovery"
+  "owner": [
+    "@elastic/kibana-data-discovery"
+  ],
+  // FIXME? many platform plugins depend on it (for WarningHandlerCallback, handleWarnings, ...)
+  "group": "platform",
+  "visibility": "shared"
 }
