@@ -9,8 +9,8 @@ post:
     The request must include:
 
     - The `Content-Type: multipart/form-data` HTTP header.
-    
-    - A link to the file that is being uploaded.
+
+    - The location of the file that is being uploaded.
   tags:
     - cases
   parameters:

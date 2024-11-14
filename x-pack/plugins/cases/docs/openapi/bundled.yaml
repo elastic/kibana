@@ -1215,7 +1215,7 @@ paths:
       description: |
         Attach a file to a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. The request must include:
         - The `Content-Type: multipart/form-data` HTTP header.
-        - A link to the file that is being uploaded.
+        - The location of the file that is being uploaded.
       tags:
         - cases
       parameters:
@@ -3378,12 +3378,8 @@ components:
           type: string
           format: binary
         filename:
-          description: The name of file being attached to the case. **This should not include the file extension.**
+          description: The desired name of the file being attached to the case, it can be different than the name of the file in the filesystem. **This should not include the file extension.**
           type: string
-        mimeType:
-          description: The MIME type of the file being attached to the case.
-          type: string
-          example: image/jpeg
   examples:
     create_case_request:
       summary: Create a security case that uses a Jira connector.
