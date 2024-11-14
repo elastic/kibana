@@ -23,9 +23,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       before(async () => {
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-        const apmSynthtraceKibanaClient = synthtrace.apmSynthtraceKibanaClient;
-        const latestVersion = await apmSynthtraceKibanaClient.fetchLatestApmPackageVersion();
-        await apmSynthtraceKibanaClient.installApmPackage(latestVersion);
 
         const instance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })

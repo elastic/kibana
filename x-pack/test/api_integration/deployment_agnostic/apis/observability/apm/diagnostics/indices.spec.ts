@@ -93,9 +93,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(async () => {
         await es.indices.delete({ index: 'traces-apm-default' });
-        const apmSynthtraceKibanaClient = synthtrace.apmSynthtraceKibanaClient;
-        const latestVersion = await apmSynthtraceKibanaClient.fetchLatestApmPackageVersion();
-        await apmSynthtraceKibanaClient.installApmPackage(latestVersion);
         await apmSynthtraceEsClient.clean();
       });
 
@@ -138,9 +135,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       after(async () => {
-        const apmSynthtraceKibanaClient = synthtrace.apmSynthtraceKibanaClient;
-        const latestVersion = await apmSynthtraceKibanaClient.fetchLatestApmPackageVersion();
-        await apmSynthtraceKibanaClient.installApmPackage(latestVersion);
         await apmSynthtraceEsClient.clean();
       });
 
