@@ -20,7 +20,7 @@ import { ReportingCore } from '..';
 import { deprecations } from '../lib/deprecations';
 import { getKibanaPrivilegesDocumentationUrl } from '../utils/get_kibana_privileges_doc_url';
 
-const REPORTING_USER_ROLE_NAME = 'reporting_user';
+const APM_USER_ROLE_NAME = 'apm_user';
 
 interface ExtraDependencies {
   reportingCore: ReportingCore;
@@ -29,7 +29,7 @@ interface ExtraDependencies {
 export async function getDeprecationsInfo(
   { esClient }: GetDeprecationsContext,
   { reportingCore }: ExtraDependencies
-): Promise<DeprecationsDetails[]> {
+) {
   const client = esClient.asCurrentUser;
   const { security, docLinks } = reportingCore.getPluginSetupDeps();
 
@@ -38,8 +38,7 @@ export async function getDeprecationsInfo(
     return [];
   }
 
-  const config = reportingCore.getConfig();
-  const deprecatedRoles = config.roles.allow || ['reporting_user'];
+  const deprecatedRoles = [APM_USER_ROLE_NAME];
 
   return [
     ...(await getUsersDeprecations(client, reportingCore, deprecatedRoles, docLinks)),
@@ -53,43 +52,25 @@ async function getUsersDeprecations(
   deprecatedRoles: string[],
   docLinks: DocLinksServiceSetup
 ): Promise<DeprecationsDetails[]> {
-  const usingDeprecatedConfig = !reportingCore.getContract().usesUiCapabilities();
   const strings = {
-    title: i18n.translate('xpack.reporting.deprecations.reportingRoleUsers.title', {
-      defaultMessage: `The "{reportingUserRoleName}" role is deprecated: check user roles`,
-      values: { reportingUserRoleName: REPORTING_USER_ROLE_NAME },
+    title: i18n.translate('xpack.reporting.deprecations.apmUser.title', {
+      defaultMessage: `The "{apmUserRoleName}" role has been removed: check user roles`,
+      values: { apmUserRoleName: APM_USER_ROLE_NAME },
     }),
-    message: i18n.translate('xpack.reporting.deprecations.reportingRoleUsers.description', {
-      defaultMessage:
-        `The default mechanism for Reporting privileges will work differently in future versions, and` +
-        ` this cluster has users who have a deprecated role for this privilege.` +
-        ` Set "xpack.reporting.roles.enabled" to "false" to adopt the future behavior before upgrading.`,
+    message: i18n.translate('xpack.reporting.deprecations.apmUser.description', {
+      defaultMessage: `The "{apmUserRoleName}" has been removed and this cluster has users with the removed role.`,
+      values: { apmUserRoleName: APM_USER_ROLE_NAME },
     }),
     manualSteps: (usersRoles: string) => [
-      ...(usingDeprecatedConfig
-        ? [
-            i18n.translate('xpack.reporting.deprecations.reportingRoleUsers.manualStepOne', {
-              defaultMessage: `Set "xpack.reporting.roles.enabled" to "false" in kibana.yml.`,
-            }),
-            i18n.translate('xpack.reporting.deprecations.reportingRoleUsers.manualStepTwo', {
-              defaultMessage: `Remove "xpack.reporting.roles.allow" in kibana.yml, if present.`,
-            }),
-          ]
-        : []),
-
-      i18n.translate('xpack.reporting.deprecations.reportingRoleUsers.manualStepThree', {
-        defaultMessage:
-          `Go to Management > Security > Roles to create one or more roles that grant` +
-          ` the Kibana application privilege for Reporting.`,
+      i18n.translate('xpack.reporting.deprecations.apmUser.manualStepOne', {
+        defaultMessage: `Go to Management > Security > Users to find users with the "{apmUserRoleName}" role.`,
+        values: { apmUserRoleName: APM_USER_ROLE_NAME },
       }),
-      i18n.translate('xpack.reporting.deprecations.reportingRoleUsers.manualStepFour', {
-        defaultMessage: `Grant Reporting privileges to users by assigning one of the new roles.`,
-      }),
-      i18n.translate('xpack.reporting.deprecations.reportingRoleUsers.manualStepFive', {
+      i18n.translate('xpack.reporting.deprecations.apmUser.manualStepTwo', {
         defaultMessage:
-          `Remove the "reporting_user" role from all users and add the custom role.` +
+          `Remove the "{apmUserRoleName}" role from all users and add the built-in "viewer" roles.` +
           ` The affected users are: {usersRoles}.`,
-        values: { usersRoles },
+        values: { apmUserRoleName: APM_USER_ROLE_NAME, usersRoles },
       }),
     ],
   };
@@ -131,7 +112,7 @@ async function getUsersDeprecations(
       title: strings.title,
       message: strings.message,
       correctiveActions: { manualSteps: strings.manualSteps(reportingUsers.join(', ')) },
-      level: 'warning',
+      level: 'critical',
       deprecationType: 'feature',
       documentationUrl: getKibanaPrivilegesDocumentationUrl(
         reportingCore.getKibanaPackageInfo().branch
@@ -146,43 +127,25 @@ async function getRoleMappingsDeprecations(
   deprecatedRoles: string[],
   docLinks: DocLinksServiceSetup
 ): Promise<DeprecationsDetails[]> {
-  const usingDeprecatedConfig = !reportingCore.getContract().usesUiCapabilities();
   const strings = {
-    title: i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.title', {
-      defaultMessage: `The "{reportingUserRoleName}" role is deprecated: check role mappings`,
-      values: { reportingUserRoleName: REPORTING_USER_ROLE_NAME },
+    title: i18n.translate('xpack.reporting.deprecations.apmUserRoleMappings.title', {
+      defaultMessage: `The "{apmUserRoleName}" role has been removed: check role mappings`,
+      values: { apmUserRoleName: APM_USER_ROLE_NAME },
     }),
-    message: i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.description', {
-      defaultMessage:
-        `The default mechanism for Reporting privileges will work differently in future versions, and` +
-        ` this cluster has role mappings that are mapped to a deprecated role for this privilege.` +
-        ` Set "xpack.reporting.roles.enabled" to "false" to adopt the future behavior before upgrading.`,
+    message: i18n.translate('xpack.reporting.deprecations.apmUser.description', {
+      defaultMessage: `The "{apmUserRoleName}" role has been removed.`,
+      values: { apmUserRoleName: APM_USER_ROLE_NAME },
     }),
     manualSteps: (roleMappings: string) => [
-      ...(usingDeprecatedConfig
-        ? [
-            i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepOne', {
-              defaultMessage: `Set "xpack.reporting.roles.enabled" to "false" in kibana.yml.`,
-            }),
-            i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepTwo', {
-              defaultMessage: `Remove "xpack.reporting.roles.allow" in kibana.yml, if present.`,
-            }),
-          ]
-        : []),
-
-      i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepThree', {
-        defaultMessage:
-          `Go to Management > Security > Roles to create one or more roles that grant` +
-          ` the Kibana application privilege for Reporting.`,
+      i18n.translate('xpack.reporting.deprecations.apmUser.manualStepOne', {
+        defaultMessage: `Go to Management > Security > Roles to find roles with the "{apmUserRoleName}" role.`,
+        values: { apmUserRoleName: APM_USER_ROLE_NAME },
       }),
-      i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepFour', {
-        defaultMessage: `Grant Reporting privileges to users by assigning one of the new roles.`,
-      }),
-      i18n.translate('xpack.reporting.deprecations.reportingRoleMappings.manualStepFive', {
+      i18n.translate('xpack.reporting.deprecations.apmUserRoleMappings.manualStepFive', {
         defaultMessage:
-          `Remove the "reporting_user" role from all role mappings and add the custom role.` +
+          `Remove the "{apmUserRoleName}" role from all role mappings and add the built-in "viewer" roles.` +
           ` The affected role mappings are: {roleMappings}.`,
-        values: { roleMappings },
+        values: { apmUserRoleName: APM_USER_ROLE_NAME, roleMappings },
       }),
     ],
   };
@@ -229,7 +192,7 @@ async function getRoleMappingsDeprecations(
       correctiveActions: {
         manualSteps: strings.manualSteps(roleMappingsWithReportingRole.join(', ')),
       },
-      level: 'warning',
+      level: 'critical',
       deprecationType: 'feature',
       documentationUrl: getKibanaPrivilegesDocumentationUrl(
         reportingCore.getKibanaPackageInfo().branch

@@ -9,6 +9,7 @@ import { ReportingCore } from '../core';
 
 import { getDeprecationsInfo as getIlmPolicyDeprecationsInfo } from './migrate_existing_indices_ilm_policy';
 import { getDeprecationsInfo as getReportingRoleDeprecationsInfo } from './reporting_role';
+import { getDeprecationsInfo as getApmUserRoleDeprecationsInfo } from './apm_user_role';
 
 export const registerDeprecations = ({
   core,
@@ -22,6 +23,7 @@ export const registerDeprecations = ({
       return [
         ...(await getIlmPolicyDeprecationsInfo(ctx)),
         ...(await getReportingRoleDeprecationsInfo(ctx, { reportingCore })),
+        ...(await getApmUserRoleDeprecationsInfo(ctx, { reportingCore })),
       ];
     },
   });

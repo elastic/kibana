@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`roles mapped to a removed role includes steps to remove the incompatible config, when applicable 1`] = `
+Array [
+  Object {
+    "correctiveActions": Object {
+      "manualSteps": Array [
+        "Go to Management > Security > Users to find users with the \\"apm_user\\" role.",
+        "Remove the \\"apm_user\\" role from all users and add the built-in \\"viewer\\" roles. The affected users are: reportron[apm_user].",
+      ],
+    },
+    "deprecationType": "feature",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/branch/kibana-privileges.html",
+    "level": "critical",
+    "message": "The \\"apm_user\\" has been removed and this cluster has users with the removed role.",
+    "title": "The \\"apm_user\\" role has been removed: check user roles",
+  },
+]
+`;
+
+exports[`roles mapped to a removed role logs a deprecation when a role was found that maps to the removed apm_user role 1`] = `
+Array [
+  Object {
+    "correctiveActions": Object {
+      "manualSteps": Array [
+        "Go to Management > Security > Roles to find roles with the \\"apm_user\\" role.",
+        "Remove the \\"apm_user\\" role from all role mappings and add the built-in \\"viewer\\" roles. The affected role mappings are: dungeon_master[apm_user].",
+      ],
+    },
+    "deprecationType": "feature",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/branch/kibana-privileges.html",
+    "level": "critical",
+    "message": "The \\"apm_user\\" role has been removed.",
+    "title": "The \\"apm_user\\" role has been removed: check role mappings",
+  },
+]
+`;
+
+exports[`users assigned to a removed role includes steps to remove the incompatible config, when applicable 1`] = `
+Array [
+  Object {
+    "correctiveActions": Object {
+      "manualSteps": Array [
+        "Go to Management > Security > Users to find users with the \\"apm_user\\" role.",
+        "Remove the \\"apm_user\\" role from all users and add the built-in \\"viewer\\" roles. The affected users are: reportron[apm_user].",
+      ],
+    },
+    "deprecationType": "feature",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/branch/kibana-privileges.html",
+    "level": "critical",
+    "message": "The \\"apm_user\\" has been removed and this cluster has users with the removed role.",
+    "title": "The \\"apm_user\\" role has been removed: check user roles",
+  },
+]
+`;
+
+exports[`users assigned to a removed role logs a deprecation when a user was found with a removed apm_user role 1`] = `
+Array [
+  Object {
+    "correctiveActions": Object {
+      "manualSteps": Array [
+        "Go to Management > Security > Users to find users with the \\"apm_user\\" role.",
+        "Remove the \\"apm_user\\" role from all users and add the built-in \\"viewer\\" roles. The affected users are: reportron[apm_user].",
+      ],
+    },
+    "deprecationType": "feature",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/branch/kibana-privileges.html",
+    "level": "critical",
+    "message": "The \\"apm_user\\" has been removed and this cluster has users with the removed role.",
+    "title": "The \\"apm_user\\" role has been removed: check user roles",
+  },
+]
+`;
