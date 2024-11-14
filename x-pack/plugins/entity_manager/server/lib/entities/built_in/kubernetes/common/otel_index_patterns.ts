@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const commonOtelIndexPatterns = ['metrics-*', 'logs-*'];
+export const commonOtelIndexPatterns = ['metrics-*otel*', 'logs-*'];
