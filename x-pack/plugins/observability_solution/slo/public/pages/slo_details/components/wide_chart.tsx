@@ -26,7 +26,7 @@ import { useAnnotations } from '@kbn/observability-plugin/public';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { getBrushTimeBounds } from '../../../utils/slo/duration';
 import { TimeBounds } from '../types';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { ChartData } from '../../../typings';
 
 type ChartType = 'area' | 'line';

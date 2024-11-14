@@ -3324,6 +3324,20 @@
           },
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.FunctionDefinition.preview",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "preview",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
             "id": "def-common.FunctionDefinition.ignoreAsSuggestion",
             "type": "CompoundType",
             "tags": [],
