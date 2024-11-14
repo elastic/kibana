@@ -46,8 +46,7 @@ export class AutoOpsAPIService {
     logger.debug(
       `[AutoOps API] Creating autoops agent with TLS cert: ${
         autoopsConfig?.api?.tls?.certificate ? '[REDACTED]' : 'undefined'
-      } and TLS key: ${autoopsConfig?.api?.tls?.key ? '[REDACTED]' : 'undefined'}
-      and TLS ca: ${autoopsConfig?.api?.tls?.ca ? '[REDACTED]' : 'undefined'}`
+      } and TLS key: ${autoopsConfig?.api?.tls?.key ? '[REDACTED]' : 'undefined'}`
     );
     const tlsConfig = this.createTlsConfig(autoopsConfig);
 
@@ -146,7 +145,6 @@ export class AutoOpsAPIService {
         enabled: true,
         certificate: autoopsConfig?.api?.tls?.certificate,
         key: autoopsConfig?.api?.tls?.key,
-        certificateAuthorities: autoopsConfig?.api?.tls?.ca,
       })
     );
   }
@@ -164,7 +162,6 @@ export class AutoOpsAPIService {
           ...requestConfig.httpsAgent.options,
           cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
           key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
-          ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
         },
       },
     });
