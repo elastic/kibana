@@ -7,8 +7,8 @@
 
 import { FindSLODefinitionsResponse } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+import { usePluginContext } from './use_plugin_context';
 
 export interface UseFetchSloDefinitionsResponse {
   data: FindSLODefinitionsResponse | undefined;
@@ -31,19 +31,19 @@ export function useFetchSloDefinitions({
   page = 1,
   perPage = 100,
 }: Params): UseFetchSloDefinitionsResponse {
-  const { http } = useKibana().services;
+  const { sloClient } = usePluginContext();
   const search = name.endsWith('*') ? name : `${name}*`;
 
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
     queryKey: sloKeys.definitions(search, page, perPage, includeOutdatedOnly),
     queryFn: async ({ signal }) => {
       try {
-        const response = await http.get<FindSLODefinitionsResponse>(
-          '/api/observability/slos/_definitions',
-          { query: { search, includeOutdatedOnly, page, perPage }, signal }
-        );
-
-        return response;
+        return await sloClient.fetch('GET /api/observability/slos/_definitions 2023-10-31', {
+          params: {
+            query: { search, includeOutdatedOnly, page: String(page), perPage: String(perPage) },
+          },
+          signal,
+        });
       } catch (error) {
         throw new Error(`Something went wrong. Error: ${error}`);
       }
