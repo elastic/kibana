@@ -176,17 +176,25 @@ export class SloPlugin
 
   public start(coreStart: CoreStart, pluginsStart: SloPublicPluginsStart) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
+
+    const getCreateSLOFlyout = getCreateSLOFlyoutLazy({
+      core: coreStart,
+      isDev: this.initContext.env.mode.dev,
+      kibanaVersion,
+      observabilityRuleTypeRegistry: pluginsStart.observability.observabilityRuleTypeRegistry,
+      ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
+      plugins: pluginsStart,
+      isServerless: !!pluginsStart.serverless,
+      experimentalFeatures: this.experimentalFeatures,
+    });
+
+    pluginsStart.discoverShared.features.registry.register({
+      id: 'observability-create-slo',
+      createSLOFlyout: getCreateSLOFlyout,
+    });
+
     return {
-      getCreateSLOFlyout: getCreateSLOFlyoutLazy({
-        core: coreStart,
-        isDev: this.initContext.env.mode.dev,
-        kibanaVersion,
-        observabilityRuleTypeRegistry: pluginsStart.observability.observabilityRuleTypeRegistry,
-        ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
-        plugins: pluginsStart,
-        isServerless: !!pluginsStart.serverless,
-        experimentalFeatures: this.experimentalFeatures,
-      }),
+      getCreateSLOFlyout,
     };
   }
 
