@@ -127,7 +127,7 @@ export function ConfiguredSettings({
           const Component = settingComponentRegistry.get(getInnerType(configuredSetting.schema));
 
           if (!Component) {
-            throw new Error(`Unknown setting type: ${configuredSetting.schema._type}}`);
+            throw new Error(`Unknown setting type: ${configuredSetting.schema._type}`);
           }
 
           return (

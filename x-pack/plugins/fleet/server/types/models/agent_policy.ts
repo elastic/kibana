@@ -385,6 +385,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
             schema.object({
               rotateeverybytes: schema.maybe(schema.number()),
               keepfiles: schema.maybe(schema.number()),
+              interval: schema.maybe(schema.string()),
             })
           ),
         })

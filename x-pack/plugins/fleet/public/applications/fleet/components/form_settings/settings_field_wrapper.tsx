@@ -101,9 +101,13 @@ export const SettingsFieldWrapper: React.FC<{
 };
 
 export const getInnerType = (schema: z.ZodType<any, any>) => {
-  return schema instanceof z.ZodDefault
-    ? schema._def.innerType._def.typeName === 'ZodEffects'
+  if (schema._def.innerType) {
+    return schema._def.innerType._def.typeName === 'ZodEffects'
       ? schema._def.innerType._def.schema._def.typeName
-      : schema._def.innerType._def.typeName
-    : schema._def.typeName;
+      : schema._def.innerType._def.typeName;
+  }
+  if (schema._def.typeName === 'ZodEffects') {
+    return schema._def.schema._def.typeName;
+  }
+  return schema._def.typeName;
 };

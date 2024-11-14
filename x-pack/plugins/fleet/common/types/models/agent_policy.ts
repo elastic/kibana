@@ -191,6 +191,7 @@ export interface FullAgentPolicy {
       files?: {
         rotateeverybytes?: number;
         keepfiles?: number;
+        interval?: string;
       };
     };
     limits?: {
