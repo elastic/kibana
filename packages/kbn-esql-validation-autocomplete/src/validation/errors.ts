@@ -190,6 +190,21 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           }
         ),
       };
+    case 'fnUnsupportedAfterCommand':
+      return {
+        type: 'error',
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.fnUnsupportedAfterCommand',
+          {
+            defaultMessage: '[{function}] function cannot be used after {command}',
+            values: {
+              function: out.function,
+              command: out.command,
+            },
+          }
+        ),
+      };
+
     case 'unknownInterval':
       return {
         message: i18n.translate(
@@ -415,6 +430,16 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
             values: {
               nestedAgg: out.nestedAgg,
             },
+          }
+        ),
+      };
+    case 'onlyWhereCommandSupported':
+      return {
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.onlyWhereCommandSupported',
+          {
+            defaultMessage: '[{fn}] function is only supported in WHERE commands',
+            values: { fn: out.fn.toUpperCase() },
           }
         ),
       };
