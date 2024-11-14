@@ -11,6 +11,7 @@ export type {
   BaseDeprecationDetails,
   ConfigDeprecationDetails,
   FeatureDeprecationDetails,
+  ApiDeprecationDetails,
   DeprecationsDetails,
   DomainDeprecationDetails,
   DeprecationsGetResponse,

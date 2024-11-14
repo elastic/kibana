@@ -71,11 +71,11 @@ export const ElasticRule = z.object({
   /**
    * The translated elastic query.
    */
-  query: z.string(),
+  query: z.string().optional(),
   /**
    * The translated elastic query language.
    */
-  query_language: z.literal('esql').default('esql'),
+  query_language: z.literal('esql').optional(),
   /**
    * The Elastic prebuilt rule id matched.
    */
@@ -99,16 +99,20 @@ export const RuleMigration = z.object({
    * The migration id.
    */
   migration_id: z.string(),
+  /**
+   * The username of the user who created the migration.
+   */
+  created_by: z.string(),
   original_rule: OriginalRule,
   elastic_rule: ElasticRule.optional(),
   /**
-   * The translation state.
+   * The rule translation result.
    */
-  translation_state: z.enum(['complete', 'partial', 'untranslatable']).optional(),
+  translation_result: z.enum(['full', 'partial', 'untranslatable']).optional(),
   /**
-   * The status of the rule migration.
+   * The status of the rule migration process.
    */
-  status: z.enum(['pending', 'processing', 'finished', 'error']).default('pending'),
+  status: z.enum(['pending', 'processing', 'completed', 'failed']).default('pending'),
   /**
    * The comments for the migration including a summary from the LLM in markdown.
    */
@@ -122,3 +126,55 @@ export const RuleMigration = z.object({
    */
   updated_by: z.string().optional(),
 });
+
+/**
+ * The rule migration task stats object.
+ */
+export type RuleMigrationTaskStats = z.infer<typeof RuleMigrationTaskStats>;
+export const RuleMigrationTaskStats = z.object({
+  /**
+   * Indicates if the migration task status.
+   */
+  status: z.enum(['ready', 'running', 'stopped', 'finished']),
+  /**
+   * The rules migration stats.
+   */
+  rules: z.object({
+    /**
+     * The total number of rules to migrate.
+     */
+    total: z.number().int(),
+    /**
+     * The number of rules that are pending migration.
+     */
+    pending: z.number().int(),
+    /**
+     * The number of rules that are being migrated.
+     */
+    processing: z.number().int(),
+    /**
+     * The number of rules that have been migrated successfully.
+     */
+    completed: z.number().int(),
+    /**
+     * The number of rules that have failed migration.
+     */
+    failed: z.number().int(),
+  }),
+  /**
+   * The moment of the last update.
+   */
+  last_updated_at: z.string().optional(),
+});
+
+export type RuleMigrationAllTaskStats = z.infer<typeof RuleMigrationAllTaskStats>;
+export const RuleMigrationAllTaskStats = z.array(
+  RuleMigrationTaskStats.merge(
+    z.object({
+      /**
+       * The migration id
+       */
+      migration_id: z.string(),
+    })
+  )
+);

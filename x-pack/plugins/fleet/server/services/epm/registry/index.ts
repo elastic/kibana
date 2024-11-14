@@ -54,6 +54,8 @@ import { resolveDataStreamFields, resolveDataStreamsMap, withPackageSpan } from 
 
 import { verifyPackageArchiveSignature } from '../packages/package_verification';
 
+import type { ArchiveIterator } from '../../../../common/types';
+
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
 
@@ -309,11 +311,12 @@ async function getPackageInfoFromArchiveOrCache(
 export async function getPackage(
   name: string,
   version: string,
-  options?: { ignoreUnverified?: boolean }
+  options?: { ignoreUnverified?: boolean; useStreaming?: boolean }
 ): Promise<{
   paths: string[];
   packageInfo: ArchivePackage;
   assetsMap: AssetsMap;
+  archiveIterator: ArchiveIterator;
   verificationResult?: PackageVerificationResult;
 }> {
   const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
@@ -340,18 +343,18 @@ export async function getPackage(
     setVerificationResult({ name, version }, latestVerificationResult);
   }
 
-  const { assetsMap, paths } = await unpackBufferToAssetsMap({
-    name,
-    version,
+  const contentType = ensureContentType(archivePath);
+  const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
     archiveBuffer,
-    contentType: ensureContentType(archivePath),
+    contentType,
+    useStreaming: options?.useStreaming,
   });
 
   if (!packageInfo) {
     packageInfo = await getPackageInfoFromArchiveOrCache(name, version, archiveBuffer, archivePath);
   }
 
-  return { paths, packageInfo, assetsMap, verificationResult };
+  return { paths, packageInfo, assetsMap, archiveIterator, verificationResult };
 }
 
 export async function getPackageFieldsMetadata(
@@ -397,7 +400,7 @@ export async function getPackageFieldsMetadata(
   }
 }
 
-function ensureContentType(archivePath: string) {
+export function ensureContentType(archivePath: string) {
   const contentType = mime.lookup(archivePath);
 
   if (!contentType) {

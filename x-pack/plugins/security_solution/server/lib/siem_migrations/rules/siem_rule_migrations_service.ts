@@ -5,52 +5,67 @@
  * 2.0.
  */
 
+import assert from 'assert';
 import type { IClusterClient, Logger } from '@kbn/core/server';
 import { RuleMigrationsDataStream } from './data_stream/rule_migrations_data_stream';
 import type {
-  SiemRuleMigrationsClient,
   SiemRulesMigrationsSetupParams,
-  SiemRuleMigrationsGetClientParams,
+  SiemRuleMigrationsCreateClientParams,
+  SiemRuleMigrationsClient,
 } from './types';
+import { RuleMigrationsTaskRunner } from './task/rule_migrations_task_runner';
 
 export class SiemRuleMigrationsService {
-  private dataStreamAdapter: RuleMigrationsDataStream;
+  private rulesDataStream: RuleMigrationsDataStream;
   private esClusterClient?: IClusterClient;
+  private taskRunner: RuleMigrationsTaskRunner;
 
   constructor(private logger: Logger, kibanaVersion: string) {
-    this.dataStreamAdapter = new RuleMigrationsDataStream({ kibanaVersion });
+    this.rulesDataStream = new RuleMigrationsDataStream(this.logger, kibanaVersion);
+    this.taskRunner = new RuleMigrationsTaskRunner(this.logger);
   }
 
   setup({ esClusterClient, ...params }: SiemRulesMigrationsSetupParams) {
     this.esClusterClient = esClusterClient;
     const esClient = esClusterClient.asInternalUser;
-    this.dataStreamAdapter.install({ ...params, esClient, logger: this.logger }).catch((err) => {
+
+    this.rulesDataStream.install({ ...params, esClient }).catch((err) => {
       this.logger.error(`Error installing data stream for rule migrations: ${err.message}`);
       throw err;
     });
   }
 
-  getClient({ spaceId, request }: SiemRuleMigrationsGetClientParams): SiemRuleMigrationsClient {
-    if (!this.esClusterClient) {
-      throw new Error('ES client not available, please call setup first');
-    }
-    // Installs the data stream for the specific space. it will only install if it hasn't been installed yet.
-    // The adapter stores the data stream name promise, it will return it directly when the data stream is known to be installed.
-    const dataStreamNamePromise = this.dataStreamAdapter.installSpace(spaceId);
+  createClient({
+    spaceId,
+    currentUser,
+    request,
+  }: SiemRuleMigrationsCreateClientParams): SiemRuleMigrationsClient {
+    assert(currentUser, 'Current user must be authenticated');
+    assert(this.esClusterClient, 'ES client not available, please call setup first');
 
     const esClient = this.esClusterClient.asScoped(request).asCurrentUser;
+    const dataClient = this.rulesDataStream.createClient({ spaceId, currentUser, esClient });
+
     return {
-      create: async (ruleMigrations) => {
-        const _index = await dataStreamNamePromise;
-        return esClient.bulk({
-          refresh: 'wait_for',
-          body: ruleMigrations.flatMap((ruleMigration) => [{ create: { _index } }, ruleMigration]),
-        });
-      },
-      search: async (term) => {
-        const index = await dataStreamNamePromise;
-        return esClient.search({ index, body: { query: { term } } });
+      data: dataClient,
+      task: {
+        start: (params) => {
+          return this.taskRunner.start({ ...params, currentUser, dataClient });
+        },
+        stop: (migrationId) => {
+          return this.taskRunner.stop({ migrationId, dataClient });
+        },
+        getStats: async (migrationId) => {
+          return this.taskRunner.getStats({ migrationId, dataClient });
+        },
+        getAllStats: async () => {
+          return this.taskRunner.getAllStats({ dataClient });
+        },
       },
     };
+  }
+
+  stop() {
+    this.taskRunner.stopAll();
   }
 }

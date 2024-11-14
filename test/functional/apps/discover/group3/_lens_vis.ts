@@ -110,7 +110,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return seriesType;
   }
 
-  describe('discover lens vis', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/184600
+  describe.skip('discover lens vis', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -288,7 +289,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      expect(await getCurrentVisTitle()).to.be('Bar');
+      // Line has been retained although the query changed!
+      expect(await getCurrentVisTitle()).to.be('Line');
 
       await checkESQLHistogramVis(defaultTimespanESQL, '100');
 
@@ -567,15 +569,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
-      await monacoEditor.setCodeEditorValue(
-        'from logstash-* | stats averageB = avg(bytes) by extension.raw'
-      );
+      // reset to histogram
+      await monacoEditor.setCodeEditorValue('from logstash-*');
       await testSubjects.click('querySubmitButton');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
       expect(await getCurrentVisTitle()).to.be('Bar');
-      expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
+      expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
 

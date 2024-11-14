@@ -957,6 +957,14 @@ export const ModelsList: FC<Props> = ({
               }
             });
 
+            setItemIdToExpandedRowMap((prev) => {
+              const newMap = { ...prev };
+              modelsToDelete.forEach((model) => {
+                delete newMap[model.model_id];
+              });
+              return newMap;
+            });
+
             setModelsToDelete([]);
 
             if (refreshList) {

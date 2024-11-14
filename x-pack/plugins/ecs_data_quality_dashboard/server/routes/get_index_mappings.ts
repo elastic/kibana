@@ -19,7 +19,11 @@ export const getIndexMappingsRoute = (router: IRouter, logger: Logger) => {
     .get({
       path: GET_INDEX_MAPPINGS,
       access: 'internal',
-      options: { tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {

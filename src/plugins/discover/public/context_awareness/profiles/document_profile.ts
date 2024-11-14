@@ -54,17 +54,13 @@ export interface DocumentContext {
   type: DocumentType;
 }
 
-export type DocumentProfileProvider = ProfileProvider<
+export type DocumentProfileProvider<TProviderContext = {}> = ProfileProvider<
   DocumentProfile,
   DocumentProfileProviderParams,
-  DocumentContext
+  DocumentContext & TProviderContext
 >;
 
-export class DocumentProfileService extends ProfileService<
-  DocumentProfile,
-  DocumentProfileProviderParams,
-  DocumentContext
-> {
+export class DocumentProfileService extends ProfileService<DocumentProfileProvider> {
   constructor() {
     super({
       profileId: 'default-document-profile',

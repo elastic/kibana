@@ -11,7 +11,6 @@ disabled:
   - x-pack/test/osquery_cypress/serverless_cli_config.ts
   - x-pack/test/security_solution_cypress/serverless_config.ts
 
-
   # Playwright
   - x-pack/test/security_solution_playwright/serverless_config.ts
 
@@ -93,6 +92,9 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists_items/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/authorization/exceptions/lists/essentials_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/authorization/exceptions/common/essentials_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/authorization/exceptions/items/essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/lists_items/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/explore/hosts/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/explore/network/trial_license_complete_tier/configs/serverless.config.ts
@@ -106,6 +108,7 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/metadata/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/package/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/policy_response/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/policy/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/resolver/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/response_actions/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/spaces/trial_license_complete_tier/configs/serverless.config.ts

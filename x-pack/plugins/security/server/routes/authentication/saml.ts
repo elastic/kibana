@@ -30,6 +30,12 @@ export function defineSAMLRoutes({
     router.post(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route must remain accessible to 3rd-party SAML providers',
+          },
+        },
         validate: {
           body: schema.object(
             { SAMLResponse: schema.string(), RelayState: schema.maybe(schema.string()) },

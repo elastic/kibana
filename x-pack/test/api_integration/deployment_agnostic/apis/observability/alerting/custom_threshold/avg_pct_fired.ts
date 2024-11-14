@@ -27,11 +27,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
   const logger = getService('log');
-  let roleAuthc: RoleCredentials;
-  let internalReqHeader: InternalRequestHeader;
   const config = getService('config');
   const isServerless = config.get('serverless');
   const expectedConsumer = isServerless ? 'observability' : 'logs';
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('AVG - PCT - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';

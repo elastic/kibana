@@ -10,6 +10,7 @@
 import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosResponse } from 'axios';
+import util from 'util';
 import * as cheerio from 'cheerio';
 import { Cookie, parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
@@ -263,23 +264,26 @@ export const finishSAMLHandshake = async ({
 }) => {
   const encodedResponse = encodeURIComponent(samlResponse);
   const url = kbnHost + '/api/security/saml/callback';
+  const request = {
+    url,
+    method: 'post',
+    data: `SAMLResponse=${encodedResponse}`,
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
+      ...(sid ? { Cookie: `sid=${sid}` } : {}),
+    },
+    validateStatus: () => true,
+    maxRedirects: 0,
+  };
   let authResponse: AxiosResponse;
 
   try {
-    authResponse = await axios.request({
-      url,
-      method: 'post',
-      data: `SAMLResponse=${encodedResponse}`,
-      headers: {
-        'content-type': 'application/x-www-form-urlencoded',
-        ...(sid ? { Cookie: `sid=${sid}` } : {}),
-      },
-      validateStatus: () => true,
-      maxRedirects: 0,
-    });
+    authResponse = await axios.request(request);
   } catch (ex) {
     log.error('Failed to call SAML callback');
     cleanException(url, ex);
+    // Logging the `Cookie: sid=xxxx` header is safe here since it’s an intermediate, non-authenticated cookie that cannot be reused if leaked.
+    log.error(`Request sent: ${util.inspect(request)}`);
     throw ex;
   }
 
