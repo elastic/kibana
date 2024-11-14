@@ -61,6 +61,7 @@ interface GetExpressionRendererPropsParams {
   api: LensApi;
   addUserMessages: (messages: UserMessage[]) => void;
   updateBlockingErrors: (error: Error) => void;
+  renderCount: number;
 }
 
 async function getExpressionFromDocument(
@@ -145,6 +146,7 @@ export async function getExpressionRendererParams(
     addUserMessages,
     updateBlockingErrors,
     searchContext,
+    renderCount,
   }: GetExpressionRendererPropsParams
 ): Promise<{
   params: ExpressionWrapperProps | null;
@@ -167,6 +169,8 @@ export async function getExpressionRendererParams(
   // if at least one indexPattern is time based, then the Lens embeddable requires the timeRange prop
   // this is necessary for the dataview embeddable but not the ES|QL one
   if (
+    // restore the legacy behavior for now to not break things
+    renderCount < 2 &&
     isSearchContextIncompatibleWithDataViews(
       api,
       getExecutionContext(),

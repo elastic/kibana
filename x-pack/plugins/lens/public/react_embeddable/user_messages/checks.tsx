@@ -48,10 +48,6 @@ export function isSearchContextIncompatibleWithDataViews(
   indexPatterns: IndexPatternMap
 ) {
   return (
-    context?.type !== 'canvas' &&
-    // SLO chart was relying on a bug in the previous system
-    // so we need to exclude it for now
-    context?.id !== 'sloErrorRateChart' &&
     !api.isTextBasedLanguage() &&
     searchContext.timeRange == null &&
     indexPatternRefs.some(({ id }) => {

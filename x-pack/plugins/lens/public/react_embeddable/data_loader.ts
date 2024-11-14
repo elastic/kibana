@@ -214,6 +214,7 @@ export function loadEmbeddableData(
         handleEvent,
         disableTriggers,
         updateBlockingErrors,
+        renderCount: internalApi.renderCount$.getValue(),
       }),
       getUsedDataViews(
         currentState.attributes.references,
