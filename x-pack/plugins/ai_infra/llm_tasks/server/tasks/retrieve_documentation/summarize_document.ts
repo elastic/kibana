@@ -45,12 +45,10 @@ export const summarizeDocument = async ({
     functionCalling,
     system: `You are an helpful Elastic assistant, and your current task is to help answer the user's question.
 
-      Given a question and a document, please provide a condensed version of the document
-      that can be used to answer the question.
-      - Limit the length of the output to 800 words.
-      - Try to include all relevant information that could be used to answer the question in the condensed version. If this
-        can't be done without exceeding the 800 words limit requirement, then only include the information that you think
-        are the most relevant and the most helpful to answer the question.
+      Given a question and a document, please provide a condensed version of the document that can be used to answer the question.
+      - Limit the length of the output to 500 words.
+      - Try to include all relevant information that could be used to answer the question. If this
+        can't be done within the 500 words limit, then only include the most relevant information related to the question.
       - If you think the document isn't relevant at all to answer the question, just return an empty text`,
     input: `
       ## User question
