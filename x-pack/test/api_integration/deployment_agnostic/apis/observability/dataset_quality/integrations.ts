@@ -88,8 +88,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(
-          new Set(body.integrations.map((integration: Integration) => integration.name).sort())
-        ).to.eql(new Set(preExistingIntegrations.concat(['synthetics', 'system']).sort()));
+          new Set(body.integrations.map((integration: Integration) => integration.name))
+        ).to.eql(new Set(preExistingIntegrations.concat(['synthetics', 'system'])));
 
         expect(
           body.integrations.find((integration: Integration) => integration.name === 'synthetics')
@@ -132,8 +132,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(
-          new Set(body.integrations.map((integration: Integration) => integration.name).sort())
-        ).to.eql(new Set(preExistingIntegrations.concat('my.custom.integration').sort()));
+          new Set(body.integrations.map((integration: Integration) => integration.name))
+        ).to.eql(new Set(preExistingIntegrations.concat('my.custom.integration')));
 
         expect(
           Object.entries(
