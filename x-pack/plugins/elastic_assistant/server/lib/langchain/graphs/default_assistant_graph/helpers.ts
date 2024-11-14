@@ -104,6 +104,7 @@ export const streamGraph = async ({
     );
 
     for await (const { event, data, tags } of stream) {
+      console.log('sTREAM event', { event, data });
       if ((tags || []).includes(AGENT_NODE_TAG)) {
         if (event === 'on_chat_model_stream') {
           const msg = data.chunk as AIMessageChunk;
@@ -117,7 +118,11 @@ export const streamGraph = async ({
           !data.output.lc_kwargs?.tool_calls?.length &&
           !didEnd
         ) {
-          handleStreamEnd(data.output.content);
+          console.log('sTREAM on_chat_model_end', data.output.content);
+          const value = Array.isArray(data.output.content)
+            ? data.output.content.reduce((acc, i) => `${acc}${i.text}`, '')
+            : data.output.content;
+          handleStreamEnd(value);
         }
       }
     }

@@ -169,26 +169,28 @@ export const ConverseActionParamsSchema = schema.object({
     stopSequences: schema.maybe(schema.arrayOf(schema.string())),
     topP: schema.maybe(schema.number()),
   }),
-  toolConfig: schema.object({
-    tools: schema.arrayOf(
-      schema.object({
-        toolSpec: schema.object({
-          name: schema.string(),
-          description: schema.string(),
-          inputSchema: schema.object({
-            json: schema.object({
-              type: schema.string(),
-              properties: schema.object({}, { unknowns: 'allow' }),
-              required: schema.maybe(schema.arrayOf(schema.string())),
-              additionalProperties: schema.boolean(),
-              $schema: schema.maybe(schema.string()),
+  toolConfig: schema.maybe(
+    schema.object({
+      tools: schema.arrayOf(
+        schema.object({
+          toolSpec: schema.object({
+            name: schema.string(),
+            description: schema.string(),
+            inputSchema: schema.object({
+              json: schema.object({
+                type: schema.string(),
+                properties: schema.object({}, { unknowns: 'allow' }),
+                required: schema.maybe(schema.arrayOf(schema.string())),
+                additionalProperties: schema.boolean(),
+                $schema: schema.maybe(schema.string()),
+              }),
             }),
           }),
-        }),
-      })
-    ),
-    toolChoice: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  }),
+        })
+      ),
+      toolChoice: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    })
+  ),
   additionalModelRequestFields: schema.maybe(schema.any()),
   additionalModelResponseFieldPaths: schema.maybe(schema.any()),
   guardrailConfig: schema.maybe(schema.any()),

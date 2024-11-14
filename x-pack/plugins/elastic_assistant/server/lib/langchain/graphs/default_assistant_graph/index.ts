@@ -81,6 +81,31 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       maxRetries: 0,
     });
 
+  // const model = new ActionsClientBedrockChatModel({
+  //   actionsClient,
+  //   connectorId,
+  //   llmType,
+  //   logger,
+  //   // possible client model override,
+  //   // let this be undefined otherwise so the connector handles the model
+  //   model: request.body.model,
+  //   // ensure this is defined because we default to it in the language_models
+  //   // This is where the LangSmith logs (Metadata > Invocation Params) are set
+  //   temperature: getDefaultArguments(llmType).temperature,
+  //   signal: abortSignal,
+  //   streaming: isStream,
+  //   // prevents the agent from retrying on failure
+  //   // failure could be due to bad connector, we should deliver that result to the client asap
+  //   maxRetries: 0,
+  // });
+  //
+  // const streamText = model.streamEvents('Whats the weather like in san francisco?', {
+  //   version: 'v2',
+  // });
+  // for await (const chunk of streamText) {
+  //   console.log('streamText', chunk.data);
+  // }
+
   const anonymizationFieldsRes =
     await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
       perPage: 1000,

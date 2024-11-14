@@ -25,8 +25,8 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   model?: string;
   maxTokens?: number;
 }
-export const ActionsClientBedrockChatModel = ActionsClientChatBedrockConverse;
-export class ActionsClientBedrockChatModeld extends _BedrockChat {
+export const ActionsClientBedrockChatModeld = ActionsClientChatBedrockConverse;
+export class ActionsClientBedrockChatModel extends _BedrockChat {
   constructor({ actionsClient, connectorId, logger, ...params }: CustomChatModelInput) {
     super({
       ...params,
@@ -37,7 +37,7 @@ export class ActionsClientBedrockChatModeld extends _BedrockChat {
       fetchFn: async (url, options) => {
         const inputBody = JSON.parse(options?.body as string);
 
-        if (this.streaming && !inputBody.tools?.length) {
+        if (this.streaming) {
           const data = (await actionsClient.execute({
             actionId: connectorId,
             params: {
