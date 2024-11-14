@@ -20,6 +20,8 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/core-injected-metadata-common-internal",
     "@kbn/ui-theme",
+    "@kbn/core-user-profile-browser",
+    "@kbn/core-user-profile-browser-mocks",
   ],
   "exclude": [
     "target/**/*",
