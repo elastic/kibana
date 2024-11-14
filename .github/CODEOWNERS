@@ -1240,6 +1240,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test_serverless/**/test_suites/observability/infra/ @elastic/obs-ux-infra_services-team
 
 # Elastic Stack Monitoring
+/x-pack/test/monitoring_api_integration @elastic/stack-monitoring
 /x-pack/test/functional/page_objects/monitoring_page.ts @elastic/stack-monitoring
 /x-pack/test/functional/es_archives/monitoring @elastic/stack-monitoring
 /x-pack/test/functional/services/monitoring @elastic/stack-monitoring
