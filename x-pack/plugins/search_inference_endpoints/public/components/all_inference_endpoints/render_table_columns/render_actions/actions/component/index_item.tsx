@@ -18,28 +18,29 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { ENTERPRISE_SEARCH_CONTENT_APP_ID } from '@kbn/deeplinks-search';
-import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
+
+import { SEARCH_INDICES } from '@kbn/deeplinks-search/constants';
 
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { InferenceUsageInfo } from '../../../../types';
-import { PIPELINE_URL } from '../../../../constants';
+import { SERVERLESS_INDEX_MANAGEMENT_URL } from '../../../../constants';
 
 interface UsageProps {
   usageItem: InferenceUsageInfo;
 }
-export const UsageItem: React.FC<UsageProps> = ({ usageItem }) => {
+export const IndexItem: React.FC<UsageProps> = ({ usageItem }) => {
   const {
-    services: { application },
+    services: { application, serverless },
   } = useKibana();
-  const handleNavigateToIndex = () => {
-    if (usageItem.type === 'Index') {
-      application?.navigateToApp(ENTERPRISE_SEARCH_CONTENT_APP_ID, {
-        path: `search_indices/${usageItem.id}`,
+  const navigateToIndex = async () => {
+    if (serverless) {
+      application?.navigateToApp(SEARCH_INDICES, {
+        path: `${SERVERLESS_INDEX_MANAGEMENT_URL}/${usageItem.id}/data`,
         openInNewTab: true,
       });
-    } else if (usageItem.type === 'Pipeline') {
-      application?.navigateToApp(MANAGEMENT_APP_ID, {
-        path: `${PIPELINE_URL}?pipeline=${usageItem.id}`,
+    } else {
+      application?.navigateToApp(ENTERPRISE_SEARCH_CONTENT_APP_ID, {
+        path: `search_indices/${usageItem.id}`,
         openInNewTab: true,
       });
     }
@@ -62,9 +63,9 @@ export const UsageItem: React.FC<UsageProps> = ({ usageItem }) => {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj="navigateToIndexPage" onClick={handleNavigateToIndex}>
+            <EuiLink data-test-subj="navigateToIndexPage" onClick={navigateToIndex}>
               <EuiIcon size="s" type="popout" />
-            </EuiLink>
+            </EuiLink>{' '}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

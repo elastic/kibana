@@ -11,6 +11,8 @@ import { AppMountParameters } from '@kbn/core/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import React from 'react';
+
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { App } from './components/app';
 import type { InferenceEndpointsProvider } from './providers/inference_endpoints_provider';
 
@@ -27,12 +29,15 @@ export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
   share: SharePluginStart;
   console?: ConsolePluginStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export interface AppServicesContext {
   http: HttpStart;
   ml?: MlPluginStart;
   console?: ConsolePluginStart;
+  serverless?: ServerlessPluginStart;
+  share: SharePluginStart;
 }
 
 export interface InferenceUsageResponse {

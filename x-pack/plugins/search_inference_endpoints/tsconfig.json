@@ -1,14 +1,9 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "__mocks__/**/*",
-    "common/**/*",
-    "public/**/*",
-    "server/**/*"
-  ],
+  "include": ["__mocks__/**/*", "common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
@@ -33,9 +28,8 @@
     "@kbn/features-plugin",
     "@kbn/ui-theme",
     "@kbn/deeplinks-search",
-    "@kbn/deeplinks-management"
+    "@kbn/deeplinks-management",
+    "@kbn/serverless"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }
