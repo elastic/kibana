@@ -14,22 +14,11 @@ import { KNOWLEDGE_BASE_RETRIEVAL_TOOL } from './knowledge_base/knowledge_base_r
 import { KNOWLEDGE_BASE_WRITE_TOOL } from './knowledge_base/knowledge_base_write_tool';
 import { SECURITY_LABS_KNOWLEDGE_BASE_TOOL } from './security_labs/security_labs_tool';
 
-export const getAssistantTools = ({
-  assistantKnowledgeBaseByDefault,
-}: {
-  assistantKnowledgeBaseByDefault?: boolean;
-}): AssistantTool[] => {
-  const tools = [
-    ALERT_COUNTS_TOOL,
-    NL_TO_ESQL_TOOL,
-    KNOWLEDGE_BASE_RETRIEVAL_TOOL,
-    KNOWLEDGE_BASE_WRITE_TOOL,
-    OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL,
-  ];
-
-  if (assistantKnowledgeBaseByDefault) {
-    tools.push(SECURITY_LABS_KNOWLEDGE_BASE_TOOL);
-  }
-
-  return tools;
-};
+export const assistantTools: AssistantTool[] = [
+  ALERT_COUNTS_TOOL,
+  NL_TO_ESQL_TOOL,
+  KNOWLEDGE_BASE_RETRIEVAL_TOOL,
+  KNOWLEDGE_BASE_WRITE_TOOL,
+  OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL,
+  SECURITY_LABS_KNOWLEDGE_BASE_TOOL,
+];

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { EuiFlexGroup, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiText, EuiBetaBadge } from '@elastic/eui';
 import type { LanguageDocumentationSections } from '../../types';
 
 import './documentation.scss';
@@ -18,7 +19,7 @@ interface DocumentationContentProps {
   filteredGroups?: Array<{
     label: string;
     description?: string;
-    options: Array<{ label: string; description?: JSX.Element | undefined }>;
+    options: Array<{ label: string; description?: JSX.Element | undefined; preview?: boolean }>;
   }>;
   sections?: LanguageDocumentationSections;
 }
@@ -76,6 +77,23 @@ function DocumentationContent({
                         }
                       }}
                     >
+                      {helpItem.preview && (
+                        <EuiBetaBadge
+                          className="documentation__techPreviewBadge"
+                          label={i18n.translate('languageDocumentation.technicalPreviewLabel', {
+                            defaultMessage: 'Technical Preview',
+                          })}
+                          size="s"
+                          color="subdued"
+                          tooltipContent={i18n.translate(
+                            'languageDocumentation.technicalPreviewTooltip',
+                            {
+                              defaultMessage:
+                                'This functionality is experimental and not supported. It may change or be removed at any time.',
+                            }
+                          )}
+                        />
+                      )}
                       {helpItem.description}
                     </article>
                   );
