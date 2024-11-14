@@ -10,7 +10,7 @@ import { skip } from 'rxjs';
 import React, { useEffect, useState } from 'react';
 import { ControlGroupRenderer, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { Filter } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import { SearchState } from '../../hooks/use_url_search_state';

@@ -10,7 +10,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { fromKueryExpression, Query, TimeRange, toElasticsearchQuery } from '@kbn/es-query';
 import { kqlQuerySchema, kqlWithFiltersSchema } from '@kbn/slo-schema';
 import React, { memo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
 import { SearchBarProps } from './query_builder';
 import { useKibana } from '../../../../hooks/use_kibana';

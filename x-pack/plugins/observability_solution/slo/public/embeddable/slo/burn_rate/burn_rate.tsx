@@ -6,7 +6,7 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingChart } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -41,12 +41,7 @@ export function BurnRate({ sloId, sloInstanceId, duration, reloadSubject }: Embe
 
   if (isLoading || !slo) {
     return (
-      <EuiFlexGroup
-        direction="column"
-        alignItems="center"
-        justifyContent="center"
-        className={container}
-      >
+      <EuiFlexGroup direction="column" alignItems="center" justifyContent="center" css={container}>
         <EuiFlexItem grow={false}>
           <EuiLoadingChart />
         </EuiFlexItem>
@@ -56,12 +51,7 @@ export function BurnRate({ sloId, sloInstanceId, duration, reloadSubject }: Embe
 
   if (isSloNotFound) {
     return (
-      <EuiFlexGroup
-        direction="column"
-        alignItems="center"
-        justifyContent="center"
-        className={container}
-      >
+      <EuiFlexGroup direction="column" alignItems="center" justifyContent="center" css={container}>
         <EuiFlexItem grow={false}>
           {i18n.translate('xpack.slo.sloEmbeddable.overview.sloNotFoundText', {
             defaultMessage:
@@ -84,7 +74,7 @@ export function BurnRate({ sloId, sloInstanceId, duration, reloadSubject }: Embe
           <EuiFlexItem>
             <EuiLink
               data-test-subj="sloBurnRateLink"
-              className={link}
+              css={link}
               color="text"
               onClick={() => {
                 setSelectedSlo(slo);

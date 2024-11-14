@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -21,7 +22,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createBrowserHistory } from 'history';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import styled from 'styled-components';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';
@@ -165,7 +165,7 @@ export const getOverviewEmbeddableFactory = ({
               const kqlQuery = groupFilters?.kqlQuery ?? '';
               const groups = groupFilters?.groups ?? [];
               return (
-                <Wrapper>
+                <div css={style}>
                   <EuiFlexGroup data-test-subj="sloGroupOverviewPanel" data-shared-item="">
                     <EuiFlexItem
                       css={`
@@ -182,7 +182,7 @@ export const getOverviewEmbeddableFactory = ({
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                </Wrapper>
+                </div>
               );
             } else {
               return (
@@ -231,7 +231,7 @@ export const getOverviewEmbeddableFactory = ({
   return factory;
 };
 
-const Wrapper = styled.div`
+const style = css`
   width: 100%;
   padding: 5px 15px;
   overflow: scroll;

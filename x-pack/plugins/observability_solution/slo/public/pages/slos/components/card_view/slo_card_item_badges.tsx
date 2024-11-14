@@ -9,7 +9,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { SloIndicatorTypeBadge } from '../badges/slo_indicator_type_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { BurnRateRuleParams } from '../../../../typings';

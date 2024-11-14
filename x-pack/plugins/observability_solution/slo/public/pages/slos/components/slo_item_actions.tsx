@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { BurnRateRuleParams } from '../../../typings';

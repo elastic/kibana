@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { FetchContext } from '@kbn/presentation-publishing';
 import { SloIncludedCount } from './components/slo_included_count';
@@ -87,12 +87,17 @@ export function SloAlertsWrapper({
     );
   };
   return (
-    <Wrapper>
+    <div
+      css={css`
+        width: 100%;
+        overflow: scroll;
+      `}
+    >
       <EuiFlexGroup
         data-shared-item=""
         justifyContent="flexEnd"
         wrap
-        css={`
+        css={css`
           margin: 0 35px;
         `}
       >
@@ -150,11 +155,6 @@ export function SloAlertsWrapper({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Wrapper>
+    </div>
   );
 }
-
-const Wrapper = styled.div`
-  width: 100%;
-  overflow: scroll;
-`;

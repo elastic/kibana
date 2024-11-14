@@ -9,7 +9,7 @@ import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { observabilityAppId } from '@kbn/observability-plugin/public';
 import React, { useEffect } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSloCrudLoading } from '../hooks/use_crud_loading';
 import { useSloSummaryDataView } from '../hooks/use_summary_dataview';
