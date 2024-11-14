@@ -39,13 +39,13 @@ export const sourceOptionDescriptions = {
   [DISABLED_SOURCE_OPTION]: i18n.translate(
     'xpack.idxMgmt.mappingsEditor.configuration.disabledSourceFieldsDescription',
     {
-      defaultMessage: 'Reconstructs source content to save on disk usage',
+      defaultMessage: 'Strongly discouraged, will impact downstream functionality',
     }
   ),
   [SYNTHETIC_SOURCE_OPTION]: i18n.translate(
     'xpack.idxMgmt.mappingsEditor.configuration.syntheticSourceFieldsDescription',
     {
-      defaultMessage: 'Strongly discouraged, will impact downstream functionality',
+      defaultMessage: 'Reconstructs source content to save on disk usage',
     }
   ),
 };
