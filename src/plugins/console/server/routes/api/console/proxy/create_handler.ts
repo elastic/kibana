@@ -152,7 +152,7 @@ export const createHandler =
           method: method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head',
           headers: requestHeaders,
           uri,
-          timeout,
+          timeout: 60000,
           payload: body,
           rejectUnauthorized,
           agent,
