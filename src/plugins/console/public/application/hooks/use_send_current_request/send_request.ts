@@ -157,10 +157,18 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
 
         const { statusCode, statusText } = extractStatusCodeAndText(response, path);
 
-        if (body) {
-          value = JSON.stringify(body, null, 2);
+        // When the request is sent, the HTTP library tries to parse the response body as JSON.
+        // However, if the response body is empty or not in valid JSON format, it throws an error.
+        // To handle this, if the request resolves with a 200 status code but has an empty or invalid body,
+        // we should still display a success message to the user.
+        if (statusCode === 200 && body === null) {
+          value = 'OK';
         } else {
-          value = 'Request failed to get to the server (status code: ' + statusCode + ')';
+          if (body) {
+            value = JSON.stringify(body, null, 2);
+          } else {
+            value = 'Request failed to get to the server (status code: ' + statusCode + ')';
+          }
         }
 
         if (isMultiRequest) {
