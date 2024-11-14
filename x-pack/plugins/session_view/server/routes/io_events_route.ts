@@ -32,7 +32,7 @@ export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason: `This route delegates authorization to Elasticsearch and it's not tied to a Kibana privilege.`,
           },
         },
         validate: {
