@@ -344,6 +344,7 @@ export const UnifiedHistogramLayout = ({
     <>
       <InPortal node={topPanelNode}>
         <ChartMemoized
+          key={dataView.id}
           abortController={abortController}
           isChartAvailable={isChartAvailable}
           className={chartClassName}
