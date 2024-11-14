@@ -72,14 +72,10 @@ export function SloAlertsWrapper({
     }
   }, [isSummaryLoaded, isTableLoaded, onRenderComplete]);
   const handleGoToAlertsClick = () => {
-    let kuery = '';
-    slos.map((slo, index) => {
-      const shouldAddOr = index < slos.length - 1;
-      kuery += `(slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}")`;
-      if (shouldAddOr) {
-        kuery += ' or ';
-      }
-    });
+    const kuery = slos
+      .map((slo) => `(slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}")`)
+      .join(' or ');
+
     navigateToUrl(
       `${basePath.prepend(observabilityPaths.alerts)}?_a=(kuery:'${kuery}',rangeFrom:${
         timeRange.from
