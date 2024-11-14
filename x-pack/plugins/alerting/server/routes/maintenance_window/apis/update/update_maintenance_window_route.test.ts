@@ -68,9 +68,6 @@ describe('updateMaintenanceWindowRoute', () => {
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "internal",
-        "tags": Array [
-          "access:write-maintenance-window",
-        ],
       }
     `);
 
