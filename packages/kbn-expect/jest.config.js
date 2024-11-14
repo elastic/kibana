@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreTheme } from '@kbn/core/public';
-import { Observable } from 'rxjs';
-
-export const defaultTheme$: Observable<CoreTheme> = new Observable((subscriber) =>
-  subscriber.next({ darkMode: false })
-);
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-expect'],
+};
