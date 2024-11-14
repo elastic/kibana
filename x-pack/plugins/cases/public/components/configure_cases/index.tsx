@@ -422,6 +422,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
   const onCloseObservableTypesFlyout = useCallback(() => {
     setFlyOutVisibility({ type: 'observableTypes', visible: false });
+    setObservableTypeToEdit(null);
   }, [setFlyOutVisibility]);
 
   const onObservableTypeSave = useCallback(
