@@ -118,5 +118,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('applyFlyoutButton');
       expect(await testSubjects.exists('mtrVis')).to.be(true);
     });
+
+    it('should add a second panel and remove when hitting cancel', async () => {
+      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+      await dashboardAddPanel.expectEditorMenuClosed();
+      await dashboard.waitForRenderComplete();
+      // Cancel
+      await testSubjects.click('cancelFlyoutButton');
+      // Test that there's only 1 panel left
+      await dashboard.waitForRenderComplete();
+      await retry.try(async () => {
+        const panelCount = await dashboard.getPanelCount();
+        expect(panelCount).to.eql(1);
+      });
+    });
+
+    it('should not remove the first panel of two when editing and cancelling', async () => {
+      // add a second panel
+      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+      await dashboardAddPanel.expectEditorMenuClosed();
+      await dashboard.waitForRenderComplete();
+      // save it
+      await testSubjects.click('applyFlyoutButton');
+      await dashboard.waitForRenderComplete();
+
+      // now edit the first one
+      const [firstPanel] = await dashboard.getDashboardPanels();
+      await dashboardPanelActions.clickInlineEdit(firstPanel);
+      await testSubjects.click('cancelFlyoutButton');
+      await dashboard.waitForRenderComplete();
+      await retry.try(async () => {
+        const panelCount = await dashboard.getPanelCount();
+        expect(panelCount).to.eql(2);
+      });
+    });
   });
 }
