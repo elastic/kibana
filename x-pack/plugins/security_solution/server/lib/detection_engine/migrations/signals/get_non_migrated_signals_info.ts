@@ -18,7 +18,7 @@ interface OutdatedSpaces {
   isMigrationRequired: boolean;
   spaces: string[];
   indices: string[];
-  fromRange: string | undefined;
+  fromRange?: string;
 }
 
 /**
@@ -45,6 +45,14 @@ export const getNonMigratedSignalsInfo = async ({
   });
 
   const indices = Object.keys(indexAliasesMap);
+
+  if (indices.length === 0) {
+    return {
+      isMigrationRequired: false,
+      spaces: [],
+      indices: [],
+    };
+  }
 
   const indexVersionsByIndex = await getIndexVersionsByIndex({
     esClient,
@@ -76,6 +84,14 @@ export const getNonMigratedSignalsInfo = async ({
     },
     []
   );
+
+  if (outdatedIndices.length === 0) {
+    return {
+      isMigrationRequired: false,
+      spaces: [],
+      indices: [],
+    };
+  }
 
   const outdatedIndexNames = outdatedIndices.map((outdatedIndex) => outdatedIndex.indexName);
 
