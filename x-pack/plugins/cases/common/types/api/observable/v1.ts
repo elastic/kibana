@@ -34,5 +34,3 @@ export const BulkGetObservablesResponseRt = rt.strict({
 
 export type AddObservableRequest = rt.TypeOf<typeof AddObservableRequestRt>;
 export type UpdateObservableRequest = rt.TypeOf<typeof UpdateObservableRequestRt>;
-
-export type ObservableRequest = AddObservableRequest;
