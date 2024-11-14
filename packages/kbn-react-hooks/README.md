@@ -4,7 +4,7 @@ A utility package, `@kbn/react-hooks`, provides custom react hooks for simple ab
 
 ## Custom Hooks
 
-### [useBoolean](./src/useBoolean)
+### [useBoolean](./src/use_boolean/use_boolean.ts)
 
 Simplify handling boolean value with predefined handlers.
 
@@ -27,7 +27,7 @@ function App() {
 }
 ```
 
-### [useErrorTextStyle](./src/useErrorTextStyle)
+### [useErrorTextStyle](./src/use_error_text_style/use_error_text_style.ts)
 
 Returns styles used for styling error text.
 
