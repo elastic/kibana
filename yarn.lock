@@ -1748,10 +1748,20 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@97.3.1":
+"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.0.1_97.3.1_prerelease_001.tgz":
+  version "0.0.1"
+  resolved "file:./elastic_eui_theme_borealis_0.0.1_97.3.1_prerelease_001.tgz#e0d269f202097d72dad41cdf5168fcd78f97a99a"
+
+"@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.0.1_97.3.1_prerelease_001.tgz":
+  version "0.0.1"
+  resolved "file:./elastic_eui_theme_common_0.0.1_97.3.1_prerelease_001.tgz#fed94a21eeac809d5659b9fcd6e703ec89cf66d6"
+  dependencies:
+    "@types/lodash" "^4.14.202"
+    lodash "^4.17.21"
+
+"@elastic/eui@file:./elastic_eui_97.3.1_borealis_prerelease_001.tgz":
   version "97.3.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-97.3.1.tgz#b0f07c603042bd359544b41829507e65f4fa3cd2"
-  integrity sha512-zJs3aaO6qjTdxJM2mPahcqaC6FfaC34yTc3qpQq7+Cbhw2xGrwx8bAfIzhttLU87mwgr59Sqv9Ojvwk8c3js7A==
+  resolved "file:./elastic_eui_97.3.1_borealis_prerelease_001.tgz#38b28e0c9afd10cafaf9875e72d1c2769131f703"
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
