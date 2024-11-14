@@ -163,6 +163,89 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
   });
 
   describe('isInferenceEndpointExists', () => {
+    it('returns true when the model is fully allocated and started in ESS', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      esClientMock.ml.getTrainedModelsStats.mockResolvedValueOnce({
+        trained_model_stats: [
+          {
+            deployment_stats: {
+              state: 'started',
+              // @ts-expect-error not full response interface
+              allocation_status: { state: 'fully_allocated' },
+            },
+          },
+        ],
+      });
+
+      const result = await client.isInferenceEndpointExists();
+
+      expect(result).toBe(true);
+    });
+
+    it('returns true when the model is started in serverless', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      esClientMock.ml.getTrainedModelsStats.mockResolvedValueOnce({
+        trained_model_stats: [
+          {
+            deployment_stats: {
+              // @ts-expect-error not full response interface
+              nodes: [{ routing_state: { routing_state: 'started' } }],
+            },
+          },
+        ],
+      });
+
+      const result = await client.isInferenceEndpointExists();
+
+      expect(result).toBe(true);
+    });
+
+    it('returns false when the model is not fully allocated in ESS', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      esClientMock.ml.getTrainedModelsStats.mockResolvedValueOnce({
+        trained_model_stats: [
+          {
+            deployment_stats: {
+              state: 'started',
+              // @ts-expect-error not full response interface
+              allocation_status: { state: 'partially_allocated' },
+            },
+          },
+        ],
+      });
+
+      const result = await client.isInferenceEndpointExists();
+
+      expect(result).toBe(false);
+    });
+
+    it('returns false when the model is not started in serverless', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      esClientMock.ml.getTrainedModelsStats.mockResolvedValueOnce({
+        trained_model_stats: [
+          {
+            deployment_stats: {
+              // @ts-expect-error not full response interface
+              nodes: [{ routing_state: { routing_state: 'stopped' } }],
+            },
+          },
+        ],
+      });
+
+      const result = await client.isInferenceEndpointExists();
+
+      expect(result).toBe(false);
+    });
+
+    it('returns false when an error occurs during the check', async () => {
+      const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
+      esClientMock.ml.getTrainedModelsStats.mockRejectedValueOnce(new Error('Mocked Error'));
+
+      const result = await client.isInferenceEndpointExists();
+
+      expect(result).toBe(false);
+    });
+
     it('should return true when inference check succeeds', async () => {
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
       const result = await client.isInferenceEndpointExists();
