@@ -6,14 +6,20 @@
  */
 
 import { UrlFilter } from '@kbn/exploratory-view-plugin/public';
+import { useSelector } from 'react-redux';
 import { useGetUrlParams } from '../../../hooks';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
+import { selectOverviewStatus } from '../../../state/overview_status';
 
 export const useMonitorFilters = ({ forAlerts }: { forAlerts?: boolean }): UrlFilter[] => {
   const { space } = useKibanaSpace();
-  const { locations, monitorTypes, tags, projects } = useGetUrlParams();
+  const { locations, monitorTypes, tags, projects, schedules } = useGetUrlParams();
+  const { status: overviewStatus } = useSelector(selectOverviewStatus);
+  const allIds = overviewStatus?.allIds ?? [];
 
   return [
+    // since schedule isn't available in heartbeat data, in that case we rely on monitor.id
+    ...(allIds?.length && schedules ? [{ field: 'monitor.id', values: allIds }] : []),
     ...(projects?.length ? [{ field: 'monitor.project.id', values: getValues(projects) }] : []),
     ...(monitorTypes?.length ? [{ field: 'monitor.type', values: getValues(monitorTypes) }] : []),
     ...(tags?.length ? [{ field: 'tags', values: getValues(tags) }] : []),
