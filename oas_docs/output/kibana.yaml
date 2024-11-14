@@ -7326,7 +7326,7 @@ paths:
 
         - The `Content-Type: multipart/form-data` HTTP header.
 
-        - A link to the file that is being uploaded.
+        - The location of the file that is being uploaded.
       operationId: addCaseFileDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_kbn_xsrf'
@@ -44499,12 +44499,9 @@ components:
           type: string
         filename:
           description: >-
-            The name of file being attached to the case. **This should not
-            include the file extension.**
-          type: string
-        mimeType:
-          description: The MIME type of the file being attached to the case.
-          example: image/jpeg
+            The desired name of the file being attached to the case, it can be
+            different than the name of the file in the filesystem. **This should
+            not include the file extension.**
           type: string
       required:
         - file
