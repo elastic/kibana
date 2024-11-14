@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
-import { Maybe } from '@kbn/apm-plugin/typings/common';
+import { isFinite } from 'lodash';
+import type { Maybe } from '@kbn/apm-plugin/typings/common';
+
+// _.isNumber() returns true for NaN, _.isFinite() does not refine
+export function isFiniteNumber(value: any): value is number {
+  return isFinite(value);
+}
 
 export function roundNumber(num: Maybe<number>) {
   return isFiniteNumber(num) ? Number(num.toPrecision(4)) : null;
