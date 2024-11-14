@@ -23,6 +23,7 @@ export const getLegacySiemSignalsUsage = async ({
   const { indices, spaces } = await getNonMigratedSignalsInfo({
     esClient,
     signalsIndex,
+    logger,
   });
 
   return {

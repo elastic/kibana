@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { getIndexVersionsByIndex } from '../get_index_versions_by_index';
 import { getSignalVersionsByIndex } from '../get_signal_versions_by_index';
@@ -27,86 +27,105 @@ interface OutdatedSpaces {
 export const getNonMigratedSignalsInfo = async ({
   esClient,
   signalsIndex,
+  logger,
 }: {
   esClient: ElasticsearchClient;
   signalsIndex: string;
+  logger: Logger;
 }): Promise<OutdatedSpaces> => {
   const signalsAliasAllSpaces = `${signalsIndex}-*`;
 
-  const latestTemplateVersion = await getLatestIndexTemplateVersion({
-    esClient,
-    name: signalsAliasAllSpaces,
-  });
+  try {
+    const latestTemplateVersion = await getLatestIndexTemplateVersion({
+      esClient,
+      name: signalsAliasAllSpaces,
+    });
+    const indexAliasesMap = await getIndexAliasPerSpace({
+      esClient,
+      signalsAliasAllSpaces,
+      signalsIndex,
+    });
 
-  const indexAliasesMap = await getIndexAliasPerSpace({
-    esClient,
-    signalsAliasAllSpaces,
-    signalsIndex,
-  });
+    const indices = Object.keys(indexAliasesMap);
 
-  const indices = Object.keys(indexAliasesMap);
+    if (indices.length === 0) {
+      return {
+        isMigrationRequired: false,
+        spaces: [],
+        indices: [],
+      };
+    }
 
-  if (indices.length === 0) {
+    const indexVersionsByIndex = await getIndexVersionsByIndex({
+      esClient,
+      index: indices,
+    });
+
+    const signalVersionsByIndex = await getSignalVersionsByIndex({
+      esClient,
+      index: indices,
+    });
+
+    const outdatedIndices = indices.reduce<Array<{ indexName: string; space: string }>>(
+      (acc, indexName) => {
+        const version = indexVersionsByIndex[indexName] ?? 0;
+        const signalVersions = signalVersionsByIndex[indexName] ?? [];
+
+        const isOutdated =
+          getIsOutdated({ current: version, target: latestTemplateVersion }) ||
+          signalsAreOutdated({ signalVersions, target: latestTemplateVersion });
+
+        if (isOutdated) {
+          acc.push({
+            indexName,
+            space: indexAliasesMap[indexName].space,
+          });
+        }
+
+        return acc;
+      },
+      []
+    );
+
+    if (outdatedIndices.length === 0) {
+      return {
+        isMigrationRequired: false,
+        spaces: [],
+        indices: [],
+      };
+    }
+
+    const outdatedIndexNames = outdatedIndices.map((outdatedIndex) => outdatedIndex.indexName);
+
+    const fromRange = await getOldestSignalTimestamp({
+      esClient,
+      index: outdatedIndexNames,
+    });
+
+    // remove duplicated spaces
+    const spaces = [...new Set<string>(outdatedIndices.map((indexStatus) => indexStatus.space))];
+    const isMigrationRequired = outdatedIndices.length > 0;
+
+    logger.debug(
+      isMigrationRequired
+        ? `Legacy siem signals indices require migration: "${outdatedIndexNames.join(
+            ', '
+          )}" in "${spaces.join(', ')}" spaces`
+        : 'No legacy siem indices require migration'
+    );
+
+    return {
+      isMigrationRequired,
+      spaces,
+      fromRange,
+      indices: outdatedIndexNames,
+    };
+  } catch (e) {
+    logger.debug(`Getting information about legacy siem signals failed:"${e?.message}"`);
     return {
       isMigrationRequired: false,
       spaces: [],
       indices: [],
     };
   }
-
-  const indexVersionsByIndex = await getIndexVersionsByIndex({
-    esClient,
-    index: indices,
-  });
-
-  const signalVersionsByIndex = await getSignalVersionsByIndex({
-    esClient,
-    index: indices,
-  });
-
-  const outdatedIndices = indices.reduce<Array<{ indexName: string; space: string }>>(
-    (acc, indexName) => {
-      const version = indexVersionsByIndex[indexName] ?? 0;
-      const signalVersions = signalVersionsByIndex[indexName] ?? [];
-
-      const isOutdated =
-        getIsOutdated({ current: version, target: latestTemplateVersion }) ||
-        signalsAreOutdated({ signalVersions, target: latestTemplateVersion });
-
-      if (isOutdated) {
-        acc.push({
-          indexName,
-          space: indexAliasesMap[indexName].space,
-        });
-      }
-
-      return acc;
-    },
-    []
-  );
-
-  if (outdatedIndices.length === 0) {
-    return {
-      isMigrationRequired: false,
-      spaces: [],
-      indices: [],
-    };
-  }
-
-  const outdatedIndexNames = outdatedIndices.map((outdatedIndex) => outdatedIndex.indexName);
-
-  const fromRange = await getOldestSignalTimestamp({
-    esClient,
-    index: outdatedIndexNames,
-  });
-
-  // remove duplicated spaces
-  const spaces = [...new Set<string>(outdatedIndices.map((indexStatus) => indexStatus.space))];
-
-  return {
-    isMigrationRequired: outdatedIndices.length > 0,
-    spaces,
-    fromRange,
-    indices: outdatedIndexNames,
-  };
 };

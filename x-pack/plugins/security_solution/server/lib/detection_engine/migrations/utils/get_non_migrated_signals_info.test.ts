@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import { getNonMigratedSignalsInfo } from './get_non_migrated_signals_info';
 import { getIndexVersionsByIndex } from '../get_index_versions_by_index';
@@ -32,6 +33,7 @@ const OLDEST_SIGNAL = '2020-03-03T00:00:00.000Z';
 
 describe('getNonMigratedSignalsInfo', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  const logger = loggerMock.create();
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -62,7 +64,11 @@ describe('getNonMigratedSignalsInfo', () => {
   it('returns empty results if no siem indices found', async () => {
     getIndexAliasPerSpaceMock.mockReturnValue({});
 
-    const result = await getNonMigratedSignalsInfo({ esClient, signalsIndex: 'siem-signals' });
+    const result = await getNonMigratedSignalsInfo({
+      esClient,
+      signalsIndex: 'siem-signals',
+      logger,
+    });
 
     expect(result).toEqual({
       isMigrationRequired: false,
@@ -70,6 +76,25 @@ describe('getNonMigratedSignalsInfo', () => {
       indices: [],
     });
   });
+
+  it('returns empty when error happens', async () => {
+    getLatestIndexTemplateVersionMock.mockRejectedValueOnce(new Error('Test failure'));
+    const debugSpy = jest.spyOn(logger, 'debug');
+
+    const result = await getNonMigratedSignalsInfo({
+      esClient,
+      signalsIndex: 'siem-signals',
+      logger,
+    });
+
+    expect(result).toEqual({
+      isMigrationRequired: false,
+      spaces: [],
+      indices: [],
+    });
+    expect(debugSpy).toHaveBeenCalledWith(expect.stringContaining('Test failure'));
+  });
+
   it('returns empty results if no siem indices or signals outdated', async () => {
     getIndexVersionsByIndexMock.mockReturnValue({
       '.siem-signals-another-1-legacy': TEMPLATE_VERSION,
@@ -79,7 +104,11 @@ describe('getNonMigratedSignalsInfo', () => {
       '.siem-signals-another-1-legacy': [{ count: 2, version: TEMPLATE_VERSION }],
     });
 
-    const result = await getNonMigratedSignalsInfo({ esClient, signalsIndex: 'siem-signals' });
+    const result = await getNonMigratedSignalsInfo({
+      esClient,
+      signalsIndex: 'siem-signals',
+      logger,
+    });
 
     expect(result).toEqual({
       isMigrationRequired: false,
@@ -96,7 +125,11 @@ describe('getNonMigratedSignalsInfo', () => {
       '.siem-signals-another-1-legacy': [{ count: 2, version: TEMPLATE_VERSION }],
     });
 
-    const result = await getNonMigratedSignalsInfo({ esClient, signalsIndex: 'siem-signals' });
+    const result = await getNonMigratedSignalsInfo({
+      esClient,
+      signalsIndex: 'siem-signals',
+      logger,
+    });
 
     expect(result).toEqual({
       fromRange: OLDEST_SIGNAL,
@@ -114,7 +147,11 @@ describe('getNonMigratedSignalsInfo', () => {
       '.siem-signals-another-1-legacy': [{ count: 2, version: 12 }],
     });
 
-    const result = await getNonMigratedSignalsInfo({ esClient, signalsIndex: 'siem-signals' });
+    const result = await getNonMigratedSignalsInfo({
+      esClient,
+      signalsIndex: 'siem-signals',
+      logger,
+    });
 
     expect(result).toEqual({
       fromRange: OLDEST_SIGNAL,
@@ -132,7 +169,11 @@ describe('getNonMigratedSignalsInfo', () => {
       '.siem-signals-another-1-legacy': [{ count: 2, version: 11 }],
     });
 
-    const result = await getNonMigratedSignalsInfo({ esClient, signalsIndex: 'siem-signals' });
+    const result = await getNonMigratedSignalsInfo({
+      esClient,
+      signalsIndex: 'siem-signals',
+      logger,
+    });
 
     expect(result).toEqual({
       fromRange: OLDEST_SIGNAL,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DeprecationsDetails, GetDeprecationsContext } from '@kbn/core/server';
+import type { DeprecationsDetails, GetDeprecationsContext, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 
 import type { ConfigType } from '../config';
@@ -14,13 +14,15 @@ import { getNonMigratedSignalsInfo } from '../lib/detection_engine/migrations/ut
 
 export const getSignalsMigrationDeprecationsInfo = async (
   ctx: GetDeprecationsContext,
-  config: ConfigType
+  config: ConfigType,
+  logger: Logger
 ): Promise<DeprecationsDetails[]> => {
   const esClient = ctx.esClient.asInternalUser;
 
   const { isMigrationRequired, spaces, fromRange } = await getNonMigratedSignalsInfo({
     esClient,
     signalsIndex: config.signalsIndex,
+    logger,
   });
 
   if (isMigrationRequired) {

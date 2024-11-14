@@ -207,7 +207,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.analytics.registerEventType(eventConfig);
     });
 
-    registerDeprecations({ core, config: this.config });
+    registerDeprecations({ core, config: this.config, logger: this.logger });
 
     this.ruleMonitoringService.setup(core, plugins);
 
