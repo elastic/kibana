@@ -35,7 +35,7 @@ describe('Get Knowledge Base Status Route', () => {
       },
       isModelInstalled: jest.fn().mockResolvedValue(true),
       isSetupAvailable: jest.fn().mockResolvedValue(true),
-      isModelDeployed: jest.fn().mockResolvedValue(true),
+      isInferenceEndpointExists: jest.fn().mockResolvedValue(true),
       isSetupInProgress: false,
       isSecurityLabsDocsLoaded: jest.fn().mockResolvedValue(true),
       isUserDataExists: jest.fn().mockResolvedValue(true),

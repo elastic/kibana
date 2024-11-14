@@ -545,9 +545,10 @@ export class IndexTable extends Component {
 
     return (
       <AppContextConsumer>
-        {({ services, config, core }) => {
+        {({ services, config, core, plugins }) => {
           const { extensionsService } = services;
           const { application, http } = core;
+          const { share } = plugins;
           const columnConfigs = getColumnConfigs({
             showIndexStats: config.enableIndexStats,
             showSizeAndDocCount: config.enableSizeAndDocCount,
@@ -669,7 +670,7 @@ export class IndexTable extends Component {
                   </>
                 )}
                 <EuiFlexItem grow={false}>
-                  <CreateIndexButton loadIndices={loadIndices} />
+                  <CreateIndexButton loadIndices={loadIndices} share={share} />
                 </EuiFlexItem>
               </EuiFlexGroup>
 
@@ -714,6 +715,7 @@ export class IndexTable extends Component {
                         <EuiTableRowCell align="center" colSpan={columnsCount}>
                           <NoMatch
                             loadIndices={loadIndices}
+                            share={share}
                             filter={filter}
                             resetFilter={() => filterChanged('')}
                             extensionsService={extensionsService}

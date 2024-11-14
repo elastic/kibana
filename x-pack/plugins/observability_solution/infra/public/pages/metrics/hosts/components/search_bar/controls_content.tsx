@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
 import {
   ControlGroupRenderer,
   ControlGroupRendererApi,
-  DataControlApi,
   ControlGroupRuntimeState,
+  DataControlApi,
 } from '@kbn/controls-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { Subscription } from 'rxjs';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useControlPanels } from '../../hooks/use_control_panels_url_state';
+import { useControlPanels } from '@kbn/observability-shared-plugin/public';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { Subscription } from 'rxjs';
+import { controlPanelConfigs } from './control_panels_config';
 import { ControlTitle } from './controls_title';
 
 interface Props {
@@ -34,7 +35,7 @@ export const ControlsContent: React.FC<Props> = ({
   timeRange,
   onFiltersChange,
 }) => {
-  const [controlPanels, setControlPanels] = useControlPanels(dataView);
+  const [controlPanels, setControlPanels] = useControlPanels(controlPanelConfigs, dataView);
   const subscriptions = useRef<Subscription>(new Subscription());
 
   const getInitialInput = useCallback(
