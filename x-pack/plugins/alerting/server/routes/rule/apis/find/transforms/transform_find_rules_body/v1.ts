@@ -23,6 +23,7 @@ export const transformFindRulesBody = (params: FindRulesRequestQueryV1): FindRul
     has_reference: hasReference,
     fields,
     filter,
+    filter_consumers: filterConsumers,
   } = params;
   return {
     ...(page ? { page } : {}),
@@ -37,6 +38,7 @@ export const transformFindRulesBody = (params: FindRulesRequestQueryV1): FindRul
     ...(searchFields
       ? { searchFields: Array.isArray(searchFields) ? searchFields : [searchFields] }
       : {}),
+    ...(filterConsumers ? { consumers: filterConsumers } : {}),
   };
 };
 

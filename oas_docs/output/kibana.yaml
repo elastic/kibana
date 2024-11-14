@@ -3941,6 +3941,14 @@ paths:
           required: false
           schema:
             type: string
+        - in: query
+          name: filter_consumers
+          required: false
+          schema:
+            items:
+              description: List of consumers to filter.
+              type: string
+            type: array
       responses:
         '200':
           content:
