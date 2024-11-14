@@ -98,12 +98,12 @@ export const AlertsDetailsTable = memo(
     const alertDataResults = (data?.hits?.hits as AlertsDetailsFields[])?.map(
       (item: AlertsDetailsFields) => {
         return {
-          id: item.fields?._id[0],
-          index: item.fields?._index[0],
-          reason: item.fields?.['kibana.alert.reason'][0],
-          ruleName: item.fields?.['kibana.alert.rule.name'][0],
-          ruleUuid: item.fields?.['kibana.alert.rule.uuid'][0],
-          severity: item.fields?.['kibana.alert.severity'][0],
+          id: item.fields?._id?.[0],
+          index: item.fields?._index?.[0],
+          reason: item.fields?.['kibana.alert.reason']?.[0],
+          ruleName: item.fields?.['kibana.alert.rule.name']?.[0],
+          ruleUuid: item.fields?.['kibana.alert.rule.uuid']?.[0],
+          severity: item.fields?.['kibana.alert.severity']?.[0],
         };
       }
     );
@@ -246,7 +246,7 @@ export const AlertsDetailsTable = memo(
           </EuiLink>
 
           <EuiSpacer size="xl" />
-          <DistributionBar stats={alertStats} />
+          <DistributionBar stats={alertStats.reverse()} />
           <EuiSpacer size="l" />
           <EuiBasicTable
             items={pageOfItems || []}
