@@ -121,7 +121,12 @@ describe('configure', () => {
         username: 'lknope',
         email: 'leslie.knope@elastic.co',
       },
-      observableTypes: [],
+      observableTypes: [
+        {
+          key: '8498cd52-e311-4467-9073-c6056960e2ca',
+          label: 'Email',
+        },
+      ],
     };
 
     it('has expected attributes in request', () => {
