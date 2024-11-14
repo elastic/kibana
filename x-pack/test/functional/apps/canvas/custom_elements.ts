@@ -18,7 +18,6 @@ export default function canvasCustomElementTest({
   const retry = getService('retry');
   const { canvas } = getPageObjects(['canvas']);
   const find = getService('find');
-  const kibanaServer = getService('kibanaServer');
 
   describe('custom elements', function () {
     this.tags('skipFirefox');
