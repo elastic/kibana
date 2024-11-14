@@ -24,8 +24,10 @@ export const groupAndMergeSignalMatches = (signalHits: SignalSourceHit[]): Signa
     if (existingSignalHit == null) {
       acc[signalId] = signalHit;
     } else {
-      const existingQueries = existingSignalHit?.matched_queries ?? [];
-      const newQueries = signalHit.matched_queries ?? [];
+      const existingQueries = Array.isArray(existingSignalHit?.matched_queries)
+        ? existingSignalHit.matched_queries
+        : [];
+      const newQueries = Array.isArray(signalHit.matched_queries) ? signalHit.matched_queries : [];
       existingSignalHit.matched_queries = [...existingQueries, ...newQueries];
 
       acc[signalId] = existingSignalHit;
