@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseObservableRt, ObservablePatch } from '../../domain';
+import { ObservablePatch } from '../../domain';
 
 /**
  * Observables
@@ -18,18 +18,6 @@ export const AddObservableRequestRt = rt.strict({
 
 export const UpdateObservableRequestRt = rt.strict({
   observable: ObservablePatch,
-});
-
-export const BulkGetObservablesResponseRt = rt.strict({
-  observables: CaseObservableRt,
-  errors: rt.array(
-    rt.strict({
-      error: rt.string,
-      message: rt.string,
-      status: rt.union([rt.undefined, rt.number]),
-      attachmentId: rt.string,
-    })
-  ),
 });
 
 export type AddObservableRequest = rt.TypeOf<typeof AddObservableRequestRt>;
