@@ -5,8 +5,8 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   createServiceGroupApi,
   deleteAllServiceGroups,
