@@ -38,7 +38,7 @@ type InferEsqlResponseOf<
   TOptions extends EsqlOptions | undefined = { asPlainObjects: true }
 > = TOptions extends { asPlainObjects: true }
   ? {
-      objects: Array<{
+      hits: Array<{
         [key in keyof TOutput]: TOutput[key];
       }>;
     }
@@ -51,6 +51,7 @@ export interface EsqlQueryResponse {
   columns: Array<{ name: string; type: string }>;
   values: EsqlValue[][];
 }
+
 /**
  * An Elasticsearch Client with a fully typed `search` method and built-in
  * APM instrumentation.
@@ -145,7 +146,7 @@ export function createObservabilityEsClient({
 
             const shouldParseOutput = options?.asPlainObjects !== false;
             const finalResponse = shouldParseOutput
-              ? { objects: esqlResultToPlainObjects<EsqlOutput>(esqlResponse) }
+              ? { hits: esqlResultToPlainObjects<EsqlOutput>(esqlResponse) }
               : esqlResponse;
 
             return finalResponse as InferEsqlResponseOf<TOutput, TEsqlOptions>;

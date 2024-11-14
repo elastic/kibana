@@ -1,3 +1,3 @@
-# Entities App
+# Streams app
 
-Home of the Entities app plugin, which renders ... _entities_!
+Home of the Streams app plugin, which allows users to manage Streams via the UI.
