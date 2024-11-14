@@ -107,7 +107,6 @@ export const ConnectorsOverview = () => {
                 learnMoreLink: (
                   <EuiLink
                     data-test-subj="serverlessSearchConnectorsOverviewLink"
-                    external
                     target="_blank"
                     href={docLinks.connectors}
                   >

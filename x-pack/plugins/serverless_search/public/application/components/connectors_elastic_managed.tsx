@@ -43,7 +43,6 @@ export const ConnectorsElasticManaged = () => {
                 learnMoreLink: (
                   <EuiLink
                     data-test-subj="serverlessSearchConnectorsOverviewLink"
-                    external
                     target="_blank"
                     href={CONNECTORS.self_managed_docs}
                   >
