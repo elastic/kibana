@@ -143,7 +143,7 @@ const SimilarCasesBadge = ({
         css={css`
           margin-left: ${euiTheme.size.xs};
         `}
-        data-test-subj="case-view-observables-stats-badge"
+        data-test-subj="case-view-similar-cases-badge"
         color={activeTab === CASE_VIEW_PAGE_TABS.SIMILAR_CASES ? 'accent' : 'subdued'}
       >
         {count ?? 0}
