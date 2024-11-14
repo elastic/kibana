@@ -21,5 +21,11 @@
     "@kbn/repo-info",
     "@kbn/es",
     "@kbn/dev-proc-runner",
+    "@kbn/test",
+    "@kbn/es-archiver",
+    "@kbn/dev-utils",
+    "@kbn/mock-idp-utils",
+    "@kbn/test-suites-xpack",
+    "@kbn/test-subj-selector",
   ]
 }
