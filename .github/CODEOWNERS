@@ -1302,7 +1302,25 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 ### END Observability Plugins
 
 # Presentation
-/x-pack/test/disable_ems @elastic/kibana-presentation
+/test/functional/services/inspector.ts @elastic/kibana-presentation
+/x-pack/test/functional/services/canvas_element.ts @elastic/kibana-presentation
+/x-pack/test/functional/page_objects/canvas_page.ts @elastic/kibana-presentation
+/x-pack/test/accessibility/apps/group3/canvas.ts @elastic/kibana-presentation
+/x-pack/test/upgrade/apps/canvas @elastic/kibana-presentation
+/x-pack/test/upgrade/apps/dashboard @elastic/kibana-presentation
+/test/functional/screenshots/baseline/tsvb_dashboard.png @elastic/kibana-presentation
+/test/functional/screenshots/baseline/dashboard_*.png @elastic/kibana-presentation
+/test/functional/screenshots/baseline/area_chart.png @elastic/kibana-presentation
+/test/functional/page_objects/share_page.ts @elastic/kibana-presentation
+/x-pack/test/disable_ems @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/165986
+/x-pack/test/functional/fixtures/kbn_archiver/dashboard* @elastic/kibana-presentation
+/test/functional/page_objects/dashboard_page* @elastic/kibana-presentation
+/test/functional/firefox/dashboard.config.ts @elastic/kibana-presentation # Assigned per: https://github.com/elastic/kibana/issues/15023
+/test/functional/fixtures/es_archiver/dashboard @elastic/kibana-presentation # Assigned per: https://github.com/elastic/kibana/issues/15023
+/test/api_integration/apis/short_url/**/*.ts @elastic/kibana-presentation # Assigned per: https://github.com/elastic/kibana/issues/15023
+/test/accessibility/apps/kibana_overview_* @elastic/kibana-presentation
+/test/accessibility/apps/dashboard.ts @elastic/kibana-presentation
+/test/accessibility/apps/filter_panel.ts @elastic/kibana-presentation
 /x-pack/test/functional/apps/dashboard @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group3/maps.ts  @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group1/dashboard_panel_options.ts  @elastic/kibana-presentation
