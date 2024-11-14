@@ -23,11 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
-import {
-  ELASTIC_MANAGED_WEB_CRAWLERS_PATH,
-  BASE_WEB_CRAWLERS_PATH,
-  CRAWLER,
-} from '../../constants';
+import { ELASTIC_MANAGED_WEB_CRAWLERS_PATH, BASE_WEB_CRAWLERS_PATH } from '../../constants';
 import { DecorativeHorizontalStepper } from '../common/decorative_horizontal_stepper';
 
 export const EmptyWebCrawlersPrompt: React.FC = () => {
@@ -116,7 +112,7 @@ export const EmptyWebCrawlersPrompt: React.FC = () => {
                                     <EuiLink
                                       target="_blank"
                                       data-test-subj="serverlessSearchEmptyConnectorsPromptSourceLink"
-                                      href={CRAWLER.github_repo}
+                                      href={'https://github.com/elastic/crawler'}
                                     >
                                       {i18n.translate(
                                         'xpack.serverlessSearch.webCrawlersEmpty.sourceLabel',
@@ -128,7 +124,9 @@ export const EmptyWebCrawlersPrompt: React.FC = () => {
                                     <EuiLink
                                       target="_blank"
                                       data-test-subj="serverlessSearchEmptyConnectorsPromptDockerLink"
-                                      href={CRAWLER.docker_doc}
+                                      href={
+                                        'https://github.com/elastic/crawler?tab=readme-ov-file#running-open-crawler-with-docker'
+                                      }
                                     >
                                       {i18n.translate(
                                         'xpack.serverlessSearch.webCrawlersEmpty.dockerLabel',
@@ -231,7 +229,7 @@ export const EmptyWebCrawlersPrompt: React.FC = () => {
                   data-test-subj="serverlessSearchEmptyConnectorsPromptCreateSelfManagedConnectorButton"
                   fill
                   iconType={githubIcon}
-                  href={CRAWLER.github_repo}
+                  href={'https://github.com/elastic/crawler'}
                 >
                   {i18n.translate('xpack.serverlessSearch.webCrawlersEmpty.selfManagedButton', {
                     defaultMessage: 'Self-managed web crawler',
