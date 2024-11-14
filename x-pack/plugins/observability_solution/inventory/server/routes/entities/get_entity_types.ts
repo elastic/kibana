@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import type { EntityInstance } from '@kbn/entities-schema';
 import { ENTITIES_LATEST_ALIAS } from '../../../common/entities';

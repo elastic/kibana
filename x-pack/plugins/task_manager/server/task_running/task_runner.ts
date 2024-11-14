@@ -55,11 +55,12 @@ import {
   TaskStatus,
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { isUnrecoverableError } from './errors';
+import { isUnrecoverableError, isUserError } from './errors';
 import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
 import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
+import { TaskErrorSource } from '../../common/constants';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -397,8 +398,9 @@ export class TaskManagerRunner implements TaskRunner {
       if (apmTrans) apmTrans.end('success');
       return processedResult;
     } catch (err) {
+      const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
       this.logger.error(`Task ${this} failed: ${err}`, {
-        tags: [this.taskType, this.instance.task.id, 'task-run-failed'],
+        tags: [this.taskType, this.instance.task.id, 'task-run-failed', `${errorSource}-error`],
         error: { stack_trace: err.stack },
       });
       // in error scenario, we can not get the RunResult

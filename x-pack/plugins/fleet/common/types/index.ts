@@ -49,6 +49,7 @@ export interface FleetConfigType {
   packages?: PreconfiguredPackage[];
   outputs?: PreconfiguredOutput[];
   agentIdVerificationEnabled?: boolean;
+  eventIngestedEnabled?: boolean;
   enableExperimental?: string[];
   packageVerification?: {
     gpgKeyPath?: string;
