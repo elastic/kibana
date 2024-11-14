@@ -5322,6 +5322,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/index-adapter@link:packages/kbn-index-adapter":
+  version "0.0.0"
+  uid ""
+
 "@kbn/index-lifecycle-management-common-shared@link:x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared":
   version "0.0.0"
   uid ""
@@ -5910,7 +5914,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils@link:x-pack/packages/observability/observability_utils":
+"@kbn/observability-utils-browser@link:x-pack/packages/observability/observability_utils/observability_utils_browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-utils-common@link:x-pack/packages/observability/observability_utils/observability_utils_common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-utils-server@link:x-pack/packages/observability/observability_utils/observability_utils_server":
   version "0.0.0"
   uid ""
 
@@ -6903,6 +6915,10 @@
   uid ""
 
 "@kbn/storybook@link:packages/kbn-storybook":
+  version "0.0.0"
+  uid ""
+
+"@kbn/streams-plugin@link:x-pack/plugins/streams":
   version "0.0.0"
   uid ""
 
