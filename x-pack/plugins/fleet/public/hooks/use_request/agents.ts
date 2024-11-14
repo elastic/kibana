@@ -53,7 +53,7 @@ import type {
   PostRetrieveAgentsByActionsResponse,
 } from '../../types';
 
-import { useRequest, sendRequest } from './use_request';
+import { useRequest, sendRequest, sendRequestForRq } from './use_request';
 import type { UseRequestConfig } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
@@ -352,7 +352,7 @@ export function sendGetAgentsAvailableVersions() {
 }
 
 export function sendGetAgentStatusRuntimeField() {
-  return sendRequest<string>({
+  return sendRequestForRq<string>({
     method: 'get',
     path: '/internal/fleet/agents/status_runtime_field',
     version: API_VERSIONS.internal.v1,
