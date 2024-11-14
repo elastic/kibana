@@ -7,12 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import { type DataViewField } from '@kbn/data-views-plugin/common';
+import { KNOWN_FIELD_TYPES } from './field_types';
 
-const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
+const supportedTypes = new Set([
+  KNOWN_FIELD_TYPES.STRING,
+  KNOWN_FIELD_TYPES.BOOLEAN,
+  KNOWN_FIELD_TYPES.NUMBER,
+  KNOWN_FIELD_TYPES.IP,
+]);
 
 export const fieldSupportsBreakdown = (field: DataViewField) =>
-  supportedTypes.has(field.type) &&
+  supportedTypes.has(field.type as KNOWN_FIELD_TYPES) &&
   field.aggregatable &&
   !field.scripted &&
   field.timeSeriesMetric !== 'counter';

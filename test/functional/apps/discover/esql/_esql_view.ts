@@ -42,7 +42,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     enableESQL: true,
   };
 
-  describe('discover esql view', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/196866
+  describe.skip('discover esql view', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
@@ -839,6 +840,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(prevList).to.eql([]);
 
         await discover.loadSavedSearch('esql view with breakdown');
+        await header.waitUntilLoadingHasFinished();
+        const list = await discover.getHistogramLegendList();
+        expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
+      });
+
+      it('should choose breakdown field when selected from field stats', async () => {
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const testQuery = 'from logstash-*';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await unifiedFieldList.clickFieldListAddBreakdownField('extension');
         await header.waitUntilLoadingHasFinished();
         const list = await discover.getHistogramLegendList();
         expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
