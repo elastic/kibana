@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     updateTemplate,
     cleanUpTemplates,
     simulateTemplate,
+    simulateTemplateByName,
   } = templatesApi(getService);
 
   describe('index templates', () => {
@@ -451,6 +452,18 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { body } = await simulateTemplate(payload).expect(200);
         expect(body.template).to.be.ok();
+      });
+
+      it('should simulate an index template by name', async () => {
+        const templateName = `template-${getRandomString()}`;
+        const payload = getTemplatePayload(templateName, [getRandomString()]);
+
+        await createTemplate(payload).expect(200);
+
+        await simulateTemplateByName(templateName).expect(200);
+
+        // cleanup
+        await deleteTemplates([{ name: templateName }]);
       });
     });
   });
