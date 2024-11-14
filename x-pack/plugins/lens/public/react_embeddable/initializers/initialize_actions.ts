@@ -30,7 +30,7 @@ import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
 import { Datasource, IndexPatternMap } from '../../types';
 import { getMergedSearchContext } from '../expressions/merged_search_context';
-import { buildObservableVariable, emptySerializer, isTextBasedLanguage } from '../helper';
+import { buildObservableVariable, isTextBasedLanguage } from '../helper';
 import type {
   GetStateType,
   LensEmbeddableStartServices,
@@ -268,7 +268,7 @@ export function initializeActionApi(
         enhancements: getUnchangingComparator(),
       }),
     },
-    serialize: emptySerializer,
+    serialize: () => dynamicActionsApi?.serializeDynamicActions() ?? {},
     cleanup: () => {
       maybeStopDynamicActions?.stopDynamicActions();
     },
