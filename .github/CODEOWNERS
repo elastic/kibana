@@ -1100,6 +1100,33 @@ src/plugins/discover/public/context_awareness/profile_providers/security @elasti
 /x-pack/test/screenshot_creation @elastic/platform-docs
 
 # Visualizations
+/test/functional/apps/getting_started/*.ts @elastic/kibana-visualizations # Assigned per https://github.com/elastic/kibana/pull/199767#discussion_r1840485031
+/x-pack/test/upgrade/apps/graph @elastic/kibana-visualizations
+/x-pack/test/functional/page_objects/log_wrapper.ts @elastic/kibana-visualizations # Assigned per https://github.com/elastic/kibana/pull/36437
+/x-pack/test/functional/page_objects/graph_page.ts @elastic/kibana-visualizations
+/x-pack/test/functional/apps/managed_content @elastic/kibana-visualizations
+/test/functional/services/visualizations @elastic/kibana-visualizations
+/test/functional/services/renderable.ts @elastic/kibana-visualizations
+/test/functional/services/inspector.ts @elastic/kibana-visualizations # Assigned per https://github.com/elastic/kibana/pull/28509
+/test/functional/page_objects/vega_chart_page.ts @elastic/kibana-visualizations
+/test/functional/page_objects/visual_builder_page.ts @elastic/kibana-visualizations
+/test/functional/page_objects/visualize_*.ts @elastic/kibana-visualizations
+/test/functional/page_objects/timelion_page.ts @elastic/kibana-visualizations
+/test/functional/page_objects/time_to_visualize_page.ts @elastic/kibana-visualizations
+/test/functional/page_objects/tag_cloud_page.ts @elastic/kibana-visualizations
+/x-pack/test/functional/page_objects/lens_page.ts @elastic/kibana-visualizations
+/x-pack/test/functional/es_archives/lens @elastic/kibana-visualizations
+/x-pack/test/examples/embedded_lens @elastic/kibana-visualizations
+/x-pack/test/api_integration/fixtures/kbn_archiver/lens/constant_keyword.json @elastic/kibana-visualizations
+/test/plugin_functional/test_suites/custom_visualizations @elastic/kibana-visualizations
+/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
+/x-pack/test/functional/fixtures/kbn_archiver/visualize @elastic/kibana-visualizations
+/x-pack/test/functional/fixtures/kbn_archiver/lens @elastic/kibana-visualizations
+/test/functional/page_objects/legacy/data_table_vis.ts @elastic/kibana-visualizations
+/test/functional/page_objects/annotation_library_editor_page.ts @elastic/kibana-visualizations # Assigned per git blame
+/test/functional/firefox/visualize.config.ts @elastic/kibana-visualizations
+/test/examples/expressions_explorer/*.ts @elastic/kibana-visualizations
+/test/accessibility/apps/visualize.ts @elastic/kibana-visualizations
 /x-pack/test/accessibility/apps/group3/graph.ts @elastic/kibana-visualizations
 /x-pack/test/accessibility/apps/group2/lens.ts @elastic/kibana-visualizations
 /x-pack/test/functional/apps/visualize @elastic/kibana-visualizations
@@ -1111,7 +1138,11 @@ src/plugins/discover/public/context_awareness/profile_providers/security @elasti
 /test/api_integration/apis/event_annotations @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/test_suites/common/visualizations/ @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
-packages/kbn-monaco/src/esql @elastic/kibana-esql
+packages/kbn-monaco/src/esql
+
+# ESQL
+/test/api_integration/apis/esql/*.ts @elastic/kibana-esql
+/test/functional/services/esql.ts @elastic/kibana-esql
 
 # Global Experience
 
