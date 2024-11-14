@@ -34,11 +34,13 @@ const sortDates = (date1?: string, date2?: string) => {
 
 export const getHistoryItems = (sortDirection: 'desc' | 'asc'): QueryHistoryItem[] => {
   const localStorageString = localStorage.getItem(QUERY_HISTORY_ITEM_KEY) ?? '[]';
-  const historyItems: QueryHistoryItem[] = JSON.parse(localStorageString);
-
-  // for backwards compatibility
-  historyItems.forEach((item) => {
-    item.timeRan = item.timeRan ? new Date(item.timeRan).toISOString() : undefined;
+  const localStorageItems: QueryHistoryItem[] = JSON.parse(localStorageString);
+  const historyItems: QueryHistoryItem[] = localStorageItems.map((item) => {
+    return {
+      status: item.status,
+      queryString: item.queryString,
+      timeRan: item.timeRan ? new Date(item.timeRan).toISOString() : undefined,
+    };
   });
 
   const sortedByDate = historyItems.sort((a, b) => {
