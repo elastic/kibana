@@ -264,3 +264,5 @@ As part of the bundled package update process, we'll likely also need to update 
 To update this registry image, pull the digest SHA from the package storage Jenkins pipeline at https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/activity and update the files above. The digest value should appear in the "publish Docker image" step as part of the `docker push` command in the logs.
 
 ![image](https://user-images.githubusercontent.com/6766512/171409455-64f9ab1d-08fe-4872-9b74-58359ed938dd.png)
+
+test
