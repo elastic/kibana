@@ -1721,10 +1721,10 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@^8.15.1":
-  version "8.15.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.15.1.tgz#ca294ba11ed1514bf87d4a2e253b11f6cefd8552"
-  integrity sha512-L3YzSaxrasMMGtcxnktiUDjS5f177L0zpHsBH+jL0LgPhdMk9xN/VKrAaYzvri86IlV5IbveA0ANV6o/BDUmhQ==
+"@elastic/elasticsearch@^8.15.2":
+  version "8.15.2"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.15.2.tgz#024e3617b0d1db6425b369a7176d3514598e4c9e"
+  integrity sha512-DTvjK4bs4WkgdQkXZJx2eVcwKzF1it/PyGT3rl1ReUNIWbkzMEKksiDQK3wY1U3WHT4zTuWQi4GrDOC1w5ej8Q==
   dependencies:
     "@elastic/transport" "^8.8.1"
     tslib "^2.4.0"
@@ -5322,6 +5322,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/index-adapter@link:packages/kbn-index-adapter":
+  version "0.0.0"
+  uid ""
+
 "@kbn/index-lifecycle-management-common-shared@link:x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared":
   version "0.0.0"
   uid ""
@@ -5910,7 +5914,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils@link:x-pack/packages/observability/observability_utils":
+"@kbn/observability-utils-browser@link:x-pack/packages/observability/observability_utils/observability_utils_browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-utils-common@link:x-pack/packages/observability/observability_utils/observability_utils_common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-utils-server@link:x-pack/packages/observability/observability_utils/observability_utils_server":
   version "0.0.0"
   uid ""
 
@@ -6903,6 +6915,10 @@
   uid ""
 
 "@kbn/storybook@link:packages/kbn-storybook":
+  version "0.0.0"
+  uid ""
+
+"@kbn/streams-plugin@link:x-pack/plugins/streams":
   version "0.0.0"
   uid ""
 
@@ -15063,9 +15079,9 @@ cross-spawn@^6.0.0:
     which "^1.2.9"
 
 cross-spawn@^7.0.0, cross-spawn@^7.0.2, cross-spawn@^7.0.3:
-  version "7.0.3"
-  resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.3.tgz#f73a85b9d5d41d045551c177e2882d4ac85728a6"
-  integrity sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==
+  version "7.0.5"
+  resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.5.tgz#910aac880ff5243da96b728bc6521a5f6c2f2f82"
+  integrity sha512-ZVJrKKYunU38/76t0RMOulHOnUcbU9GbpWKAOZ0mhjr7CX6FVrH+4FrAapSOekrgFQ3f/8gwMEuIft0aKq6Hug==
   dependencies:
     path-key "^3.1.0"
     shebang-command "^2.0.0"

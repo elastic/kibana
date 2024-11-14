@@ -64,13 +64,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail('discoverDocTable');
         });
 
-        it('should show Field Statistics data in ES|QL mode', async () => {
+        it('should not show Field Statistics data in ES|QL mode', async () => {
           await discover.selectTextBaseLang();
-          await discover.waitUntilSearchingHasFinished();
-
-          await testSubjects.click('dscViewModeFieldStatsButton');
           await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('dataVisualizerTableContainer');
+          await discover.waitUntilSearchingHasFinished();
+          await testSubjects.missingOrFail('dscViewModeFieldStatsButton');
         });
       });
     });

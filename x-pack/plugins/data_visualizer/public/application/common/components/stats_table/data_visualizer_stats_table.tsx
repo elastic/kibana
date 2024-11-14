@@ -65,7 +65,7 @@ interface DataVisualizerTableProps<T extends object> {
   error?: Error | string;
 }
 
-export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
+const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
   items,
   pageState,
   updatePageState,
@@ -506,3 +506,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     </EuiResizeObserver>
   );
 };
+
+export const DataVisualizerTable = React.memo(
+  UnmemoizedDataVisualizerTable
+) as typeof UnmemoizedDataVisualizerTable;

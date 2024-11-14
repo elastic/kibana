@@ -14,7 +14,7 @@ import { constant, identity } from 'fp-ts/lib/function';
 import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { FilterStateStore } from '@kbn/es-query';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useUrlState } from '../../../../hooks/use_url_state';
+import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
