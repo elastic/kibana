@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Client } from '@elastic/elasticsearch';
+
 export const mockAutoOpsResponse = {
   metrics: {
     ingest_rate: [
@@ -41,3 +43,46 @@ export const mockAutoOpsResponse = {
     ],
   },
 };
+
+export const createDataStreams = async (es: Client) => {
+  const dataStreamNames = new Set<string>(
+    dataStreamsMockResponse.map((dataStream) => dataStream.name)
+  );
+
+  for (const name of dataStreamNames) {
+    try {
+      await es.indices.createDataStream({ name });
+    } catch (e) {
+      throw e;
+    }
+  }
+};
+
+export const deleteDataStreams = async (es: Client) => {
+  const dataStreamNames = new Set<string>(
+    dataStreamsMockResponse.map((dataStream) => dataStream.name)
+  );
+
+  for (const name of dataStreamNames) {
+    try {
+      await es.indices.deleteDataStream({ name });
+    } catch (e) {
+      throw e;
+    }
+  }
+};
+
+export const dataStreamsMockResponse = [
+  {
+    name: 'metrics-system.cpu-default',
+    storageSizeBytes: 6197,
+  },
+  {
+    name: 'metrics-system.core.total.pct-default',
+    storageSizeBytes: 5197,
+  },
+  {
+    name: 'logs-nginx.access-default',
+    storageSizeBytes: 1938,
+  },
+];
