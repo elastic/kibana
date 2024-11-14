@@ -3114,6 +3114,87 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      it('suppresses alerts when query has 3 sequences', async () => {
+        // the first sequence alert is comprised of events [timestamp1, ...2, ...3]
+        // the other suppressed alerts will be made up of the following sequences
+        // [timestamp2, timestamp3, timestamp4]
+        // [timestamp3, timestamp4, timestamp5]
+        // [timestamp4, timestamp5, timestamp6]
+        const id = uuidv4();
+        const dateNow = Date.now();
+        const timestamp1 = new Date(dateNow - 5000).toISOString();
+        const timestamp2 = new Date(dateNow - 5500).toISOString();
+        const timestamp3 = new Date(dateNow - 5800).toISOString();
+        const timestamp4 = new Date(dateNow - 6000).toISOString();
+        const timestamp5 = new Date(dateNow - 6100).toISOString();
+        const timestamp6 = new Date(dateNow - 6200).toISOString();
+
+        const firstSequenceEvent = {
+          id,
+          '@timestamp': timestamp1,
+          host: {
+            name: 'host-a',
+          },
+        };
+        await indexListOfSourceDocuments([
+          firstSequenceEvent,
+          { ...firstSequenceEvent, '@timestamp': timestamp2 },
+          { ...firstSequenceEvent, '@timestamp': timestamp3 },
+        ]);
+
+        const secondSequenceEvent = {
+          id,
+          '@timestamp': timestamp4,
+          host: {
+            name: 'host-a',
+          },
+        };
+
+        await indexListOfSourceDocuments([
+          secondSequenceEvent,
+          { ...secondSequenceEvent, '@timestamp': timestamp5 },
+          { ...secondSequenceEvent, '@timestamp': timestamp6 },
+        ]);
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: `sequence [any where id == "${id}"] [any where id == "${id}"] [any where id == "${id}"]`,
+          alert_suppression: {
+            group_by: ['host.name'],
+            duration: {
+              value: 10,
+              unit: 's',
+            },
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-30s',
+          interval: '10s',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+        // we expect one shell alert
+        // and three building block alerts
+        expect(alerts.hits.hits.length).toEqual(4);
+        const [sequenceAlert, buildingBlockAlerts] = partition(
+          alerts.hits.hits,
+          (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
+        );
+        expect(buildingBlockAlerts.length).toEqual(3);
+        expect(sequenceAlert.length).toEqual(1);
+
+        expect(sequenceAlert[0]._source).toEqual({
+          ...sequenceAlert[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: 'host-a',
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
+        });
+      });
+
       it('does not suppress alerts outside of duration when query with 3 sequences', async () => {
         const id = uuidv4();
         const dateNow = Date.now();
