@@ -2055,11 +2055,20 @@ export default ({ getService }: FtrProviderContext) => {
           host: undefined,
         };
 
+        // this should generate three sequence alerts
         // sequence alert 1 will be doc1 and doc1WithLaterTimestamp
         // sequence alert 2 will be doc1WithLaterTimestamp and doc2WithNoHost
-        // the reason for the second alert is because despite the value being null
-        // in one of the two events in the sequence, the sequence alert will
-        // adopt the value for host.name and be suppressible.
+        // sequence alert 3 will be doc2WithNoHost and doc3WithNoHost
+        // This logic is defined in objectPairIntersection
+        // x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/build_alert_group_from_sequence.ts
+        // Any sequence comprised of events where one field contains a value, followed by any number of
+        // events in the sequence where the value is null or undefined will have that field
+        // stripped from the sequence alert. So given that, we expect three alerts here
+        // The sequence comprised of [doc1, doc1WithLaterTimestamp] will have
+        // host.name and 'host-a' as the suppression values
+        // the other two sequence alerts comprised of [doc1WithLaterTimestamp, doc2WithNoHost]
+        // and [doc2WithNoHost, doc3WithNoHost] will have no suppression values set because
+        // of the logic outlined above
         await indexListOfSourceDocuments([
           doc1,
           doc1WithLaterTimestamp,
