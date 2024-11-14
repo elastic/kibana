@@ -9,7 +9,6 @@ import { wrapErrorAndRejectPromise } from '@kbn/security-solution-plugin/common/
 import {
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
-  AGENT_POLICY_SUMMARY_ROUTE,
   BASE_ENDPOINT_ACTION_ROUTE,
   BASE_POLICY_RESPONSE_ROUTE,
   EXECUTE_ROUTE,
@@ -145,15 +144,6 @@ export default function ({ getService }: FtrProviderContext) {
       },
     ];
 
-    const superuserApiList: ApiCallsInterface[] = [
-      {
-        method: 'get',
-        path: `${AGENT_POLICY_SUMMARY_ROUTE}?package_name=endpoint`,
-        version: '2023-10-31',
-        body: undefined,
-      },
-    ];
-
     function replacePathIds(path: string) {
       return path.replace('{action_id}', actionId).replace('{agentId}', agentId);
     }
@@ -188,7 +178,6 @@ export default function ({ getService }: FtrProviderContext) {
         ...canReadActionsLogManagementApiList,
         ...canIsolateHostApiList,
         ...canWriteProcessOperationsApiList,
-        ...superuserApiList,
       ]) {
         it(`should return 403 when [${apiListItem.method.toUpperCase()} ${
           apiListItem.path
@@ -224,11 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with minimal_all and actions_log_management_read', () => {
-      for (const apiListItem of [
-        ...canIsolateHostApiList,
-        ...canWriteProcessOperationsApiList,
-        ...superuserApiList,
-      ]) {
+      for (const apiListItem of [...canIsolateHostApiList, ...canWriteProcessOperationsApiList]) {
         it(`should return 403 when [${apiListItem.method.toUpperCase()} ${
           apiListItem.path
         }]`, async () => {
@@ -265,24 +250,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with minimal_all, actions_log_management_all, host_isolation_all, and process_operations_all', () => {
-      for (const apiListItem of superuserApiList) {
-        it(`should return 403 when [${apiListItem.method.toUpperCase()} ${
-          apiListItem.path
-        }]`, async () => {
-          await endpointOperationsAnalystSupertest[apiListItem.method](
-            replacePathIds(apiListItem.path)
-          )
-            .set('kbn-xsrf', 'xxx')
-            .send(getBodyPayload(apiListItem))
-            .expect(403, {
-              statusCode: 403,
-              error: 'Forbidden',
-              message: 'Endpoint authorization failure',
-            })
-            .catch(wrapErrorAndRejectPromise);
-        });
-      }
-
       for (const apiListItem of [
         ...canReadSecuritySolutionApiList,
         ...canReadActionsLogManagementApiList,
@@ -326,17 +293,6 @@ export default function ({ getService }: FtrProviderContext) {
               apiListItem.version || '2023-10-31'
             )
             .set(samlAuth.getInternalRequestHeader())
-            .send(getBodyPayload(apiListItem))
-            .expect(200);
-        });
-      }
-      for (const apiListItem of [...superuserApiList]) {
-        // Admin user has no access to these APIs
-        it(`@skipInServerless should return 200 when [${apiListItem.method.toUpperCase()} ${
-          apiListItem.path
-        }]`, async () => {
-          await adminSupertest[apiListItem.method](replacePathIds(apiListItem.path))
-            .set('kbn-xsrf', 'xxx')
             .send(getBodyPayload(apiListItem))
             .expect(200);
         });

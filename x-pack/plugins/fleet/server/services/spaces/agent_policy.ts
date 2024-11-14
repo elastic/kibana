@@ -13,6 +13,8 @@ import {
   AGENTS_INDEX,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
 
 import { appContextService } from '../app_context';
@@ -22,6 +24,7 @@ import { packagePolicyService } from '../package_policy';
 import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { isSpaceAwarenessEnabled } from './helpers';
+import type { UninstallTokenSOAttributes } from '../security/uninstall_token_service';
 
 export async function updateAgentPolicySpaces({
   agentPolicyId,
@@ -110,6 +113,25 @@ export async function updateAgentPolicySpaces({
     if (soRes.error) {
       throw soRes.error;
     }
+  }
+
+  // Update uninstall tokens
+  const uninstallTokensRes = await soClient.find<UninstallTokenSOAttributes>({
+    perPage: SO_SEARCH_LIMIT,
+    type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+    filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id:"${agentPolicyId}"`,
+  });
+
+  if (uninstallTokensRes.total > 0) {
+    await soClient.bulkUpdate(
+      uninstallTokensRes.saved_objects.map((so) => ({
+        id: so.id,
+        type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+        attributes: {
+          namespaces: newSpaceIds,
+        },
+      }))
+    );
   }
 
   // Update fleet server index agents, enrollment api keys

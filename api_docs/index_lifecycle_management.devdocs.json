@@ -76,7 +76,7 @@
         "signature": [
           "\"ILM_LOCATOR_ID\""
         ],
-        "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+        "path": "x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
