@@ -9,21 +9,17 @@
 
 import React, { useState } from 'react';
 
-import { EuiButtonEmpty, EuiPopover, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/shared-ux-markdown';
-import { css } from '@emotion/react';
+import { useErrorTextStyle } from '@kbn/react-hooks';
 
 interface ControlErrorProps {
   error: Error | string;
 }
 
 export const ControlError = ({ error }: ControlErrorProps) => {
-  const { euiTheme } = useEuiTheme();
-  const errorTextStyle = css`
-    font-family: ${euiTheme.font.familyCode};
-    white-space: break-spaces;
-  `;
+  const errorTextStyle = useErrorTextStyle();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const errorMessage = error instanceof Error ? error.message : error;
 

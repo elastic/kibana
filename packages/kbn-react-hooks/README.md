@@ -26,3 +26,19 @@ function App() {
   );
 }
 ```
+
+### [useErrorTextStyle](./src/useErrorTextStyle)
+
+Returns styles used for styling error text.
+
+```tsx
+function App() {
+  const errorTextStyle = useErrorTextStyle();
+
+  return (
+    <div>
+      <EuiText css={errorTextStyle}>Error message</EuiText>
+    </div>
+  );
+}
+```
