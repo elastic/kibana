@@ -188,6 +188,7 @@ const convertTaskStatus = (taskStatus: TaskStatus): InstallationStatus | 'unknow
     case TaskStatus.Unrecognized:
     case TaskStatus.DeadLetter:
     case TaskStatus.ShouldDelete:
+    default:
       return 'unknown';
   }
 };
