@@ -1320,8 +1320,6 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 # Machine Learning
 /x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/config.ts @elastic/ml-ui
 /x-pack/test/stack_functional_integration/apps/ml @elastic/ml-ui
-/x-pack/test/monitoring_api_integration/fixtures/elasticsearch/ml_jobs.json @elastic/ml-ui
-/x-pack/test/monitoring_api_integration/apis/elasticsearch/ml_jobs.ts @elastic/ml-ui
 /x-pack/test/functional/fixtures/kbn_archiver/ml @elastic/ml-ui
 /x-pack/test/accessibility/apps/group2/ml_* @elastic/ml-ui
 /x-pack/test/api_integration/apis/file_upload @elastic/ml-ui
