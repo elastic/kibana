@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from './use_kibana';
 
 interface UseLicenseReturnValue {
   getLicense: () => ILicense | null;
