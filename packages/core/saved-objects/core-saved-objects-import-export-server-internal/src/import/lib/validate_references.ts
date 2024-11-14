@@ -110,7 +110,7 @@ export async function validateReferences(params: ValidateReferencesParams) {
       continue;
     }
 
-    const missingReferences = [];
+    const missingReferences: Array<{ type: string; id: string }> = [];
     const enforcedTypeReferences = references?.filter(filterReferencesToValidate) || [];
 
     const seenReferences = new Set();
