@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 // import { generatePath } from 'react-router-dom';
+import { SERVERLESS_ES_CONNECTORS_ID } from '@kbn/deeplinks-search/constants';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
@@ -37,7 +38,7 @@ export const ElasticManagedConnectorComingSoon: React.FC = () => {
   );
 
   const {
-    application: { navigateToUrl },
+    application: { navigateToApp },
   } = useKibanaServices();
 
   const assetBasePath = useAssetBasePath();
@@ -56,7 +57,7 @@ export const ElasticManagedConnectorComingSoon: React.FC = () => {
               <EuiButtonEmpty
                 data-test-subj="serverlessSearchElasticManagedConnectorEmptyBackButton"
                 iconType="arrowLeft"
-                onClick={() => navigateToUrl('./')}
+                onClick={() => navigateToApp(SERVERLESS_ES_CONNECTORS_ID)}
               >
                 {BACK_LABEL}
               </EuiButtonEmpty>
