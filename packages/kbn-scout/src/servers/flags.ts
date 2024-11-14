@@ -14,9 +14,9 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { CliSupportedServerModes } from '../types';
 
-export type StartServerOptions = ReturnType<typeof parseFlags>;
+export type StartServerOptions = ReturnType<typeof parseServerFlags>;
 
-export const FLAG_OPTIONS: FlagOptions = {
+export const SERVER_FLAG_OPTIONS: FlagOptions = {
   string: ['serverless', 'esFrom', 'kibana-install-dir'],
   boolean: ['stateful', 'logToFile'],
   help: `
@@ -28,7 +28,7 @@ export const FLAG_OPTIONS: FlagOptions = {
   `,
 };
 
-export function parseFlags(flags: FlagsReader) {
+export function parseServerFlags(flags: FlagsReader) {
   const serverlessType = flags.enum('serverless', ['es', 'oblt', 'security']);
   const isStateful = flags.boolean('stateful');
 

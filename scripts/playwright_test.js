@@ -7,13 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { startServersCli, runTestsCli } from './src/cli';
-export { expect, test, createPlaywrightConfig, createLazyPageObject } from './src/playwright';
-export type {
-  ScoutPage,
-  ScoutPlaywrightOptions,
-  ScoutTestOptions,
-  PageObjects,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
-} from './src/playwright';
+require('../src/setup_node_env');
+require('@kbn/scout').runTestsCli();

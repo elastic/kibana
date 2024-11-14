@@ -9,3 +9,5 @@
 
 export { loadConfig } from './loader/config_load';
 export { getConfigFilePath } from './get_config_file';
+export { loadServersConfig } from './utils';
+export type { Config } from './config';

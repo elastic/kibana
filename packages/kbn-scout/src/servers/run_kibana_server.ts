@@ -9,13 +9,11 @@
 
 import Path from 'path';
 import Os from 'os';
-
 import { v4 as uuidv4 } from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-
 import { parseRawFlags, getArgValue, remapPluginPaths, DedicatedTaskRunner } from '@kbn/test';
-import type { Config } from '../config/config';
+import { Config } from '../config';
 
 export async function runKibanaServer(options: {
   procs: ProcRunner;
@@ -124,4 +122,19 @@ export async function runKibanaServer(options: {
   }
 
   await Promise.all(promises);
+}
+
+export function getExtraKbnOpts(installDir: string | undefined, isServerless: boolean) {
+  if (installDir) {
+    return [];
+  }
+
+  return [
+    '--dev',
+    '--no-dev-config',
+    '--no-dev-credentials',
+    isServerless
+      ? '--server.versioned.versionResolution=newest'
+      : '--server.versioned.versionResolution=oldest',
+  ];
 }

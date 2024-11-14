@@ -8,27 +8,32 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-
 import { initLogsDir } from '@kbn/test';
-
-import { startServers, parseServerFlags, SERVER_FLAG_OPTIONS } from '../servers';
+import { TEST_FLAG_OPTIONS, parseTestFlags, runTests } from '../playwright/runner';
 
 /**
- * Start servers
+ * Start servers and run the tests
  */
-export function startServersCli() {
+export function runTestsCli() {
   run(
-    async ({ flagsReader: flags, log }) => {
-      const options = parseServerFlags(flags);
+    async ({ flagsReader, log }) => {
+      const options = await parseTestFlags(flagsReader);
 
       if (options.logsDir) {
         initLogsDir(log, options.logsDir);
       }
 
-      await startServers(log, options);
+      await runTests(log, options);
     },
     {
-      flags: SERVER_FLAG_OPTIONS,
+      description: `Run Playwright UI Tests`,
+      usage: `
+      Usage:
+        node scripts/playwright_test --help
+        node scripts/playwright_test --stateful --config <playwright_config_path>
+        node scripts/playwright_test --serverless=es --headed --config <playwright_config_path>
+      `,
+      flags: TEST_FLAG_OPTIONS,
     }
   );
 }

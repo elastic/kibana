@@ -15,6 +15,7 @@ test.describe('Discover app - value suggestions', () => {
       'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns'
     );
     await kbnClient.uiSettings.update({
+      defaultIndex: 'logstash-*', // TODO: investigate why it is required for `node scripts/playwright_test.js` run
       'doc_table:legacy': false,
     });
   });

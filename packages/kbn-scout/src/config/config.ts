@@ -13,7 +13,7 @@ import Path from 'path';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from './schema';
-import { formatCurrentDate, getProjectType } from '../utils';
+import { formatCurrentDate, getProjectType } from '../common/utils';
 import { ScoutServerConfig } from '../types';
 
 const $values = Symbol('values');

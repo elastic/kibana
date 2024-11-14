@@ -7,23 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import path from 'path';
 import * as Fs from 'fs';
-import { ServerlessProjectType } from '@kbn/es';
-import { REPO_ROOT } from '@kbn/repo-info';
-import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
-import { ScoutServerConfig } from '../types';
+import path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { CliSupportedServerModes, ScoutServerConfig } from '../types';
+import { getConfigFilePath } from './get_config_file';
+import { loadConfig } from './loader/config_load';
 
-export const getProjectType = (kbnServerArgs: string[]) => {
-  const options = getopts(kbnServerArgs);
-  return options.serverless as ServerlessProjectType;
-};
-
-export const saveTestServersConfigOnDisk = (
-  testServersConfig: ScoutServerConfig,
-  log: ToolingLog
-) => {
+const saveTestServersConfigOnDisk = (testServersConfig: ScoutServerConfig, log: ToolingLog) => {
   const configDirPath = path.resolve(REPO_ROOT, '.scout', 'servers');
   const configFilePath = path.join(configDirPath, `local.json`);
 
@@ -42,3 +34,16 @@ export const saveTestServersConfigOnDisk = (
     throw new Error(`Failed to save test server configuration at ${configFilePath}`);
   }
 };
+
+export async function loadServersConfig(mode: CliSupportedServerModes, log: ToolingLog) {
+  // get path to one of the predefined config files
+  const configPath = getConfigFilePath(mode);
+  // load config that is compatible with kbn-test input format
+  const config = await loadConfig(configPath, log);
+  // construct config for Playwright Test
+  const scoutServerConfig = config.getTestServersConfig();
+  // save test config to the file
+  saveTestServersConfigOnDisk(scoutServerConfig, log);
+
+  return config;
+}

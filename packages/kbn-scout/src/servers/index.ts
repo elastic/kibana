@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { parseFlags, FLAG_OPTIONS } from './flags';
+export { parseServerFlags, SERVER_FLAG_OPTIONS } from './flags';
 export { startServers } from './start_servers';
+export { runKibanaServer } from './run_kibana_server';
+export { runElasticsearch } from './run_elasticsearch';
+
+export type { StartServerOptions } from './flags';

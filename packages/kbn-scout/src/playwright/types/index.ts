@@ -11,8 +11,11 @@ import { PlaywrightTestConfig, PlaywrightTestOptions } from 'playwright/test';
 
 export type Protocol = 'http' | 'https';
 
+export const VALID_CONFIG_MARKER = Symbol('validConfig');
+
 export interface ScoutTestOptions extends PlaywrightTestOptions {
   serversConfigDir: string;
+  [VALID_CONFIG_MARKER]: boolean;
 }
 
 export interface ScoutPlaywrightOptions extends Pick<PlaywrightTestConfig, 'testDir' | 'workers'> {
