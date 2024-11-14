@@ -121,7 +121,7 @@ export const policies = [
  * @returns
  */
 export function getFunctionSignaturesByReturnType(
-  command: string,
+  command: string | string[],
   _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
@@ -165,12 +165,16 @@ export function getFunctionSignaturesByReturnType(
 
   const deduped = Array.from(new Set(list));
 
+  const commands = Array.isArray(command) ? command : [command];
   return deduped
     .filter(({ signatures, ignoreAsSuggestion, supportedCommands, supportedOptions, name }) => {
       if (ignoreAsSuggestion) {
         return false;
       }
-      if (!supportedCommands.includes(command) && !supportedOptions?.includes(option || '')) {
+      if (
+        !commands.some((c) => supportedCommands.includes(c)) &&
+        !supportedOptions?.includes(option || '')
+      ) {
         return false;
       }
       const filteredByReturnType = signatures.filter(

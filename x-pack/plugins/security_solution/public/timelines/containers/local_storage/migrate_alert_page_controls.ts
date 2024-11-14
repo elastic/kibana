@@ -7,8 +7,10 @@
 
 import type { DefaultControlState, ControlGroupRuntimeState } from '@kbn/controls-plugin/common';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { StartPlugins } from '../../../types';
 
-export const PAGE_FILTER_STORAGE_KEY = 'siem.default.pageFilters';
+export const GET_PAGE_FILTER_STORAGE_KEY = (spaceId: string = 'default') =>
+  `siem.${spaceId}.pageFilters`;
 
 interface OldFormat {
   viewMode: string;
@@ -96,8 +98,11 @@ interface NewFormatExplicitInput {
  * This migration script is to migrate the old format to the new format.
  *
  */
-export function migrateAlertPageControlsTo816(storage: Storage) {
-  const oldFormat: OldFormat = storage.get(PAGE_FILTER_STORAGE_KEY);
+export async function migrateAlertPageControlsTo816(storage: Storage, plugins: StartPlugins) {
+  const space = await plugins.spaces?.getActiveSpace();
+  const spaceId = space?.id ?? 'default';
+  const storageKey = GET_PAGE_FILTER_STORAGE_KEY(spaceId);
+  const oldFormat: OldFormat = storage.get(GET_PAGE_FILTER_STORAGE_KEY(spaceId));
   if (oldFormat && Object.keys(oldFormat).includes('panels')) {
     // Only run when it is old format
     const newFormat: ControlGroupRuntimeState<NewFormatExplicitInput & DefaultControlState> = {
@@ -131,6 +136,6 @@ export function migrateAlertPageControlsTo816(storage: Storage) {
       };
     }
 
-    storage.set(PAGE_FILTER_STORAGE_KEY, newFormat);
+    storage.set(storageKey, newFormat);
   }
 }
