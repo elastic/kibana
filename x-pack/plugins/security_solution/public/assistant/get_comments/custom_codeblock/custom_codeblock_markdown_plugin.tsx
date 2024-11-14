@@ -13,7 +13,7 @@ export const customCodeBlockLanguagePlugin = () => {
     if ('children' in node) {
       const nodeAsParent = node as Parent;
       nodeAsParent.children.forEach((child) => {
-        visitor(child, nodeAsParent);
+        visitor(child);
       });
     }
 
