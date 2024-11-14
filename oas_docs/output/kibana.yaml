@@ -6666,14 +6666,9 @@ paths:
         - cases
   /api/cases/{caseId}/files:
     post:
-      description: >
-        Attach a file to a case. You must have `all` privileges for the
-        **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the case you're updating. The request must include:
-
+      description: |
+        Attach a file to a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. The request must include:
         - The `Content-Type: multipart/form-data` HTTP header.
-
         - The location of the file that is being uploaded.
       operationId: addCaseFileDefaultSpace
       parameters:
@@ -43673,9 +43668,7 @@ components:
         - $ref: '#/components/schemas/Cases_add_user_comment_request_properties'
       title: Add case comment request
     Cases_add_case_file_request:
-      description: >-
-        Defines the file that will be attached to the case. Optional parameters
-        will be generated automatically from the file metadata if not defined.
+      description: Defines the file that will be attached to the case. Optional parameters will be generated automatically from the file metadata if not defined.
       type: object
       properties:
         file:
@@ -43683,10 +43676,7 @@ components:
           format: binary
           type: string
         filename:
-          description: >-
-            The desired name of the file being attached to the case, it can be
-            different than the name of the file in the filesystem. **This should
-            not include the file extension.**
+          description: The desired name of the file being attached to the case, it can be different than the name of the file in the filesystem. **This should not include the file extension.**
           type: string
       required:
         - file
