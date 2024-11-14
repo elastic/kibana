@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // BUG: Should have read priileges
-    describe.skip('read value list', () => {
+    describe('read value list', () => {
       it('should return 200 for t1_analyst', async () => {
         // create a simple list to read
         await admin

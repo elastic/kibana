@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // BUG: Requires `manage` privilege, returning 500
-    describe.skip('create value list', () => {
+    describe('create value list', () => {
       it('should return 200 for t3_analyst', async () => {
         await t3Analyst
           .post(LIST_URL)
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // BUG: Requires `manage` privilege, returning 500
-    describe.skip('patch value list', () => {
+    describe('patch value list', () => {
       it('should return 200 for t3_analyst', async () => {
         const listId = getCreateMinimalListSchemaMock().id as string;
         // create a simple list
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // BUG: Requires `manage` privilege, returning 500
-    describe.skip('update value list', () => {
+    describe('update value list', () => {
       it('should return 200 for t3_analyst', async () => {
         // create a simple list
         await admin

@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // BUG: returning 500 instead of 403
-    describe.skip('patch value list item', () => {
+    describe('patch value list item', () => {
       it('should return 403 for endpoint_operations_analyst', async () => {
         const listItemId = getCreateMinimalListItemSchemaMock().id as string;
         // create a simple list
@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // BUG: returning 500 instead of 403
-    describe.skip('update value list item', () => {
+    describe('update value list item', () => {
       it('should return 403 for endpoint_operations_analyst', async () => {
         // create a simple list
         await admin

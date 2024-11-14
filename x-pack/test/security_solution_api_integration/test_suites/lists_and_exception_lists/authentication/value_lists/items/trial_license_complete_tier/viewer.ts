@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // BUG: Should have read priileges
-    describe.skip('find value list item', () => {
+    describe('find value list item', () => {
       it('should return 403 for viewer', async () => {
         await admin
           .post(LIST_URL)
@@ -125,7 +125,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // BUG: Should have read priileges
-    describe.skip('read value list item', () => {
+    describe('read value list item', () => {
       it('should return 403 for viewer', async () => {
         await admin
           .post(LIST_URL)

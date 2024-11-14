@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // BUG: should be able to, returning 500
-    describe.skip('patch value list item', () => {
+    describe('patch value list item', () => {
       it('should return 200 for soc_manager', async () => {
         const listItemId = getCreateMinimalListItemSchemaMock().id as string;
         // create a simple list
@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // BUG: should be able to, returning 500
-    describe.skip('update value list item', () => {
+    describe('update value list item', () => {
       it('should return 200 for soc_manager', async () => {
         // create a simple list
         await admin
