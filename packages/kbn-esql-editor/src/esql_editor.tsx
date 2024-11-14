@@ -99,7 +99,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     theme,
     uiSettings,
   } = kibana.services;
-  const darkMode = theme.getTheme().darkMode;
+  const darkMode = theme?.getTheme().darkMode;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
