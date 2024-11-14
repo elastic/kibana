@@ -2,7 +2,10 @@
 First start the servers with
 
 ```bash
-node scripts/functional_tests_server.js --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/platform.stateful.config.ts
+// ESS
+node scripts/playwright_start_servers.js --stateful
+// Serverless
+node scripts/playwright_start_servers.js --serverless=es
 ```
 
 Then you can run the tests multiple times in another terminal with:
