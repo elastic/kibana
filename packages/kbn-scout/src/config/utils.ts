@@ -8,12 +8,29 @@
  */
 
 import * as Fs from 'fs';
-import { ToolingLog } from '@kbn/tooling-log';
+import getopts from 'getopts';
 import path from 'path';
+import { ToolingLog } from '@kbn/tooling-log';
+import { ServerlessProjectType } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { CliSupportedServerModes, ScoutServerConfig } from '../types';
 import { getConfigFilePath } from './get_config_file';
 import { loadConfig } from './loader/config_load';
+
+export const formatCurrentDate = () => {
+  const now = new Date();
+
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = now.getFullYear();
+
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+};
 
 const saveTestServersConfigOnDisk = (testServersConfig: ScoutServerConfig, log: ToolingLog) => {
   const configDirPath = path.resolve(REPO_ROOT, '.scout', 'servers');
@@ -47,3 +64,8 @@ export async function loadServersConfig(mode: CliSupportedServerModes, log: Tool
 
   return config;
 }
+
+export const getProjectType = (kbnServerArgs: string[]) => {
+  const options = getopts(kbnServerArgs);
+  return options.serverless as ServerlessProjectType;
+};

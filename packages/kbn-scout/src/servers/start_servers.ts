@@ -16,7 +16,7 @@ import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
 import { StartServerOptions } from './flags';
 import { loadServersConfig } from '../config';
-import { silence } from '../common/utils';
+import { silence } from '../common';
 
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();

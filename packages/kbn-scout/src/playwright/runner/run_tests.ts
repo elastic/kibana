@@ -15,7 +15,7 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { runElasticsearch, runKibanaServer } from '../../servers';
 import { loadServersConfig } from '../../config';
-import { silence } from '../../common/utils';
+import { silence } from '../../common';
 import { RunTestsOptions } from './flags';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 

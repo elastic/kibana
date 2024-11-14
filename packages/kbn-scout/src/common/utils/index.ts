@@ -7,5 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './common';
-export * from './config';
+import { ToolingLog } from '@kbn/tooling-log';
+import * as Rx from 'rxjs';
+
+export async function silence(log: ToolingLog, milliseconds: number) {
+  await Rx.firstValueFrom(
+    log.getWritten$().pipe(
+      Rx.startWith(null),
+      Rx.switchMap(() => Rx.timer(milliseconds))
+    )
+  );
+}
