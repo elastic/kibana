@@ -11,15 +11,14 @@ import { omit, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { Readable } from 'stream';
 import { ToolingLog } from '@kbn/tooling-log';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
   const es = getService('es');
   const log = getService('log');
 
@@ -55,30 +54,29 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     };
   }
 
-  registry.when('Time range metadata without data', { config: 'basic', archives: [] }, () => {
-    it('handles empty state', async () => {
-      const response = await getTimeRangeMedata({
-        start,
-        end,
+  describe('Time range metadata', () => {
+    describe('without data', () => {
+      it('handles empty state', async () => {
+        const response = await getTimeRangeMedata({
+          start,
+          end,
+        });
+
+        expect(response.isUsingServiceDestinationMetrics).to.eql(false);
+        expect(response.sources.filter((source) => source.hasDocs)).to.eql([
+          {
+            documentType: ApmDocumentType.TransactionEvent,
+            rollupInterval: RollupInterval.None,
+            hasDocs: true,
+            hasDurationSummaryField: false,
+          },
+        ]);
       });
-
-      expect(response.isUsingServiceDestinationMetrics).to.eql(false);
-      expect(response.sources.filter((source) => source.hasDocs)).to.eql([
-        {
-          documentType: ApmDocumentType.TransactionEvent,
-          rollupInterval: RollupInterval.None,
-          hasDocs: true,
-          hasDurationSummaryField: false,
-        },
-      ]);
     });
-  });
 
-  registry.when(
-    'Time range metadata when generating data with multiple APM server versions',
-    { config: 'basic', archives: [] },
-    () => {
+    describe('when generating data with multiple APM server versions', () => {
       describe('data loaded with and without summary field', () => {
+        let apmSynthtraceEsClient: ApmSynthtraceEsClient;
         const withoutSummaryFieldStart = moment('2023-04-28T00:00:00.000Z');
         const withoutSummaryFieldEnd = moment(withoutSummaryFieldStart).add(2, 'hours');
 
@@ -86,6 +84,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const withSummaryFieldEnd = moment(withSummaryFieldStart).add(2, 'hours');
 
         before(async () => {
+          apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
           await getTransactionEvents({
             start: withoutSummaryFieldStart,
             end: withoutSummaryFieldEnd,
@@ -259,15 +258,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
       });
-    }
-  );
+    });
 
-  registry.when(
-    'Time range metadata when generating data',
-    { config: 'basic', archives: [] },
-    () => {
-      before(() => {
+    describe('when generating data', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+      before(async () => {
         const instance = apm.service('my-service', 'production', 'java').instance('instance');
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
         return apmSynthtraceEsClient.index(
           timerange(moment(start).subtract(1, 'day'), end)
@@ -620,8 +617,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ]);
         });
       });
-    }
-  );
+    });
+  });
 }
 
 function getTransactionEvents({
