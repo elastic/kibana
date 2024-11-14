@@ -37,7 +37,7 @@ import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 
 type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
 
-interface ContextualFlyoutAlertsField {
+interface ResultAlertsField {
   _id: string[];
   _index: string[];
   'kibana.alert.rule.uuid': string[];
@@ -46,8 +46,17 @@ interface ContextualFlyoutAlertsField {
   'kibana.alert.rule.name': string[];
 }
 
+interface ContextualFlyoutAlertsField {
+  id: string;
+  index: string;
+  ruleUuid: string;
+  ruleName: string;
+  reason: string;
+  severity: AlertSeverity;
+}
+
 interface AlertsDetailsFields {
-  fields: ContextualFlyoutAlertsField;
+  fields: ResultAlertsField;
 }
 
 export const AlertsDetailsTable = memo(
@@ -62,7 +71,7 @@ export const AlertsDetailsTable = memo(
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
 
-    const alertsPagination = (alerts: AlertsDetailsFields[]) => {
+    const alertsPagination = (alerts: ContextualFlyoutAlertsField[]) => {
       let pageOfItems;
 
       if (!pageIndex && !pageSize) {
@@ -88,12 +97,19 @@ export const AlertsDetailsTable = memo(
 
     const alertDataResults = (data?.hits?.hits as AlertsDetailsFields[])?.map(
       (item: AlertsDetailsFields) => {
-        return { fields: item.fields };
+        return {
+          id: item.fields?._id[0],
+          index: item.fields?._index[0],
+          reason: item.fields?.['kibana.alert.reason'][0],
+          ruleName: item.fields?.['kibana.alert.rule.name'][0],
+          ruleUuid: item.fields?.['kibana.alert.rule.uuid'][0],
+          severity: item.fields?.['kibana.alert.severity'][0],
+        };
       }
     );
 
-    const severitiesMap =
-      alertDataResults?.map((item) => item.fields['kibana.alert.severity'][0]) || [];
+    const severitiesMap = alertDataResults?.map((item) => item.severity) || [];
+
     const alertStats = Object.entries(
       severitiesMap.reduce((acc: Record<string, number>, item) => {
         acc[item] = (acc[item] || 0) + 1;
@@ -114,7 +130,7 @@ export const AlertsDetailsTable = memo(
       pageSizeOptions: [10, 25, 100],
     };
 
-    const onTableChange = ({ page }: Criteria<AlertsDetailsFields>) => {
+    const onTableChange = ({ page }: Criteria<ContextualFlyoutAlertsField>) => {
       if (page) {
         const { index, size } = page;
         setPageIndex(index);
@@ -142,26 +158,20 @@ export const AlertsDetailsTable = memo(
 
     const tableId = TableId.alertsOnRuleDetailsPage;
 
-    const columns: Array<EuiBasicTableColumn<AlertsDetailsFields>> = [
+    const columns: Array<EuiBasicTableColumn<ContextualFlyoutAlertsField>> = [
       {
-        field: 'fields',
+        field: 'id',
         name: '',
         width: '5%',
-        render: (field: ContextualFlyoutAlertsField) => (
-          <EuiLink
-            onClick={() =>
-              handleOnEventAlertDetailPanelOpened(field._id[0], field._index[0], tableId)
-            }
-          >
+        render: (id: string, alert: ContextualFlyoutAlertsField) => (
+          <EuiLink onClick={() => handleOnEventAlertDetailPanelOpened(id, alert.index, tableId)}>
             <EuiIcon type={'expand'} />
           </EuiLink>
         ),
       },
       {
-        field: 'fields',
-        render: (field: ContextualFlyoutAlertsField) => (
-          <EuiText size="s">{field['kibana.alert.rule.name'][0]}</EuiText>
-        ),
+        field: 'ruleName',
+        render: (ruleName: string) => <EuiText size="s">{ruleName}</EuiText>,
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.alerts.table.ruleNameColumnName',
           {
@@ -171,13 +181,10 @@ export const AlertsDetailsTable = memo(
         width: '35%',
       },
       {
-        field: 'fields',
-        render: (field: ContextualFlyoutAlertsField) => (
+        field: 'severity',
+        render: (severity: AlertSeverity) => (
           <EuiText size="s">
-            <SeverityBadge
-              value={field['kibana.alert.severity'][0] as AlertSeverity}
-              data-test-subj="severityPropertyValue"
-            />
+            <SeverityBadge value={severity} data-test-subj="severityPropertyValue" />
           </EuiText>
         ),
         name: i18n.translate(
@@ -189,10 +196,8 @@ export const AlertsDetailsTable = memo(
         width: '20%',
       },
       {
-        field: 'fields',
-        render: (field: ContextualFlyoutAlertsField) => (
-          <EuiText size="s">{field['kibana.alert.reason'][0]}</EuiText>
-        ),
+        field: 'reason',
+        render: (reason: string) => <EuiText size="s">{reason}</EuiText>,
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.alerts.table.reasonColumnName',
           {
