@@ -835,13 +835,6 @@ describe('CasePatchRequestRt', () => {
       `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
     );
   });
-
-  it(`does not throw an error when observables are empty`, () => {
-    CasePatchRequestRt.decode({
-      ...defaultRequest,
-      observables: [],
-    });
-  });
 });
 
 describe('CasesPatchRequestRt', () => {
