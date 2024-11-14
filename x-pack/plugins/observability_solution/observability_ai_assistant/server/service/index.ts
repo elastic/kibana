@@ -10,7 +10,6 @@ import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-pl
 import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
@@ -43,16 +42,13 @@ export const resourceNames = {
     conversations: getResourceName('index-template-conversations'),
     kb: getResourceName('index-template-kb'),
   },
-  pipelines: {
-    kb: getResourceName('kb-ingest-pipeline'),
-  },
 };
 
 export class ObservabilityAIAssistantService {
   private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   private readonly logger: Logger;
-  private readonly getModelId: () => Promise<string>;
-  public kbService?: KnowledgeBaseService;
+  private readonly getSearchConnectorModelId: () => Promise<string>;
+  private kbService?: KnowledgeBaseService;
   private enableKnowledgeBase: boolean;
 
   private readonly registrations: RegistrationCallback[] = [];
@@ -60,36 +56,28 @@ export class ObservabilityAIAssistantService {
   constructor({
     logger,
     core,
-    taskManager,
-    getModelId,
+    getSearchConnectorModelId,
     enableKnowledgeBase,
   }: {
     logger: Logger;
     core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
-    taskManager: TaskManagerSetupContract;
-    getModelId: () => Promise<string>;
+    getSearchConnectorModelId: () => Promise<string>;
     enableKnowledgeBase: boolean;
   }) {
     this.core = core;
     this.logger = logger;
-    this.getModelId = getModelId;
+    this.getSearchConnectorModelId = getSearchConnectorModelId;
     this.enableKnowledgeBase = enableKnowledgeBase;
 
-    this.allowInit();
-  }
-
-  getKnowledgeBaseStatus() {
-    return this.init().then(() => {
-      return this.kbService!.status();
-    });
+    this.resetInit();
   }
 
   init = async () => {};
 
-  private allowInit = () => {
+  private resetInit = () => {
     this.init = once(async () => {
       return this.doInit().catch((error) => {
-        this.allowInit();
+        this.resetInit(); // reset the once flag if an error occurs
         throw error;
       });
     });
@@ -97,18 +85,18 @@ export class ObservabilityAIAssistantService {
 
   private doInit = async () => {
     try {
-      const [coreStart, pluginsStart] = await this.core.getStartServices();
+      this.logger.debug('Setting up index assets');
+      const [coreStart] = await this.core.getStartServices();
 
-      const elserModelId = await this.getModelId();
+      const { asInternalUser } = coreStart.elasticsearch.client;
 
-      const esClient = coreStart.elasticsearch.client;
-      await esClient.asInternalUser.cluster.putComponentTemplate({
+      await asInternalUser.cluster.putComponentTemplate({
         create: false,
         name: resourceNames.componentTemplate.conversations,
         template: conversationComponentTemplate,
       });
 
-      await esClient.asInternalUser.indices.putIndexTemplate({
+      await asInternalUser.indices.putIndexTemplate({
         name: resourceNames.indexTemplate.conversations,
         composed_of: [resourceNames.componentTemplate.conversations],
         create: false,
@@ -119,18 +107,13 @@ export class ObservabilityAIAssistantService {
             auto_expand_replicas: '0-1',
             hidden: true,
           },
-          mappings: {
-            _meta: {
-              model: elserModelId,
-            },
-          },
         },
       });
 
       const conversationAliasName = resourceNames.aliases.conversations;
 
       await createConcreteWriteIndex({
-        esClient: esClient.asInternalUser,
+        esClient: asInternalUser,
         logger: this.logger,
         totalFieldsLimit: 10000,
         indexPatterns: {
@@ -143,34 +126,15 @@ export class ObservabilityAIAssistantService {
         dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
 
-      await esClient.asInternalUser.cluster.putComponentTemplate({
+      // Knowledge base: component template
+      await asInternalUser.cluster.putComponentTemplate({
         create: false,
         name: resourceNames.componentTemplate.kb,
         template: kbComponentTemplate,
       });
 
-      await esClient.asInternalUser.ingest.putPipeline({
-        id: resourceNames.pipelines.kb,
-        processors: [
-          {
-            inference: {
-              model_id: elserModelId,
-              target_field: 'ml',
-              field_map: {
-                text: 'text_field',
-              },
-              inference_config: {
-                // @ts-expect-error
-                text_expansion: {
-                  results_field: 'tokens',
-                },
-              },
-            },
-          },
-        ],
-      });
-
-      await esClient.asInternalUser.indices.putIndexTemplate({
+      // Knowledge base: index template
+      await asInternalUser.indices.putIndexTemplate({
         name: resourceNames.indexTemplate.kb,
         composed_of: [resourceNames.componentTemplate.kb],
         create: false,
@@ -186,8 +150,9 @@ export class ObservabilityAIAssistantService {
 
       const kbAliasName = resourceNames.aliases.kb;
 
+      // Knowledge base: write index
       await createConcreteWriteIndex({
-        esClient: esClient.asInternalUser,
+        esClient: asInternalUser,
         logger: this.logger,
         totalFieldsLimit: 10000,
         indexPatterns: {
@@ -202,15 +167,16 @@ export class ObservabilityAIAssistantService {
 
       this.kbService = new KnowledgeBaseService({
         logger: this.logger.get('kb'),
-        esClient,
-        taskManagerStart: pluginsStart.taskManager,
-        getModelId: this.getModelId,
+        esClient: {
+          asInternalUser,
+        },
+        getSearchConnectorModelId: this.getSearchConnectorModelId,
         enabled: this.enableKnowledgeBase,
       });
 
       this.logger.info('Successfully set up index assets');
     } catch (error) {
-      this.logger.error(`Failed to initialize service: ${error.message}`);
+      this.logger.error(`Failed setting up index assets: ${error.message}`);
       this.logger.debug(error);
       throw error;
     }
