@@ -16,6 +16,7 @@ import { useDispatch } from '../../mappings_state_context';
 import { DynamicMappingSection } from './dynamic_mapping_section';
 import {
   SourceFieldSection,
+  STORED_SOURCE_OPTION,
   SYNTHETIC_SOURCE_OPTION,
   DISABLED_SOURCE_OPTION,
 } from './source_field_section';
@@ -48,7 +49,11 @@ const formSerializer = (formData: GenericObject) => {
       : sourceField?.option === DISABLED_SOURCE_OPTION
       ? { enabled: false }
       : sourceField?.includes || sourceField?.excludes
-      ? { includes: sourceField?.includes, excludes: sourceField?.excludes }
+      ? {
+          enabled: sourceField?.option === STORED_SOURCE_OPTION ? true : undefined,
+          includes: sourceField?.includes,
+          excludes: sourceField?.excludes,
+        }
       : undefined;
 
   const serialized = {
@@ -96,7 +101,7 @@ const formDeserializer = (formData: GenericObject) => {
       dynamic_date_formats,
     },
     sourceField: {
-      option: mode ?? (enabled === false ? 'disabled' : undefined),
+      option: mode ?? (enabled === false ? 'disabled' : enabled === true ? 'stored' : undefined),
       includes,
       excludes,
     },

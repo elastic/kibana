@@ -7,6 +7,7 @@
 
 import { AppDependencies } from '../../../..';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { ConfigurationForm } from '../../components/configuration_form';
 import { WithAppDependencies } from './helpers/setup_environment';
 import { TestSubjects } from './helpers/mappings_editor.helpers';
@@ -36,6 +37,9 @@ describe('Mappings editor: configuration form', () => {
       config: {
         enableMappingsSourceFieldSection: true,
       },
+      plugins: {
+        licensing: licensingMock.createStart(),
+      },
     } as unknown as AppDependencies;
 
     await act(async () => {
@@ -53,6 +57,9 @@ describe('Mappings editor: configuration form', () => {
         config: {
           enableMappingsSourceFieldSection: true,
         },
+        plugins: {
+          licensing: licensingMock.createStart(),
+        },
       } as unknown as AppDependencies;
 
       await act(async () => {
@@ -68,6 +75,9 @@ describe('Mappings editor: configuration form', () => {
       const ctx = {
         config: {
           enableMappingsSourceFieldSection: false,
+        },
+        plugins: {
+          licensing: licensingMock.createStart(),
         },
       } as unknown as AppDependencies;
 
