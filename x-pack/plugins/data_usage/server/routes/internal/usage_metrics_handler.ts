@@ -12,24 +12,22 @@ import {
   UsageMetricsRequestBody,
   UsageMetricsResponseSchemaBody,
 } from '../../../common/rest_types';
-import { DataUsageRequestHandlerContext } from '../../types';
+import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 
 import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../utils';
+import { DataUsageService } from '../../services';
 
 const formatStringParams = <T extends string>(value: T | T[]): T[] | MetricTypes[] =>
   typeof value === 'string' ? [value] : value;
 
-export const getUsageMetricsHandler = (): RequestHandler<
-  never,
-  unknown,
-  UsageMetricsRequestBody,
-  DataUsageRequestHandlerContext
-> => {
+export const getUsageMetricsHandler = (
+  dataUsageContext: DataUsageContext
+): RequestHandler<never, unknown, UsageMetricsRequestBody, DataUsageRequestHandlerContext> => {
   return async (context, request, response) => {
+    const logger = dataUsageContext.logFactory.get('usageMetricsRoute');
     try {
       const core = await context.core;
-      const logger = (await context.dataUsage).logFactory.get('usageMetricsRoute');
 
       const esClient = core.elasticsearch.client.asCurrentUser;
 
@@ -61,6 +59,8 @@ export const getUsageMetricsHandler = (): RequestHandler<
           new CustomHttpRequestError('Failed to retrieve data streams', 400)
         );
       }
+
+      const dataUsageService = new DataUsageService();
       const metrics = await dataUsageService.getMetrics({
         from,
         to,

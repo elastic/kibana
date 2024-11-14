@@ -6,17 +6,15 @@
  */
 
 import { RequestHandler } from '@kbn/core/server';
-import { DataUsageRequestHandlerContext } from '../../types';
+import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 import { errorHandler } from '../error_handler';
 import { getMeteringStats } from '../../utils/get_metering_stats';
 
-export const getDataStreamsHandler = (): RequestHandler<
-  never,
-  unknown,
-  DataUsageRequestHandlerContext
-> => {
+export const getDataStreamsHandler = (
+  dataUsageContext: DataUsageContext
+): RequestHandler<never, unknown, DataUsageRequestHandlerContext> => {
   return async (context, _, response) => {
-    const logger = (await context.dataUsage).logFactory.get('dataStreamsRoute');
+    const logger = dataUsageContext.logFactory.get('dataStreamsRoute');
     logger.debug('Retrieving user data streams');
 
     try {

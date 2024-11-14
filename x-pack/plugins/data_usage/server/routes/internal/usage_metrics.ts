@@ -7,11 +7,14 @@
 
 import { UsageMetricsRequestSchema, UsageMetricsResponseSchema } from '../../../common/rest_types';
 import { DATA_USAGE_METRICS_API_ROUTE } from '../../../common';
-import { DataUsageRouter } from '../../types';
+import { DataUsageContext, DataUsageRouter } from '../../types';
 
 import { getUsageMetricsHandler } from './usage_metrics_handler';
 
-export const registerUsageMetricsRoute = (router: DataUsageRouter) => {
+export const registerUsageMetricsRoute = (
+  router: DataUsageRouter,
+  dataUsageContext: DataUsageContext
+) => {
   router.versioned
     .post({
       access: 'internal',
@@ -29,6 +32,6 @@ export const registerUsageMetricsRoute = (router: DataUsageRouter) => {
           },
         },
       },
-      getUsageMetricsHandler()
+      getUsageMetricsHandler(dataUsageContext)
     );
 };

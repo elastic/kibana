@@ -82,7 +82,7 @@ export class DataUsagePlugin
       ],
     });
     const router = coreSetup.http.createRouter<DataUsageRequestHandlerContext>();
-    registerDataUsageRoutes(router);
+    registerDataUsageRoutes(router, this.dataUsageContext);
 
     return {};
   }
