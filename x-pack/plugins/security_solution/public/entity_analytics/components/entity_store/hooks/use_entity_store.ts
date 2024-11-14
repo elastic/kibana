@@ -7,7 +7,6 @@
 
 import type { UseMutationOptions, UseQueryOptions } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback } from 'react';
 
 import type {
   GetEntityStoreStatusResponse,
@@ -22,74 +21,65 @@ import type {
 import { useEntityStoreRoutes } from '../../../api/entity_store';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 
-const ENTITY_STORE_ENGINE_STATUS = 'ENTITY_STORE_ENGINE_STATUS';
-
+const ENTITY_STORE_STATUS = ['GET', 'ENTITY_STORE_STATUS'];
 export const useEntityStoreStatus = (options: UseQueryOptions<GetEntityStoreStatusResponse>) => {
   const { getEntityStoreStatus } = useEntityStoreRoutes();
 
-  const query = useQuery<GetEntityStoreStatusResponse>(
-    [ENTITY_STORE_ENGINE_STATUS],
-    getEntityStoreStatus,
-    options
-  );
+  const query = useQuery<GetEntityStoreStatusResponse>(ENTITY_STORE_STATUS, getEntityStoreStatus, {
+    refetchInterval: (data) => {
+      if (data?.status === 'installing') {
+        return 5000;
+      }
+      return false;
+    },
+    ...options,
+  });
   return query;
 };
 
-export const ENABLE_ENTITY_STORE_STATUS_KEY = ['POST', 'ENABLE_ENTITY_STORE'];
+export const ENABLE_STORE_STATUS_KEY = ['POST', 'ENABLE_ENTITY_STORE'];
 export const useEnableEntityStoreMutation = (options?: UseMutationOptions<{}>) => {
+  const { telemetry } = useKibana().services;
+  const queryClient = useQueryClient();
   const { enableEntityStore } = useEntityStoreRoutes();
 
-  return useMutation<InitEntityStoreResponse>(() => enableEntityStore(), {
-    ...options,
-    mutationKey: ENABLE_ENTITY_STORE_STATUS_KEY,
-  });
-};
-
-export const INIT_ENTITY_ENGINE_STATUS_KEY = ['POST', 'INIT_ENTITY_ENGINE'];
-
-export const useInvalidateEntityEngineStatusQuery = () => {
-  const queryClient = useQueryClient();
-
-  return useCallback(() => {
-    queryClient.invalidateQueries([ENTITY_STORE_ENGINE_STATUS], {
-      refetchType: 'active',
-    });
-  }, [queryClient]);
-};
-
-export const useInitEntityEngineMutation = (options?: UseMutationOptions<{}>) => {
-  const { telemetry } = useKibana().services;
-  const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
-  const { initEntityEngine } = useEntityStoreRoutes();
-  return useMutation<InitEntityEngineResponse[]>(
+  return useMutation<InitEntityStoreResponse>(
     () => {
       telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
         timestamp: new Date().toISOString(),
         action: 'start',
       });
-      return initEntityEngine('user').then((usr) =>
-        initEntityEngine('host').then((host) => [usr, host])
-      );
+      return enableEntityStore();
     },
     {
+      mutationKey: ENABLE_STORE_STATUS_KEY,
+      onSuccess: () => queryClient.refetchQueries(ENTITY_STORE_STATUS),
       ...options,
-      mutationKey: INIT_ENTITY_ENGINE_STATUS_KEY,
-      onSettled: (...args) => {
-        invalidateEntityEngineStatusQuery();
+    }
+  );
+};
 
-        if (options?.onSettled) {
-          options.onSettled(...args);
-        }
-      },
+export const INIT_ENTITY_ENGINE_STATUS_KEY = ['POST', 'INIT_ENTITY_ENGINE'];
+export const useInitEntityEngineMutation = (options?: UseMutationOptions<{}>) => {
+  const queryClient = useQueryClient();
+
+  const { initEntityEngine } = useEntityStoreRoutes();
+  return useMutation<InitEntityEngineResponse[]>(
+    () => Promise.all([initEntityEngine('user'), initEntityEngine('host')]),
+
+    {
+      mutationKey: INIT_ENTITY_ENGINE_STATUS_KEY,
+      onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
+      ...options,
     }
   );
 };
 
 export const STOP_ENTITY_ENGINE_STATUS_KEY = ['POST', 'STOP_ENTITY_ENGINE'];
-
 export const useStopEntityEngineMutation = (options?: UseMutationOptions<{}>) => {
   const { telemetry } = useKibana().services;
-  const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
+  const queryClient = useQueryClient();
+
   const { stopEntityEngine } = useEntityStoreRoutes();
   return useMutation<StopEntityEngineResponse[]>(
     () => {
@@ -97,44 +87,26 @@ export const useStopEntityEngineMutation = (options?: UseMutationOptions<{}>) =>
         timestamp: new Date().toISOString(),
         action: 'stop',
       });
-      return stopEntityEngine('user').then((usr) =>
-        stopEntityEngine('host').then((host) => [usr, host])
-      );
+      return Promise.all([stopEntityEngine('user'), stopEntityEngine('host')]);
     },
     {
-      ...options,
       mutationKey: STOP_ENTITY_ENGINE_STATUS_KEY,
-      onSettled: (...args) => {
-        invalidateEntityEngineStatusQuery();
-
-        if (options?.onSettled) {
-          options.onSettled(...args);
-        }
-      },
+      onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
+      ...options,
     }
   );
 };
 
 export const DELETE_ENTITY_ENGINE_STATUS_KEY = ['POST', 'STOP_ENTITY_ENGINE'];
-
 export const useDeleteEntityEngineMutation = (options?: UseMutationOptions<{}>) => {
-  const invalidateEntityEngineStatusQuery = useInvalidateEntityEngineStatusQuery();
+  const queryClient = useQueryClient();
   const { deleteEntityEngine } = useEntityStoreRoutes();
   return useMutation<DeleteEntityEngineResponse[]>(
-    () =>
-      deleteEntityEngine('user', true).then((usr) =>
-        deleteEntityEngine('host', true).then((host) => [usr, host])
-      ),
+    () => Promise.all([deleteEntityEngine('user', true), deleteEntityEngine('host', true)]),
     {
-      ...options,
       mutationKey: DELETE_ENTITY_ENGINE_STATUS_KEY,
-      onSettled: (...args) => {
-        invalidateEntityEngineStatusQuery();
-
-        if (options?.onSettled) {
-          options.onSettled(...args);
-        }
-      },
+      onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
+      ...options,
     }
   );
 };

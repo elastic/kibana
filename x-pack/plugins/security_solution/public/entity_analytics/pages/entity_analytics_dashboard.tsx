@@ -24,7 +24,7 @@ import { useHasSecurityCapability } from '../../helper_hooks';
 import { EntityAnalyticsHeader } from '../components/entity_analytics_header';
 import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomalies';
 
-import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_panels';
+import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_entity_store_panels';
 import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
