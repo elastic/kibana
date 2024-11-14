@@ -95,12 +95,13 @@ export const buildAlertGroupFromSequence = ({
   alertTimestampOverride,
   publicBaseUrl,
   intendedTimestamp,
-}: BuildAlertGroupFromSequence): Array<
-  WrappedFieldsLatest<EqlBuildingBlockFieldsLatest | EqlShellFieldsLatest>
-> => {
+}: BuildAlertGroupFromSequence): {
+  shellAlert: WrappedFieldsLatest<EqlShellFieldsLatest> | undefined;
+  buildingBlocks: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+} => {
   const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
   if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
-    return [];
+    return { shellAlert: undefined, buildingBlocks: [] };
   }
 
   // The "building block" alerts start out as regular BaseFields.
@@ -129,7 +130,7 @@ export const buildAlertGroupFromSequence = ({
     );
   } catch (error) {
     ruleExecutionLogger.error(error);
-    return [];
+    return { shellAlert: undefined, buildingBlocks: [] };
   }
 
   // The ID of each building block alert depends on all of the other building blocks as well,
@@ -190,7 +191,7 @@ export const buildAlertGroupFromSequence = ({
   );
 
   // sequence alert guaranteed to be first
-  return [sequenceAlert, ...wrappedBuildingBlocks];
+  return { shellAlert: sequenceAlert, buildingBlocks: wrappedBuildingBlocks };
 };
 
 export interface BuildAlertRootParams {

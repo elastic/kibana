@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { createHash } from 'crypto';
-import { chunk, get, invert, isEmpty, partition } from 'lodash';
+import { chunk, get, invert, isEmpty, merge, partition } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
@@ -17,7 +17,6 @@ import {
   ALERT_UUID,
   ALERT_RULE_UUID,
   ALERT_RULE_PARAMETERS,
-  ALERT_BUILDING_BLOCK_TYPE,
   TIMESTAMP,
   ALERT_INSTANCE_ID,
   ALERT_SUPPRESSION_DOCS_COUNT,
@@ -85,7 +84,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
-import { ALERT_GROUP_ID } from '../../../../../common/field_maps/field_names';
+import type { ConfigType } from '../../../../config';
 import type {
   ExtraFieldsForShellAlert,
   WrappedEqlShellOptionalSubAlertsType,
@@ -1053,16 +1052,18 @@ export const getDisabledActionsWarningText = ({
   }
 };
 
-export const isEqlBuildingBlockAlert = (
-  alertObject: BaseFieldsLatest
-): alertObject is EqlBuildingBlockFieldsLatest =>
-  (alertObject as EqlBuildingBlockFieldsLatest)?.[ALERT_BUILDING_BLOCK_TYPE] != null;
-
-export const isEqlShellAlert = (
-  alertObject: BaseFieldsLatest
-): alertObject is EqlShellFieldsLatest =>
-  (alertObject as EqlShellFieldsLatest)?.[ALERT_UUID] != null &&
-  (alertObject as EqlShellFieldsLatest)?.[ALERT_GROUP_ID] != null;
+export interface SharedParams {
+  spaceId: string;
+  completeRule: CompleteRule<RuleWithInMemorySuppression>;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+  indicesToQuery: string[];
+  alertTimestampOverride: Date | undefined;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  publicBaseUrl: string | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
+  intendedTimestamp: Date | undefined;
+}
 
 export type RuleWithInMemorySuppression =
   | ThreatRuleParams
@@ -1103,7 +1104,7 @@ export const buildShellAlertSuppressionTermsAndFields = ({
 } => {
   const suppressionTerms = getSuppressionTerms({
     alertSuppression: completeRule?.ruleParams?.alertSuppression,
-    fields: shellAlert?._source,
+    fields: shellAlert._source,
   });
   const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
@@ -1134,10 +1135,12 @@ export const buildShellAlertSuppressionTermsAndFields = ({
     [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
   };
 
+  merge<EqlShellFieldsLatest, SuppressionFieldsLatest>(shellAlert._source, suppressionFields);
+
   return {
     _id: shellAlert._id,
     _index: shellAlert._index,
-    _source: { ...shellAlert._source, ...suppressionFields },
+    _source: shellAlert._source as EqlShellFieldsLatest & SuppressionFieldsLatest,
     subAlerts: buildingBlockAlerts,
   };
 };

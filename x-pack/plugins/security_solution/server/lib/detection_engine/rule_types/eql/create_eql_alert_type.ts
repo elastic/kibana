@@ -11,10 +11,12 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from './eql';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateRuleOptions, SecurityAlertType, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
-import { EqlUtils } from './eql_utils';
+import type { SharedParams } from '../utils/utils';
+import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
+import type { BuildReasonMessage } from '../utils/reason_formatters';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
@@ -90,7 +92,7 @@ export const createEqlAlertType = (
         licensing,
       });
 
-      const eqlUtils = new EqlUtils({
+      const sharedParams: SharedParams = {
         spaceId,
         completeRule,
         mergeStrategy,
@@ -101,7 +103,27 @@ export const createEqlAlertType = (
         primaryTimestamp,
         secondaryTimestamp,
         intendedTimestamp,
-      });
+      };
+
+      const wrapSuppressedHits = (
+        events: SignalSourceHit[],
+        buildReasonMessage: BuildReasonMessage
+      ) =>
+        wrapSuppressedAlerts({
+          events,
+          spaceId,
+          completeRule,
+          mergeStrategy,
+          indicesToQuery: inputIndex,
+          buildReasonMessage,
+          alertTimestampOverride,
+          ruleExecutionLogger,
+          publicBaseUrl,
+          primaryTimestamp,
+          secondaryTimestamp,
+          intendedTimestamp,
+        });
+
       const { result, loggedRequests } = await eqlExecutor({
         completeRule,
         tuple,
@@ -117,7 +139,8 @@ export const createEqlAlertType = (
         secondaryTimestamp,
         exceptionFilter,
         unprocessedExceptions,
-        eqlUtils,
+        wrapSuppressedHits,
+        sharedParams,
         alertTimestampOverride,
         alertWithSuppression,
         isAlertSuppressionActive,

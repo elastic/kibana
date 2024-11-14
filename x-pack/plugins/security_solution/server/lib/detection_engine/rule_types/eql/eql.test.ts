@@ -18,7 +18,7 @@ import { getCompleteRuleMock, getEqlRuleParams } from '../../rule_schema/mocks';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { eqlExecutor } from './eql';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
-import type { IEqlUtils } from './eql_utils';
+import type { SharedParams } from '../utils/utils';
 
 jest.mock('../../routes/index/get_index_version');
 jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
@@ -39,7 +39,21 @@ describe('eql_executor', () => {
   };
   const mockExperimentalFeatures = {} as ExperimentalFeatures;
   const mockScheduleNotificationResponseActionsService = jest.fn();
-  const mockEqlUtils = {} as IEqlUtils;
+  const ruleExecutionLoggerMock = ruleExecutionLogMock.forExecutors.create();
+  const SPACE_ID = 'space';
+  const PUBLIC_BASE_URL = 'http://testkibanabaseurl.com';
+
+  const sharedParams: SharedParams = {
+    ruleExecutionLogger: ruleExecutionLoggerMock,
+    completeRule: eqlCompleteRule,
+    mergeStrategy: 'allFields',
+    spaceId: SPACE_ID,
+    indicesToQuery: eqlCompleteRule.ruleParams.index as string[],
+    alertTimestampOverride: undefined,
+    publicBaseUrl: PUBLIC_BASE_URL,
+    intendedTimestamp: undefined,
+    primaryTimestamp: new Date().toISOString(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -70,8 +84,9 @@ describe('eql_executor', () => {
           primaryTimestamp: '@timestamp',
           exceptionFilter: undefined,
           unprocessedExceptions: [getExceptionListItemSchemaMock()],
+          wrapSuppressedHits: jest.fn(),
+          sharedParams,
           alertTimestampOverride: undefined,
-          eqlUtils: mockEqlUtils,
           alertWithSuppression: jest.fn(),
           isAlertSuppressionActive: false,
           experimentalFeatures: mockExperimentalFeatures,
@@ -106,7 +121,8 @@ describe('eql_executor', () => {
         primaryTimestamp: '@timestamp',
         exceptionFilter: undefined,
         unprocessedExceptions: [],
-        eqlUtils: mockEqlUtils,
+        wrapSuppressedHits: jest.fn(),
+        sharedParams,
         alertTimestampOverride: undefined,
         alertWithSuppression: jest.fn(),
         isAlertSuppressionActive: true,
@@ -131,7 +147,8 @@ describe('eql_executor', () => {
         primaryTimestamp: '@timestamp',
         exceptionFilter: undefined,
         unprocessedExceptions: [],
-        eqlUtils: mockEqlUtils,
+        wrapSuppressedHits: jest.fn(),
+        sharedParams,
         alertTimestampOverride: undefined,
         alertWithSuppression: jest.fn(),
         isAlertSuppressionActive: false,
@@ -171,7 +188,8 @@ describe('eql_executor', () => {
         primaryTimestamp: '@timestamp',
         exceptionFilter: undefined,
         unprocessedExceptions: [],
-        eqlUtils: mockEqlUtils,
+        wrapSuppressedHits: jest.fn(),
+        sharedParams,
         alertTimestampOverride: undefined,
         alertWithSuppression: jest.fn(),
         isAlertSuppressionActive: true,

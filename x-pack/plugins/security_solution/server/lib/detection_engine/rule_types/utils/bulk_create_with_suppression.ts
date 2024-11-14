@@ -43,7 +43,6 @@ export const bulkCreateWithSuppression = async <
   alertWithSuppression,
   ruleExecutionLogger,
   wrappedDocs,
-  buildingBlockAlerts,
   services,
   suppressionWindow,
   alertTimestampOverride,
@@ -55,7 +54,6 @@ export const bulkCreateWithSuppression = async <
   alertWithSuppression: SuppressedAlertService;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   wrappedDocs: Array<WrappedFieldsLatest<T> & { subAlerts?: Array<WrappedFieldsLatest<T>> }>;
-  buildingBlockAlerts?: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
   services: RuleServices;
   suppressionWindow: string;
   alertTimestampOverride: Date | undefined;

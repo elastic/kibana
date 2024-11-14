@@ -45,7 +45,7 @@ export const wrapSequencesFactory =
         | WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>
       >
     >((acc, sequence) => {
-      const alerts = buildAlertGroupFromSequence({
+      const { shellAlert, buildingBlocks } = buildAlertGroupFromSequence({
         ruleExecutionLogger,
         sequence,
         completeRule,
@@ -57,6 +57,9 @@ export const wrapSequencesFactory =
         publicBaseUrl,
         intendedTimestamp,
       });
-
-      return [...acc, ...alerts];
+      if (shellAlert) {
+        acc.push(shellAlert, ...buildingBlocks);
+        return acc;
+      }
+      return acc;
     }, []);

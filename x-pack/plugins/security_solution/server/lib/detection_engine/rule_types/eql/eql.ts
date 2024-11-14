@@ -27,7 +27,9 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
   CreateRuleOptions,
+  WrapSuppressedHits,
 } from '../types';
+import type { SharedParams } from '../utils/utils';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
@@ -52,7 +54,6 @@ import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { logEqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
-import type { IEqlUtils } from './eql_utils';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -64,12 +65,13 @@ interface EqlExecutorParams {
   version: string;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
-  eqlUtils: IEqlUtils;
+  sharedParams: SharedParams;
   wrapSequences: WrapSequences;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
+  wrapSuppressedHits: WrapSuppressedHits;
   alertTimestampOverride: Date | undefined;
   alertWithSuppression: SuppressedAlertService;
   isAlertSuppressionActive: boolean;
@@ -93,7 +95,8 @@ export const eqlExecutor = async ({
   secondaryTimestamp,
   exceptionFilter,
   unprocessedExceptions,
-  eqlUtils,
+  wrapSuppressedHits,
+  sharedParams,
   alertTimestampOverride,
   alertWithSuppression,
   isAlertSuppressionActive,
@@ -108,6 +111,7 @@ export const eqlExecutor = async ({
   const isLoggedRequestsEnabled = state?.isLoggedRequestsEnabled ?? false;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
 
+  // eslint-disable-next-line complexity
   return withSecuritySpan('eqlExecutor', async () => {
     const result = createSearchAfterReturnType();
 
@@ -174,7 +178,7 @@ export const eqlExecutor = async ({
             ruleExecutionLogger,
             tuple,
             alertSuppression: completeRule.ruleParams.alertSuppression,
-            wrapSuppressedHits: eqlUtils.wrapSuppressedHits,
+            wrapSuppressedHits,
             alertTimestampOverride,
             alertWithSuppression,
             experimentalFeatures,
@@ -196,7 +200,7 @@ export const eqlExecutor = async ({
             ruleExecutionLogger,
             tuple,
             alertSuppression: completeRule.ruleParams.alertSuppression,
-            eqlUtils,
+            sharedParams,
             alertTimestampOverride,
             alertWithSuppression,
             experimentalFeatures,

@@ -3116,7 +3116,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('does not suppress alerts outside of duration when query with 3 sequences', async () => {
         const id = uuidv4();
-        // this timestamp is 1 minute in the past
         const dateNow = Date.now();
         const timestampSequenceEvent1 = new Date(dateNow - 5000).toISOString();
         const timestampSequenceEvent2 = new Date(dateNow - 5500).toISOString();
@@ -3196,7 +3195,7 @@ export default ({ getService }: FtrProviderContext) => {
           { ...secondSequenceEvent, '@timestamp': secondTimestampEventSequence3 },
         ]);
         await patchRule(supertest, log, { id: createdRule.id, enabled: true });
-        const afterTimestamp2 = new Date(dateNow2 + 25000);
+        const afterTimestamp2 = new Date(dateNow2 + 55000);
         const secondAlerts = await getOpenAlerts(
           supertest,
           log,
