@@ -47,6 +47,7 @@ export const SourceFieldSection = () => {
       value: STORED_SOURCE_OPTION,
       inputDisplay: sourceOptionLabels[STORED_SOURCE_OPTION],
       dropdownDisplay: renderOptionDropdownDisplay(STORED_SOURCE_OPTION),
+      'data-test-subj': 'storedSourceFieldOption',
     },
   ];
 
@@ -55,12 +56,14 @@ export const SourceFieldSection = () => {
       value: SYNTHETIC_SOURCE_OPTION,
       inputDisplay: sourceOptionLabels[SYNTHETIC_SOURCE_OPTION],
       dropdownDisplay: renderOptionDropdownDisplay(SYNTHETIC_SOURCE_OPTION),
+      'data-test-subj': 'syntheticSourceFieldOption',
     });
   }
   sourceValueOptions.push({
     value: DISABLED_SOURCE_OPTION,
     inputDisplay: sourceOptionLabels[DISABLED_SOURCE_OPTION],
     dropdownDisplay: renderOptionDropdownDisplay(DISABLED_SOURCE_OPTION),
+    'data-test-subj': 'disabledSourceFieldOption',
   });
 
   const renderDisableWarning = () => (
