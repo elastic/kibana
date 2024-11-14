@@ -1038,9 +1038,23 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /x-pack/plugins/entity_manager @elastic/obs-entities
 /x-pack/test/api_integration/apis/entity_manager @elastic/obs-entities
 
+
 # Data Discovery
-/test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
+/test/functional/fixtures/es_archiver/alias @elastic/kibana-data-discovery
+/test/functional/page_objects/context_page.ts @elastic/kibana-data-discovery
+/test/functional/services/data_views.ts @elastic/kibana-data-discovery
+/test/functional/services/saved_objects_finder.ts @elastic/kibana-data-discovery
+/test/functional/page_objects/unified_search_page.ts @elastic/kibana-data-discovery
 /test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
+/test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
+/test/functional/page_objects/discover_page.ts @elastic/kibana-data-discovery
+/test/functional/fixtures/es_archiver/index_pattern_without_timefield @elastic/kibana-data-discovery
+/test/functional/fixtures/es_archiver/huge_fields @elastic/kibana-data-discovery
+/test/functional/fixtures/es_archiver/date_n* @elastic/kibana-data-discovery
+/test/functional/firefox/discover.config.ts @elastic/kibana-data-discovery
+/test/functional/fixtures/es_archiver/discover/**/*.ts @elastic/kibana-data-discovery
+/test/api_integration/apis/suggestions @elastic/kibana-data-discovery
+/test/api_integration/apis/saved_queries/*.ts @elastic/kibana-data-discovery
 /x-pack/test/api_integration/apis/kibana/kql_telemetry @elastic/kibana-data-discovery @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/es_archives/pre_calculated_histogram @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/es_archives/kibana_sample_data_flights_index_pattern @elastic/kibana-data-discovery
