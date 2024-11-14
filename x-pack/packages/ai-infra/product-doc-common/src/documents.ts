@@ -24,7 +24,7 @@ export interface ProductDocumentationAttributes {
   slug: string;
   url: string;
   version: string;
-  ai_subtitle: SemanticTextField;
+  ai_subtitle: string;
   ai_summary: SemanticTextField;
   ai_questions_answered: SemanticTextArrayField;
   ai_tags: string[];

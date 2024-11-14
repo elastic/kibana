@@ -35,7 +35,7 @@ export const performSearch = async ({
               fields: [
                 'content_title',
                 'content_body.text',
-                'ai_subtitle.text',
+                'ai_subtitle',
                 'ai_summary.text',
                 'ai_questions_answered.text',
                 'ai_tags',
@@ -60,12 +60,6 @@ export const performSearch = async ({
           {
             semantic: {
               field: 'content_body',
-              query: searchQuery,
-            },
-          },
-          {
-            semantic: {
-              field: 'ai_subtitle',
               query: searchQuery,
             },
           },
