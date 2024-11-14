@@ -23,7 +23,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const createNewLens = async () => {
     await visualize.navigateToNewVisualization();
     await visualize.clickVisType('lens');
-    await lens.goToTimeRange();
 
     await lens.configureDimension({
       dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -39,7 +38,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await visualize.gotoVisualizationLandingPage();
     await listingTable.searchForItemWithName('lnsXYvis');
     await lens.clickVisualizeListItemTitle('lnsXYvis');
-    await lens.goToTimeRange();
     await lens.waitForVisualization('xyVisChart');
   };
 
