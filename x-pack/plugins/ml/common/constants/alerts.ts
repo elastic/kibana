@@ -23,7 +23,7 @@ export const ML_ALERT_TYPES = {
 } as const;
 
 export const ML_RULE_TYPE_IDS = Object.values(ML_ALERT_TYPES);
-export const ML_VALID_CONSUMERS = [AlertConsumers.ML];
+export const ML_VALID_CONSUMERS = [AlertConsumers.ML, AlertConsumers.ALERTS];
 
 export type MlAlertType = (typeof ML_ALERT_TYPES)[keyof typeof ML_ALERT_TYPES];
 
