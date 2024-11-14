@@ -1318,6 +1318,12 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
 
 # Machine Learning
+/x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/config.ts @elastic/ml-ui
+/x-pack/test/stack_functional_integration/apps/ml @elastic/ml-ui
+/x-pack/test/monitoring_api_integration/fixtures/elasticsearch/ml_jobs.json @elastic/ml-ui
+/x-pack/test/monitoring_api_integration/apis/elasticsearch/ml_jobs.ts @elastic/ml-ui
+/x-pack/test/functional/fixtures/kbn_archiver/ml @elastic/ml-ui
+/x-pack/test/accessibility/apps/group2/ml_* @elastic/ml-ui
 /x-pack/test/api_integration/apis/file_upload @elastic/ml-ui
 /x-pack/test/accessibility/apps/group2/ml.ts  @elastic/ml-ui
 /x-pack/test/accessibility/apps/group3/ml_embeddables_in_dashboard.ts @elastic/ml-ui
@@ -1337,7 +1343,8 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/api_integration/services/ml.ts @elastic/ml-ui
 
 # Additional plugins and packages maintained by the ML team.
-/test/examples/response_stream @elastic/ml-ui
+/x-pack/test/functional/services/aiops @elastic/ml-ui
+/test/examples/response_stream/*.ts @elastic/ml-ui
 /x-pack/test/accessibility/apps/group2/transform.ts  @elastic/ml-ui
 /x-pack/test/api_integration/apis/aiops/ @elastic/ml-ui
 /x-pack/test/api_integration/apis/transform/ @elastic/ml-ui
