@@ -10,6 +10,7 @@
 import classNames from 'classnames';
 import React, { FC, ReactElement, useEffect, useState } from 'react';
 import { v4 } from 'uuid';
+import { Subscription } from 'rxjs';
 
 import {
   PANEL_HOVER_TRIGGER,
@@ -19,7 +20,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
-
+import { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
 import { uiActionsService } from '../../services/kibana_services';
 import './floating_actions.scss';
 
@@ -41,46 +42,72 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   className = '',
   disabledActions,
 }) => {
-  const [floatingActions, setFloatingActions] = useState<JSX.Element | undefined>(undefined);
+  const [floatingActions, setFloatingActions] = useState<
+    Array<AnyApiAction & { MenuItem: React.FC<{ context: unknown }> }>
+  >([]);
 
   useEffect(() => {
     if (!api) return;
 
-    const getActions = async () => {
-      let mounted = true;
-      const context = {
-        embeddable: api,
-        trigger: panelHoverTrigger,
-      };
+    let mounted = true;
+    const context = {
+      embeddable: api,
+      trigger: panelHoverTrigger,
+    };
+
+    const getActions: () => Promise<
+      Array<AnyApiAction & { MenuItem: React.FC<{ context: unknown }> }>
+    > = async () => {
       const actions = (
         await uiActionsService.getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context)
       )
-        .filter((action): action is Action & { MenuItem: React.FC<{ context: unknown }> } => {
+        .filter((action) => {
           return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
         })
         .sort((a, b) => (a.order || 0) - (b.order || 0));
-
-      if (!mounted) return;
-      if (actions.length > 0) {
-        setFloatingActions(
-          <>
-            {actions.map((action) =>
-              React.createElement(action.MenuItem, {
-                key: action.id,
-                context,
-              })
-            )}
-          </>
-        );
-      } else {
-        setFloatingActions(undefined);
-      }
-      return () => {
-        mounted = false;
-      };
+      return actions as Array<AnyApiAction & { MenuItem: React.FC<{ context: unknown }> }>;
     };
 
-    getActions();
+    const subscriptions = new Subscription();
+
+    const handleActionCompatibilityChange = (isCompatible: boolean, action: Action) => {
+      if (!mounted) return;
+      setFloatingActions((currentActions) => {
+        const newActions = currentActions
+          ?.filter((current) => current.id !== action.id)
+          .sort((a, b) => (a.order || 0) - (b.order || 0));
+        if (isCompatible) {
+          return [action, ...newActions] as Array<
+            AnyApiAction & {
+              MenuItem: React.FC<{ context: unknown }>;
+            }
+          >;
+        }
+        return newActions as Array<AnyApiAction & { MenuItem: React.FC<{ context: unknown }> }>;
+      });
+    };
+
+    (async () => {
+      const actions = await getActions();
+      if (!mounted) return;
+      setFloatingActions(actions);
+
+      const frequentlyChangingActions = uiActionsService.getFrequentlyChangingActionsForTrigger(
+        PANEL_HOVER_TRIGGER,
+        context
+      );
+
+      for (const action of frequentlyChangingActions) {
+        subscriptions.add(
+          action.subscribeToCompatibilityChanges(context, handleActionCompatibilityChange)
+        );
+      }
+    })();
+
+    return () => {
+      mounted = false;
+      subscriptions.unsubscribe();
+    };
   }, [api, viewMode, disabledActions]);
 
   return (
@@ -93,7 +120,14 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
           }`}
           className={classNames('presentationUtil__floatingActions', className)}
         >
-          {floatingActions}
+          <>
+            {floatingActions.map((action) =>
+              React.createElement(action.MenuItem, {
+                key: action.id,
+                context: { embeddable: api },
+              })
+            )}
+          </>
         </div>
       )}
     </div>
