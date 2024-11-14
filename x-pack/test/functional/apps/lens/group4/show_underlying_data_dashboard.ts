@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(dashboardWindowHandle);
     });
 
-    it('should bring both dashboard context and visualization context to discover for Lens ES|QL panels', async () => {
+    it('should bring visualization context to discover for Lens ES|QL panels', async () => {
       // clear out the dashboard
       await dashboard.switchToEditMode();
       await dashboardPanelActions.openContextMenu();
