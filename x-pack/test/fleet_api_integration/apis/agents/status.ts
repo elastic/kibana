@@ -336,6 +336,13 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return incoming data status for specified agents', async () => {
+      // force install the system package to override package verification
+      await supertest
+        .post(`/api/fleet/epm/packages/system/1.50.0`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
       const { body: apiResponse1 } = await supertest
         .get(`/api/fleet/agent_status/data?agentsIds=agent1&agentsIds=agent2`)
         .expect(200);
