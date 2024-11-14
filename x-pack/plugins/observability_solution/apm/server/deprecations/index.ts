@@ -9,7 +9,6 @@ import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { getDeprecationsInfo as getApmUserRoleDeprecationsInfo } from './apm_user_role';
 
 export interface DeprecationApmDeps {
-  branch: string;
   logger: Logger;
   security?: SecurityPluginSetup;
 }

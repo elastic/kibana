@@ -22,8 +22,7 @@ import { deprecations } from '../lib/deprecations';
 
 const APM_USER_ROLE_NAME = 'apm_user';
 const getKibanaPrivilegesDocumentationUrl = (branch: string) => {
-  const docBranch = branch === 'main' ? 'master' : branch;
-  return `https://www.elastic.co/guide/en/kibana/${docBranch}/kibana-privileges.html`;
+  return `https://www.elastic.co/guide/en/kibana/${branch}/kibana-privileges.html`;
 };
 
 export async function getDeprecationsInfo(
@@ -113,7 +112,7 @@ async function getUsersDeprecations(
       correctiveActions: { manualSteps: strings.manualSteps(reportingUsers.join(', ')) },
       level: 'critical',
       deprecationType: 'feature',
-      documentationUrl: getKibanaPrivilegesDocumentationUrl(apmDeps.branch),
+      documentationUrl: getKibanaPrivilegesDocumentationUrl(docLinks.version),
     },
   ];
 }
@@ -190,7 +189,7 @@ async function getRoleMappingsDeprecations(
       },
       level: 'critical',
       deprecationType: 'feature',
-      documentationUrl: getKibanaPrivilegesDocumentationUrl(apmDeps.branch),
+      documentationUrl: getKibanaPrivilegesDocumentationUrl(docLinks.version),
     },
   ];
 }

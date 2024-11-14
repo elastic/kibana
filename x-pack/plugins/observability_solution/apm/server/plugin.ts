@@ -230,7 +230,6 @@ export class APMPlugin
     registerDeprecations({
       core,
       apmDeps: {
-        branch: this.initContext.env.packageInfo.branch,
         logger: this.logger,
         security: plugins.security,
       },
