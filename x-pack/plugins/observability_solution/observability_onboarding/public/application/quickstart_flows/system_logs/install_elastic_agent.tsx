@@ -276,7 +276,7 @@ export function InstallElasticAgent() {
           apiKeyEncoded,
           apiEndpoint: setup?.apiEndpoint,
           scriptDownloadUrl: setup?.scriptDownloadUrl,
-          elasticAgentVersion: setup?.elasticAgentVersion.agentVersion,
+          elasticAgentVersion: setup?.elasticAgentVersionInfo.agentVersion,
           autoDownloadConfig: wizardState.autoDownloadConfig,
           onboardingId,
         })}
