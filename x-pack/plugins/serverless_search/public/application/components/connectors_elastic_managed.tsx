@@ -15,7 +15,7 @@ import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { ElasticManagedConnectorComingSoon } from './connectors/elastic_managed_connector_coming_soon';
 
-import { CONNECTORS } from '../constants';
+import { docLinks } from '../../../common/doc_links';
 
 export const ConnectorsElasticManaged = () => {
   const { console: consolePlugin } = useKibanaServices();
@@ -44,7 +44,7 @@ export const ConnectorsElasticManaged = () => {
                   <EuiLink
                     data-test-subj="serverlessSearchConnectorsOverviewLink"
                     target="_blank"
-                    href={CONNECTORS.self_managed_docs}
+                    href={docLinks.connectors}
                   >
                     {LEARN_MORE_LABEL}
                   </EuiLink>

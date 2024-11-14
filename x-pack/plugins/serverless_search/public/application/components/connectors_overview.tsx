@@ -30,7 +30,7 @@ import { ConnectorsTable } from './connectors/connectors_table';
 import { ConnectorPrivilegesCallout } from './connectors/connector_config/connector_privileges_callout';
 import { useAssetBasePath } from '../hooks/use_asset_base_path';
 
-import { BASE_CONNECTORS_PATH, CONNECTORS, ELASTIC_MANAGED_CONNECTOR_PATH } from '../constants';
+import { BASE_CONNECTORS_PATH, ELASTIC_MANAGED_CONNECTOR_PATH } from '../constants';
 
 const CALLOUT_KEY = 'search.connectors.ElasticManaged.ComingSoon.feedbackCallout';
 
@@ -71,7 +71,7 @@ export const ConnectorsOverview = () => {
                 <EuiFlexGroup direction="row" alignItems="center" justifyContent="center">
                   <EuiFlexItem>
                     <GithubLink
-                      href={CONNECTORS.github_repo}
+                      href={'https://github.com/elastic/connectors'}
                       label={i18n.translate('xpack.serverlessSearch.connectorsPythonLink', {
                         defaultMessage: 'elastic/connectors',
                       })}
