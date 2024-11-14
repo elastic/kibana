@@ -18,6 +18,7 @@ import {
   AppUpdater,
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
+  AppStatus,
 } from '@kbn/core/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -32,13 +33,14 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { CanvasAppLocatorDefinition } from '../common/locator';
-import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
+import { SESSIONSTORAGE_LASTPATH, CANVAS_APP, API_ROUTE_WORKPAD } from '../common/lib/constants';
 import { getSessionStorage } from './lib/storage';
 import { initLoadingIndicator } from './lib/loading_indicator';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
 import { addCanvasElementTrigger } from './state/triggers/add_canvas_element_trigger';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import type { WorkpadFindResponse } from './services/canvas_workpad_service';
 
 export type { CoreStart, CoreSetup };
 
@@ -161,9 +163,29 @@ export class CanvasPlugin
       },
     });
 
-    if (setupPlugins.home) {
-      setupPlugins.home.featureCatalogue.register(featureCatalogueEntry);
-    }
+    (
+      coreSetup.http.get(`${API_ROUTE_WORKPAD}/find`, {
+        query: {
+          perPage: 1,
+          name: '',
+        },
+        version: '1',
+      }) as Promise<WorkpadFindResponse>
+    )
+      .then((response: WorkpadFindResponse) => {
+        const hasWorkpads = response.total > 0;
+        this.appUpdater.next(() => ({
+          status: hasWorkpads ? AppStatus.accessible : AppStatus.inaccessible,
+        }));
+        if (hasWorkpads && setupPlugins.home) {
+          setupPlugins.home.featureCatalogue.register(featureCatalogueEntry);
+        }
+      })
+      .catch(() => {
+        this.appUpdater.next(() => ({
+          status: AppStatus.inaccessible,
+        }));
+      });
 
     if (setupPlugins.share) {
       setupPlugins.share.url.locators.create(new CanvasAppLocatorDefinition());
