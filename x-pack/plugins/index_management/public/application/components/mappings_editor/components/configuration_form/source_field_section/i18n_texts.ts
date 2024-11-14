@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { STORED_SOURCE_OPTION, DISABLED_SOURCE_OPTION, SYNTHETIC_SOURCE_OPTION} from './constants';
+import { STORED_SOURCE_OPTION, DISABLED_SOURCE_OPTION, SYNTHETIC_SOURCE_OPTION } from './constants';
 
 export const sourceOptionLabels = {
   [STORED_SOURCE_OPTION]: i18n.translate(
