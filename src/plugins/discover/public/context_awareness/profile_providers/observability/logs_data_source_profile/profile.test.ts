@@ -22,6 +22,7 @@ import { createLogsDataSourceProfileProvider } from './profile';
 import { DataGridDensity } from '@kbn/unified-data-table';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { ContextWithProfileId } from '../../../profile_service';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 
 const mockServices = createContextAwarenessMocks().profileProviderServices;
 
@@ -31,7 +32,7 @@ describe('logsDataSourceProfileProvider', () => {
   const MIXED_INDEX_PATTERN = 'logs-nginx.access-*,metrics-*';
   const INVALID_INDEX_PATTERN = 'my_source-access-*';
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
-    profileId: 'root-profile',
+    profileId: OBSERVABILITY_ROOT_PROFILE_ID,
     solutionType: SolutionType.Observability,
   };
   const RESOLUTION_MATCH = {

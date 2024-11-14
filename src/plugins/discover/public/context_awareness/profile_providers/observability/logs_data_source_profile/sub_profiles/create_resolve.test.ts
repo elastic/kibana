@@ -16,12 +16,13 @@ import {
   SolutionType,
 } from '../../../../profiles';
 import { createResolve } from './create_resolve';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 
 describe('createResolve', () => {
   const VALID_INDEX_PATTERN = 'valid';
   const INVALID_INDEX_PATTERN = 'invalid';
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
-    profileId: 'root-profile',
+    profileId: OBSERVABILITY_ROOT_PROFILE_ID,
     solutionType: SolutionType.Observability,
   };
   const RESOLUTION_MATCH = {

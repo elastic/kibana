@@ -20,13 +20,14 @@ import {
 import { createContextAwarenessMocks } from '../../../__mocks__';
 import { createObservabilityLogDocumentProfileProvider } from './profile';
 import { ContextWithProfileId } from '../../../profile_service';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 
 const mockServices = createContextAwarenessMocks().profileProviderServices;
 
 describe('logDocumentProfileProvider', () => {
   const logDocumentProfileProvider = createObservabilityLogDocumentProfileProvider(mockServices);
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
-    profileId: 'root-profile',
+    profileId: OBSERVABILITY_ROOT_PROFILE_ID,
     solutionType: SolutionType.Observability,
   };
   const DATA_SOURCE_CONTEXT: ContextWithProfileId<DataSourceContext> = {
