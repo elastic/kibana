@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('add observable to a case', () => {
-      it('allows the assignees field to be an empty array', async () => {
+      it('can add an observable to a case', async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
         expect(postedCase.observables).to.eql([]);
 
