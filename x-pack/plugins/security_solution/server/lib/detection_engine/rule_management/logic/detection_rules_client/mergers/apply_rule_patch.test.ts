@@ -453,4 +453,36 @@ describe('applyRulePatch', () => {
       })
     ).rejects.toThrowError('new_terms_fields: Expected array, received string');
   });
+
+  test('should retain existing required_fields when not present in rule patch body', async () => {
+    const rulePatch = {
+      name: 'new name',
+    } as PatchRuleRequestBody;
+    const existingRule = {
+      ...getRulesSchemaMock(),
+      required_fields: [
+        {
+          name: 'event.action',
+          type: 'keyword',
+          ecs: true,
+        },
+      ],
+    };
+    const patchedRule = await applyRulePatch({
+      rulePatch,
+      existingRule,
+      prebuiltRuleAssetClient,
+    });
+    expect(patchedRule).toEqual(
+      expect.objectContaining({
+        required_fields: [
+          {
+            name: 'event.action',
+            type: 'keyword',
+            ecs: true,
+          },
+        ],
+      })
+    );
+  });
 });
