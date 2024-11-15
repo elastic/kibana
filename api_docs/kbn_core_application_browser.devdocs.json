@@ -821,7 +821,7 @@
             "tags": [],
             "label": "navigateToApp",
             "description": [
-              "\nNavigate to a given app\n"
+              "\nNavigate to a given app.\nIf a plugin is disabled any applications it registers won't be available either.\nBefore rendering a UI element that a user could use to navigate to another application,\nfirst check if the destination application is actually available using the isAppRegistered API.\n"
             ],
             "signature": [
               "(appId: string, options?: ",
@@ -844,7 +844,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "appId",
-                "description": [],
+                "description": [
+                  "- The identifier of the app to navigate to"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -947,6 +949,44 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser",
+            "id": "def-public.ApplicationStart.isAppRegistered",
+            "type": "Function",
+            "tags": [],
+            "label": "isAppRegistered",
+            "description": [
+              "\nChecks whether a given application is registered.\n"
+            ],
+            "signature": [
+              "(appId: string) => boolean"
+            ],
+            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-application-browser",
+                "id": "def-public.ApplicationStart.isAppRegistered.$1",
+                "type": "string",
+                "tags": [],
+                "label": "appId",
+                "description": [
+                  "- The identifier of the app to check"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "true if the given appId is registered in the system, false otherwise."
+            ]
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
