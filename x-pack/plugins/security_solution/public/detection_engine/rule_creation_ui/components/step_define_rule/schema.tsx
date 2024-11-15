@@ -11,13 +11,10 @@ import { EuiText } from '@elastic/eui';
 import React from 'react';
 
 import {
-  singleEntryThreat,
-  containsInvalidItems,
-} from '../../../../common/components/threat_match/helpers';
-import {
+  isEqlRule,
+  isEqlSequenceQuery,
   isEsqlRule,
   isNewTermsRule,
-  isThreatMatchRule,
   isThresholdRule,
   isSuppressionRuleConfiguredWithGroupBy,
 } from '../../../../../common/detection_engine/utils';
@@ -40,13 +37,9 @@ import {
   INDEX_HELPER_TEXT,
   THREAT_MATCH_REQUIRED,
   THREAT_MATCH_EMPTIES,
+  EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
 } from './translations';
-import { queryRequiredValidatorFactory } from '../../validators/query_required_validator_factory';
-import { kueryValidatorFactory } from '../../validators/kuery_validator_factory';
-
-export const schema: FormSchema<DefineStepRule> = {
   index: {
-    defaultValue: [],
     fieldsToValidateOnChange: ['index', 'queryBar'],
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
@@ -372,42 +365,6 @@ export const schema: FormSchema<DefineStepRule> = {
         ],
       },
     },
-  },
-  threatMapping: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatMappingLabel',
-      {
-        defaultMessage: 'Indicator mapping',
-      }
-    ),
-    validations: [
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ path, formData }] = args;
-          const needsValidation = isThreatMatchRule(formData.ruleType);
-          if (!needsValidation) {
-            return;
-          }
-          if (singleEntryThreat(formData.threatMapping)) {
-            return {
-              code: 'ERR_FIELD_MISSING',
-              path,
-              message: THREAT_MATCH_REQUIRED,
-            };
-          } else if (containsInvalidItems(formData.threatMapping)) {
-            return {
-              code: 'ERR_FIELD_MISSING',
-              path,
-              message: THREAT_MATCH_EMPTIES,
-            };
-          } else {
-            return undefined;
-          }
-        },
-      },
-    ],
   },
   newTermsFields: {
     type: FIELD_TYPES.COMBO_BOX,
