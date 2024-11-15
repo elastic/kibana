@@ -25,15 +25,12 @@ export function EqlQueryEditAdapter({
     <EqlQueryEdit
       path="eqlQuery"
       required
-      eqlOptions={EQL_OPTIONS}
       dataView={dataView ?? DEFAULT_DATA_VIEW_BASE}
       loading={isLoading}
       disabled={isLoading}
     />
   );
 }
-
-const EQL_OPTIONS = {};
 
 const DEFAULT_DATA_VIEW_BASE: DataViewBase = {
   title: '',

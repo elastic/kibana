@@ -62,9 +62,12 @@ export const validateEql = async ({
           params: {
             index: dataViewTitle,
             body: { query, runtime_mappings: runtimeMappings, size: 0 },
-            timestamp_field: eqlOptions?.timestampField,
-            tiebreaker_field: eqlOptions?.tiebreakerField,
-            event_category_field: eqlOptions?.eventCategoryField,
+            // Prevent passing empty string values
+            timestamp_field: eqlOptions?.timestampField ? eqlOptions.timestampField : undefined,
+            tiebreaker_field: eqlOptions?.tiebreakerField ? eqlOptions.tiebreakerField : undefined,
+            event_category_field: eqlOptions?.eventCategoryField
+              ? eqlOptions.eventCategoryField
+              : undefined,
           },
           options: { ignore: [400] },
         },

@@ -32,7 +32,7 @@ describe('EQL footer', () => {
     it('EQL settings button is enable when popover is NOT open', () => {
       const wrapper = mount(
         <TestProviders>
-          <EqlQueryBarFooter errors={[]} onOptionsChange={jest.fn()} />
+          <EqlQueryBarFooter errors={[]} onEqlOptionsChange={jest.fn()} />
         </TestProviders>
       );
 
@@ -44,7 +44,7 @@ describe('EQL footer', () => {
     it('disable EQL settings button when popover is open', () => {
       const wrapper = mount(
         <TestProviders>
-          <EqlQueryBarFooter errors={[]} onOptionsChange={jest.fn()} />
+          <EqlQueryBarFooter errors={[]} onEqlOptionsChange={jest.fn()} />
         </TestProviders>
       );
       wrapper.find(`[data-test-subj="eql-settings-trigger"]`).first().simulate('click');

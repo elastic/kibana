@@ -17,16 +17,13 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import type { FieldHook } from '../../../../shared_imports';
 import { FilterBar } from '../../../../common/components/filter_bar';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import * as i18n from './translations';
+import type { EqlFieldsComboBoxOptions, EqlOptions } from '../../../../../common/search_strategy';
+import { useKibana } from '../../../../common/lib/kibana';
+import type { FieldValueQueryBar } from '../query_bar';
+import type { EqlQueryBarFooterProps } from './footer';
 import { EqlQueryBarFooter } from './footer';
 import { getValidationResults } from './validators';
-import type {
-  EqlFieldsComboBoxOptions,
-  EqlOptions,
-  FieldsEqlOptions,
-} from '../../../../../common/search_strategy';
-import { useKibana } from '../../../../common/lib/kibana';
+import * as i18n from './translations';
 
 const TextArea = styled(EuiTextArea)`
   display: block;
@@ -60,15 +57,14 @@ const StyledFormRow = styled(EuiFormRow)`
 
 export interface EqlQueryBarProps {
   dataTestSubj: string;
-  field: FieldHook<DefineStepRule['queryBar']>;
-  isLoading: boolean;
+  field: FieldHook<FieldValueQueryBar>;
+  eqlOptionsField?: FieldHook<EqlOptions>;
+  isLoading?: boolean;
   indexPattern: DataViewBase;
   showFilterBar?: boolean;
   idAria?: string;
   eqlFieldsComboBoxOptions?: EqlFieldsComboBoxOptions;
-  eqlOptions?: EqlOptions;
   isSizeOptionDisabled?: boolean;
-  onEqlOptionsChange?: (field: FieldsEqlOptions, newValue: string | undefined) => void;
   onValidityChange?: (arg: boolean) => void;
   onValidatingChange?: (arg: boolean) => void;
 }
@@ -76,14 +72,13 @@ export interface EqlQueryBarProps {
 export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   dataTestSubj,
   field,
-  isLoading,
+  eqlOptionsField,
+  isLoading = false,
   indexPattern,
   showFilterBar,
   idAria,
   eqlFieldsComboBoxOptions,
-  eqlOptions: optionsSelected,
   isSizeOptionDisabled,
-  onEqlOptionsChange,
   onValidityChange,
   onValidatingChange,
 }) => {
@@ -172,6 +167,18 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
     [fieldValue, setFieldValue, onValidatingChange]
   );
 
+  const handleEqlOptionsChange = useCallback<
+    NonNullable<EqlQueryBarFooterProps['onEqlOptionsChange']>
+  >(
+    (eqlOptionsFieldName, value) => {
+      eqlOptionsField?.setValue((prevEqlOptions) => ({
+        ...prevEqlOptions,
+        [eqlOptionsFieldName]: value,
+      }));
+    },
+    [eqlOptionsField]
+  );
+
   return (
     <StyledFormRow
       label={field.label}
@@ -196,8 +203,8 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
           isLoading={isValidating}
           isSizeOptionDisabled={isSizeOptionDisabled}
           optionsData={eqlFieldsComboBoxOptions}
-          optionsSelected={optionsSelected}
-          onOptionsChange={onEqlOptionsChange}
+          eqlOptions={eqlOptionsField?.value}
+          onEqlOptionsChange={handleEqlOptionsChange}
         />
         {showFilterBar && (
           <>

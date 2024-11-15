@@ -13,7 +13,7 @@ export const getEqlOptions = () =>
     selectTimeline,
     (timeline) =>
       timeline?.eqlOptions ?? {
-        eventCategoryField: [{ label: 'event.category' }],
+        eventCategoryField: 'event.category',
         timestampField: [
           {
             label: '@timestamp',

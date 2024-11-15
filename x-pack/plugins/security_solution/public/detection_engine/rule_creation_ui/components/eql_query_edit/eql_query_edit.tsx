@@ -8,12 +8,8 @@
 import React, { useMemo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import type { FieldConfig } from '../../../../shared_imports';
-import { UseField } from '../../../../shared_imports';
-import type {
-  EqlFieldsComboBoxOptions,
-  EqlOptions,
-  FieldsEqlOptions,
-} from '../../../../../common/search_strategy';
+import { UseField, UseMultiFields } from '../../../../shared_imports';
+import type { EqlFieldsComboBoxOptions, EqlOptions } from '../../../../../common/search_strategy';
 import { queryRequiredValidatorFactory } from '../../validators/query_required_validator_factory';
 import { debounceAsync } from '../../validators/debounce_async';
 import { eqlQueryValidatorFactory } from '../../validators/eql_query_validator_factory';
@@ -23,40 +19,34 @@ import type { FieldValueQueryBar } from '../query_bar';
 
 interface EqlQueryEditProps {
   path: string;
+  eqlOptionsPath?: string;
   fieldsToValidateOnChange?: string | string[];
   eqlFieldsComboBoxOptions?: EqlFieldsComboBoxOptions;
-  eqlOptions?: EqlOptions;
   showEqlSizeOption?: boolean;
   showFilterBar?: boolean;
   dataView: DataViewBase;
   required?: boolean;
   loading?: boolean;
   disabled?: boolean;
-  onEqlOptionsChange?: (field: FieldsEqlOptions, newValue: string | undefined) => void;
   onValidityChange?: (arg: boolean) => void;
-  onValidatingChange?: (arg: boolean) => void;
 }
 
 export function EqlQueryEdit({
   path,
+  eqlOptionsPath,
   fieldsToValidateOnChange,
   eqlFieldsComboBoxOptions,
-  eqlOptions,
   showEqlSizeOption = false,
   showFilterBar = false,
   dataView,
   required,
   loading,
   disabled,
-  onEqlOptionsChange,
   onValidityChange,
-  onValidatingChange,
 }: EqlQueryEditProps): JSX.Element {
   const componentProps = useMemo(
     () => ({
       eqlFieldsComboBoxOptions,
-      eqlOptions,
-      onEqlOptionsChange,
       isSizeOptionDisabled: !showEqlSizeOption,
       isDisabled: disabled,
       isLoading: loading,
@@ -65,16 +55,12 @@ export function EqlQueryEdit({
       idAria: 'ruleEqlQueryBar',
       dataTestSubj: 'ruleEqlQueryBar',
       onValidityChange,
-      onValidatingChange,
     }),
     [
       eqlFieldsComboBoxOptions,
-      eqlOptions,
       showEqlSizeOption,
       showFilterBar,
-      onEqlOptionsChange,
       onValidityChange,
-      onValidatingChange,
       dataView,
       loading,
       disabled,
@@ -95,25 +81,51 @@ export function EqlQueryEdit({
             ]
           : []),
         {
-          validator: debounceAsync(
-            eqlQueryValidatorFactory(
+          validator: debounceAsync((...args) => {
+            const [{ formData }] = args;
+            const eqlOptions =
+              eqlOptionsPath && formData[eqlOptionsPath] ? formData[eqlOptionsPath] : {};
+
+            return eqlQueryValidatorFactory(
               dataView.id
                 ? {
                     dataViewId: dataView.id,
-                    eqlOptions: eqlOptions ?? {},
+                    eqlOptions,
                   }
                 : {
                     indexPatterns: dataView.title.split(','),
-                    eqlOptions: eqlOptions ?? {},
+                    eqlOptions,
                   }
-            ),
-            300
-          ),
+            )(...args);
+          }, 300),
         },
       ],
     }),
-    [required, dataView.id, dataView.title, eqlOptions, path, fieldsToValidateOnChange]
+    [eqlOptionsPath, required, dataView.id, dataView.title, path, fieldsToValidateOnChange]
   );
+
+  if (eqlOptionsPath) {
+    return (
+      <UseMultiFields<{
+        eqlQuery: FieldValueQueryBar;
+        eqlOptions: EqlOptions;
+      }>
+        fields={{
+          eqlQuery: {
+            path,
+            config: fieldConfig,
+          },
+          eqlOptions: {
+            path: eqlOptionsPath,
+          },
+        }}
+      >
+        {({ eqlQuery, eqlOptions }) => (
+          <EqlQueryBar field={eqlQuery} eqlOptionsField={eqlOptions} {...componentProps} />
+        )}
+      </UseMultiFields>
+    );
+  }
 
   return (
     <UseField

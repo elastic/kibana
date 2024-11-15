@@ -33,7 +33,6 @@ import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_f
 import type { SetRuleQuery } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import type { EqlOptions, FieldsEqlOptions } from '../../../../../common/search_strategy';
 import { filterRuleFieldsForType, getStepDataDataSource } from '../../pages/rule_creation/helpers';
 import type {
   DefineStepRule,
@@ -108,8 +107,6 @@ export interface StepDefineRuleProps extends RuleStepProps {
   threatIndicesConfig: string[];
   defaultSavedQuery?: SavedQuery;
   form: FormHook<DefineStepRule>;
-  optionsSelected: EqlOptions;
-  setOptionsSelected: React.Dispatch<React.SetStateAction<EqlOptions>>;
   indexPattern: DataViewBase;
   isIndexPatternLoading: boolean;
   isQueryBarValid: boolean;
@@ -166,13 +163,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   isLoading,
   isQueryBarValid,
   isUpdateView = false,
-  optionsSelected,
   queryBarSavedId,
   queryBarTitle,
   ruleType,
   setIsQueryBarValid,
   setIsThreatQueryBarValid,
-  setOptionsSelected,
   shouldLoadQueryDynamically,
   threatIndex,
   threatIndicesConfig,
@@ -223,15 +218,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       };
       if (timelineQueryBar.query.language === 'eql') {
         setRuleTypeCallback('eql', setQuery);
-        setOptionsSelected((prevOptions) => ({
-          ...prevOptions,
-          ...(eqlOptions != null ? eqlOptions : {}),
-        }));
+        setFieldValue('eqlOptions', eqlOptions ?? {});
       } else {
         setQuery();
       }
     },
-    [setFieldValue, setRuleTypeCallback, setOptionsSelected]
+    [setFieldValue, setRuleTypeCallback]
   );
 
   const { onOpenTimeline, loading: timelineQueryLoading } =
@@ -722,21 +714,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ]
   );
 
-  const onOptionsChange = useCallback(
-    (field: FieldsEqlOptions, value: string | undefined) => {
-      setOptionsSelected((prevOptions) => {
-        const newOptions = {
-          ...prevOptions,
-          [field]: value,
-        };
-
-        setFieldValue('eqlOptions', newOptions);
-        return newOptions;
-      });
-    },
-    [setFieldValue, setOptionsSelected]
-  );
-
   const optionsData = useMemo(
     () =>
       isEmpty(indexPattern.fields)
@@ -800,18 +777,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   <EqlQueryEdit
                     key="eqlQueryBar"
                     path="queryBar"
+                    eqlOptionsPath="eqlOptions"
                     fieldsToValidateOnChange={ALERT_SUPPRESSION_FIELDS_FIELD_NAME}
                     required
                     showFilterBar
                     eqlFieldsComboBoxOptions={optionsData}
-                    eqlOptions={optionsSelected}
                     dataView={indexPattern}
                     loading={isIndexPatternLoading}
                     disabled={isLoading}
                     onValidityChange={setIsQueryBarValid}
-                    onEqlOptionsChange={onOptionsChange}
                   />
-                  <UseField path="eqlOptions" component={HiddenField} />
                 </>
               ) : isEsqlRule(ruleType) ? (
                 EsqlQueryBarMemo
