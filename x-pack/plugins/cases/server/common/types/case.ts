@@ -49,7 +49,7 @@ export interface CasePersistedAttributes {
   updated_by: User | null;
   category?: string | null;
   customFields?: CasePersistedCustomFields;
-  observables: Observable[];
+  observables?: Observable[];
 }
 
 type CasePersistedCustomFields = Array<{
