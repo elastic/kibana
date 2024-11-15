@@ -12,12 +12,15 @@ import { DataSourceEditForm } from './fields/data_source';
 import { AlertSuppressionEditForm } from './fields/alert_suppression';
 import { ThreatMatchIndexEditForm } from './fields/threat_match_index';
 import { ThreatMatchQueryEditForm } from './fields/threat_match_query';
+import { ThreatMatchMappingEditForm } from './fields/threat_match_mapping';
 
 interface ThreatMatchRuleFieldEditProps {
   fieldName: UpgradeableThreatMatchFields;
 }
 
-export function ThreatMatchRuleFieldEdit({ fieldName }: ThreatMatchRuleFieldEditProps) {
+export function ThreatMatchRuleFieldEdit({
+  fieldName,
+}: ThreatMatchRuleFieldEditProps): JSX.Element | null {
   switch (fieldName) {
     case 'kql_query':
       return <KqlQueryEditForm />;
@@ -29,6 +32,8 @@ export function ThreatMatchRuleFieldEdit({ fieldName }: ThreatMatchRuleFieldEdit
       return <ThreatMatchIndexEditForm />;
     case 'threat_query':
       return <ThreatMatchQueryEditForm />;
+    case 'threat_mapping':
+      return <ThreatMatchMappingEditForm />;
     default:
       return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
   }

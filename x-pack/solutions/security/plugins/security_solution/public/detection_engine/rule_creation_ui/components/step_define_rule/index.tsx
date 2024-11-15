@@ -65,7 +65,7 @@ import {
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryEdit } from '../../../rule_creation/components/eql_query_edit';
 import { DataViewSelectorField } from '../data_view_selector_field';
-import { ThreatMatchEdit } from '../threat_match_edit';
+import { ThreatMatchMappingEdit } from '../../../rule_creation/components/threat_match_mapping_edit';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
@@ -658,11 +658,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 loading={threatIndexPatternsLoading}
               />
               <EuiSpacer size="m" />
-              <ThreatMatchEdit
+              <ThreatMatchMappingEdit
                 path="threatMapping"
                 indexPatterns={indexPattern}
                 threatIndexPatterns={threatIndexPatterns}
-                onValidityChange={setIsThreatQueryBarValid}
               />
             </>
           </RuleTypeEuiFormRow>

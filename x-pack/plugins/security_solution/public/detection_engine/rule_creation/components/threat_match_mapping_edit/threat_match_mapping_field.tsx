@@ -5,64 +5,33 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
 import type { ThreatMapEntries } from '../../../../common/components/threat_match/types';
 import { ThreatMatchComponent } from '../../../../common/components/threat_match';
 import type { FieldHook } from '../../../../shared_imports';
-import { UseField, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
-
-interface ThreatMatchEditProps {
-  path: string;
-  threatIndexPatterns: DataViewBase;
-  indexPatterns: DataViewBase;
-  onValidityChange?: (isValid: boolean) => void;
-}
-
-export const ThreatMatchEdit = memo(function ThreatMatchEdit({
-  path,
-  indexPatterns,
-  threatIndexPatterns,
-  onValidityChange,
-}: ThreatMatchEditProps): JSX.Element {
-  const componentProps = {
-    indexPatterns,
-    threatIndexPatterns,
-    onValidityChange,
-  };
-
-  return <UseField path={path} component={ThreatMatchField} componentProps={componentProps} />;
-});
+import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 
 interface ThreatMatchFieldProps {
   field: FieldHook<ThreatMapEntries[]>;
   threatIndexPatterns: DataViewBase;
   indexPatterns: DataViewBase;
-  onValidityChange?: (isValid: boolean) => void;
 }
 
-function ThreatMatchField({
+export function ThreatMatchField({
   field,
   threatIndexPatterns,
   indexPatterns,
-  onValidityChange,
 }: ThreatMatchFieldProps): JSX.Element {
-  const { isInvalid: isThreatMappingInvalid, errorMessage } =
-    getFieldValidityAndErrorMessage(field);
-  const [isThreatIndexPatternValid, setIsThreatIndexPatternValid] = useState(false);
-
-  useEffect(() => {
-    if (onValidityChange) {
-      onValidityChange(!isThreatMappingInvalid && isThreatIndexPatternValid);
-    }
-  }, [isThreatIndexPatternValid, isThreatMappingInvalid, onValidityChange]);
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+  const { setValue } = field;
 
   const handleBuilderOnChange = useCallback(
     ({ entryItems }: { entryItems: ThreatMapEntries[] }): void => {
-      field.setValue(entryItems);
+      setValue(entryItems);
     },
-    [field]
+    [setValue]
   );
 
   return (
@@ -71,7 +40,7 @@ function ThreatMatchField({
       labelAppend={field.labelAppend}
       helpText={field.helpText}
       error={errorMessage}
-      isInvalid={isThreatMappingInvalid}
+      isInvalid={isInvalid}
       fullWidth
     >
       <ThreatMatchComponent

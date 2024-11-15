@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export * from './threat_match_edit';
+import { i18n } from '@kbn/i18n';
+
+export const THREAT_MATCH_MAPPING_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleManagement.ruleFields.threatMatchMapping.label',
+  {
+    defaultMessage: 'Indicator mapping',
+  }
+);
