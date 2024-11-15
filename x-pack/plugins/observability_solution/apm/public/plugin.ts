@@ -350,12 +350,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     core.application.register({
       id: 'apm',
-      title: 'APM',
+      title: 'Applications',
       order: 8300,
       euiIconType: 'logoObservability',
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
+      keywords: ['Applications', 'APM'],
       deepLinks: [
         {
           id: 'service-groups-list',
@@ -372,20 +373,42 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           title: tracesTitle,
           path: '/traces',
         },
-        { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
+        {
+          id: 'service-map',
+          title: serviceMapTitle,
+          path: '/service-map',
+        },
         {
           id: 'dependencies',
           title: dependenciesTitle,
           path: '/dependencies/inventory',
         },
-        { id: 'settings', title: apmSettingsTitle, path: '/settings' },
+        {
+          id: 'settings',
+          title: apmSettingsTitle,
+          path: '/settings',
+        },
         {
           id: 'storage-explorer',
           title: apmStorageExplorerTitle,
           path: '/storage-explorer',
           visibleIn: featureFlags.storageExplorerAvailable ? ['globalSearch'] : [],
         },
-        { id: 'tutorial', title: apmTutorialTitle, path: '/tutorial' },
+        {
+          id: 'tutorial',
+          title: apmTutorialTitle,
+          path: '/tutorial',
+        },
+        // {
+        //   id: 'alerts',
+        //   title: 'Alerts',
+        //   path: '/overview/alerts',
+        // },
+        // {
+        //   id: 'cases',
+        //   title: 'Cases',
+        //   path: '/overview/cases',
+        // },
       ],
 
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
