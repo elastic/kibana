@@ -11,11 +11,17 @@ import { CaseObservableBaseRt } from '../../domain/observable/v1';
 /**
  * Observables
  */
-export const ObservablePatch = CaseObservableBaseRt;
+export const ObservablePost = CaseObservableBaseRt;
+
+export const ObservablePatch = rt.strict({
+  value: rt.string,
+  description: rt.union([rt.string, rt.null]),
+});
+
 export type ObservablePatchType = rt.TypeOf<typeof ObservablePatch>;
 
 export const AddObservableRequestRt = rt.strict({
-  observable: ObservablePatch,
+  observable: ObservablePost,
 });
 
 export const UpdateObservableRequestRt = rt.strict({
