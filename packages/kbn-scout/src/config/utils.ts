@@ -20,16 +20,13 @@ import { loadConfig } from './loader/config_load';
 export const formatCurrentDate = () => {
   const now = new Date();
 
-  const day = String(now.getDate()).padStart(2, '0');
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const year = now.getFullYear();
+  const format = (num: number, length: number) => String(num).padStart(length, '0');
 
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
-
-  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+  return (
+    `${format(now.getDate(), 2)}/${format(now.getMonth() + 1, 2)}/${now.getFullYear()} ` +
+    `${format(now.getHours(), 2)}:${format(now.getMinutes(), 2)}:${format(now.getSeconds(), 2)}.` +
+    `${format(now.getMilliseconds(), 3)}`
+  );
 };
 
 const saveTestServersConfigOnDisk = (testServersConfig: ScoutServerConfig, log: ToolingLog) => {
