@@ -18,7 +18,7 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import {
   ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW,
   uiMetricService,
@@ -103,17 +103,7 @@ export const VulnerabilitiesPreview = ({
 
   const { euiTheme } = useEuiTheme();
 
-  const { data: dataMisconfiguration } = useMisconfigurationPreview({
-    query: buildEntityFlyoutPreviewQuery('host.name', name),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-  });
-
-  const passedFindings = dataMisconfiguration?.count.passed || 0;
-  const failedFindings = dataMisconfiguration?.count.failed || 0;
-
-  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
+  const { hasMisconfigurationFindings } = useHasMisconfigurations('host.name', name);
 
   const buildFilterQuery = useMemo(() => buildHostNamesFilter([name]), [name]);
   const riskScoreState = useRiskScore({

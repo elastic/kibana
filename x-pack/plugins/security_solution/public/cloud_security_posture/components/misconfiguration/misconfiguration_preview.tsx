@@ -11,12 +11,11 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { i18n } from '@kbn/i18n';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
-import { hasVulnerabilitiesData, statusColors } from '@kbn/cloud-security-posture';
+import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { statusColors } from '@kbn/cloud-security-posture';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
@@ -111,45 +110,19 @@ export const MisconfigurationsPreview = ({
   hasNonClosedAlerts?: boolean;
   isPreviewMode?: boolean;
 }) => {
-  const { data } = useMisconfigurationPreview({
-    query: buildEntityFlyoutPreviewQuery(fieldName, name),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-    ignore_unavailable: true,
-  });
+  const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
+    fieldName,
+    name
+  );
+
   const isUsingHostName = fieldName === 'host.name';
-  const passedFindings = data?.count.passed || 0;
-  const failedFindings = data?.count.failed || 0;
 
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT);
   }, []);
   const { euiTheme } = useEuiTheme();
-  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
 
-  const { data: vulnerabilitiesData } = useVulnerabilitiesPreview({
-    query: buildEntityFlyoutPreviewQuery('host.name', name),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-  });
-
-  const {
-    CRITICAL = 0,
-    HIGH = 0,
-    MEDIUM = 0,
-    LOW = 0,
-    NONE = 0,
-  } = vulnerabilitiesData?.count || {};
-
-  const hasVulnerabilitiesFindings = hasVulnerabilitiesData({
-    critical: CRITICAL,
-    high: HIGH,
-    medium: MEDIUM,
-    low: LOW,
-    none: NONE,
-  });
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', name);
 
   const buildFilterQuery = useMemo(
     () => (isUsingHostName ? buildHostNamesFilter([name]) : buildUserNamesFilter([name])),

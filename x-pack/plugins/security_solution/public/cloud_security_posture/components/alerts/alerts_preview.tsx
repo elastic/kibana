@@ -11,13 +11,9 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import {
-  buildEntityFlyoutPreviewQuery,
-  getAbbreviatedNumber,
-} from '@kbn/cloud-security-posture-common';
-import { hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
-import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
+import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
+import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type {
   AlertsByStatus,
@@ -107,41 +103,11 @@ export const AlertsPreview = ({
 
   const totalAlertsCount = alertStats.reduce((total, item) => total + item.count, 0);
 
-  const { data } = useMisconfigurationPreview({
-    query: buildEntityFlyoutPreviewQuery(fieldName, name),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-    ignore_unavailable: true,
-  });
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(fieldName, name);
+
   const isUsingHostName = fieldName === 'host.name';
-  const passedFindings = data?.count.passed || 0;
-  const failedFindings = data?.count.failed || 0;
 
-  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
-
-  const { data: vulnerabilitiesData } = useVulnerabilitiesPreview({
-    query: buildEntityFlyoutPreviewQuery('host.name', name),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-  });
-
-  const {
-    CRITICAL = 0,
-    HIGH = 0,
-    MEDIUM = 0,
-    LOW = 0,
-    NONE = 0,
-  } = vulnerabilitiesData?.count || {};
-
-  const hasVulnerabilitiesFindings = hasVulnerabilitiesData({
-    critical: CRITICAL,
-    high: HIGH,
-    medium: MEDIUM,
-    low: LOW,
-    none: NONE,
-  });
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', name);
 
   const buildFilterQuery = useMemo(
     () => (isUsingHostName ? buildHostNamesFilter([name]) : buildUserNamesFilter([name])),
