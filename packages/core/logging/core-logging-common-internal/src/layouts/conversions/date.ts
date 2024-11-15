@@ -59,10 +59,6 @@ function validateTimezone(timezone: string) {
 }
 
 function validate(rawString: string) {
-  if (rawString.length > 1000) {
-    throw new Error(`Date input too long, given ${rawString.length}`);
-  }
-
   for (const matched of rawString.matchAll(dateRegExp)) {
     const { format, timezone } = matched.groups!;
 
