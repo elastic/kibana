@@ -256,19 +256,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     () => (indexPattern.fields as FieldSpec[]).filter((field) => field.aggregatable === true),
     [indexPattern.fields]
   );
-  // const termsAggregationFields = useMemo(
-  //   /**
-  //    * Typecasting to FieldSpec because fields is
-  //    * typed as DataViewFieldBase[] which does not have
-  //    * the 'aggregatable' property, however the type is incorrect
-  //    *
-  //    * fields does contain elements with the aggregatable property.
-  //    * We will need to determine where these types are defined and
-  //    * figure out where the discrepency is.
-  //    */
-  //   () => getTermsAggregationFields(indexPattern.fields as FieldSpec[]),
-  //   [indexPattern.fields]
-  // );
 
   const termsAggregationFields = useTermsAggregationFields(indexPattern.fields);
 
