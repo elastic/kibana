@@ -25,24 +25,22 @@ describe('ActionInternal', () => {
     const addWarningMock = jest.fn();
     beforeAll(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../services').getNotifications = () => (
-        {
-          toasts: {
-            addWarning: addWarningMock
-          }
-        }
-      );
+      require('../services').getNotifications = () => ({
+        toasts: {
+          addWarning: addWarningMock,
+        },
+      });
     });
 
     beforeEach(() => {
       addWarningMock.mockReset();
-    })
+    });
 
     test('execute function is sync', async () => {
       const action = new ActionInternal({
         id: 'test-action',
         execute: () => {
-          throw new Error('')
+          throw new Error('');
         },
       });
       await action.execute({});
@@ -53,11 +51,11 @@ describe('ActionInternal', () => {
       const action = new ActionInternal({
         id: 'test-action',
         execute: async () => {
-          throw new Error('')
+          throw new Error('');
         },
       });
       await action.execute({});
       expect(addWarningMock).toBeCalledTimes(1);
     });
-  })
+  });
 });
