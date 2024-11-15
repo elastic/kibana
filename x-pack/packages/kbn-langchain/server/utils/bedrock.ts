@@ -10,12 +10,22 @@ import { finished } from 'stream/promises';
 import { Logger } from '@kbn/core/server';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
+import {
+  ConverseStreamMetrics,
+  ConverseStreamOutput,
+} from '@aws-sdk/client-bedrock-runtime/dist-types/models/models_0';
+import {
+  ContentBlockDelta,
+  StopReason,
+  TokenUsage,
+} from '@aws-sdk/client-bedrock-runtime/dist-types/models';
 import { StreamParser } from './types';
 
 export const parseBedrockStreamAsAsyncIterator = async function* (
   responseStream: Readable,
   logger: Logger,
-  abortSignal?: AbortSignal
+  abortSignal?: AbortSignal,
+  apiType: 'invoke' | 'converse' = 'invoke'
 ) {
   if (abortSignal) {
     abortSignal.addEventListener('abort', () => {
@@ -24,7 +34,12 @@ export const parseBedrockStreamAsAsyncIterator = async function* (
   }
   try {
     for await (const chunk of responseStream) {
-      const bedrockChunk = handleBedrockChunk({ chunk, bedrockBuffer: new Uint8Array(0), logger });
+      const bedrockChunk = handleBedrockChunk({
+        chunk,
+        bedrockBuffer: new Uint8Array(0),
+        logger,
+        apiType,
+      });
       yield bedrockChunk.decodedChunk;
     }
   } catch (err) {
@@ -102,11 +117,13 @@ export const handleBedrockChunk = ({
   bedrockBuffer,
   chunkHandler,
   logger,
+  apiType = 'invoke',
 }: {
   chunk: Uint8Array;
   bedrockBuffer: Uint8Array;
   chunkHandler?: (chunk: string) => void;
   logger?: Logger;
+  apiType?: 'invoke' | 'converse';
 }): { decodedChunk: string; bedrockBuffer: Uint8Array } => {
   // Concatenate the current chunk to the existing buffer.
   let newBuffer = concatChunks(bedrockBuffer, chunk);
@@ -132,6 +149,18 @@ export const handleBedrockChunk = ({
   const decodedChunk = buildChunks
     .map((bChunk) => {
       const event = awsDecoder.decode(bChunk);
+      if (apiType === 'converse') {
+        const body = new TextDecoder().decode(event.body);
+        const decodedContent = prepareBedrockConverseOutput(
+          JSON.parse(new TextDecoder().decode(event.body)),
+          logger
+        );
+        console.log('bodyyy', decodedContent);
+        if (decodedContent) {
+          return JSON.stringify(decodedContent);
+        }
+        return '';
+      }
       const body = JSON.parse(
         Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
       );
@@ -189,7 +218,7 @@ interface CompletionChunk {
 }
 
 /**
- * Prepare the streaming output from the bedrock API
+ * Prepare the streaming output from the bedrock invoke API
  * @param responseBody
  * @returns string
  */
@@ -207,6 +236,61 @@ const prepareBedrockOutput = (responseBody: CompletionChunk, logger?: Logger): s
   }
   // ignore any chunks that do not include text output
   return '';
+};
+
+interface ConverseChunk {
+  contentBlockIndex?: number;
+  delta?: ContentBlockDelta;
+  stopReason?: StopReason;
+  metrics?: ConverseStreamMetrics;
+  usage?: TokenUsage;
+}
+/**
+ * Prepare the streaming output from the bedrock converse API
+ * @param responseBody
+ * @returns string
+ */
+const prepareBedrockConverseOutput = (
+  responseBody: ConverseChunk,
+  logger?: Logger
+): ConverseStreamOutput | undefined => {
+  console.log('responseBody', responseBody);
+  console.log('responseBody', responseBody);
+  if (responseBody.delta) {
+    return {
+      contentBlockDelta: {
+        delta: responseBody.delta,
+        contentBlockIndex: responseBody.contentBlockIndex,
+      },
+    };
+  }
+  if (responseBody.stopReason) {
+    return {
+      messageStop: {
+        stopReason: responseBody.stopReason,
+      },
+    };
+  }
+  if (responseBody.metrics && responseBody.usage) {
+    return {
+      metadata: {
+        metrics: responseBody.metrics,
+        usage: responseBody.usage,
+      },
+    };
+  }
+
+  //   if (responseBody.type === 'message_start' && responseBody.message) {
+  //     return parseContent(responseBody.message.content);
+  //   } else if (
+  //     responseBody.type === 'content_block_delta' &&
+  //     responseBody.delta?.type === 'text_delta' &&
+  //     typeof responseBody.delta?.text === 'string'
+  //   ) {
+  //     return responseBody.delta.text;
+  //   }
+  // }
+  // ignore any chunks that do not include text output
 };
 
 /**

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IterableReadableStream } from '@langchain/core/utils/stream';
 import {
   BedrockRuntimeClient as _BedrockRuntimeClient,
   BedrockRuntimeClientConfig,
@@ -13,6 +14,8 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { Logger } from '@kbn/logging';
 import { Readable } from 'stream';
+import { de_ConverseStreamCommand } from '@aws-sdk/client-bedrock-runtime/dist-types/protocols/Aws_restJson1';
+import { parseBedrockStreamAsAsyncIterator } from '../../utils/bedrock';
 
 export interface CustomChatModelInput extends BedrockRuntimeClientConfig {
   actionsClient: PublicMethodsOf<ActionsClient>;
@@ -42,19 +45,12 @@ export class BedrockRuntimeClient extends _BedrockRuntimeClient {
     this.maxTokens = fields.maxTokens;
     this.anthropicVersion = fields.anthropicVersion;
   }
-  public async send({ input }, options) {
+  public async send(command, options) {
+    const { input } = command;
     const messages = prepareMessages(input.messages);
-    console.log(
-      'subactionparams',
-      JSON.stringify(
-        {
-          ...input,
-          messages,
-        },
-        null,
-        2
-      )
-    );
+    const logger = this.logger;
+    console.log('wutthis', this);
+
     if (this.streaming) {
       const data = (await this.actionsClient.execute({
         actionId: this.connectorId,
@@ -67,15 +63,42 @@ export class BedrockRuntimeClient extends _BedrockRuntimeClient {
         },
       })) as { data: Readable; status: string; message?: string; serviceMessage?: string };
 
-      console.log('stream here', data);
       if (data.status === 'error') {
         throw new Error(
           `ActionsClientBedrockChat: action result status is error: ${data?.message} - ${data?.serviceMessage}`
         );
       }
+      //
+      // for await (const token of parseBedrockStreamAsAsyncIterator(readable)) {
+      //   console.log('parseToken', token);
+      //   yield token;
+      // }
+      // const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
+      de_ConverseStreamCommand(data.data, this.config);
+      const parsedStream = async function* () {
+        for await (const token of parseBedrockStreamAsAsyncIterator(
+          data.data,
+          logger,
+          options?.signal,
+          'converse'
+        )) {
+          console.log('parseToken', token);
+          yield JSON.parse(token);
+        }
+        // const bedrockChunk = handleBedrockChunk({
+        //   chunk,
+        //   bedrockBuffer: new Uint8Array(0),
+        //   logger: () => {},
+        // });
+        // const decodedChunk = awsDecoder.decode(chunk);
+        // console.log('bedrockChunk decodedChunk', decodedChunk);
+        // const event = JSON.parse(new TextDecoder().decode(decodedChunk.body));
+        // console.log('bedrockChunk event', event);
+        // yield event;
+      };
 
       return {
-        stream: Readable.toWeb(data.data),
+        stream: IterableReadableStream.fromAsyncGenerator(parsedStream()),
       } as unknown as Response;
     }
 

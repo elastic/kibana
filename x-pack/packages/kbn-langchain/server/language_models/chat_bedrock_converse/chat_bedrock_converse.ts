@@ -48,6 +48,7 @@ export class ActionsClientChatBedrockConverse extends ChatBedrockConverse {
       streaming: this.streaming,
       maxTokens: fields?.maxTokens,
       temperature: fields?.temperature,
+      region: 'REGION',
     });
   }
 }

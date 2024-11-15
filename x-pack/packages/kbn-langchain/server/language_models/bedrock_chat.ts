@@ -25,8 +25,8 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   model?: string;
   maxTokens?: number;
 }
-export const ActionsClientBedrockChatModeld = ActionsClientChatBedrockConverse;
-export class ActionsClientBedrockChatModel extends _BedrockChat {
+export const ActionsClientBedrockChatModel = ActionsClientChatBedrockConverse;
+export class ActionsClientBedrockChatModeld extends _BedrockChat {
   constructor({ actionsClient, connectorId, logger, ...params }: CustomChatModelInput) {
     super({
       ...params,

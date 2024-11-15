@@ -310,6 +310,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       },
       connectorUsageCollector
     );
+    console.log('RESPONSE.headers', response.headers);
 
     return response.data.pipe(new PassThrough());
   }
