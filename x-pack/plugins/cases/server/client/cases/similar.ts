@@ -90,6 +90,12 @@ export const similar = async (
       };
     }
 
+    const ownerFilter = buildFilter({
+      filters: retrievedCase.owner,
+      field: OWNER_FIELD,
+      operator: 'or',
+    });
+
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findCases);
 
@@ -110,10 +116,9 @@ export const similar = async (
       }, {} as Record<string, string[]>)
     );
 
-    const finalCasesFilter = combineFilterWithAuthorizationFilter(
-      similarCasesFilter,
-      authorizationFilter
-    );
+    const filters = combineFilters([similarCasesFilter, ownerFilter]);
+
+    const finalCasesFilter = combineFilterWithAuthorizationFilter(filters, authorizationFilter);
 
     const cases = await caseService.findCases({
       filter: finalCasesFilter,
