@@ -60,11 +60,7 @@ import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import { ruleStepsOrder } from '../../../../detections/pages/detection_engine/rules/utils';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
-import {
-  APP_UI_ID,
-  DEFAULT_INDEX_KEY,
-  DEFAULT_THREAT_INDEX_KEY,
-} from '../../../../../common/constants';
+import { APP_UI_ID, DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
@@ -117,7 +113,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   );
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
   const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
     rule,
@@ -229,7 +224,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   isLoading={loading || isLoading || isSavedQueryLoading}
                   isUpdateView
                   indicesConfig={indicesConfig}
-                  threatIndicesConfig={threatIndicesConfig}
                   defaultSavedQuery={savedQuery}
                   form={defineStepForm}
                   key="defineStep"
@@ -350,7 +344,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       isSavedQueryLoading,
       isLoading,
       indicesConfig,
-      threatIndicesConfig,
       savedQuery,
       defineStepForm,
       indexPattern,

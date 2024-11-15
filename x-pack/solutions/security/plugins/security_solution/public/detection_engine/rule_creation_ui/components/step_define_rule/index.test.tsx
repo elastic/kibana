@@ -817,7 +817,6 @@ function TestForm({
         isLoading={false}
         form={form}
         indicesConfig={[]}
-        threatIndicesConfig={[]}
         indexPattern={indexPattern}
         isIndexPatternLoading={false}
         isQueryBarValid={true}
