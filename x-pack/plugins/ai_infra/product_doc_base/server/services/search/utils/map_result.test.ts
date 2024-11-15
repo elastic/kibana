@@ -28,7 +28,7 @@ describe('mapResult', () => {
       slug: 'foo.html',
       url: 'http://lost.com/foo.html',
       version: '8.16',
-      ai_subtitle: { text: 'ai_subtitle' },
+      ai_subtitle: 'ai_subtitle',
       ai_summary: { text: 'ai_summary' },
       ai_questions_answered: { text: ['question A'] },
       ai_tags: ['foo', 'bar', 'test'],
