@@ -6,16 +6,16 @@
  */
 
 import { intersection } from 'lodash';
-import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
+import { OBSERVABLE_TYPES_BUILTIN, OWNER_FIELD } from '../../../common/constants';
 import type { CasesSimilarResponse, SimilarCasesSearchRequest } from '../../../common/types/api';
 import { SimilarCasesSearchRequestRt, CasesSimilarResponseRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
 import { createCaseError } from '../../common/error';
-import type { CasesClientArgs } from '..';
+import type { CasesClient, CasesClientArgs } from '..';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { Operations } from '../../authorization';
-import { buildObservablesFieldsFilter } from '../utils';
+import { buildFilter, buildObservablesFieldsFilter, combineFilters } from '../utils';
 import { combineFilterWithAuthorizationFilter } from '../../authorization/utils';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
@@ -57,11 +57,11 @@ const getSimilarities = (
 export const similar = async (
   caseId: string,
   params: SimilarCasesSearchRequest,
-  clientArgs: CasesClientArgs
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
 ): Promise<CasesSimilarResponse> => {
   const {
-    unsecuredSavedObjectsClient,
-    services: { caseService, caseConfigureService },
+    services: { caseService },
     logger,
     authorization,
   } = clientArgs;
@@ -70,15 +70,13 @@ export const similar = async (
     const paramArgs = decodeWithExcessOrThrow(SimilarCasesSearchRequestRt)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
 
-    const config = await caseConfigureService.find({
-      unsecuredSavedObjectsClient,
+    const configurations = await casesClient.configure.get({
+      owner: retrievedCase.attributes.owner,
     });
+    const observableTypes = configurations[0]?.observableTypes ?? [];
 
     const availableObservableTypesSet = new Set(
-      [
-        ...config.saved_objects.flatMap(({ attributes }) => attributes.observableTypes),
-        ...OBSERVABLE_TYPES_BUILTIN,
-      ].map(({ key }) => key)
+      [...observableTypes, ...OBSERVABLE_TYPES_BUILTIN].map(({ key }) => key)
     );
 
     if (!retrievedCase.attributes.observables.length) {
@@ -91,7 +89,7 @@ export const similar = async (
     }
 
     const ownerFilter = buildFilter({
-      filters: retrievedCase.owner,
+      filters: retrievedCase.attributes.owner,
       field: OWNER_FIELD,
       operator: 'or',
     });

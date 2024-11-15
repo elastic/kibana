@@ -157,7 +157,7 @@ export const createCasesSubClient = (
     replaceCustomField: (params: ReplaceCustomFieldArgs) =>
       replaceCustomField(params, clientArgs, casesClient),
     similar: (caseId: string, params: SimilarCasesSearchRequest) =>
-      similar(caseId, params, clientArgs),
+      similar(caseId, params, clientArgs, casesClient),
     addObservable: (caseId: string, params: AddObservableRequest) =>
       addObservable(caseId, params, clientArgs, casesClient),
     updateObservable: (caseId: string, observableId: string, params: UpdateObservableRequest) =>
