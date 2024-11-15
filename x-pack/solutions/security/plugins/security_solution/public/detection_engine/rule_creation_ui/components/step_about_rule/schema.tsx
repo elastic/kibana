@@ -18,7 +18,7 @@ import type {
   AboutStepRiskScore,
   AboutStepRule,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import { OptionalFieldLabel } from '../optional_field_label';
+import { OptionalFieldLabel } from '../../../rule_creation/components/optional_field_label';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import * as I18n from './translations';
 import { defaultRiskScoreValidator } from '../../validators/default_risk_score_validator';
@@ -249,23 +249,6 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
-  threatIndicatorPath: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathLabel',
-      {
-        defaultMessage: 'Indicator prefix override',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathHelpText',
-      {
-        defaultMessage:
-          'Specify the document prefix containing your indicator fields. Used for enrichment of indicator match alerts.',
-      }
-    ),
-    labelAppend: OptionalFieldLabel,
-  },
   timestampOverride: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate(
@@ -359,39 +342,4 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
-};
-
-const threatIndicatorPathRequiredSchemaValue = {
-  type: FIELD_TYPES.TEXT,
-  label: i18n.translate(
-    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathLabel',
-    {
-      defaultMessage: 'Indicator prefix override',
-    }
-  ),
-  helpText: i18n.translate(
-    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathHelpText',
-    {
-      defaultMessage:
-        'Specify the document prefix containing your indicator fields. Used for enrichment of indicator match alerts.',
-    }
-  ),
-  validations: [
-    {
-      validator: emptyField(
-        i18n.translate(
-          'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.threatIndicatorPathFieldEmptyError',
-          {
-            defaultMessage: 'Indicator prefix override must not be empty',
-          }
-        )
-      ),
-      type: VALIDATION_TYPES.FIELD,
-    },
-  ],
-};
-
-export const threatMatchAboutSchema = {
-  ...schema,
-  threatIndicatorPath: threatIndicatorPathRequiredSchemaValue,
 };
