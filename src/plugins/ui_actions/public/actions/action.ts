@@ -150,7 +150,7 @@ export interface ActionDefinition<Context extends object = object>
   /**
    * Executes the action.
    */
-  execute: (context: ActionDefinitionContext<Context>) => Promise<void>;
+  execute(context: ActionDefinitionContext<Context>): Promise<void>;
 
   /**
    * Determines if action should be executed automatically,
