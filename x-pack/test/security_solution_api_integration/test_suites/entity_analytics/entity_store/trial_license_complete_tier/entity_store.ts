@@ -14,7 +14,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
 
   const utils = EntityStoreUtils(getService);
-  describe('@ess @skipInServerlessMKI Entity Store Engine APIs', () => {
+  describe('@ess @skipInServerlessMKI Entity Store APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
 
     before(async () => {
@@ -191,6 +191,37 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         await utils.expectEngineAssetsDoNotExist('user');
+      });
+    });
+
+    describe('status', () => {
+      it('should return "not_installed" when no engines have been initialized', async () => {
+        const { body } = await api.getEntityStoreStatus().expect(200);
+
+        expect(body).to.eql({
+          engines: [],
+          status: 'not_installed',
+        });
+      });
+
+      it('should return "started" when all engines are started', async () => {
+        await utils.enableEntityStore();
+
+        const { body } = await api.getEntityStoreStatus().expect(200);
+
+        expect(body).to.eql({
+          engines: [
+            {
+              status: 'started',
+              type: 'host',
+            },
+            {
+              status: 'started',
+              type: 'user',
+            },
+          ],
+          status: 'started',
+        });
       });
     });
 
