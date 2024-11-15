@@ -167,8 +167,8 @@ export const schema: FormSchema<DefineStepRule> = {
   },
   threshold: {},
   threatIndex: {},
-  threatQueryBar: {},
   threatMapping: {},
+  threatQueryBar: {},
   newTermsFields: {},
   historyWindowSize: {},
   [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: {

@@ -11,6 +11,7 @@ import { KqlQueryEditForm } from './fields/kql_query';
 import { DataSourceEditForm } from './fields/data_source';
 import { AlertSuppressionEditForm } from './fields/alert_suppression';
 import { ThreatMatchIndexEditForm } from './fields/threat_match_index';
+import { ThreatMatchQueryEditForm } from './fields/threat_match_query';
 
 interface ThreatMatchRuleFieldEditProps {
   fieldName: UpgradeableThreatMatchFields;
@@ -26,6 +27,8 @@ export function ThreatMatchRuleFieldEdit({ fieldName }: ThreatMatchRuleFieldEdit
       return <AlertSuppressionEditForm />;
     case 'threat_index':
       return <ThreatMatchIndexEditForm />;
+    case 'threat_query':
+      return <ThreatMatchQueryEditForm />;
     default:
       return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
   }

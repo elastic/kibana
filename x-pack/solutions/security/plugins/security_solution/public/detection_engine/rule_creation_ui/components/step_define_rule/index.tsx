@@ -93,6 +93,7 @@ import { ThreatMatchIndexEdit } from '../../../rule_creation/components/threat_m
 import { usePersistentNewTermsState } from './use_persistent_new_terms_state';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { usePersistentThresholdState } from './use_persistent_threshold_state';
+import { ThreatMatchQueryEdit } from '../../../rule_creation/components/threat_match_query_edit';
 import { usePersistentQuery } from './use_persistent_query';
 import { usePersistentMachineLearningState } from './use_persistent_machine_learning_state';
 import { CreateCustomMlJobButton } from '../../../rule_creation/components/create_ml_job_button/create_ml_job_button';
@@ -650,11 +651,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           >
             <>
               <ThreatMatchIndexEdit path="threatIndex" />
+              <EuiSpacer size="m" />
+              <ThreatMatchQueryEdit
+                path="threatQueryBar"
+                threatIndexPatterns={threatIndexPatterns}
+                loading={threatIndexPatternsLoading}
+              />
+              <EuiSpacer size="m" />
               <ThreatMatchEdit
                 path="threatMapping"
                 indexPatterns={indexPattern}
                 threatIndexPatterns={threatIndexPatterns}
-                threatIndexPatternsLoading={threatIndexPatternsLoading}
                 onValidityChange={setIsThreatQueryBarValid}
               />
             </>
