@@ -56,8 +56,8 @@ export class AutoOpsAPIService {
     const tlsConfig = this.createTlsConfig(autoopsConfig);
     const cloudSetup = appContextService.getCloud();
 
-    const from = dateMath.parse(requestBody.from)?.valueOf();
-    const to = dateMath.parse(requestBody.to)?.valueOf();
+    const from = dateMath.parse(requestBody.from)?.toISOString();
+    const to = dateMath.parse(requestBody.to)?.toISOString();
     const requestConfig: AxiosRequestConfig = {
       url: `${autoopsConfig.api?.url}/monitoring/serverless/v1/projects/${cloudSetup?.serverless.projectId}/metrics`,
       data: {
@@ -79,6 +79,8 @@ export class AutoOpsAPIService {
         key: tlsConfig.key,
       }),
     };
+
+    this.logger.info(JSON.stringify(requestConfig));
 
     if (!cloudSetup?.isServerlessEnabled) {
       requestConfig.data.stack_version = appContextService.getKibanaVersion();
