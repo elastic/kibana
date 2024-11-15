@@ -616,7 +616,7 @@ export class VectorStyleEditor extends Component<Props, State> {
     }
 
     return (
-      <EuiFormRow display="columnCompressedSwitch">
+      <EuiFormRow display="columnCompressed">
         <EuiSwitch
           label={i18n.translate('xpack.maps.vectorStyleEditor.isTimeAwareLabel', {
             defaultMessage: 'Apply global time to style metadata requests',

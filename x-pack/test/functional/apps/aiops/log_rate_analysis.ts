@@ -167,6 +167,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         testData.dataGenerator
       );
 
+      if (testData.editedQuery && testData.query) {
+        await aiops.logRateAnalysisPage.setQueryInput(testData.editedQuery);
+        await aiops.logRateAnalysisPage.assertRerunAnalysisButtonExists(true);
+        await aiops.logRateAnalysisPage.setQueryInput(testData.query);
+      }
+
       // At this stage the baseline and deviation brush position should be stored in
       // the url state and a full browser refresh should restore the analysis.
       await browser.refresh();

@@ -15,6 +15,7 @@ import type {
 
 import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
 import { DocumentCountChartRedux } from '@kbn/aiops-components';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
@@ -37,15 +38,27 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   barHighlightColorOverride,
   ...docCountChartProps
 }) => {
-  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
+  const { data, uiSettings, fieldFormats, charts, embeddingOrigin } = useAiopsAppContext();
 
   const { documentStats } = useAppSelector((s) => s.logRateAnalysis);
   const { sampleProbability, totalCount, documentCountStats } = documentStats;
 
   if (documentCountStats === undefined) {
-    return totalCount !== undefined ? (
+    return totalCount !== undefined && embeddingOrigin !== AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD ? (
       <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
     ) : null;
+  }
+
+  if (embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD) {
+    return (
+      <DocumentCountChartRedux
+        dependencies={{ data, uiSettings, fieldFormats, charts }}
+        barColorOverride={barColorOverride}
+        barHighlightColorOverride={barHighlightColorOverride}
+        changePoint={documentCountStats.changePoint}
+        {...docCountChartProps}
+      />
+    );
   }
 
   return (

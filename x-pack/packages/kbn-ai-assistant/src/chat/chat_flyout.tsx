@@ -234,14 +234,14 @@ export function ChatFlyout({
                     <EuiToolTip
                       content={i18n.translate(
                         'xpack.aiAssistant.chatFlyout.euiToolTip.newChatLabel',
-                        { defaultMessage: 'New chat' }
+                        { defaultMessage: 'New conversation' }
                       )}
                       display="block"
                     >
                       <NewChatButton
                         aria-label={i18n.translate(
                           'xpack.aiAssistant.chatFlyout.euiButtonIcon.newChatLabel',
-                          { defaultMessage: 'New chat' }
+                          { defaultMessage: 'New conversation' }
                         )}
                         collapsed
                         data-test-subj="observabilityAiAssistantNewChatFlyoutButton"

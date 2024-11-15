@@ -10,7 +10,7 @@
 import { ScopedHistory } from '@kbn/core-application-browser';
 
 import { ForwardedDashboardState } from './locator';
-import { convertSavedPanelsToPanelMap, DashboardContainerInput } from '../../../common';
+import { convertPanelsArrayToPanelMap, DashboardContainerInput } from '../../../common';
 
 export const loadDashboardHistoryLocationState = (
   getScopedHistory: () => ScopedHistory
@@ -28,6 +28,6 @@ export const loadDashboardHistoryLocationState = (
 
   return {
     ...restOfState,
-    ...{ panels: convertSavedPanelsToPanelMap(panels) },
+    ...{ panels: convertPanelsArrayToPanelMap(panels) },
   };
 };

@@ -44,10 +44,6 @@ const customHostSettingsSchema = schema.object({
   ),
   ssl: schema.maybe(
     schema.object({
-      /**
-       * @deprecated in favor of `verificationMode`
-       **/
-      rejectUnauthorized: schema.maybe(schema.boolean()),
       verificationMode: schema.maybe(
         schema.oneOf(
           [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
@@ -98,16 +94,8 @@ export const configSchema = schema.object({
   }),
   proxyUrl: schema.maybe(schema.string()),
   proxyHeaders: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-  /**
-   * @deprecated in favor of `ssl.proxyVerificationMode`
-   **/
-  proxyRejectUnauthorizedCertificates: schema.boolean({ defaultValue: true }),
   proxyBypassHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
   proxyOnlyHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
-  /**
-   * @deprecated in favor of `ssl.verificationMode`
-   **/
-  rejectUnauthorized: schema.boolean({ defaultValue: true }),
   ssl: schema.maybe(
     schema.object({
       verificationMode: schema.maybe(

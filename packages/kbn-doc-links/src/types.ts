@@ -240,9 +240,6 @@ export interface DocLinks {
     readonly base: string;
     readonly inputElasticAgent: string;
   };
-  readonly functionbeat: {
-    readonly base: string;
-  };
   readonly winlogbeat: {
     readonly base: string;
   };
@@ -317,6 +314,7 @@ export interface DocLinks {
     readonly autocompleteSuggestions: string;
     readonly secureSavedObject: string;
     readonly xpackSecurity: string;
+    readonly dashboardImportExport: string;
   };
   readonly upgradeAssistant: {
     readonly overview: string;

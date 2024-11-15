@@ -25,12 +25,15 @@ export {
   type ToolChoice,
   type ChatCompleteAPI,
   type ChatCompleteOptions,
-  type ChatCompletionResponse,
+  type ChatCompleteCompositeResponse,
   type ChatCompletionTokenCountEvent,
   type ChatCompletionEvent,
   type ChatCompletionChunkEvent,
   type ChatCompletionChunkToolCall,
   type ChatCompletionMessageEvent,
+  type ChatCompleteStreamResponse,
+  type ChatCompleteResponse,
+  type ChatCompletionTokenCount,
   withoutTokenCountEvents,
   withoutChunkEvents,
   isChatCompletionMessageEvent,
@@ -48,7 +51,10 @@ export {
 export {
   OutputEventType,
   type OutputAPI,
+  type OutputOptions,
   type OutputResponse,
+  type OutputCompositeResponse,
+  type OutputStreamResponse,
   type OutputCompleteEvent,
   type OutputUpdateEvent,
   type Output,
@@ -75,3 +81,5 @@ export {
   isInferenceInternalError,
   isInferenceRequestError,
 } from './src/errors';
+
+export { truncateList } from './src/truncate_list';
