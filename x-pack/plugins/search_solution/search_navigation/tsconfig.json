@@ -12,12 +12,12 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/core-chrome-browser",
     "@kbn/shared-ux-page-solution-nav",
     "@kbn/logging",
     "@kbn/serverless",
+    "@kbn/core-plugins-browser",
   ],
   "exclude": ["target/**/*"]
 }
