@@ -6,13 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { INTERNAL_CASE_OBSERVABLES_PATCH_URL } from '../../../../common/constants';
+import { INTERNAL_CASE_OBSERVABLES_DELETE_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 
 export const deleteObservableRoute = createCasesRoute({
   method: 'delete',
-  path: INTERNAL_CASE_OBSERVABLES_PATCH_URL,
+  path: INTERNAL_CASE_OBSERVABLES_DELETE_URL,
   params: {
     params: schema.object({
       case_id: schema.string(),
@@ -32,7 +32,7 @@ export const deleteObservableRoute = createCasesRoute({
 
       await casesClient.cases.deleteObservable(caseId, observableId);
 
-      return response.ok({});
+      return response.noContent();
     } catch (error) {
       throw createCaseError({
         message: `Failed to delete observable in route case id: ${request.params.case_id}, observable id: ${request.params.observable_id}: ${error}`,

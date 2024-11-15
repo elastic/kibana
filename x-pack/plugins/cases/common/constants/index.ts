@@ -88,6 +88,8 @@ export const INTERNAL_PUT_CUSTOM_FIELDS_URL = `${CASES_INTERNAL_URL}/{case_id}/c
 export const INTERNAL_CASE_OBSERVABLES_URL = `${CASES_INTERNAL_URL}/{case_id}/observables` as const;
 export const INTERNAL_CASE_OBSERVABLES_PATCH_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
+export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
+  `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
 
 /**
  * Action routes
