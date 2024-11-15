@@ -1552,8 +1552,11 @@ export class Embeddable
         )
       )
     ).forEach((dataView) => indexPatterns.push(dataView));
+    const prevInternalDataViews = this.internalDataViews;
 
-    this.internalDataViews = uniqBy(indexPatterns, 'id');
+    // making sure to not run into the race condition that the data source has the previous data view id
+    // causing to throw an exception that's not necessary
+    this.internalDataViews = uniqBy([...indexPatterns, ...prevInternalDataViews], 'id');
 
     // passing edit url and index patterns to the output of this embeddable for
     // the container to pick them up and use them to configure filter bar and
