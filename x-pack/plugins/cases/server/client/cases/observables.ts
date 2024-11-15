@@ -88,7 +88,6 @@ export const addObservable = async (
 
     validateDuplicatedObservablesInRequest({
       requestFields: updatedObservables,
-      fieldName: 'observables',
     });
 
     const updatedCase = await caseService.patchCase({
@@ -158,7 +157,6 @@ export const updateObservable = async (
 
     validateDuplicatedObservablesInRequest({
       requestFields: updatedObservables,
-      fieldName: 'observables',
     });
 
     const updatedCase = await caseService.patchCase({

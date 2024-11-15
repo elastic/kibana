@@ -75,10 +75,8 @@ export const validateDuplicatedLabelsInRequest = ({
  */
 export const validateDuplicatedObservablesInRequest = ({
   requestFields = [],
-  fieldName,
 }: {
   requestFields?: Array<{ typeKey: string; value: string }>;
-  fieldName: string;
 }) => {
   const stringifyItem = (item: { value: string; typeKey: string }) =>
     [item.typeKey, item.value].join();
@@ -96,7 +94,7 @@ export const validateDuplicatedObservablesInRequest = ({
 
   if (duplicatedObservables.size > 0) {
     throw Boom.badRequest(
-      `Invalid duplicated ${fieldName} in request: ${Array.from(duplicatedObservables.values())}`
+      `Invalid duplicated observables in request: ${Array.from(duplicatedObservables.values())}`
     );
   }
 };

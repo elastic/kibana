@@ -132,8 +132,6 @@ describe('validators', () => {
               typeKey: 'typeKey',
             },
           ],
-
-          fieldName: 'observables',
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"Invalid duplicated observables in request: typeKey,value"`
@@ -157,8 +155,6 @@ describe('validators', () => {
               typeKey: 'typeKey 2',
             },
           ],
-
-          fieldName: 'observables',
         })
       ).not.toThrow();
     });
