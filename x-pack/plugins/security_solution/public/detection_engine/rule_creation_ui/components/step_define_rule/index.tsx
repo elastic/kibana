@@ -92,6 +92,7 @@ import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit';
 import { ThreatMatchIndexEdit } from '../../../rule_creation/components/threat_match_index_edit';
+import { ThreatMatchQueryEdit } from '../../../rule_creation/components/threat_match_query_edit';
 import { usePersistentQuery } from './use_persistent_query';
 
 const CommonUseField = getUseField({ component: Field });
@@ -685,11 +686,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           >
             <>
               <ThreatMatchIndexEdit path="threatIndex" />
+              <EuiSpacer size="m" />
+              <ThreatMatchQueryEdit
+                path="threatQueryBar"
+                threatIndexPatterns={threatIndexPatterns}
+                loading={threatIndexPatternsLoading}
+              />
+              <EuiSpacer size="m" />
               <ThreatMatchEdit
                 path="threatMapping"
                 indexPatterns={indexPattern}
                 threatIndexPatterns={threatIndexPatterns}
-                threatIndexPatternsLoading={threatIndexPatternsLoading}
                 onValidityChange={setIsThreatQueryBarValid}
               />
             </>

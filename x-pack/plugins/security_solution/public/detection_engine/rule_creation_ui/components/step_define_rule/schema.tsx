@@ -409,29 +409,6 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  threatQueryBar: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatQueryBarLabel',
-      {
-        defaultMessage: 'Indicator index query',
-      }
-    ),
-    validations: [
-      {
-        validator: (...args) => {
-          const [{ formData }] = args;
-          if (!isThreatMatchRule(formData.ruleType)) {
-            return;
-          }
-
-          return queryRequiredValidatorFactory(formData.ruleType)(...args);
-        },
-      },
-      {
-        validator: kueryValidatorFactory(),
-      },
-    ],
-  },
   newTermsFields: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
