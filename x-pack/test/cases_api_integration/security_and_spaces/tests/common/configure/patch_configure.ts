@@ -130,18 +130,10 @@ export default ({ getService }: FtrProviderContext): void => {
       ] as ConfigurationPatchRequest['observableTypes'];
       const configuration = await createConfiguration(supertest);
 
-      let exception;
-
-      try {
-        await updateConfiguration(supertest, configuration.id, {
+      await updateConfiguration(supertest, configuration.id, {
           version: configuration.version,
           observableTypes,
-        });
-      } catch (e) {
-        exception = e;
-      }
-
-      expect(exception).not.to.be(undefined);
+        }, 400);
     });
 
     it('should update mapping when changing connector', async () => {
