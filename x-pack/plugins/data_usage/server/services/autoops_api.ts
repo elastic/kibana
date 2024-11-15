@@ -6,6 +6,7 @@
  */
 
 import https from 'https';
+import dateMath from '@kbn/datemath';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import apm from 'elastic-apm-node';
 
@@ -55,9 +56,18 @@ export class AutoOpsAPIService {
     const tlsConfig = this.createTlsConfig(autoopsConfig);
     const cloudSetup = appContextService.getCloud();
 
+    const from = dateMath.parse(requestBody.from)?.valueOf();
+    const to = dateMath.parse(requestBody.to)?.valueOf();
     const requestConfig: AxiosRequestConfig = {
       url: `${autoopsConfig.api?.url}/monitoring/serverless/v1/projects/${cloudSetup?.serverless.projectId}/metrics`,
-      data: requestBody,
+      data: {
+        from,
+        to,
+        size: requestBody.dataStreams.length,
+        level: 'datastream',
+        metric_types: ['storage_retained', 'ingest_rate'],
+        allowed_indices: requestBody.dataStreams,
+      },
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
