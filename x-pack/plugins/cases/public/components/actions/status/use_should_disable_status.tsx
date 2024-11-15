@@ -29,7 +29,7 @@ export const useShouldDisableStatus = () => {
       if (selectedCasesContainsClosed) {
         return !canReopenCase;
       } else {
-        return canUpdate;
+        return !canUpdate;
       }
     },
     [canReopenCase, canUpdate]

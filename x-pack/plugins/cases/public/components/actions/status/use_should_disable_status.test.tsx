@@ -70,7 +70,7 @@ describe('useShouldDisableStatus', () => {
     expect(result.current(closedCases)).toBe(true);
 
     const openCases = [{ status: CaseStatuses.open }];
-    expect(result.current(openCases)).toBe(true);
+    expect(result.current(openCases)).toBe(false);
   });
 
   it('should handle multiple selected cases correctly', () => {
