@@ -1304,14 +1304,17 @@
                     },
                     "flapping": {
                       "additionalProperties": false,
+                      "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                       "nullable": true,
                       "properties": {
                         "look_back_window": {
+                          "description": "The minimum number of runs in which the threshold must be met.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
                         },
                         "status_change_threshold": {
+                          "description": "The minimum number of times an alert must switch states in the look back window.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
@@ -2083,14 +2086,17 @@
                   },
                   "flapping": {
                     "additionalProperties": false,
+                    "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                     "nullable": true,
                     "properties": {
                       "look_back_window": {
+                        "description": "The minimum number of runs in which the threshold must be met.",
                         "maximum": 20,
                         "minimum": 2,
                         "type": "number"
                       },
                       "status_change_threshold": {
+                        "description": "The minimum number of times an alert must switch states in the look back window.",
                         "maximum": 20,
                         "minimum": 2,
                         "type": "number"
@@ -2484,14 +2490,17 @@
                     },
                     "flapping": {
                       "additionalProperties": false,
+                      "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                       "nullable": true,
                       "properties": {
                         "look_back_window": {
+                          "description": "The minimum number of runs in which the threshold must be met.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
                         },
                         "status_change_threshold": {
+                          "description": "The minimum number of times an alert must switch states in the look back window.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
@@ -3253,14 +3262,17 @@
                   },
                   "flapping": {
                     "additionalProperties": false,
+                    "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                     "nullable": true,
                     "properties": {
                       "look_back_window": {
+                        "description": "The minimum number of runs in which the threshold must be met.",
                         "maximum": 20,
                         "minimum": 2,
                         "type": "number"
                       },
                       "status_change_threshold": {
+                        "description": "The minimum number of times an alert must switch states in the look back window.",
                         "maximum": 20,
                         "minimum": 2,
                         "type": "number"
@@ -3647,14 +3659,17 @@
                     },
                     "flapping": {
                       "additionalProperties": false,
+                      "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                       "nullable": true,
                       "properties": {
                         "look_back_window": {
+                          "description": "The minimum number of runs in which the threshold must be met.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
                         },
                         "status_change_threshold": {
+                          "description": "The minimum number of times an alert must switch states in the look back window.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
@@ -5094,14 +5109,17 @@
                     },
                     "flapping": {
                       "additionalProperties": false,
+                      "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                       "nullable": true,
                       "properties": {
                         "look_back_window": {
+                          "description": "The minimum number of runs in which the threshold must be met.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
                         },
                         "status_change_threshold": {
+                          "description": "The minimum number of times an alert must switch states in the look back window.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
@@ -5628,7 +5646,6 @@
     },
     "/api/fleet/agent_download_sources": {
       "get": {
-        "description": "List agent binary download sources",
         "operationId": "get-fleet-agent-download-sources",
         "parameters": [
           {
@@ -5731,13 +5748,12 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get agent binary download sources",
         "tags": [
           "Elastic Agent binary download sources"
         ]
       },
       "post": {
-        "description": "Create agent binary download source",
         "operationId": "post-fleet-agent-download-sources",
         "parameters": [
           {
@@ -5870,7 +5886,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Create an agent binary download source",
         "tags": [
           "Elastic Agent binary download sources"
         ]
@@ -5878,7 +5894,7 @@
     },
     "/api/fleet/agent_download_sources/{sourceId}": {
       "delete": {
-        "description": "Delete agent binary download source by ID",
+        "description": "Delete an agent binary download source by ID.",
         "operationId": "delete-fleet-agent-download-sources-sourceid",
         "parameters": [
           {
@@ -5957,13 +5973,13 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Delete an agent binary download source",
         "tags": [
           "Elastic Agent binary download sources"
         ]
       },
       "get": {
-        "description": "Get agent binary download source by ID",
+        "description": "Get an agent binary download source by ID.",
         "operationId": "get-fleet-agent-download-sources-sourceid",
         "parameters": [
           {
@@ -6059,13 +6075,13 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get an agent binary download source",
         "tags": [
           "Elastic Agent binary download sources"
         ]
       },
       "put": {
-        "description": "Update agent binary download source by ID",
+        "description": "Update an agent binary download source by ID.",
         "operationId": "put-fleet-agent-download-sources-sourceid",
         "parameters": [
           {
@@ -6206,7 +6222,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Update an agent binary download source",
         "tags": [
           "Elastic Agent binary download sources"
         ]
@@ -6214,7 +6230,6 @@
     },
     "/api/fleet/agent_policies": {
       "get": {
-        "description": "List agent policies",
         "operationId": "get-fleet-agent-policies",
         "parameters": [
           {
@@ -7046,13 +7061,12 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get agent policies",
         "tags": [
           "Elastic Agent policies"
         ]
       },
       "post": {
-        "description": "Create an agent policy",
         "operationId": "post-fleet-agent-policies",
         "parameters": [
           {
@@ -8039,7 +8053,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Create an agent policy",
         "tags": [
           "Elastic Agent policies"
         ]
@@ -8047,7 +8061,6 @@
     },
     "/api/fleet/agent_policies/_bulk_get": {
       "post": {
-        "description": "Bulk get agent policies",
         "operationId": "post-fleet-agent-policies-bulk-get",
         "parameters": [
           {
@@ -8826,7 +8839,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Bulk get agent policies",
         "tags": [
           "Elastic Agent policies"
         ]
@@ -8834,7 +8847,7 @@
     },
     "/api/fleet/agent_policies/delete": {
       "post": {
-        "description": "Delete agent policy by ID",
+        "description": "Delete an agent policy by ID.",
         "operationId": "post-fleet-agent-policies-delete",
         "parameters": [
           {
@@ -8931,7 +8944,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Delete an agent policy",
         "tags": [
           "Elastic Agent policies"
         ]
@@ -8939,7 +8952,7 @@
     },
     "/api/fleet/agent_policies/outputs": {
       "post": {
-        "description": "Get list of outputs associated with agent policies",
+        "description": "Get a list of outputs associated with agent policies.",
         "operationId": "post-fleet-agent-policies-outputs",
         "parameters": [
           {
@@ -9116,7 +9129,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get outputs for agent policies",
         "tags": [
           "Elastic Agent policies"
         ]
@@ -9124,7 +9137,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}": {
       "get": {
-        "description": "Get an agent policy by ID",
+        "description": "Get an agent policy by ID.",
         "operationId": "get-fleet-agent-policies-agentpolicyid",
         "parameters": [
           {
@@ -9869,13 +9882,13 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get an agent policy",
         "tags": [
           "Elastic Agent policies"
         ]
       },
       "put": {
-        "description": "Update an agent policy by ID",
+        "description": "Update an agent policy by ID.",
         "operationId": "put-fleet-agent-policies-agentpolicyid",
         "parameters": [
           {
@@ -10874,7 +10887,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Update an agent policy",
         "tags": [
           "Elastic Agent policies"
         ]
@@ -10882,7 +10895,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}/copy": {
       "post": {
-        "description": "Copy an agent policy by ID",
+        "description": "Copy an agent policy by ID.",
         "operationId": "post-fleet-agent-policies-agentpolicyid-copy",
         "parameters": [
           {
@@ -11659,7 +11672,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Copy an agent policy",
         "tags": [
           "Elastic Agent policies"
         ]
@@ -11667,7 +11680,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}/download": {
       "get": {
-        "description": "Download an agent policy by ID",
+        "description": "Download an agent policy by ID.",
         "operationId": "get-fleet-agent-policies-agentpolicyid-download",
         "parameters": [
           {
@@ -11776,7 +11789,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Download an agent policy",
         "tags": [
           "Elastic Agent policies"
         ]
@@ -11784,7 +11797,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}/full": {
       "get": {
-        "description": "Get a full agent policy by ID",
+        "description": "Get a full agent policy by ID.",
         "operationId": "get-fleet-agent-policies-agentpolicyid-full",
         "parameters": [
           {
@@ -12278,7 +12291,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get a full agent policy",
         "tags": [
           "Elastic Agent policies"
         ]
@@ -12286,7 +12299,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}/outputs": {
       "get": {
-        "description": "Get list of outputs associated with agent policy by policy id",
+        "description": "Get a list of outputs associated with agent policy by policy id.",
         "operationId": "get-fleet-agent-policies-agentpolicyid-outputs",
         "parameters": [
           {
@@ -12436,7 +12449,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get outputs for an agent policy",
         "tags": [
           "Elastic Agent policies"
         ]
@@ -12444,7 +12457,6 @@
     },
     "/api/fleet/agent_status": {
       "get": {
-        "description": "Get agent status summary",
         "operationId": "get-fleet-agent-status",
         "parameters": [
           {
@@ -12584,7 +12596,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get an agent status summary",
         "tags": [
           "Elastic Agent status"
         ]
@@ -12592,7 +12604,6 @@
     },
     "/api/fleet/agent_status/data": {
       "get": {
-        "description": "Get incoming agent data",
         "operationId": "get-fleet-agent-status-data",
         "parameters": [
           {
@@ -12700,7 +12711,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get incoming agent data",
         "tags": [
           "Elastic Agents"
         ]
@@ -12708,7 +12719,6 @@
     },
     "/api/fleet/agents": {
       "get": {
-        "description": "List agents",
         "operationId": "get-fleet-agents",
         "parameters": [
           {
@@ -13253,13 +13263,12 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get agents",
         "tags": [
           "Elastic Agents"
         ]
       },
       "post": {
-        "description": "List agents by action ids",
         "operationId": "post-fleet-agents",
         "parameters": [
           {
@@ -13354,7 +13363,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get agents by action ids",
         "tags": [
           "Elastic Agents"
         ]
@@ -13362,7 +13371,6 @@
     },
     "/api/fleet/agents/action_status": {
       "get": {
-        "description": "Get agent action status",
         "operationId": "get-fleet-agents-action-status",
         "parameters": [
           {
@@ -13590,7 +13598,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get an agent action status",
         "tags": [
           "Elastic Agent actions"
         ]
@@ -13598,7 +13606,6 @@
     },
     "/api/fleet/agents/actions/{actionId}/cancel": {
       "post": {
-        "description": "Cancel agent action",
         "operationId": "post-fleet-agents-actions-actionid-cancel",
         "parameters": [
           {
@@ -13732,7 +13739,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Cancel an agent action",
         "tags": [
           "Elastic Agent actions"
         ]
@@ -13740,7 +13747,6 @@
     },
     "/api/fleet/agents/available_versions": {
       "get": {
-        "description": "Get available agent versions",
         "operationId": "get-fleet-agents-available-versions",
         "parameters": [
           {
@@ -13804,7 +13810,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get available agent versions",
         "tags": [
           "Elastic Agents"
         ]
@@ -13812,7 +13818,6 @@
     },
     "/api/fleet/agents/bulk_reassign": {
       "post": {
-        "description": "Bulk reassign agents",
         "operationId": "post-fleet-agents-bulk-reassign",
         "parameters": [
           {
@@ -13922,7 +13927,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Bulk reassign agents",
         "tags": [
           "Elastic Agent actions"
         ]
@@ -13930,7 +13935,6 @@
     },
     "/api/fleet/agents/bulk_request_diagnostics": {
       "post": {
-        "description": "Bulk request diagnostics from agents",
         "operationId": "post-fleet-agents-bulk-request-diagnostics",
         "parameters": [
           {
@@ -14041,7 +14045,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Bulk request diagnostics from agents",
         "tags": [
           "Elastic Agent actions"
         ]
@@ -14049,7 +14053,6 @@
     },
     "/api/fleet/agents/bulk_unenroll": {
       "post": {
-        "description": "Bulk unenroll agents",
         "operationId": "post-fleet-agents-bulk-unenroll",
         "parameters": [
           {
@@ -14165,7 +14168,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Bulk unenroll agents",
         "tags": [
           "Elastic Agent actions"
         ]
@@ -14173,7 +14176,6 @@
     },
     "/api/fleet/agents/bulk_update_agent_tags": {
       "post": {
-        "description": "Bulk update agent tags",
         "operationId": "post-fleet-agents-bulk-update-agent-tags",
         "parameters": [
           {
@@ -14291,7 +14293,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Bulk update agent tags",
         "tags": [
           "Elastic Agent actions"
         ]
@@ -14299,7 +14301,6 @@
     },
     "/api/fleet/agents/bulk_upgrade": {
       "post": {
-        "description": "Bulk upgrade agents",
         "operationId": "post-fleet-agents-bulk-upgrade",
         "parameters": [
           {
@@ -14425,7 +14426,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Bulk upgrade agents",
         "tags": [
           "Elastic Agent actions"
         ]
@@ -14433,7 +14434,7 @@
     },
     "/api/fleet/agents/files/{fileId}": {
       "delete": {
-        "description": "Delete file uploaded by agent",
+        "description": "Delete a file uploaded by an agent.",
         "operationId": "delete-fleet-agents-files-fileid",
         "parameters": [
           {
@@ -14516,7 +14517,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Delete an uploaded file",
         "tags": [
           "Elastic Agents"
         ]
@@ -14524,7 +14525,7 @@
     },
     "/api/fleet/agents/files/{fileId}/{fileName}": {
       "get": {
-        "description": "Get file uploaded by agent",
+        "description": "Get a file uploaded by an agent.",
         "operationId": "get-fleet-agents-files-fileid-filename",
         "parameters": [
           {
@@ -14592,7 +14593,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get an uploaded file",
         "tags": [
           "Elastic Agents"
         ]
@@ -14600,7 +14601,6 @@
     },
     "/api/fleet/agents/setup": {
       "get": {
-        "description": "Get agent setup info",
         "operationId": "get-fleet-agents-setup",
         "parameters": [
           {
@@ -14695,13 +14695,12 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get agent setup info",
         "tags": [
           "Elastic Agents"
         ]
       },
       "post": {
-        "description": "Initiate agent setup",
         "operationId": "post-fleet-agents-setup",
         "parameters": [
           {
@@ -14793,7 +14792,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Initiate agent setup",
         "tags": [
           "Elastic Agents"
         ]
@@ -14801,7 +14800,6 @@
     },
     "/api/fleet/agents/tags": {
       "get": {
-        "description": "List agent tags",
         "operationId": "get-fleet-agents-tags",
         "parameters": [
           {
@@ -14882,7 +14880,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get agent tags",
         "tags": [
           "Elastic Agents"
         ]
@@ -14890,7 +14888,7 @@
     },
     "/api/fleet/agents/{agentId}": {
       "delete": {
-        "description": "Delete agent by ID",
+        "description": "Delete an agent by ID.",
         "operationId": "delete-fleet-agents-agentid",
         "parameters": [
           {
@@ -14972,13 +14970,13 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Delete an agent",
         "tags": [
           "Elastic Agents"
         ]
       },
       "get": {
-        "description": "Get agent by ID",
+        "description": "Get an agent by ID.",
         "operationId": "get-fleet-agents-agentid",
         "parameters": [
           {
@@ -15437,13 +15435,13 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get an agent",
         "tags": [
           "Elastic Agents"
         ]
       },
       "put": {
-        "description": "Update agent by ID",
+        "description": "Update an agent by ID.",
         "operationId": "put-fleet-agents-agentid",
         "parameters": [
           {
@@ -15925,7 +15923,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Update an agent",
         "tags": [
           "Elastic Agents"
         ]
@@ -15933,7 +15931,6 @@
     },
     "/api/fleet/agents/{agentId}/actions": {
       "post": {
-        "description": "Create agent action",
         "operationId": "post-fleet-agents-agentid-actions",
         "parameters": [
           {
@@ -16142,7 +16139,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Create an agent action",
         "tags": [
           "Elastic Agent actions"
         ]
@@ -16150,7 +16147,6 @@
     },
     "/api/fleet/agents/{agentId}/reassign": {
       "post": {
-        "description": "Reassign agent",
         "operationId": "post-fleet-agents-agentid-reassign",
         "parameters": [
           {
@@ -16240,7 +16236,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Reassign an agent",
         "tags": [
           "Elastic Agent actions"
         ]
@@ -16248,7 +16244,6 @@
     },
     "/api/fleet/agents/{agentId}/request_diagnostics": {
       "post": {
-        "description": "Request agent diagnostics",
         "operationId": "post-fleet-agents-agentid-request-diagnostics",
         "parameters": [
           {
@@ -16349,7 +16344,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Request agent diagnostics",
         "tags": [
           "Elastic Agent actions"
         ]
@@ -16357,7 +16352,6 @@
     },
     "/api/fleet/agents/{agentId}/unenroll": {
       "post": {
-        "description": "Unenroll agent",
         "operationId": "post-fleet-agents-agentid-unenroll",
         "parameters": [
           {
@@ -16411,7 +16405,7 @@
           }
         },
         "responses": {},
-        "summary": "",
+        "summary": "Unenroll an agent",
         "tags": [
           "Elastic Agent actions"
         ]
@@ -16419,7 +16413,6 @@
     },
     "/api/fleet/agents/{agentId}/upgrade": {
       "post": {
-        "description": "Upgrade agent",
         "operationId": "post-fleet-agents-agentid-upgrade",
         "parameters": [
           {
@@ -16518,7 +16511,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Upgrade an agent",
         "tags": [
           "Elastic Agent actions"
         ]
@@ -16526,7 +16519,6 @@
     },
     "/api/fleet/agents/{agentId}/uploads": {
       "get": {
-        "description": "List agent uploads",
         "operationId": "get-fleet-agents-agentid-uploads",
         "parameters": [
           {
@@ -16638,7 +16630,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get agent uploads",
         "tags": [
           "Elastic Agents"
         ]
@@ -16646,7 +16638,6 @@
     },
     "/api/fleet/check-permissions": {
       "get": {
-        "description": "Check permissions",
         "operationId": "get-fleet-check-permissions",
         "parameters": [
           {
@@ -16723,7 +16714,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Check permissions",
         "tags": [
           "Fleet internals"
         ]
@@ -16731,7 +16722,6 @@
     },
     "/api/fleet/data_streams": {
       "get": {
-        "description": "List data streams",
         "operationId": "get-fleet-data-streams",
         "parameters": [
           {
@@ -16881,7 +16871,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get data streams",
         "tags": [
           "Data streams"
         ]
@@ -16889,7 +16879,6 @@
     },
     "/api/fleet/enrollment_api_keys": {
       "get": {
-        "description": "List enrollment API keys",
         "operationId": "get-fleet-enrollment-api-keys",
         "parameters": [
           {
@@ -16980,6 +16969,49 @@
                       },
                       "type": "array"
                     },
+                    "list": {
+                      "deprecated": true,
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "active": {
+                            "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
+                            "type": "boolean"
+                          },
+                          "api_key": {
+                            "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
+                            "type": "string"
+                          },
+                          "api_key_id": {
+                            "description": "The ID of the API key in the Security API.",
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "description": "The name of the enrollment API key.",
+                            "type": "string"
+                          },
+                          "policy_id": {
+                            "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "api_key_id",
+                          "api_key",
+                          "active",
+                          "created_at"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
                     "page": {
                       "type": "number"
                     },
@@ -16994,7 +17026,8 @@
                     "items",
                     "total",
                     "page",
-                    "perPage"
+                    "perPage",
+                    "list"
                   ],
                   "type": "object"
                 }
@@ -17027,13 +17060,12 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get enrollment API keys",
         "tags": [
           "Fleet enrollment API keys"
         ]
       },
       "post": {
-        "description": "Create enrollment API key",
         "operationId": "post-fleet-enrollment-api-keys",
         "parameters": [
           {
@@ -17171,7 +17203,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Create an enrollment API key",
         "tags": [
           "Fleet enrollment API keys"
         ]
@@ -17179,7 +17211,7 @@
     },
     "/api/fleet/enrollment_api_keys/{keyId}": {
       "delete": {
-        "description": "Revoke enrollment API key by ID by marking it as inactive",
+        "description": "Revoke an enrollment API key by ID by marking it as inactive.",
         "operationId": "delete-fleet-enrollment-api-keys-keyid",
         "parameters": [
           {
@@ -17261,13 +17293,13 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Revoke an enrollment API key",
         "tags": [
           "Fleet enrollment API keys"
         ]
       },
       "get": {
-        "description": "Get enrollment API key by ID",
+        "description": "Get an enrollment API key by ID.",
         "operationId": "get-fleet-enrollment-api-keys-keyid",
         "parameters": [
           {
@@ -17372,7 +17404,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get an enrollment API key",
         "tags": [
           "Fleet enrollment API keys"
         ]
@@ -17380,7 +17412,6 @@
     },
     "/api/fleet/epm/bulk_assets": {
       "post": {
-        "description": "Bulk get assets",
         "operationId": "post-fleet-epm-bulk-assets",
         "parameters": [
           {
@@ -17523,7 +17554,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Bulk get assets",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -17531,7 +17562,6 @@
     },
     "/api/fleet/epm/categories": {
       "get": {
-        "description": "List package categories",
         "operationId": "get-fleet-epm-categories",
         "parameters": [
           {
@@ -17634,7 +17664,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get package categories",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -17642,7 +17672,6 @@
     },
     "/api/fleet/epm/custom_integrations": {
       "post": {
-        "description": "Create custom integration",
         "operationId": "post-fleet-epm-custom-integrations",
         "parameters": [
           {
@@ -17843,7 +17872,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Create a custom integration",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -17851,7 +17880,6 @@
     },
     "/api/fleet/epm/data_streams": {
       "get": {
-        "description": "List data streams",
         "operationId": "get-fleet-epm-data-streams",
         "parameters": [
           {
@@ -17969,7 +17997,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get data streams",
         "tags": [
           "Data streams"
         ]
@@ -17977,7 +18005,6 @@
     },
     "/api/fleet/epm/packages": {
       "get": {
-        "description": "List packages",
         "operationId": "get-fleet-epm-packages",
         "parameters": [
           {
@@ -18543,13 +18570,12 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get packages",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
       },
       "post": {
-        "description": "Install package by upload",
         "operationId": "post-fleet-epm-packages",
         "parameters": [
           {
@@ -18730,7 +18756,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Install a package by upload",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -18738,7 +18764,6 @@
     },
     "/api/fleet/epm/packages/_bulk": {
       "post": {
-        "description": "Bulk install packages",
         "operationId": "post-fleet-epm-packages-bulk",
         "parameters": [
           {
@@ -19008,7 +19033,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Bulk install packages",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -19016,7 +19041,6 @@
     },
     "/api/fleet/epm/packages/installed": {
       "get": {
-        "description": "Get installed packages",
         "operationId": "get-fleet-epm-packages-installed",
         "parameters": [
           {
@@ -19249,7 +19273,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get installed packages",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -19257,7 +19281,6 @@
     },
     "/api/fleet/epm/packages/limited": {
       "get": {
-        "description": "Get limited package list",
         "operationId": "get-fleet-epm-packages-limited",
         "parameters": [
           {
@@ -19321,7 +19344,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get a limited package list",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -19329,7 +19352,6 @@
     },
     "/api/fleet/epm/packages/{pkgName}/stats": {
       "get": {
-        "description": "Get package stats",
         "operationId": "get-fleet-epm-packages-pkgname-stats",
         "parameters": [
           {
@@ -19407,7 +19429,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get package stats",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -19415,7 +19437,6 @@
     },
     "/api/fleet/epm/packages/{pkgName}/{pkgVersion}": {
       "delete": {
-        "description": "Delete package",
         "operationId": "delete-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
@@ -19579,13 +19600,12 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Delete a package",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
       },
       "get": {
-        "description": "Get package",
         "operationId": "get-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
@@ -20271,13 +20291,12 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get a package",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
       },
       "post": {
-        "description": "Install package from registry",
         "operationId": "post-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
@@ -20493,13 +20512,12 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Install a package from the registry",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
       },
       "put": {
-        "description": "Update package settings",
         "operationId": "put-fleet-epm-packages-pkgname-pkgversion",
         "parameters": [
           {
@@ -21168,7 +21186,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Update package settings",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -21176,7 +21194,6 @@
     },
     "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize": {
       "post": {
-        "description": "Authorize transforms",
         "operationId": "post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize",
         "parameters": [
           {
@@ -21312,15 +21329,14 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Authorize transforms",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
       }
     },
-    "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath*}": {
+    "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}": {
       "get": {
-        "description": "Get package file",
         "operationId": "get-fleet-epm-packages-pkgname-pkgversion-filepath",
         "parameters": [
           {
@@ -21394,7 +21410,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get a package file",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -21402,7 +21418,6 @@
     },
     "/api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs": {
       "get": {
-        "description": "Get inputs template",
         "operationId": "get-fleet-epm-templates-pkgname-pkgversion-inputs",
         "parameters": [
           {
@@ -21563,7 +21578,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get an inputs template",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -21571,7 +21586,6 @@
     },
     "/api/fleet/epm/verification_key_id": {
       "get": {
-        "description": "Get a package signature verification key ID",
         "operationId": "get-fleet-epm-verification-key-id",
         "parameters": [
           {
@@ -21633,7 +21647,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get a package signature verification key ID",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -21641,7 +21655,6 @@
     },
     "/api/fleet/fleet_server_hosts": {
       "get": {
-        "description": "List Fleet Server hosts",
         "operationId": "get-fleet-fleet-server-hosts",
         "parameters": [
           {
@@ -21753,13 +21766,12 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get Fleet Server hosts",
         "tags": [
           "Fleet Server hosts"
         ]
       },
       "post": {
-        "description": "Create Fleet Server host",
         "operationId": "post-fleet-fleet-server-hosts",
         "parameters": [
           {
@@ -21910,7 +21922,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Create a Fleet Server host",
         "tags": [
           "Fleet Server hosts"
         ]
@@ -21918,7 +21930,7 @@
     },
     "/api/fleet/fleet_server_hosts/{itemId}": {
       "delete": {
-        "description": "Delete Fleet Server host by ID",
+        "description": "Delete a Fleet Server host by ID.",
         "operationId": "delete-fleet-fleet-server-hosts-itemid",
         "parameters": [
           {
@@ -21997,13 +22009,13 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Delete a Fleet Server host",
         "tags": [
           "Fleet Server hosts"
         ]
       },
       "get": {
-        "description": "Get Fleet Server host by ID",
+        "description": "Get a Fleet Server host by ID.",
         "operationId": "get-fleet-fleet-server-hosts-itemid",
         "parameters": [
           {
@@ -22108,13 +22120,13 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get a Fleet Server host",
         "tags": [
           "Fleet Server hosts"
         ]
       },
       "put": {
-        "description": "Update Fleet Server host by ID",
+        "description": "Update a Fleet Server host by ID.",
         "operationId": "put-fleet-fleet-server-hosts-itemid",
         "parameters": [
           {
@@ -22264,7 +22276,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Update a Fleet Server host",
         "tags": [
           "Fleet Server hosts"
         ]
@@ -22272,7 +22284,6 @@
     },
     "/api/fleet/health_check": {
       "post": {
-        "description": "Check Fleet Server health",
         "operationId": "post-fleet-health-check",
         "parameters": [
           {
@@ -22392,7 +22403,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Check Fleet Server health",
         "tags": [
           "Fleet internals"
         ]
@@ -22400,7 +22411,6 @@
     },
     "/api/fleet/kubernetes": {
       "get": {
-        "description": "Get full K8s agent manifest",
         "operationId": "get-fleet-kubernetes",
         "parameters": [
           {
@@ -22485,7 +22495,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get a full K8s agent manifest",
         "tags": [
           "Elastic Agent policies"
         ]
@@ -22593,7 +22603,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Download an agent manifest",
         "tags": [
           "Elastic Agent policies"
         ]
@@ -22601,7 +22611,6 @@
     },
     "/api/fleet/logstash_api_keys": {
       "post": {
-        "description": "Generate Logstash API key",
         "operationId": "post-fleet-logstash-api-keys",
         "parameters": [
           {
@@ -22672,7 +22681,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Generate a Logstash API key",
         "tags": [
           "Fleet outputs"
         ]
@@ -22680,7 +22689,6 @@
     },
     "/api/fleet/message_signing_service/rotate_key_pair": {
       "post": {
-        "description": "Rotate fleet message signing key pair",
         "operationId": "post-fleet-message-signing-service-rotate-key-pair",
         "parameters": [
           {
@@ -22785,7 +22793,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Rotate a Fleet message signing key pair",
         "tags": [
           "Message Signing Service"
         ]
@@ -22793,7 +22801,6 @@
     },
     "/api/fleet/outputs": {
       "get": {
-        "description": "List outputs",
         "operationId": "get-fleet-outputs",
         "parameters": [
           {
@@ -23884,13 +23891,12 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get outputs",
         "tags": [
           "Fleet outputs"
         ]
       },
       "post": {
-        "description": "Create output",
         "operationId": "post-fleet-outputs",
         "parameters": [
           {
@@ -26000,7 +26006,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Create output",
         "tags": [
           "Fleet outputs"
         ]
@@ -26008,7 +26014,7 @@
     },
     "/api/fleet/outputs/{outputId}": {
       "delete": {
-        "description": "Delete output by ID",
+        "description": "Delete output by ID.",
         "operationId": "delete-fleet-outputs-outputid",
         "parameters": [
           {
@@ -26112,13 +26118,13 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Delete output",
         "tags": [
           "Fleet outputs"
         ]
       },
       "get": {
-        "description": "Get output by ID",
+        "description": "Get output by ID.",
         "operationId": "get-fleet-outputs-outputid",
         "parameters": [
           {
@@ -27202,13 +27208,13 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get output",
         "tags": [
           "Fleet outputs"
         ]
       },
       "put": {
-        "description": "Update output by ID",
+        "description": "Update output by ID.",
         "operationId": "put-fleet-outputs-outputid",
         "parameters": [
           {
@@ -29302,7 +29308,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Update output",
         "tags": [
           "Fleet outputs"
         ]
@@ -29310,7 +29316,6 @@
     },
     "/api/fleet/outputs/{outputId}/health": {
       "get": {
-        "description": "Get latest output health",
         "operationId": "get-fleet-outputs-outputid-health",
         "parameters": [
           {
@@ -29390,7 +29395,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get the latest output health",
         "tags": [
           "Fleet outputs"
         ]
@@ -29398,7 +29403,6 @@
     },
     "/api/fleet/package_policies": {
       "get": {
-        "description": "List package policies",
         "operationId": "get-fleet-package-policies",
         "parameters": [
           {
@@ -30107,13 +30111,12 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get package policies",
         "tags": [
           "Fleet package policies"
         ]
       },
       "post": {
-        "description": "Create package policy",
         "operationId": "post-fleet-package-policies",
         "parameters": [
           {
@@ -31379,7 +31382,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Create a package policy",
         "tags": [
           "Fleet package policies"
         ]
@@ -31387,7 +31390,6 @@
     },
     "/api/fleet/package_policies/_bulk_get": {
       "post": {
-        "description": "Bulk get package policies",
         "operationId": "post-fleet-package-policies-bulk-get",
         "parameters": [
           {
@@ -32077,7 +32079,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Bulk get package policies",
         "tags": [
           "Fleet package policies"
         ]
@@ -32085,7 +32087,6 @@
     },
     "/api/fleet/package_policies/delete": {
       "post": {
-        "description": "Bulk delete package policies",
         "operationId": "post-fleet-package-policies-delete",
         "parameters": [
           {
@@ -32281,7 +32282,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Bulk delete package policies",
         "tags": [
           "Fleet package policies"
         ]
@@ -32289,7 +32290,7 @@
     },
     "/api/fleet/package_policies/upgrade": {
       "post": {
-        "description": "Upgrade package policy to a newer package version",
+        "description": "Upgrade a package policy to a newer package version.",
         "operationId": "post-fleet-package-policies-upgrade",
         "parameters": [
           {
@@ -32406,7 +32407,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Upgrade a package policy",
         "tags": [
           "Fleet package policies"
         ]
@@ -32414,7 +32415,6 @@
     },
     "/api/fleet/package_policies/upgrade/dryrun": {
       "post": {
-        "description": "Dry run package policy upgrade",
         "operationId": "post-fleet-package-policies-upgrade-dryrun",
         "parameters": [
           {
@@ -33592,7 +33592,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Dry run a package policy upgrade",
         "tags": [
           "Fleet package policies"
         ]
@@ -33600,7 +33600,7 @@
     },
     "/api/fleet/package_policies/{packagePolicyId}": {
       "delete": {
-        "description": "Delete package policy by ID",
+        "description": "Delete a package policy by ID.",
         "operationId": "delete-fleet-package-policies-packagepolicyid",
         "parameters": [
           {
@@ -33687,13 +33687,13 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Delete a package policy",
         "tags": [
           "Fleet package policies"
         ]
       },
       "get": {
-        "description": "Get package policy by ID",
+        "description": "Get a package policy by ID.",
         "operationId": "get-fleet-package-policies-packagepolicyid",
         "parameters": [
           {
@@ -34353,13 +34353,13 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get a package policy",
         "tags": [
           "Fleet package policies"
         ]
       },
       "put": {
-        "description": "Update package policy by ID",
+        "description": "Update a package policy by ID.",
         "operationId": "put-fleet-package-policies-packagepolicyid",
         "parameters": [
           {
@@ -35625,7 +35625,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Update a package policy",
         "tags": [
           "Fleet package policies"
         ]
@@ -35633,7 +35633,6 @@
     },
     "/api/fleet/proxies": {
       "get": {
-        "description": "List proxies",
         "operationId": "get-fleet-proxies",
         "parameters": [
           {
@@ -35759,13 +35758,12 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get proxies",
         "tags": [
           "Fleet proxies"
         ]
       },
       "post": {
-        "description": "Create proxy",
         "operationId": "post-fleet-proxies",
         "parameters": [
           {
@@ -35944,7 +35942,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Create a proxy",
         "tags": [
           "Fleet proxies"
         ]
@@ -35952,7 +35950,7 @@
     },
     "/api/fleet/proxies/{itemId}": {
       "delete": {
-        "description": "Delete proxy by ID",
+        "description": "Delete a proxy by ID",
         "operationId": "delete-fleet-proxies-itemid",
         "parameters": [
           {
@@ -36031,13 +36029,13 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Delete a proxy",
         "tags": [
           "Fleet proxies"
         ]
       },
       "get": {
-        "description": "Get proxy by ID",
+        "description": "Get a proxy by ID.",
         "operationId": "get-fleet-proxies-itemid",
         "parameters": [
           {
@@ -36156,13 +36154,13 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get a proxy",
         "tags": [
           "Fleet proxies"
         ]
       },
       "put": {
-        "description": "Update proxy by ID",
+        "description": "Update a proxy by ID.",
         "operationId": "put-fleet-proxies-itemid",
         "parameters": [
           {
@@ -36344,7 +36342,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Update a proxy",
         "tags": [
           "Fleet proxies"
         ]
@@ -36352,7 +36350,6 @@
     },
     "/api/fleet/service_tokens": {
       "post": {
-        "description": "Create a service token",
         "operationId": "post-fleet-service-tokens",
         "parameters": [
           {
@@ -36444,7 +36441,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Create a service token",
         "tags": [
           "Fleet service tokens"
         ]
@@ -36452,7 +36449,6 @@
     },
     "/api/fleet/settings": {
       "get": {
-        "description": "Get settings",
         "operationId": "get-fleet-settings",
         "parameters": [
           {
@@ -36591,13 +36587,12 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get settings",
         "tags": [
           "Fleet internals"
         ]
       },
       "put": {
-        "description": "Update settings",
         "operationId": "put-fleet-settings",
         "parameters": [
           {
@@ -36793,7 +36788,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Update settings",
         "tags": [
           "Fleet internals"
         ]
@@ -36801,7 +36796,6 @@
     },
     "/api/fleet/setup": {
       "post": {
-        "description": "Initiate Fleet setup",
         "operationId": "post-fleet-setup",
         "parameters": [
           {
@@ -36912,7 +36906,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Initiate Fleet setup",
         "tags": [
           "Fleet internals"
         ]
@@ -36920,7 +36914,7 @@
     },
     "/api/fleet/uninstall_tokens": {
       "get": {
-        "description": "List metadata for latest uninstall tokens per agent policy",
+        "description": "List the metadata for the latest uninstall tokens per agent policy.",
         "operationId": "get-fleet-uninstall-tokens",
         "parameters": [
           {
@@ -37061,7 +37055,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get metadata for latest uninstall tokens",
         "tags": [
           "Fleet uninstall tokens"
         ]
@@ -37069,7 +37063,7 @@
     },
     "/api/fleet/uninstall_tokens/{uninstallTokenId}": {
       "get": {
-        "description": "Get one decrypted uninstall token by its ID",
+        "description": "Get one decrypted uninstall token by its ID.",
         "operationId": "get-fleet-uninstall-tokens-uninstalltokenid",
         "parameters": [
           {
@@ -37169,7 +37163,7 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get a decrypted uninstall token",
         "tags": [
           "Fleet uninstall tokens"
         ]

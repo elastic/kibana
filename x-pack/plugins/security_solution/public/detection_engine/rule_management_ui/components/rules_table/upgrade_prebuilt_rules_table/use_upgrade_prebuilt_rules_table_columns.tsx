@@ -160,15 +160,21 @@ const createUpgradeButtonColumn = (
       />
     );
 
+    const tooltipContent = isDisabledByConflicts
+      ? i18n.UPDATE_RULE_BUTTON_TOOLTIP_CONFLICTS
+      : undefined;
+
     return (
-      <EuiButtonEmpty
-        size="s"
-        disabled={isUpgradeButtonDisabled}
-        onClick={() => upgradeRules([ruleId])}
-        data-test-subj={`upgradeSinglePrebuiltRuleButton-${ruleId}`}
-      >
-        {isRuleUpgrading ? spinner : i18n.UPDATE_RULE_BUTTON}
-      </EuiButtonEmpty>
+      <EuiToolTip content={tooltipContent}>
+        <EuiButtonEmpty
+          size="s"
+          disabled={isUpgradeButtonDisabled}
+          onClick={() => upgradeRules([ruleId])}
+          data-test-subj={`upgradeSinglePrebuiltRuleButton-${ruleId}`}
+        >
+          {isRuleUpgrading ? spinner : i18n.UPDATE_RULE_BUTTON}
+        </EuiButtonEmpty>
+      </EuiToolTip>
     );
   },
   width: '10%',

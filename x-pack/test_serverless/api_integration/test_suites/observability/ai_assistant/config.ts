@@ -29,6 +29,6 @@ export default createTestConfig({
   // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
   esServerArgs: ['xpack.ml.dfa.enabled=false'],
   kbnServerArgs: [
-    `--xpack.observabilityAIAssistant.modelId=${SUPPORTED_TRAINED_MODELS.TINY_ELSER.name}`,
+    `--xpack.observabilityAIAssistant.modelId=${SUPPORTED_TRAINED_MODELS.TINY_ELSER.name}`, // TODO: Remove
   ],
 });

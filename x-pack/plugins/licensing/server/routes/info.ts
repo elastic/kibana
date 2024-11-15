@@ -9,7 +9,16 @@ import { LicensingRouter } from '../types';
 
 export function registerInfoRoute(router: LicensingRouter) {
   router.get(
-    { path: '/api/licensing/info', validate: false },
+    {
+      path: '/api/licensing/info',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     async (context, request, response) => {
       return response.ok({
         body: (await context.licensing).license,
