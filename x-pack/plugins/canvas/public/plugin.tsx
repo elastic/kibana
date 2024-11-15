@@ -31,7 +31,6 @@ import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { CanvasAppLocatorDefinition } from '../common/locator';
 import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
 import { getSessionStorage } from './lib/storage';
@@ -167,9 +166,6 @@ export class CanvasPlugin
       this.appUpdater.next(() => ({
         status: hasWorkpads ? AppStatus.accessible : AppStatus.inaccessible,
       }));
-      if (hasWorkpads && setupPlugins.home) {
-        setupPlugins.home.featureCatalogue.register(featureCatalogueEntry);
-      }
     });
 
     if (setupPlugins.share) {
