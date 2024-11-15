@@ -80,8 +80,6 @@ export class AutoOpsAPIService {
       }),
     };
 
-    this.logger.info(JSON.stringify(requestConfig));
-
     if (!cloudSetup?.isServerlessEnabled) {
       requestConfig.data.stack_version = appContextService.getKibanaVersion();
     }
@@ -149,7 +147,6 @@ export class AutoOpsAPIService {
       }
     );
 
-    this.logger.info(JSON.stringify(response));
     const validatedResponse = UsageMetricsAutoOpsResponseSchema.body().validate(response.data);
 
     this.logger.debug(`[AutoOps API] Successfully created an autoops agent ${response}`);
