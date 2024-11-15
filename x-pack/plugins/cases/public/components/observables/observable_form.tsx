@@ -22,9 +22,13 @@ import { useGetCaseConfiguration } from '../../containers/configure/use_get_case
 import * as i18n from './translations';
 import { fieldsConfig, normalizeValueType } from './fields_config';
 
-export const ObservableFormFields = memo(() => {
+export interface ObservableFormFieldsProps {
+  observable?: Observable;
+}
+
+export const ObservableFormFields = memo(({ observable }: ObservableFormFieldsProps) => {
   const { data, isLoading } = useGetCaseConfiguration();
-  const [selectedTypeKey, setSelectedTypeKey] = useState<string>('');
+  const [selectedTypeKey, setSelectedTypeKey] = useState<string>(observable?.typeKey ?? '');
 
   const options = useMemo(() => {
     return [...OBSERVABLE_TYPES_BUILTIN, ...data.observableTypes].map((observableType) => ({
@@ -35,13 +39,15 @@ export const ObservableFormFields = memo(() => {
 
   return (
     <>
-      <UseField
-        component={SelectField}
-        componentProps={{ euiFieldProps: { options, hasNoInitialSelection: true, isLoading } }}
-        onChange={setSelectedTypeKey}
-        path="typeKey"
-        config={fieldsConfig.typeKey}
-      />
+      {!observable && (
+        <UseField
+          component={SelectField}
+          componentProps={{ euiFieldProps: { options, hasNoInitialSelection: true, isLoading } }}
+          onChange={setSelectedTypeKey}
+          path="typeKey"
+          config={fieldsConfig.typeKey}
+        />
+      )}
       <UseField
         path="value"
         config={fieldsConfig.value[normalizeValueType(selectedTypeKey)]}
@@ -92,7 +98,7 @@ export const ObservableForm: FC<ObservableFormProps> = ({
 
   return (
     <Form form={form}>
-      <ObservableFormFields />
+      <ObservableFormFields observable={observable} />
       <EuiSpacer size="m" />
 
       <EuiFlexGroup justifyContent="spaceBetween">
