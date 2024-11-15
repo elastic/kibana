@@ -8,14 +8,14 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import { ScheduleItem } from '.';
+import { ScheduleItemField } from './schedule_item_field';
 import { TestProviders, useFormFieldMock } from '../../../../common/mock';
 
-describe('ScheduleItem', () => {
+describe('ScheduleItemField', () => {
   it('renders correctly', () => {
     const mockField = useFormFieldMock<string>();
     const wrapper = shallow(
-      <ScheduleItem
+      <ScheduleItemField
         dataTestSubj="schedule-item"
         idAria="idAria"
         isDisabled={false}
@@ -30,7 +30,7 @@ describe('ScheduleItem', () => {
     const mockField = useFormFieldMock<string>();
     const wrapper = mount(
       <TestProviders>
-        <ScheduleItem
+        <ScheduleItemField
           dataTestSubj="schedule-item"
           idAria="idAria"
           isDisabled={false}
@@ -53,7 +53,7 @@ describe('ScheduleItem', () => {
     const mockField = useFormFieldMock<string>();
     const wrapper = mount(
       <TestProviders>
-        <ScheduleItem
+        <ScheduleItemField
           dataTestSubj="schedule-item"
           idAria="idAria"
           isDisabled={false}
@@ -77,7 +77,7 @@ describe('ScheduleItem', () => {
     const mockField = useFormFieldMock<string>();
     const wrapper = mount(
       <TestProviders>
-        <ScheduleItem
+        <ScheduleItemField
           dataTestSubj="schedule-item"
           idAria="idAria"
           isDisabled={false}

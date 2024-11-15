@@ -77,8 +77,6 @@ import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelectorField } from '../data_view_selector_field';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { NewTermsFieldsEdit } from '../../../rule_creation/components/new_terms_fields_edit';
-import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../../detections/pages/detection_engine/rules/utils';
@@ -94,6 +92,8 @@ import { AlertSuppressionEdit } from '../../../rule_creation/components/alert_su
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { useTermsAggregationFields } from '../../../../common/hooks/use_terms_aggregation_fields';
+import { HistoryWindowStartEdit } from '../../../rule_creation/components/history_window_start_edit';
+import { NewTermsFieldsEdit } from '../../../rule_creation/components/new_terms_fields_edit';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -925,22 +925,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             fullWidth
           >
             <>
-              <UseField
-                path="newTermsFields"
-                component={NewTermsFieldsEdit}
-                componentProps={{
-                  browserFields: termsAggregationFields,
-                }}
-              />
-              <UseField
-                path="historyWindowSize"
-                component={ScheduleItem}
-                componentProps={{
-                  idAria: 'detectionEngineStepDefineRuleHistoryWindowSize',
-                  dataTestSubj: 'detectionEngineStepDefineRuleHistoryWindowSize',
-                  timeTypes: ['m', 'h', 'd'],
-                }}
-              />
+              <NewTermsFieldsEdit path="newTermsFields" browserFields={termsAggregationFields} />
+              <HistoryWindowStartEdit path="historyWindowSize" />
             </>
           </RuleTypeEuiFormRow>
           <EuiSpacer size="m" />

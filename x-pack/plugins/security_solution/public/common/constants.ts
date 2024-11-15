@@ -18,3 +18,5 @@ export const RISK_SCORE_HIGH = 73;
 export const RISK_SCORE_CRITICAL = 99;
 
 export const ONBOARDING_VIDEO_SOURCE = '//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?';
+
+export const DEFAULT_HISTORY_WINDOW_SIZE = '7d';

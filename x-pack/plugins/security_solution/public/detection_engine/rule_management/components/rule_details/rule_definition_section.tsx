@@ -42,7 +42,6 @@ import * as timelinesI18n from '../../../../timelines/components/timeline/transl
 import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import type { Duration } from '../../../../detections/pages/detection_engine/rules/types';
-import { convertHistoryStartToSize } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { MlJobsDescription } from '../../../rule_creation/components/ml_jobs_description/ml_jobs_description';
 import { MlJobLink } from '../../../rule_creation/components/ml_job_link/ml_job_link';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
@@ -59,6 +58,7 @@ import {
 } from './rule_definition_section.styles';
 import { getQueryLanguageLabel } from './helpers';
 import { useDefaultIndexPattern } from '../../hooks/use_default_index_pattern';
+import { convertHistoryStartToSize } from '../../../../common/utils/history_window';
 
 interface SavedQueryNameProps {
   savedQueryName: string;

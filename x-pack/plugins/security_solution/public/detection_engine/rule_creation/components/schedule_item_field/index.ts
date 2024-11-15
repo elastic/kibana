@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { NewTermsFieldsEdit } from './new_terms_fields_edit';
+export { ScheduleItemField } from './schedule_item_field';

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { NewTermsFieldsEdit } from './new_terms_fields_edit';
+export { HistoryWindowStartEdit } from './history_window_start_edit';

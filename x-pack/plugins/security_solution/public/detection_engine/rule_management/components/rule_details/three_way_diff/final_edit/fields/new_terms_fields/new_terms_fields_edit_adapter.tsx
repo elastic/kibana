@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { UseField } from '../../../../../../../../shared_imports';
+import React from 'react';
 import { NewTermsFieldsEdit } from '../../../../../../../rule_creation/components/new_terms_fields_edit';
 import { useDiffableRuleDataView } from '../hooks/use_diffable_rule_data_view';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
@@ -22,18 +21,5 @@ export function NewTermsFieldsEditAdapter({
   const { dataView } = useDiffableRuleDataView(finalDiffableRule);
   const termsAggregationFields = useTermsAggregationFields(dataView?.fields || []);
 
-  const componentProps = useMemo(
-    () => ({
-      browserFields: termsAggregationFields,
-    }),
-    [termsAggregationFields]
-  );
-
-  return (
-    <UseField
-      path="newTermsFields"
-      component={NewTermsFieldsEdit}
-      componentProps={componentProps}
-    />
-  );
+  return <NewTermsFieldsEdit path="newTermsFields" browserFields={termsAggregationFields} />;
 }

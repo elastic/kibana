@@ -76,7 +76,7 @@ const getNumberFromUserInput = (input: string, minimumValue = 0): number => {
   }
 };
 
-export const ScheduleItem = ({
+export const ScheduleItemField = ({
   dataTestSubj,
   field,
   idAria,
