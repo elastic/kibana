@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+
 import { i18n } from '@kbn/i18n';
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
 
@@ -59,6 +60,62 @@ export const buildEntityFlyoutPreviewQuery = (field: string, queryValue?: string
           },
         },
       ],
+    },
+  };
+};
+
+export const buildEntityAlertsQuery = (
+  field: string,
+  to: string,
+  from: string,
+  queryValue?: string,
+  size?: number
+) => {
+  return {
+    size: size || 0,
+    _source: false,
+    fields: [
+      '_id',
+      '_index',
+      'kibana.alert.rule.uuid',
+      'kibana.alert.severity',
+      'kibana.alert.rule.name',
+      'kibana.alert.workflow_status',
+    ],
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              must: [],
+              filter: [
+                {
+                  match_phrase: {
+                    [field]: {
+                      query: queryValue,
+                    },
+                  },
+                },
+              ],
+              should: [],
+              must_not: [],
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: from,
+                lte: to,
+              },
+            },
+          },
+          {
+            terms: {
+              'kibana.alert.workflow_status': ['open', 'acknowledged'],
+            },
+          },
+        ],
+      },
     },
   };
 };
