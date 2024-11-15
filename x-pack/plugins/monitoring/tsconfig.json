@@ -49,6 +49,7 @@
     "@kbn/flot-charts",
     "@kbn/ui-theme",
     "@kbn/core-elasticsearch-server",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",
