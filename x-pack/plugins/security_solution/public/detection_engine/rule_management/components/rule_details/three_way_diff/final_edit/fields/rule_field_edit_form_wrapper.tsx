@@ -27,13 +27,13 @@ export type FieldDeserializerFn = (
 
 interface RuleFieldEditFormWrapperProps {
   component: RuleFieldEditComponent;
-  ruleFieldFormSchema: FormSchema;
+  ruleFieldFormSchema?: FormSchema;
   deserializer?: FieldDeserializerFn;
   serializer?: (formData: FormData) => FormData;
 }
 
 /**
- * FieldFormWrapper component manages form state and renders "Save" and "Cancel" buttons.
+ * RuleFieldEditFormWrapper component manages form state and renders "Save" and "Cancel" buttons.
  *
  * @param {Object} props - Component props.
  * @param {React.ComponentType} props.component - Field component to be wrapped.

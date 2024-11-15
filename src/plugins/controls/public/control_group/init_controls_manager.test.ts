@@ -263,7 +263,7 @@ describe('getNewControlState', () => {
   test('should contain defaults when there are no existing controls', () => {
     const controlsManager = initControlsManager({}, new BehaviorSubject<ControlPanelsState>({}));
     expect(controlsManager.getNewControlState()).toEqual({
-      grow: true,
+      grow: false,
       width: 'medium',
       dataViewId: undefined,
     });
@@ -284,7 +284,7 @@ describe('getNewControlState', () => {
       new BehaviorSubject<ControlPanelsState>(intialControlsState)
     );
     expect(controlsManager.getNewControlState()).toEqual({
-      grow: true,
+      grow: false,
       width: 'medium',
       dataViewId: 'myOtherDataViewId',
     });
