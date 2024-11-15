@@ -447,6 +447,11 @@ export async function create(
       customFields: validatedConfigurationRequest.customFields,
     });
 
+    validateDuplicatedLabelsInRequest({
+      requestFields: validatedConfigurationRequest.observableTypes,
+      fieldName: 'observableTypes',
+    });
+
     let error = null;
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
