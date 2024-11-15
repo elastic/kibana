@@ -158,6 +158,8 @@ export const getCasesSubFeaturesMapV2 = ({
               read: [],
             },
             cases: {
+              create: [APP_ID],
+              createComment: [APP_ID],
               reopenCase: [APP_ID],
             },
             ui: uiCapabilities.reopenCase,

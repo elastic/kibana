@@ -57,6 +57,7 @@ export const getCasesBaseKibanaFeature = ({
           create: [APP_ID],
           read: [APP_ID],
           update: [APP_ID],
+          push: [APP_ID],
           createComment: [APP_ID],
           reopenCase: [APP_ID],
         },

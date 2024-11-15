@@ -17,6 +17,7 @@ import { useActions } from './use_actions';
 import { basicCase } from '../../containers/mock';
 import * as api from '../../containers/api';
 import type { AppMockRenderer } from '../../common/mock';
+import { CaseStatuses } from '../../../common/types/domain';
 import {
   createAppMockRenderer,
   noDeleteCasesPermissions,
@@ -383,7 +384,7 @@ describe('useActions', () => {
       });
     });
 
-    it('shows actions when user only has reopenCase permission', async () => {
+    it('shows actions when user only has reopenCase permission and only when case is closed', async () => {
       appMockRender = createAppMockRenderer({
         permissions: {
           all: false,
@@ -404,8 +405,8 @@ describe('useActions', () => {
       });
 
       expect(result.current.actions).not.toBe(null);
-
-      const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+      const caseWithClosedStatus = { ...basicCase, status: CaseStatuses.closed };
+      const comp = result.current.actions!.render(caseWithClosedStatus) as React.ReactElement;
       const res = appMockRender.render(comp);
 
       await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
@@ -439,8 +440,9 @@ describe('useActions', () => {
       });
 
       expect(result.current.actions).not.toBe(null);
+      const caseWithClosedStatus = { ...basicCase, status: CaseStatuses.closed };
 
-      const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+      const comp = result.current.actions!.render(caseWithClosedStatus) as React.ReactElement;
       const res = appMockRender.render(comp);
 
       await user.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
