@@ -39,12 +39,10 @@ export const validateDuplicatedKeysInRequest = ({
 /**
  * Throws an error if the request has observable types with duplicated labels.
  */
-export const validateDuplicatedLabelsInRequest = ({
+export const validateDuplicatedObservableTypesInRequest = ({
   requestFields = [],
-  fieldName,
 }: {
   requestFields?: Array<{ label: string }>;
-  fieldName: string;
 }) => {
   const stringifyItem = (item: { label: string }) => item.label.toLowerCase();
 
@@ -65,7 +63,7 @@ export const validateDuplicatedLabelsInRequest = ({
 
   if (duplicatedLabels.size > 0) {
     throw Boom.badRequest(
-      `Invalid duplicated ${fieldName} labels in request: ${Array.from(duplicatedLabels.values())}`
+      `Invalid duplicated observable types in request: ${Array.from(duplicatedLabels.values())}`
     );
   }
 };

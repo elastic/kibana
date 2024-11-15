@@ -7,7 +7,7 @@
 
 import {
   validateDuplicatedKeysInRequest,
-  validateDuplicatedLabelsInRequest,
+  validateDuplicatedObservableTypesInRequest,
   validateDuplicatedObservablesInRequest,
 } from './validators';
 
@@ -58,10 +58,10 @@ describe('validators', () => {
     });
   });
 
-  describe('validateDuplicatedLabelsInRequest', () => {
-    it('returns fields in request that have duplicated labels', () => {
+  describe('validateDuplicatedObservableTypesInRequest', () => {
+    it('returns fields in request that have duplicated observable types', () => {
       expect(() =>
-        validateDuplicatedLabelsInRequest({
+        validateDuplicatedObservableTypesInRequest({
           requestFields: [
             {
               label: 'triplicated_label',
@@ -79,17 +79,15 @@ describe('validators', () => {
               label: 'duplicated_label',
             },
           ],
-
-          fieldName: 'foobar',
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid duplicated foobar labels in request: triplicated_label,duplicated_label"`
+        `"Invalid duplicated observable types in request: triplicated_label,duplicated_label"`
       );
     });
 
-    it('does not throw if no fields in request have duplicated labels', () => {
+    it('does not throw if no fields in request have duplicated observable types', () => {
       expect(() =>
-        validateDuplicatedLabelsInRequest({
+        validateDuplicatedObservableTypesInRequest({
           requestFields: [
             {
               label: '1',
@@ -98,23 +96,22 @@ describe('validators', () => {
               label: '2',
             },
           ],
-          fieldName: 'foobar',
         })
       ).not.toThrow();
     });
 
     it('does throw if the provided label duplicates builtin type', () => {
       expect(() =>
-        validateDuplicatedLabelsInRequest({
+        validateDuplicatedObservableTypesInRequest({
           requestFields: [
             {
               label: 'email',
             },
           ],
-
-          fieldName: 'foobar',
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Invalid duplicated foobar labels in request: email"`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid duplicated observable types in request: email"`
+      );
     });
   });
 
