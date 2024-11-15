@@ -12,6 +12,7 @@ import { DataSourceEditForm } from './fields/data_source';
 import { HistoryWindowStartEditForm } from './fields/history_window_start/history_window_start_edit_form';
 import { KqlQueryEditForm } from './fields/kql_query';
 import { NewTermsFieldsEditForm } from './fields/new_terms_fields/new_terms_fields_edit_form';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 interface NewTermsRuleFieldEditProps {
   fieldName: UpgradeableNewTermsFields;
@@ -30,6 +31,6 @@ export function NewTermsRuleFieldEdit({ fieldName }: NewTermsRuleFieldEditProps)
     case 'new_terms_fields':
       return <NewTermsFieldsEditForm />;
     default:
-      return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
+      return assertUnreachable(fieldName);
   }
 }
