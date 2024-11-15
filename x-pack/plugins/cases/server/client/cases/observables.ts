@@ -142,10 +142,7 @@ export const updateObservable = async (
     );
 
     if (observableIndex === -1) {
-      throw createCaseError({
-        message: `Failed to update observable: ${JSON.stringify(params)}: observable not found`,
-        logger,
-      });
+      throw Boom.notFound(`Failed to update observable: observable id ${observableId} not found`);
     }
 
     const updatedObservables = [...currentObservables];
@@ -205,6 +202,11 @@ export const deleteObservable = async (
     const updatedObservables = retrievedCase.attributes.observables.filter(
       (observable) => observable.id !== observableId
     );
+
+    // NOTE: same length of observables pre and post filter means that the observable id has not been found
+    if (updatedObservables.length === retrievedCase.attributes.observables.length) {
+      throw Boom.notFound(`Failed to delete observable: observable id ${observableId} not found`);
+    }
 
     await caseService.patchCase({
       caseId: retrievedCase.id,
