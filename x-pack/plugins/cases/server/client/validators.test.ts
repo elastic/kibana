@@ -138,7 +138,7 @@ describe('validators', () => {
       );
     });
 
-    it('does not throw if no fields in request have duplicated labels', () => {
+    it('does not throw if no fields in request have duplicated observables', () => {
       expect(() =>
         validateDuplicatedObservablesInRequest({
           requestFields: [
