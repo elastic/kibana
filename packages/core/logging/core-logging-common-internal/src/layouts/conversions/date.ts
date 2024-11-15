@@ -12,8 +12,7 @@ import { last } from 'lodash';
 import { LogRecord } from '@kbn/logging';
 import { Conversion } from './types';
 
-const dateRegExpEscaped =
-  /%date(?:\{(?<format>ISO8601|ISO8601_TZ|ABSOLUTE|UNIX|UNIX_MILLIS)\})?(?:\{(?<timezone>[A-Za-z/_+-]+)\})?/g;
+const dateRegExp = /%date(?:\{(?<format>[^}]+)\})?(?:\{(?<timezone>[A-Za-z/_+-]+)\})?/g;
 
 const formats = {
   ISO8601: 'ISO8601',
@@ -30,7 +29,6 @@ function formatDate(
 ): string {
   const momentDate = moment(date);
   momentDate.tz(timezone ?? moment.tz.guess());
-
   switch (dateFormat) {
     case formats.ISO8601:
       return momentDate.toISOString();
@@ -61,12 +59,11 @@ function validateTimezone(timezone: string) {
 }
 
 function validate(rawString: string) {
-  // Polynomial regular expression used on uncontrolled data
   if (rawString.length > 1000) {
     throw new Error(`Date input too long, given ${rawString.length}`);
   }
 
-  for (const matched of rawString.matchAll(dateRegExpEscaped)) {
+  for (const matched of rawString.matchAll(dateRegExp)) {
     const { format, timezone } = matched.groups!;
 
     if (format) {
@@ -79,7 +76,7 @@ function validate(rawString: string) {
 }
 
 export const DateConversion: Conversion = {
-  pattern: dateRegExpEscaped,
+  pattern: dateRegExp,
   convert(record: LogRecord, highlight: boolean, ...matched: any[]) {
     const groups: Record<string, string | undefined> = last(matched);
     const { format, timezone } = groups;
