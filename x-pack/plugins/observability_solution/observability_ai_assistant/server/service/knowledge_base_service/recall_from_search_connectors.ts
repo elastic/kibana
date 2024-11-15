@@ -235,12 +235,6 @@ async function getElserModelId(
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>,
   logger: Logger
 ) {
-  // TODO: Remove this once the modelId is removed from the config
-  // const configModelId = this.config.modelId;
-  // if (configModelId) {
-  //   return configModelId;
-  // }
-
   const defaultModelId = '.elser_model_2';
   const [_, pluginsStart] = await core.getStartServices();
 
