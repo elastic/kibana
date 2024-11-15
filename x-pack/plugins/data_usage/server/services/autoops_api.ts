@@ -147,7 +147,11 @@ export class AutoOpsAPIService {
       }
     );
 
-    const validatedResponse = UsageMetricsAutoOpsResponseSchema.body().validate(response.data);
+    const validatedResponse = response.data.metrics
+      ? UsageMetricsAutoOpsResponseSchema.body().validate(response.data)
+      : UsageMetricsAutoOpsResponseSchema.body().validate({
+          metrics: response.data,
+        });
 
     this.logger.debug(`[AutoOps API] Successfully created an autoops agent ${response}`);
     return validatedResponse;
