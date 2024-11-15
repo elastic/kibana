@@ -550,7 +550,6 @@ const CreateRulePageComponent: React.FC = () => {
           <StepDefineRule
             isLoading={isCreateRuleLoading || loading}
             indicesConfig={indicesConfig}
-            threatIndicesConfig={threatIndicesConfig}
             form={defineStepForm}
             indexPattern={indexPattern}
             isIndexPatternLoading={isIndexPatternLoading}
@@ -588,7 +587,6 @@ const CreateRulePageComponent: React.FC = () => {
       isQueryBarValid,
       loading,
       memoDefineStepReadOnly,
-      threatIndicesConfig,
     ]
   );
   const memoDefineStepExtraAction = useMemo(

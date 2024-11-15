@@ -13,7 +13,6 @@ import React from 'react';
 import {
   singleEntryThreat,
   containsInvalidItems,
-  customValidators,
 } from '../../../../common/components/threat_match/helpers';
 import {
   isEsqlRule,
@@ -39,7 +38,6 @@ import {
 import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
 import {
   INDEX_HELPER_TEXT,
-  THREAT_MATCH_INDEX_HELPER_TEXT,
   THREAT_MATCH_REQUIRED,
   THREAT_MATCH_EMPTIES,
 } from './translations';
@@ -374,50 +372,6 @@ export const schema: FormSchema<DefineStepRule> = {
         ],
       },
     },
-  },
-  threatIndex: {
-    type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatIndexPatternsLabel',
-      {
-        defaultMessage: 'Indicator index patterns',
-      }
-    ),
-    helpText: <EuiText size="xs">{THREAT_MATCH_INDEX_HELPER_TEXT}</EuiText>,
-    validations: [
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData }] = args;
-          const needsValidation = isThreatMatchRule(formData.ruleType);
-          if (!needsValidation) {
-            return;
-          }
-          return fieldValidators.emptyField(
-            i18n.translate(
-              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchoutputIndiceNameFieldRequiredError',
-              {
-                defaultMessage: 'A minimum of one index pattern is required.',
-              }
-            )
-          )(...args);
-        },
-      },
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData, value }] = args;
-          const needsValidation = isThreatMatchRule(formData.ruleType);
-          if (!needsValidation) {
-            return;
-          }
-
-          return customValidators.forbiddenField(value, '*');
-        },
-      },
-    ],
   },
   threatMapping: {
     label: i18n.translate(
