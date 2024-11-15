@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import { GenericIndexPatternColumn } from '../form_based';
@@ -78,7 +79,7 @@ describe('BucketNestingEditor', () => {
     expect(nestingSwitch).not.toBeChecked();
   });
 
-  it('should reorder the columns when toggled', () => {
+  it('should reorder the columns when toggled', async () => {
     const setColumns = jest.fn();
     const { rerender } = render(
       <BucketNestingEditor
@@ -97,7 +98,7 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId('indexPattern-nesting-switch'));
+    await userEvent.click(screen.getByTestId('indexPattern-nesting-switch'));
     expect(setColumns).toHaveBeenCalledTimes(1);
     expect(setColumns).toHaveBeenCalledWith(['a', 'b', 'c']);
 
@@ -118,7 +119,7 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId('indexPattern-nesting-switch'));
+    await userEvent.click(screen.getByTestId('indexPattern-nesting-switch'));
     expect(setColumns).toHaveBeenCalledTimes(2);
     expect(setColumns).toHaveBeenLastCalledWith(['b', 'a', 'c']);
   });
@@ -187,7 +188,7 @@ describe('BucketNestingEditor', () => {
     expect((control as HTMLSelectElement).value).toEqual('c');
   });
 
-  it('should reorder the columns when a column is selected in the dropdown', () => {
+  it('should reorder the columns when a column is selected in the dropdown', async () => {
     const setColumns = jest.fn();
     render(
       <BucketNestingEditor
@@ -207,12 +208,12 @@ describe('BucketNestingEditor', () => {
     );
 
     const control = screen.getByTestId('indexPattern-nesting-select');
-    fireEvent.change(control, { target: { value: 'b' } });
+    await userEvent.selectOptions(control, 'b');
 
     expect(setColumns).toHaveBeenCalledWith(['c', 'b', 'a']);
   });
 
-  it('should move to root if the first dropdown item is selected', () => {
+  it('should move to root if the first dropdown item is selected', async () => {
     const setColumns = jest.fn();
     render(
       <BucketNestingEditor
@@ -232,12 +233,12 @@ describe('BucketNestingEditor', () => {
     );
 
     const control = screen.getByTestId('indexPattern-nesting-select');
-    fireEvent.change(control, { target: { value: '' } });
+    await userEvent.selectOptions(control, '');
 
     expect(setColumns).toHaveBeenCalledWith(['a', 'c', 'b']);
   });
 
-  it('should allow the last bucket to be moved', () => {
+  it('should allow the last bucket to be moved', async () => {
     const setColumns = jest.fn();
     render(
       <BucketNestingEditor
@@ -257,7 +258,7 @@ describe('BucketNestingEditor', () => {
     );
 
     const control = screen.getByTestId('indexPattern-nesting-select');
-    fireEvent.change(control, { target: { value: '' } });
+    await userEvent.selectOptions(control, '');
 
     expect(setColumns).toHaveBeenCalledWith(['b', 'c', 'a']);
   });
