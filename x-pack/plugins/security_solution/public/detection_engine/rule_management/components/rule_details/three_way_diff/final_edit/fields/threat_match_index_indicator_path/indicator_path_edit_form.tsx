@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
-import { ThreatMatchIndicatorPathEditAdapter } from './threat_match_indicator_path_edit_adapter';
+import { ThreatMatchIndicatorPathEditAdapter } from './indicator_path_edit_adapter';
 
 export function ThreatMatchIndicatorPathEditForm(): JSX.Element {
   return (
