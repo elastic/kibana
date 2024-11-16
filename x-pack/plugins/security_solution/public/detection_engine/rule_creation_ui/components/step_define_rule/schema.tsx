@@ -366,6 +366,9 @@ import {
       },
     },
   },
+  threatIndex: {},
+  threatQueryBar: {},
+  threatMapping: {},
   newTermsFields: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(

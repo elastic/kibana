@@ -70,6 +70,8 @@ import {
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryEdit } from '../../../rule_creation/components/eql_query_edit';
 import { DataViewSelectorField } from '../data_view_selector_field';
+import { ThreatMatchIndexEdit } from '../../../rule_creation/components/threat_match_index_edit';
+import { ThreatMatchQueryEdit } from '../../../rule_creation/components/threat_match_query_edit';
 import { ThreatMatchMappingEdit } from '../../../rule_creation/components/threat_match_mapping_edit';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
@@ -91,8 +93,6 @@ import {
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit';
-import { ThreatMatchIndexEdit } from '../../../rule_creation/components/threat_match_index_edit';
-import { ThreatMatchQueryEdit } from '../../../rule_creation/components/threat_match_query_edit';
 import { usePersistentQuery } from './use_persistent_query';
 
 const CommonUseField = getUseField({ component: Field });

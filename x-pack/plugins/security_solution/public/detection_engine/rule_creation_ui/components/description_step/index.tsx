@@ -55,7 +55,6 @@ import * as i18n from './translations';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
-import { THREAT_QUERY_LABEL } from './translations';
 import { filterEmptyThreats } from '../../pages/rule_creation/helpers';
 import { useLicense } from '../../../../common/hooks/use_license';
 import type { LicenseService } from '../../../../../common/license';
@@ -73,6 +72,10 @@ import {
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import type { FieldValueQueryBar } from '../query_bar_field';
+import { THREAT_MATCH_MAPPING_FIELD_LABEL } from '../../../rule_creation/components/threat_match_mapping_edit/translations';
+import { THREAT_MATCH_QUERY_FIELD_LABEL } from '../../../rule_creation/components/threat_match_query_edit/translations';
+import { THREAT_MATCH_INDEX_FIELD_LABEL } from '../../../rule_creation/components/threat_match_index_edit/translations';
+import { THREAT_MATCH_INDICATOR_PATH_FIELD_LABEL } from '../../../rule_creation/components/threat_match_indicator_path_edit/translations';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
@@ -325,6 +328,9 @@ export const getDescriptionItem = (
     return buildRuleTypeDescription(label, ruleType);
   } else if (field === 'kibanaSiemAppUrl') {
     return [];
+  } else if (field === 'threatIndex') {
+    const values: string[] = get(field, data);
+    return buildStringArrayDescription(THREAT_MATCH_INDEX_FIELD_LABEL, field, values);
   } else if (field === 'threatQueryBar') {
     const filters = addFilterStateIfNotThere(get('threatQueryBar.filters', data) ?? []);
     const query = get('threatQueryBar.query.query', data);
@@ -336,11 +342,18 @@ export const getDescriptionItem = (
       query,
       savedId,
       indexPatterns,
-      queryLabel: THREAT_QUERY_LABEL,
+      queryLabel: THREAT_MATCH_QUERY_FIELD_LABEL,
     });
   } else if (field === 'threatMapping') {
     const threatMap: ThreatMapping = get(field, data);
-    return buildThreatMappingDescription(label, threatMap);
+    return buildThreatMappingDescription(THREAT_MATCH_MAPPING_FIELD_LABEL, threatMap);
+  } else if (field === 'threatIndicatorPath') {
+    return [
+      {
+        title: THREAT_MATCH_INDICATOR_PATH_FIELD_LABEL,
+        description: get(field, data),
+      },
+    ];
   } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
     const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);
