@@ -249,6 +249,7 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
+  threatIndicatorPath: {},
   timestampOverride: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate(
