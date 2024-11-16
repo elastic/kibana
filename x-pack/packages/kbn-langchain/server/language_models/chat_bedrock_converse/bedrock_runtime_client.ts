@@ -9,9 +9,10 @@ import {
   BedrockRuntimeClient as _BedrockRuntimeClient,
   BedrockRuntimeClientConfig,
 } from '@aws-sdk/client-bedrock-runtime';
-import { constructStack, MiddlewareStack } from '@smithy/middleware-stack';
+import { constructStack } from '@smithy/middleware-stack';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+
 import { NodeHttpHandler } from './node_http_handler';
 
 export interface CustomChatModelInput extends BedrockRuntimeClientConfig {
@@ -21,7 +22,7 @@ export interface CustomChatModelInput extends BedrockRuntimeClientConfig {
 }
 
 export class BedrockRuntimeClient extends _BedrockRuntimeClient {
-  middlewareStack: MiddlewareStack;
+  middlewareStack: _BedrockRuntimeClient['middlewareStack'];
 
   constructor({ actionsClient, connectorId, ...fields }: CustomChatModelInput) {
     super(fields ?? {});
@@ -31,6 +32,6 @@ export class BedrockRuntimeClient extends _BedrockRuntimeClient {
       connectorId,
     });
     // eliminate middleware steps that handle auth as we handle auth the connector
-    this.middlewareStack = constructStack();
+    this.middlewareStack = constructStack() as _BedrockRuntimeClient['middlewareStack'];
   }
 }
