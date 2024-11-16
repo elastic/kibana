@@ -117,11 +117,7 @@ export const streamGraph = async ({
           !data.output.lc_kwargs?.tool_calls?.length &&
           !didEnd
         ) {
-          console.log('sTREAM on_chat_model_end', data.output.content);
-          const value = Array.isArray(data.output.content)
-            ? data.output.content.reduce((acc, i) => `${acc}${i.text}`, '')
-            : data.output.content;
-          handleStreamEnd(value);
+          handleStreamEnd(data.output.content);
         }
       }
     }
