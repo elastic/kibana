@@ -555,7 +555,6 @@ const CreateRulePageComponent: React.FC = () => {
             isIndexPatternLoading={isIndexPatternLoading}
             isQueryBarValid={isQueryBarValid}
             setIsQueryBarValid={setIsQueryBarValid}
-            setIsThreatQueryBarValid={setIsThreatQueryBarValid}
             index={memoizedIndex}
             threatIndex={defineStepData.threatIndex}
             alertSuppressionFields={defineStepData[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]}

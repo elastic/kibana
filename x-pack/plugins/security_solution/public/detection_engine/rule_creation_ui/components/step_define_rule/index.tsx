@@ -70,9 +70,7 @@ import {
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryEdit } from '../../../rule_creation/components/eql_query_edit';
 import { DataViewSelectorField } from '../data_view_selector_field';
-import { ThreatMatchIndexEdit } from '../../../rule_creation/components/threat_match_index_edit';
-import { ThreatMatchQueryEdit } from '../../../rule_creation/components/threat_match_query_edit';
-import { ThreatMatchMappingEdit } from '../../../rule_creation/components/threat_match_mapping_edit';
+import { ThreatMatchEdit } from '../threat_match_edit/threat_match_edit';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
@@ -94,6 +92,7 @@ import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit';
 import { usePersistentQuery } from './use_persistent_query';
+import { usePersistentThreatMatchState } from './use_persistent_threat_match_state';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -108,7 +107,6 @@ export interface StepDefineRuleProps extends RuleStepProps {
   isIndexPatternLoading: boolean;
   isQueryBarValid: boolean;
   setIsQueryBarValid: (valid: boolean) => void;
-  setIsThreatQueryBarValid: (valid: boolean) => void;
   index: string[];
   threatIndex: string[];
   alertSuppressionFields?: string[];
@@ -161,7 +159,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   queryBarSavedId,
   queryBarTitle,
   setIsQueryBarValid,
-  setIsThreatQueryBarValid,
   shouldLoadQueryDynamically,
   threatIndex,
   thresholdFields,
@@ -238,6 +235,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const { setPersistentEqlQuery, setPersistentEqlOptions } = usePersistentQuery({ form });
   usePersistentAlertSuppressionState({ form });
+  usePersistentThreatMatchState({
+    form,
+    ruleTypePath: 'ruleType',
+    indexPatternPath: 'threatIndex',
+    queryPath: 'threatQueryBar',
+    mappingPath: 'threatMapping',
+  });
 
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
     ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
@@ -680,23 +684,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
           {isThreatMatchRule(ruleType) && (
-            <>
-              <EuiSpacer size="xl" />
-              <ThreatMatchIndexEdit path="threatIndex" />
-              <EuiSpacer size="m" />
-              <ThreatMatchQueryEdit
-                path="threatQueryBar"
-                threatIndexPatterns={threatIndexPatterns}
-                loading={threatIndexPatternsLoading}
-              />
-              <EuiSpacer size="m" />
-              <ThreatMatchMappingEdit
-                path="threatMapping"
-                indexPatterns={indexPattern}
-                threatIndexPatterns={threatIndexPatterns}
-              />
-              <EuiSpacer size="m" />
-            </>
+            <ThreatMatchEdit
+              indexPatternPath="threatIndex"
+              queryPath="threatQueryBar"
+              mappingPath="threatMapping"
+              indexPatterns={indexPattern}
+              threatIndexPatterns={threatIndexPatterns}
+              loading={threatIndexPatternsLoading}
+            />
           )}
           <RuleTypeEuiFormRow
             $isVisible={isNewTermsRule(ruleType)}
