@@ -98,7 +98,7 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     this.registerSubAction({
       name: SUB_ACTION.INVOKE_STREAM,
       method: 'invokeStream',
-      schema: InvokeAIRawActionParamsSchema,
+      schema: InvokeAIActionParamsSchema,
     });
 
     this.registerSubAction({
@@ -310,7 +310,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       },
       connectorUsageCollector
     );
-    console.log('RESPONSE.headers', response.headers);
 
     return response.data.pipe(new PassThrough());
   }
@@ -461,7 +460,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       },
       connectorUsageCollector
     );
-    console.log('converseStream', res);
+
     return res;
   }
 }

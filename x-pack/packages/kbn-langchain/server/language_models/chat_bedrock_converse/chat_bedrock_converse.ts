@@ -34,6 +34,7 @@ export class ActionsClientChatBedrockConverse extends ChatBedrockConverse {
       actionsClient,
       connectorId,
       streaming: this.streaming,
+      region: DEFAULT_BEDROCK_REGION,
     });
   }
 }

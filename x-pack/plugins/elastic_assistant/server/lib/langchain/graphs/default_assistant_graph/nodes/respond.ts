@@ -24,15 +24,10 @@ export async function respond({
   logger.debug(() => `${NodeType.RESPOND}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
   if (state?.agentOutcome && 'returnValues' in state.agentOutcome) {
-    console.log('user message??', state.agentOutcome?.returnValues?.output);
-    const value = Array.isArray(state.agentOutcome?.returnValues?.output)
-      ? state.agentOutcome?.returnValues?.output.reduce((acc, i) => `${acc}${i.text}`, '')
-      : state.agentOutcome?.returnValues?.output;
-    console.log('value??', value);
     const userMessage = [
       'user',
       `Respond exactly with
-    ${value}
+    ${state.agentOutcome?.returnValues?.output}
 
     Do not verify, confirm or anything else. Just reply with the same content as provided above.`,
     ] as [StringWithAutocomplete<'user'>, string];
