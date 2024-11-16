@@ -679,12 +679,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </>
           </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow
-            $isVisible={isThreatMatchRule(ruleType)}
-            data-test-subj="threatMatchInput"
-            fullWidth
-          >
+          {isThreatMatchRule(ruleType) && (
             <>
+              <EuiSpacer size="xl" />
               <ThreatMatchIndexEdit path="threatIndex" />
               <EuiSpacer size="m" />
               <ThreatMatchQueryEdit
@@ -698,8 +695,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 indexPatterns={indexPattern}
                 threatIndexPatterns={threatIndexPatterns}
               />
+              <EuiSpacer size="m" />
             </>
-          </RuleTypeEuiFormRow>
+          )}
           <RuleTypeEuiFormRow
             $isVisible={isNewTermsRule(ruleType)}
             data-test-subj="newTermsInput"
