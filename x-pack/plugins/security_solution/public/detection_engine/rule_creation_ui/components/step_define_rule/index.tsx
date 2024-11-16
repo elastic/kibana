@@ -44,7 +44,6 @@ import type { QueryBarDefineRuleProps } from '../query_bar';
 import { QueryBarDefineRule } from '../query_bar';
 import { SelectRuleType } from '../select_rule_type';
 import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
-import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { ThresholdInput } from '../threshold_input';
@@ -96,6 +95,7 @@ import {
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
+import { MachineLearningJobIdEdit } from '../../../rule_creation/components/machine_learning_job_id_edit';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -805,13 +805,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           )}
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
-              <UseField
-                path="machineLearningJobId"
-                component={MlJobSelect}
-                componentProps={{
-                  describedByIds: ['detectionEngineStepDefineRulemachineLearningJobId'],
-                }}
-              />
+              <MachineLearningJobIdEdit path="machineLearningJobId" />
               <UseField
                 path="anomalyThreshold"
                 component={AnomalyThresholdSlider}

@@ -5,17 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiToolTip,
-  EuiText,
-} from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
 import styled from 'styled-components';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
@@ -26,21 +17,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { HelpText } from './help_text';
 
 import * as i18n from './translations';
-
-interface MlJobValue {
-  id: string;
-  description: string;
-  name?: string;
-}
-
-const JobDisplayContainer = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-`;
-
-type MlJobOption = EuiComboBoxOptionOption<MlJobValue>;
+import { MlJobComboBox } from './ml_job_combobox';
 
 const MlJobSelectEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 5px;
@@ -50,31 +27,10 @@ const MlJobEuiButton = styled(EuiButton)`
   margin-top: 20px;
 `;
 
-const JobDisplay: React.FC<MlJobValue> = ({ description, name, id }) => (
-  <JobDisplayContainer>
-    <strong>{name ?? id}</strong>
-    <EuiToolTip content={description}>
-      <EuiText size="xs" color="subdued">
-        <p>{description}</p>
-      </EuiText>
-    </EuiToolTip>
-  </JobDisplayContainer>
-);
-
 interface MlJobSelectProps {
   describedByIds: string[];
   field: FieldHook;
 }
-
-const renderJobOption = (option: MlJobOption) => (
-  <JobDisplay
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    id={option.value!.id}
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    description={option.value!.description}
-    name={option.value?.name}
-  />
-);
 
 export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], field }) => {
   const jobIds = field.value as string[];
@@ -82,30 +38,6 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
   const { loading, jobs } = useSecurityJobs();
   const { getUrlForApp, navigateToApp } = useKibana().services.application;
   const mlUrl = getUrlForApp('ml');
-  const handleJobSelect = useCallback(
-    (selectedJobOptions: MlJobOption[]): void => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const selectedJobIds = selectedJobOptions.map((option) => option.value!.id);
-      field.setValue(selectedJobIds);
-    },
-    [field]
-  );
-
-  const jobOptions = jobs.map((job) => ({
-    value: {
-      id: job.id,
-      description: job.description,
-      name: job.customSettings?.security_app_display_name,
-    },
-    // Make sure users can search for id or name.
-    // The label contains the name and id because EuiComboBox uses it for the textual search.
-    label: `${job.customSettings?.security_app_display_name} ${job.id}`,
-  }));
-
-  const selectedJobOptions = jobOptions
-    .filter((option) => jobIds.includes(option.value.id))
-    // 'label' defines what is rendered inside the selected ComboBoxPill
-    .map((options) => ({ ...options, label: options.value.name ?? options.value.id }));
 
   const notRunningJobIds = useMemo<string[]>(() => {
     const selectedJobs = jobs.filter(({ id }) => jobIds.includes(id));
@@ -130,15 +62,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], f
         >
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiComboBox
-                isLoading={loading}
-                onChange={handleJobSelect}
-                options={jobOptions}
-                placeholder={i18n.ML_JOB_SELECT_PLACEHOLDER_TEXT}
-                renderOption={renderJobOption}
-                rowHeight={50}
-                selectedOptions={selectedJobOptions}
-              />
+              <MlJobComboBox field={field} isLoading={loading} jobs={jobs} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRow>

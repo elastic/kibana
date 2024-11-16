@@ -47,6 +47,7 @@ import { DataSourceType, AlertSuppressionDurationType } from './types';
 import { severityOptions } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { RuleAction, RuleResponse } from '../../../../../common/api/detection_engine';
+import { normalizeMachineLearningJobId } from '../../../../common/utils/normalize_machine_learning_job_id';
 
 export interface GetStepsData {
   aboutRuleData: AboutStepRule;
@@ -97,9 +98,7 @@ export const getActionsStepsData = (
 
 export const getMachineLearningJobId = (rule: RuleResponse): string[] | undefined => {
   if (rule.type === 'machine_learning') {
-    return typeof rule.machine_learning_job_id === 'string'
-      ? [rule.machine_learning_job_id]
-      : rule.machine_learning_job_id;
+    return normalizeMachineLearningJobId(rule.machine_learning_job_id);
   }
   return undefined;
 };
