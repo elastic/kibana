@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './threat_match_indicator_path_edit_form';
+export * from './indicator_path_edit_form';

@@ -14,7 +14,7 @@ import { AlertSuppressionEditForm } from './fields/alert_suppression';
 import { ThreatMatchIndexEditForm } from './fields/threat_match_index';
 import { ThreatMatchQueryEditForm } from './fields/threat_match_query';
 import { ThreatMatchMappingEditForm } from './fields/threat_match_mapping';
-import { ThreatMatchIndicatorPathEditForm } from './fields/threat_match_index_indicator_path/threat_match_indicator_path_edit_form';
+import { ThreatMatchIndicatorPathEditForm } from './fields/threat_match_index_indicator_path/indicator_path_edit_form';
 
 interface ThreatMatchRuleFieldEditProps {
   fieldName: UpgradeableThreatMatchFields;
