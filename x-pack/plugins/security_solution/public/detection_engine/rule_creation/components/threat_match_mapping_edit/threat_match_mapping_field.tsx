@@ -8,10 +8,13 @@
 import React, { useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
+import { createOrNewEntryItem } from '../../../../common/components/threat_match/helpers';
 import type { ThreatMapEntries } from '../../../../common/components/threat_match/types';
 import { ThreatMatchComponent } from '../../../../common/components/threat_match';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+
+export const DEFAULT_VALUE = [createOrNewEntryItem()];
 
 interface ThreatMatchFieldProps {
   field: FieldHook<ThreatMapEntries[]>;
@@ -27,8 +30,13 @@ export function ThreatMatchField({
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { setValue } = field;
 
-  const handleBuilderOnChange = useCallback(
-    ({ entryItems }: { entryItems: ThreatMapEntries[] }): void => {
+  const handleMappingChange = useCallback(
+    (entryItems: ThreatMapEntries[]): void => {
+      if (entryItems.length === 0) {
+        setValue(DEFAULT_VALUE);
+        return;
+      }
+
       setValue(entryItems);
     },
     [setValue]
@@ -44,12 +52,12 @@ export function ThreatMatchField({
       fullWidth
     >
       <ThreatMatchComponent
-        listItems={field.value}
+        mappingEntries={field.value}
         indexPatterns={indexPatterns}
         threatIndexPatterns={threatIndexPatterns}
         data-test-subj="threatmatch-builder"
         id-aria="threatmatch-builder"
-        onChange={handleBuilderOnChange}
+        onMappingEntriesChange={handleMappingChange}
       />
     </EuiFormRow>
   );

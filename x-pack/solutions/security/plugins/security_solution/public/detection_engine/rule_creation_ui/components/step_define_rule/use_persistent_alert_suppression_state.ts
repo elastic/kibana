@@ -26,14 +26,16 @@ import {
 
 interface UsePersistentAlertSuppressionStateParams {
   form: FormHook<DefineStepRule>;
+  ruleTypePath: string;
 }
 
 export function usePersistentAlertSuppressionState({
   form,
+  ruleTypePath,
 }: UsePersistentAlertSuppressionStateParams): void {
   const [
     {
-      ruleType,
+      [ruleTypePath]: ruleType,
       [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: thresholdAlertSuppressionEnabled,
       [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: suppressionFields,
       [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: suppressionDurationType,
@@ -43,7 +45,7 @@ export function usePersistentAlertSuppressionState({
   ] = useFormData({
     form,
     watch: [
-      'ruleType',
+      ruleTypePath,
       THRESHOLD_ALERT_SUPPRESSION_ENABLED,
       ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
       ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
