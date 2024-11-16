@@ -100,7 +100,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
-  const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
 
   const backOptions = useMemo(
     () => ({
@@ -149,7 +148,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const isPreviewDisabled = getIsRulePreviewDisabled({
     ruleType: defineStepData.ruleType,
     isQueryBarValid,
-    isThreatQueryBarValid,
+    isThreatQueryBarValid: defineStepForm.getFields().threatQueryBar?.isValid,
     index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
     dataSourceType: defineStepData.dataSourceType,
@@ -231,7 +230,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   isIndexPatternLoading={isIndexPatternLoading}
                   isQueryBarValid={isQueryBarValid}
                   setIsQueryBarValid={setIsQueryBarValid}
-                  setIsThreatQueryBarValid={setIsThreatQueryBarValid}
                   index={memoizedIndex}
                   threatIndex={defineStepData.threatIndex}
                   alertSuppressionFields={defineStepData[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]}
