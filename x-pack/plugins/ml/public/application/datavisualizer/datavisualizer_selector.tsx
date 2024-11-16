@@ -180,8 +180,8 @@ export const DatavisualizerSelector: FC = () => {
                         color="hollow"
                         tooltipContent={
                           <FormattedMessage
-                            id="xpack.ml.datavisualizer.selector.technicalPreviewBadge.titleMsg"
-                            defaultMessage="ES|QL is in technical preview."
+                            id="xpack.ml.datavisualizer.selector.esqlTechnicalPreviewBadge.titleMsg"
+                            defaultMessage="ES|QL data visualizer is in technical preview."
                           />
                         }
                         tooltipPosition={'right'}
