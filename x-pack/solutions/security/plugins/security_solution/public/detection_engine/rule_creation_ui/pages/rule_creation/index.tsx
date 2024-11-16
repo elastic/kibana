@@ -206,7 +206,6 @@ const CreateRulePageComponent: React.FC = () => {
   const collapseFn = useRef<() => void | undefined>();
   const [prevRuleType, setPrevRuleType] = useState<string>();
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
-  const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
 
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
 
@@ -222,7 +221,7 @@ const CreateRulePageComponent: React.FC = () => {
   const isPreviewDisabled = getIsRulePreviewDisabled({
     ruleType,
     isQueryBarValid,
-    isThreatQueryBarValid,
+    isThreatQueryBarValid: defineStepForm.getFields().threatQueryBar?.isValid,
     index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
     dataSourceType: defineStepData.dataSourceType,
