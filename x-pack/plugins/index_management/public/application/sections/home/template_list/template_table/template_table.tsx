@@ -15,8 +15,8 @@ import { ScopedHistory } from '@kbn/core/public';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { TemplateListItem } from '../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
-import { UseRequestResponse, reactRouterNavigate, useKibana } from '../../../../../shared_imports';
-import { useServices } from '../../../../app_context';
+import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
+import { useAppContext, useServices } from '../../../../app_context';
 import { TemplateDeleteModal } from '../../../../components';
 import { TemplateContentIndicator } from '../../../../components/shared';
 import { getComponentTemplatesLink, getTemplateDetailsLink } from '../../../../services/routing';
@@ -39,8 +39,11 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
   cloneTemplate,
   history,
 }) => {
+  const {
+    core: { capabilities },
+  } = useAppContext();
+
   const { uiMetricService } = useServices();
-  const { services } = useKibana();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<
     Array<{ name: string; isLegacy?: boolean }>
@@ -192,9 +195,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       }),
       width: '120px',
       // todo better types
-      actions: services.application?.capabilities.index_management.manageIndexTemplate
-        ? actions
-        : [],
+      actions: capabilities.index_management.manageIndexTemplate ? actions : [],
     },
   ];
 
@@ -213,7 +214,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     pageSizeOptions: PAGE_SIZE_OPTIONS,
   };
 
-  const selectionConfig = services.application?.capabilities.index_management.manageIndexTemplate
+  const selectionConfig = capabilities.index_management.manageIndexTemplate
     ? {
         onSelectionChange: setSelection,
         selectable: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
@@ -248,7 +249,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
 
   const toolsRight: React.JSX.Element[] = [];
 
-  if (services.application?.capabilities.index_management.manageIndexTemplate) {
+  if (capabilities.index_management.manageIndexTemplate) {
     toolsRight.push(createTemplateButton);
   }
 

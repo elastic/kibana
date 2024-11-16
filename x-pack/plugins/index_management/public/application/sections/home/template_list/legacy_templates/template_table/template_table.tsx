@@ -11,16 +11,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiInMemoryTable, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
-import {
-  UseRequestResponse,
-  reactRouterNavigate,
-  useKibana,
-} from '../../../../../../shared_imports';
+import { UseRequestResponse, reactRouterNavigate } from '../../../../../../shared_imports';
 import { TemplateListItem } from '../../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../../components';
 import { getTemplateDetailsLink } from '../../../../../services/routing';
-import { useServices } from '../../../../../app_context';
+import { useServices, useAppContext } from '../../../../../app_context';
 import { TemplateContentIndicator } from '../../../../../components/shared';
 import { TemplateTypeIndicator } from '../../components';
 
@@ -40,7 +36,9 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
   history,
 }) => {
   const { uiMetricService } = useServices();
-  const { services } = useKibana();
+  const {
+    core: { capabilities },
+  } = useAppContext();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<
     Array<{ name: string; isLegacy?: boolean }>
@@ -188,7 +186,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
     },
   ];
 
-  if (services.application?.capabilities.index_management.manageIndexTemplate) {
+  if (capabilities.index_management.manageIndexTemplate) {
     columns.push(actions);
   }
 
@@ -204,7 +202,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
     },
   } as const;
 
-  const selectionConfig = services.application?.capabilities.index_management.manageIndexTemplate
+  const selectionConfig = capabilities.index_management.manageIndexTemplate
     ? {
         onSelectionChange: setSelection,
         selectable: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
@@ -222,7 +220,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
       }
     : undefined;
 
-  const toolsRight = services.application?.capabilities.index_management.manageIndexTemplate
+  const toolsRight = capabilities.index_management.manageIndexTemplate
     ? [
         <EuiButton
           iconType="plusInCircle"

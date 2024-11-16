@@ -64,6 +64,10 @@ history.createHref.mockImplementation((location: LocationDescriptorObject) => {
   return `${location.pathname}?${location.search}`;
 });
 
+const capabilities = {
+  index_management: { manageIndexTemplate: true, manageEnrich: true },
+} as unknown as Capabilities;
+
 const appDependencies = {
   services,
   history,
@@ -73,6 +77,7 @@ const appDependencies = {
     http: httpServiceMock.createSetupContract(),
     application: applicationServiceMock.createStartContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+    capabilities,
   },
   plugins: {
     usageCollection: usageCollectionPluginMock.createSetupContract(),
@@ -96,10 +101,6 @@ const appDependencies = {
 } as any;
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
-
-const capabilities = {
-  index_management: { manageIndexTemplate: true },
-} as unknown as Capabilities;
 
 const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   uiSettings: uiSettingsServiceMock.createSetupContract(),
