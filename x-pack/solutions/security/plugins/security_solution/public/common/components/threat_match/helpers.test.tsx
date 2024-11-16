@@ -6,20 +6,18 @@
  */
 
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
-import type { Entry, EmptyEntry, ThreatMapEntries, FormattedEntry } from './types';
+import type { Entry, ThreatMapEntries, FormattedEntry } from './types';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
 import moment from 'moment-timezone';
 
 import {
-  filterItems,
   getEntryOnFieldChange,
   getFormattedEntries,
   getFormattedEntry,
   getUpdatedEntriesOnDelete,
   customValidators,
 } from './helpers';
-import type { ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
@@ -271,26 +269,6 @@ describe('Helpers', () => {
         },
       };
       expect(output).toEqual(expected);
-    });
-  });
-
-  describe('#filterItems', () => {
-    test('it removes entry items with "value" of "undefined"', () => {
-      const entry: ThreatMapEntry = { field: 'host.name', type: 'mapping', value: 'host.name' };
-      const mockEmpty: EmptyEntry = {
-        field: 'host.name',
-        type: 'mapping',
-        value: undefined,
-      };
-      const items = filterItems([
-        {
-          entries: [entry],
-        },
-        {
-          entries: [mockEmpty],
-        },
-      ]);
-      expect(items).toEqual([{ entries: [entry] }]);
     });
   });
 

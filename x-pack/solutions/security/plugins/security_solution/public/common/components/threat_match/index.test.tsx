@@ -59,7 +59,7 @@ describe('ThreatMatchComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
-          listItems={[]}
+          mappingEntries={[]}
           indexPatterns={
             {
               id: '1234',
@@ -74,7 +74,7 @@ describe('ThreatMatchComponent', () => {
               fields,
             } as DataViewBase
           }
-          onChange={jest.fn()}
+          onMappingEntriesChange={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -92,7 +92,7 @@ describe('ThreatMatchComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
-          listItems={getPayLoad()}
+          mappingEntries={getPayLoad()}
           indexPatterns={
             {
               id: '1234',
@@ -107,7 +107,7 @@ describe('ThreatMatchComponent', () => {
               fields,
             } as DataViewBase
           }
-          onChange={jest.fn()}
+          onMappingEntriesChange={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -123,7 +123,7 @@ describe('ThreatMatchComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
-          listItems={[]}
+          mappingEntries={[]}
           indexPatterns={
             {
               id: '1234',
@@ -138,7 +138,7 @@ describe('ThreatMatchComponent', () => {
               fields,
             } as DataViewBase
           }
-          onChange={jest.fn()}
+          onMappingEntriesChange={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -151,7 +151,7 @@ describe('ThreatMatchComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
-          listItems={[]}
+          mappingEntries={[]}
           indexPatterns={
             {
               id: '1234',
@@ -166,7 +166,7 @@ describe('ThreatMatchComponent', () => {
               fields,
             } as DataViewBase
           }
-          onChange={jest.fn()}
+          onMappingEntriesChange={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -196,7 +196,7 @@ describe('ThreatMatchComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
-          listItems={[]}
+          mappingEntries={[]}
           indexPatterns={
             {
               id: '1234',
@@ -211,7 +211,7 @@ describe('ThreatMatchComponent', () => {
               fields,
             } as DataViewBase
           }
-          onChange={jest.fn()}
+          onMappingEntriesChange={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -241,7 +241,7 @@ describe('ThreatMatchComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
-          listItems={getDoublePayLoad()}
+          mappingEntries={getDoublePayLoad()}
           indexPatterns={
             {
               id: '1234',
@@ -256,7 +256,7 @@ describe('ThreatMatchComponent', () => {
               fields,
             } as DataViewBase
           }
-          onChange={jest.fn()}
+          onMappingEntriesChange={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -271,7 +271,7 @@ describe('ThreatMatchComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
-          listItems={[]}
+          mappingEntries={[]}
           indexPatterns={
             {
               id: '1234',
@@ -286,7 +286,7 @@ describe('ThreatMatchComponent', () => {
               fields,
             } as DataViewBase
           }
-          onChange={jest.fn()}
+          onMappingEntriesChange={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -302,7 +302,7 @@ describe('ThreatMatchComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ThreatMatchComponent
-          listItems={[]}
+          mappingEntries={[]}
           indexPatterns={
             {
               id: '1234',
@@ -317,7 +317,7 @@ describe('ThreatMatchComponent', () => {
               fields,
             } as DataViewBase
           }
-          onChange={jest.fn()}
+          onMappingEntriesChange={jest.fn()}
         />
       </ThemeProvider>
     );
