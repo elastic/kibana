@@ -8,8 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { addIdToItem } from '@kbn/securitysolution-utils';
-import type { ThreatMap, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { threatMap } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMap } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -128,7 +127,7 @@ export const getEntryOnThreatFieldChange = (
   };
 };
 
-export const getDefaultEmptyEntry = (): EmptyEntry => {
+export const createAndNewEntryItem = (): EmptyEntry => {
   return addIdToItem({
     field: '',
     type: 'mapping',
@@ -136,7 +135,7 @@ export const getDefaultEmptyEntry = (): EmptyEntry => {
   });
 };
 
-export const getNewItem = (): ThreatMap => {
+export const createOrNewEntryItem = (): ThreatMap => {
   return addIdToItem({
     entries: [
       addIdToItem({
@@ -146,17 +145,6 @@ export const getNewItem = (): ThreatMap => {
       }),
     ],
   });
-};
-
-export const filterItems = (items: ThreatMapEntries[]): ThreatMapping => {
-  return items.reduce<ThreatMapping>((acc, item) => {
-    const newItem = { ...item, entries: item.entries };
-    if (threatMap.is(newItem)) {
-      return [...acc, newItem];
-    } else {
-      return acc;
-    }
-  }, []);
 };
 
 /**
