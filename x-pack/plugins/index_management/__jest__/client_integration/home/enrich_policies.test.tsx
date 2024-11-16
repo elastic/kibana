@@ -35,6 +35,20 @@ describe('Enrich policies tab', () => {
   const { httpSetup, httpRequestsMockHelpers, setDelayResponse } = setupEnvironment();
   let testBed: EnrichPoliciesTestBed;
 
+  describe('permissions check', () => {
+    // todo fix
+    it('shows a permissions error when the user does not have sufficient privileges', async () => {
+      testBed = await setup(httpSetup);
+      await act(async () => {
+        testBed.actions.goToEnrichPoliciesTab();
+      });
+
+      testBed.component.update();
+
+      expect(testBed.exists('enrichPoliciesTable')).toBe(true);
+    });
+  });
+
   describe('empty states', () => {
     beforeEach(async () => {
       setDelayResponse(false);
@@ -74,20 +88,6 @@ describe('Enrich policies tab', () => {
       component.update();
 
       expect(exists('sectionError')).toBe(true);
-    });
-  });
-
-  describe('permissions check', () => {
-    // todo fix
-    it('shows a permissions error when the user does not have sufficient privileges', async () => {
-      testBed = await setup(httpSetup);
-      await act(async () => {
-        testBed.actions.goToEnrichPoliciesTab();
-      });
-
-      testBed.component.update();
-
-      expect(testBed.exists('enrichPoliciesTable')).toBe(true);
     });
   });
 
