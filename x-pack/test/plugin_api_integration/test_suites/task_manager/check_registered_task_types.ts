@@ -151,6 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:update_agent_tags:retry',
         'fleet:upgrade_action:retry',
         'logs-data-telemetry',
+        'obs-ai-assistant:knowledge-base-migration',
         'osquery:telemetry-configs',
         'osquery:telemetry-packs',
         'osquery:telemetry-saved-queries',
