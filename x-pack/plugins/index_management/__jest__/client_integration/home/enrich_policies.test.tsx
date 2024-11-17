@@ -36,7 +36,6 @@ describe('Enrich policies tab', () => {
   let testBed: EnrichPoliciesTestBed;
 
   describe('permissions check', () => {
-    // todo fix
     it('shows a permissions error when the user does not have sufficient privileges', async () => {
       testBed = await setup(httpSetup);
       await act(async () => {
