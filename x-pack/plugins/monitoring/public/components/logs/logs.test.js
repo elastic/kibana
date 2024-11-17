@@ -7,7 +7,18 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { Logs } from './logs';
+import { LogsContent } from './logs';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+
+const sharePlugin = sharePluginMock.createStartContract();
+
+jest.mock('@kbn/logs-shared-plugin/common', () => {
+  return {
+    getLogsLocatorsFromUrlService: jest.fn().mockReturnValue({
+      logsLocator: { getRedirectUrl: jest.fn(() => '') },
+    }),
+  };
+});
 
 jest.mock('../../legacy_shims', () => ({
   Legacy: {
@@ -123,32 +134,40 @@ const logs = {
 
 describe('Logs', () => {
   it('should render normally', () => {
-    const component = shallow(<Logs logs={logs} />);
+    const component = shallow(<LogsContent sharePlugin={sharePlugin} logs={logs} />);
     expect(component).toMatchSnapshot();
   });
 
   it('should render fewer columns for node or index view', () => {
-    const component = shallow(<Logs logs={logs} nodeId="12345" />);
+    const component = shallow(<LogsContent sharePlugin={sharePlugin} logs={logs} nodeId="12345" />);
     expect(component.find('EuiBasicTable').prop('columns')).toMatchSnapshot();
   });
 
   it('should render a link to filter by cluster uuid', () => {
-    const component = shallow(<Logs logs={logs} clusterUuid="12345" />);
+    const component = shallow(
+      <LogsContent sharePlugin={sharePlugin} logs={logs} clusterUuid="12345" />
+    );
     expect(component.find('EuiCallOut')).toMatchSnapshot();
   });
 
   it('should render a link to filter by cluster uuid and node uuid', () => {
-    const component = shallow(<Logs logs={logs} clusterUuid="12345" nodeId="6789" />);
+    const component = shallow(
+      <LogsContent sharePlugin={sharePlugin} logs={logs} clusterUuid="12345" nodeId="6789" />
+    );
     expect(component.find('EuiCallOut')).toMatchSnapshot();
   });
 
   it('should render a link to filter by cluster uuid and index uuid', () => {
-    const component = shallow(<Logs logs={logs} clusterUuid="12345" indexUuid="6789" />);
+    const component = shallow(
+      <LogsContent sharePlugin={sharePlugin} logs={logs} clusterUuid="12345" indexUuid="6789" />
+    );
     expect(component.find('EuiCallOut')).toMatchSnapshot();
   });
 
   it('should render a reason if the logs are disabled', () => {
-    const component = shallow(<Logs logs={{ enabled: false, limit: 15, reason: {} }} />);
+    const component = shallow(
+      <LogsContent sharePlugin={sharePlugin} logs={{ enabled: false, limit: 15, reason: {} }} />
+    );
     expect(component).toMatchSnapshot();
   });
 });
