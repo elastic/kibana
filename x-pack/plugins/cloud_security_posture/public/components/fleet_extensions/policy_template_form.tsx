@@ -148,7 +148,7 @@ const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps
   {
     id: GCP_SINGLE_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountLabel', {
-      defaultMessage: 'Single Account',
+      defaultMessage: 'Single Project',
     }),
     testId: 'gcpSingleAccountTestId',
   },
