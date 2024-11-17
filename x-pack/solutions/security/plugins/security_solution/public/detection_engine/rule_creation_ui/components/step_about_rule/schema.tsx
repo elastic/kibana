@@ -20,9 +20,9 @@ import type {
 } from '../../../../detections/pages/detection_engine/rules/types';
 import { OptionalFieldLabel } from '../../../rule_creation/components/optional_field_label';
 import { isUrlInvalid } from '../../../../common/utils/validators';
-import * as I18n from './translations';
 import { defaultRiskScoreValidator } from '../../validators/default_risk_score_validator';
 import { maxSignalsValidatorFactory } from '../../validators/max_signals_validator_factory';
+import * as I18n from './translations';
 
 const { emptyField } = fieldValidators;
 
