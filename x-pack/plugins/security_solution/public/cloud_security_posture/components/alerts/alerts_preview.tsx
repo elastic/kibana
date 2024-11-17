@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { capitalize } from 'lodash';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
@@ -14,27 +14,15 @@ import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type {
   AlertsByStatus,
   ParsedAlertsData,
 } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
-import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
-import {
-  buildHostNamesFilter,
-  buildUserNamesFilter,
-  RiskScoreEntity,
-} from '../../../../common/search_strategy';
-import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
-import { HostDetailsPanelKey } from '../../../flyout/entity_details/host_details_left';
-import {
-  EntityDetailsLeftPanelTab,
-  CspInsightLeftPanelSubTab,
-} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { UserDetailsPanelKey } from '../../../flyout/entity_details/user_details_left';
+import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { useEntityInsight } from '../../hooks/use_entity_insight';
+import { useRiskScoreData } from '../../hooks/use_risk_score_data';
 
 const AlertsCount = ({
   alertsTotal,
@@ -109,65 +97,22 @@ export const AlertsPreview = ({
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', name);
 
-  const buildFilterQuery = useMemo(
-    () => (isUsingHostName ? buildHostNamesFilter([name]) : buildUserNamesFilter([name])),
-    [isUsingHostName, name]
-  );
-
-  const riskScoreState = useRiskScore({
-    riskEntity: isUsingHostName ? RiskScoreEntity.host : RiskScoreEntity.user,
-    filterQuery: buildFilterQuery,
-    onlyLatest: false,
-    pagination: FIRST_RECORD_PAGINATION,
+  const { isRiskScoreExist } = useRiskScoreData({
+    isUsingHostName,
+    name,
   });
-
-  const { data: hostRisk } = riskScoreState;
-
-  const riskData = hostRisk?.[0];
-
-  const isRiskScoreExist = isUsingHostName
-    ? !!(riskData as HostRiskScore)?.host.risk
-    : !!(riskData as UserRiskScore)?.user.risk;
 
   const hasNonClosedAlerts = totalAlertsCount > 0;
 
-  const { openLeftPanel } = useExpandableFlyoutApi();
-
-  const goToEntityInsightTab = useCallback(() => {
-    openLeftPanel({
-      id: isUsingHostName ? HostDetailsPanelKey : UserDetailsPanelKey,
-      params: isUsingHostName
-        ? {
-            name,
-            isRiskScoreExist,
-            hasMisconfigurationFindings,
-            hasVulnerabilitiesFindings,
-            hasNonClosedAlerts,
-            path: {
-              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-              subTab: CspInsightLeftPanelSubTab.ALERTS,
-            },
-          }
-        : {
-            user: { name },
-            isRiskScoreExist,
-            hasMisconfigurationFindings,
-            hasNonClosedAlerts,
-            path: {
-              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-              subTab: CspInsightLeftPanelSubTab.ALERTS,
-            },
-          },
-    });
-  }, [
+  const { goToEntityInsightTab } = useEntityInsight({
+    isUsingHostName,
+    name,
+    isRiskScoreExist,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
     hasVulnerabilitiesFindings,
-    isRiskScoreExist,
-    isUsingHostName,
-    name,
-    openLeftPanel,
-  ]);
+    subTab: CspInsightLeftPanelSubTab.ALERTS,
+  });
   const link = useMemo(
     () =>
       !isPreviewMode
@@ -191,7 +136,7 @@ export const AlertsPreview = ({
           <EuiText
             size="xs"
             css={{
-              fontWeight: euiTheme.font.weight.semiBold,
+              fontWeight: euiTheme.font.weight.bold,
             }}
           >
             <FormattedMessage

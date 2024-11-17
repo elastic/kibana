@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
@@ -17,7 +17,6 @@ import {
   getAbbreviatedNumber,
 } from '@kbn/cloud-security-posture-common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import {
   ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW,
@@ -25,16 +24,9 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
-import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { HostDetailsPanelKey } from '../../../flyout/entity_details/host_details_left';
-import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
-import { buildHostNamesFilter } from '../../../../common/search_strategy';
-
-const FIRST_RECORD_PAGINATION = {
-  cursorStart: 0,
-  querySize: 1,
-};
+import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { useEntityInsight } from '../../hooks/use_entity_insight';
+import { useRiskScoreData } from '../../hooks/use_risk_score_data';
 
 const VulnerabilitiesCount = ({
   vulnerabilitiesTotal,
@@ -105,37 +97,20 @@ export const VulnerabilitiesPreview = ({
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations('host.name', name);
 
-  const buildFilterQuery = useMemo(() => buildHostNamesFilter([name]), [name]);
-  const riskScoreState = useRiskScore({
-    riskEntity: RiskScoreEntity.host,
-    filterQuery: buildFilterQuery,
-    onlyLatest: false,
-    pagination: FIRST_RECORD_PAGINATION,
+  const { isRiskScoreExist } = useRiskScoreData({
+    isUsingHostName: true,
+    name,
   });
-  const { data: hostRisk } = riskScoreState;
-  const riskData = hostRisk?.[0];
-  const isRiskScoreExist = riskData?.host.risk;
-  const { openLeftPanel } = useExpandableFlyoutApi();
-  const goToEntityInsightTab = useCallback(() => {
-    openLeftPanel({
-      id: HostDetailsPanelKey,
-      params: {
-        name,
-        isRiskScoreExist,
-        hasMisconfigurationFindings,
-        hasVulnerabilitiesFindings,
-        hasNonClosedAlerts,
-        path: { tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS, subTab: 'vulnerabilitiesTabId' },
-      },
-    });
-  }, [
+
+  const { goToEntityInsightTab } = useEntityInsight({
+    isUsingHostName: true,
+    name,
+    isRiskScoreExist,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
     hasVulnerabilitiesFindings,
-    isRiskScoreExist,
-    name,
-    openLeftPanel,
-  ]);
+    subTab: CspInsightLeftPanelSubTab.VULNERABILITIES,
+  });
   const link = useMemo(
     () =>
       !isPreviewMode

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
@@ -13,7 +13,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { statusColors } from '@kbn/cloud-security-posture';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -22,21 +21,9 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
-import {
-  CspInsightLeftPanelSubTab,
-  EntityDetailsLeftPanelTab,
-} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { UserDetailsPanelKey } from '../../../flyout/entity_details/user_details_left';
-import { HostDetailsPanelKey } from '../../../flyout/entity_details/host_details_left';
-import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
-import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
-import { buildHostNamesFilter, buildUserNamesFilter } from '../../../../common/search_strategy';
-
-const FIRST_RECORD_PAGINATION = {
-  cursorStart: 0,
-  querySize: 1,
-};
+import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { useEntityInsight } from '../../hooks/use_entity_insight';
+import { useRiskScoreData } from '../../hooks/use_risk_score_data';
 
 export const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
@@ -124,63 +111,20 @@ export const MisconfigurationsPreview = ({
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', name);
 
-  const buildFilterQuery = useMemo(
-    () => (isUsingHostName ? buildHostNamesFilter([name]) : buildUserNamesFilter([name])),
-    [isUsingHostName, name]
-  );
-
-  const riskScoreState = useRiskScore({
-    riskEntity: isUsingHostName ? RiskScoreEntity.host : RiskScoreEntity.user,
-    filterQuery: buildFilterQuery,
-    onlyLatest: false,
-    pagination: FIRST_RECORD_PAGINATION,
+  const { isRiskScoreExist } = useRiskScoreData({
+    isUsingHostName,
+    name,
   });
 
-  const { data: hostRisk } = riskScoreState;
-
-  const riskData = hostRisk?.[0];
-
-  const isRiskScoreExist = isUsingHostName
-    ? !!(riskData as HostRiskScore)?.host.risk
-    : !!(riskData as UserRiskScore)?.user.risk;
-
-  const { openLeftPanel } = useExpandableFlyoutApi();
-
-  const goToEntityInsightTab = useCallback(() => {
-    openLeftPanel({
-      id: isUsingHostName ? HostDetailsPanelKey : UserDetailsPanelKey,
-      params: isUsingHostName
-        ? {
-            name,
-            isRiskScoreExist,
-            hasMisconfigurationFindings,
-            hasVulnerabilitiesFindings,
-            hasNonClosedAlerts,
-            path: {
-              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-              subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
-            },
-          }
-        : {
-            user: { name },
-            isRiskScoreExist,
-            hasMisconfigurationFindings,
-            hasNonClosedAlerts,
-            path: {
-              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-              subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
-            },
-          },
-    });
-  }, [
+  const { goToEntityInsightTab } = useEntityInsight({
+    isUsingHostName,
+    name,
+    isRiskScoreExist,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
     hasVulnerabilitiesFindings,
-    isRiskScoreExist,
-    isUsingHostName,
-    name,
-    openLeftPanel,
-  ]);
+    subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
+  });
   const link = useMemo(
     () =>
       !isPreviewMode
