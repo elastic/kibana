@@ -6,7 +6,6 @@
  */
 
 import { useMemo } from 'react';
-// import type { ESQuery } from '../../../common/typed_json';
 import {
   RiskScoreEntity,
   type HostRiskScore,
@@ -28,16 +27,14 @@ export const useRiskScoreData = ({
     () => (isUsingHostName ? buildHostNamesFilter([name]) : buildUserNamesFilter([name])),
     [isUsingHostName, name]
   );
-  const riskScoreState = useRiskScore({
+  const { data } = useRiskScore({
     riskEntity: isUsingHostName ? RiskScoreEntity.host : RiskScoreEntity.user,
     filterQuery: buildFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
   });
 
-  const { data: hostRisk } = riskScoreState;
-
-  const riskData = hostRisk?.[0];
+  const riskData = data?.[0];
 
   const isRiskScoreExist = isUsingHostName
     ? !!(riskData as HostRiskScore)?.host.risk
