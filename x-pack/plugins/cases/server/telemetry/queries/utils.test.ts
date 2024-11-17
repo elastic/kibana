@@ -817,7 +817,6 @@ describe('utils', () => {
         counts: {
           date_range: {
             field: 'test.attributes.created_at',
-            format: 'dd/MM/YYYY',
             ranges: [
               { from: 'now-1d', to: 'now' },
               { from: 'now-1w', to: 'now' },
@@ -1132,7 +1131,6 @@ describe('utils', () => {
           counts: {
             date_range: {
               field: 'test.attributes.created_at',
-              format: 'dd/MM/YYYY',
               ranges: [
                 {
                   from: 'now-1d',
@@ -1261,7 +1259,6 @@ describe('utils', () => {
           counts: {
             date_range: {
               field: 'cases-comments.attributes.created_at',
-              format: 'dd/MM/YYYY',
               ranges: [
                 {
                   from: 'now-1d',

@@ -62,7 +62,6 @@ describe('alerts', () => {
           counts: {
             date_range: {
               field: 'cases-comments.attributes.created_at',
-              format: 'dd/MM/YYYY',
               ranges: [
                 {
                   from: 'now-1d',

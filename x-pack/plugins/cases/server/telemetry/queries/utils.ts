@@ -38,7 +38,6 @@ export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {
     date_range: {
       field: `${savedObjectType}.attributes.created_at`,
-      format: 'dd/MM/YYYY',
       ranges: [
         { from: 'now-1d', to: 'now' },
         { from: 'now-1w', to: 'now' },
@@ -52,7 +51,6 @@ export const getAlertsCountsAggregationQuery = () => ({
   counts: {
     date_range: {
       field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.created_at`,
-      format: 'dd/MM/YYYY',
       ranges: [
         { from: 'now-1d', to: 'now' },
         { from: 'now-1w', to: 'now' },
