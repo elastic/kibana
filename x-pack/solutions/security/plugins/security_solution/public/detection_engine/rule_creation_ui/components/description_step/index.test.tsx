@@ -271,7 +271,7 @@ describe('description_step', () => {
         mockLicenseService
       );
 
-      expect(result.length).toEqual(14);
+      expect(result.length).toEqual(15);
     });
   });
 
