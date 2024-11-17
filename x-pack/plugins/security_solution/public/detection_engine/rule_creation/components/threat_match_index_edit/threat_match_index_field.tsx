@@ -33,8 +33,8 @@ export const ThreatMatchIndexField = memo(function ThreatIndexField({
   return (
     <ComboBoxField
       field={field as FieldHook<unknown>}
-      idAria="ruleThreatMatchIndices"
-      data-test-subj="ruleThreatMatchIndices"
+      idAria="ruleThreatMatchIndicesField"
+      data-test-subj="ruleThreatMatchIndicesField"
       euiFieldProps={EUI_COMBOBOX_PROPS}
       label={i18n.THREAT_MATCH_INDEX_FIELD_LABEL}
       labelAppend={

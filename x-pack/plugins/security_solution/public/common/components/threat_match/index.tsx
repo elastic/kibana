@@ -33,6 +33,8 @@ interface ThreatMatchComponentProps {
   mappingEntries: ThreatMapEntries[];
   indexPatterns: DataViewBase;
   threatIndexPatterns: DataViewBase;
+  'id-aria'?: string;
+  'data-test-subj'?: string;
   onMappingEntriesChange: (newValue: ThreatMapEntries[]) => void;
 }
 
@@ -40,6 +42,8 @@ export const ThreatMatchComponent = ({
   mappingEntries,
   indexPatterns,
   threatIndexPatterns,
+  'id-aria': idAria,
+  'data-test-subj': dataTestSubj,
   onMappingEntriesChange,
 }: ThreatMatchComponentProps) => {
   const handleEntryItemChange = useCallback(
@@ -98,7 +102,7 @@ export const ThreatMatchComponent = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="s" direction="column">
+    <EuiFlexGroup gutterSize="s" direction="column" id-aria={idAria} data-test-subj={dataTestSubj}>
       {mappingEntries.map((entryListItem, index) => {
         const key = (entryListItem as typeof entryListItem & { id?: string }).id ?? `${index}`;
         return (
@@ -139,7 +143,7 @@ export const ThreatMatchComponent = ({
         );
       })}
 
-      <MyButtonsContainer data-test-subj={'andOrOperatorButtons'}>
+      <MyButtonsContainer data-test-subj="andOrOperatorButtons">
         <EuiFlexGroup gutterSize="s">
           {andLogicIncluded && (
             <MyInvisibleAndBadge grow={false}>

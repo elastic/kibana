@@ -55,8 +55,8 @@ export function ThreatMatchField({
         mappingEntries={field.value}
         indexPatterns={indexPatterns}
         threatIndexPatterns={threatIndexPatterns}
-        data-test-subj="threatmatch-builder"
-        id-aria="threatmatch-builder"
+        data-test-subj="ruleThreatMatchMappingField"
+        id-aria="ruleThreatMatchMappingField"
         onMappingEntriesChange={handleMappingChange}
       />
     </EuiFormRow>

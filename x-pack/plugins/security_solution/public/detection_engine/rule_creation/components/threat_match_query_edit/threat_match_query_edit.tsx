@@ -36,8 +36,8 @@ export const ThreatMatchQueryEdit = memo(function ThreatMatchQueryEdit({
         isLoading: loading,
         isDisabled: false,
         openTimelineSearch: false,
-        idAria: 'ruleThreatMatchQuery',
-        dataTestSubj: 'ruleThreatMatchQuery',
+        idAria: 'ruleThreatMatchQueryField',
+        dataTestSubj: 'ruleThreatMatchQueryField',
       }}
     />
   );
