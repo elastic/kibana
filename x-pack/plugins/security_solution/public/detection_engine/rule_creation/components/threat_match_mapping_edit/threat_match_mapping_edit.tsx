@@ -11,7 +11,7 @@ import type { ThreatMapEntries } from '../../../../common/components/threat_matc
 import type { FieldConfig } from '../../../../shared_imports';
 import { UseField } from '../../../../shared_imports';
 import { threatMatchMappingValidatorFactory } from '../../../rule_creation_ui/validators/threat_match_mapping_validator';
-import { DEFAULT_VALUE, ThreatMatchField } from './threat_match_mapping_field';
+import { ThreatMatchField } from './threat_match_mapping_field';
 import * as i18n from './translations';
 
 interface ThreatMatchMappingEditProps {
@@ -29,7 +29,6 @@ export const ThreatMatchMappingEdit = memo(function ThreatMatchMappingEdit({
     <UseField
       path={path}
       config={THREAT_MATCH_MAPPING_FIELD_CONFIG}
-      defaultValue={DEFAULT_VALUE}
       component={ThreatMatchField}
       componentProps={{
         indexPatterns,
