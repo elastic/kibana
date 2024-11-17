@@ -147,6 +147,12 @@ const registerHttpRequestMockHelpers = (
   const setSimulateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/index_templates/simulate`, response, error);
 
+  const setSimulateTemplateByNameResponse = (
+    name: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('POST', `${API_BASE_PATH}/index_templates/simulate/${name}`, response, error);
+
   const setLoadComponentTemplatesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/component_templates`, response, error);
 
@@ -226,6 +232,7 @@ const registerHttpRequestMockHelpers = (
     setLoadIndexStatsResponse,
     setUpdateIndexSettingsResponse,
     setSimulateTemplateResponse,
+    setSimulateTemplateByNameResponse,
     setLoadComponentTemplatesResponse,
     setLoadNodesPluginsResponse,
     setLoadTelemetryResponse,

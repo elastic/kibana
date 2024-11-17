@@ -131,7 +131,9 @@
             "docId": "kibDiscoverSharedPluginApi",
             "section": "def-public.ObservabilityLogsAIAssistantFeature",
             "text": "ObservabilityLogsAIAssistantFeature"
-          }
+          },
+          " | ",
+          "ObservabilityCreateSLOFeature"
         ],
         "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
         "deprecated": false,
