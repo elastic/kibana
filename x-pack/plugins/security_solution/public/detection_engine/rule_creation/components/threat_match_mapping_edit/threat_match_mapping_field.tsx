@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
 import { createOrNewEntryItem } from '../../../../common/components/threat_match/helpers';
@@ -13,8 +13,6 @@ import type { ThreatMapEntries } from '../../../../common/components/threat_matc
 import { ThreatMatchComponent } from '../../../../common/components/threat_match';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
-
-export const DEFAULT_VALUE = [createOrNewEntryItem()];
 
 interface ThreatMatchFieldProps {
   field: FieldHook<ThreatMapEntries[]>;
@@ -28,7 +26,7 @@ export function ThreatMatchField({
   indexPatterns,
 }: ThreatMatchFieldProps): JSX.Element {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const { setValue } = field;
+  const { value, setValue, clearErrors } = field;
 
   const handleMappingChange = useCallback(
     (entryItems: ThreatMapEntries[]): void => {
@@ -41,6 +39,19 @@ export function ThreatMatchField({
     },
     [setValue]
   );
+
+  useEffect(() => {
+    if (!Array.isArray(value) || value.length === 0) {
+      setValue(DEFAULT_VALUE);
+
+      // Avoid showing validation errors when setting default value
+      // Since Form Hook's validation is async setTimeout is required
+      // to clear error after validation
+      setTimeout(() => {
+        clearErrors();
+      });
+    }
+  }, [value, setValue, clearErrors]);
 
   return (
     <EuiFormRow
@@ -62,3 +73,5 @@ export function ThreatMatchField({
     </EuiFormRow>
   );
 }
+
+const DEFAULT_VALUE = [createOrNewEntryItem()];
