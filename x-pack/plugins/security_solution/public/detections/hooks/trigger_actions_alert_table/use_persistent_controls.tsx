@@ -53,7 +53,10 @@ const AdditionalToolbarControlsComponent = ({
         METRIC_TYPE.CLICK,
         getTelemetryEvent.groupChanged({ groupingId: tableType, selected: groupSelection })
       );
-      telemetry.reportEvent(AlertsEventTypes.AlertsGroupingChanged, { groupByField: groupSelection, tableId: tableType });
+      telemetry.reportEvent(AlertsEventTypes.AlertsGroupingChanged, {
+        groupByField: groupSelection,
+        tableId: tableType,
+      });
     },
     [tableType, telemetry]
   );
@@ -67,8 +70,8 @@ const AdditionalToolbarControlsComponent = ({
   );
 
   const fields = useMemo(() => {
-      return Object.values(sourcererDataView.fields || {});
-    }, [sourcererDataView.fields]);
+    return Object.values(sourcererDataView.fields || {});
+  }, [sourcererDataView.fields]);
 
   const groupSelector = useGetGroupSelectorStateless({
     groupingId: tableType,
