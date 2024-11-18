@@ -97,6 +97,7 @@ export const EntityStoreUtils = (
       log.error(JSON.stringify(res.body));
     }
     expect(res.status).to.eql(200);
+    return res;
   };
 
   const expectTransformStatus = async (

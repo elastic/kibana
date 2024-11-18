@@ -195,6 +195,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('status', () => {
+      afterEach(async () => {
+        await utils.cleanEngines();
+      });
       it('should return "not_installed" when no engines have been initialized', async () => {
         const { body } = await api.getEntityStoreStatus().expect(200);
 
@@ -204,24 +207,26 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should return "started" when all engines are started', async () => {
+      it('should return "installing" when at least one engine is being initialized', async () => {
         await utils.enableEntityStore();
 
         const { body } = await api.getEntityStoreStatus().expect(200);
 
-        expect(body).to.eql({
-          engines: [
-            {
-              status: 'started',
-              type: 'host',
-            },
-            {
-              status: 'started',
-              type: 'user',
-            },
-          ],
-          status: 'started',
-        });
+        expect(body.status).to.eql('installing');
+        expect(body.engines.length).to.eql(2);
+        expect(body.engines[0].status).to.eql('installing');
+        expect(body.engines[1].status).to.eql('installing');
+      });
+
+      it('should return "started" when all engines are started', async () => {
+        await utils.initEntityEngineForEntityTypesAndWait(['host', 'user']);
+
+        const { body } = await api.getEntityStoreStatus().expect(200);
+
+        expect(body.status).to.eql('running');
+        expect(body.engines.length).to.eql(2);
+        expect(body.engines[0].status).to.eql('started');
+        expect(body.engines[1].status).to.eql('started');
       });
     });
 
