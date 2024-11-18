@@ -627,13 +627,7 @@ paths:
                       $ref: '#/components/schemas/EngineDescriptor'
                     type: array
                   status:
-                    enum:
-                      - not_installed
-                      - installing
-                      - running
-                      - stopped
-                      - error
-                    type: string
+                    $ref: '#/components/schemas/StoreStatus'
           description: Successful response
       summary: Get the status of the Entity Store
       tags:
@@ -1108,6 +1102,14 @@ components:
         - index
         - description
         - category
+    StoreStatus:
+      enum:
+        - not_installed
+        - installing
+        - running
+        - stopped
+        - error
+      type: string
     TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object
