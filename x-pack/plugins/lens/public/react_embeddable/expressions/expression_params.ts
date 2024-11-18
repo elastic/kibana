@@ -35,10 +35,10 @@ import type {
   LensRuntimeState,
 } from '../types';
 import { getVariables } from './variables';
-import {
-  getSearchContextIncompatibleMessage,
-  isSearchContextIncompatibleWithDataViews,
-} from '../user_messages/checks';
+// import {
+//   getSearchContextIncompatibleMessage,
+//   isSearchContextIncompatibleWithDataViews,
+// } from '../user_messages/checks';
 import { getExecutionSearchContext, type MergedSearchContext } from './merged_search_context';
 
 interface GetExpressionRendererPropsParams {
