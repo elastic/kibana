@@ -8,20 +8,36 @@
  */
 
 import React from 'react';
-import { EuiTextColor } from '@elastic/eui';
+import { EuiTextColor, useEuiTheme } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
+import { css } from '@emotion/react';
 import { existsOperator, isOneOfOperator } from '../../filter_bar/filter_editor';
 import { strings } from '../i18n';
 
-const FilterValue = ({ value }: { value: string | number }) => {
+const FilterValue = ({ value, operator }: { value?: string | number; operator?: string }) => {
+  const { euiTheme } = useEuiTheme();
+  const operatorStyles = css`
+    font-weight: ${euiTheme.font.weight.semiBold};
+    color: ${euiTheme.colors.primaryText};
+  `;
+  const valueFontWeight = css`
+    font-weight: ${euiTheme.font.weight.medium};
+  `;
+
   return (
-    <EuiTextColor
-      color={typeof value === 'string' ? 'success' : 'accent'}
-      className="globalFilterLabel__value"
-    >
-      {` ${value}`}
-    </EuiTextColor>
+    <>
+      {operator ? (
+        <EuiTextColor color="primary" css={operatorStyles} className="globalFilterLabel__value">
+          {` ${operator}`}
+        </EuiTextColor>
+      ) : null}
+      {value ? (
+        <EuiTextColor color="success" css={valueFontWeight} className="globalFilterLabel__value">
+          {` ${value}`}
+        </EuiTextColor>
+      ) : null}
+    </>
   );
 };
 
@@ -32,16 +48,31 @@ const FilterField = ({
   filter: Filter;
   fieldLabel?: string | undefined;
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const fontWeight = css`
+    font-weight: ${euiTheme.font.weight.semiBold};
+  `;
+
   return (
     <>
       <Prefix prefix={filter.meta.negate} />
-      {fieldLabel || filter.meta.key}:
+      <EuiTextColor css={fontWeight}>{fieldLabel || filter.meta.key}:</EuiTextColor>
     </>
   );
 };
 
-const Prefix = ({ prefix }: { prefix?: boolean }) =>
-  prefix ? <EuiTextColor color="danger">{strings.getNotLabel()}</EuiTextColor> : null;
+const Prefix = ({ prefix }: { prefix?: boolean }) => {
+  const { euiTheme } = useEuiTheme();
+  const fontWeight = css`
+    font-weight: ${euiTheme.font.weight.semiBold};
+  `;
+
+  return prefix ? (
+    <EuiTextColor color="danger" css={fontWeight}>
+      {strings.getNotLabel()}
+    </EuiTextColor>
+  ) : null;
+};
 
 export interface FilterContentProps {
   filter: Filter;
@@ -65,14 +96,14 @@ export function FilterContent({ filter, valueLabel, fieldLabel, hideAlias }: Fil
       return (
         <>
           <FilterField filter={filter} fieldLabel={fieldLabel} />
-          <FilterValue value={`${existsOperator.message}`} />
+          <FilterValue operator={existsOperator.message} />
         </>
       );
     case FILTERS.PHRASES:
       return (
         <>
           <FilterField filter={filter} fieldLabel={fieldLabel} />
-          <FilterValue value={`${isOneOfOperator.message} ${valueLabel}`} />
+          <FilterValue operator={isOneOfOperator.message} value={valueLabel} />
         </>
       );
     case FILTERS.QUERY_STRING:

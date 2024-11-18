@@ -9,10 +9,10 @@
 
 import React, { Fragment } from 'react';
 import type { Filter, BooleanRelation, DataViewBase } from '@kbn/es-query';
-import { EuiTextColor } from '@elastic/eui';
+import { EuiBadge, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FilterBadgeErrorBoundary } from './filter_badge_error_boundary';
 import { FilterExpressionBadge } from './filter_badge_expression';
-import { conditionCss } from './filter_badge.styles';
 
 export interface FilterBadgeGroupProps {
   filters: Filter[];
@@ -23,10 +23,15 @@ export interface FilterBadgeGroupProps {
 }
 
 const BooleanRelationDelimiter = ({ conditional }: { conditional: BooleanRelation }) => {
+  const { euiTheme } = useEuiTheme();
+  const horizontalMargin = css`
+    margin-inline: ${euiTheme.size.s};
+  `;
+
   /**
    *  Spaces have been added to make the title readable.
    */
-  return <EuiTextColor className={conditionCss}>{` ${conditional} `}</EuiTextColor>;
+  return <EuiBadge color="warning" css={horizontalMargin}>{` ${conditional} `}</EuiBadge>;
 };
 
 export function FilterBadgeGroup({

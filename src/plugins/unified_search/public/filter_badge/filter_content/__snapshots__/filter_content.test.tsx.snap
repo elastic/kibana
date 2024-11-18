@@ -3,7 +3,7 @@
 exports[`alias 1`] = `
 <div>
   <span
-    class="globalFilterLabel__value emotion-euiTextColor-success"
+    class="globalFilterLabel__value emotion-EuiTextColor"
   >
      geo.coordinates in US
   </span>
@@ -13,14 +13,18 @@ exports[`alias 1`] = `
 exports[`alias with error status 1`] = `
 <div>
   <span
-    class="emotion-euiTextColor-danger"
+    class="emotion-EuiTextColor"
   >
     NOT 
   </span>
-  machine.os
-  :
   <span
-    class="globalFilterLabel__value emotion-euiTextColor-success"
+    class="emotion-EuiTextColor"
+  >
+    machine.os
+    :
+  </span>
+  <span
+    class="globalFilterLabel__value emotion-EuiTextColor"
   >
      Error
   </span>
@@ -30,14 +34,18 @@ exports[`alias with error status 1`] = `
 exports[`alias with warning status 1`] = `
 <div>
   <span
-    class="emotion-euiTextColor-danger"
+    class="emotion-EuiTextColor"
   >
     NOT 
   </span>
-  machine.os
-  :
   <span
-    class="globalFilterLabel__value emotion-euiTextColor-success"
+    class="emotion-EuiTextColor"
+  >
+    machine.os
+    :
+  </span>
+  <span
+    class="globalFilterLabel__value emotion-EuiTextColor"
   >
      Warning
   </span>
@@ -46,10 +54,14 @@ exports[`alias with warning status 1`] = `
 
 exports[`error 1`] = `
 <div>
-  machine.os
-  :
   <span
-    class="globalFilterLabel__value emotion-euiTextColor-success"
+    class="emotion-EuiTextColor"
+  >
+    machine.os
+    :
+  </span>
+  <span
+    class="globalFilterLabel__value emotion-EuiTextColor"
   >
      Error
   </span>
@@ -58,10 +70,14 @@ exports[`error 1`] = `
 
 exports[`field custom label 1`] = `
 <div>
-  test label
-  :
   <span
-    class="globalFilterLabel__value emotion-euiTextColor-success"
+    class="emotion-EuiTextColor"
+  >
+    test label
+    :
+  </span>
+  <span
+    class="globalFilterLabel__value emotion-EuiTextColor"
   >
      ios
   </span>
@@ -70,10 +86,14 @@ exports[`field custom label 1`] = `
 
 exports[`warning 1`] = `
 <div>
-  machine.os
-  :
   <span
-    class="globalFilterLabel__value emotion-euiTextColor-success"
+    class="emotion-EuiTextColor"
+  >
+    machine.os
+    :
+  </span>
+  <span
+    class="globalFilterLabel__value emotion-EuiTextColor"
   >
      Warning
   </span>
