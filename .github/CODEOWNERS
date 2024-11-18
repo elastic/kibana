@@ -225,7 +225,6 @@ packages/core/security/core-security-server @elastic/kibana-core
 packages/core/security/core-security-server-internal @elastic/kibana-core
 packages/core/security/core-security-server-mocks @elastic/kibana-core
 packages/core/status/core-status-common @elastic/kibana-core
-packages/core/status/core-status-common-internal @elastic/kibana-core
 packages/core/status/core-status-server @elastic/kibana-core
 packages/core/status/core-status-server-internal @elastic/kibana-core
 packages/core/status/core-status-server-mocks @elastic/kibana-core
