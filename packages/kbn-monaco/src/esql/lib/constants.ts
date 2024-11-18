@@ -8,6 +8,7 @@
  */
 
 export const ESQL_LANG_ID = 'esql';
-export const ESQL_THEME_ID = 'esqlTheme';
+export const ESQL_LIGHT_THEME_ID = 'esqlThemeLight';
+export const ESQL_DARK_THEME_ID = 'esqlThemeDark';
 
 export const ESQL_TOKEN_POSTFIX = '.esql';
