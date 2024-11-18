@@ -64,7 +64,6 @@ export const timelineDefaults: SubsetTimelineModel &
   indexNames: [],
   isFavorite: false,
   isLive: false,
-  isLoading: false,
   isSaving: false,
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50, 100],
