@@ -10,9 +10,7 @@ import { BaseChatModelParams } from '@langchain/core/language_models/chat_models
 import { Logger } from '@kbn/logging';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { BedrockRuntimeClient } from './bedrock_runtime_client';
-
-export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-3-5-sonnet-20240620-v1:0';
-export const DEFAULT_BEDROCK_REGION = 'us-east-1';
+import { DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_REGION } from '../utils/bedrock';
 
 export interface CustomChatModelInput extends BaseChatModelParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
@@ -22,6 +20,18 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   model?: string;
 }
 
+/**
+ * Custom chat model class for Bedrock Converse API.
+ * The ActionsClientChatBedrockConverse chat model supports streaming and
+ * non-streaming via the Bedrock Converse and ConverseStream APIs.
+ *
+ * @param {Object} params - The parameters for the chat model.
+ * @param {ActionsClient} params.actionsClient - The actions client.
+ * @param {string} params.connectorId - The connector ID.
+ * @param {Logger} params.logger - The logger instance.
+ * @param {AbortSignal} [params.signal] - Optional abort signal.
+ * @param {string} [params.model] - Optional model name.
+ */
 export class ActionsClientChatBedrockConverse extends ChatBedrockConverse {
   constructor({ actionsClient, connectorId, logger, ...fields }: CustomChatModelInput) {
     super({

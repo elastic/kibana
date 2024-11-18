@@ -12,6 +12,8 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { Readable } from 'stream';
 import { fromUtf8 } from '@smithy/util-utf8';
+import { ConverseResponse } from '@aws-sdk/client-bedrock-runtime';
+import { prepareMessages } from '../../utils/bedrock';
 
 interface NodeHandlerOptions extends NodeHttpHandlerOptions {
   streaming: boolean;
@@ -84,16 +86,3 @@ export class NodeHttpHandler extends _NodeHttpHandler {
     };
   }
 }
-
-const prepareMessages = (messages: Array<{ role: string; content: string[] }>) =>
-  messages.reduce((acc: Array<{ role: string; content: string[] }>, { role, content }) => {
-    const lastMessage = acc.at(-1);
-
-    if (lastMessage?.role === role) {
-      lastMessage.content.push(...content);
-    } else {
-      acc.push({ role, content });
-    }
-
-    return acc;
-  }, []);
