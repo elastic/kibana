@@ -17,6 +17,10 @@ import { Observable } from 'rxjs';
 export interface CoreTheme {
   /** is dark mode enabled or not */
   readonly darkMode: boolean;
+  /**
+   * Name of the active theme
+   */
+  readonly name: string;
 }
 
 /**
