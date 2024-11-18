@@ -301,17 +301,25 @@ export const OverviewPage: React.FC<Props> = memo(
     const [showAVCBanner, setShowAVCBanner] = useState(
       storage.get('securitySolution.showAvcBanner') ?? true
     );
-    const [showBidIntBanner, setShowBidIntBanner] = useState(
-      storage.get('securitySolution.showBidIntBanner') ?? true
+    const [showCSBidIntBanner, setShowCSBidIntBanner] = useState(
+      storage.get('fleet.showBidIntBannerForCS') ?? true
+    );
+    const [showSOCFBidIntBanner, setShowSOCFBidIntBanner] = useState(
+      storage.get('fleet.showBidIntBannerForSOCF') ?? true
     );
     const onAVCBannerDismiss = useCallback(() => {
       setShowAVCBanner(false);
       storage.set('securitySolution.showAvcBanner', false);
     }, [storage]);
 
-    const onBidIntBannerDismiss = useCallback(() => {
-      setShowBidIntBanner(false);
-      storage.set('securitySolution.showBidIntBanner', false);
+    const onCSBidIntBannerDismiss = useCallback(() => {
+      setShowCSBidIntBanner(false);
+      storage.set('fleet.showBidIntBannerForCS', false);
+    }, [storage]);
+
+    const onSOCFBidIntBannerDismiss = useCallback(() => {
+      setShowSOFCBidIntBanner(false);
+      storage.set('fleet.showBidIntBannerForSOCF', false);
     }, [storage]);
 
     return (
@@ -334,9 +342,15 @@ export const OverviewPage: React.FC<Props> = memo(
               <EuiSpacer size="s" />
             </>
           )}
-          {(isCrowdStrike || isSentinelOneCloudFunnel) && showBidIntBanner && (
+          {isCrowdStrike && showCSBidIntBanner && (
             <>
-              <BidirectionalIntegrationsBanner onDismiss={onBidIntBannerDismiss} />
+              <BidirectionalIntegrationsBanner onDismiss={onCSBidIntBannerDismiss} />
+              <EuiSpacer size="s" />
+            </>
+          )}
+          {isSentinelOneCloudFunnel && showSOCFBidIntBanner && (
+            <>
+              <BidirectionalIntegrationsBanner onDismiss={onSOCFBidIntBannerDismiss} />
               <EuiSpacer size="s" />
             </>
           )}
