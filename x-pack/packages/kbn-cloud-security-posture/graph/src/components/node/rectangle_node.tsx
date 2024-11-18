@@ -19,12 +19,13 @@ import {
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { RectangleHoverShape, RectangleShape } from './shapes/rectangle_shape';
+import { NodeExpandButton } from './node_expand_button';
 
 const NODE_WIDTH = 81;
 const NODE_HEIGHT = 80;
 
 export const RectangleNode: React.FC<NodeProps> = memo((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick } =
+  const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   return (
@@ -55,11 +56,14 @@ export const RectangleNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           {icon && <NodeIcon x="8" y="7" icon={icon} color={color} />}
         </NodeShapeSvg>
         {interactive && (
-          <NodeButton
-            onClick={(e) => expandButtonClick?.(e, props)}
-            x={`${NODE_WIDTH - NodeButton.ExpandButtonSize / 4}px`}
-            y={`${(NODE_HEIGHT - NodeButton.ExpandButtonSize / 2) / 2}px`}
-          />
+          <>
+            <NodeButton onClick={(e) => nodeClick?.(e, props)} />
+            <NodeExpandButton
+              onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
+              x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize / 4}px`}
+              y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize / 2) / 2}px`}
+            />
+          </>
         )}
         <Handle
           type="target"
