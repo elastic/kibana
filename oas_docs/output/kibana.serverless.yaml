@@ -19323,7 +19323,7 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
       x-beta: true
-  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath*}:
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}:
     get:
       operationId: get-fleet-epm-packages-pkgname-pkgversion-filepath
       parameters:
