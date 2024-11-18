@@ -34,7 +34,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { getIndexModeLabel } from '../../../../lib/index_mode_labels';
+import { indexModeLabels } from '../../../../lib/index_mode_labels';
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { getLifecycleValue } from '../../../../lib/data_streams';
 import { SectionLoading, reactRouterNavigate } from '../../../../../shared_imports';
@@ -355,7 +355,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage:
             "The index mode applied to the data stream's backing indices, as defined in its associated index template.",
         }),
-        content: getIndexModeLabel(indexMode),
+        content: indexModeLabels[indexMode],
         dataTestSubj: 'indexModeDetail',
       },
       {
