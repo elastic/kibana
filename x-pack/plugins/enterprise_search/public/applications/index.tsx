@@ -119,6 +119,7 @@ export const renderApp = (
     history,
     indexMappingComponent,
     isSidebarEnabled,
+    kibanaVersion,
     lens,
     ml,
     navigateToUrl,
