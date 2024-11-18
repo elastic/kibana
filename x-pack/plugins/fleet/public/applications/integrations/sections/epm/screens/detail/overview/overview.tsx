@@ -42,7 +42,10 @@ import { SideBarColumn } from '../../../components/side_bar_column';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
 
-import { CloudPostureThirdPartySupportCallout } from '../components/cloud_posture_third_party_support_callout';
+import {
+  CloudPostureThirdPartySupportCallout,
+  BidirectionalIntegrationsBanner,
+} from '../components';
 
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
@@ -172,6 +175,8 @@ export const OverviewPage: React.FC<Props> = memo(
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
     const isPrerelease = isPackagePrerelease(packageInfo.version);
     const isElasticDefend = packageInfo.name === 'endpoint';
+    const isSentinelOneCloudFunnel = packageInfo.name === 'sentinel_one_cloud_funnel';
+    const isCrowdStrike = packageInfo.name === 'crowdstrike';
     const [markdown, setMarkdown] = useState<string | undefined>(undefined);
     const [selectedItemId, setSelectedItem] = useState<string | undefined>(undefined);
     const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
@@ -296,9 +301,17 @@ export const OverviewPage: React.FC<Props> = memo(
     const [showAVCBanner, setShowAVCBanner] = useState(
       storage.get('securitySolution.showAvcBanner') ?? true
     );
-    const onBannerDismiss = useCallback(() => {
+    const [showBidIntBanner, setShowBidIntBanner] = useState(
+      storage.get('securitySolution.showBidIntBanner') ?? true
+    );
+    const onAVCBannerDismiss = useCallback(() => {
       setShowAVCBanner(false);
       storage.set('securitySolution.showAvcBanner', false);
+    }, [storage]);
+
+    const onBidIntBannerDismiss = useCallback(() => {
+      setShowBidIntBanner(false);
+      storage.set('securitySolution.showBidIntBanner', false);
     }, [storage]);
 
     return (
@@ -317,7 +330,13 @@ export const OverviewPage: React.FC<Props> = memo(
           {isUnverified && <UnverifiedCallout />}
           {useIsStillYear2024() && isElasticDefend && showAVCBanner && (
             <>
-              <AVCResultsBanner2024 onDismiss={onBannerDismiss} />
+              <AVCResultsBanner2024 onDismiss={onAVCBannerDismiss} />
+              <EuiSpacer size="s" />
+            </>
+          )}
+          {(isCrowdStrike || isSentinelOneCloudFunnel) && showBidIntBanner && (
+            <>
+              <BidirectionalIntegrationsBanner onDismiss={onBidIntBannerDismiss} />
               <EuiSpacer size="s" />
             </>
           )}
