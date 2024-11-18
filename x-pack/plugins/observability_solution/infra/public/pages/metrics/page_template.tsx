@@ -95,12 +95,12 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
 
   if (isLoading && !source) return <SourceLoadingPage />;
 
-  if (!remoteClustersExist) {
-    return <NoRemoteCluster />;
+  if (sourceError) {
+    return <SourceErrorPage errorMessage={sourceError} retry={loadSource} />;
   }
 
-  if (sourceError) {
-    <SourceErrorPage errorMessage={sourceError} retry={loadSource} />;
+  if (!isLoading && !remoteClustersExist) {
+    return <NoRemoteCluster />;
   }
 
   if (dataViewLoadError) {
