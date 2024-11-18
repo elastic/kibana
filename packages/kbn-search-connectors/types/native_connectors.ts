@@ -3379,9 +3379,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         default_value: null,
         depends_on: [
           {
-            'field': 'data_source',
-            'value': 'outlook_cloud'
-          }
+            field: 'data_source',
+            value: 'outlook_cloud',
+          },
         ],
         display: TEXTBOX,
         label: translate('searchConnectors.nativeConnectors.outlook.client_emails.label', {
@@ -3392,7 +3392,8 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: false,
         sensitive: false,
         tooltip: translate('searchConnectors.nativeConnectors.outlook.client_emails.tooltip', {
-          defaultMessage: 'Specify the email addresses to limit data fetching to specific clients. If set to *, data will be fetched for all users.',
+          defaultMessage:
+            'Specify the email addresses to limit data fetching to specific clients. If set to *, data will be fetched for all users.',
         }),
         type: LIST,
         ui_restrictions: [],
