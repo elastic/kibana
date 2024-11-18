@@ -171,6 +171,7 @@ export const DashboardLinkComponent = ({
         linkCurrent: link.destination === parentDashboardId,
         dashboardLinkError: Boolean(link.error),
         'dashboardLinkError--noLabel': !link.label,
+        overflowTextWrap: link.overflow === 'textWrap',
       })}
       label={linkLabel}
       external={link.options?.openInNewTab}

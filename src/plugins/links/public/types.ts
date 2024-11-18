@@ -69,6 +69,7 @@ export type ResolvedLink = Link & {
   label?: string;
   description?: string;
   error?: Error;
+  overflow?: 'ellipsis' | 'textWrap';
 };
 
 export interface DashboardItem {

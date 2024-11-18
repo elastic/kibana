@@ -91,20 +91,20 @@ const LinksEditor = ({
   const [isSaving, setIsSaving] = useState(false);
   const [orderedLinks, setOrderedLinks] = useState<ResolvedLink[]>([]);
   const [saveByReference, setSaveByReference] = useState(isByReference);
-  const [toggleCompressedIdSelected, setToggleCompressedIdSelected] = useState(`__1`);
-  const toggleButtonsCompressed = [
+  const [toggleOverflowIdSelected, setToggleOverflowIdSelected] = useState('textEllipsis');
+  const toggleButtonsOverflow = [
     {
-      id: `__0`,
+      id: 'textEllipsis',
       label: LinksStrings.editor.linkEditor.getOverflowEllipsis(),
     },
     {
-      id: `__1`,
+      id: 'textWrap',
       label: LinksStrings.editor.linkEditor.getOverflowTextWrap(),
     },
   ];
 
-  const onChangeCompressed = (optionId: React.SetStateAction<string>) => {
-    setToggleCompressedIdSelected(optionId);
+  const onChangeOverflow = (optionId: React.SetStateAction<string>) => {
+    setToggleOverflowIdSelected(optionId);
   };
 
   const isEditingExisting = initialLinks || isByReference;
@@ -213,9 +213,9 @@ const LinksEditor = ({
           <EuiFormRow label={LinksStrings.editor.linkEditor.getOverflowLegend()}>
             <EuiButtonGroup
               legend={LinksStrings.editor.linkEditor.getOverflowLegend()}
-              options={toggleButtonsCompressed}
-              idSelected={toggleCompressedIdSelected}
-              onChange={(id) => onChangeCompressed(id)}
+              options={toggleButtonsOverflow}
+              idSelected={toggleOverflowIdSelected}
+              onChange={(id) => onChangeOverflow(id)}
               buttonSize="compressed"
             />
           </EuiFormRow>
@@ -313,6 +313,13 @@ const LinksEditor = ({
                     disabled={hasZeroLinks}
                     data-test-subj={'links--panelEditor--saveBtn'}
                     onClick={async () => {
+                      setOrderedLinks(
+                        orderedLinks.map((link) => {
+                          return toggleOverflowIdSelected === 'textWrap'
+                            ? { ...link, overflow: 'textWrap' }
+                            : { ...link, overflow: 'ellipsis' };
+                        })
+                      );
                       if (saveByReference) {
                         setIsSaving(true);
                         onSaveToLibrary(orderedLinks, currentLayout)

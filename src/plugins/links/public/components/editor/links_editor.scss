@@ -78,3 +78,9 @@
 .linksDroppableLinksArea {
   margin: 0 (-$euiSizeXS);
 }
+
+// Add classname logic for the wrap text
+&.overflowTextWrap span:first-child {
+  white-space: normal !important;
+  overflow: auto !important;
+}

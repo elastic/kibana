@@ -51,6 +51,7 @@ export const ExternalLinkComponent = ({
       external
       color="text"
       isDisabled={Boolean(link.error)}
+      className={'linksPanelLink'}
       showToolTip={Boolean(link.error)}
       toolTipProps={{
         content: link.error?.message,
