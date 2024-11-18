@@ -9,20 +9,14 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { createConversation } from './create_conversation';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getConversation } from './get_conversation';
+import { authenticatedUser } from '../../__mocks__/user';
 import { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/core-security-common';
 
 jest.mock('./get_conversation', () => ({
   getConversation: jest.fn(),
 }));
 
-const mockUser1 = {
-  username: 'my_username',
-  authentication_realm: {
-    type: 'my_realm_type',
-    name: 'my_realm_name',
-  },
-} as AuthenticatedUser;
+const mockUser1 = authenticatedUser;
 
 export const getCreateConversationMock = (): ConversationCreateProps => ({
   title: 'test',

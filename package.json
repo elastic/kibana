@@ -232,6 +232,7 @@
     "@kbn/content-management-content-insights-public": "link:packages/content-management/content_insights/content_insights_public",
     "@kbn/content-management-content-insights-server": "link:packages/content-management/content_insights/content_insights_server",
     "@kbn/content-management-examples-plugin": "link:examples/content_management_examples",
+    "@kbn/content-management-favorites-common": "link:packages/content-management/favorites/favorites_common",
     "@kbn/content-management-favorites-public": "link:packages/content-management/favorites/favorites_public",
     "@kbn/content-management-favorites-server": "link:packages/content-management/favorites/favorites_server",
     "@kbn/content-management-plugin": "link:src/plugins/content_management",

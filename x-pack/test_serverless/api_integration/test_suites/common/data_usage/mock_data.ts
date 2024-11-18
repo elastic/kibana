@@ -10,6 +10,7 @@ export const mockAutoOpsResponse = {
     ingest_rate: [
       {
         name: 'metrics-system.cpu-default',
+        error: null,
         data: [
           [1726858530000, 13756849],
           [1726862130000, 14657904],
@@ -17,6 +18,7 @@ export const mockAutoOpsResponse = {
       },
       {
         name: 'logs-nginx.access-default',
+        error: null,
         data: [
           [1726858530000, 12894623],
           [1726862130000, 14436905],
@@ -26,6 +28,7 @@ export const mockAutoOpsResponse = {
     storage_retained: [
       {
         name: 'metrics-system.cpu-default',
+        error: null,
         data: [
           [1726858530000, 12576413],
           [1726862130000, 13956423],
@@ -33,6 +36,7 @@ export const mockAutoOpsResponse = {
       },
       {
         name: 'logs-nginx.access-default',
+        error: null,
         data: [
           [1726858530000, 12894623],
           [1726862130000, 14436905],
