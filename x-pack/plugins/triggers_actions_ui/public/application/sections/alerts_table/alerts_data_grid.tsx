@@ -366,14 +366,33 @@ export const AlertsDataGrid = typedMemo(
       clearSelection();
     }, [clearSelection, refreshQueries]);
 
-  const toolbarVisibilityArgs = useMemo(() => {
-    return {
+    const toolbarVisibilityArgs = useMemo(() => {
+      return {
+        bulkActions,
+        alertsCount,
+        rowSelection: bulkActionsState.rowSelection,
+        alerts,
+        isLoading,
+        columnIds: columns.map((column) => column.id),
+        onToggleColumn,
+        onResetColumns,
+        browserFields,
+        additionalToolbarControls,
+        setIsBulkActionsLoading,
+        clearSelection,
+        refresh,
+        fieldsBrowserOptions,
+        alertsQuerySnapshot,
+        showInspectButton,
+        toolbarVisibilityProp,
+      };
+    }, [
       bulkActions,
       alertsCount,
-      rowSelection: bulkActionsState.rowSelection,
+      bulkActionsState.rowSelection,
       alerts,
       isLoading,
-      columnIds: columns.map((column) => column.id),
+      columns,
       onToggleColumn,
       onResetColumns,
       browserFields,
@@ -385,26 +404,7 @@ export const AlertsDataGrid = typedMemo(
       alertsQuerySnapshot,
       showInspectButton,
       toolbarVisibilityProp,
-    };
-  }, [
-    bulkActions,
-    alertsCount,
-    bulkActionsState.rowSelection,
-    alerts,
-    isLoading,
-    columns,
-    onToggleColumn,
-    onResetColumns,
-    browserFields,
-    additionalToolbarControls,
-    setIsBulkActionsLoading,
-    clearSelection,
-    refresh,
-    fieldsBrowserOptions,
-    alertsQuerySnapshot,
-    showInspectButton,
-    toolbarVisibilityProp,
-  ]);
+    ]);
 
     const toolbarVisibility = useGetToolbarVisibility(toolbarVisibilityArgs);
 
