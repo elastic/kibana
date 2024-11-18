@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import classNames from 'classnames';
 import React, { useMemo } from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -52,10 +51,6 @@ export const ExternalLinkComponent = ({
       external
       color="text"
       isDisabled={Boolean(link.error)}
-      className={classNames('linksPanelLink', {
-        overflowEllipsis: linkOptions?.overflowEllipsis,
-        overflowTextWrap: linkOptions?.overflowTextWrap,
-      })}
       showToolTip={Boolean(link.error)}
       toolTipProps={{
         content: link.error?.message,
