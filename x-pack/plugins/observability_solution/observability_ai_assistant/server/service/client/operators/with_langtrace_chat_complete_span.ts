@@ -41,7 +41,10 @@ export function withLangtraceChatCompleteSpan<T extends ChatEvent>({
     'http.max.retries': 0,
     // dummy URL
     'url.full': 'http://localhost:3000/chat/completions',
+    'url.path': '/chat/completions',
     'http.timeout': 120 * 1000,
+    'gen_ai.operation.name': 'chat_completion',
+    'gen_ai.request.model': model,
     'llm.prompts': JSON.stringify(
       messages.map((message) => ({
         role: message.message.role,
