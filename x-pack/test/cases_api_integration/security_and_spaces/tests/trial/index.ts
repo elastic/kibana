@@ -37,6 +37,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     // sub privileges are only available with a license above basic
     loadTestFile(require.resolve('./delete_sub_privilege'));
     loadTestFile(require.resolve('./user_profiles/get_current'));
+    // case observables are only available with a license above basic
+    loadTestFile(require.resolve('./cases/observables'));
 
     // Internal routes
     loadTestFile(require.resolve('./internal/get_user_action_stats'));
