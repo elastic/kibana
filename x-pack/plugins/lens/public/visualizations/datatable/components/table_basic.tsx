@@ -80,7 +80,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
   const isInteractive = props.interactive;
-  const isDarkMode = useObservable(props.theme.theme$, { darkMode: false }).darkMode;
+  const isDarkMode = useObservable(props.theme.theme$, {
+    darkMode: false,
+    name: 'amsterdam',
+  }).darkMode;
 
   const [columnConfig, setColumnConfig] = useState({
     columns: props.args.columns,
