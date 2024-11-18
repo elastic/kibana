@@ -12,21 +12,26 @@ import { createEsqlDataSource } from '../../../../../../common/data_sources';
 import { DataSourceCategory, RootContext, SolutionType } from '../../../../profiles';
 import { createContextAwarenessMocks } from '../../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from '../profile';
-import { createWindowsLogsDataSourceProfileProvider } from './windows_logs';
+import { createAwsS3accessLogsDataSourceProfileProvider } from './aws_s3access_logs';
+import type { ContextWithProfileId } from '../../../../profile_service';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 
-const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Default };
+const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
+  profileId: OBSERVABILITY_ROOT_PROFILE_ID,
+  solutionType: SolutionType.Observability,
+};
 const { profileProviderServices } = createContextAwarenessMocks();
 const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(profileProviderServices);
-const dataSourceProfileProvider = createWindowsLogsDataSourceProfileProvider(
+const dataSourceProfileProvider = createAwsS3accessLogsDataSourceProfileProvider(
   logsDataSourceProfileProvider
 );
 
-describe('createWindowsLogsDataSourceProfileProvider', () => {
+describe('createAwsS3accessLogsDataSourceProfileProvider', () => {
   it('should match a valid index pattern', async () => {
     const result = await dataSourceProfileProvider.resolve({
       rootContext: ROOT_CONTEXT,
       dataSource: createEsqlDataSource(),
-      query: { esql: 'FROM logs-windows.powershell-*' },
+      query: { esql: 'FROM logs-aws.s3access-*' },
     });
     expect(result).toEqual({ isMatch: true, context: { category: DataSourceCategory.Logs } });
   });
@@ -35,7 +40,7 @@ describe('createWindowsLogsDataSourceProfileProvider', () => {
     const result = await dataSourceProfileProvider.resolve({
       rootContext: ROOT_CONTEXT,
       dataSource: createEsqlDataSource(),
-      query: { esql: 'FROM logs-notwindows.powershell-*' },
+      query: { esql: 'FROM logs-aws.s3noaccess-*' },
     });
     expect(result).toEqual({ isMatch: false });
   });
@@ -47,8 +52,10 @@ describe('createWindowsLogsDataSourceProfileProvider', () => {
     expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toEqual({
       columns: [
         { name: 'timestamp', width: 212 },
-        { name: 'log.level', width: 150 },
-        { name: 'host.name', width: 250 },
+        { name: 'aws.s3.bucket.name', width: 200 },
+        { name: 'aws.s3.object.key', width: 200 },
+        { name: 'aws.s3access.operation', width: 200 },
+        { name: 'client.ip', width: 150 },
         { name: 'message' },
       ],
     });
