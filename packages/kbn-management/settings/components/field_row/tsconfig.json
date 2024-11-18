@@ -30,5 +30,6 @@
     "@kbn/core-theme-browser-mocks",
     "@kbn/core-i18n-browser",
     "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-user-profile-browser-mocks",
   ]
 }

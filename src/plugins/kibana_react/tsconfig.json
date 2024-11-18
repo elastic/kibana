@@ -25,6 +25,7 @@
     "@kbn/code-editor",
     "@kbn/core-analytics-browser",
     "@kbn/shared-ux-link-redirect-app",
+    "@kbn/core-user-profile-browser",
   ],
   "exclude": [
     "target/**/*",
