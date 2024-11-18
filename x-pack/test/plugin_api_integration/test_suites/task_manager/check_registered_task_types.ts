@@ -151,6 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:update_agent_tags:retry',
         'fleet:upgrade_action:retry',
         'logs-data-telemetry',
+        'obs-ai-assistant:knowledge-base-migration',
         'osquery:telemetry-configs',
         'osquery:telemetry-packs',
         'osquery:telemetry-saved-queries',
@@ -169,6 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-timelines',
         'session_cleanup',
         'task_manager:delete_inactive_background_task_nodes',
+        'task_manager:mark_removed_tasks_as_unrecognized',
       ]);
     });
   });
