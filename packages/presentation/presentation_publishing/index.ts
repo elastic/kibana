@@ -109,6 +109,10 @@ export {
   type PublishesPhaseEvents,
 } from './interfaces/publishes_phase_events';
 export {
+  apiPublishesRendered,
+  type PublishesRendered,
+} from './interfaces/publishes_rendered';
+export {
   apiPublishesSavedObjectId,
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
