@@ -4470,10 +4470,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-status-common-internal@link:packages/core/status/core-status-common-internal":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-status-common@link:packages/core/status/core-status-common":
   version "0.0.0"
   uid ""
