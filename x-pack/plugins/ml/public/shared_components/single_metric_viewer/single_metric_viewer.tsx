@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { FC } from 'react';
@@ -120,7 +120,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   const [selectedJobWrapper, setSelectedJobWrapper] = useState<
     { job: MlJob; stats: MlJobStats } | undefined
   >();
-  const errorEncounteredStatusCode = useRef<number | undefined>();
+  const [errorEncountered, setErrorEncountered] = useState<number | undefined>();
 
   const isMounted = useMountedState();
   const { mlApi, mlTimeSeriesExplorerService, toastNotificationService } = mlServices;
@@ -136,11 +136,9 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
 
   useEffect(
     function resetErrorOnJobChange() {
-      if (errorEncounteredStatusCode.current !== undefined) {
-        errorEncounteredStatusCode.current = undefined;
-        // Calling onError to clear any previous error
-        onError?.();
-      }
+      // Calling onError to clear any previous error
+      setErrorEncountered(undefined);
+      onError?.();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedJobId]
@@ -156,32 +154,27 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
               mlApi.getJobStats({ jobId: selectedJobId }),
             ]);
             setSelectedJobWrapper({ job: jobs[0], stats: jobStats[0] });
-            errorEncounteredStatusCode.current = undefined;
           } catch (e) {
             const error = extractErrorProperties(e);
             // Could get 404 because job has been deleted and also avoid infinite refetches on any error
-            errorEncounteredStatusCode.current = error.statusCode;
+            setErrorEncountered(error.statusCode);
             if (onError) {
               onError(
-                new Error(
-                  errorEncounteredStatusCode.current === 404
-                    ? jobNotFoundErrorMessage
-                    : basicErrorMessage
-                )
+                new Error(errorEncountered === 404 ? jobNotFoundErrorMessage : basicErrorMessage)
               );
             }
           }
         }
       }
-      if (isMounted() === false || errorEncounteredStatusCode.current !== undefined) {
-        errorEncounteredStatusCode.current = undefined;
+      if (isMounted() === false || errorEncountered !== undefined) {
         return;
       }
       fetchSelectedJob();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedJobId, isMounted]
+    [selectedJobId, isMounted, errorEncountered]
   );
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
