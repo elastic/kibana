@@ -11,7 +11,7 @@ import type { ToolSchema } from '../chat_complete/tool_schema';
 /**
  * Static options used to call the {@link BoundChatCompleteAPI}
  */
-export type StaticOutputOptions<
+export type BoundOutputOptions<
   TId extends string = string,
   TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined,
   TStream extends boolean = false
@@ -20,7 +20,7 @@ export type StaticOutputOptions<
 /**
  * Options used to call the {@link BoundChatCompleteAPI}
  */
-export type DynamicOutputOptions<
+export type UnboundOutputOptions<
   TId extends string = string,
   TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined,
   TStream extends boolean = false
@@ -34,5 +34,5 @@ export type BoundOutputAPI = <
   TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined,
   TStream extends boolean = false
 >(
-  options: DynamicOutputOptions<TId, TOutputSchema, TStream>
+  options: UnboundOutputOptions<TId, TOutputSchema, TStream>
 ) => OutputCompositeResponse<TId, TOutputSchema, TStream>;

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { StaticChatCompleteOptions } from '@kbn/inference-common';
+import type { BoundChatCompleteOptions } from '@kbn/inference-common';
 import { createScopedChatCompleteAPI } from '../../common/chat_complete';
 import { createScopedOutputAPI } from '../../common/output';
 import type { InferenceClient, BoundInferenceClient } from './types';
 
 export const createBoundInferenceClient = (
   unboundClient: InferenceClient,
-  boundParams: StaticChatCompleteOptions
+  boundParams: BoundChatCompleteOptions
 ): BoundInferenceClient => {
   return {
     ...unboundClient,

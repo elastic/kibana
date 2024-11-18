@@ -10,7 +10,7 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { StaticChatCompleteOptions } from '@kbn/inference-common';
+import type { BoundChatCompleteOptions } from '@kbn/inference-common';
 import type { InferenceClient, BoundInferenceClient } from './inference_client';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -28,7 +28,7 @@ export interface InferenceServerSetup {}
 /**
  * Options to create an inference client using the {@link InferenceServerStart.getClient} API.
  */
-export interface InferenceClientCreateOptions<T extends StaticChatCompleteOptions | undefined> {
+export interface InferenceClientCreateOptions<T extends BoundChatCompleteOptions | undefined> {
   /**
    * The request to scope the client to.
    */
@@ -74,7 +74,7 @@ export interface InferenceServerStart {
    * });
    * ```
    */
-  getClient: <T extends StaticChatCompleteOptions | undefined>(
+  getClient: <T extends BoundChatCompleteOptions | undefined>(
     options: InferenceClientCreateOptions<T>
-  ) => T extends StaticChatCompleteOptions ? BoundInferenceClient : InferenceClient;
+  ) => T extends BoundChatCompleteOptions ? BoundInferenceClient : InferenceClient;
 }

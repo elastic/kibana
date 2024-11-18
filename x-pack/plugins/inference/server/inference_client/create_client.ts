@@ -7,19 +7,19 @@
 
 import type { Logger } from '@kbn/logging';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { StaticChatCompleteOptions } from '@kbn/inference-common';
+import type { BoundChatCompleteOptions } from '@kbn/inference-common';
 import type { InferenceClientCreateOptions } from '../types';
 import type { BoundInferenceClient, InferenceClient } from './types';
 import { createInferenceClient } from './inference_client';
 import { createBoundInferenceClient } from './scoped_client';
 
-export function createClient<T extends StaticChatCompleteOptions | undefined>(
+export function createClient<T extends BoundChatCompleteOptions | undefined>(
   options: InferenceClientCreateOptions<T> & {
     actions: ActionsPluginStart;
     logger: Logger;
   }
-): T extends StaticChatCompleteOptions ? BoundInferenceClient : InferenceClient;
-export function createClient<T extends StaticChatCompleteOptions | undefined>({
+): T extends BoundChatCompleteOptions ? BoundInferenceClient : InferenceClient;
+export function createClient<T extends BoundChatCompleteOptions | undefined>({
   actions,
   request,
   logger,

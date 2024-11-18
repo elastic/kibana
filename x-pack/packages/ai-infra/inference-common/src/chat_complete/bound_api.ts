@@ -11,7 +11,7 @@ import type { ToolOptions } from './tools';
 /**
  * Static options used to call the {@link BoundChatCompleteAPI}
  */
-export type StaticChatCompleteOptions<
+export type BoundChatCompleteOptions<
   TToolOptions extends ToolOptions = ToolOptions,
   TStream extends boolean = false
 > = Pick<ChatCompleteOptions<TToolOptions, TStream>, 'connectorId' | 'functionCalling'>;
@@ -19,7 +19,7 @@ export type StaticChatCompleteOptions<
 /**
  * Options used to call the {@link BoundChatCompleteAPI}
  */
-export type DynamicChatCompleteOptions<
+export type UnboundChatCompleteOptions<
   TToolOptions extends ToolOptions = ToolOptions,
   TStream extends boolean = false
 > = Omit<ChatCompleteOptions<TToolOptions, TStream>, 'connectorId' | 'functionCalling'>;
@@ -31,5 +31,5 @@ export type BoundChatCompleteAPI = <
   TToolOptions extends ToolOptions = ToolOptions,
   TStream extends boolean = false
 >(
-  options: DynamicChatCompleteOptions<TToolOptions, TStream>
+  options: UnboundChatCompleteOptions<TToolOptions, TStream>
 ) => ChatCompleteCompositeResponse<TToolOptions, TStream>;

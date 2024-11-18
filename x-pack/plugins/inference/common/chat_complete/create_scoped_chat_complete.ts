@@ -9,20 +9,20 @@ import type {
   ChatCompleteAPI,
   ChatCompleteOptions,
   BoundChatCompleteAPI,
-  StaticChatCompleteOptions,
-  DynamicChatCompleteOptions,
+  BoundChatCompleteOptions,
+  UnboundChatCompleteOptions,
   ToolOptions,
 } from '@kbn/inference-common';
 
 export function createScopedChatCompleteAPI(
   chatComplete: ChatCompleteAPI,
-  boundParams: StaticChatCompleteOptions
+  boundParams: BoundChatCompleteOptions
 ): BoundChatCompleteAPI;
 export function createScopedChatCompleteAPI(
   chatComplete: ChatCompleteAPI,
-  boundParams: StaticChatCompleteOptions
+  boundParams: BoundChatCompleteOptions
 ) {
-  return (dynamicParams: DynamicChatCompleteOptions<ToolOptions, boolean>) => {
+  return (dynamicParams: UnboundChatCompleteOptions<ToolOptions, boolean>) => {
     const params: ChatCompleteOptions<ToolOptions, boolean> = {
       ...boundParams,
       ...dynamicParams,

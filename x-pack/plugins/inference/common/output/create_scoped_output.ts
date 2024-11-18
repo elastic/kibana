@@ -9,17 +9,17 @@ import type {
   OutputAPI,
   OutputOptions,
   BoundOutputAPI,
-  StaticOutputOptions,
-  DynamicOutputOptions,
+  BoundOutputOptions,
+  UnboundOutputOptions,
   ToolSchema,
 } from '@kbn/inference-common';
 
 export function createScopedOutputAPI(
   chatComplete: OutputAPI,
-  boundParams: StaticOutputOptions
+  boundParams: BoundOutputOptions
 ): BoundOutputAPI;
-export function createScopedOutputAPI(chatComplete: OutputAPI, boundParams: StaticOutputOptions) {
-  return (dynamicParams: DynamicOutputOptions<string, ToolSchema, boolean>) => {
+export function createScopedOutputAPI(chatComplete: OutputAPI, boundParams: BoundOutputOptions) {
+  return (dynamicParams: UnboundOutputOptions<string, ToolSchema, boolean>) => {
     const params: OutputOptions<string, ToolSchema, boolean> = {
       ...boundParams,
       ...dynamicParams,

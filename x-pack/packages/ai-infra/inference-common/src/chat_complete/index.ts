@@ -15,9 +15,9 @@ export type {
 } from './api';
 export type {
   BoundChatCompleteAPI,
-  StaticChatCompleteOptions,
-  DynamicChatCompleteOptions,
-} from './scoped_api';
+  BoundChatCompleteOptions,
+  UnboundChatCompleteOptions,
+} from './bound_api';
 export {
   ChatCompletionEventType,
   type ChatCompletionMessageEvent,
