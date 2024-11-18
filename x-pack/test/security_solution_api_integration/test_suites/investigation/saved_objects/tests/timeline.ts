@@ -209,14 +209,12 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             timelineType: TimelineTypeEnum.default,
           });
 
-        expect(responseToTest.body.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
-        expect(responseToTest.body.data!.persistFavorite.favorite.length).to.be(1);
-        expect(responseToTest.body.data!.persistFavorite.version).to.not.be.eql(version);
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineId).to.be.eql(null);
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(null);
-        expect(responseToTest.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineTypeEnum.default
-        );
+        expect(responseToTest.body.savedObjectId).to.be(savedObjectId);
+        expect(responseToTest.body.favorite.length).to.be(1);
+        expect(responseToTest.body.version).to.not.be.eql(version);
+        expect(responseToTest.body.templateTimelineId).to.be.eql(null);
+        expect(responseToTest.body.templateTimelineVersion).to.be.eql(null);
+        expect(responseToTest.body.timelineType).to.be.eql(TimelineTypeEnum.default);
       });
 
       it('to an existing timeline template', async () => {
@@ -235,18 +233,14 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             templateTimelineVersion: templateTimelineVersionFromStore,
             timelineType: TimelineTypeEnum.template,
           });
-        expect(responseToTest.body.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
-        expect(responseToTest.body.data!.persistFavorite.favorite.length).to.be(1);
-        expect(responseToTest.body.data!.persistFavorite.version).to.not.be.eql(version);
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineId).to.be.eql(
-          templateTimelineIdFromStore
-        );
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(
+        expect(responseToTest.body.savedObjectId).to.be(savedObjectId);
+        expect(responseToTest.body.favorite.length).to.be(1);
+        expect(responseToTest.body.version).to.not.be.eql(version);
+        expect(responseToTest.body.templateTimelineId).to.be.eql(templateTimelineIdFromStore);
+        expect(responseToTest.body.templateTimelineVersion).to.be.eql(
           templateTimelineVersionFromStore
         );
-        expect(responseToTest.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineTypeEnum.template
-        );
+        expect(responseToTest.body.timelineType).to.be.eql(TimelineTypeEnum.template);
       });
 
       it('to Unfavorite an existing timeline', async () => {
@@ -271,14 +265,12 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             timelineType: TimelineTypeEnum.default,
           });
 
-        expect(responseToTest.body.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
-        expect(responseToTest.body.data!.persistFavorite.favorite).to.be.empty();
-        expect(responseToTest.body.data!.persistFavorite.version).to.not.be.eql(version);
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineId).to.be.eql(null);
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(null);
-        expect(responseToTest.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineTypeEnum.default
-        );
+        expect(responseToTest.body.savedObjectId).to.be(savedObjectId);
+        expect(responseToTest.body.favorite).to.be.empty();
+        expect(responseToTest.body.version).to.not.be.eql(version);
+        expect(responseToTest.body.templateTimelineId).to.be.eql(null);
+        expect(responseToTest.body.templateTimelineVersion).to.be.eql(null);
+        expect(responseToTest.body.timelineType).to.be.eql(TimelineTypeEnum.default);
       });
 
       it('to Unfavorite an existing timeline template', async () => {
@@ -305,18 +297,14 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             timelineType: TimelineTypeEnum.template,
           });
 
-        expect(responseToTest.body.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
-        expect(responseToTest.body.data!.persistFavorite.favorite).to.be.empty();
-        expect(responseToTest.body.data!.persistFavorite.version).to.not.be.eql(version);
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineId).to.be.eql(
-          templateTimelineIdFromStore
-        );
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(
+        expect(responseToTest.body.savedObjectId).to.be(savedObjectId);
+        expect(responseToTest.body.favorite).to.be.empty();
+        expect(responseToTest.body.version).to.not.be.eql(version);
+        expect(responseToTest.body.templateTimelineId).to.be.eql(templateTimelineIdFromStore);
+        expect(responseToTest.body.templateTimelineVersion).to.be.eql(
           templateTimelineVersionFromStore
         );
-        expect(responseToTest.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineTypeEnum.template
-        );
+        expect(responseToTest.body.timelineType).to.be.eql(TimelineTypeEnum.template);
       });
 
       it('to a timeline without a timelineId', async () => {
@@ -330,14 +318,12 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             timelineType: TimelineTypeEnum.default,
           });
 
-        expect(response.body.data!.persistFavorite.savedObjectId).to.not.be.empty();
-        expect(response.body.data!.persistFavorite.favorite.length).to.be(1);
-        expect(response.body.data!.persistFavorite.version).to.not.be.empty();
-        expect(response.body.data!.persistFavorite.templateTimelineId).to.be.eql(null);
-        expect(response.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(null);
-        expect(response.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineTypeEnum.default
-        );
+        expect(response.body.savedObjectId).to.not.be.empty();
+        expect(response.body.favorite.length).to.be(1);
+        expect(response.body.version).to.not.be.empty();
+        expect(response.body.templateTimelineId).to.be.eql(null);
+        expect(response.body.templateTimelineVersion).to.be.eql(null);
+        expect(response.body.timelineType).to.be.eql(TimelineTypeEnum.default);
       });
 
       it('to a timeline template without a timelineId', async () => {
@@ -354,18 +340,12 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             timelineType: TimelineTypeEnum.template,
           });
 
-        expect(response.body.data!.persistFavorite.savedObjectId).to.not.be.empty();
-        expect(response.body.data!.persistFavorite.favorite.length).to.be(1);
-        expect(response.body.data!.persistFavorite.version).to.not.be.empty();
-        expect(response.body.data!.persistFavorite.templateTimelineId).to.be.eql(
-          templateTimelineIdFromStore
-        );
-        expect(response.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(
-          templateTimelineVersionFromStore
-        );
-        expect(response.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineTypeEnum.template
-        );
+        expect(response.body.savedObjectId).to.not.be.empty();
+        expect(response.body.favorite.length).to.be(1);
+        expect(response.body.version).to.not.be.empty();
+        expect(response.body.templateTimelineId).to.be.eql(templateTimelineIdFromStore);
+        expect(response.body.templateTimelineVersion).to.be.eql(templateTimelineVersionFromStore);
+        expect(response.body.timelineType).to.be.eql(TimelineTypeEnum.template);
       });
     });
 
@@ -382,7 +362,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             savedObjectIds: [savedObjectId],
           });
 
-        expect(responseToTest.body.data!.deleteTimeline).to.be(true);
+        expect(responseToTest.statusCode).to.be(200);
       });
 
       it('multiple timelines', async () => {

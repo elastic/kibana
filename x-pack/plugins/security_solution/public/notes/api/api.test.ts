@@ -23,16 +23,12 @@ describe('Notes API client', () => {
   describe('create note', () => {
     it('should throw an error when a response code other than 200 is returned', async () => {
       const errorResponse: PersistNoteRouteResponse = {
-        data: {
-          persistNote: {
-            code: 500,
-            message: 'Internal server error',
-            note: {
-              timelineId: '1',
-              noteId: '2',
-              version: '3',
-            },
-          },
+        code: 500,
+        message: 'Internal server error',
+        note: {
+          timelineId: '1',
+          noteId: '2',
+          version: '3',
         },
       };
       (KibanaServices.get as jest.Mock).mockReturnValue({

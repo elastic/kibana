@@ -63,12 +63,8 @@ describe('Timeline pinned event middleware', () => {
 
   it('should persist a timeline pin event action', async () => {
     (persistPinnedEvent as jest.Mock).mockResolvedValue({
-      data: {
-        persistPinnedEventOnTimeline: {
-          code: 200,
-          eventId: testEventId,
-        },
-      },
+      code: 200,
+      eventId: testEventId,
     });
     expect(selectTimelineById(store.getState(), TimelineId.test).pinnedEventIds).toEqual({});
     await store.dispatch(pinEvent({ id: TimelineId.test, eventId: testEventId }));
@@ -118,11 +114,7 @@ describe('Timeline pinned event middleware', () => {
 
   it('should ensure the timeline is saved or in draft mode before pinning an event', async () => {
     (persistPinnedEvent as jest.Mock).mockResolvedValue({
-      data: {
-        persistPinnedEventOnTimeline: {
-          code: 200,
-        },
-      },
+      code: 200,
     });
     expect(selectTimelineById(store.getState(), TimelineId.test).pinnedEventIds).toEqual({});
     await store.dispatch(pinEvent({ id: TimelineId.test, eventId: testEventId }));
@@ -140,11 +132,7 @@ describe('Timeline pinned event middleware', () => {
 
   it('should show an error message when the call is unauthorized', async () => {
     (persistPinnedEvent as jest.Mock).mockResolvedValue({
-      data: {
-        persistPinnedEventOnTimeline: {
-          code: 403,
-        },
-      },
+      code: 403,
     });
 
     await store.dispatch(unPinEvent({ id: TimelineId.test, eventId: testEventId }));

@@ -70,9 +70,9 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             note: { note: myNewNote, timelineId },
           });
 
-        expect(responseToTest.body.data!.persistNote.note.note).to.be(myNewNote);
-        expect(responseToTest.body.data!.persistNote.note.noteId).to.be(noteId);
-        expect(responseToTest.body.data!.persistNote.note.version).to.not.be.eql(version);
+        expect(responseToTest.body.note.note).to.be(myNewNote);
+        expect(responseToTest.body.note.noteId).to.be(noteId);
+        expect(responseToTest.body.note.version).to.not.be.eql(version);
       });
     });
 

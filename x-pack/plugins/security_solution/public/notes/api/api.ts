@@ -27,7 +27,7 @@ export const createNote = async ({ note }: { note: BareNote }) => {
       body: JSON.stringify({ note }),
       version: '2023-10-31',
     });
-    const noteResponse = response.data.persistNote;
+    const noteResponse = response;
     if (noteResponse.code !== 200) {
       throw new Error(noteResponse.message);
     }
