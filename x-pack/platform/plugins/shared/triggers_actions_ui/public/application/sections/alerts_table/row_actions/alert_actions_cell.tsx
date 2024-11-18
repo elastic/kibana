@@ -15,8 +15,8 @@ import {
 
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { getAlertsTableDefaultAlertActionsLazy } from '../../../../common/get_alerts_table_default_row_actions';
-import type { AlertActionsProps } from '../../../../types';
+import type { AlertsTableProps } from '../../../../types';
+import { DefaultAlertActions } from '.';
 
 const actionsToolTip = i18n.translate('xpack.triggersActionsUI.alertsTable.moreActionsTextLabel', {
   defaultMessage: 'More actions',
@@ -25,7 +25,7 @@ const actionsToolTip = i18n.translate('xpack.triggersActionsUI.alertsTable.moreA
 /**
  * The cell containing contextual actions for a single alert row in the table
  */
-export function AlertActionsCell(alertActionsProps: AlertActionsProps) {
+export const AlertActionsCell: AlertsTableProps['renderActionsCell'] = (props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const closeActionsPopover = () => {
@@ -37,14 +37,15 @@ export function AlertActionsCell(alertActionsProps: AlertActionsProps) {
   };
 
   const DefaultRowActions = useMemo(
-    () =>
-      getAlertsTableDefaultAlertActionsLazy({
-        key: 'defaultRowActions',
-        onActionExecuted: closeActionsPopover,
-        isAlertDetailsEnabled: false,
-        ...alertActionsProps,
-      } as AlertActionsProps),
-    [alertActionsProps]
+    () => (
+      <DefaultAlertActions
+        key="defaultRowActions"
+        onActionExecuted={closeActionsPopover}
+        isAlertDetailsEnabled={false}
+        {...props}
+      />
+    ),
+    [props]
   );
 
   // TODO re-enable view in app when it works
@@ -81,4 +82,4 @@ export function AlertActionsCell(alertActionsProps: AlertActionsProps) {
       </EuiFlexItem>
     </>
   );
-}
+};

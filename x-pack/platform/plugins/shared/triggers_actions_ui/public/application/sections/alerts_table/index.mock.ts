@@ -10,11 +10,11 @@ import { CasesService } from './types';
 export const openAddToExistingCaseModalMock = jest.fn();
 export const openAddToNewCaseFlyoutMock = jest.fn();
 
-const uiMock: jest.Mocked<CasesService['ui']> = {
+const uiMock: jest.MockedObject<CasesService['ui']> = {
   getCasesContext: jest.fn().mockImplementation(() => null),
 };
 
-const hooksMock: jest.Mocked<CasesService['hooks']> = {
+const hooksMock: jest.MockedObject<CasesService['hooks']> = {
   useCasesAddToNewCaseFlyout: jest.fn().mockImplementation(() => ({
     open: openAddToNewCaseFlyoutMock,
   })),
@@ -23,12 +23,12 @@ const hooksMock: jest.Mocked<CasesService['hooks']> = {
   })),
 };
 
-const helpersMock: jest.Mocked<CasesService['helpers']> = {
+const helpersMock: jest.MockedObject<CasesService['helpers']> = {
   canUseCases: jest.fn(),
   groupAlertsByRule: jest.fn(),
 };
 
-export const createCasesServiceMock = (): CasesService => ({
+export const createCasesServiceMock = (): jest.MaybeMockedDeep<CasesService> => ({
   ui: uiMock,
   hooks: hooksMock,
   helpers: helpersMock,

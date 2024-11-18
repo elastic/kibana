@@ -33,11 +33,14 @@ export const InspectButtonContainer: React.FC<InspectButtonContainerProps> = mem
 interface InspectButtonProps {
   onCloseInspect?: () => void;
   showInspectButton?: boolean;
-  querySnapshot: EsQuerySnapshot;
+  alertsQuerySnapshot: EsQuerySnapshot;
   inspectTitle: string;
 }
 
-const InspectButtonComponent: React.FC<InspectButtonProps> = ({ querySnapshot, inspectTitle }) => {
+const InspectButtonComponent: React.FC<InspectButtonProps> = ({
+  alertsQuerySnapshot,
+  inspectTitle,
+}) => {
   const [isShowingModal, setIsShowingModal] = useState(false);
 
   const onOpenModal = useCallback(() => {
@@ -63,7 +66,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({ querySnapshot, i
         <ModalInspectQuery
           closeModal={onCloseModal}
           data-test-subj="inspect-modal"
-          querySnapshot={querySnapshot}
+          alertsQuerySnapshot={alertsQuerySnapshot}
           title={inspectTitle}
         />
       )}

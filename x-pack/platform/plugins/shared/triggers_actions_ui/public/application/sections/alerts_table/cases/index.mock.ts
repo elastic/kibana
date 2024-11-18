@@ -20,11 +20,9 @@ export const theCase: Case = {
   owner: 'cases',
 };
 
-export const getCasesMockMap = (): Map<string, Case> => {
-  const casesMap = new Map();
-
-  casesMap.set(theCase.id, theCase);
-  casesMap.set('test-id-2', { ...theCase, id: 'test-id-2', title: 'Test case 2' });
-
-  return casesMap;
+export const getCasesMock = () => {
+  return [theCase, { ...theCase, id: 'test-id-2', title: 'Test case 2' }];
 };
+
+export const getCasesMapMock = () =>
+  getCasesMock().reduce((acc, val) => acc.set(val.id, val), new Map());

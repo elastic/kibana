@@ -11,11 +11,11 @@ import { EuiBadge, EuiFlexGroup, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { AlertLifecycleStatusBadge } from '../../../components/alert_lifecycle_status_badge';
-import { CellComponentProps } from '../types';
 import { DefaultCell } from './default_cell';
 import { useAlertMutedState } from '../hooks/alert_mute/use_alert_muted_state';
+import type { CellComponent } from '../types';
 
-const AlertLifecycleStatusCellComponent: React.FC<CellComponentProps> = (props) => {
+export const AlertLifecycleStatusCell: CellComponent = memo((props) => {
   const { euiTheme } = useEuiTheme();
   const { alert, showAlertStatusWithFlapping } = props;
   const { isMuted } = useAlertMutedState(alert);
@@ -54,8 +54,4 @@ const AlertLifecycleStatusCellComponent: React.FC<CellComponentProps> = (props) 
   }
 
   return <DefaultCell {...props} />;
-};
-
-AlertLifecycleStatusCellComponent.displayName = 'AlertLifecycleStatusCell';
-
-export const AlertLifecycleStatusCell = memo(AlertLifecycleStatusCellComponent);
+});

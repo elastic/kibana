@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
-import { AlertsTableContext } from '../contexts/alerts_table_context';
-import { BulkActionsVerbs } from '../../../../types';
+import { AdditionalContext, BulkActionsVerbs, RenderContext } from '../../../../types';
 
-type PaginationProps = RuleRegistrySearchRequestPagination & {
+export type PaginationProps = RuleRegistrySearchRequestPagination & {
+  bulkActionsStore: RenderContext<AdditionalContext>['bulkActionsStore'];
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
 };
 
@@ -22,10 +22,13 @@ export type UsePagination = (props: PaginationProps) => {
   setFlyoutAlertIndex: (alertIndex: number) => void;
 };
 
-export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationProps) {
-  const {
-    bulkActions: [, updateBulkActionsState],
-  } = useContext(AlertsTableContext);
+export function usePagination({
+  bulkActionsStore,
+  onPageChange,
+  pageIndex,
+  pageSize,
+}: PaginationProps) {
+  const [_, updateBulkActionsState] = bulkActionsStore;
   const [pagination, setPagination] = useState<RuleRegistrySearchRequestPagination>({
     pageIndex,
     pageSize,
