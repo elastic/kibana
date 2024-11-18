@@ -199,7 +199,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       this.esConfig = { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER };
     }
 
-    if (!this.config.host) return; // No API to call
     if (this.hasInitialized) return; // We've already made an initial call
 
     try {
