@@ -1542,6 +1542,7 @@ x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
 x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor tests migration
 
 # Core
+/x-pack/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-core
 /test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
 /test/plugin_functional/plugins/session_notifications @elastic/kibana-core
 /x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
@@ -1618,7 +1619,6 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /test/server_integration/http/ssl @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
 /test/server_integration/config.base.js @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
 /test/server_integration/__fixtures__ @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
-/x-pack/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
 /.github/workflows/codeql-stats.yml @elastic/kibana-security
