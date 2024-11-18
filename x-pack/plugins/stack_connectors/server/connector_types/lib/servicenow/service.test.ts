@@ -1239,10 +1239,10 @@ describe('ServiceNow service', () => {
           },
         }));
 
-        const res = await service.closeIncident({ incidentId: '', correlationId: null });
+        const res = await service.closeIncident({ incidentId: '2', correlationId: null });
         expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
-            "[ServiceNow][CloseIncident] No incident found with correlation_id: null or incidentId: .",
+            "[ServiceNow][CloseIncident] No incident found with correlation_id: null or incidentId: 2.",
           ]
         `);
 
