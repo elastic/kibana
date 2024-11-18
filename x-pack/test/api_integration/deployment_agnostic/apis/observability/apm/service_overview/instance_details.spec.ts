@@ -128,8 +128,33 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             expect(response.body).to.not.eql({});
           });
 
-          it.skip('return the correct data', () => {
-            expectSnapshot(omit(response.body, '@timestamp')).toMatch();
+          it('return the correct data', () => {
+            expect(omit(response.body, '@timestamp')).to.eql({
+              agent: {
+                name: "java",
+              },
+              container: {
+                id: "123",
+              },
+              host: {
+                name: "multiple-env-service-production",
+              },
+              kubernetes: {
+                container: {},
+                deployment: {},
+                pod: {
+                  uid: "234",
+                },
+                replicaset: {},
+              },
+              service: {
+                environment: "production",
+                name: "service1",
+                node: {
+                  name: "multiple-env-service-production",
+                }
+              }
+            });
           });
         });
       });
