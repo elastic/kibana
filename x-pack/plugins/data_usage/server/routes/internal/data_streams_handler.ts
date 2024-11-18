@@ -12,9 +12,9 @@ import { getMeteringStats } from '../../utils/get_metering_stats';
 
 export const getDataStreamsHandler = (
   dataUsageContext: DataUsageContext
-): RequestHandler<never, unknown, DataUsageRequestHandlerContext> => {
+): RequestHandler<never, never, unknown, DataUsageRequestHandlerContext> => {
+  const logger = dataUsageContext.logFactory.get('dataStreamsRoute');
   return async (context, _, response) => {
-    const logger = dataUsageContext.logFactory.get('dataStreamsRoute');
     logger.debug('Retrieving user data streams');
 
     try {

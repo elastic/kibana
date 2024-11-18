@@ -24,8 +24,8 @@ const formatStringParams = <T extends string>(value: T | T[]): T[] | MetricTypes
 export const getUsageMetricsHandler = (
   dataUsageContext: DataUsageContext
 ): RequestHandler<never, unknown, UsageMetricsRequestBody, DataUsageRequestHandlerContext> => {
+  const logger = dataUsageContext.logFactory.get('usageMetricsRoute');
   return async (context, request, response) => {
-    const logger = dataUsageContext.logFactory.get('usageMetricsRoute');
     try {
       const core = await context.core;
 
