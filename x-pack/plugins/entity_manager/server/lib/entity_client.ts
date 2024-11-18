@@ -181,7 +181,7 @@ export class EntityClient {
           plugin: `@kbn/entityManager-plugin`,
         });
 
-        const mandatoryFields = ['@timestamp', ...source.identity_fields];
+        const mandatoryFields = [source.timestamp_field, ...source.identity_fields];
         const { fields } = await esClient.client.fieldCaps({
           index: source.index_patterns,
           fields: [...mandatoryFields, ...source.metadata_fields],
