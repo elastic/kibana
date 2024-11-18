@@ -49,7 +49,8 @@
     "@kbn/std",
     "@kbn/zod",
     "@kbn/inference-plugin",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/core-analytics-server"
   ],
   "exclude": [
     "target/**/*",

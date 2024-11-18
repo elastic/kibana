@@ -18,10 +18,8 @@ import {
 import { OptionsListControlState } from '../../common/options_list';
 import { mockDataControlState, mockOptionsListControlState } from '../mocks';
 import { removeHideExcludeAndHideExists } from './control_group_migrations';
-import {
-  SerializableControlGroupState,
-  getDefaultControlGroupState,
-} from './control_group_persistence';
+import { getDefaultControlGroupState } from './control_group_persistence';
+import type { SerializableControlGroupState } from './types';
 
 describe('migrate control group', () => {
   const getOptionsListControl = (

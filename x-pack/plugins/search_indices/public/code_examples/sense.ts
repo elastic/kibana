@@ -36,7 +36,7 @@ export const ConsoleVectorsIngestDataExample: IngestDataCodeDefinition = {
     let result = 'POST /_bulk?pretty\n';
     sampleDocuments.forEach((document) => {
       result += `{ "index": { "_index": "${indexName}" } }
-${JSON.stringify(document)}`;
+${JSON.stringify(document)}\n`;
     });
     result += '\n';
     return result;

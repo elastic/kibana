@@ -46,13 +46,15 @@ export const ChartFilters = memo<ChartFiltersProps>(
     const filters = useMemo(() => {
       return (
         <>
-          {showMetricsTypesFilter && <ChartsFilter filterOptions={filterOptions.metricTypes} />}
+          {showMetricsTypesFilter && (
+            <ChartsFilter filterOptions={filterOptions.metricTypes} data-test-subj={dataTestSubj} />
+          )}
           {!filterOptions.dataStreams.isFilterLoading && (
-            <ChartsFilter filterOptions={filterOptions.dataStreams} />
+            <ChartsFilter filterOptions={filterOptions.dataStreams} data-test-subj={dataTestSubj} />
           )}
         </>
       );
-    }, [filterOptions, showMetricsTypesFilter]);
+    }, [dataTestSubj, filterOptions, showMetricsTypesFilter]);
 
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);
 
@@ -68,6 +70,7 @@ export const ChartFilters = memo<ChartFiltersProps>(
             onRefresh={onRefresh}
             onRefreshChange={onRefreshChange}
             onTimeChange={onTimeChange}
+            data-test-subj={dataTestSubj}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

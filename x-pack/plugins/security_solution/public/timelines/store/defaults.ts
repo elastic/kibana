@@ -12,10 +12,9 @@ import {
   RowRendererIdEnum,
 } from '../../../common/api/timeline';
 
-import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import type { SubsetTimelineModel, TimelineModel } from './model';
-import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
+import { defaultUdtHeaders } from '../components/timeline/body/column_headers/default_headers';
 
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
@@ -109,7 +108,7 @@ export const timelineDefaults: SubsetTimelineModel &
 };
 
 export const getTimelineManageDefaults = (id: string) => ({
-  defaultColumns: defaultHeaders,
+  defaultColumns: defaultUdtHeaders,
   documentType: '',
   selectAll: false,
   id,

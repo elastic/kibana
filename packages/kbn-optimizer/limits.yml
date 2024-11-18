@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 27596
   aiAssistantManagementSelection: 19146
-  aiops: 10000
+  aiops: 16526
   alerting: 106936
   apm: 64385
   banners: 17946
@@ -33,7 +33,7 @@ pageLoadAssetSize:
   dataViewFieldEditor: 42021
   dataViewManagement: 5300
   dataViews: 65000
-  dataVisualizer: 27530
+  dataVisualizer: 30000
   devTools: 38637
   discover: 99999
   discoverEnhanced: 42730
@@ -119,7 +119,7 @@ pageLoadAssetSize:
   observabilityAiAssistantManagement: 19279
   observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
-  observabilityShared: 80000
+  observabilityShared: 111036
   osquery: 107090
   painlessLab: 179748
   presentationPanel: 55463
@@ -159,6 +159,7 @@ pageLoadAssetSize:
   spaces: 57868
   stackAlerts: 58316
   stackConnectors: 67227
+  streams: 16742
   synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586

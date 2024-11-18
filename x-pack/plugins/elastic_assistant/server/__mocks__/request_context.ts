@@ -127,11 +127,11 @@ const createElasticAssistantRequestContextMock = (
       () => clients.elasticAssistant.getAIAssistantKnowledgeBaseDataClient
     ) as unknown as jest.MockInstance<
       Promise<AIAssistantKnowledgeBaseDataClient | null>,
-      [params: GetAIAssistantKnowledgeBaseDataClientParams],
+      [params?: GetAIAssistantKnowledgeBaseDataClientParams],
       unknown
     > &
       ((
-        params: GetAIAssistantKnowledgeBaseDataClientParams
+        params?: GetAIAssistantKnowledgeBaseDataClientParams
       ) => Promise<AIAssistantKnowledgeBaseDataClient | null>),
     getCurrentUser: jest.fn(),
     getServerBasePath: jest.fn(),

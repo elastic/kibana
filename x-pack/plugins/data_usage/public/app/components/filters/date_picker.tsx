@@ -15,6 +15,7 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export interface DateRangePickerValues {
   autoRefreshOptions: {
@@ -32,10 +33,19 @@ interface UsageMetricsDateRangePickerProps {
   onRefresh: () => void;
   onRefreshChange: (evt: OnRefreshChangeProps) => void;
   onTimeChange: ({ start, end }: DurationRange) => void;
+  'data-test-subj'?: string;
 }
 
 export const UsageMetricsDateRangePicker = memo<UsageMetricsDateRangePickerProps>(
-  ({ dateRangePickerState, isDataLoading, onRefresh, onRefreshChange, onTimeChange }) => {
+  ({
+    dateRangePickerState,
+    isDataLoading,
+    onRefresh,
+    onRefreshChange,
+    onTimeChange,
+    'data-test-subj': dataTestSubj,
+  }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const kibana = useKibana<IUnifiedSearchPluginServices>();
     const { uiSettings } = kibana.services;
     const [commonlyUsedRanges] = useState(() => {
@@ -54,6 +64,7 @@ export const UsageMetricsDateRangePicker = memo<UsageMetricsDateRangePickerProps
 
     return (
       <EuiSuperDatePicker
+        data-test-subj={getTestId('date-range')}
         isLoading={isDataLoading}
         dateFormat={uiSettings.get('dateFormat')}
         commonlyUsedRanges={commonlyUsedRanges}
