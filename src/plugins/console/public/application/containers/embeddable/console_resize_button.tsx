@@ -8,7 +8,9 @@
  */
 
 import React, { useCallback, useEffect, useState, useRef } from 'react';
+import { debounce } from 'lodash';
 import { EuiResizableButton, useEuiTheme, keys, EuiThemeComputed } from '@elastic/eui';
+import { WELCOME_TOUR_DELAY } from '../../../../common/constants';
 
 const CONSOLE_MIN_HEIGHT = 200;
 
@@ -64,9 +66,16 @@ export const EmbeddedConsoleResizeButton = ({
   // When the height changes, simulate a window resize to prompt
   // the current onboarding tour step to adjust its layouts
   useEffect(() => {
-    setTimeout(() => {
+    const debouncedResize = debounce(() => {
       window.dispatchEvent(new Event('resize'));
-    }, 350);
+    }, WELCOME_TOUR_DELAY);
+
+    debouncedResize();
+
+    // Cleanup the debounce instance on unmount or dependency change
+    return () => {
+      debouncedResize.cancel();
+    };
   }, [consoleHeight]);
 
   useEffect(() => {

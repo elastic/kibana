@@ -9,6 +9,7 @@
 
 import React, { ReactNode, ReactElement, useState, useEffect } from 'react';
 import { EuiTourStep, PopoverAnchorPosition } from '@elastic/eui';
+import { WELCOME_TOUR_DELAY } from '../../../common/constants';
 
 export interface ConsoleTourStepProps {
   step: number;
@@ -47,13 +48,21 @@ export const ConsoleTourStep = ({ tourStepProps, children }: Props) => {
   const [popoverVisible, setPopoverVisible] = useState(false);
 
   useEffect(() => {
+    let timeoutId: any;
+
     if (isStepOpen) {
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         setPopoverVisible(true);
-      }, 500);
+      }, WELCOME_TOUR_DELAY);
     } else {
       setPopoverVisible(false);
     }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [isStepOpen]);
 
   return (
