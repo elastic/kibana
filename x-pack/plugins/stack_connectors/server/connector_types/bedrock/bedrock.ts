@@ -442,14 +442,15 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @returns A promise that resolves to the response of the conversation action.
    */
   public async converse(
-    input: ConverseActionParams,
+    { signal, ...converseApiInput }: ConverseActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<ConverseActionResponse> {
     const res = await this.runApi(
       {
-        body: JSON.stringify(input),
+        body: JSON.stringify(converseApiInput),
         raw: true,
         apiType: 'converse',
+        signal,
       },
       connectorUsageCollector
     );
@@ -463,13 +464,14 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @returns A promise that resolves to the streaming response of the conversation action.
    */
   public async converseStream(
-    input: ConverseActionParams,
+    { signal, ...converseApiInput }: ConverseActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<IncomingMessage> {
     const res = await this.streamApi(
       {
-        body: JSON.stringify(input),
+        body: JSON.stringify(converseApiInput),
         apiType: 'converse',
+        signal,
       },
       connectorUsageCollector
     );

@@ -155,6 +155,7 @@ export const DashboardActionResponseSchema = schema.object({
 });
 
 export const ConverseActionParamsSchema = schema.object({
+  // Bedrock API Properties
   modelId: schema.maybe(schema.string()),
   messages: schema.arrayOf(
     schema.object({
@@ -198,6 +199,8 @@ export const ConverseActionParamsSchema = schema.object({
   additionalModelRequestFields: schema.maybe(schema.any()),
   additionalModelResponseFieldPaths: schema.maybe(schema.any()),
   guardrailConfig: schema.maybe(schema.any()),
+  // Kibana related properties
+  signal: schema.maybe(schema.any()),
 });
 
 export const ConverseActionResponseSchema = schema.object({}, { unknowns: 'allow' });

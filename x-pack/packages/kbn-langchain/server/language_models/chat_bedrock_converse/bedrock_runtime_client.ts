@@ -31,7 +31,7 @@ export class BedrockRuntimeClient extends _BedrockRuntimeClient {
       actionsClient,
       connectorId,
     });
-    // eliminate middleware steps that handle auth as we handle auth the connector
+    // eliminate middleware steps that handle auth as Kibana connector handles auth
     this.middlewareStack = constructStack() as _BedrockRuntimeClient['middlewareStack'];
   }
 }

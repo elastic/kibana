@@ -44,7 +44,7 @@ export class NodeHttpHandler extends _NodeHttpHandler {
         actionId: this.connectorId,
         params: {
           subAction: 'converseStream',
-          subActionParams: { ...body, messages },
+          subActionParams: { ...body, messages, signal: options.abortSignal },
         },
       })) as { data: Readable; status: string; message?: string; serviceMessage?: string };
 
@@ -67,7 +67,7 @@ export class NodeHttpHandler extends _NodeHttpHandler {
       actionId: this.connectorId,
       params: {
         subAction: 'converse',
-        subActionParams: { ...body, messages },
+        subActionParams: { ...body, messages, signal: options.abortSignal },
       },
     })) as { data: ConverseResponse; status: string; message?: string; serviceMessage?: string };
 
