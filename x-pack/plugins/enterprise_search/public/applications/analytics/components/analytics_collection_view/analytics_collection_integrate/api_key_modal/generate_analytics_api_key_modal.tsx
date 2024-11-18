@@ -85,7 +85,7 @@ export const GenerateAnalyticsApiKeyModal: React.FC<GenerateAnalyticsApiKeyModal
                         <EuiFormRow
                           label={
                             <FormattedMessage
-                              id="xpack.enterpriseSearch.generateAnalyticsApiKeyModal.euiFormRow.nameYourAPIKeyLabel"
+                              id="xpack.enterpriseSearch.content.analytics.api.generateAnalyticsApiKeyModal.nameYourAPIKeyLabel"
                               defaultMessage="Name your API key"
                             />
                           }
