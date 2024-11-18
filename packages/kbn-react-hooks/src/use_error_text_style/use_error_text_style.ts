@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/status/core-status-common-internal'],
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+
+export const useErrorTextStyle = () => {
+  const { euiTheme } = useEuiTheme();
+  const errorTextStyle = css`
+    font-family: ${euiTheme.font.familyCode};
+    white-space: break-spaces;
+  `;
+
+  return errorTextStyle;
 };
