@@ -112,6 +112,27 @@ exports.EcsCustomPropertyMappings = {
                   },
                   filled_intervals: {
                     type: 'date_range',
+                    format: 'strict_date_optional_time||epoch_millis',
+                  },
+                  unfilled_intervals: {
+                    format: 'strict_date_optional_time||epoch_millis',
+                    type: 'date_range',
+                  },
+                  in_progress_intervals: {
+                    format: 'strict_date_optional_time||epoch_millis',
+                    type: 'date_range',
+                  },
+                  total_gap_duration_ms: {
+                    type: 'long',
+                  },
+                  filled_duration_ms: {
+                    type: 'long',
+                  },
+                  unfilled_duration_ms: {
+                    type: 'long',
+                  },
+                  in_progress_duration_ms: {
+                    type: 'long',
                   },
                 },
               },

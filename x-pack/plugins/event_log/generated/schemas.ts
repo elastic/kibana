@@ -151,6 +151,12 @@ export const EventSchema = schema.maybe(
                     status: ecsString(),
                     range: ecsDateRange(),
                     filled_intervals: ecsDateRange(),
+                    unfilled_intervals: ecsDateRange(),
+                    in_progress_intervals: ecsDateRange(),
+                    total_gap_duration_ms: ecsStringOrNumber(),
+                    filled_duration_ms: ecsStringOrNumber(),
+                    unfilled_duration_ms: ecsStringOrNumber(),
+                    in_progress_duration_ms: ecsStringOrNumber(),
                   })
                 ),
                 execution: schema.maybe(
