@@ -26,7 +26,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await esDeleteAllIndices(['search-*', 'test-*']);
   };
 
-  describe('Elasticsearch Start [Onboarding Empty State]', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/200020
+  describe.skip('Elasticsearch Start [Onboarding Empty State]', function () {
     describe('developer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginWithRole('developer');
