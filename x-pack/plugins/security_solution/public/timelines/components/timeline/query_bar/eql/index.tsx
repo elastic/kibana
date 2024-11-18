@@ -85,27 +85,31 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
         return;
       }
 
-      dispatch(
-        timelineActions.updateEqlOptions({
-          id: timelineId,
-          field: 'query',
-          value: `${formData.eqlQueryBar.query.query}`,
-        })
-      );
+      if (eqlOptions.query !== `${formData.eqlQueryBar.query.query}`) {
+        dispatch(
+          timelineActions.updateEqlOptions({
+            id: timelineId,
+            field: 'query',
+            value: `${formData.eqlQueryBar.query.query}`,
+          })
+        );
+      }
 
       for (const fieldName of Object.keys(formData.eqlOptions) as Array<
         keyof typeof formData.eqlOptions
       >) {
-        dispatch(
-          timelineActions.updateEqlOptions({
-            id: timelineId,
-            field: fieldName,
-            value: formData.eqlOptions[fieldName],
-          })
-        );
+        if (formData.eqlOptions[fieldName] !== eqlOptions[fieldName]) {
+          dispatch(
+            timelineActions.updateEqlOptions({
+              id: timelineId,
+              field: fieldName,
+              value: formData.eqlOptions[fieldName],
+            })
+          );
+        }
       }
     },
-    [dispatch, timelineId]
+    [dispatch, timelineId, eqlOptions]
   );
 
   const { form } = useForm<TimelineEqlQueryBar>({
