@@ -9,6 +9,7 @@ import z from 'zod';
 
 export const entitySourceSchema = z.object({
   type: z.string(),
+  timestamp_field: z.optional(z.string()).default('@timestamp'),
   index_patterns: z.array(z.string()),
   identity_fields: z.array(z.string()),
   metadata_fields: z.array(z.string()),
@@ -47,7 +48,7 @@ const filterCommands = (source: EntitySource) => {
 const statsCommand = (source: EntitySource) => {
   const aggs = [
     // default 'last_seen' attribute
-    'entity.last_seen_timestamp=MAX(@timestamp)',
+    `entity.last_seen_timestamp=MAX(${source.timestamp_field})`,
     ...source.metadata_fields
       .filter((field) => !source.identity_fields.some((idField) => idField === field))
       .map((field) => `metadata.${field}=VALUES(${field})`),

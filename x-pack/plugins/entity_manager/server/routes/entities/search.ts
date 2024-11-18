@@ -26,6 +26,7 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
       const sources = [
         {
           type: 'service',
+          timestamp_field: '@timestamp',
           index_patterns: ['remote_cluster:logs-*'],
           identity_fields: ['service.name', 'service.environment'],
           metadata_fields: [],
@@ -52,7 +53,7 @@ export const searchEntitiesPreviewRoute = createEntityManagerServerRoute({
           ...source,
           filters: [
             ...source.filters,
-            `@timestamp >= "${moment().subtract(5, 'minutes').toISOString()}"`,
+            `${source.timestamp_field} >= "${moment().subtract(5, 'minutes').toISOString()}"`,
           ],
         }))
       ),
