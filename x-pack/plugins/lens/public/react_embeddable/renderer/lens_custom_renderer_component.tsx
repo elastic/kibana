@@ -60,7 +60,12 @@ export function LensRenderer({
     const lensApi = apiRef.current;
     // trigger a re-render if the attributes change
     if (lensApi) {
-      lensApi.updateAttributes({ ...initialStateRef.current, ...props.attributes });
+      lensApi.updateAttributes({
+        ...('attributes' in initialStateRef.current
+          ? initialStateRef.current.attributes
+          : initialStateRef.current),
+        ...props.attributes,
+      });
       lensApi.updateOverrides(props.overrides);
     }
   }, [props.attributes, props.overrides]);
