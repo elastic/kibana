@@ -375,8 +375,8 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       >
         <EuiFormRow
           fullWidth
-          error={touchedFields.namespace && validation.namespace ? validation.namespace : null}
-          isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
+          error={validation.namespace ? validation.namespace : null}
+          isInvalid={Boolean(validation.namespace)}
           isDisabled={disabled}
         >
           <EuiComboBox
