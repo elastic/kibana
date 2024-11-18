@@ -11,15 +11,20 @@ import { DataTableRecord } from '@kbn/discover-utils';
 import { DocumentProfileProvider, DocumentType } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
 import { getDocViewer } from './accessors';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 
-export const createLogDocumentProfileProvider = (
+export const createObservabilityLogDocumentProfileProvider = (
   services: ProfileProviderServices
 ): DocumentProfileProvider => ({
-  profileId: 'log-document-profile',
+  profileId: 'observability-log-document-profile',
   profile: {
     getDocViewer,
   },
-  resolve: ({ record }) => {
+  resolve: ({ record, rootContext }) => {
+    if (rootContext.profileId !== OBSERVABILITY_ROOT_PROFILE_ID) {
+      return { isMatch: false };
+    }
+
     const isLogRecord = getIsLogRecord(record, services.logsContextService.isLogsIndexPattern);
 
     if (!isLogRecord) {
