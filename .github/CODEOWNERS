@@ -1254,6 +1254,12 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
 
 # Observability UX management team
+/x-pack/test/api_integration/services/data_view_api.ts @elastic/obs-ux-management-team
+/x-pack/test/api_integration/services/slo.ts @elastic/obs-ux-management-team
+/x-pack/test/functional/services/slo @elastic/obs-ux-management-team
+/x-pack/test/functional/apps/slo @elastic/obs-ux-management-team
+/x-pack/test/observability_api_integration @elastic/obs-ux-management-team # Assigned per https://github.com/elastic/kibana/pull/182243
+/x-pack/test/functional/services/observability @elastic/obs-ux-management-team
 /x-pack/test/api_integration/apis/slos @elastic/obs-ux-management-team
 /x-pack/test/accessibility/apps/group1/uptime.ts @elastic/obs-ux-management-team
 /x-pack/test/accessibility/apps/group3/observability.ts @elastic/obs-ux-management-team
@@ -1264,7 +1270,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test_serverless/**/test_suites/observability/custom_threshold_rule/ @elastic/obs-ux-management-team
 /x-pack/test_serverless/**/test_suites/observability/slos/ @elastic/obs-ux-management-team
 /x-pack/test_serverless/api_integration/test_suites/observability/es_query_rule @elastic/obs-ux-management-team
-/x-pack/test/api_integration/deployment_agnostic/apis/observability/alerting @elastic/obs-ux-management-team
+/x-pack/test/api_integration/deployment_agnostic/apis/observability/alerting/burn_rate_rule @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/services/alerting_api @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/services/slo_api @elastic/obs-ux-management-team
 /x-pack/test_serverless/**/test_suites/observability/infra/ @elastic/obs-ux-infra_services-team
