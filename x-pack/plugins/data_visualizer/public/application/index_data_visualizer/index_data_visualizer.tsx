@@ -16,7 +16,6 @@ import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
@@ -341,29 +340,20 @@ export const IndexDataVisualizer: FC<Props> = ({
 
   return (
     <KibanaRenderContextProvider {...startServices}>
-      <KibanaThemeProvider
-        theme={coreStart.theme}
-        modify={{
-          breakpoint: {
-            xxl: XXL_BREAKPOINT,
-          },
-        }}
-      >
-        <KibanaContextProvider services={{ ...services }}>
-          <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
-            <DatePickerContextProvider {...datePickerDeps}>
-              {!esql ? (
-                <DataVisualizerStateContextProvider
-                  IndexDataVisualizerComponent={IndexDataVisualizerView}
-                  getAdditionalLinks={getAdditionalLinks}
-                />
-              ) : (
-                <DataVisualizerESQLStateContextProvider />
-              )}
-            </DatePickerContextProvider>
-          </StorageContextProvider>
-        </KibanaContextProvider>
-      </KibanaThemeProvider>
+      <KibanaContextProvider services={{ ...services }}>
+        <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
+          <DatePickerContextProvider {...datePickerDeps}>
+            {!esql ? (
+              <DataVisualizerStateContextProvider
+                IndexDataVisualizerComponent={IndexDataVisualizerView}
+                getAdditionalLinks={getAdditionalLinks}
+              />
+            ) : (
+              <DataVisualizerESQLStateContextProvider />
+            )}
+          </DatePickerContextProvider>
+        </StorageContextProvider>
+      </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );
 };
