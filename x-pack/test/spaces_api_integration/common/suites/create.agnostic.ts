@@ -130,7 +130,7 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
 
         after(async () => {
           if (user) {
-            (supertest as SupertestWithRoleScopeType).destroy();
+            await (supertest as SupertestWithRoleScopeType).destroy();
           }
         });
 

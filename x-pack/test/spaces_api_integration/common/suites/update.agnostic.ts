@@ -91,8 +91,8 @@ export function updateTestSuiteFactory(context: DeploymentAgnosticFtrProviderCon
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           );
         });
-        after(() => {
-          maybeDestroySupertest(supertest);
+        after(async () => {
+          await maybeDestroySupertest(supertest);
           esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           );
