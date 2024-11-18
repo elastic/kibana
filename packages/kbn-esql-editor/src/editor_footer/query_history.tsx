@@ -17,7 +17,6 @@ import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiButtonEmpty,
-  Criteria,
   EuiButtonIcon,
   CustomItemAction,
   EuiCopy,
@@ -25,6 +24,7 @@ import {
   euiScrollBarStyles,
 } from '@elastic/eui';
 import { css, Interpolation, Theme } from '@emotion/react';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { type QueryHistoryItem, getHistoryItems } from '../history_local_storage';
 import { getReducedSpaceStyling, swapArrayElements } from './query_history_helpers';
 
@@ -212,8 +212,16 @@ export function QueryHistory({
 }) {
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const historyItems: QueryHistoryItem[] = getHistoryItems(sortDirection);
+
+  const { sorting, onTableChange } = useEuiTablePersist<QueryHistoryItem>({
+    tableId: 'esqlQueryHistory',
+    initialSort: {
+      field: 'timeRan',
+      direction: 'desc',
+    },
+  });
+
+  const historyItems: QueryHistoryItem[] = getHistoryItems(sorting.sort.direction);
 
   const actions: Array<CustomItemAction<QueryHistoryItem>> = useMemo(() => {
     return [
@@ -276,19 +284,6 @@ export function QueryHistory({
     return getTableColumns(containerWidth, isOnReducedSpaceLayout, actions);
   }, [actions, containerWidth, isOnReducedSpaceLayout]);
 
-  const onTableChange = ({ page, sort }: Criteria<QueryHistoryItem>) => {
-    if (sort) {
-      const { direction } = sort;
-      setSortDirection(direction);
-    }
-  };
-
-  const sorting = {
-    sort: {
-      field: 'timeRan',
-      direction: sortDirection,
-    },
-  };
   const { euiTheme } = theme;
   const extraStyling = isOnReducedSpaceLayout ? getReducedSpaceStyling() : '';
 
