@@ -77,7 +77,7 @@ export class AutoOpsAPIService {
       headers: {
         'Content-type': 'application/json',
         'X-Request-ID': traceId,
-        traceparent: apm.currentTraceparent,
+        traceparent: traceId,
       },
       httpsAgent: new https.Agent({
         rejectUnauthorized: tlsConfig.rejectUnauthorized,
