@@ -10,18 +10,24 @@
 import { DataSourceProfileProvider } from '../../../../profiles';
 import { extendProfileProvider } from '../../../extend_profile_provider';
 import { createGetDefaultAppState } from '../accessors';
-import { HOST_NAME_COLUMN, LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
+import { LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
 import { createResolve } from './create_resolve';
 
-export const createWindowsLogsDataSourceProfileProvider = (
+export const createKubernetesContainerLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'windows-logs-data-source',
+    profileId: 'observability-kubernetes-container-logs-data-source-profile',
     profile: {
       getDefaultAppState: createGetDefaultAppState({
-        defaultColumns: [LOG_LEVEL_COLUMN, HOST_NAME_COLUMN, MESSAGE_COLUMN],
+        defaultColumns: [
+          LOG_LEVEL_COLUMN,
+          { name: 'kubernetes.pod.name', width: 200 },
+          { name: 'kubernetes.namespace', width: 200 },
+          { name: 'orchestrator.cluster.name', width: 200 },
+          MESSAGE_COLUMN,
+        ],
       }),
     },
-    resolve: createResolve('logs-windows'),
+    resolve: createResolve('logs-kubernetes.container_logs'),
   });
