@@ -129,7 +129,6 @@ export interface TimelineModel {
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
-  isLoading: boolean;
   selectAll: boolean;
   /* discover saved search Id */
   savedSearchId: string | null;
@@ -190,7 +189,6 @@ export type SubsetTimelineModel = Readonly<
     | 'show'
     | 'sort'
     | 'isSaving'
-    | 'isLoading'
     | 'savedObjectId'
     | 'version'
     | 'status'

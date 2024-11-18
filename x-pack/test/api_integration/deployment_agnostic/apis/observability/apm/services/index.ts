@@ -13,6 +13,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./error_groups/error_groups_main_statistics.spec.ts'));
     loadTestFile(require.resolve('./service_details/service_details.spec.ts'));
     loadTestFile(require.resolve('./service_icons/service_icons.spec.ts'));
+    loadTestFile(require.resolve('./agent.spec.ts'));
     loadTestFile(require.resolve('./archive_services_detailed_statistics.spec.ts'));
     loadTestFile(require.resolve('./derived_annotations.spec.ts'));
     loadTestFile(require.resolve('./get_service_node_metadata.spec.ts'));
