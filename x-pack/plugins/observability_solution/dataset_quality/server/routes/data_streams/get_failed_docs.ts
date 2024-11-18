@@ -29,6 +29,7 @@ async function getPaginatedResults(options: {
     filter: [...rangeQuery(start, end)],
   };
 
+  // TODO: Fix index for accesing failure store (::failures) and remove the search parameter
   const response = await datasetQualityESClient.search({
     index,
     size: 0,

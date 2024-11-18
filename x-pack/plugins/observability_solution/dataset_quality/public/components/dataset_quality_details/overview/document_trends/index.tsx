@@ -25,23 +25,24 @@ import {
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { css } from '@emotion/react';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram-plugin/public';
-import { useFailedDocsChart } from '../../../../../hooks/use_failed_docs_chart';
+import { i18n } from '@kbn/i18n';
+import { useFailedDocsChart } from '../../../../hooks/use_failed_docs_chart';
 import {
   discoverAriaText,
   logsExplorerAriaText,
   openInDiscoverText,
   openInLogsExplorerText,
   overviewTrendsDocsText,
-} from '../../../../../../common/translations';
-import { DegradedDocsChart } from './degraded_docs_chart';
+} from '../../../../../common/translations';
+import { TrendDocsChart } from './trend_docs_chart';
 import {
   useDatasetDetailsRedirectLinkTelemetry,
   useDatasetQualityDetailsState,
   useDegradedDocsChart,
   useRedirectLink,
-} from '../../../../../hooks';
-import { _IGNORED } from '../../../../../../common/es_fields';
-import { NavigationSource } from '../../../../../services/telemetry';
+} from '../../../../hooks';
+import { _IGNORED } from '../../../../../common/es_fields';
+import { NavigationSource } from '../../../../services/telemetry';
 
 const trendDocsTooltip = (
   <FormattedMessage
@@ -54,7 +55,7 @@ const DEGRADED_DOCS_KUERY = `${_IGNORED}: *`;
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
-export default function DegradedDocs({ lastReloadTime }: { lastReloadTime: number }) {
+export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: number }) {
   const { timeRange, updateTimeRange, datasetDetails } = useDatasetQualityDetailsState();
   const {
     dataView: degradedDataView,
@@ -77,17 +78,19 @@ export default function DegradedDocs({ lastReloadTime }: { lastReloadTime: numbe
 
   const [selectedChart, setSelectedChart] = useState('degradedDocs');
 
+  const query = selectedChart === 'degradedDocs' ? DEGRADED_DOCS_KUERY : '';
+
   const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
-    query: { language: 'kuery', query: DEGRADED_DOCS_KUERY },
+    query: { language: 'kuery', query },
     navigationSource: NavigationSource.Trend,
   });
 
-  const degradedDocLinkLogsExplorer = useRedirectLink({
+  const qualityIssueDocsLinkLogsExplorer = useRedirectLink({
     dataStreamStat: datasetDetails,
     timeRangeConfig: timeRange,
     query: {
       language: 'kuery',
-      query: selectedChart === 'degradedDocs' ? DEGRADED_DOCS_KUERY : '',
+      query,
     },
     sendTelemetry,
   });
@@ -138,29 +141,37 @@ export default function DegradedDocs({ lastReloadTime }: { lastReloadTime: numbe
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem>
             <EuiButtonGroup
-              legend="Legend is required"
+              legend={i18n.translate('xpack.datasetQuality.details.chartTypeLegend', {
+                defaultMessage: 'Quality chart type',
+              })}
               onChange={setSelectedChart}
               options={[
-                { id: 'degradedDocs', label: 'Ignored fields' },
-                { id: 'failedDocs', label: 'Failed docs' },
+                {
+                  id: 'degradedDocs',
+                  label: i18n.translate('xpack.datasetQuality.details.chartType.degradedDocs', {
+                    defaultMessage: 'Ignored fields',
+                  }),
+                },
+                {
+                  id: 'failedDocs',
+                  label: i18n.translate('xpack.datasetQuality.details.chartType.failedDocs', {
+                    defaultMessage: 'Failed docs',
+                  }),
+                },
               ]}
               idSelected={selectedChart}
             />
           </EuiFlexItem>
-          {selectedChart === 'degradedDocs' ? (
-            <EuiSkeletonRectangle width={160} height={32} isLoading={!degradedDataView}>
-              <UnifiedBreakdownFieldSelector
-                dataView={degradedDataView!}
-                breakdown={{ field: breakdownDataViewField }}
-                onBreakdownFieldChange={degradedBreakdown.onChange}
-              />
-            </EuiSkeletonRectangle>
-          ) : (
-            <></>
-          )}
+          <EuiSkeletonRectangle width={160} height={32} isLoading={!degradedDataView}>
+            <UnifiedBreakdownFieldSelector
+              dataView={degradedDataView!}
+              breakdown={{ field: breakdownDataViewField }}
+              onBreakdownFieldChange={degradedBreakdown.onChange}
+            />
+          </EuiSkeletonRectangle>
           <EuiToolTip
             content={
-              degradedDocLinkLogsExplorer.isLogsExplorerAvailable
+              qualityIssueDocsLinkLogsExplorer.isLogsExplorerAvailable
                 ? openInLogsExplorerText
                 : openInDiscoverText
             }
@@ -168,31 +179,31 @@ export default function DegradedDocs({ lastReloadTime }: { lastReloadTime: numbe
             <EuiButtonIcon
               display="base"
               iconType={
-                degradedDocLinkLogsExplorer.isLogsExplorerAvailable
+                qualityIssueDocsLinkLogsExplorer.isLogsExplorerAvailable
                   ? 'logoObservability'
                   : 'discoverApp'
               }
               aria-label={
-                degradedDocLinkLogsExplorer.isLogsExplorerAvailable
+                qualityIssueDocsLinkLogsExplorer.isLogsExplorerAvailable
                   ? logsExplorerAriaText
                   : discoverAriaText
               }
               size="s"
               data-test-subj="datasetQualityDetailsLinkToDiscover"
-              {...degradedDocLinkLogsExplorer.linkProps}
+              {...qualityIssueDocsLinkLogsExplorer.linkProps}
             />
           </EuiToolTip>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         {selectedChart === 'degradedDocs' ? (
-          <DegradedDocsChart
+          <TrendDocsChart
             {...degradeChartProps}
             timeRange={timeRange}
             lastReloadTime={lastReloadTime}
             onTimeRangeChange={onTimeRangeChange}
           />
         ) : (
-          <DegradedDocsChart
+          <TrendDocsChart
             {...failedChartProps}
             timeRange={timeRange}
             lastReloadTime={lastReloadTime}

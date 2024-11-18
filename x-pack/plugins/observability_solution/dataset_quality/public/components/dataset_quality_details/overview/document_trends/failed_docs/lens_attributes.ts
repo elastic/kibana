@@ -130,6 +130,7 @@ export function getLensAttributes({
 }
 
 function getAdHocDataViewState(id: string, dataStream: string, title: string) {
+  // TODO: Need to fix the index pattern used here (aka ::failures)
   return {
     internalReferences: [
       {
@@ -244,7 +245,7 @@ function getChartColumns(breakdownField?: string): Record<string, GenericIndexPa
           [DatasetQualityLensColumn.Breakdown]: {
             dataType: 'number',
             isBucketed: true,
-            label: getFlyoutDegradedDocsTopNText(MAX_BREAKDOWN_SERIES, breakdownField),
+            label: getFlyoutFailedDocsTopNText(MAX_BREAKDOWN_SERIES, breakdownField),
             operationType: 'terms',
             scale: 'ordinal',
             sourceField: breakdownField,
@@ -267,10 +268,10 @@ function getChartColumns(breakdownField?: string): Record<string, GenericIndexPa
   };
 }
 
-const getFlyoutDegradedDocsTopNText = (count: number, fieldName: string) =>
-  i18n.translate('xpack.datasetQuality.details.degradedDocsTopNValues', {
+const getFlyoutFailedDocsTopNText = (count: number, fieldName: string) =>
+  i18n.translate('xpack.datasetQuality.details.failedDocsTopNValues', {
     defaultMessage: 'Top {count} values of {fieldName}',
     values: { count, fieldName },
     description:
-      'Tooltip label for the top N values of a field in the degraded documents trend chart.',
+      'Tooltip label for the top N values of a field in the failed documents trend chart.',
   });

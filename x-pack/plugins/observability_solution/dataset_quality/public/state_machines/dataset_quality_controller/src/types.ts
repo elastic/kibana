@@ -98,7 +98,15 @@ export type DatasetQualityControllerTypeState =
       context: DefaultDatasetQualityStateContext;
     }
   | {
+      value: 'stats.docsStats.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
       value: 'stats.degradedDocs.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'stats.failedDocs.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {

@@ -171,7 +171,9 @@ export const getDatasetQualityTableColumns = ({
   canUserMonitorDataset,
   canUserMonitorAnyDataStream,
   loadingDataStreamStats,
+  loadingDocStats,
   loadingDegradedStats,
+  loadingFailedStats,
   showFullDatasetNames,
   isActiveDataset,
   timeRange,
@@ -181,7 +183,9 @@ export const getDatasetQualityTableColumns = ({
   canUserMonitorDataset: boolean;
   canUserMonitorAnyDataStream: boolean;
   loadingDataStreamStats: boolean;
+  loadingDocStats: boolean;
   loadingDegradedStats: boolean;
+  loadingFailedStats: boolean;
   showFullDatasetNames: boolean;
   isActiveDataset: (lastActivity: number) => boolean;
   timeRange: TimeRangeConfig;
@@ -260,7 +264,7 @@ export const getDatasetQualityTableColumns = ({
                     width="60px"
                     height="20px"
                     borderRadius="m"
-                    isLoading={loadingDataStreamStats || loadingDegradedStats}
+                    isLoading={loadingDataStreamStats || loadingDegradedStats || loadingDocStats}
                   >
                     {formatNumber(
                       DataStreamStat.calculateFilteredSize(dataStreamStat),
@@ -289,7 +293,7 @@ export const getDatasetQualityTableColumns = ({
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
         <DatasetQualityIndicator
-          isLoading={loadingDegradedStats}
+          isLoading={loadingDegradedStats || loadingFailedStats || loadingDocStats}
           quality={dataStreamStat.quality}
         />
       ),
@@ -332,7 +336,7 @@ export const getDatasetQualityTableColumns = ({
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
         <FailedDocsPercentageLink
-          isLoading={loadingDegradedStats}
+          isLoading={loadingFailedStats}
           dataStreamStat={dataStreamStat}
           timeRange={timeRange}
         />

@@ -167,10 +167,12 @@ function getDatasetDetailsEbtProps({
     type: datasetDetails.type,
   };
   const degradedDocs = dataStreamDetails?.degradedDocsCount ?? 0;
+  const failedDocs = dataStreamDetails?.failedDocsCount ?? 0;
   const totalDocs = dataStreamDetails?.docsCount ?? 0;
   const degradedPercentage =
     totalDocs > 0 ? Number(((degradedDocs / totalDocs) * 100).toFixed(2)) : 0;
-  const health = mapPercentageToQuality([degradedPercentage]);
+  const failedPercentage = totalDocs > 0 ? Number(((failedDocs / totalDocs) * 100).toFixed(2)) : 0;
+  const health = mapPercentageToQuality([degradedPercentage, failedPercentage]);
   const { startDate: from, endDate: to } = getDateISORange(timeRange);
 
   return {
