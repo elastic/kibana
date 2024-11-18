@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const partitionSequenceBuildingBlocks = (
     alerts: Array<SearchHit<DetectionAlert & RiskEnrichmentFields>>
-  ) => partition(alerts, (alert) => alert?._source?.['kibana.alert.building_block_type'] == null);
+  ) => partition(alerts, (alert) => alert?._source?.['kibana.alert.group.index'] == null);
 
   // NOTE: Add to second quality gate after feature is GA
   describe('@ess @serverless Alert Suppression for EQL rules', () => {
