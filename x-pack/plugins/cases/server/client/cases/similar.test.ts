@@ -150,7 +150,7 @@ describe('similar', () => {
       `);
   });
 
-  it('should not call find when the case has no observables', async () => {
+  it('should not call findCases when the case has no observables', async () => {
     jest.mocked(clientArgs.services.caseService.getCase).mockResolvedValue({
       ...mockCases[0],
       attributes: {
