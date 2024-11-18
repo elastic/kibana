@@ -1695,6 +1695,16 @@ describe('validation logic', () => {
         ['Argument of [trim] must be [keyword], found value [doubleField] type [double]']
       );
     });
+
+    describe('unsupported fields', () => {
+      testErrorsAndWarnings(
+        `from a_index | keep unsupportedField`,
+        [],
+        [
+          'Field [unsupportedField] cannot be retrieved, it is unsupported or not indexed; returning null',
+        ]
+      );
+    });
   });
 
   describe('Ignoring errors based on callbacks', () => {

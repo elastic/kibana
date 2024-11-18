@@ -1223,21 +1223,24 @@ function validateFieldsShadowing(
   return messages;
 }
 
-function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>) {
+function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>, ast: ESQLAst) {
+  const usedColumnsInQuery: string[] = [];
+
+  walk(ast, {
+    visitColumn: (node) => usedColumnsInQuery.push(node.name),
+  });
   const messages: ESQLMessage[] = [];
-  for (const field of fields.values()) {
-    if (field.type === 'unsupported') {
-      // Removed temporarily to supress all these warnings
-      // Issue to re-enable in a better way: https://github.com/elastic/kibana/issues/189666
-      // messages.push(
-      //   getMessageFromId({
-      //     messageId: 'unsupportedFieldType',
-      //     values: {
-      //       field: field.name,
-      //     },
-      //     locations: { min: 1, max: 1 },
-      //   })
-      // );
+  for (const column of usedColumnsInQuery) {
+    if (fields.has(column) && fields.get(column)!.type === 'unsupported') {
+      messages.push(
+        getMessageFromId({
+          messageId: 'unsupportedFieldType',
+          values: {
+            field: column,
+          },
+          locations: { min: 1, max: 1 },
+        })
+      );
     }
   }
   return messages;
@@ -1350,7 +1353,7 @@ async function validateAst(
   const variables = collectVariables(ast, availableFields, queryString);
   // notify if the user is rewriting a column as variable with another type
   messages.push(...validateFieldsShadowing(availableFields, variables));
-  messages.push(...validateUnsupportedTypeFields(availableFields));
+  messages.push(...validateUnsupportedTypeFields(availableFields, ast));
 
   for (const [index, command] of ast.entries()) {
     const references: ReferenceMaps = {
