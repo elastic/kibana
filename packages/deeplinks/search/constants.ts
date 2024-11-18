@@ -25,3 +25,4 @@ export const SEARCH_ELASTICSEARCH = 'enterpriseSearchElasticsearch';
 export const SEARCH_VECTOR_SEARCH = 'enterpriseSearchVectorSearch';
 export const SEARCH_SEMANTIC_SEARCH = 'enterpriseSearchSemanticSearch';
 export const SEARCH_AI_SEARCH = 'enterpriseSearchAISearch';
+export const SEARCH_INDICES_CREATE_INDEX = 'createIndex';

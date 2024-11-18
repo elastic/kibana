@@ -9,8 +9,9 @@ import expect from '@kbn/expect';
 import {
   clearKnowledgeBase,
   createKnowledgeBaseModel,
+  deleteInferenceEndpoint,
+  deleteKnowledgeBaseModel,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
-import { deleteKnowledgeBaseModel } from './helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 
@@ -24,7 +25,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   // TODO: https://github.com/elastic/kibana/issues/192886
   describe.skip('Knowledge base', function () {
-    // TODO: https://github.com/elastic/kibana/issues/192757
     this.tags(['skipMKI']);
     let roleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
@@ -36,6 +36,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     after(async () => {
       await deleteKnowledgeBaseModel(ml);
+      await deleteInferenceEndpoint({ es });
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
