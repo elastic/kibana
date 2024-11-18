@@ -24,7 +24,6 @@ import type { EndpointAppContext } from '../../types';
 import {
   eventsIndexPattern,
   SUGGESTIONS_INTERNAL_ROUTE,
-  SUGGESTIONS_ROUTE,
 } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
@@ -38,33 +37,6 @@ export function registerEndpointSuggestionsRoutes(
   config$: Observable<ConfigSchema>,
   endpointContext: EndpointAppContext
 ) {
-  router.versioned
-    .post({
-      access: 'public',
-      path: SUGGESTIONS_ROUTE,
-      security: {
-        authz: {
-          requiredPrivileges: ['securitySolution'],
-        },
-      },
-      options: { authRequired: true },
-      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-      deprecated: true,
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: EndpointSuggestionsSchema,
-        },
-      },
-      withEndpointAuthz(
-        { any: ['canWriteEventFilters'] },
-        endpointContext.logFactory.get('endpointSuggestions'),
-        getEndpointSuggestionsRequestHandler(config$, getLogger(endpointContext))
-      )
-    );
-
   router.versioned
     .post({
       access: 'internal',
