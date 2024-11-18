@@ -111,10 +111,12 @@ export default ({ getService }: FtrProviderContext): void => {
       ] as ConfigurationPatchRequest['observableTypes'];
       const configuration = await createConfiguration(supertest);
 
-      await updateConfiguration(supertest, configuration.id, {
+      const updatedConfiguration = await updateConfiguration(supertest, configuration.id, {
         version: configuration.version,
         observableTypes,
       });
+
+      expect(updatedConfiguration.observableTypes).to.be(observableTypes);
     });
 
     it('should not patch a configuration with duplicated observableTypes', async () => {
@@ -130,10 +132,15 @@ export default ({ getService }: FtrProviderContext): void => {
       ] as ConfigurationPatchRequest['observableTypes'];
       const configuration = await createConfiguration(supertest);
 
-      await updateConfiguration(supertest, configuration.id, {
+      await updateConfiguration(
+        supertest,
+        configuration.id,
+        {
           version: configuration.version,
           observableTypes,
-        }, 400);
+        },
+        400
+      );
     });
 
     it('should update mapping when changing connector', async () => {
