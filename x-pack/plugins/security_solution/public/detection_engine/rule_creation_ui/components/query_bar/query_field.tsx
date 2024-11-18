@@ -24,9 +24,6 @@ import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import type { FieldValueQueryBar } from './types';
 import * as i18n from './translations';
 
-export * from './types';
-export * from './default_queries';
-
 export interface QueryBarDefineRuleProps {
   dataTestSubj: string;
   field: FieldHook;
