@@ -60,6 +60,7 @@ export interface KibanaLogicProps {
   history: ScopedHistory;
   indexMappingComponent?: React.FC<IndexMappingProps>;
   isSidebarEnabled: boolean;
+  kibanaVersion?: string;
   lens?: LensPublicStart;
   ml?: MlPluginStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
@@ -94,6 +95,7 @@ export interface KibanaValues {
   indexMappingComponent: React.FC<IndexMappingProps> | null;
   isCloud: boolean;
   isSidebarEnabled: boolean;
+  kibanaVersion: string | null;
   lens: LensPublicStart | null;
   ml: MlPluginStart | null;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
@@ -133,6 +135,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     history: [props.history, {}],
     indexMappingComponent: [props.indexMappingComponent || null, {}],
     isSidebarEnabled: [props.isSidebarEnabled, {}],
+    kibanaVersion: [props.kibanaVersion || null, {}],
     lens: [props.lens || null, {}],
     ml: [props.ml || null, {}],
     navigateToUrl: [
