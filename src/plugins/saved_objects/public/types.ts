@@ -8,15 +8,11 @@
  */
 
 import {
-  ChromeStart,
   CoreStart,
-  OverlayStart,
-  SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObjectReference,
 } from '@kbn/core/public';
-import { ISearchSource, ISearchStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 /**
@@ -60,14 +56,6 @@ export interface SavedObjectSaveOpts {
 export interface SavedObjectCreationOpts {
   references?: SavedObjectReference[];
   overwrite?: boolean;
-}
-
-export interface SavedObjectKibanaServices {
-  savedObjectsClient: SavedObjectsClientContract;
-  dataViews: DataViewsContract;
-  search: ISearchStart;
-  chrome: ChromeStart;
-  overlays: OverlayStart;
 }
 
 export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
