@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { render, type RenderResult } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ThemeProvider } from 'styled-components';
+import { type RenderResult } from '@testing-library/react';
+
+import { createFleetTestRendererMock } from '../../../../../../../mock';
 
 import {
   BidirectionalIntegrationsBanner,
@@ -26,20 +26,9 @@ describe('BidirectionalIntegrationsBanner', () => {
       onDismiss: jest.fn(),
     };
 
-    renderResult = render(
-      <IntlProvider locale="en">
-        <ThemeProvider
-          theme={() => ({
-            eui: {
-              euiColorAccent: '#f04e98',
-              euiPanelBackgroundColorModifiers: { accent: '#feedf5' },
-            },
-          })}
-        >
-          <BidirectionalIntegrationsBanner {...formProps} />
-        </ThemeProvider>
-      </IntlProvider>
-    );
+    const renderer = createFleetTestRendererMock();
+
+    renderResult = renderer.render(<BidirectionalIntegrationsBanner {...formProps} />);
   });
 
   it('should render bidirectional integrations banner', () => {
