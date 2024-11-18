@@ -72,7 +72,7 @@ export async function confirmUpdate(
 ) {
   const { agentCount, agentPolicyCount } = await getCountsForDownloadSource(downloadSource).catch(
     () => ({
-      //  Fail gracefully when count are not avaiable
+      //  Fail gracefully when counts are not avaiable
       agentCount: undefined,
       agentPolicyCount: undefined,
     })
