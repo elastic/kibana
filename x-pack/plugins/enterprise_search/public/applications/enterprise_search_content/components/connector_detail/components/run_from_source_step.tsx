@@ -117,7 +117,7 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
           <p>
             {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.navigateToRootLabel', {
               defaultMessage:
-                'Navigate to the root of your cloned repository and create a configuration file:',
+                'Navigate to the root of your cloned repository, checkout the appropriate version branch, and create a configuration file:',
             })}
           </p>
         </EuiText>
@@ -125,7 +125,7 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
         <CodeBox
           showTopBar={false}
           languageType="bash"
-          codeSnippet="cd connectors && touch config.yml"
+          codeSnippet="cd connectors && git checkout 8.17 && touch config.yml"
         />
         <EuiSpacer size="s" />
         <EuiText size="s">
