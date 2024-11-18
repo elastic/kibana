@@ -1230,6 +1230,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/api_integration/services/infraops_source_configuration.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/pull/34916
 
 ## Logs UI code exceptions -> @elastic/obs-ux-logs-team
+/x-pack/test/upgrade/apps/logs @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/page_objects/svl_oblt_onboarding_stream_log_file.ts @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/page_objects/svl_oblt_onboarding_page.ts @elastic/obs-ux-logs-team
 /x-pack/plugins/observability_solution/infra/common/http_api/log_alerts @elastic/obs-ux-logs-team
@@ -1251,6 +1252,8 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/plugins/observability_solution/infra/server/routes/log_alerts @elastic/obs-ux-logs-team
 /x-pack/plugins/observability_solution/infra/server/routes/log_analysis @elastic/obs-ux-logs-team
 /x-pack/plugins/observability_solution/infra/server/services/rules @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+/x-pack/test/common/utils/synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/blob/main/packages/kbn-apm-synthtrace/kibana.jsonc#L5
+
 # Infra Monitoring tests
 /x-pack/test/api_integration/apis/infra @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/infra @elastic/obs-ux-infra_services-team
