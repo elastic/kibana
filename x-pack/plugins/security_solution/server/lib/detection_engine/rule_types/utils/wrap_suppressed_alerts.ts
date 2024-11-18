@@ -47,7 +47,7 @@ export const wrapSuppressedAlerts = ({
   return events.map((event) => {
     const suppressionTerms = getSuppressionTerms({
       alertSuppression: completeRule?.ruleParams?.alertSuppression,
-      fields: event.fields,
+      input: event.fields,
     });
 
     const id = generateId(

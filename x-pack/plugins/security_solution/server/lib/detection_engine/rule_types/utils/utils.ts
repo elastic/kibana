@@ -1104,7 +1104,7 @@ export const buildShellAlertSuppressionTermsAndFields = ({
 } => {
   const suppressionTerms = getSuppressionTerms({
     alertSuppression: completeRule?.ruleParams?.alertSuppression,
-    fields: shellAlert._source,
+    input: shellAlert._source,
   });
   const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 

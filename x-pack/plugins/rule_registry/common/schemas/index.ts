@@ -13,11 +13,11 @@ import type {
   CommonAlertFields880,
 } from './8.8.0';
 
-import type { AlertWithSuppressionFields8130, SuppressionFields8130 } from './8.13.0';
+import type { AlertWithSuppressionFields8170, SuppressionFields8170 } from './8.17.0';
 
 export type {
-  AlertWithSuppressionFields8130 as AlertWithSuppressionFieldsLatest,
-  SuppressionFields8130 as SuppressionFieldsLatest,
+  AlertWithSuppressionFields8170 as AlertWithSuppressionFieldsLatest,
+  SuppressionFields8170 as SuppressionFieldsLatest,
   CommonAlertFieldName880 as CommonAlertFieldNameLatest,
   CommonAlertIdFieldName870 as CommonAlertIdFieldNameLatest,
   CommonAlertFields880 as CommonAlertFieldsLatest,

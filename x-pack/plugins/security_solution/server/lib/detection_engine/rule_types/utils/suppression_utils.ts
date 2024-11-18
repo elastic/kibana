@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pick from 'lodash/pick';
 import get from 'lodash/get';
 import sortBy from 'lodash/sortBy';
 
@@ -18,10 +17,12 @@ import {
 } from '@kbn/rule-data-utils';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { ExtraFieldsForShellAlert } from '../eql/build_alert_group_from_sequence';
+import { robustGet } from './source_fields_merging/utils/robust_field_access';
+import type { SearchTypes } from '../../../../../common/detection_engine/types';
 
 export interface SuppressionTerm {
   field: string;
-  value: string[] | number[] | null;
+  value: SearchTypes | null;
 }
 
 /**
@@ -60,23 +61,21 @@ export const getSuppressionAlertFields = ({
 };
 
 /**
+ * generates values from a source event for the fields provided in the alertSuppression object
+ * @param alertSuppression {@link AlertSuppressionCamel} options defining how to suppress alerts
+ * @param input source data from either the _source of "fields" property on the event
  * returns an array of {@link SuppressionTerm}s by retrieving the appropriate field values based on the provided alertSuppression configuration
  */
 export const getSuppressionTerms = ({
   alertSuppression,
-  fields,
+  input,
 }: {
-  fields: Record<string, unknown> | undefined;
   alertSuppression: AlertSuppressionCamel | undefined;
+  input: Record<string, unknown> | undefined;
 }): SuppressionTerm[] => {
   const suppressedBy = alertSuppression?.groupBy ?? [];
-  const suppressedProps = pick(fields, suppressedBy) as Record<
-    string,
-    string[] | number[] | undefined
-  >;
-
   const suppressionTerms = suppressedBy.map((field) => {
-    const value = get(suppressedProps, field) ?? null;
+    const value = input != null ? robustGet({ document: input, key: field }) ?? null : null;
     const sortedValue = Array.isArray(value) ? (sortBy(value) as string[] | number[]) : value;
     return {
       field,
