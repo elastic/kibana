@@ -128,6 +128,15 @@ export {
   PROFILE_ALLOC_SPACE,
   PROFILE_INUSE_OBJECTS,
   PROFILE_INUSE_SPACE,
+  ENTITY,
+  ENTITY_DEFINITION_ID,
+  ENTITY_DISPLAY_NAME,
+  ENTITY_FIRST_SEEN,
+  ENTITY_ID,
+  ENTITY_LAST_SEEN,
+  ENTITY_TYPE,
+  SOURCE_DATA_STREAM_TYPE,
+  ENTITY_IDENTITY_FIELDS,
 } from './field_names/elasticsearch';
 
 export {
@@ -184,6 +193,7 @@ export type {
 
 export {
   ServiceOverviewLocatorDefinition,
+  SERVICE_OVERVIEW_LOCATOR_ID,
   TransactionDetailsByNameLocatorDefinition,
   ASSET_DETAILS_FLYOUT_LOCATOR_ID,
   AssetDetailsFlyoutLocatorDefinition,
@@ -208,3 +218,5 @@ export {
 } from './locators';
 
 export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';
+
+export { ENTITY_TYPES, EntityDataStreamType } from './entity';

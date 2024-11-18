@@ -8,15 +8,16 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { pluginServices, registry } from './services/plugin_services';
 import {
-  PresentationUtilPluginSetupDeps,
-  PresentationUtilPluginStartDeps,
   PresentationUtilPluginSetup,
+  PresentationUtilPluginSetupDeps,
   PresentationUtilPluginStart,
+  PresentationUtilPluginStartDeps,
 } from './types';
 
 import { registerExpressionsLanguage } from '.';
+import { setKibanaServices } from './services/kibana_services';
+import { getPresentationLabsService } from './services/presentation_labs_service';
 
 export class PresentationUtilPlugin
   implements
@@ -38,11 +39,10 @@ export class PresentationUtilPlugin
     coreStart: CoreStart,
     startPlugins: PresentationUtilPluginStartDeps
   ): PresentationUtilPluginStart {
-    pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
+    setKibanaServices(coreStart, startPlugins);
 
     return {
-      ContextProvider: pluginServices.getContextProvider(),
-      labsService: pluginServices.getServices().labs,
+      labsService: getPresentationLabsService(),
       registerExpressionsLanguage,
     };
   }

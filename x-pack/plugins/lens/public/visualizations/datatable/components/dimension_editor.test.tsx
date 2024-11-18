@@ -6,25 +6,20 @@
  */
 
 import React from 'react';
-import { DEFAULT_COLOR_MAPPING_CONFIG, type PaletteRegistry } from '@kbn/coloring';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { act, render, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
-import {
-  FramePublicAPI,
-  OperationDescriptor,
-  VisualizationDimensionEditorProps,
-  DatasourcePublicAPI,
-  DataType,
-} from '../../../types';
+import { FramePublicAPI, DatasourcePublicAPI, OperationDescriptor } from '../../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
-import { TableDimensionEditor } from './dimension_editor';
+import { TableDimensionEditor, TableDimensionEditorProps } from './dimension_editor';
 import { ColumnState } from '../../../../common/expressions';
 import { capitalize } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 
 describe('data table dimension editor', () => {
   let user: UserEvent;
@@ -35,10 +30,8 @@ describe('data table dimension editor', () => {
     alignment: EuiButtonGroupTestHarness;
   };
   let mockOperationForFirstColumn: (overrides?: Partial<OperationDescriptor>) => void;
-  let props: VisualizationDimensionEditorProps<DatatableVisualizationState> & {
-    paletteService: PaletteRegistry;
-    isDarkMode: boolean;
-  };
+
+  let props: TableDimensionEditorProps;
 
   function testState(): DatatableVisualizationState {
     return {
@@ -80,6 +73,7 @@ describe('data table dimension editor', () => {
             name: 'foo',
             meta: {
               type: 'string',
+              params: {},
             },
           },
         ],
@@ -114,13 +108,7 @@ describe('data table dimension editor', () => {
     mockOperationForFirstColumn();
   });
 
-  const renderTableDimensionEditor = (
-    overrideProps?: Partial<
-      VisualizationDimensionEditorProps<DatatableVisualizationState> & {
-        paletteService: PaletteRegistry;
-      }
-    >
-  ) => {
+  const renderTableDimensionEditor = (overrideProps?: Partial<TableDimensionEditorProps>) => {
     return render(<TableDimensionEditor {...props} {...overrideProps} />, {
       wrapper: ({ children }) => (
         <I18nProvider>
@@ -137,9 +125,16 @@ describe('data table dimension editor', () => {
   });
 
   it('should render default alignment for number', () => {
-    mockOperationForFirstColumn({ dataType: 'number' });
+    frame.activeData!.first.columns[0].meta.type = 'number';
     renderTableDimensionEditor();
     expect(btnGroups.alignment.selected).toHaveTextContent('Right');
+  });
+
+  it('should render default alignment for ranges', () => {
+    frame.activeData!.first.columns[0].meta.type = 'number';
+    frame.activeData!.first.columns[0].meta.params = { id: 'range' };
+    renderTableDimensionEditor();
+    expect(btnGroups.alignment.selected).toHaveTextContent('Left');
   });
 
   it('should render specific alignment', () => {
@@ -181,10 +176,11 @@ describe('data table dimension editor', () => {
     expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
   });
 
-  it.each<DataType>(['date'])(
+  it.each<DatatableColumnType>(['date'])(
     'should not show the dynamic coloring option for "%s" columns',
-    (dataType) => {
-      mockOperationForFirstColumn({ dataType });
+    (type) => {
+      frame.activeData!.first.columns[0].meta.type = type;
+
       renderTableDimensionEditor();
       expect(screen.queryByTestId('lnsDatatable_dynamicColoring_groups')).not.toBeInTheDocument();
       expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
@@ -231,15 +227,16 @@ describe('data table dimension editor', () => {
     });
   });
 
-  it.each<{ flyout: 'terms' | 'values'; isBucketed: boolean; dataType: DataType }>([
-    { flyout: 'terms', isBucketed: true, dataType: 'number' },
-    { flyout: 'terms', isBucketed: false, dataType: 'string' },
-    { flyout: 'values', isBucketed: false, dataType: 'number' },
+  it.each<{ flyout: 'terms' | 'values'; isBucketed: boolean; type: DatatableColumnType }>([
+    { flyout: 'terms', isBucketed: true, type: 'number' },
+    { flyout: 'terms', isBucketed: false, type: 'string' },
+    { flyout: 'values', isBucketed: false, type: 'number' },
   ])(
-    'should show color by $flyout flyout when bucketing is $isBucketed with $dataType column',
-    async ({ flyout, isBucketed, dataType }) => {
+    'should show color by $flyout flyout when bucketing is $isBucketed with $type column',
+    async ({ flyout, isBucketed, type }) => {
       state.columns[0].colorMode = 'cell';
-      mockOperationForFirstColumn({ isBucketed, dataType });
+      frame.activeData!.first.columns[0].meta.type = type;
+      mockOperationForFirstColumn({ isBucketed });
       renderTableDimensionEditor();
 
       await user.click(screen.getByLabelText('Edit colors'));
@@ -251,6 +248,7 @@ describe('data table dimension editor', () => {
 
   it('should show the dynamic coloring option for a bucketed operation', () => {
     state.columns[0].colorMode = 'cell';
+    frame.activeData!.first.columns[0].meta.type = 'string';
     mockOperationForFirstColumn({ isBucketed: true });
 
     renderTableDimensionEditor();

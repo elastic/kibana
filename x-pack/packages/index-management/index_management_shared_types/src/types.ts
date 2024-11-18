@@ -12,12 +12,33 @@ import {
   Uuid,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ScopedHistory } from '@kbn/core-application-browser';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { ExtensionsSetup } from './services/extensions_service';
 import { PublicApiServiceSetup } from './services/public_api_service';
+
+export type IndexManagementLocatorParams = SerializableRecord &
+  (
+    | {
+        page: 'data_streams_details';
+        dataStreamName?: string;
+      }
+    | {
+        page: 'index_template';
+        indexTemplate: string;
+      }
+    | {
+        page: 'component_template';
+        componentTemplate: string;
+      }
+  );
+
+export type IndexManagementLocator = LocatorPublic<IndexManagementLocatorParams>;
 
 export interface IndexManagementPluginSetup {
   apiService: PublicApiServiceSetup;
   extensionsService: ExtensionsSetup;
+  locator?: IndexManagementLocator;
 }
 
 export interface IndexManagementPluginStart {
@@ -58,9 +79,11 @@ export interface Index {
 export interface IndexMappingProps {
   index?: Index;
   showAboutMappings?: boolean;
+  hasUpdateMappingsPrivilege?: boolean;
 }
 export interface IndexSettingProps {
   indexName: string;
+  hasUpdateSettingsPrivilege?: boolean;
 }
 export interface SendRequestResponse<D = any, E = any> {
   data: D | null;

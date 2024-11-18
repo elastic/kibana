@@ -10,10 +10,11 @@
 import { useMutation } from '@tanstack/react-query';
 import type { HttpStart, IHttpFetchError } from '@kbn/core-http-browser';
 import { updateRule, UpdateRuleBody } from '../apis/update_rule';
+import { Rule } from '../types';
 
 export interface UseUpdateRuleProps {
   http: HttpStart;
-  onSuccess?: (formData: UpdateRuleBody) => void;
+  onSuccess?: (rule: Rule) => void;
   onError?: (error: IHttpFetchError<{ message: string }>) => void;
 }
 

@@ -34,6 +34,7 @@ import { ControlPanelProps, DefaultControlApi } from '../../controls/types';
 import { ControlError } from './control_error';
 
 import './control_panel.scss';
+import { isCompressed } from '../utils/is_compressed';
 
 const DragHandle = ({
   isEditable,
@@ -122,7 +123,6 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
   const isEditable = viewMode === ViewMode.EDIT;
   const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
   const controlGrow = grow ?? DEFAULT_CONTROL_GROW;
-
   return (
     <EuiFlexItem
       ref={setNodeRef}
@@ -154,12 +154,10 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
           data-test-subj="control-frame-title"
           fullWidth
           label={usingTwoLineLayout ? panelTitle || defaultPanelTitle || '...' : undefined}
-          display="rowCompressed"
         >
           <EuiFormControlLayout
             fullWidth
             isLoading={Boolean(dataLoading)}
-            compressed
             className={classNames(
               'controlFrame__formControlLayout',
               {
@@ -191,6 +189,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                 )}
               </>
             }
+            compressed={isCompressed(api)}
           >
             <>
               {blockingError && (

@@ -98,6 +98,10 @@ export function useBulkGetAgentPolicies({
     ['agentPolicies', policyIds],
 
     async () => {
+      if (!policyIds.length) {
+        return [];
+      }
+
       return (await sendBulkGetAgentPolicies({ http, requestBody: { ids: policyIds } }))?.items;
     },
 

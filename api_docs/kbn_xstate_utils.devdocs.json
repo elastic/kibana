@@ -2,26 +2,27 @@
   "id": "@kbn/xstate-utils",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.createNotificationChannel",
+        "id": "def-public.createConsoleInspector",
+        "type": "Function",
+        "tags": [],
+        "label": "createConsoleInspector",
+        "description": [],
+        "signature": [
+          "() => (inspectionEvent: InspectionEvent) => void"
+        ],
+        "path": "packages/kbn-xstate-utils/src/console_inspector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/xstate-utils",
+        "id": "def-public.createNotificationChannel",
         "type": "Function",
         "tags": [],
         "label": "createNotificationChannel",
@@ -32,9 +33,9 @@
           ", TSentEvent>(shouldReplayLastEvent?: boolean) => ",
           {
             "pluginId": "@kbn/xstate-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnXstateUtilsPluginApi",
-            "section": "def-common.NotificationChannel",
+            "section": "def-public.NotificationChannel",
             "text": "NotificationChannel"
           },
           "<TContext, TEvent, TSentEvent>"
@@ -45,7 +46,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/xstate-utils",
-            "id": "def-common.createNotificationChannel.$1",
+            "id": "def-public.createNotificationChannel.$1",
             "type": "boolean",
             "tags": [],
             "label": "shouldReplayLastEvent",
@@ -64,7 +65,7 @@
       },
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.getDevToolsOptions",
+        "id": "def-public.getDevToolsOptions",
         "type": "Function",
         "tags": [],
         "label": "getDevToolsOptions",
@@ -81,7 +82,7 @@
       },
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.isDevMode",
+        "id": "def-public.isDevMode",
         "type": "Function",
         "tags": [],
         "label": "isDevMode",
@@ -98,7 +99,7 @@
       },
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.sendIfDefined",
+        "id": "def-public.sendIfDefined",
         "type": "Function",
         "tags": [],
         "label": "sendIfDefined",
@@ -126,7 +127,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/xstate-utils",
-            "id": "def-common.sendIfDefined.$1",
+            "id": "def-public.sendIfDefined.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "target",
@@ -149,7 +150,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.NotificationChannel",
+        "id": "def-public.NotificationChannel",
         "type": "Interface",
         "tags": [],
         "label": "NotificationChannel",
@@ -157,9 +158,9 @@
         "signature": [
           {
             "pluginId": "@kbn/xstate-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnXstateUtilsPluginApi",
-            "section": "def-common.NotificationChannel",
+            "section": "def-public.NotificationChannel",
             "text": "NotificationChannel"
           },
           "<TContext, TEvent, TSentEvent>"
@@ -170,7 +171,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/xstate-utils",
-            "id": "def-common.NotificationChannel.createService",
+            "id": "def-public.NotificationChannel.createService",
             "type": "Function",
             "tags": [],
             "label": "createService",
@@ -188,7 +189,7 @@
           },
           {
             "parentPluginId": "@kbn/xstate-utils",
-            "id": "def-common.NotificationChannel.notify",
+            "id": "def-public.NotificationChannel.notify",
             "type": "Function",
             "tags": [],
             "label": "notify",
@@ -208,7 +209,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/xstate-utils",
-                "id": "def-common.NotificationChannel.notify.$1",
+                "id": "def-public.NotificationChannel.notify.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "eventExpr",
@@ -233,7 +234,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.MatchedState",
+        "id": "def-public.MatchedState",
         "type": "Type",
         "tags": [],
         "label": "MatchedState",
@@ -258,7 +259,7 @@
       },
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.MatchedStateFromActor",
+        "id": "def-public.MatchedStateFromActor",
         "type": "Type",
         "tags": [],
         "label": "MatchedStateFromActor",
@@ -284,7 +285,7 @@
       },
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.OmitDeprecatedState",
+        "id": "def-public.OmitDeprecatedState",
         "type": "Type",
         "tags": [],
         "label": "OmitDeprecatedState",
@@ -298,6 +299,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

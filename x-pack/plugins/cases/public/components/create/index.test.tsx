@@ -172,6 +172,8 @@ describe('CreateCase case', () => {
 
     await user.click(screen.getByTestId('create-case-submit'));
 
-    expect(defaultProps.onSuccess).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(defaultProps.onSuccess).toHaveBeenCalled();
+    });
   });
 });

@@ -8,11 +8,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
-import { useDataViewsService } from '../../services';
 import {
   ESFieldsSelect as Component,
   ESFieldsSelectProps as Props,
 } from './es_fields_select.component';
+import { getDataViewFields } from '../../lib/data_view_helpers';
 
 type ESFieldsSelectProps = Omit<Props, 'fields'> & { index: string };
 
@@ -21,11 +21,10 @@ export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = (pro
   const [fields, setFields] = useState<string[]>([]);
   const prevIndex = usePrevious(index);
   const mounted = useRef(true);
-  const { getFields } = useDataViewsService();
 
   useEffect(() => {
     if (prevIndex !== index) {
-      getFields(index).then((newFields) => {
+      getDataViewFields(index).then((newFields) => {
         if (!mounted.current) {
           return;
         }
@@ -37,7 +36,7 @@ export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = (pro
         }
       });
     }
-  }, [fields, index, onChange, prevIndex, selected, getFields]);
+  }, [fields, index, onChange, prevIndex, selected]);
 
   useEffect(
     () => () => {

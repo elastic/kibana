@@ -9,20 +9,21 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { RULE_PREVIEW_FOOTER_TEST_ID, RULE_PREVIEW_OPEN_RULE_FLYOUT_TEST_ID } from './test_ids';
 import { PreviewFooter } from './footer';
-import { mockFlyoutApi } from '../../document_details/shared/mocks/mock_flyout_context';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { RulePanelKey } from '../right';
+import { useRuleDetailsLink } from '../../document_details/shared/hooks/use_rule_details_link';
+import { TestProviders } from '../../../common/mock';
 
-jest.mock('@kbn/expandable-flyout');
+jest.mock('../../document_details/shared/hooks/use_rule_details_link');
 
-const renderRulePreviewFooter = () => render(<PreviewFooter ruleId="ruleid" />);
+const renderRulePreviewFooter = () =>
+  render(
+    <TestProviders>
+      <PreviewFooter ruleId="ruleid" />
+    </TestProviders>
+  );
 
 describe('<RulePreviewFooter />', () => {
-  beforeAll(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-  });
-
   it('should render rule details link correctly when ruleId is available', () => {
+    (useRuleDetailsLink as jest.Mock).mockReturnValue('rule_details_link');
     const { getByTestId } = renderRulePreviewFooter();
 
     expect(getByTestId(RULE_PREVIEW_FOOTER_TEST_ID)).toBeInTheDocument();
@@ -32,13 +33,9 @@ describe('<RulePreviewFooter />', () => {
     );
   });
 
-  it('should open rule flyout when clicked', () => {
-    const { getByTestId } = renderRulePreviewFooter();
-
-    getByTestId(RULE_PREVIEW_OPEN_RULE_FLYOUT_TEST_ID).click();
-
-    expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith({
-      right: { id: RulePanelKey, params: { ruleId: 'ruleid' } },
-    });
+  it('should not render the footer if rule link is not available', () => {
+    (useRuleDetailsLink as jest.Mock).mockReturnValue(null);
+    const { container } = renderRulePreviewFooter();
+    expect(container).toBeEmptyDOMElement();
   });
 });

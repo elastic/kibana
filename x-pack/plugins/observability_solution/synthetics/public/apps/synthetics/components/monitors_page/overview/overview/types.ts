@@ -10,4 +10,5 @@ export interface FlyoutParamProps {
   configId: string;
   location: string;
   locationId: string;
+  spaceId?: string;
 }

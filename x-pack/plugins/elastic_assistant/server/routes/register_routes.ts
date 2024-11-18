@@ -7,9 +7,9 @@
 
 import type { Logger } from '@kbn/core/server';
 
-import { cancelAttackDiscoveryRoute } from './attack_discovery/cancel_attack_discovery';
-import { getAttackDiscoveryRoute } from './attack_discovery/get_attack_discovery';
-import { postAttackDiscoveryRoute } from './attack_discovery/post_attack_discovery';
+import { cancelAttackDiscoveryRoute } from './attack_discovery/post/cancel/cancel_attack_discovery';
+import { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
+import { postAttackDiscoveryRoute } from './attack_discovery/post/post_attack_discovery';
 import { ElasticAssistantPluginRouter, GetElser } from '../types';
 import { createConversationRoute } from './user_conversations/create_route';
 import { deleteConversationRoute } from './user_conversations/delete_route';
@@ -18,6 +18,7 @@ import { updateConversationRoute } from './user_conversations/update_route';
 import { findUserConversationsRoute } from './user_conversations/find_route';
 import { bulkActionConversationsRoute } from './user_conversations/bulk_actions_route';
 import { appendConversationMessageRoute } from './user_conversations/append_conversation_messages_route';
+import { getKnowledgeBaseIndicesRoute } from './knowledge_base/get_knowledge_base_indices';
 import { getKnowledgeBaseStatusRoute } from './knowledge_base/get_knowledge_base_status';
 import { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
 import { getEvaluateRoute } from './evaluate/get_evaluate';
@@ -60,6 +61,7 @@ export const registerRoutes = (
   findUserConversationsRoute(router);
 
   // Knowledge Base Setup
+  getKnowledgeBaseIndicesRoute(router);
   getKnowledgeBaseStatusRoute(router);
   postKnowledgeBaseRoute(router);
 

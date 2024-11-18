@@ -25,8 +25,15 @@ import { pick, throttle } from 'lodash';
 import type { MlDependencies } from '../../application/app';
 import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
 import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
-import type { SingleMetricViewerServices, MlEntity } from '../../embeddables/types';
-import './_index.scss';
+import type {
+  SingleMetricViewerServices,
+  MlEntity,
+  SingleMetricViewerEmbeddableApi,
+} from '../../embeddables/types';
+import {
+  getTimeseriesExplorerStyles,
+  getAnnotationStyles,
+} from '../../application/timeseriesexplorer/styles';
 
 const containerPadding = 20;
 const minElemAndChartDiff = 20;
@@ -46,6 +53,7 @@ export type SingleMetricViewerSharedComponent = FC<SingleMetricViewerProps>;
  * Only used to initialize internally
  */
 export type SingleMetricViewerPropsWithDeps = SingleMetricViewerProps & {
+  api?: SingleMetricViewerEmbeddableApi;
   coreStart: CoreStart;
   pluginStart: MlDependencies;
   mlServices: SingleMetricViewerServices;
@@ -72,8 +80,12 @@ export interface SingleMetricViewerProps {
 type Zoom = AppStateZoom | undefined;
 type ForecastId = string | undefined;
 
+const timeseriesExplorerStyles = getTimeseriesExplorerStyles();
+const annotationStyles = getAnnotationStyles();
+
 const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   // Component dependencies
+  api,
   coreStart,
   pluginStart,
   mlServices,
@@ -217,7 +229,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
           }}
           data-test-subj={`mlSingleMetricViewer_${uuid}`}
           ref={resizeRef}
-          className="ml-time-series-explorer"
+          css={[timeseriesExplorerStyles, annotationStyles]}
           data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
           data-rendering-count={1}
         >
@@ -236,6 +248,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
                   autoZoomDuration !== undefined &&
                   selectedJobId === selectedJobWrapper?.job.job_id && (
                     <TimeSeriesExplorerEmbeddableChart
+                      api={api}
                       chartWidth={chartDimensions.width - containerPadding}
                       chartHeight={chartDimensions.height - containerPadding}
                       dataViewsService={pluginStart.data.dataViews}

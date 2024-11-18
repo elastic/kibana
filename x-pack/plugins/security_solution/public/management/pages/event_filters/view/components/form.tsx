@@ -30,8 +30,12 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import {
   EVENT_FILTERS_OPERATORS,
   hasWrongOperatorWithWildcard,
+  hasPartialCodeSignatureEntry,
 } from '@kbn/securitysolution-list-utils';
-import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
+import {
+  WildCardWithWrongOperatorCallout,
+  PartialCodeSignatureCallout,
+} from '@kbn/securitysolution-exception-list-components';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
@@ -170,6 +174,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] = useState<boolean>(
       hasWrongOperatorWithWildcard([exception])
     );
+
+    const [hasPartialCodeSignatureWarning, setHasPartialCodeSignatureWarning] =
+      useState<boolean>(false);
 
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => [eventsIndexPattern], []);
@@ -563,6 +570,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
 
         // handle wildcard with wrong operator case
         setHasWildcardWithWrongOperator(hasWrongOperatorWithWildcard(arg.exceptionItems));
+        setHasPartialCodeSignatureWarning(hasPartialCodeSignatureEntry(arg.exceptionItems));
 
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
           arg.exceptionItems[0] !== undefined
@@ -725,6 +733,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         <EuiHorizontalRule />
         {criteriaSection}
         {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+        {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
         {hasDuplicateFields && (
           <>
             <EuiSpacer size="xs" />

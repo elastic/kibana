@@ -12,7 +12,6 @@
  * In the future, each top level folder should be exported like that to avoid naming collision
  */
 import * as Forms from './forms';
-import * as ace from './ace';
 import * as GlobalFlyout from './global_flyout';
 import * as XJson from './xjson';
 
@@ -47,7 +46,7 @@ export {
   useAuthorizationContext,
 } from './authorization';
 
-export { Forms, ace, GlobalFlyout, XJson };
+export { Forms, GlobalFlyout, XJson };
 
 export { extractQueryParams, attemptToURIDecode } from './url';
 

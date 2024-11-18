@@ -14,7 +14,7 @@ import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
-import { ErrorCode } from '../../common/constants';
+import { GenerationErrorCode } from '../../common/constants';
 
 export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -30,6 +30,13 @@ export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRoute
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because the privileges are not defined yet.',
+          },
+        },
         validate: {
           request: {
             body: buildRouteValidationWithZod(CheckPipelineRequestBody),
@@ -51,7 +58,7 @@ export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRoute
             });
           } catch (err) {
             try {
-              handleCustomErrors(err, ErrorCode.RECURSION_LIMIT);
+              handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);
             } catch (e) {
               if (isErrorThatHandlesItsOwnResponse(e)) {
                 return e.sendResponse(res);

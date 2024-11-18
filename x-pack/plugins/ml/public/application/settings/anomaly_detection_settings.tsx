@@ -27,11 +27,13 @@ import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_co
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
+import { separateCalendarsByType } from './calendars/dst_utils';
 
 export const AnomalyDetectionSettings: FC = () => {
   const mlApi = useMlApi();
 
   const [calendarsCount, setCalendarsCount] = useState(0);
+  const [calendarsDstCount, setCalendarsDstCount] = useState(0);
   const [filterListsCount, setFilterListsCount] = useState(0);
 
   const { canGetFilters, canCreateFilter, canGetCalendars, canCreateCalendar } = useContext(
@@ -40,7 +42,9 @@ export const AnomalyDetectionSettings: FC = () => {
 
   const { displayErrorToast } = useToastNotificationService();
   const redirectToCalendarList = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_MANAGE);
+  const redirectToCalendarDstList = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_DST_MANAGE);
   const redirectToNewCalendarPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_NEW);
+  const redirectToNewCalendarDstPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_DST_NEW);
   const redirectToFilterLists = useCreateAndNavigateToMlLink(ML_PAGES.FILTER_LISTS_MANAGE);
   const redirectToNewFilterListPage = useCreateAndNavigateToMlLink(ML_PAGES.FILTER_LISTS_NEW);
 
@@ -53,8 +57,9 @@ export const AnomalyDetectionSettings: FC = () => {
     // Obtain the counts of calendars and filter lists.
     if (canGetCalendars === true) {
       try {
-        const calendars = await mlApi.calendars();
+        const { calendarsDst, calendars } = separateCalendarsByType(await mlApi.calendars());
         setCalendarsCount(calendars.length);
+        setCalendarsDstCount(calendarsDst.length);
       } catch (e) {
         displayErrorToast(
           e,
@@ -94,7 +99,7 @@ export const AnomalyDetectionSettings: FC = () => {
       <EuiSpacer size="m" />
 
       <EuiFlexGroup gutterSize="xl">
-        <EuiFlexItem grow={5}>
+        <EuiFlexItem>
           <EuiTitle size="s">
             <h3>
               <FormattedMessage
@@ -160,7 +165,79 @@ export const AnomalyDetectionSettings: FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={5}>
+
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.ml.settings.anomalyDetection.calendarsDstTitle"
+                defaultMessage="DST Calendars"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s">
+            <EuiTextColor color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.settings.anomalyDetection.calendarsDstText"
+                  defaultMessage="DST calendars contain a list of scheduled events for which you do not want to generate anomalies, taking into account daylight saving time shifts that may cause events to occur one hour earlier or later."
+                />
+              </p>
+            </EuiTextColor>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center">
+            {canGetCalendars && (
+              <EuiFlexItem grow={false} style={{ display: 'block' }}>
+                <EuiText>
+                  <FormattedMessage
+                    id="xpack.ml.settings.anomalyDetection.calendarsDstSummaryCount"
+                    defaultMessage="You have {calendarsCountBadge} {calendarsDstCount, plural, one {calendar} other {calendars}}"
+                    values={{
+                      calendarsCountBadge: <EuiBadge>{calendarsDstCount}</EuiBadge>,
+                      calendarsDstCount,
+                    }}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="mlCalendarsDstMngButton"
+                flush="left"
+                color="primary"
+                onClick={redirectToCalendarDstList}
+                isDisabled={canGetCalendars === false}
+              >
+                <FormattedMessage
+                  id="xpack.ml.settings.anomalyDetection.manageCalendarsDstLink"
+                  defaultMessage="Manage"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="mlCalendarsDstCreateButton"
+                flush="left"
+                color="primary"
+                onClick={redirectToNewCalendarDstPage}
+                isDisabled={canCreateCalendar === false}
+              >
+                <FormattedMessage
+                  id="xpack.ml.settings.anomalyDetection.createCalendarDstLink"
+                  defaultMessage="Create"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="xl" />
+
+      <EuiFlexGroup gutterSize="xl">
+        <EuiFlexItem>
           <EuiTitle size="s">
             <h3>
               <FormattedMessage
@@ -225,6 +302,7 @@ export const AnomalyDetectionSettings: FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+        <EuiFlexItem />
       </EuiFlexGroup>
     </Fragment>
   );

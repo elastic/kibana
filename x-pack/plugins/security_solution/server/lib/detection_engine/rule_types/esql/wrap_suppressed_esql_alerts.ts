@@ -36,6 +36,7 @@ export const wrapSuppressedEsqlAlerts = ({
   isRuleAggregating,
   primaryTimestamp,
   secondaryTimestamp,
+  intendedTimestamp,
 }: {
   isRuleAggregating: boolean;
   events: Array<estypes.SearchHit<SignalSource>>;
@@ -52,6 +53,7 @@ export const wrapSuppressedEsqlAlerts = ({
   };
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>(
     (event, i) => {
@@ -87,6 +89,7 @@ export const wrapSuppressedEsqlAlerts = ({
         ruleExecutionLogger,
         alertUuid: id,
         publicBaseUrl,
+        intendedTimestamp,
       });
 
       return {

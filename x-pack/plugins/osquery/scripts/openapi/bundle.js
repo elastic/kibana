@@ -28,6 +28,7 @@ const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
         tags: [
           {
             name: 'Security Osquery API',
+            'x-displayName': 'Security Osquery',
             description: 'Run live queries, manage packs and saved queries.',
           },
         ],
@@ -49,6 +50,7 @@ const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
         tags: [
           {
             name: 'Security Osquery API',
+            'x-displayName': 'Security Osquery',
             description: 'Run live queries, manage packs and saved queries.',
           },
         ],

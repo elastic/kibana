@@ -100,7 +100,7 @@ function runEvaluations() {
             evaluationConnectorId: evaluationConnector.id!,
             persist: argv.persist,
             suite: mocha.suite,
-            scope: 'all',
+            scopes: ['all'],
           });
 
           const header: string[][] = [

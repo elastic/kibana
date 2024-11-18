@@ -6,7 +6,6 @@
  */
 
 import { ExternalPageName, SecurityPageName } from '@kbn/security-solution-navigation';
-import IconFilebeatChart from './icons/filebeat_chart';
 import { INVESTIGATIONS_PATH } from '../../../../../common/constants';
 import { SERVER_APP_ID } from '../../../../../common';
 import type { LinkItem } from '../../../../common/links/types';
@@ -25,37 +24,16 @@ const investigationsAppLink: LinkItem = {
   links: [], // timeline and note links are added via the methods below
 };
 
-export const createInvestigationsLinkFromTimeline = (timelineLink: LinkItem): LinkItem => {
-  return {
-    ...investigationsAppLink,
-    links: [
-      { ...timelineLink, description: i18n.TIMELINE_DESCRIPTION, landingIcon: IconTimelineLazy },
-    ],
-  };
-};
+export const createInvestigationsLink = (links: LinkItem[]): LinkItem => ({
+  ...investigationsAppLink,
+  links,
+});
 
-export const createInvestigationsLinkFromNotes = (noteLink: LinkItem): LinkItem => {
-  return {
-    ...investigationsAppLink,
-    links: [{ ...noteLink, description: i18n.NOTE_DESCRIPTION, landingIcon: IconTimelineLazy }],
-  };
-};
-
-export const updateInvestigationsLinkFromNotes = (
-  investigationsLink: LinkItem,
-  noteLink: LinkItem
-): LinkItem => {
-  const currentLinks = investigationsLink.links ?? [];
-  currentLinks.push({
-    ...noteLink,
-    description: i18n.NOTE_DESCRIPTION,
-    landingIcon: IconFilebeatChart,
-  });
-  return {
-    ...investigationsLink,
-    links: currentLinks,
-  };
-};
+export const createTimelineLink = (timelineLink: LinkItem): LinkItem => ({
+  ...timelineLink,
+  description: i18n.TIMELINE_DESCRIPTION,
+  landingIcon: IconTimelineLazy,
+});
 
 // navLinks define the navigation links for the Security Solution pages and External pages as well
 export const investigationsNavLinks: SolutionNavLink[] = [

@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: '1'
+  version: '2023-10-31'
   title: Risk Scoring API
   description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
 paths:
@@ -57,4 +57,3 @@ components:
                 type: integer
               error:
                 type: string
-

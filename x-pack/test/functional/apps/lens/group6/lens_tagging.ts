@@ -16,13 +16,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const { tagManagement, header, dashboard, visualize, lens, timePicker } = getPageObjects([
+  const { tagManagement, header, dashboard, visualize, lens } = getPageObjects([
     'tagManagement',
     'header',
     'dashboard',
     'visualize',
     'lens',
-    'timePicker',
   ]);
 
   const lensTag = 'extreme-lens-tag';
@@ -31,20 +30,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens tagging', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await dashboard.navigateToApp();
       await dashboard.preserveCrossAppState();
       await dashboard.clickNewDashboard();
     });
 
-    after(async () => {
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-    });
-
     it('adds a new tag to a Lens visualization', async () => {
       // create lens
       await dashboardAddPanel.clickCreateNewLink();
-      await lens.goToTimeRange();
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
@@ -97,7 +90,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('retains its saved object tags after save and return', async () => {
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await lens.saveAndReturn();
       await header.waitUntilLoadingHasFinished();

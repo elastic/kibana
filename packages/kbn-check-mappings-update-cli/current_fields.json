@@ -233,9 +233,7 @@
     "payload.connector.type",
     "type"
   ],
-  "cloud-security-posture-settings": [
-    "rules"
-  ],
+  "cloud-security-posture-settings": [],
   "config": [
     "buildNum"
   ],
@@ -313,6 +311,7 @@
     "apiKey"
   ],
   "entity-engine-status": [
+    "fieldHistoryLength",
     "filter",
     "indexPattern",
     "status",
@@ -717,6 +716,9 @@
     "vars"
   ],
   "ingest_manager_settings": [
+    "delete_unenrolled_agents",
+    "delete_unenrolled_agents.enabled",
+    "delete_unenrolled_agents.is_preconfigured",
     "fleet_server_hosts",
     "has_seen_add_data_notice",
     "output_secret_storage_requirements_met",
@@ -861,6 +863,7 @@
     "alertSampleSizePerShard",
     "dataViewId",
     "enabled",
+    "excludeAlertStatuses",
     "filter",
     "identifierType",
     "interval",
@@ -1070,6 +1073,7 @@
     "urls"
   ],
   "synthetics-param": [],
+  "synthetics-private-location": [],
   "synthetics-privates-locations": [],
   "tag": [
     "color",

@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { reduceAsyncChunks } from '../../../utils/reduce_async_chunks';
 
 export interface MeteringStatsResponse {
   datastreams: Array<{
@@ -26,11 +27,13 @@ export async function getDataStreamsMeteringStats({
     return {};
   }
 
-  const { datastreams: dataStreamsStats } = await esClient.transport.request<MeteringStatsResponse>(
-    {
-      method: 'GET',
-      path: `/_metering/stats/` + dataStreams.join(','),
-    }
+  const { datastreams: dataStreamsStats } = await reduceAsyncChunks(
+    dataStreams,
+    (dataStreamsChunk) =>
+      esClient.transport.request<MeteringStatsResponse>({
+        method: 'GET',
+        path: `/_metering/stats/` + dataStreamsChunk.join(','),
+      })
   );
 
   return dataStreamsStats.reduce(

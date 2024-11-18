@@ -4,30 +4,26 @@
  * 1.  Allow wrapping of long filter items
  */
 
-.euiBadge.globalFilterItem {
+.globalFilterItem {
   line-height: $euiSize;
-  border: none;
   color: $euiTextColor;
-  padding-top: calc($euiSizeM / 2) + 1px;
-  padding-bottom: calc($euiSizeM / 2) + 1px;
+  padding-block: calc($euiSizeM / 2);
   white-space: normal; /* 1 */
 
   &:not(.globalFilterItem-isDisabled) {
-    @include euiFormControlDefaultShadow;
-    & { // stylelint-disable-line no-duplicate-selectors
-      box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $kbnGlobalFilterItemBorderColor; // Make the actual border more visible
-    }
+    border-color: $kbnGlobalFilterItemBorderColor; // Make the actual border more visible
   }
 }
 
-.euiBadge.globalFilterItem-isDisabled {
+.globalFilterItem-isDisabled {
   color: $euiColorDarkShade;
   background-color: transparentize($euiColorLightShade, .5);
+  border-color: transparent;
   text-decoration: line-through;
   font-weight: $euiFontWeightRegular;
 }
 
-.euiBadge.globalFilterItem-isError, .globalFilterItem-isWarning {
+.globalFilterItem-isError, .globalFilterItem-isWarning {
   .globalFilterLabel__value {
     font-weight: $euiFontWeightBold;
   }
@@ -47,6 +43,7 @@
 
 .globalFilterItem-isPinned {
   position: relative;
+  overflow: hidden;
 
   &::before {
     content: '';
@@ -56,14 +53,12 @@
     left: 0;
     width: $euiSizeXS;
     background-color: $kbnGlobalFilterItemBorderColor;
-    border-top-left-radius: calc($euiBorderRadius / 2);
-    border-bottom-left-radius: calc($euiBorderRadius / 2);
   }
 }
 
 .globalFilterItem-isExcluded {
   &:not(.globalFilterItem-isDisabled) {
-    box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $kbnGlobalFilterItemBorderColorExcluded;
+    border-color: $kbnGlobalFilterItemBorderColorExcluded;
 
     &::before {
       background-color: $kbnGlobalFilterItemPinnedColorExcluded;

@@ -80,6 +80,7 @@ describe('storeCounter', () => {
         ],
         Object {
           "namespace": "default",
+          "refresh": false,
           "upsertAttributes": Object {
             "counterName": "b",
             "counterType": "c",

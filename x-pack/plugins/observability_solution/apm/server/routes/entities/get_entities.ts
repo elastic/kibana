@@ -5,11 +5,13 @@
  * 2.0.
  */
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { FIRST_SEEN, LAST_SEEN } from '../../../common/es_fields/entities';
+import {
+  ENTITY_FIRST_SEEN,
+  ENTITY_LAST_SEEN,
+} from '@kbn/observability-shared-plugin/common/field_names/elasticsearch';
 import type { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { getEntityLatestServices } from './get_entity_latest_services';
 import type { EntityLatestServiceRaw } from './types';
-import { getEntityHistoryServicesMetrics } from './get_entity_history_services_metrics';
 
 export function entitiesRangeQuery(start?: number, end?: number): QueryDslQueryContainer[] {
   if (!start || !end) {
@@ -19,14 +21,14 @@ export function entitiesRangeQuery(start?: number, end?: number): QueryDslQueryC
   return [
     {
       range: {
-        [LAST_SEEN]: {
+        [ENTITY_LAST_SEEN]: {
           gte: start,
         },
       },
     },
     {
       range: {
-        [FIRST_SEEN]: {
+        [ENTITY_FIRST_SEEN]: {
           lte: end,
         },
       },
@@ -61,30 +63,5 @@ export async function getEntities({
     serviceName,
   });
 
-  const serviceEntitiesHistoryMetricsMap = entityLatestServices.length
-    ? await getEntityHistoryServicesMetrics({
-        start,
-        end,
-        entitiesESClient,
-        entityIds: entityLatestServices.map((latestEntity) => latestEntity.entity.id),
-        size,
-      })
-    : undefined;
-
-  return entityLatestServices.map((latestEntity) => {
-    const historyEntityMetrics = serviceEntitiesHistoryMetricsMap?.[latestEntity.entity.id];
-    return {
-      ...latestEntity,
-      entity: {
-        ...latestEntity.entity,
-        metrics: historyEntityMetrics || {
-          latency: undefined,
-          logErrorRate: undefined,
-          failedTransactionRate: undefined,
-          logRate: undefined,
-          throughput: undefined,
-        },
-      },
-    };
-  });
+  return entityLatestServices;
 }

@@ -5,43 +5,85 @@
  * 2.0.
  */
 
-import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
-import { kqlQuery } from '@kbn/observability-utils/es/queries/kql_query';
-import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
+import type { QueryDslQueryContainer, ScalarValue } from '@elastic/elasticsearch/lib/api/types';
+import type { EntityInstance } from '@kbn/entities-schema';
+import {
+  ENTITY_DISPLAY_NAME,
+  ENTITY_LAST_SEEN,
+  ENTITY_TYPE,
+} from '@kbn/observability-shared-plugin/common';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import {
   ENTITIES_LATEST_ALIAS,
+  InventoryEntity,
   MAX_NUMBER_OF_ENTITIES,
-  type EntityType,
-  Entity,
+  type EntityColumnIds,
 } from '../../../common/entities';
-import { getEntityDefinitionIdWhereClause, getEntityTypesWhereClause } from './query_helper';
+import { getBuiltinEntityDefinitionIdESQLWhereClause } from './query_helper';
+
+type EntitySortableColumnIds = Extract<
+  EntityColumnIds,
+  'entityLastSeenTimestamp' | 'entityDisplayName' | 'entityType'
+>;
+const SORT_FIELDS_TO_ES_FIELDS: Record<EntitySortableColumnIds, string> = {
+  entityLastSeenTimestamp: ENTITY_LAST_SEEN,
+  entityDisplayName: ENTITY_DISPLAY_NAME,
+  entityType: ENTITY_TYPE,
+} as const;
 
 export async function getLatestEntities({
   inventoryEsClient,
   sortDirection,
   sortField,
+  esQuery,
   entityTypes,
-  kuery,
 }: {
   inventoryEsClient: ObservabilityElasticsearchClient;
   sortDirection: 'asc' | 'desc';
-  sortField: string;
-  entityTypes?: EntityType[];
-  kuery?: string;
-}) {
-  const latestEntitiesEsqlResponse = await inventoryEsClient.esql('get_latest_entities', {
-    query: `FROM ${ENTITIES_LATEST_ALIAS}
-     | ${getEntityTypesWhereClause(entityTypes)}
-     | ${getEntityDefinitionIdWhereClause()}
-     | SORT ${sortField} ${sortDirection}
-     | LIMIT ${MAX_NUMBER_OF_ENTITIES}
-     `,
-    filter: {
-      bool: {
-        filter: [...kqlQuery(kuery)],
-      },
-    },
-  });
+  sortField: EntityColumnIds;
+  esQuery?: QueryDslQueryContainer;
+  entityTypes?: string[];
+}): Promise<InventoryEntity[]> {
+  // alertsCount doesn't exist in entities index. Ignore it and sort by entity.lastSeenTimestamp by default.
+  const entitiesSortField =
+    SORT_FIELDS_TO_ES_FIELDS[sortField as EntitySortableColumnIds] ?? ENTITY_LAST_SEEN;
 
-  return esqlResultToPlainObjects<Entity>(latestEntitiesEsqlResponse);
+  const from = `FROM ${ENTITIES_LATEST_ALIAS}`;
+  const where: string[] = [getBuiltinEntityDefinitionIdESQLWhereClause()];
+  const params: ScalarValue[] = [];
+
+  if (entityTypes) {
+    where.push(`WHERE ${ENTITY_TYPE} IN (${entityTypes.map(() => '?').join()})`);
+    params.push(...entityTypes);
+  }
+
+  const sort = `SORT ${entitiesSortField} ${sortDirection}`;
+  const limit = `LIMIT ${MAX_NUMBER_OF_ENTITIES}`;
+
+  const query = [from, ...where, sort, limit].join(' | ');
+
+  const latestEntitiesEsqlResponse = await inventoryEsClient.esql<EntityInstance>(
+    'get_latest_entities',
+    {
+      query,
+      filter: esQuery,
+      params,
+    }
+  );
+
+  return latestEntitiesEsqlResponse.map((lastestEntity) => {
+    const { entity, ...metadata } = lastestEntity;
+
+    return {
+      entityId: entity.id,
+      entityType: entity.type,
+      entityDefinitionId: entity.definition_id,
+      entityDisplayName: entity.display_name,
+      entityIdentityFields: entity.identity_fields,
+      entityLastSeenTimestamp: entity.last_seen_timestamp,
+      entityDefinitionVersion: entity.definition_version,
+      entitySchemaVersion: entity.schema_version,
+      ...metadata,
+    };
+  });
 }

@@ -100,7 +100,6 @@ type GetColorFn = (
 type GetPointConfigFn = (config: {
   xAccessor: string | undefined;
   markSizeAccessor: string | undefined;
-  emphasizeFitting?: boolean;
   showPoints?: boolean;
   pointsRadius?: number;
 }) => Partial<AreaSeriesStyle['point']>;
@@ -297,17 +296,13 @@ export const getSeriesName: GetSeriesNameFn = (
   return splitValues.length > 0 ? splitValues.join(' - ') : yAccessorTitle;
 };
 
-const getPointConfig: GetPointConfigFn = ({
-  xAccessor,
-  markSizeAccessor,
-  emphasizeFitting,
-  showPoints,
-  pointsRadius,
-}) => ({
-  visible: showPoints !== undefined ? showPoints : !xAccessor || markSizeAccessor !== undefined,
-  radius: pointsRadius !== undefined ? pointsRadius : xAccessor && !emphasizeFitting ? 5 : 0,
-  fill: markSizeAccessor ? ColorVariant.Series : undefined,
-});
+const getPointConfig: GetPointConfigFn = ({ markSizeAccessor, showPoints, pointsRadius }) => {
+  return {
+    visible: showPoints || markSizeAccessor ? 'always' : 'auto',
+    radius: pointsRadius,
+    fill: markSizeAccessor ? ColorVariant.Series : undefined,
+  };
+};
 
 const getFitLineConfig = () => ({
   visible: true,
@@ -546,7 +541,6 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       point: getPointConfig({
         xAccessor: xColumnId,
         markSizeAccessor: markSizeColumnId,
-        emphasizeFitting,
         showPoints: layer.showPoints,
         pointsRadius: layer.pointsRadius,
       }),
@@ -563,7 +557,6 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       point: getPointConfig({
         xAccessor: xColumnId,
         markSizeAccessor: markSizeColumnId,
-        emphasizeFitting,
         showPoints: layer.showPoints,
         pointsRadius: layer.pointsRadius,
       }),

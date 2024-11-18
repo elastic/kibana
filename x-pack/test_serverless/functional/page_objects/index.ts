@@ -23,6 +23,8 @@ import { SvlIngestPipelines } from './svl_ingest_pipelines';
 import { SvlSearchHomePageProvider } from './svl_search_homepage';
 import { SvlSearchIndexDetailPageProvider } from './svl_search_index_detail_page';
 import { SvlSearchElasticsearchStartPageProvider } from './svl_search_elasticsearch_start_page';
+import { SvlApiKeysProvider } from './svl_api_keys';
+import { SvlSearchCreateIndexPageProvider } from './svl_search_create_index_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
@@ -43,4 +45,6 @@ export const pageObjects = {
   svlSearchHomePage: SvlSearchHomePageProvider,
   svlSearchIndexDetailPage: SvlSearchIndexDetailPageProvider,
   svlSearchElasticsearchStartPage: SvlSearchElasticsearchStartPageProvider,
+  svlApiKeys: SvlApiKeysProvider,
+  svlSearchCreateIndexPage: SvlSearchCreateIndexPageProvider,
 };

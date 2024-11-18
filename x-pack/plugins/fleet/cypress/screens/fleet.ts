@@ -46,6 +46,8 @@ export const AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD = 'createAgentPolicyNam
 export const AGENT_POLICIES_FLYOUT_ADVANCED_DEFAULT_NAMESPACE_HEADER = 'defaultNamespaceHeader';
 export const AGENT_POLICY_FLYOUT_CREATE_BUTTON = 'createAgentPolicyFlyoutBtn';
 
+export const AGENT_POLICIES_TABLE = 'agentPoliciesTable';
+
 export const ENROLLMENT_TOKENS = {
   CREATE_TOKEN_BUTTON: 'createEnrollmentTokenButton',
   CREATE_TOKEN_MODAL_NAME_FIELD: 'createEnrollmentTokenNameField',
@@ -241,4 +243,7 @@ export const API_KEYS = {
 
 export const AGENT_POLICY_DETAILS_PAGE = {
   ADD_AGENT_LINK: 'addAgentLink',
+  SETTINGS_TAB: 'agentPolicySettingsTab',
+  SPACE_SELECTOR_COMBOBOX: 'spaceSelectorComboBox',
+  SAVE_BUTTON: 'agentPolicyDetailsSaveButton',
 };

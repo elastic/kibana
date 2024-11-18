@@ -29,5 +29,14 @@ console.error = (message, ...rest) => {
   ) {
     return;
   }
+  // @see https://github.com/jsdom/jsdom/issues/2177
+  // JSDOM doesn't yet know how to parse @container CSS queries -
+  // all we can do is silence its errors for now
+  if (
+    typeof message === 'object' &&
+    message?.message?.startsWith('Could not parse CSS stylesheet')
+  ) {
+    return;
+  }
   consoleError(message, ...rest);
 };

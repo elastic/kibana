@@ -52,10 +52,8 @@ const createRulesClientMock = () => {
     bulkDisableRules: jest.fn(),
     snooze: jest.fn(),
     unsnooze: jest.fn(),
-    clearExpiredSnoozes: jest.fn(),
     runSoon: jest.fn(),
     clone: jest.fn(),
-    getAlertFromRaw: jest.fn(),
     getScheduleFrequency: jest.fn(),
     bulkUntrackAlerts: jest.fn(),
   };

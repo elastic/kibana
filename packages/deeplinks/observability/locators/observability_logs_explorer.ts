@@ -49,3 +49,6 @@ export interface ObsLogsExplorerDataViewLocatorParams extends DatasetLocatorPara
    */
   id: string;
 }
+
+// To store the last used logs viewer (either of discover or observability-logs-explorer)
+export const OBS_LOGS_EXPLORER_LOGS_VIEWER_KEY = 'obs-logs-explorer:lastUsedViewer';

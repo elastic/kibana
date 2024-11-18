@@ -85,12 +85,16 @@ export const applyRulePatch = async ({
     from: rulePatch.from ?? existingRule.from,
     license: rulePatch.license ?? existingRule.license,
     output_index: rulePatch.output_index ?? existingRule.output_index,
+    alias_purpose: rulePatch.alias_purpose ?? existingRule.alias_purpose,
+    alias_target_id: rulePatch.alias_target_id ?? existingRule.alias_target_id,
     timeline_id: rulePatch.timeline_id ?? existingRule.timeline_id,
     timeline_title: rulePatch.timeline_title ?? existingRule.timeline_title,
     meta: rulePatch.meta ?? existingRule.meta,
     max_signals: rulePatch.max_signals ?? existingRule.max_signals,
     related_integrations: rulePatch.related_integrations ?? existingRule.related_integrations,
-    required_fields: addEcsToRequiredFields(rulePatch.required_fields),
+    required_fields: rulePatch.required_fields
+      ? addEcsToRequiredFields(rulePatch.required_fields)
+      : existingRule.required_fields,
     risk_score: rulePatch.risk_score ?? existingRule.risk_score,
     risk_score_mapping: rulePatch.risk_score_mapping ?? existingRule.risk_score_mapping,
     rule_name_override: rulePatch.rule_name_override ?? existingRule.rule_name_override,
@@ -111,6 +115,7 @@ export const applyRulePatch = async ({
     interval: rulePatch.interval ?? existingRule.interval,
     throttle: rulePatch.throttle ?? existingRule.throttle,
     actions: rulePatch.actions ?? existingRule.actions,
+    response_actions: rulePatch.response_actions ?? existingRule.response_actions,
     ...typeSpecificParams,
   };
 
@@ -138,7 +143,6 @@ const patchEqlParams = (
       rulePatch.event_category_override ?? existingRule.event_category_override,
     tiebreaker_field: rulePatch.tiebreaker_field ?? existingRule.tiebreaker_field,
     alert_suppression: rulePatch.alert_suppression ?? existingRule.alert_suppression,
-    response_actions: rulePatch.response_actions ?? existingRule.response_actions,
   };
 };
 
@@ -151,7 +155,6 @@ const patchEsqlParams = (
     language: rulePatch.language ?? existingRule.language,
     query: rulePatch.query ?? existingRule.query,
     alert_suppression: rulePatch.alert_suppression ?? existingRule.alert_suppression,
-    response_actions: rulePatch.response_actions ?? existingRule.response_actions,
   };
 };
 
@@ -191,7 +194,6 @@ const patchQueryParams = (
     query: rulePatch.query ?? existingRule.query,
     filters: rulePatch.filters ?? existingRule.filters,
     saved_id: rulePatch.saved_id ?? existingRule.saved_id,
-    response_actions: rulePatch.response_actions ?? existingRule.response_actions,
     alert_suppression: rulePatch.alert_suppression ?? existingRule.alert_suppression,
   };
 };
@@ -208,7 +210,6 @@ const patchSavedQueryParams = (
     query: rulePatch.query ?? existingRule.query,
     filters: rulePatch.filters ?? existingRule.filters,
     saved_id: rulePatch.saved_id ?? existingRule.saved_id,
-    response_actions: rulePatch.response_actions ?? existingRule.response_actions,
     alert_suppression: rulePatch.alert_suppression ?? existingRule.alert_suppression,
   };
 };
@@ -260,7 +261,6 @@ const patchNewTermsParams = (
     new_terms_fields: params.new_terms_fields ?? existingRule.new_terms_fields,
     history_window_start: params.history_window_start ?? existingRule.history_window_start,
     alert_suppression: params.alert_suppression ?? existingRule.alert_suppression,
-    response_actions: params.response_actions ?? existingRule.response_actions,
   };
 };
 

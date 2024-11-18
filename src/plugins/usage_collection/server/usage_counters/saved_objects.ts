@@ -122,6 +122,7 @@ export const storeCounter = async ({ metric, soRepository }: StoreCounterParams)
         counterType,
         source,
       },
+      refresh: false,
     }
   );
 };

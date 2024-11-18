@@ -20,7 +20,7 @@ import React from 'react';
 import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 
 interface Data {
   key: number;
@@ -82,7 +82,7 @@ export function SloSparkline({ chart, data, id, isLoading, size, state }: Props)
         fit={Fit.Nearest}
         id={id}
         lineSeriesStyle={{
-          point: { visible: false },
+          point: { visible: 'never' },
         }}
         xAccessor={'key'}
         xScaleType={ScaleType.Time}

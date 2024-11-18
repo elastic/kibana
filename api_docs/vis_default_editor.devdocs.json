@@ -211,7 +211,7 @@
             "section": "def-public.VisEditorOptionsProps",
             "text": "VisEditorOptionsProps"
           },
-          "<VisParams> & { legendPositions: LegendPositions; }) => JSX.Element"
+          "<VisParams> & { legendPositions: LegendPositions; }) => React.JSX.Element"
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/basic_options.tsx",
         "deprecated": false,
@@ -251,7 +251,7 @@
         "label": "ColorRanges",
         "description": [],
         "signature": [
-          "({\n  'data-test-subj': dataTestSubj,\n  colorsRange,\n  setValue,\n  setValidity,\n  setTouched,\n}: ColorRangesProps) => JSX.Element"
+          "({\n  'data-test-subj': dataTestSubj,\n  colorsRange,\n  setValue,\n  setValidity,\n  setTouched,\n}: ColorRangesProps) => React.JSX.Element"
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/color_ranges.tsx",
         "deprecated": false,
@@ -284,7 +284,7 @@
         "label": "ColorSchemaOptions",
         "description": [],
         "signature": [
-          "({\n  disabled,\n  colorSchema,\n  colorSchemas,\n  invertColors,\n  uiState,\n  setValue,\n  showHelpText = true,\n}: ColorSchemaOptionsProps) => JSX.Element"
+          "({\n  disabled,\n  colorSchema,\n  colorSchemas,\n  invertColors,\n  uiState,\n  setValue,\n  showHelpText = true,\n}: ColorSchemaOptionsProps) => React.JSX.Element"
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/color_schema.tsx",
         "deprecated": false,
@@ -407,7 +407,7 @@
         "label": "LegendSizeSettings",
         "description": [],
         "signature": [
-          "({ legendSize, onLegendSizeChange, isVerticalLegend, showAutoOption, }: LegendSizeSettingsProps) => JSX.Element"
+          "({ legendSize, onLegendSizeChange, isVerticalLegend, showAutoOption, }: LegendSizeSettingsProps) => React.JSX.Element"
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/legend_size_settings.tsx",
         "deprecated": false,
@@ -442,7 +442,7 @@
         "signature": [
           "({\n  'data-test-subj': dataTestSubj,\n  setValue,\n  truncateLegend,\n  maxLegendLines,\n}: ",
           "LongLegendOptionsProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/long_legend_options.tsx",
         "deprecated": false,
@@ -485,7 +485,7 @@
             "section": "def-public.NumberInputOptionProps",
             "text": "NumberInputOptionProps"
           },
-          "<ParamName>) => JSX.Element"
+          "<ParamName>) => React.JSX.Element"
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/number_input.tsx",
         "deprecated": false,
@@ -527,7 +527,7 @@
         "signature": [
           "({\n  activePalette,\n  palettes,\n  paramName,\n  setPalette,\n}: ",
           "PalettePickerProps",
-          "<ParamName>) => JSX.Element"
+          "<ParamName>) => React.JSX.Element"
         ],
         "path": "src/plugins/vis_default_editor/public/components/controls/palette_picker.tsx",
         "deprecated": false,
@@ -563,7 +563,7 @@
         "signature": [
           "({\n  'data-test-subj': dataTestSubj,\n  setValue,\n  percentageMode,\n  formatPattern,\n  disabled,\n}: ",
           "PercentageModeOptionProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/percentage_mode.tsx",
         "deprecated": false,
@@ -596,7 +596,7 @@
         "label": "RangeOption",
         "description": [],
         "signature": [
-          "({\n  label,\n  max,\n  min,\n  showInput,\n  showLabels,\n  showValue = true,\n  step,\n  paramName,\n  value,\n  setValue,\n}: RangeOptionProps<ParamName>) => JSX.Element"
+          "({\n  label,\n  max,\n  min,\n  showInput,\n  showLabels,\n  showValue = true,\n  step,\n  paramName,\n  value,\n  setValue,\n}: RangeOptionProps<ParamName>) => React.JSX.Element"
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/range.tsx",
         "deprecated": false,
@@ -629,7 +629,7 @@
         "label": "RangesParamEditor",
         "description": [],
         "signature": [
-          "({\n  'data-test-subj': dataTestSubj = 'range',\n  addRangeValues,\n  error,\n  value = [],\n  hidePlaceholders,\n  setValue,\n  setTouched,\n  setValidity,\n  validateRange,\n}: RangesParamEditorProps) => JSX.Element"
+          "({\n  'data-test-subj': dataTestSubj = 'range',\n  addRangeValues,\n  error,\n  value = [],\n  hidePlaceholders,\n  setValue,\n  setTouched,\n  setValidity,\n  validateRange,\n}: RangesParamEditorProps) => React.JSX.Element"
         ],
         "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
         "deprecated": false,
@@ -664,7 +664,7 @@
           "\nUse only this component instead of NumberInputOption in 'number_input.tsx'.\nIt is required for compatibility with TS 3.7.0\n"
         ],
         "signature": [
-          "({\n  disabled,\n  error,\n  isInvalid,\n  label,\n  max,\n  min,\n  paramName,\n  step,\n  value,\n  setValue,\n  setValidity,\n  'data-test-subj': dataTestSubj,\n}: NumberInputOptionProps<ParamName>) => JSX.Element"
+          "({\n  disabled,\n  error,\n  isInvalid,\n  label,\n  max,\n  min,\n  paramName,\n  step,\n  value,\n  setValue,\n  setValidity,\n  'data-test-subj': dataTestSubj,\n}: NumberInputOptionProps<ParamName>) => React.JSX.Element"
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/required_number_input.tsx",
         "deprecated": false,
@@ -697,7 +697,7 @@
         "label": "SelectOption",
         "description": [],
         "signature": [
-          "({\n  disabled,\n  helpText,\n  id,\n  label,\n  labelAppend,\n  options,\n  paramName,\n  value,\n  setValue,\n  'data-test-subj': dataTestSubj,\n}: SelectOptionProps<ParamName, ValidParamValues>) => JSX.Element"
+          "({\n  disabled,\n  helpText,\n  id,\n  label,\n  labelAppend,\n  options,\n  paramName,\n  value,\n  setValue,\n  'data-test-subj': dataTestSubj,\n}: SelectOptionProps<ParamName, ValidParamValues>) => React.JSX.Element"
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/select.tsx",
         "deprecated": false,
@@ -730,7 +730,7 @@
         "label": "SwitchOption",
         "description": [],
         "signature": [
-          "({\n  'data-test-subj': dataTestSubj,\n  tooltip,\n  label,\n  disabled,\n  paramName,\n  value = false,\n  setValue,\n}: SwitchOptionProps<ParamName>) => JSX.Element"
+          "({\n  'data-test-subj': dataTestSubj,\n  tooltip,\n  label,\n  disabled,\n  paramName,\n  value = false,\n  setValue,\n}: SwitchOptionProps<ParamName>) => React.JSX.Element"
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/switch.tsx",
         "deprecated": false,
@@ -763,7 +763,7 @@
         "label": "TextInputOption",
         "description": [],
         "signature": [
-          "({\n  'data-test-subj': dataTestSubj,\n  disabled,\n  helpText,\n  label,\n  paramName,\n  value = '',\n  setValue,\n}: TextInputOptionProps<ParamName>) => JSX.Element"
+          "({\n  'data-test-subj': dataTestSubj,\n  disabled,\n  helpText,\n  label,\n  paramName,\n  value = '',\n  setValue,\n}: TextInputOptionProps<ParamName>) => React.JSX.Element"
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/text_input.tsx",
         "deprecated": false,
@@ -883,7 +883,7 @@
             "label": "error",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/number_input.tsx",
             "deprecated": false,
@@ -911,7 +911,7 @@
             "label": "label",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/number_input.tsx",
             "deprecated": false,

@@ -72,7 +72,7 @@ function toggleDisabledFeatures(
     (acc, feature) => {
       if (disabledFeatureKeys.includes(feature.id)) {
         acc.disabledFeatures.push(feature);
-      } else {
+      } else if (!feature.deprecated) {
         acc.enabledFeatures.push(feature);
       }
       return acc;

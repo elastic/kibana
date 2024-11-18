@@ -30,7 +30,8 @@ import {
   observabilityMinReadAlertsAllSpacesAll,
   observabilityOnlyAllSpacesAllWithReadESIndices,
   securitySolutionOnlyAllSpacesAllWithReadESIndices,
-  stackAlertsOnlyAllSpacesAll,
+  stackAlertsOnlyReadSpacesAll as stackAlertsOnlyReadSpacesAllRole,
+  stackAlertsOnlyAllSpacesAll as stackAlertsOnlyAllSpacesAllRole,
 } from './roles';
 import { User } from './types';
 
@@ -130,6 +131,12 @@ export const obsOnlyReadSpacesAll: User = {
   roles: [observabilityOnlyReadSpacesAll.name],
 };
 
+export const stackAlertsOnlyReadSpacesAll: User = {
+  username: 'stack_alerts_only_read_spaces_all',
+  password: 'stack_alerts_only_read_spaces_all',
+  roles: [stackAlertsOnlyReadSpacesAllRole.name],
+};
+
 export const users = [
   superUser,
   secOnly,
@@ -177,10 +184,10 @@ export const logsOnlySpacesAll: User = {
   roles: [logsOnlyAllSpacesAll.name],
 };
 
-export const stackAlertsOnlySpacesAll: User = {
+export const stackAlertsOnlyAllSpacesAll: User = {
   username: 'stack_alerts_only_all_spaces_all',
   password: 'stack_alerts_only_all_spaces_all',
-  roles: [stackAlertsOnlyAllSpacesAll.name],
+  roles: [stackAlertsOnlyAllSpacesAllRole.name],
 };
 
 export const obsOnlySpacesAllEsRead: User = {
@@ -297,7 +304,8 @@ export const allUsers = [
   secOnlyReadSpacesAll,
   obsOnlySpacesAll,
   logsOnlySpacesAll,
-  stackAlertsOnlySpacesAll,
+  stackAlertsOnlyReadSpacesAll,
+  stackAlertsOnlyAllSpacesAll,
   obsSecSpacesAll,
   obsSecReadSpacesAll,
   obsMinReadAlertsRead,

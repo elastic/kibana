@@ -19,11 +19,15 @@ import { EsHitRecord } from '@kbn/discover-utils/types';
 import {
   MAX_FINDINGS_TO_LOAD,
   CDR_VULNERABILITIES_INDEX_PATTERN,
-  LATEST_VULNERABILITIES_RETENTION_POLICY,
+  CDR_3RD_PARTY_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
 import { FindingsBaseEsQuery, showErrorToast } from '@kbn/cloud-security-posture';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
-import { VULNERABILITY_FIELDS } from '../../../common/constants';
+import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
+import {
+  CDR_VULNERABILITY_DATA_TABLE_RUNTIME_MAPPING_FIELDS,
+  VULNERABILITY_FIELDS,
+} from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { getCaseInsensitiveSortScript } from '../utils/custom_sort_script';
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
@@ -52,6 +56,21 @@ const getMultiFieldsSort = (sort: string[][]) => {
   });
 };
 
+const getRuntimeMappingsFromSort = (sort: string[][]) => {
+  return sort
+    .filter(([field]) => CDR_VULNERABILITY_DATA_TABLE_RUNTIME_MAPPING_FIELDS.includes(field))
+    .reduce((acc, [field]) => {
+      const type: RuntimePrimitiveTypes = 'keyword';
+
+      return {
+        ...acc,
+        [field]: {
+          type,
+        },
+      };
+    }, {});
+};
+
 export const getVulnerabilitiesQuery = (
   { query, sort }: VulnerabilitiesQuery,
   pageParam: number
@@ -59,6 +78,7 @@ export const getVulnerabilitiesQuery = (
   index: CDR_VULNERABILITIES_INDEX_PATTERN,
   ignore_unavailable: true,
   sort: getMultiFieldsSort(sort),
+  runtime_mappings: getRuntimeMappingsFromSort(sort),
   size: MAX_FINDINGS_TO_LOAD,
   query: {
     ...query,
@@ -69,7 +89,7 @@ export const getVulnerabilitiesQuery = (
         {
           range: {
             '@timestamp': {
-              gte: `now-${LATEST_VULNERABILITIES_RETENTION_POLICY}`,
+              gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
               lte: 'now',
             },
           },

@@ -20,9 +20,10 @@ import { useServices } from './services';
  */
 export const KibanaNoDataPage = ({
   onDataViewCreated,
-  onESQLNavigationComplete,
   noDataConfig,
   allowAdHocDataView,
+  onTryESQL,
+  onESQLNavigationComplete,
   showPlainSpinner,
 }: KibanaNoDataPageProps) => {
   // These hooks are temporary, until this component is moved to a package.
@@ -58,8 +59,9 @@ export const KibanaNoDataPage = ({
     return (
       <NoDataViewsPrompt
         onDataViewCreated={onDataViewCreated}
-        onESQLNavigationComplete={onESQLNavigationComplete}
         allowAdHocDataView={allowAdHocDataView}
+        onTryESQL={onTryESQL}
+        onESQLNavigationComplete={onESQLNavigationComplete}
       />
     );
   }

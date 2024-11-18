@@ -5,13 +5,30 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { SecuritySolutionPluginSetup } from '@kbn/security-solution-plugin/server/plugin_contract';
-import { USAGE_SERVICE_USAGE_URL } from './constants';
-import { productTypes } from '../common/config';
+
+import { schema } from '@kbn/config-schema';
+
 import type { ExperimentalFeatures } from '../common/experimental_features';
+
+import { productTypes } from '../common/config';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+
+const tlsConfig = schema.object({
+  certificate: schema.string(),
+  key: schema.string(),
+  ca: schema.string(),
+});
+export type TlsConfigSchema = TypeOf<typeof tlsConfig>;
+
+const usageApiConfig = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  url: schema.maybe(schema.string()),
+  tls: schema.maybe(tlsConfig),
+});
+export type UsageApiConfigSchema = TypeOf<typeof usageApiConfig>;
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
@@ -34,10 +51,6 @@ export const configSchema = schema.object({
   usageReportingTaskTimeout: schema.string({ defaultValue: '1m' }),
 
   /**
-   * Usage Reporting: the URL to send usage data to
-   */
-  usageReportingApiUrl: schema.string({ defaultValue: USAGE_SERVICE_USAGE_URL }),
-  /**
    * For internal use. A list of string values (comma delimited) that will enable experimental
    * type of functionality that is not yet released. Valid values for this settings need to
    * be defined in:
@@ -52,6 +65,8 @@ export const configSchema = schema.object({
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
   }),
+
+  usageApi: usageApiConfig,
 });
 export type ServerlessSecuritySchema = TypeOf<typeof configSchema>;
 

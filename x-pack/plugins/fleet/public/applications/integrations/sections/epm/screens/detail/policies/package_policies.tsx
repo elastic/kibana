@@ -20,8 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
-import { policyHasFleetServer } from '../../../../../../../../common/services';
-
 import { InstallStatus } from '../../../../../types';
 import type { GetAgentPoliciesResponseItem, InMemoryPackagePolicy } from '../../../../../types';
 import {
@@ -54,6 +52,7 @@ interface PackagePoliciesPanelProps {
 interface InMemoryPackagePolicyAndAgentPolicy {
   packagePolicy: InMemoryPackagePolicy;
   agentPolicies: GetAgentPoliciesResponseItem[];
+  rowIndex: number;
 }
 
 const IntegrationDetailsLink = memo<{
@@ -89,6 +88,8 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string | null>(
     agentPolicyIdFromParams
   );
+  const [selectedTableIndex, setSelectedTableIndex] = useState<number | undefined>();
+
   const { getPath, getHref } = useLink();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
@@ -108,19 +109,18 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
-  const canAddAgents = useAuthz().fleet.addAgents;
-  const canAddFleetServers = useAuthz().fleet.addFleetServers;
   const canReadAgentPolicies = useAuthz().fleet.readAgentPolicies;
 
   const packageAndAgentPolicies = useMemo((): Array<{
     agentPolicies: GetAgentPoliciesResponseItem[];
     packagePolicy: InMemoryPackagePolicy;
+    rowIndex: number;
   }> => {
     if (!data?.items) {
       return [];
     }
 
-    const newPolicies = data.items.map(({ agentPolicies, packagePolicy }) => {
+    const newPolicies = data.items.map(({ agentPolicies, packagePolicy }, index) => {
       const hasUpgrade = isPackagePolicyUpgradable(packagePolicy);
 
       return {
@@ -129,6 +129,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           ...packagePolicy,
           hasUpgrade,
         },
+        rowIndex: index,
       };
     });
 
@@ -283,7 +284,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.agentCount', {
           defaultMessage: 'Agents',
         }),
-        render({ agentPolicies, packagePolicy }: InMemoryPackagePolicyAndAgentPolicy) {
+        render({ agentPolicies, packagePolicy, rowIndex }: InMemoryPackagePolicyAndAgentPolicy) {
           if (agentPolicies.length === 0) {
             return (
               <EuiText color="subdued" size="xs">
@@ -294,16 +295,13 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
               </EuiText>
             );
           }
-          const agentPolicy = agentPolicies[0]; // TODO: handle multiple agent policies
-          const canAddAgentsForPolicy = policyHasFleetServer(agentPolicy)
-            ? canAddFleetServers
-            : canAddAgents;
           return (
             <PackagePolicyAgentsCell
-              agentPolicy={agentPolicy}
-              agentCount={agentPolicy.agents}
-              onAddAgent={() => setFlyoutOpenForPolicyId(agentPolicy.id)}
-              canAddAgents={canAddAgentsForPolicy}
+              agentPolicies={agentPolicies}
+              onAddAgent={() => {
+                setSelectedTableIndex(rowIndex);
+                setFlyoutOpenForPolicyId(agentPolicies[0].id);
+              }}
               hasHelpPopover={showAddAgentHelpForPackagePolicyId === packagePolicy.id}
             />
           );
@@ -340,8 +338,6 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       getHref,
       canWriteIntegrationPolicies,
       canShowMultiplePoliciesCell,
-      canAddFleetServers,
-      canAddAgents,
       showAddAgentHelpForPackagePolicyId,
       refreshPolicies,
     ]
@@ -373,11 +369,13 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       <Redirect to={getPath('integration_details_overview', { pkgkey: `${name}-${version}` })} />
     );
   }
-  const selectedPolicies = packageAndAgentPolicies.find(({ agentPolicies: policies }) =>
-    policies.find((policy) => policy.id === flyoutOpenForPolicyId)
-  );
+
+  const selectedPolicies =
+    selectedTableIndex !== undefined ? packageAndAgentPolicies[selectedTableIndex] : undefined;
+
   const agentPolicies = selectedPolicies?.agentPolicies;
   const packagePolicy = selectedPolicies?.packagePolicy;
+  const flyoutPolicy = agentPolicies?.length === 1 ? agentPolicies[0] : undefined;
 
   return (
     <AgentPolicyRefreshContext.Provider value={{ refresh: refreshPolicies }}>
@@ -402,7 +400,8 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             const { addAgentToPolicyId, ...rest } = parse(search);
             history.replace({ search: stringify(rest) });
           }}
-          agentPolicy={agentPolicies[0]}
+          agentPolicy={flyoutPolicy}
+          selectedAgentPolicies={agentPolicies}
           isIntegrationFlow={true}
           installedPackagePolicy={{
             name: packagePolicy?.package?.name || '',

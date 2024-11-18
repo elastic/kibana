@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { PluginStartDependencies } from '.';
+import type { CoreSetup } from '@kbn/core/server';
+
+import type { PluginStartDependencies } from '.';
 
 export function initRoutes(core: CoreSetup<PluginStartDependencies>) {
   const router = core.http.createRouter();

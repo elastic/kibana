@@ -32,7 +32,7 @@ properties:
     type: string
     example: 22fd3e30-03b1-11ed-920c-974bfa104448
   owner:
-    $ref: 'owners.yaml'
+    $ref: 'owner.yaml'
   payload:
     oneOf:
       - $ref: 'payload_alert_comment.yaml'

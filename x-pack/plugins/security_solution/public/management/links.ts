@@ -8,7 +8,6 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
-import IconFilebeatChart from '../app/solution_navigation/links/sections/icons/filebeat_chart';
 import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
 import {
   calculateEndpointAuthz,
@@ -16,14 +15,12 @@ import {
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
-  ENABLE_ASSET_CRITICALITY_SETTING,
   ENDPOINTS_PATH,
-  ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
+  ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGE_PATH,
-  NOTES_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
   SecurityPageName,
@@ -40,13 +37,13 @@ import {
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
   ENTITY_ANALYTICS_RISK_SCORE,
-  ASSET_CRITICALITY,
-  NOTES,
+  ENTITY_STORE,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
 import { cloudDefendLink } from '../cloud_defend/links';
+import { links as notesLink } from '../notes/links';
 import { IconConsole } from '../common/icons/console';
 import { IconShield } from '../common/icons/shield';
 import { IconEndpoints } from '../common/icons/endpoints';
@@ -65,7 +62,7 @@ const categories = [
     }),
     linkIds: [
       SecurityPageName.entityAnalyticsManagement,
-      SecurityPageName.entityAnalyticsAssetClassification,
+      SecurityPageName.entityAnalyticsEntityStoreManagement,
     ],
   },
   {
@@ -197,20 +194,16 @@ export const links: LinkItem = {
       licenseType: 'platinum',
     },
     {
-      id: SecurityPageName.entityAnalyticsAssetClassification,
-      title: ASSET_CRITICALITY,
-      description: i18n.translate(
-        'xpack.securitySolution.appLinks.assetClassificationDescription',
-        {
-          defaultMessage: 'Represents the criticality of an asset to your business infrastructure.',
-        }
-      ),
+      id: SecurityPageName.entityAnalyticsEntityStoreManagement,
+      title: ENTITY_STORE,
+      description: i18n.translate('xpack.securitySolution.appLinks.entityStoreDescription', {
+        defaultMessage: 'Store host and user entities observed in events.',
+      }),
       landingIcon: IconAssetCriticality,
-      path: ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
+      path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SERVER_APP_ID}.entity-analytics`],
-      uiSettingRequired: ENABLE_ASSET_CRITICALITY_SETTING,
     },
     {
       id: SecurityPageName.responseActionsHistory,
@@ -224,19 +217,7 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     cloudDefendLink,
-    {
-      id: SecurityPageName.notes,
-      title: NOTES,
-      description: i18n.translate('xpack.securitySolution.appLinks.notesDescription', {
-        defaultMessage:
-          'Oversee, revise and revisit the annotations within each document and timeline.',
-      }),
-      landingIcon: IconFilebeatChart,
-      path: NOTES_PATH,
-      skipUrlState: true,
-      hideTimeline: true,
-      experimentalKey: 'securitySolutionNotesEnabled',
-    },
+    notesLink,
   ],
 };
 

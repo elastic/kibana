@@ -81,6 +81,7 @@ export const createAppContextStartContractMock = (
     agents: { enabled: true, elasticsearch: {} },
     enabled: true,
     agentIdVerificationEnabled: true,
+    eventIngestedEnabled: false,
     ...configOverrides,
   };
 
@@ -113,12 +114,14 @@ export const createAppContextStartContractMock = (
     experimentalFeatures: {
       agentTamperProtectionEnabled: true,
       diagnosticFileUploadEnabled: true,
+      enableReusableIntegrationPolicies: true,
     } as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
       agentIdVerificationEnabled: true,
+      eventIngestedEnabled: false,
     },
     config$,
     kibanaVersion: '8.99.0', // Fake version :)
@@ -139,6 +142,7 @@ export const createAppContextStartContractMock = (
         }
       : {}),
     unenrollInactiveAgentsTask: {} as any,
+    deleteUnenrolledAgentsTask: {} as any,
   };
 };
 
@@ -185,7 +189,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     inspect: jest.fn(),
     delete: jest.fn(),
     get: jest.fn(),
-    getByIDs: jest.fn(),
+    getByIDs: jest.fn().mockResolvedValue(Promise.resolve([])),
     list: jest.fn(),
     listIds: jest.fn(),
     update: jest.fn(),
@@ -223,13 +227,13 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
  */
 export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceInterface> => {
   return {
-    get: jest.fn(),
-    list: jest.fn(),
-    getFullAgentPolicy: jest.fn(),
-    getByIds: jest.fn(),
-    turnOffAgentTamperProtections: jest.fn(),
-    fetchAllAgentPolicies: jest.fn(),
-    fetchAllAgentPolicyIds: jest.fn(),
+    get: jest.fn().mockReturnValue(Promise.resolve()),
+    list: jest.fn().mockReturnValue(Promise.resolve()),
+    getFullAgentPolicy: jest.fn().mockReturnValue(Promise.resolve()),
+    getByIds: jest.fn().mockReturnValue(Promise.resolve()),
+    turnOffAgentTamperProtections: jest.fn().mockReturnValue(Promise.resolve()),
+    fetchAllAgentPolicies: jest.fn().mockReturnValue(Promise.resolve()),
+    fetchAllAgentPolicyIds: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 

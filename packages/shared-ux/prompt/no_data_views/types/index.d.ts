@@ -42,7 +42,7 @@ export interface NoDataViewsPromptServices {
   openDataViewEditor: (options: DataViewEditorOptions) => () => void;
   /** A link to information about Data Views in Kibana */
   dataViewsDocLink: string;
-  /** Get a handler for trying ES|QL */
+  /** If the cluster has data, this handler allows the user to try ES|QL */
   onTryESQL: (() => void) | undefined;
   /** A link to the documentation for ES|QL */
   esqlDocLink: string;
@@ -92,7 +92,7 @@ export interface NoDataViewsPromptComponentProps {
   emptyPromptColor?: EuiEmptyPromptProps['color'];
   /** Click handler for create button. **/
   onClickCreate?: () => void;
-  /** Handler for someone wanting to try ES|QL. */
+  /** If the cluster has data, this handler allows the user to try ES|QL */
   onTryESQL?: () => void;
   /** Link to documentation on ES|QL. */
   esqlDocLink?: string;
@@ -104,6 +104,10 @@ export interface NoDataViewsPromptProps {
   allowAdHocDataView?: boolean;
   /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
+  /** If the cluster has data, this handler allows the user to try ES|QL */
+  onTryESQL?: () => void;
   /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
   onESQLNavigationComplete?: () => void;
+  /** Empty prompt color **/
+  emptyPromptColor?: PanelColor;
 }

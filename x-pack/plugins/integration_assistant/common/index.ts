@@ -19,6 +19,9 @@ export {
   AnalyzeLogsRequestBody,
   AnalyzeLogsResponse,
 } from './api/analyze_logs/analyze_logs_route.gen';
+export { CelInputRequestBody, CelInputResponse } from './api/cel/cel_input_route.gen';
+
+export { partialShuffleArray } from './utils';
 
 export type {
   DataStream,
@@ -26,14 +29,15 @@ export type {
   Integration,
   Pipeline,
   Docs,
-  SamplesFormat,
   LangSmithOptions,
 } from './api/model/common_attributes.gen';
-export { SamplesFormatName } from './api/model/common_attributes.gen';
+export { SamplesFormat, SamplesFormatName } from './api/model/common_attributes.gen';
 export type { ESProcessorItem } from './api/model/processor_attributes.gen';
+export type { CelInput } from './api/model/cel_input_attributes.gen';
 
 export {
   CATEGORIZATION_GRAPH_PATH,
+  CEL_INPUT_GRAPH_PATH,
   ECS_GRAPH_PATH,
   INTEGRATION_ASSISTANT_APP_ROUTE,
   INTEGRATION_ASSISTANT_BASE_PATH,

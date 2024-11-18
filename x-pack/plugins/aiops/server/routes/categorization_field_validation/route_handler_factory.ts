@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core/server';
 import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
 import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 
 import type { CategorizationFieldValidationSchema } from '@kbn/aiops-log-pattern-analysis/schema';
@@ -34,7 +34,7 @@ export const routeHandlerFactory: (
     const { headers } = request;
     trackAIOpsRouteUsage(
       `POST ${AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_VALIDATION}`,
-      headers[AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN],
+      headers[AIOPS_ANALYSIS_RUN_ORIGIN],
       usageCounter
     );
 

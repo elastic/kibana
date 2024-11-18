@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect } from 'expect';
+import expect from '@kbn/expect';
+import { expect as externalExpect } from 'expect';
 import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -13,6 +14,8 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestAdminWithApiKey: SupertestWithRoleScopeType;
   let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
+  const retry = getService('retry');
+  const retryTimeout = 20 * 1000;
 
   describe('/api/telemetry/v2/config API Telemetry config', function () {
     before(async () => {
@@ -42,7 +45,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
     it('GET should get the default config', async () => {
       const { body } = await supertestAdminWithApiKey.get('/api/telemetry/v2/config').expect(200);
 
-      expect(body).toMatchObject(baseConfig);
+      externalExpect(body).toMatchObject(baseConfig);
     });
 
     it('GET should get updated labels after dynamically updating them', async () => {
@@ -71,7 +74,13 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
         .send({ 'telemetry.labels.journeyName': null })
         .expect(200, { ok: true });
 
-      await supertestAdminWithApiKey.get('/api/telemetry/v2/config').expect(200, initialConfig);
+      await retry.tryForTime(retryTimeout, async function retryTelemetryConfigGetRequest() {
+        const { body } = await supertestAdminWithApiKey.get('/api/telemetry/v2/config').expect(200);
+        expect(body).to.eql(
+          initialConfig,
+          `Expected the response body to match the intitial config, but got: [${body}]`
+        );
+      });
     });
   });
 }

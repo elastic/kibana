@@ -6,18 +6,15 @@
  */
 
 import { compact, uniq } from 'lodash';
+import { EntityDataStreamType } from '@kbn/observability-shared-plugin/common';
 import type { EntityLatestServiceRaw } from '../types';
-import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import type { EntityDataStreamType, EntityMetrics } from '../../../../common/entities/types';
 
 export interface MergedServiceEntity {
   serviceName: string;
   agentName: AgentName;
   dataStreamTypes: EntityDataStreamType[];
   environments: string[];
-  metrics: EntityMetrics[];
-  hasLogMetrics: boolean;
 }
 
 export function mergeEntities({
@@ -40,32 +37,24 @@ export function mergeEntities({
 }
 
 function mergeFunc(entity: EntityLatestServiceRaw, existingEntity?: MergedServiceEntity) {
-  const hasLogMetrics = isFiniteNumber(entity.entity.metrics.logRate)
-    ? entity.entity.metrics.logRate > 0
-    : false;
-
   const commonEntityFields = {
     serviceName: entity.service.name,
     agentName: entity.agent.name[0],
-    lastSeenTimestamp: entity.entity.lastSeenTimestamp,
+    lastSeenTimestamp: entity.entity.last_seen_timestamp,
   };
 
   if (!existingEntity) {
     return {
       ...commonEntityFields,
-      dataStreamTypes: entity.data_stream.type,
+      dataStreamTypes: entity.source_data_stream.type,
       environments: compact([entity?.service.environment]),
-      metrics: [entity.entity.metrics],
-      hasLogMetrics,
     };
   }
   return {
     ...commonEntityFields,
     dataStreamTypes: uniq(
-      compact([...(existingEntity?.dataStreamTypes ?? []), ...entity.data_stream.type])
+      compact([...(existingEntity?.dataStreamTypes ?? []), ...entity.source_data_stream.type])
     ),
     environments: uniq(compact([...existingEntity?.environments, entity?.service.environment])),
-    metrics: [...existingEntity?.metrics, entity.entity.metrics],
-    hasLogMetrics: hasLogMetrics || existingEntity.hasLogMetrics,
   };
 }

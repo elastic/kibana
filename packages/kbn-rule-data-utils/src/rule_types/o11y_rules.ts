@@ -20,3 +20,6 @@ export enum ApmRuleType {
   TransactionDuration = 'apm.transaction_duration',
   Anomaly = 'apm.anomaly',
 }
+
+export const SYNTHETICS_STATUS_RULE = 'xpack.synthetics.alerts.monitorStatus';
+export const SYNTHETICS_TLS_RULE = 'xpack.synthetics.alerts.tls';

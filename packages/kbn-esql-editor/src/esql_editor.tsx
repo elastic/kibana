@@ -25,7 +25,14 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ESQLLang, ESQL_LANG_ID, ESQL_THEME_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
+import {
+  ESQLLang,
+  ESQL_LANG_ID,
+  ESQL_DARK_THEME_ID,
+  ESQL_LIGHT_THEME_ID,
+  monaco,
+  type ESQLCallbacks,
+} from '@kbn/monaco';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -91,7 +98,8 @@ export const ESQLEditor = memo(function ESQLEditor({
     fieldsMetadata,
     uiSettings,
   } = kibana.services;
-  const timeZone = core?.uiSettings?.get('dateFormat:tz');
+  const darkMode = core.theme?.getTheme().darkMode;
+  const timeZone = uiSettings?.get('dateFormat:tz');
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
@@ -321,13 +329,10 @@ export const ESQLEditor = memo(function ESQLEditor({
   }, []);
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
-    const fn = memoize(
-      (...args: [DataViewsPublicPluginStart, CoreStart]) => ({
-        timestamp: Date.now(),
-        result: getESQLSources(...args),
-      }),
-      ({ esql }) => esql
-    );
+    const fn = memoize((...args: [DataViewsPublicPluginStart, CoreStart]) => ({
+      timestamp: Date.now(),
+      result: getESQLSources(...args),
+    }));
 
     return { cache: fn.cache, memoizedSources: fn };
   }, []);
@@ -339,7 +344,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         const sources = await memoizedSources(dataViews, core).result;
         return sources;
       },
-      getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
+      getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
           // ES|QL with limit 0 returns only the columns and is more performant
           const esqlQuery = {
@@ -600,7 +605,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       vertical: 'auto',
     },
     scrollBeyondLastLine: false,
-    theme: ESQL_THEME_ID,
+    theme: darkMode ? ESQL_DARK_THEME_ID : ESQL_LIGHT_THEME_ID,
     wordWrap: 'on',
     wrappingIndent: 'none',
   };

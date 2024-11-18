@@ -18,13 +18,15 @@ import {
   EuiFlexItem,
   EuiToolTip,
   EuiPanel,
+  EuiHorizontalRule,
+  EuiFlexGrid,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { UserOverview } from '../../../../overview/components/user_overview';
@@ -51,6 +53,8 @@ import {
   USER_DETAILS_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID,
+  USER_DETAILS_MISCONFIGURATIONS_TEST_ID,
+  USER_DETAILS_ALERT_COUNT_TEST_ID,
 } from './test_ids';
 import {
   HOST_NAME_FIELD_NAME,
@@ -63,6 +67,9 @@ import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
+import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
+import { AlertCountInsight } from '../../shared/components/alert_count_insight';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';
@@ -127,7 +134,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
         banner: USER_PREVIEW_BANNER,
       },
     });
-    telemetry.reportDetailsFlyoutOpened({
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: scopeId,
       panel: 'preview',
     });
@@ -340,6 +347,23 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
           )}
         </AnomalyTableProvider>
         <EuiSpacer size="s" />
+        <EuiHorizontalRule margin="s" />
+        <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
+          <AlertCountInsight
+            fieldName={'user.name'}
+            name={userName}
+            direction="column"
+            data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
+          />
+          <MisconfigurationsInsight
+            fieldName={'user.name'}
+            name={userName}
+            direction="column"
+            data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
+            telemetrySuffix={'user-details'}
+          />
+        </EuiFlexGrid>
+        <EuiSpacer size="l" />
         <EuiPanel hasBorder={true}>
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>

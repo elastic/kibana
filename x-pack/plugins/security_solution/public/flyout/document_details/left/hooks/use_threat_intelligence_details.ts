@@ -71,7 +71,7 @@ export const useThreatIntelligenceDetails = (): ThreatIntelligenceDetailsResult 
   const [isEventDataLoading, eventData] = useTimelineEventsDetails({
     indexName,
     eventId,
-    runtimeMappings: sourcererDataView.sourcererDataView?.runtimeFieldMap as RunTimeMappings,
+    runtimeMappings: sourcererDataView.sourcererDataView.runtimeFieldMap as RunTimeMappings,
     skip: !eventId,
   });
 

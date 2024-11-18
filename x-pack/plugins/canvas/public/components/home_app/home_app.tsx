@@ -11,17 +11,16 @@ import { useDispatch } from 'react-redux';
 import { getBaseBreadcrumb } from '../../lib/breadcrumbs';
 import { resetWorkpad } from '../../state/actions/workpad';
 import { HomeApp as Component } from './home_app.component';
-import { usePlatformService } from '../../services';
+import { coreServices } from '../../services/kibana_services';
 
 export const HomeApp = () => {
-  const { setBreadcrumbs } = usePlatformService();
   const dispatch = useDispatch();
   const onLoad = () => dispatch(resetWorkpad());
   const history = useHistory();
 
   useEffect(() => {
-    setBreadcrumbs([getBaseBreadcrumb(history)]);
-  }, [setBreadcrumbs, history]);
+    coreServices.chrome.setBreadcrumbs([getBaseBreadcrumb(history)]);
+  }, [history]);
 
   return <Component onLoad={onLoad} />;
 };

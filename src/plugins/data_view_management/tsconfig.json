@@ -45,6 +45,8 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-mount",
     "@kbn/rollup",
+    "@kbn/share-plugin",
+    "@kbn/shared-ux-table-persist",
   ],
   "exclude": [
     "target/**/*",

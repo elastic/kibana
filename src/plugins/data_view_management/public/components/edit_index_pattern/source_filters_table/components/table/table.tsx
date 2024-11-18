@@ -21,6 +21,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/public';
+import {
+  withEuiTablePersist,
+  type EuiTablePersistInjectedProps,
+} from '@kbn/shared-ux-table-persist';
+
 import { SourceFiltersTableFilter } from '../../types';
 
 const filterHeader = i18n.translate(
@@ -69,6 +74,8 @@ const cancelAria = i18n.translate(
   }
 );
 
+const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
+
 export interface TableProps {
   indexPattern: DataView;
   items: SourceFiltersTableFilter[];
@@ -83,8 +90,11 @@ export interface TableState {
   editingFilterValue: string;
 }
 
-export class Table extends Component<TableProps, TableState> {
-  constructor(props: TableProps) {
+class TableClass extends Component<
+  TableProps & EuiTablePersistInjectedProps<SourceFiltersTableFilter>,
+  TableState
+> {
+  constructor(props: TableProps & EuiTablePersistInjectedProps<SourceFiltersTableFilter>) {
     super(props);
     this.state = {
       editingFilterId: '',
@@ -227,11 +237,15 @@ export class Table extends Component<TableProps, TableState> {
   }
 
   render() {
-    const { items, isSaving } = this.props;
+    const {
+      items,
+      isSaving,
+      euiTablePersist: { pageSize, sorting, onTableChange },
+    } = this.props;
     const columns = this.getColumns();
     const pagination = {
-      initialPageSize: 10,
-      pageSizeOptions: [5, 10, 25, 50],
+      pageSize,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
 
     return (
@@ -240,8 +254,17 @@ export class Table extends Component<TableProps, TableState> {
         items={items}
         columns={columns}
         pagination={pagination}
-        sorting={true}
+        sorting={sorting}
+        onTableChange={onTableChange}
       />
     );
   }
 }
+
+export const TableWithoutPersist = TableClass; // For testing purposes
+
+export const Table = withEuiTablePersist(TableClass, {
+  tableId: 'dataViewsSourceFilters',
+  pageSizeOptions: PAGE_SIZE_OPTIONS,
+  initialPageSize: 10,
+});

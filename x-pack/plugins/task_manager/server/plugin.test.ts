@@ -87,6 +87,7 @@ const pluginInitializerContextParams = {
   request_timeouts: {
     update_by_query: 1000,
   },
+  auto_calculate_default_ech_capacity: false,
 };
 
 describe('TaskManagerPlugin', () => {
@@ -187,6 +188,40 @@ describe('TaskManagerPlugin', () => {
   });
 
   describe('stop', () => {
+    test('should stop task polling lifecycle if it is defined', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+        pluginInitializerContextParams
+      );
+      pluginInitializerContext.node.roles.backgroundTasks = true;
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.start(coreStart, {
+        cloud: cloudMock.createStart(),
+      });
+
+      expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
+
+      await taskManagerPlugin.stop();
+
+      expect(mockTaskPollingLifecycle.stop).toHaveBeenCalled();
+    });
+
+    test('should not call stop task polling lifecycle if it is not defined', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+        pluginInitializerContextParams
+      );
+      pluginInitializerContext.node.roles.backgroundTasks = false;
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.start(coreStart, {
+        cloud: cloudMock.createStart(),
+      });
+
+      await taskManagerPlugin.stop();
+
+      expect(mockTaskPollingLifecycle.stop).not.toHaveBeenCalled();
+    });
+
     test('should remove the current from discovery service', async () => {
       const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
         pluginInitializerContextParams

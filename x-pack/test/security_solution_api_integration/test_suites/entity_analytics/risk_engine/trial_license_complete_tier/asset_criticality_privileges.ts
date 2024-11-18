@@ -6,10 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { ROLES as SERVERLESS_USERNAMES } from '@kbn/security-solution-plugin/common/test';
-import {
-  assetCriticalityRouteHelpersFactoryNoAuth,
-  enableAssetCriticalityAdvancedSetting,
-} from '../../utils';
+import { assetCriticalityRouteHelpersFactoryNoAuth } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { usersAndRolesFactory } from '../../utils/users_and_roles';
 
@@ -67,9 +64,6 @@ const USERNAME_TO_ROLES = {
 };
 
 export default ({ getService }: FtrProviderContext) => {
-  const kibanaServer = getService('kibanaServer');
-  const log = getService('log');
-
   describe('Entity Analytics - Asset Criticality Privileges API', () => {
     describe('@ess Asset Criticality Privileges API', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -95,7 +89,6 @@ export default ({ getService }: FtrProviderContext) => {
         });
       before(async () => {
         await createPrivilegeTestUsers();
-        await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
       });
 
       describe('Asset Criticality privileges API', () => {
@@ -111,6 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               },
             },
+            kibana: {},
           });
         });
         it('returns has_all_required false for user without asset criticality index read', async () => {
@@ -125,6 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               },
             },
+            kibana: {},
           });
         });
         it('returns has_all_required false for user without asset criticality index write', async () => {
@@ -139,6 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               },
             },
+            kibana: {},
           });
         });
       });
@@ -164,6 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
+          kibana: {},
         });
       });
 
@@ -182,6 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
+          kibana: {},
         });
       });
     });

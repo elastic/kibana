@@ -28,9 +28,6 @@ export const initSideNavigation = async (services: Services) => {
   const essNavigationTree$ = navigationTree$.pipe(
     map((navigationTree) =>
       produce(navigationTree, (draft) => {
-        if (draft.footer) {
-          draft.footer.unshift({ type: 'recentlyAccessed' });
-        }
         const footerGroup: GroupDefinition | undefined = draft.footer?.find(
           (node): node is GroupDefinition => node.type === 'navGroup'
         );
@@ -56,7 +53,7 @@ export const initSideNavigation = async (services: Services) => {
   });
 };
 
-// Temporary configuration to render the stack management links in the panel
+// Stack Management static node definition
 const stackManagementLinks: Array<NodeDefinition<AppDeepLinkId, string, string>> = [
   {
     title: 'Ingest',
@@ -85,6 +82,8 @@ const stackManagementLinks: Array<NodeDefinition<AppDeepLinkId, string, string>>
       { link: 'management:jobsListLink' },
       { link: 'management:watcher' },
       { link: 'management:maintenanceWindows' },
+      { link: `${SECURITY_UI_APP_ID}:${SecurityPageName.entityAnalyticsManagement}` },
+      { link: `${SECURITY_UI_APP_ID}:${SecurityPageName.entityAnalyticsEntityStoreManagement}` },
     ],
   },
   {
@@ -106,6 +105,10 @@ const stackManagementLinks: Array<NodeDefinition<AppDeepLinkId, string, string>>
       { link: 'management:search_sessions' },
       { link: 'management:aiAssistantManagementSelection' },
       { link: 'management:spaces' },
+      { link: 'maps' },
+      { link: 'visualize' },
+      { link: 'graph' },
+      { link: 'canvas' },
       { link: 'management:settings' },
     ],
   },

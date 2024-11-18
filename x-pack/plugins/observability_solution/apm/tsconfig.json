@@ -119,7 +119,6 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/test-jest-helpers",
     "@kbn/security-plugin-types-common",
-    "@kbn/entityManager-plugin",
     "@kbn/server-route-repository-utils",
     "@kbn/core-analytics-browser",
     "@kbn/apm-types",
@@ -128,6 +127,7 @@
     "@kbn/aiops-log-rate-analysis",
     "@kbn/router-utils",
     "@kbn/react-hooks",
+    "@kbn/alerting-comparators",
   ],
   "exclude": ["target/**/*"]
 }

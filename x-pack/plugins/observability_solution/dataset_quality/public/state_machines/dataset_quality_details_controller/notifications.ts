@@ -59,3 +59,28 @@ export const fetchDataStreamIntegrationFailedNotifier = (
     text: error.message,
   });
 };
+
+export const updateFieldLimitFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.details.updateFieldLimitFailed', {
+      defaultMessage: "We couldn't update the field limit.",
+    }),
+    text: error.message,
+  });
+};
+
+export const rolloverDataStreamFailedNotifier = (
+  toasts: IToasts,
+  error: Error,
+  dataStream: string
+) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.details.rolloverDataStreamFailed', {
+      defaultMessage: "We couldn't rollover the data stream: {dataStream}.",
+      values: {
+        dataStream,
+      },
+    }),
+    text: error.message,
+  });
+};

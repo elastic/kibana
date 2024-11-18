@@ -41,12 +41,13 @@ export const mockKibanaValues = {
   data: dataPluginMock.createStartContract(),
   esConfig: { elasticsearch_host: 'https://your_deployment_url' },
   getChromeStyle$: jest.fn().mockReturnValue(of('classic')),
+  getNavLinks: jest.fn().mockReturnValue([]),
   guidedOnboarding: {},
   history: mockHistory,
   indexMappingComponent: null,
   isCloud: false,
-  isSearchHomepageEnabled: false,
   isSidebarEnabled: true,
+  kibanaVersion: null,
   lens: {
     EmbeddableComponent: jest.fn(),
     stateHelperApi: jest.fn().mockResolvedValue({
@@ -65,7 +66,6 @@ export const mockKibanaValues = {
     hasWebCrawler: true,
   },
   renderHeaderActions: jest.fn(),
-  searchHomepage: null,
   searchInferenceEndpoints: null,
   searchPlayground: searchPlaygroundMock.createStart(),
   security: securityMock.createStart(),

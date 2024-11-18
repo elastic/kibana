@@ -228,7 +228,7 @@ const DefaultAttributes = {
 
 const ExtraneousAttributes = { ...DefaultAttributes, foo: 'bar' };
 
-const DefaultAttributesForEsUpdate = {
+const DefaultAttributesForEsUpdate: PartiallyUpdateableRuleAttributes = {
   running: false,
   executionStatus: {
     status: 'active' as RuleExecutionStatuses,
@@ -247,7 +247,7 @@ const DefaultAttributesForEsUpdate = {
           success: true,
           timestamp: 1640991880000,
           duration: 12,
-          outcome: 'success',
+          outcome: 'succeeded',
         },
       ],
       last_run: {
@@ -263,6 +263,17 @@ const DefaultAttributesForEsUpdate = {
       },
     },
   },
+  snoozeSchedule: [
+    {
+      duration: 1000,
+      id: '1',
+      rRule: {
+        count: 1,
+        dtstart: '2019-02-13T21:01:22.479Z',
+        tzid: 'UTC',
+      },
+    },
+  ],
 };
 
 const AttributesForEsUpdateWithUnallowedFields = {

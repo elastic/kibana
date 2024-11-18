@@ -19,7 +19,6 @@ import {
   updateRiskEngineConfigSO,
   getRiskEngineTask,
   waitForRiskEngineTaskToBeGone,
-  cleanRiskEngine,
   assetCriticalityRouteHelpersFactory,
   cleanAssetCriticality,
   waitForAssetCriticalityToBePresent,
@@ -45,6 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       before(async () => {
+        await riskEngineRoutes.cleanUp();
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
       });
 
@@ -55,13 +55,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       beforeEach(async () => {
-        await cleanRiskEngine({ kibanaServer, es, log });
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
       afterEach(async () => {
-        await cleanRiskEngine({ kibanaServer, es, log });
+        await riskEngineRoutes.cleanUp();
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });

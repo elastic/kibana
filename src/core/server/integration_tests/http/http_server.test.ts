@@ -44,6 +44,7 @@ describe('Http server', () => {
         enabled: false,
       },
       shutdownTimeout: moment.duration(5, 's'),
+      restrictInternalApis: false,
     } as any;
 
     server = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));

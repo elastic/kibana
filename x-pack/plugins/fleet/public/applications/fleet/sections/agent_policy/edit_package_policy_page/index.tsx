@@ -103,7 +103,7 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const { isAgentlessAgentPolicy } = useAgentless();
+  const { isAgentlessAgentPolicy, isAgentlessIntegration } = useAgentless();
   const {
     // data
     agentPolicies: existingAgentPolicies,
@@ -130,9 +130,10 @@ export const EditPackagePolicyForm = memo<{
   const hasAgentlessAgentPolicy = useMemo(
     () =>
       existingAgentPolicies.length === 1
-        ? existingAgentPolicies.some((policy) => isAgentlessAgentPolicy(policy))
+        ? existingAgentPolicies.some((policy) => isAgentlessAgentPolicy(policy)) &&
+          isAgentlessIntegration(packageInfo)
         : false,
-    [existingAgentPolicies, isAgentlessAgentPolicy]
+    [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, isAgentlessIntegration]
   );
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
@@ -165,8 +166,8 @@ export const EditPackagePolicyForm = memo<{
       let count = 0;
       for (const id of packagePolicy.policy_ids) {
         const { data } = await sendGetAgentStatus({ policyId: id });
-        if (data?.results.total) {
-          count += data.results.total;
+        if (data?.results.active) {
+          count += data.results.active;
         }
       }
       setAgentCount(count);

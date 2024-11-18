@@ -96,7 +96,7 @@ const formatForResponse = ({
   };
 };
 
-const filterFromRange = (range: CalculateScoresParams['range']): QueryDslQueryContainer => ({
+export const filterFromRange = (range: CalculateScoresParams['range']): QueryDslQueryContainer => ({
   range: { '@timestamp': { lt: range.end, gte: range.start } },
 });
 
@@ -175,13 +175,6 @@ const processScores = async ({
     return [];
   }
 
-  const isAssetCriticalityEnabled = await assetCriticalityService.isEnabled();
-  if (!isAssetCriticalityEnabled) {
-    return buckets.map((bucket) =>
-      formatForResponse({ bucket, now, identifierField, includeNewFields: false })
-    );
-  }
-
   const identifiers = buckets.map((bucket) => ({
     id_field: identifierField,
     id_value: bucket.key[identifierField],
@@ -225,6 +218,7 @@ export const calculateRiskScores = async ({
   runtimeMappings,
   weights,
   alertSampleSizePerShard = 10_000,
+  excludeAlertStatuses = [],
 }: {
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
@@ -233,11 +227,12 @@ export const calculateRiskScores = async ({
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
     const scriptedMetricPainless = await getPainlessScripts();
-    const filter = [
-      filterFromRange(range),
-      { bool: { must_not: { term: { [ALERT_WORKFLOW_STATUS]: 'closed' } } } },
-      { exists: { field: ALERT_RISK_SCORE } },
-    ];
+    const filter = [filterFromRange(range), { exists: { field: ALERT_RISK_SCORE } }];
+    if (excludeAlertStatuses.length > 0) {
+      filter.push({
+        bool: { must_not: { terms: { [ALERT_WORKFLOW_STATUS]: excludeAlertStatuses } } },
+      });
+    }
     if (!isEmpty(userFilter)) {
       filter.push(userFilter as QueryDslQueryContainer);
     }

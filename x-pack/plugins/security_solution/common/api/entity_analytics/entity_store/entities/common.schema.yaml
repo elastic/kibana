@@ -8,7 +8,24 @@ components:
   schemas:
     UserEntity:
       type: object
+      required:
+        - "@timestamp"
+        - user
+        - entity
       properties:
+        "@timestamp":
+          type: string
+          format: date-time
+        entity:
+          type: object
+          required:
+            - name
+            - source
+          properties:
+            name:
+              type: string
+            source:
+              type: string
         user:
           type: object
           properties:
@@ -42,46 +59,6 @@ components:
               $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
           required:
             - name
-        entity:
-          type: object
-          properties:
-            lastSeenTimestamp:
-              type: string
-              format: date-time
-            schemaVersion:
-              type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            identityFields:
-              type: array
-              items:
-                type: string
-            id:
-              type: string
-            type:
-              type: string
-              enum:
-                - node
-            firstSeenTimestamp:
-              type: string
-              format: date-time
-            definitionId:
-              type: string
-            source:
-              type: string
-          required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
-            - source
         asset:
           type: object
           properties:
@@ -91,7 +68,24 @@ components:
             - criticality
     HostEntity:
       type: object
+      required:
+        - "@timestamp"
+        - host
+        - entity
       properties:
+        "@timestamp":
+          type: string
+          format: date-time
+        entity:
+          type: object
+          required:
+            - name
+            - source
+          properties:
+            name:
+              type: string
+            source:
+              type: string
         host:
           type: object
           properties:
@@ -129,46 +123,6 @@ components:
               $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
           required:
             - name
-
-        entity:
-          type: object
-          properties:
-            lastSeenTimestamp:
-              type: string
-              format: date-time
-            schemaVersion:
-              type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            identityFields:
-              type: array
-              items:
-                type: string
-            id:
-              type: string
-            type:
-              type: string
-              enum:
-                - node
-            firstSeenTimestamp:
-              type: string
-              format: date-time
-            definitionId:
-              type: string
-            source:
-              type: string
-          required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
         asset:
           type: object
           properties:

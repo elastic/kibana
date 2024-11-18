@@ -2,8 +2,9 @@
   "type": "doc",
   "value": {
     "id": "a4cf452c1e0375c3d4412cb550ad1783358468a3b3b777da4829d72c7d6fb74f",
-    "index": ".entities.v1.latest.ea_default_user_entity_store",
+    "index": ".entities.v1.latest.security_user_default",
     "source": {
+      "@timestamp": "2024-09-11T11:24:15.588Z",
       "event": {
         "ingested": "2024-09-11T11:26:49.706875Z"
       },
@@ -17,17 +18,10 @@
         "hash": []
       },
       "entity": {
-        "lastSeenTimestamp": "2024-09-11T11:24:15.588Z",
-        "schemaVersion": "v1",
-        "definitionVersion": "1.0.0",
-        "displayName": "hinamatsumoto",
-        "identityFields": [
-          "user.name"
-        ],
-        "id": "LBQAgKHGmpup0Kg9nlKmeQ==",
-        "type": "node",
-        "firstSeenTimestamp": "2024-09-11T10:46:00.000Z",
-        "definitionId": "ea_default_user_entity_store"
+        "name": "hinamatsumoto",
+        "id": "hinamatsumoto",
+        "type": "user",
+        "source": ".ds-logs-endpoint.alerts-default-2024.10.23-000001"
       }
     }
   }
@@ -37,8 +31,9 @@
   "type": "doc",
   "value": {
     "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb71f",
-    "index": ".entities.v1.latest.ea_default_host_entity_store",
+    "index": ".entities.v1.latest.security_host_default",
     "source": {
+      "@timestamp": "2024-09-11T11:24:15.591Z",
       "event": {
         "ingested": "2024-09-11T11:26:49.641707Z"
       },
@@ -68,17 +63,10 @@
         ]
       },
       "entity": {
-        "lastSeenTimestamp": "2024-09-11T11:24:15.591Z",
-        "schemaVersion": "v1",
-        "definitionVersion": "1.0.0",
-        "displayName": "ali-ubuntu-server",
-        "identityFields": [
-          "host.name"
-        ],
-        "id": "ZXKm6GEcUJY6NHkMgPPmGQ==",
-        "type": "node",
-        "firstSeenTimestamp": "2024-09-11T10:46:00.000Z",
-        "definitionId": "ea_default_host_entity_store"
+        "name": "ali-ubuntu-server",
+        "id": "ali-ubuntu-server",
+        "type": "host",
+        "source": ".ds-logs-endpoint.events.process-default-2024.10.23-000001"
       }
     }
   }

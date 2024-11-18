@@ -88,7 +88,6 @@ module.exports = (_, argv) => {
         'moment-timezone/moment-timezone',
         'moment-timezone/data/packed/latest.json',
         'moment',
-        'react-ace',
         'react-dom',
         'react-dom/server',
         'react-router-dom',

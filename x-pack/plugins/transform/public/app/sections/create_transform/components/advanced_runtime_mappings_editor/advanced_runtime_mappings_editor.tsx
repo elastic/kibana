@@ -23,7 +23,7 @@ export const AdvancedRuntimeMappingsEditor: FC<StepDefineFormHook['runtimeMappin
       setAdvancedRuntimeMappingsConfig,
       setRuntimeMappingsEditorApplyButtonEnabled,
     },
-    state: { advancedEditorRuntimeMappingsLastApplied, advancedRuntimeMappingsConfig, xJsonMode },
+    state: { advancedEditorRuntimeMappingsLastApplied, advancedRuntimeMappingsConfig },
   }) => {
     return (
       <div data-test-subj="transformAdvancedRuntimeMappingsEditor">

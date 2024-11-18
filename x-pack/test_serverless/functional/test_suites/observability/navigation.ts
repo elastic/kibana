@@ -35,9 +35,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.expectSectionClosed('project_settings_project_nav');
 
       // navigate to the logs explorer tab by default
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-logs-explorer' });
+      // 'last-used-logs-viewer' is wrapper app to handle the navigation between logs explorer and discover
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'last-used-logs-viewer' });
       await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'observability-logs-explorer',
+        deepLinkId: 'last-used-logs-viewer',
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'observability-logs-explorer',
@@ -45,23 +46,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       expect(await browser.getCurrentUrl()).contain('/app/observability-logs-explorer');
 
       // check the aiops subsection
-      await svlCommonNavigation.sidenav.openSection('observability_project_nav.aiops'); // open ai ops subsection
-      await svlCommonNavigation.sidenav.clickLink({ navId: 'ml:anomalyDetection' });
-      await svlCommonNavigation.sidenav.expectLinkActive({ navId: 'ml:anomalyDetection' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AIOps' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'ml:anomalyDetection',
-      });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Jobs',
-      });
-      await testSubjects.click('mlCreateNewJobButton');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
-        'AIOps',
-        'Anomaly Detection',
-        'Create job',
-      ]);
-
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'observabilityAIAssistant' }); // click on AI Assistant link
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI Assistant' });
       // navigate to a different section
       await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
