@@ -30,6 +30,8 @@ import { NoDataViewsPromptComponent, useOnTryESQL } from '@kbn/shared-ux-prompt-
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
+
 import type { IndexPatternManagmentContext } from '../../types';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { type RemoveDataViewProps, removeDataView } from '../edit_index_pattern';
@@ -42,10 +44,7 @@ import { deleteModalMsg } from './delete_modal_msg';
 import { NoData } from './no_data';
 import { SpacesList } from './spaces_list';
 
-const pagination = {
-  initialPageSize: 10,
-  pageSizeOptions: [5, 10, 25, 50],
-};
+const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
 const sorting = {
   sort: {
@@ -122,6 +121,12 @@ export const IndexPatternTable = ({
     navigateToApp: application.navigateToApp,
   };
   const onTryESQL = useOnTryESQL(useOnTryESQLParams);
+
+  const { pageSize, onTableChange } = useEuiTablePersist<IndexPatternTableItem>({
+    tableId: 'dataViewsIndexPattern',
+    initialPageSize: 10,
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
+  });
 
   const handleOnChange = ({ queryText, error }: { queryText: string; error: unknown }) => {
     if (!error) {
@@ -361,8 +366,12 @@ export const IndexPatternTable = ({
           itemId="id"
           items={indexPatterns}
           columns={columns}
-          pagination={pagination}
+          pagination={{
+            pageSize,
+            pageSizeOptions: PAGE_SIZE_OPTIONS,
+          }}
           sorting={sorting}
+          onTableChange={onTableChange}
           search={search}
           selection={dataViews.getCanSaveSync() ? selection : undefined}
         />

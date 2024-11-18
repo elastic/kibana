@@ -197,6 +197,7 @@ export const AddPanelFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <SavedObjectFinder
+          id="embeddableAddPanel"
           services={{
             contentClient: contentManagement.client,
             savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),

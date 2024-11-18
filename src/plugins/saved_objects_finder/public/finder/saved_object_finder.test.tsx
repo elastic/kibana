@@ -28,7 +28,10 @@ import { IconType } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import * as sinon from 'sinon';
-import { SavedObjectFinderUi as SavedObjectFinder } from './saved_object_finder';
+import {
+  SavedObjectFinderWithoutPersist as SavedObjectFinder,
+  SavedObjectFinderUi,
+} from './saved_object_finder';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { findTestSubject } from '@kbn/test-jest-helpers';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
@@ -72,6 +75,15 @@ describe('SavedObjectsFinder', () => {
     },
   ];
 
+  const baseProps = {
+    id: 'foo',
+    euiTablePersist: {
+      pageSize: 10,
+      onTableChange: () => {},
+      sorting: { sort: { direction: 'asc' as const, field: 'title' as const } },
+    },
+  };
+
   const contentManagement = contentManagementMock.createStartContract();
   const contentClient = contentManagement.client;
   beforeEach(() => {
@@ -109,6 +121,7 @@ describe('SavedObjectsFinder', () => {
 
     const wrapper = shallow(
       <SavedObjectFinder
+        {...baseProps}
         services={{
           uiSettings,
           contentClient,
@@ -134,6 +147,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = shallow(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
@@ -157,6 +171,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           onChoose={chooseStub}
           savedObjectMetaData={searchMetaData}
@@ -179,6 +194,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = shallow(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
           helpText="This is some description about the action"
@@ -199,6 +215,7 @@ describe('SavedObjectsFinder', () => {
       const button = <EuiButton>Hello</EuiButton>;
       const wrapper = shallow(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
           leftChildren={button}
@@ -227,6 +244,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
@@ -251,6 +269,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
@@ -279,6 +298,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
@@ -299,6 +319,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
@@ -322,6 +343,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
@@ -346,6 +368,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
@@ -375,6 +398,7 @@ describe('SavedObjectsFinder', () => {
 
     const wrapper = shallow(
       <SavedObjectFinder
+        {...baseProps}
         services={{ uiSettings, contentClient, savedObjectsTagging }}
         savedObjectMetaData={[
           {
@@ -402,6 +426,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
@@ -430,6 +455,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
@@ -453,6 +479,7 @@ describe('SavedObjectsFinder', () => {
 
     const wrapper = shallow(
       <SavedObjectFinder
+        {...baseProps}
         services={{ uiSettings, contentClient, savedObjectsTagging }}
         savedObjectMetaData={[
           {
@@ -492,6 +519,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
@@ -512,6 +540,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           showFilter={false}
           savedObjectMetaData={metaDataConfig}
@@ -530,6 +559,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           showFilter={true}
           savedObjectMetaData={searchMetaData}
@@ -549,6 +579,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging: undefined }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
@@ -568,6 +599,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
@@ -608,6 +640,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
@@ -665,6 +698,7 @@ describe('SavedObjectsFinder', () => {
     const noItemsMessage = <span id="myNoItemsMessage" />;
     const wrapper = mount(
       <SavedObjectFinder
+        {...baseProps}
         services={{ uiSettings, contentClient, savedObjectsTagging }}
         noItemsMessage={noItemsMessage}
         savedObjectMetaData={searchMetaData}
@@ -693,6 +727,11 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          id="foo"
+          euiTablePersist={{
+            ...baseProps.euiTablePersist,
+            pageSize: 15,
+          }}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
@@ -715,6 +754,11 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          id="foo"
+          euiTablePersist={{
+            ...baseProps.euiTablePersist,
+            pageSize: 5,
+          }}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
@@ -742,14 +786,14 @@ describe('SavedObjectsFinder', () => {
       );
 
       const wrapper = mount(
-        <SavedObjectFinder
+        <SavedObjectFinderUi
+          id="foo"
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
         />
       );
 
-      wrapper.instance().componentDidMount!();
       await nextTick();
       wrapper.update();
       expect(wrapper.find(EuiInMemoryTable).find('tbody tr')).toHaveLength(15);
@@ -774,6 +818,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           fixedPageSize={33}
           savedObjectMetaData={searchMetaData}
@@ -796,6 +841,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           fixedPageSize={33}
           savedObjectMetaData={searchMetaData}
@@ -827,6 +873,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
@@ -840,6 +887,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={[
             {
@@ -862,6 +910,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
@@ -884,6 +933,7 @@ describe('SavedObjectsFinder', () => {
 
     const wrapper = mount(
       <SavedObjectFinder
+        {...baseProps}
         services={{ uiSettings, contentClient, savedObjectsTagging }}
         savedObjectMetaData={[
           {
@@ -912,6 +962,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
@@ -933,6 +984,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, savedObjectsTagging, contentClient }}
           savedObjectMetaData={searchMetaData}
         />
@@ -954,6 +1006,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging: undefined }}
           savedObjectMetaData={metaDataConfig}
         />
@@ -978,6 +1031,7 @@ describe('SavedObjectsFinder', () => {
 
     render(
       <SavedObjectFinder
+        {...baseProps}
         services={{ uiSettings, contentClient, savedObjectsTagging }}
         savedObjectMetaData={metaDataConfig}
         getTooltipText={(item) => (item.id === doc3.id ? tooltipText : undefined)}
@@ -990,7 +1044,7 @@ describe('SavedObjectsFinder', () => {
 
       const tooltip = screen.queryByText(tooltipText);
       if (show) {
-        expect(tooltip).toBeInTheDocument();
+        expect(tooltip)?.toBeInTheDocument();
       } else {
         expect(tooltip).toBeNull();
       }

@@ -43,6 +43,7 @@ import {
   ContentInsightsProvider,
   useContentInsightsServices,
 } from '@kbn/content-management-content-insights-public';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
 import {
   Table,
@@ -443,7 +444,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     hasUpdatedAtMetadata,
     hasCreatedByMetadata,
     hasRecentlyAccessedMetadata,
-    pagination,
+    pagination: _pagination,
     tableSort,
     tableFilter,
   } = state;
@@ -903,7 +904,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     [updateTableSortFilterAndPagination]
   );
 
-  const onTableChange = useCallback(
+  const customOnTableChange = useCallback(
     (criteria: CriteriaWithPagination<T>) => {
       const data: {
         sort?: State<T>['tableSort'];
@@ -1037,6 +1038,20 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       </React.Fragment>
     );
   }, [entityName, fetchError]);
+
+  const { pageSize, onTableChange } = useEuiTablePersist({
+    tableId: listingId,
+    initialPageSize,
+    customOnTableChange,
+    pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
+  });
+
+  const pagination = useMemo<Pagination>(() => {
+    return {
+      ..._pagination,
+      pageSize,
+    };
+  }, [_pagination, pageSize]);
 
   // ------------
   // Effects
