@@ -8,8 +8,9 @@
  */
 
 import type { BuildFlavor } from '@kbn/config';
-import type { ServiceStatusLevelId, ServiceStatus, CoreStatus } from '@kbn/core-status-common';
 import type { OpsMetrics } from '@kbn/core-metrics-server';
+import type { ServiceStatusLevelId, ServiceStatus } from './service_status';
+import type { CoreStatus } from './core_status';
 
 export interface StatusInfoServiceStatus extends Omit<ServiceStatus, 'level'> {
   level: ServiceStatusLevelId;
