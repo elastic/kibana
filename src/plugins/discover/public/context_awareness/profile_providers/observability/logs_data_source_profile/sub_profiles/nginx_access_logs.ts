@@ -10,23 +10,24 @@
 import { DataSourceProfileProvider } from '../../../../profiles';
 import { extendProfileProvider } from '../../../extend_profile_provider';
 import { createGetDefaultAppState } from '../accessors';
-import { HOST_NAME_COLUMN, LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
+import { CLIENT_IP_COLUMN, HOST_NAME_COLUMN, MESSAGE_COLUMN } from '../consts';
 import { createResolve } from './create_resolve';
 
-export const createSystemLogsDataSourceProfileProvider = (
+export const createNginxAccessLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'system-logs-data-source',
+    profileId: 'observability-nginx-access-logs-data-source-profile',
     profile: {
       getDefaultAppState: createGetDefaultAppState({
         defaultColumns: [
-          LOG_LEVEL_COLUMN,
-          { name: 'process.name', width: 150 },
+          { name: 'url.path', width: 150 },
+          { name: 'http.response.status_code', width: 200 },
+          CLIENT_IP_COLUMN,
           HOST_NAME_COLUMN,
           MESSAGE_COLUMN,
         ],
       }),
     },
-    resolve: createResolve('logs-system'),
+    resolve: createResolve('logs-nginx.access'),
   });

@@ -12,19 +12,28 @@ import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import {
   DataSourceCategory,
   DataSourceContext,
+  DocumentProfileProviderParams,
   DocumentType,
   RootContext,
   SolutionType,
 } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
-import { createLogDocumentProfileProvider } from './profile';
+import { createObservabilityLogDocumentProfileProvider } from './profile';
+import { ContextWithProfileId } from '../../../profile_service';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 
 const mockServices = createContextAwarenessMocks().profileProviderServices;
 
 describe('logDocumentProfileProvider', () => {
-  const logDocumentProfileProvider = createLogDocumentProfileProvider(mockServices);
-  const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Default };
-  const DATA_SOURCE_CONTEXT: DataSourceContext = { category: DataSourceCategory.Logs };
+  const logDocumentProfileProvider = createObservabilityLogDocumentProfileProvider(mockServices);
+  const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
+    profileId: OBSERVABILITY_ROOT_PROFILE_ID,
+    solutionType: SolutionType.Observability,
+  };
+  const DATA_SOURCE_CONTEXT: ContextWithProfileId<DataSourceContext> = {
+    profileId: 'data-source-profile',
+    category: DataSourceCategory.Logs,
+  };
   const RESOLUTION_MATCH = {
     isMatch: true,
     context: {
@@ -95,6 +104,42 @@ describe('logDocumentProfileProvider', () => {
         rootContext: ROOT_CONTEXT,
         dataSourceContext: DATA_SOURCE_CONTEXT,
         record: buildMockRecord('another-index'),
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('does not match records when solution type is not Observability', () => {
+    const params: Omit<DocumentProfileProviderParams, 'rootContext'> = {
+      dataSourceContext: DATA_SOURCE_CONTEXT,
+      record: buildMockRecord('another-index', {
+        'data_stream.type': ['logs'],
+      }),
+    };
+    expect(
+      logDocumentProfileProvider.resolve({
+        ...params,
+        rootContext: ROOT_CONTEXT,
+      })
+    ).toEqual(RESOLUTION_MATCH);
+    expect(
+      logDocumentProfileProvider.resolve({
+        ...params,
+        rootContext: { profileId: 'other-data-source-profile', solutionType: SolutionType.Default },
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+    expect(
+      logDocumentProfileProvider.resolve({
+        ...params,
+        rootContext: { profileId: 'other-data-source-profile', solutionType: SolutionType.Search },
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+    expect(
+      logDocumentProfileProvider.resolve({
+        ...params,
+        rootContext: {
+          profileId: 'other-data-source-profile',
+          solutionType: SolutionType.Security,
+        },
       })
     ).toEqual(RESOLUTION_MISMATCH);
   });
