@@ -41,7 +41,7 @@ export interface DashboardServicesConfig {
     HasLibraryTransforms<LensRuntimeState> &
     Pick<IntegrationCallbacks, 'updateOverrides'>;
   serialize: () => SerializedProps;
-  comparators: StateComparators<SerializedProps>;
+  comparators: StateComparators<SerializedProps & { isNewPanel: boolean }>;
   cleanup: () => void;
 }
 
@@ -177,6 +177,7 @@ export function initializeDashboardServices(
       className: getUnchangingComparator<LensSharedProps, 'className'>(),
       overrides: overridesComparator,
       disableTriggers: disabledTriggersComparator,
+      isNewPanel: getUnchangingComparator<{ isNewPanel: boolean }, 'isNewPanel'>(),
     },
     cleanup: noop,
   };
