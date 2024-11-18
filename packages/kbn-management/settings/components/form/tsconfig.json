@@ -34,5 +34,7 @@
     "@kbn/management-settings-utilities",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-ui-settings-common",
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/core-user-profile-browser",
   ]
 }
