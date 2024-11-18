@@ -9,7 +9,17 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { fetch$, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type KibanaExecutionContext } from '@kbn/core/public';
-import { BehaviorSubject, type Subscription, distinctUntilChanged, skip, pipe } from 'rxjs';
+import {
+  BehaviorSubject,
+  type Subscription,
+  distinctUntilChanged,
+  debounceTime,
+  skip,
+  pipe,
+  merge,
+  tap,
+  map,
+} from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { getEditPath } from '../../common/constants';
 import type {
@@ -35,6 +45,14 @@ const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
   'visualization',
   'visualizationOnEmbeddable',
 ];
+
+type ReloadReason =
+  | 'attributes'
+  | 'savedObjectId'
+  | 'overrides'
+  | 'disableTriggers'
+  | 'viewMode'
+  | 'searchContext';
 
 /**
  * The function computes the expression used to render the panel and produces the necessary props
@@ -106,13 +124,7 @@ export function loadEmbeddableData(
 
   async function reload(
     // make reload easier to debug
-    sourceId:
-      | 'attributes'
-      | 'savedObjectId'
-      | 'overrides'
-      | 'disableTriggers'
-      | 'viewMode'
-      | 'searchContext'
+    sourceId: ReloadReason
   ) {
     addLog(`Embeddable reload reason: ${sourceId}`);
     resetMessages();
@@ -243,14 +255,13 @@ export function loadEmbeddableData(
 
   // Build a custom operator to be resused for various observables
   function waitUntilChanged() {
-    return pipe(distinctUntilChanged(fastIsEqual), skip(1), debounceTime(0));
+    return pipe(distinctUntilChanged(fastIsEqual), skip(1));
   }
 
-  const subscriptions: Subscription[] = [
+  const mergedSubscriptions = merge(
     // on data change from the parentApi, reload
-    fetch$(api)
-      .pipe(debounceTime(0))
-      .subscribe((data) => {
+    fetch$(api).pipe(
+      tap((data) => {
         const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
         unifiedSearch$.next({
           query: data.query,
@@ -259,9 +270,39 @@ export function loadEmbeddableData(
           timeslice: data.timeslice,
           searchSessionId,
         });
-
-        reload('searchContext');
       }),
+      map(() => 'searchContext' as ReloadReason)
+    ),
+    // On state change, reload
+    // this is used to refresh the chart on inline editing
+    // just make sure to avoid to rerender if there's no substantial change
+    // make sure to debounce one tick to make the refresh work
+    internalApi.attributes$.pipe(
+      waitUntilChanged(),
+      tap(() => {
+        // the ES|QL query may have changed, so recompute the args for view underlying data
+        if (api.isTextBasedLanguage()) {
+          api.loadViewUnderlyingData();
+        }
+      }),
+      map(() => 'attributes' as ReloadReason)
+    ),
+    api.savedObjectId.pipe(
+      waitUntilChanged(),
+      map(() => 'savedObjectId' as ReloadReason)
+    ),
+    internalApi.overrides$.pipe(
+      waitUntilChanged(),
+      map(() => 'overrides' as ReloadReason)
+    ),
+    internalApi.disableTriggers$.pipe(
+      waitUntilChanged(),
+      map(() => 'disableTriggers' as ReloadReason)
+    )
+  );
+
+  const subscriptions: Subscription[] = [
+    mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
     // make sure to reload on viewMode change
     api.viewMode.subscribe(() => {
       // only reload if drilldowns are set
@@ -269,22 +310,6 @@ export function loadEmbeddableData(
         reload('viewMode');
       }
     }),
-    // On state change, reload
-    // this is used to refresh the chart on inline editing
-    // just make sure to avoid to rerender if there's no substantial change
-    // make sure to debounce one tick to make the refresh work
-    internalApi.attributes$.pipe(waitUntilChanged()).subscribe(() => {
-      // the ES|QL query may have changed, so recompute the args for view underlying data
-      if (api.isTextBasedLanguage()) {
-        api.loadViewUnderlyingData();
-      }
-      reload('attributes');
-    }),
-    api.savedObjectId.pipe(waitUntilChanged()).subscribe(() => reload('savedObjectId')),
-    internalApi.overrides$.pipe(waitUntilChanged()).subscribe(() => reload('overrides')),
-    internalApi.disableTriggers$
-      .pipe(waitUntilChanged())
-      .subscribe(() => reload('disableTriggers')),
   ];
   // There are few key moments when errors are checked and displayed:
   // * at setup time (here) before the first expression evaluation
