@@ -469,6 +469,7 @@ describe('getCasesTelemetryData', () => {
                 "counts": Object {
                   "date_range": Object {
                     "field": "cases.attributes.created_at",
+                    "format": "dd/MM/yyyy",
                     "ranges": Array [
                       Object {
                         "from": "now-1d",
@@ -500,6 +501,7 @@ describe('getCasesTelemetryData', () => {
             "counts": Object {
               "date_range": Object {
                 "field": "cases.attributes.created_at",
+                "format": "dd/MM/yyyy",
                 "ranges": Array [
                   Object {
                     "from": "now-1d",
@@ -545,6 +547,7 @@ describe('getCasesTelemetryData', () => {
                 "counts": Object {
                   "date_range": Object {
                     "field": "cases.attributes.created_at",
+                    "format": "dd/MM/yyyy",
                     "ranges": Array [
                       Object {
                         "from": "now-1d",
@@ -602,6 +605,7 @@ describe('getCasesTelemetryData', () => {
                 "counts": Object {
                   "date_range": Object {
                     "field": "cases.attributes.created_at",
+                    "format": "dd/MM/yyyy",
                     "ranges": Array [
                       Object {
                         "from": "now-1d",
