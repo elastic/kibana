@@ -115,7 +115,7 @@ async function getRoleMappingsDeprecations(
   docLinks: DocLinksServiceSetup
 ): Promise<DeprecationsDetails[]> {
   const title = i18n.translate('xpack.apm.deprecations.apmUserRoleMappings.title', {
-    defaultMessage: `Check for role mappings using the deprecated "apm_user" role`,
+    defaultMessage: `Check for role mappings using the deprecated "{apmUserRoleName}" role`,
     values: { apmUserRoleName: APM_USER_ROLE_NAME },
   });
 
