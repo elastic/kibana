@@ -175,7 +175,7 @@ export const OverviewPage: React.FC<Props> = memo(
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
     const isPrerelease = isPackagePrerelease(packageInfo.version);
     const isElasticDefend = packageInfo.name === 'endpoint';
-    const isSentinelOneCloudFunnel = packageInfo.name === 'sentinel_one_cloud_funnel';
+    const isSentinelOne = packageInfo.name === 'sentinel_one';
     const isCrowdStrike = packageInfo.name === 'crowdstrike';
     const [markdown, setMarkdown] = useState<string | undefined>(undefined);
     const [selectedItemId, setSelectedItem] = useState<string | undefined>(undefined);
@@ -348,7 +348,7 @@ export const OverviewPage: React.FC<Props> = memo(
               <EuiSpacer size="s" />
             </>
           )}
-          {isSentinelOneCloudFunnel && showSOReponseSupportBanner && (
+          {isSentinelOne && showSOReponseSupportBanner && (
             <>
               <BidirectionalIntegrationsBanner onDismiss={onSOResponseSupportBannerDismiss} />
               <EuiSpacer size="s" />
