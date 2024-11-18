@@ -13,8 +13,8 @@ import {
   updateConversation,
 } from './update_conversation';
 import { getConversation } from './get_conversation';
+import { authenticatedUser } from '../../__mocks__/user';
 import { ConversationResponse, ConversationUpdateProps } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/core-security-common';
 
 export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => ({
   id: 'test',
@@ -31,13 +31,7 @@ export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => (
   replacements: {},
 });
 
-const mockUser1 = {
-  username: 'my_username',
-  authentication_realm: {
-    type: 'my_realm_type',
-    name: 'my_realm_name',
-  },
-} as AuthenticatedUser;
+const mockUser1 = authenticatedUser;
 
 export const getConversationResponseMock = (): ConversationResponse => ({
   id: 'test',
