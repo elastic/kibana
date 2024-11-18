@@ -78,6 +78,7 @@ describe('test fetchAll', () => {
         resetDefaultProfileState: {
           columns: false,
           rowHeight: false,
+          breakdownField: false,
         },
       }),
       searchSessionId: '123',
@@ -270,6 +271,7 @@ describe('test fetchAll', () => {
         resetDefaultProfileState: {
           columns: false,
           rowHeight: false,
+          breakdownField: false,
         },
       }),
     };
@@ -392,6 +394,7 @@ describe('test fetchAll', () => {
           resetDefaultProfileState: {
             columns: false,
             rowHeight: false,
+            breakdownField: false,
           },
         }),
       };

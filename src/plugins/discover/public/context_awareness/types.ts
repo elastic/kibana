@@ -123,6 +123,10 @@ export interface DefaultAppStateExtension {
    * * 1-20: number of lines to display
    */
   rowHeight?: number;
+  /**
+   * The field to apply for the histogram breakdown
+   */
+  breakdownField?: string;
 }
 
 /**

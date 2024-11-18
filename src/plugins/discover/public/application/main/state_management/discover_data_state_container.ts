@@ -285,6 +285,7 @@ export function getDataStateContainer({
                 internalStateContainer.transitions.setResetDefaultProfileState({
                   columns: false,
                   rowHeight: false,
+                  breakdownField: false,
                 });
               };
 

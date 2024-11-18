@@ -178,6 +178,7 @@ describe('test getDataStateContainer', () => {
     stateContainer.internalState.transitions.setResetDefaultProfileState({
       columns: true,
       rowHeight: true,
+      breakdownField: true,
     });
 
     dataState.data$.totalHits$.next({
@@ -192,6 +193,7 @@ describe('test getDataStateContainer', () => {
     expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
       columns: false,
       rowHeight: false,
+      breakdownField: false,
     });
     expect(stateContainer.appState.get().columns).toEqual(['message', 'extension']);
     expect(stateContainer.appState.get().rowHeight).toEqual(3);
@@ -209,6 +211,7 @@ describe('test getDataStateContainer', () => {
     stateContainer.internalState.transitions.setResetDefaultProfileState({
       columns: false,
       rowHeight: false,
+      breakdownField: false,
     });
     dataState.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -221,6 +224,7 @@ describe('test getDataStateContainer', () => {
     expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
       columns: false,
       rowHeight: false,
+      breakdownField: false,
     });
     expect(stateContainer.appState.get().columns).toEqual(['default_column']);
     expect(stateContainer.appState.get().rowHeight).toBeUndefined();
