@@ -93,7 +93,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
             <EuiFlexItem>
               <EuiCheckableCard
                 id="specificTimeSchedulingCard"
-                name="specific-timeScheduling-card"
+                name="scheduling-card"
                 label={
                   <>
                     <EuiTitle size="xxs">
@@ -138,7 +138,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
             <EuiFlexItem>
               <EuiCheckableCard
                 id="intervalSchedulingCard"
-                name="interval-scheduling-card"
+                name="scheduling-card"
                 label={
                   <>
                     <EuiTitle size="xxs">
