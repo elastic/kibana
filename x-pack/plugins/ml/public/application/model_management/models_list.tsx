@@ -697,8 +697,7 @@ export const ModelsList: FC<Props> = ({
                     <>
                       {downloadState
                         ? (
-                            (downloadState.downloaded_parts / downloadState.total_parts) *
-                            100
+                            (downloadState.downloaded_parts / downloadState.total_parts || -1) * 100
                           ).toFixed(0) + '%'
                         : '100%'}
                     </>
