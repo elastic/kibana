@@ -81,6 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esDeleteAllIndices('.preview.alerts*');
     });
 
     afterEach(async () => {
@@ -89,7 +90,6 @@ export default ({ getService }: FtrProviderContext) => {
         '.alerts-security.alerts-*',
       ]);
       await deleteAllRules(supertest, log);
-      await esDeleteAllIndices('.preview.alerts*');
     });
 
     describe('non-sequence queries', () => {
