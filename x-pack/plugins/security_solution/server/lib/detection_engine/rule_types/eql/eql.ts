@@ -54,6 +54,7 @@ import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { logEqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
+import { alertSuppressionTypeGuard } from '../utils/get_is_alert_suppression_active';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -189,7 +190,8 @@ export const eqlExecutor = async ({
       } else if (sequences) {
         if (
           isAlertSuppressionActive &&
-          experimentalFeatures.alertSuppressionForSequenceEqlRuleEnabled
+          experimentalFeatures.alertSuppressionForSequenceEqlRuleEnabled &&
+          alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
         ) {
           await bulkCreateSuppressedSequencesInMemory({
             sequences,

@@ -17,6 +17,10 @@ interface GetIsAlertSuppressionActiveParams {
   licensing: LicensingPluginSetup;
 }
 
+export const alertSuppressionTypeGuard = (
+  alertSuppression: AlertSuppressionCamel | undefined
+): alertSuppression is AlertSuppressionCamel => Boolean(alertSuppression?.groupBy?.length);
+
 /**
  * checks if alert suppression is active:
  * - rule should have alert suppression config
@@ -32,7 +36,7 @@ export const getIsAlertSuppressionActive = async ({
     return false;
   }
 
-  const isAlertSuppressionConfigured = Boolean(alertSuppression?.groupBy?.length);
+  const isAlertSuppressionConfigured = alertSuppressionTypeGuard(alertSuppression);
 
   if (!isAlertSuppressionConfigured) {
     return false;

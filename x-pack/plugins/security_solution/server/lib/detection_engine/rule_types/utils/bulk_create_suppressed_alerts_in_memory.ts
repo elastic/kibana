@@ -81,6 +81,7 @@ export interface BulkCreateSuppressedSequencesParams
   experimentalFeatures: ExperimentalFeatures;
   maxNumberOfAlertsMultiplier?: number;
   sharedParams: SharedParams;
+  alertSuppression: AlertSuppressionCamel;
 }
 /**
  * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
@@ -162,7 +163,7 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
   maxNumberOfAlertsMultiplier,
 }: BulkCreateSuppressedSequencesParams) => {
   const suppressOnMissingFields =
-    (alertSuppression?.missingFieldsStrategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
+    (alertSuppression.missingFieldsStrategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
     AlertSuppressionMissingFieldsStrategyEnum.suppress;
 
   const suppressibleWrappedSequences: Array<
@@ -184,7 +185,7 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
     if (shellAlert) {
       if (!suppressOnMissingFields) {
         // does the shell alert have all the suppression fields?
-        const hasEverySuppressionField = (alertSuppression?.groupBy || []).every(
+        const hasEverySuppressionField = alertSuppression.groupBy.every(
           (suppressionPath) =>
             robustGet({ key: suppressionPath, document: shellAlert._source }) != null
         );
