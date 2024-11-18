@@ -13,7 +13,6 @@ export default defineCypressConfig({
   fileServerFolder: './cypress',
   fixturesFolder: './cypress/fixtures',
   screenshotsFolder: './cypress/screenshots',
-  experimentalMemoryManagement: true,
   videosFolder: './cypress/videos',
   requestTimeout: 10000,
   responseTimeout: 40000,
@@ -32,5 +31,6 @@ export default defineCypressConfig({
     baseUrl: 'http://localhost:5601',
     supportFile: './cypress/support/e2e.ts',
     specPattern: './cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+    experimentalMemoryManagement: true,
   },
 });
