@@ -13,6 +13,7 @@ import { ToastsService } from './toasts_service';
 import { ToastsApi } from './toasts_api';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { EventReporter } from './telemetry';
@@ -25,6 +26,7 @@ const mockI18n: any = {
 
 const mockOverlays = overlayServiceMock.createStartContract();
 const mockTheme = themeServiceMock.createStartContract();
+const mockUserProfile = userProfileServiceMock.createStart();
 const mockAnalytics = analyticsServiceMock.createAnalyticsServiceStart();
 
 const eventReporter = new EventReporter({ analytics: mockAnalytics });
@@ -51,6 +53,7 @@ describe('#start()', () => {
       analytics: mockAnalytics,
       i18n: mockI18n,
       theme: mockTheme,
+      userProfile: mockUserProfile,
       targetDomElement,
       overlays: mockOverlays,
       eventReporter,
@@ -70,6 +73,7 @@ describe('#start()', () => {
         analytics: mockAnalytics,
         i18n: mockI18n,
         theme: mockTheme,
+        userProfile: mockUserProfile,
         targetDomElement,
         overlays: mockOverlays,
         eventReporter,
@@ -89,6 +93,7 @@ describe('#stop()', () => {
       analytics: mockAnalytics,
       i18n: mockI18n,
       theme: mockTheme,
+      userProfile: mockUserProfile,
       targetDomElement,
       overlays: mockOverlays,
       eventReporter,
@@ -115,6 +120,7 @@ describe('#stop()', () => {
       analytics: mockAnalytics,
       i18n: mockI18n,
       theme: mockTheme,
+      userProfile: mockUserProfile,
       targetDomElement,
       overlays: mockOverlays,
       eventReporter,

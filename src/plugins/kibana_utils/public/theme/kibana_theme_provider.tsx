@@ -12,10 +12,12 @@ import { Observable } from 'rxjs';
 
 import { EuiProviderProps } from '@elastic/eui';
 import { CoreTheme } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaThemeProvider as KbnThemeProvider } from '@kbn/react-kibana-context-theme';
 
 export interface KibanaThemeProviderProps {
   theme$: Observable<CoreTheme>;
+  userProfile: UserProfileService;
   modify?: EuiProviderProps<{}>['modify'];
   children: React.ReactNode;
 }
@@ -23,6 +25,11 @@ export interface KibanaThemeProviderProps {
 /** @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context-theme */
 export const KibanaThemeProvider: FC<PropsWithChildren<KibanaThemeProviderProps>> = ({
   theme$,
+  userProfile,
   modify,
   children,
-}) => <KbnThemeProvider {...{ theme: { theme$ }, modify }}>{children}</KbnThemeProvider>;
+}) => (
+  <KbnThemeProvider {...{ theme: { theme$ }, modify }} userProfile={userProfile}>
+    {children}
+  </KbnThemeProvider>
+);

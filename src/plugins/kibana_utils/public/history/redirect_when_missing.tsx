@@ -15,6 +15,7 @@ import ReactDOM from 'react-dom';
 
 import { ApplicationStart, HttpStart, ToastsSetup } from '@kbn/core/public';
 import type { ThemeServiceStart } from '@kbn/core/public';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { SavedObjectNotFound } from '..';
 import { KibanaThemeProvider } from '../theme';
 
@@ -49,6 +50,7 @@ export function redirectWhenMissing({
   toastNotifications,
   onBeforeRedirect,
   theme,
+  userProfile,
 }: {
   history: History;
   navigateToApp: ApplicationStart['navigateToApp'];
@@ -67,6 +69,7 @@ export function redirectWhenMissing({
    */
   onBeforeRedirect?: (error: SavedObjectNotFound) => void;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
 }) {
   let localMappingObject: Mapping;
 
@@ -98,7 +101,7 @@ export function redirectWhenMissing({
       }),
       text: (element: HTMLElement) => {
         ReactDOM.render(
-          <KibanaThemeProvider theme$={theme.theme$}>
+          <KibanaThemeProvider theme$={theme.theme$} userProfile={userProfile}>
             <ErrorRenderer>{error.message}</ErrorRenderer>
           </KibanaThemeProvider>,
           element

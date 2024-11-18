@@ -15,6 +15,7 @@ import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { RenderingService } from './rendering_service';
@@ -26,6 +27,7 @@ describe('RenderingService#start', () => {
   let overlays: ReturnType<typeof overlayServiceMock.createStartContract>;
   let i18n: ReturnType<typeof i18nServiceMock.createStartContract>;
   let theme: ReturnType<typeof themeServiceMock.createStartContract>;
+  let userProfile: ReturnType<typeof userProfileServiceMock.createStart>;
   let targetDomElement: HTMLDivElement;
   let rendering: RenderingService;
 
@@ -41,8 +43,8 @@ describe('RenderingService#start', () => {
     overlays = overlayServiceMock.createStartContract();
     overlays.banners.getComponent.mockReturnValue(<div>I&apos;m a banner!</div>);
 
+    userProfile = userProfileServiceMock.createStart();
     theme = themeServiceMock.createStartContract();
-
     i18n = i18nServiceMock.createStartContract();
 
     targetDomElement = document.createElement('div');
@@ -58,6 +60,7 @@ describe('RenderingService#start', () => {
       overlays,
       i18n,
       theme,
+      userProfile,
       targetDomElement,
     });
   };

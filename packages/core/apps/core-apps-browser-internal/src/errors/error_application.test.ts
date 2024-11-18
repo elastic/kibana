@@ -10,7 +10,9 @@
 import { act } from 'react-dom/test-utils';
 import { type History, createMemoryHistory } from 'history';
 import { BasePath } from '@kbn/core-http-browser-internal';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { IBasePath } from '@kbn/core-http-browser';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { CoreScopedHistory } from '@kbn/core-application-browser-internal';
 
@@ -18,6 +20,7 @@ import { renderApp } from './error_application';
 
 describe('renderApp', () => {
   let basePath: IBasePath;
+  let userProfile: UserProfileService;
   let element: HTMLDivElement;
   let history: History;
   let unmount: () => void;
@@ -26,14 +29,13 @@ describe('renderApp', () => {
     basePath = new BasePath({ basePath: '' });
     element = document.createElement('div');
     history = createMemoryHistory();
+    userProfileServiceMock.createStart();
     unmount = renderApp(
       applicationServiceMock.createAppMountParameters({
         element,
         history: new CoreScopedHistory(history, '/'),
       }),
-      {
-        basePath,
-      }
+      { basePath, userProfile }
     );
   });
 

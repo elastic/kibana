@@ -22,6 +22,7 @@ import type {
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { renderApp as renderStatusApp } from './status';
 import {
   renderApp as renderErrorApp,
@@ -45,6 +46,7 @@ export interface CoreAppsServiceStartDeps {
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
 }
 
 export class CoreAppsService {
@@ -61,6 +63,7 @@ export class CoreAppsService {
         // Do not use an async import here in order to ensure that network failures
         // cannot prevent the error UI from displaying. This UI is tiny so an async
         // import here is probably not useful anyways.
+        // @ts-expect-error - userProfile is missing
         return renderErrorApp(params, { basePath: http.basePath });
       },
     });
@@ -75,6 +78,7 @@ export class CoreAppsService {
       chromeless: true,
       visibleIn: [],
       mount(params: AppMountParameters) {
+        // @ts-expect-error - userProfile is missing
         return renderStatusApp(params, { http, notifications });
       },
     });
@@ -86,9 +90,7 @@ export class CoreAppsService {
     http,
     notifications,
     uiSettings,
-    analytics,
-    i18n,
-    theme,
+    ...startDeps
   }: CoreAppsServiceStartDeps) {
     if (!application.history) {
       return;
@@ -101,7 +103,7 @@ export class CoreAppsService {
       uiSettings,
     });
 
-    setupPublicBaseUrlConfigWarning({ docLinks, http, notifications, analytics, i18n, theme });
+    setupPublicBaseUrlConfigWarning({ docLinks, http, notifications, ...startDeps });
   }
 
   public stop() {
