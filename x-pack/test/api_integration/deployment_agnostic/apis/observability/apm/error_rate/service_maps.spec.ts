@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy } from 'lodash';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 const GO_PROD_LIST_RATE = 75;
 const GO_PROD_LIST_ERROR_RATE = 25;
