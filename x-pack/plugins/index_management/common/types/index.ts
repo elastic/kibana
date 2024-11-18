@@ -19,6 +19,7 @@ export type {
   DataStream,
   DataStreamIndex,
   DataRetention,
+  IndexMode,
 } from './data_streams';
 
 export * from './component_templates';
