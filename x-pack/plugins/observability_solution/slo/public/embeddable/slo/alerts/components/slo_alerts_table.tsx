@@ -20,7 +20,6 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import { EuiDataGridColumn } from '@elastic/eui';
-import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { SloItem } from '../types';
 import { SloEmbeddableDeps } from '../types';
@@ -31,54 +30,48 @@ const ALERTS_TABLE_ID = 'xpack.observability.sloAlertsEmbeddable.alert.table';
  * columns implements a subset of `EuiDataGrid`'s `EuiDataGridColumn` interface,
  * plus additional TGrid column properties
  */
-const columns: Array<
-  Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
-> = [
-  {
-    columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate(
-      'xpack.slo.sloAlertsEmbeddable.alertsTGrid.statusColumnDescription',
-      {
-        defaultMessage: 'Status',
-      }
-    ),
-    id: ALERT_STATUS,
-    initialWidth: 110,
-  },
-  {
-    columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate(
-      'xpack.slo.sloAlertsEmbeddable.alertsTGrid.durationColumnDescription',
-      {
-        defaultMessage: 'Duration',
-      }
-    ),
-    id: ALERT_DURATION,
-    initialWidth: 116,
-  },
-  {
-    columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate(
-      'xpack.slo.sloAlertsEmbeddable.alertsTGrid.sloColumnDescription',
-      {
-        defaultMessage: 'Rule name',
-      }
-    ),
-    id: ALERT_RULE_NAME,
-    initialWidth: 110,
-  },
-  {
-    columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate(
-      'xpack.slo.sloAlertsEmbeddable.alertsTGrid.reasonColumnDescription',
-      {
-        defaultMessage: 'Reason',
-      }
-    ),
-    id: ALERT_REASON,
-    linkField: '*',
-  },
-];
+const columns: Array<Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'>> =
+  [
+    {
+      displayAsText: i18n.translate(
+        'xpack.slo.sloAlertsEmbeddable.alertsTGrid.statusColumnDescription',
+        {
+          defaultMessage: 'Status',
+        }
+      ),
+      id: ALERT_STATUS,
+      initialWidth: 110,
+    },
+    {
+      displayAsText: i18n.translate(
+        'xpack.slo.sloAlertsEmbeddable.alertsTGrid.durationColumnDescription',
+        {
+          defaultMessage: 'Duration',
+        }
+      ),
+      id: ALERT_DURATION,
+      initialWidth: 116,
+    },
+    {
+      displayAsText: i18n.translate(
+        'xpack.slo.sloAlertsEmbeddable.alertsTGrid.sloColumnDescription',
+        {
+          defaultMessage: 'Rule name',
+        }
+      ),
+      id: ALERT_RULE_NAME,
+      initialWidth: 110,
+    },
+    {
+      displayAsText: i18n.translate(
+        'xpack.slo.sloAlertsEmbeddable.alertsTGrid.reasonColumnDescription',
+        {
+          defaultMessage: 'Reason',
+        }
+      ),
+      id: ALERT_REASON,
+    },
+  ];
 
 interface Props {
   deps: SloEmbeddableDeps;
