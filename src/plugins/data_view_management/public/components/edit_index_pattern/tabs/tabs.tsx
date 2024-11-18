@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '@kbn/kibana-utils-plugin/public';
 import {
-  DataView,
+  DataViewLazy,
   DataViewField,
   DataViewsPublicPluginStart,
   META_FIELDS,
@@ -60,10 +60,11 @@ import {
   fieldsSelector,
   indexedFieldTypeSelector,
   scriptedFieldLangsSelector,
+  scriptedFieldsSelector,
 } from '../../../management_app/data_view_mgmt_selectors';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
-  indexPattern: DataView;
+  indexPattern: DataViewLazy;
   fields: DataViewField[];
   saveIndexPattern: DataViewsPublicPluginStart['updateSavedObject'];
   refreshFields: () => void;
@@ -213,6 +214,7 @@ export const Tabs: React.FC<TabsProps> = ({
   const [schemaFieldTypeFilter, setSchemaFieldTypeFilter] = useState<string[]>([]);
   const [isSchemaFilterOpen, setIsSchemaFilterOpen] = useState(false);
   const fields = useStateSelector(dataViewMgmtService.state$, fieldsSelector);
+  const scriptedFields = useStateSelector(dataViewMgmtService.state$, scriptedFieldsSelector);
   const indexedFieldTypes = convertToEuiFilterOptions(
     useStateSelector(dataViewMgmtService.state$, indexedFieldTypeSelector)
   );
@@ -483,6 +485,7 @@ export const Tabs: React.FC<TabsProps> = ({
                             ? scriptedFieldLanguageFilter.filter((f) => f !== item.value)
                             : [...scriptedFieldLanguageFilter, item.value]
                         );
+
                         // updates the UI
                         dataViewMgmtService.setScriptedFieldLangSelection(index);
                       }}
@@ -569,6 +572,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     history.push(getPath(field, indexPattern));
                   },
                 }}
+                // todo - make something more specific to scripted fields
                 onRemoveField={() => dataViewMgmtService.refreshFields()}
                 painlessDocLink={docLinks.links.scriptedFields.painless}
                 userEditPermission={dataViews.getCanSaveSync()}
@@ -587,6 +591,7 @@ export const Tabs: React.FC<TabsProps> = ({
                   dataViewMgmtService.refreshFields();
                 }}
                 indexPattern={indexPattern}
+                fields={fields}
                 filterFilter={fieldFilter}
                 fieldWildcardMatcher={fieldWildcardMatcherDecorated}
               />
@@ -640,15 +645,27 @@ export const Tabs: React.FC<TabsProps> = ({
 
   const euiTabs: EuiTabbedContentTab[] = useMemo(
     () =>
-      getTabs(indexPattern, fieldFilter, relationships.length, dataViews.scriptedFieldsEnabled).map(
-        (tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
-          return {
-            ...tab,
-            content: getContent(tab.id),
-          };
-        }
-      ),
-    [fieldFilter, getContent, indexPattern, relationships, dataViews.scriptedFieldsEnabled]
+      getTabs(
+        indexPattern,
+        [...fields, ...scriptedFields],
+        fieldFilter,
+        relationships.length,
+        dataViews.scriptedFieldsEnabled
+      ).map((tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
+        return {
+          ...tab,
+          content: getContent(tab.id),
+        };
+      }),
+    [
+      fieldFilter,
+      getContent,
+      indexPattern,
+      relationships,
+      dataViews.scriptedFieldsEnabled,
+      fields,
+      scriptedFields,
+    ]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);

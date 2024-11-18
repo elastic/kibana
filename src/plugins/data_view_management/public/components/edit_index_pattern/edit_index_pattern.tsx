@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataViewType, RuntimeField, DataView } from '@kbn/data-views-plugin/public';
+import { DataViewType, RuntimeField, DataViewLazy } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
 import { pickBy } from 'lodash';
@@ -41,7 +41,7 @@ const codeStyle: CSS.Properties = {
 };
 
 export interface EditIndexPatternProps extends RouteComponentProps {
-  indexPattern: DataView;
+  indexPattern: DataViewLazy;
 }
 
 export interface SavedObjectRelationWithTitle extends SavedObjectRelation {
@@ -64,7 +64,7 @@ const securityDataView = i18n.translate(
 
 const securitySolution = 'security-solution';
 
-const getCompositeRuntimeFields = (dataView: DataView) =>
+const getCompositeRuntimeFields = (dataView: DataViewLazy) =>
   pickBy(dataView.getAllRuntimeFields(), (fld) => fld.type === 'composite');
 
 import {

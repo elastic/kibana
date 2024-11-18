@@ -11,7 +11,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { SourceFiltersTable } from './source_filters_table';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewLazy } from '@kbn/data-views-plugin/public';
 
 jest.mock('@elastic/eui', () => ({
   EuiButton: 'eui-button',
@@ -42,13 +42,14 @@ const getIndexPatternMock = (mockedFields: any = {}) =>
   ({
     sourceFilters: [{ value: 'time*' }, { value: 'nam*' }, { value: 'age*' }],
     ...mockedFields,
-  } as DataView);
+  } as DataViewLazy);
 
 describe('SourceFiltersTable', () => {
   test('should render normally', () => {
     const component = shallow(
       <SourceFiltersTable
         indexPattern={getIndexPatternMock()}
+        fields={[]}
         fieldWildcardMatcher={() => {}}
         filterFilter={''}
         saveIndexPattern={async () => {}}
@@ -62,6 +63,7 @@ describe('SourceFiltersTable', () => {
     const component = shallow(
       <SourceFiltersTable
         indexPattern={getIndexPatternMock()}
+        fields={[]}
         fieldWildcardMatcher={() => {}}
         filterFilter={''}
         saveIndexPattern={async () => {}}
@@ -78,6 +80,7 @@ describe('SourceFiltersTable', () => {
         indexPattern={getIndexPatternMock({
           sourceFilters: [{ value: 'tim*' }],
         })}
+        fields={[]}
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
         saveIndexPattern={async () => {}}
@@ -94,8 +97,9 @@ describe('SourceFiltersTable', () => {
         indexPattern={
           getIndexPatternMock({
             sourceFilters: [{ value: 'tim*' }],
-          }) as DataView
+          }) as DataViewLazy
         }
+        fields={[]}
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
         saveIndexPattern={async () => {}}
@@ -114,8 +118,9 @@ describe('SourceFiltersTable', () => {
         indexPattern={
           getIndexPatternMock({
             sourceFilters: [{ value: 'tim*' }, { value: 'na*' }],
-          }) as DataView
+          }) as DataViewLazy
         }
+        fields={[]}
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
         saveIndexPattern={saveIndexPattern}
@@ -138,6 +143,7 @@ describe('SourceFiltersTable', () => {
         indexPattern={getIndexPatternMock({
           sourceFilters: [{ value: 'tim*' }],
         })}
+        fields={[]}
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
         saveIndexPattern={saveIndexPattern}
@@ -158,8 +164,9 @@ describe('SourceFiltersTable', () => {
         indexPattern={
           getIndexPatternMock({
             sourceFilters: [{ value: 'tim*' }],
-          }) as DataView
+          }) as DataViewLazy
         }
+        fields={[]}
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
         saveIndexPattern={saveIndexPattern}

@@ -9,7 +9,7 @@
 
 import { Dictionary, countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { AbstractDataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { FilterChecked } from '@elastic/eui';
 import {
   TAB_INDEXED_FIELDS,
@@ -76,17 +76,14 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
 }
 
 export function getTabs(
-  indexPattern: DataView,
+  dataView: AbstractDataView,
+  fields: DataViewField[],
   fieldFilter: string,
   relationshipCount = 0,
   scriptedFieldsEnabled: boolean
 ) {
-  const totalCount = getCounts(indexPattern.fields.getAll(), indexPattern.getSourceFiltering());
-  const filteredCount = getCounts(
-    indexPattern.fields.getAll(),
-    indexPattern.getSourceFiltering(),
-    fieldFilter
-  );
+  const totalCount = getCounts(fields, dataView.getSourceFiltering());
+  const filteredCount = getCounts(fields, dataView.getSourceFiltering(), fieldFilter);
 
   const tabs = [];
 
@@ -96,7 +93,7 @@ export function getTabs(
     'data-test-subj': 'tab-indexedFields',
   });
 
-  if (!isRollup(indexPattern.type) && scriptedFieldsEnabled) {
+  if (!isRollup(dataView.type) && scriptedFieldsEnabled) {
     tabs.push({
       name: getTitle('scripted', filteredCount, totalCount),
       id: TAB_SCRIPTED_FIELDS,
@@ -122,7 +119,7 @@ export function getTabs(
   return tabs;
 }
 
-export function getPath(field: DataViewField, indexPattern: DataView) {
+export function getPath(field: DataViewField, indexPattern: AbstractDataView) {
   return `/dataView/${indexPattern?.id}/field/${encodeURIComponent(field.name)}`;
 }
 
