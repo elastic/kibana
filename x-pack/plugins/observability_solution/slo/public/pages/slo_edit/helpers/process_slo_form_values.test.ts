@@ -121,4 +121,14 @@ describe('Transform partial URL state into form state', () => {
       })
     ).toMatchSnapshot();
   });
+
+  it("handles the 'settings' URL state", () => {
+    expect(
+      transform({ settings: { preventInitialBackfill: true, syncDelay: '3h' } })
+    ).toMatchSnapshot();
+  });
+
+  it("handles partial 'settings' URL state", () => {
+    expect(transform({ settings: { syncDelay: '12m' } })).toMatchSnapshot();
+  });
 });

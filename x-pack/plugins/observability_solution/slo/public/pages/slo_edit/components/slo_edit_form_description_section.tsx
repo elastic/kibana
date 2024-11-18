@@ -20,7 +20,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { useFetchSLOSuggestions } from '../hooks/use_fetch_suggestions';
 import { CreateSLOForm } from '../types';
 import { OptionalText } from './common/optional_text';
-import { MAX_WIDTH } from './constants';
+import { MAX_WIDTH } from '../constants';
 
 export function SloEditFormDescriptionSection() {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();

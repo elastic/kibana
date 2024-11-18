@@ -8,7 +8,7 @@
 import {
   EuiAccordion,
   EuiCheckbox,
-  EuiFlexGrid,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -49,40 +49,74 @@ export function AdvancedSettings() {
         </EuiFlexGroup>
       }
     >
-      <EuiFlexGrid columns={3}>
-        <EuiFlexItem>
-          <EuiFormRow isInvalid={getFieldState('settings.preventInitialBackfill').invalid}>
-            <Controller
-              name="settings.preventInitialBackfill"
-              control={control}
-              render={({ field: { ref, onChange, ...field } }) => (
-                <EuiCheckbox
-                  id={preventBackfillCheckbox}
-                  label={
-                    <span>
-                      {i18n.translate('xpack.slo.sloEdit.settings.preventInitialBackfill.label', {
-                        defaultMessage: 'Prevent initial backfill of data',
-                      })}
-                      <EuiIconTip
-                        content={i18n.translate(
-                          'xpack.slo.sloEdit.settings.preventInitialBackfill.tooltip',
-                          {
-                            defaultMessage:
-                              'Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.',
-                          }
-                        )}
-                        position="top"
-                      />
-                    </span>
-                  }
-                  checked={Boolean(field.value)}
-                  onChange={(event: any) => onChange(event.target.checked)}
-                />
-              )}
+      <EuiFormRow
+        isInvalid={getFieldState('settings.syncDelay').invalid}
+        label={
+          <span>
+            {i18n.translate('xpack.slo.sloEdit.settings.syncDelay.label', {
+              defaultMessage: 'Sync delay (in minutes)',
+            })}
+            <EuiIconTip
+              content={i18n.translate('xpack.slo.sloEdit.settings.syncDelay.tooltip', {
+                defaultMessage:
+                  'The time delay in minutes between the current time and the latest input data time. The default value is 1 minute.',
+              })}
+              position="top"
             />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGrid>
+          </span>
+        }
+      >
+        <Controller
+          name="settings.syncDelay"
+          defaultValue={1}
+          control={control}
+          rules={{ required: false, min: 1, max: 359 }}
+          render={({ field: { ref, onChange, ...field }, fieldState }) => (
+            <EuiFieldNumber
+              {...field}
+              data-test-subj="sloAdvancedSettingsSyncDelay"
+              isInvalid={fieldState.invalid}
+              required
+              value={field.value}
+              min={1}
+              max={359}
+              step={1}
+              onChange={(event) => onChange(parseInt(event.target.value, 10))}
+            />
+          )}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow isInvalid={getFieldState('settings.preventInitialBackfill').invalid}>
+        <Controller
+          name="settings.preventInitialBackfill"
+          control={control}
+          render={({ field: { ref, onChange, ...field } }) => (
+            <EuiCheckbox
+              id={preventBackfillCheckbox}
+              label={
+                <span>
+                  {i18n.translate('xpack.slo.sloEdit.settings.preventInitialBackfill.label', {
+                    defaultMessage: 'Prevent initial backfill of data',
+                  })}
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.slo.sloEdit.settings.preventInitialBackfill.tooltip',
+                      {
+                        defaultMessage:
+                          'Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.',
+                      }
+                    )}
+                    position="top"
+                  />
+                </span>
+              }
+              checked={Boolean(field.value)}
+              onChange={(event: any) => onChange(event.target.checked)}
+            />
+          )}
+        />
+      </EuiFormRow>
     </EuiAccordion>
   );
 }

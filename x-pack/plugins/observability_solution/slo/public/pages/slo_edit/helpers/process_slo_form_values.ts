@@ -9,13 +9,14 @@ import { CreateSLOInput, GetSLOResponse, Indicator, UpdateSLOInput } from '@kbn/
 import { assertNever } from '@kbn/std';
 import { RecursivePartial } from '@kbn/utility-types';
 import { cloneDeep } from 'lodash';
-import { toDuration } from '../../../utils/slo/duration';
+import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import {
   APM_AVAILABILITY_DEFAULT_VALUES,
   APM_LATENCY_DEFAULT_VALUES,
   CUSTOM_KQL_DEFAULT_VALUES,
   CUSTOM_METRIC_DEFAULT_VALUES,
   HISTOGRAM_DEFAULT_VALUES,
+  SETTINGS_DEFAULT_VALUES,
   SLO_EDIT_FORM_DEFAULT_VALUES,
   SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY,
   SYNTHETICS_AVAILABILITY_DEFAULT_VALUES,
@@ -52,6 +53,9 @@ export function transformSloResponseToCreateSloForm(
     tags: values.tags,
     settings: {
       preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
+      syncDelay: values.settings?.syncDelay
+        ? toMinutes(toDuration(values.settings.syncDelay))
+        : SETTINGS_DEFAULT_VALUES.syncDelay,
     },
   };
 }
@@ -81,6 +85,7 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
     groupBy: [values.groupBy].flat(),
     settings: {
       preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
+      syncDelay: `${values.settings?.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
     },
   };
 }
@@ -110,6 +115,7 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
     groupBy: [values.groupBy].flat(),
     settings: {
       preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
+      syncDelay: `${values.settings?.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
     },
   };
 }
@@ -220,8 +226,13 @@ export function transformPartialSLOStateToFormState(
     state.timeWindow = { duration: values.timeWindow.duration, type: values.timeWindow.type };
   }
 
-  if (!!values.settings?.preventInitialBackfill) {
-    state.settings = { preventInitialBackfill: values.settings.preventInitialBackfill };
+  if (!!values.settings) {
+    if (values.settings.preventInitialBackfill) {
+      state.settings.preventInitialBackfill = values.settings.preventInitialBackfill;
+    }
+    if (values.settings.syncDelay) {
+      state.settings.syncDelay = toMinutes(toDuration(values.settings.syncDelay));
+    }
   }
 
   return state;

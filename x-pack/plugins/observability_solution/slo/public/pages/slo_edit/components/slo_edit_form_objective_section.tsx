@@ -29,7 +29,7 @@ import {
   TIMEWINDOW_TYPE_OPTIONS,
 } from '../constants';
 import { CreateSLOForm } from '../types';
-import { MAX_WIDTH } from './constants';
+import { MAX_WIDTH } from '../constants';
 import { AdvancedSettings } from './indicator_section/advanced_settings/advanced_settings';
 import { SloEditFormObjectiveSectionTimeslices } from './slo_edit_form_objective_section_timeslices';
 

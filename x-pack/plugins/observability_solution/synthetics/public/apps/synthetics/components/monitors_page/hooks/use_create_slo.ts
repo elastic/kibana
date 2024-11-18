@@ -41,10 +41,6 @@ export function useCreateSLO({
           tags: [],
         },
       },
-      budgetingMethod: 'occurrences',
-      objective: {
-        target: 0.99,
-      },
       tags: tags || [],
       groupBy: ['monitor.name', 'observer.geo.name', 'monitor.id'],
     },

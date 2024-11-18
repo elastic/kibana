@@ -46,8 +46,10 @@ export class CreateSLO {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
-    await this.assertSLOInexistant(slo);
-    await assertExpectedIndicatorSourceIndexPrivileges(slo, this.esClient);
+    await Promise.all([
+      this.assertSLOInexistant(slo),
+      assertExpectedIndicatorSourceIndexPrivileges(slo, this.esClient),
+    ]);
 
     const rollbackOperations = [];
     const createPromise = this.repository.create(slo);

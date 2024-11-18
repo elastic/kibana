@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiSpacer, EuiSteps } from '@elastic/eui';
+import { EuiFlexGroup, EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GetSLOResponse } from '@kbn/slo-schema';
+import type { CreateSLOInput, GetSLOResponse } from '@kbn/slo-schema';
 import { RecursivePartial } from '@kbn/utility-types';
 import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -27,7 +27,7 @@ import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
 
 export interface Props {
   slo?: GetSLOResponse;
-  initialValues?: RecursivePartial<CreateSLOForm>;
+  initialValues?: RecursivePartial<CreateSLOInput>;
   onSave?: () => void;
 }
 
@@ -71,7 +71,7 @@ export function SloEditForm({ slo, initialValues, onSave }: Props) {
 
   return (
     <FormProvider {...form}>
-      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="sloForm">
+      <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloForm">
         <EuiSteps
           steps={[
             {
@@ -98,8 +98,6 @@ export function SloEditForm({ slo, initialValues, onSave }: Props) {
             },
           ]}
         />
-
-        <EuiSpacer size="m" />
 
         <SloEditFormFooter slo={slo} onSave={onSave} />
       </EuiFlexGroup>
