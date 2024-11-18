@@ -6,11 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-
-import { EuiToolTip } from '@elastic/eui';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { FieldHook } from '../../../../shared_imports';
-import { Field } from '../../../../shared_imports';
 import { FIELD_PLACEHOLDER } from './translations';
 
 interface MultiSelectAutocompleteProps {
@@ -18,7 +16,6 @@ interface MultiSelectAutocompleteProps {
   isDisabled: boolean;
   field: FieldHook;
   fullWidth?: boolean;
-  disabledText?: string;
   dataTestSubj?: string;
 }
 
@@ -28,7 +25,6 @@ const fieldDescribedByIds = 'detectionEngineMultiSelectAutocompleteField';
 
 export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteProps> = ({
   browserFields,
-  disabledText,
   isDisabled,
   field,
   fullWidth = false,
@@ -46,20 +42,14 @@ export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteP
     }),
     [browserFields, isDisabled, fullWidth]
   );
-  const fieldComponent = (
-    <Field
+
+  return (
+    <ComboBoxField
       field={field}
       idAria={fieldDescribedByIds}
       euiFieldProps={fieldEuiFieldProps}
       data-test-subj={dataTestSubj}
     />
-  );
-  return isDisabled ? (
-    <EuiToolTip position="right" content={disabledText}>
-      {fieldComponent}
-    </EuiToolTip>
-  ) : (
-    fieldComponent
   );
 };
 

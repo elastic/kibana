@@ -102,6 +102,7 @@ export const assetCriticalityPublicCSVUploadRoute = (
             recordsStream,
             retries: errorRetries,
             flushBytes: maxBulkRequestBodySizeBytes,
+            streamIndexStart: 1, // It is the first line number
           });
           const end = new Date();
 
