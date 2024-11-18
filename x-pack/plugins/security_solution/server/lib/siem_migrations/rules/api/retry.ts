@@ -14,17 +14,17 @@ import {
   StartRuleMigrationRequestParams,
   type StartRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SIEM_RULE_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/constants';
+import { SIEM_RULE_MIGRATION_RETRY_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from './util/with_license';
 
-export const registerSiemRuleMigrationsStartRoute = (
+export const registerSiemRuleMigrationsRetryRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
   router.versioned
     .put({
-      path: SIEM_RULE_MIGRATION_START_PATH,
+      path: SIEM_RULE_MIGRATION_RETRY_PATH,
       access: 'internal',
       security: { authz: { requiredPrivileges: ['securitySolution'] } },
     })
@@ -58,6 +58,11 @@ export const registerSiemRuleMigrationsStartRoute = (
                 ...getLangSmithTracer({ ...langsmithOptions, logger }),
               ],
             };
+
+            const { updated } = await ruleMigrationsClient.task.updateToRetry(migrationId);
+            if (!updated) {
+              return res.ok({ body: { started: false } });
+            }
 
             const { exists, started } = await ruleMigrationsClient.task.start({
               migrationId,

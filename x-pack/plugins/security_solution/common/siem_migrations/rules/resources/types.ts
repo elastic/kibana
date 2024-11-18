@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { IClusterClient } from '@kbn/core/server';
+import type { RuleMigrationResourceType } from '../../model/rule_migration.gen';
 
-export interface SiemMigrationsSetupParams {
-  esClusterClient: IClusterClient;
-  tasksTimeoutMs?: number;
-}
+export type RuleResourceCollection = Record<RuleMigrationResourceType, string[]>;
+export type QueryResourceIdentifier = (query: string) => RuleResourceCollection;

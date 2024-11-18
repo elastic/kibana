@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-import type { IClusterClient } from '@kbn/core/server';
-
-export interface SiemMigrationsSetupParams {
-  esClusterClient: IClusterClient;
-  tasksTimeoutMs?: number;
-}
+import { MockRuleMigrationsDataResourcesClient } from './mocks';
+export const RuleMigrationsDataResourcesClient = MockRuleMigrationsDataResourcesClient;
