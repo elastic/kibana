@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useBoolean } from './src/use_boolean';
-export { useErrorTextStyle } from './src/use_error_text_style';
-export type { UseBooleanHandlers, UseBooleanResult } from './src/use_boolean';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+
+export const useErrorTextStyle = () => {
+  const { euiTheme } = useEuiTheme();
+  const errorTextStyle = css`
+    font-family: ${euiTheme.font.familyCode};
+    white-space: break-spaces;
+  `;
+
+  return errorTextStyle;
+};
