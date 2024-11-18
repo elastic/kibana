@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LOG_LEVEL_FIELD } from '@kbn/discover-utils';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
 import {
   getCellRenderers,
   getRowIndicatorProvider,
   getRowAdditionalLeadingControls,
+  createGetDefaultAppState,
 } from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
@@ -23,13 +23,7 @@ export const createLogsDataSourceProfileProvider = (
 ): DataSourceProfileProvider => ({
   profileId: 'observability-logs-data-source-profile',
   profile: {
-    getDefaultAppState: (prev) => (params) => {
-      const appState = { ...prev(params) };
-
-      appState.breakdownField = LOG_LEVEL_FIELD;
-
-      return appState;
-    },
+    getDefaultAppState: createGetDefaultAppState(),
     getCellRenderers,
     getRowIndicatorProvider,
     getRowAdditionalLeadingControls,

@@ -15,7 +15,7 @@ export const createGetDefaultAppState = ({
   defaultColumns,
 }: {
   defaultColumns?: DefaultAppStateColumn[];
-}): DataSourceProfileProvider['profile']['getDefaultAppState'] => {
+} = {}): DataSourceProfileProvider['profile']['getDefaultAppState'] => {
   return (prev) => (params) => {
     const appState = { ...prev(params) };
 
