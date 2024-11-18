@@ -9,6 +9,7 @@ import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { similar } from './similar';
 import { mockCase } from '../../../public/containers/mock';
+import { OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
 
 describe('similar', () => {
   describe('find similar cases', () => {
@@ -22,8 +23,8 @@ describe('similar', () => {
         observables: [
           {
             id: 'ddfb207d-4b46-4545-bae8-5193c1551e50',
-            value: 'test',
-            typeKey: 'e47bb0d9-665a-43ea-a9aa-4d07c728e666',
+            value: '127.0.0.1',
+            typeKey: OBSERVABLE_TYPE_IPV4.key,
             createdAt: '2024-11-07',
             updatedAt: '2024-11-07',
             description: '',
@@ -69,8 +70,52 @@ describe('similar', () => {
           "filter": Object {
             "arguments": Array [
               Object {
-                "arguments": Array [],
-                "function": "or",
+                "arguments": Array [
+                  Object {
+                    "isQuoted": false,
+                    "type": "literal",
+                    "value": "cases.attributes.observables",
+                  },
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "arguments": Array [
+                          Object {
+                            "isQuoted": false,
+                            "type": "literal",
+                            "value": "value",
+                          },
+                          Object {
+                            "isQuoted": true,
+                            "type": "literal",
+                            "value": "127.0.0.1",
+                          },
+                        ],
+                        "function": "is",
+                        "type": "function",
+                      },
+                      Object {
+                        "arguments": Array [
+                          Object {
+                            "isQuoted": false,
+                            "type": "literal",
+                            "value": "typeKey",
+                          },
+                          Object {
+                            "isQuoted": true,
+                            "type": "literal",
+                            "value": "observable-type-ipv4",
+                          },
+                        ],
+                        "function": "is",
+                        "type": "function",
+                      },
+                    ],
+                    "function": "and",
+                    "type": "function",
+                  },
+                ],
+                "function": "nested",
                 "type": "function",
               },
               Object {

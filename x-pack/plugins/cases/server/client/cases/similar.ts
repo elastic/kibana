@@ -52,8 +52,6 @@ const getSimilarities = (
 
 /**
  * Retrieves cases similar to a given Case
- *
- * @ignore
  */
 export const similar = async (
   caseId: string,
