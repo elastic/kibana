@@ -7,7 +7,6 @@
 
 import type {
   BareNote,
-  DeleteNoteResponse,
   GetNotesResponse,
   PersistNoteRouteResponse,
 } from '../../../common/api/timeline';
@@ -98,7 +97,7 @@ export const fetchNotesBySaveObjectIds = async (savedObjectIds: string[]) => {
  * Deletes multiple notes
  */
 export const deleteNotes = async (noteIds: string[]) => {
-  const response = await KibanaServices.get().http.delete<DeleteNoteResponse>(NOTE_URL, {
+  const response = await KibanaServices.get().http.delete(NOTE_URL, {
     body: JSON.stringify({ noteIds }),
     version: '2023-10-31',
   });
