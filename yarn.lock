@@ -9596,20 +9596,7 @@
     "@smithy/util-utf8" "^3.0.0"
     tslib "^2.6.2"
 
-"@smithy/smithy-client@^3.4.2", "@smithy/smithy-client@^3.4.5":
-  version "3.4.5"
-  resolved "https://registry.yarnpkg.com/@smithy/smithy-client/-/smithy-client-3.4.5.tgz#b90fe15d80e2dca5aa9cf3bd24bd73359ad1ef61"
-  integrity sha512-k0sybYT9zlP79sIKd1XGm4TmK0AS1nA2bzDHXx7m0nGi3RQ8dxxQUs4CPkSmQTKAo+KF9aINU3KzpGIpV7UoMw==
-  dependencies:
-    "@smithy/core" "^2.5.4"
-    "@smithy/middleware-endpoint" "^3.2.4"
-    "@smithy/middleware-stack" "^3.0.10"
-    "@smithy/protocol-http" "^4.1.7"
-    "@smithy/types" "^3.7.1"
-    "@smithy/util-stream" "^3.3.1"
-    tslib "^2.6.2"
-
-"@smithy/types@^3.6.0", "@smithy/types@^3.7.1":
+"@smithy/types@^3.0.0", "@smithy/types@^3.7.1":
   version "3.7.1"
   resolved "https://registry.yarnpkg.com/@smithy/types/-/types-3.7.1.tgz#4af54c4e28351e9101996785a33f2fdbf93debe7"
   integrity sha512-XKLcLXZY7sUQgvvWyeaL/qwNPp6V3dWcUjqrQKjSb+tzYiCy340R/c64LV5j+Tnb2GhmunEX0eou+L+m2hJNYA==
