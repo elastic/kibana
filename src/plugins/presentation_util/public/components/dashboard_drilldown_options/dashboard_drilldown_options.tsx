@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
-import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import React from 'react';
+import { EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 import { DashboardDrilldownOptions } from './types';
 import { dashboardDrilldownConfigStrings } from '../../i18n/dashboard_drilldown_config';
@@ -22,22 +22,6 @@ export const DashboardDrilldownOptionsComponent = ({
   options,
   onOptionChange,
 }: DashboardDrilldownOptionsProps) => {
-  const [toggleCompressedIdSelected, setToggleCompressedIdSelected] = useState(`__1`);
-  const toggleButtonsCompressed = [
-    {
-      id: `__0`,
-      label: dashboardDrilldownConfigStrings.component.getOverflowEllipsis(),
-    },
-    {
-      id: `__1`,
-      label: dashboardDrilldownConfigStrings.component.getOverflowTextWrap(),
-    },
-  ];
-
-  const onChangeCompressed = (optionId: React.SetStateAction<string>) => {
-    setToggleCompressedIdSelected(optionId);
-  };
-
   return (
     <>
       <EuiFormRow>
@@ -68,16 +52,6 @@ export const DashboardDrilldownOptionsComponent = ({
             onChange={() => onOptionChange({ openInNewTab: !options.openInNewTab })}
             data-test-subj="dashboardDrillDownOptions--openInNewTab--checkbox"
           />
-          <EuiSpacer size="s" />
-          <EuiFormRow label={dashboardDrilldownConfigStrings.component.getOverflowLegend()}>
-            <EuiButtonGroup
-              legend={dashboardDrilldownConfigStrings.component.getOverflowLegend()}
-              options={toggleButtonsCompressed}
-              idSelected={toggleCompressedIdSelected}
-              onChange={(id) => onChangeCompressed(id)}
-              buttonSize="compressed"
-            />
-          </EuiFormRow>
         </div>
       </EuiFormRow>
     </>

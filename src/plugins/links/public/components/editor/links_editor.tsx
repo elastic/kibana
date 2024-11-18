@@ -91,6 +91,21 @@ const LinksEditor = ({
   const [isSaving, setIsSaving] = useState(false);
   const [orderedLinks, setOrderedLinks] = useState<ResolvedLink[]>([]);
   const [saveByReference, setSaveByReference] = useState(isByReference);
+  const [toggleCompressedIdSelected, setToggleCompressedIdSelected] = useState(`__1`);
+  const toggleButtonsCompressed = [
+    {
+      id: `__0`,
+      label: LinksStrings.editor.linkEditor.getOverflowEllipsis(),
+    },
+    {
+      id: `__1`,
+      label: LinksStrings.editor.linkEditor.getOverflowTextWrap(),
+    },
+  ];
+
+  const onChangeCompressed = (optionId: React.SetStateAction<string>) => {
+    setToggleCompressedIdSelected(optionId);
+  };
 
   const isEditingExisting = initialLinks || isByReference;
 
@@ -193,6 +208,15 @@ const LinksEditor = ({
                 setCurrentLayout(id as LinksLayoutType);
               }}
               legend={LinksStrings.editor.panelEditor.getLayoutSettingsLegend()}
+            />
+          </EuiFormRow>
+          <EuiFormRow label={LinksStrings.editor.linkEditor.getOverflowLegend()}>
+            <EuiButtonGroup
+              legend={LinksStrings.editor.linkEditor.getOverflowLegend()}
+              options={toggleButtonsCompressed}
+              idSelected={toggleCompressedIdSelected}
+              onChange={(id) => onChangeCompressed(id)}
+              buttonSize="compressed"
             />
           </EuiFormRow>
           <EuiFormRow label={LinksStrings.editor.panelEditor.getLinksTitle()}>
