@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IRouter, RequestHandlerContext } from '@kbn/core/server';
-import type { VersionedRoute } from '@kbn/core-http-server';
+import type { ElasticsearchClient, IRouter, RequestHandlerContext } from '@kbn/core/server';
+import type { KibanaResponseFactory, VersionedRoute } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_ASSETS_TO_IGNORE } from '../../../common';
 
@@ -20,18 +20,80 @@ const patterns = ['*', '-.*'].concat(
 
 const crossClusterPatterns = patterns.map((ds) => `*:${ds}`);
 
-export const handler: Handler = async (ctx: RequestHandlerContext, req, res) => {
+const resolveClusterTimeout = '5s';
+
+export const handler: Handler = async (ctx: RequestHandlerContext, _, res) => {
   const core = await ctx.core;
   const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-  const response = await elasticsearchClient.indices.resolveCluster({
-    name: patterns.concat(crossClusterPatterns),
-    allow_no_indices: true,
-    ignore_unavailable: true,
+
+  const hasLocalEsData = await hasEsData({
+    elasticsearchClient,
+    res,
+    matchPatterns: patterns,
+    timeoutReason: 'local_data_timeout',
   });
 
-  const hasEsData = !!Object.values(response).find((cluster) => cluster.matching_indices);
+  if (hasLocalEsData) {
+    return hasLocalEsData;
+  }
 
-  return res.ok({ body: { hasEsData } });
+  const hasCrossClusterEsData = await hasEsData({
+    elasticsearchClient,
+    res,
+    matchPatterns: crossClusterPatterns,
+    timeoutReason: 'cross_cluster_data_timeout',
+  });
+
+  if (hasCrossClusterEsData) {
+    return hasCrossClusterEsData;
+  }
+
+  return res.ok({ body: { hasEsData: false } });
+};
+
+const hasEsData = async ({
+  elasticsearchClient,
+  res,
+  matchPatterns,
+  timeoutReason,
+}: {
+  elasticsearchClient: ElasticsearchClient;
+  res: KibanaResponseFactory;
+  matchPatterns: string[];
+  timeoutReason: string;
+}) => {
+  try {
+    const response = await elasticsearchClient.indices.resolveCluster(
+      {
+        name: matchPatterns,
+        allow_no_indices: true,
+        ignore_unavailable: true,
+      },
+      { requestTimeout: resolveClusterTimeout }
+    );
+
+    const hasData = !!Object.values(response).find((cluster) => cluster.matching_indices);
+
+    if (hasData) {
+      return res.ok({ body: { hasEsData: true } });
+    }
+  } catch (e) {
+    if (e.name === 'TimeoutError') {
+      return res.badRequest({
+        body: {
+          message: 'Timeout while checking for Elasticsearch data',
+          attributes: { failureReason: timeoutReason },
+        },
+      });
+    }
+
+    return res.badRequest({
+      body: {
+        message: 'Error while checking for Elasticsearch data',
+        attributes: { failureReason: 'unknown' },
+      },
+    });
+  }
 };
 
 export const registerHasEsDataRoute = (router: IRouter): void => {
@@ -49,6 +111,15 @@ export const registerHasEsDataRoute = (router: IRouter): void => {
               body: () =>
                 schema.object({
                   hasEsData: schema.boolean(),
+                }),
+            },
+            400: {
+              body: () =>
+                schema.object({
+                  message: schema.string(),
+                  attributes: schema.object({
+                    failureReason: schema.string(),
+                  }),
                 }),
             },
           },

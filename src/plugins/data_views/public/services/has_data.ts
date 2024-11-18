@@ -8,6 +8,7 @@
  */
 
 import { CoreStart, HttpStart } from '@kbn/core/public';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
 import { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
 import { IndicesResponse, IndicesResponseModified } from '../types';
@@ -48,6 +49,16 @@ export class HasData {
         );
         return hasEsData;
       } catch (e) {
+        if (isHttpFetchError(e) && e.response?.status === 400 && e.body) {
+          const body: { attributes: { failureReason: string } } = e.body as any;
+
+          if (body?.attributes.failureReason === 'cross_cluster_data_timeout') {
+            core.notifications.toasts.addDanger({
+              title: 'Remote cluster timeout',
+              text: 'Checking for data on remote clusters timed out. One or more remote clusters may be unavailable.',
+            });
+          }
+        }
         // fallback to previous implementation
         return hasESDataViaResolveIndex();
       }
