@@ -244,12 +244,12 @@ describe('ProfilesManager', () => {
 
   it('should cancel existing data source profile resolution when another is triggered', async () => {
     const context = await mocks.dataSourceProfileProviderMock.resolve({
-      rootContext: { solutionType: SolutionType.Default },
+      rootContext: { profileId: 'root-profile', solutionType: SolutionType.Default },
       dataSource: createEsqlDataSource(),
       query: { esql: 'from *' },
     });
     const newContext = await mocks.dataSourceProfileProviderMock.resolve({
-      rootContext: { solutionType: SolutionType.Default },
+      rootContext: { profileId: 'other-root-profile', solutionType: SolutionType.Default },
       dataSource: createEsqlDataSource(),
       query: { esql: 'from logs-*' },
     });
