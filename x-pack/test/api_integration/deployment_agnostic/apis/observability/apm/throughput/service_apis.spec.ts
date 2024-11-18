@@ -11,13 +11,13 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { meanBy, sumBy } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { roundNumber } from '../../utils';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { roundNumber } from '../utils/common';
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -141,11 +141,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let throughputMetricValues: Awaited<ReturnType<typeof getThroughputValues>>;
   let throughputTransactionValues: Awaited<ReturnType<typeof getThroughputValues>>;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177535
-  registry.when('Services APIs', { config: 'basic', archives: [] }, () => {
+  describe('Services APIs', () => {
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       before(async () => {
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
@@ -153,6 +154,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const serviceGoDevInstance = apm
           .service({ name: serviceName, environment: 'development', agentName: 'go' })
           .instance('instance-b');
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
         await apmSynthtraceEsClient.index([
           timerange(start, end)
