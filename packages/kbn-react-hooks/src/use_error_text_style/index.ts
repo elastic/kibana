@@ -7,11 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  StatusInfo,
-  StatusInfoCoreStatus,
-  StatusInfoServiceStatus,
-  StatusResponse,
-  ServerVersion,
-  ServerMetrics,
-} from './status';
+export * from './use_error_text_style';
