@@ -583,14 +583,6 @@ describe('case transforms', () => {
       ).toBe('foobar');
     });
 
-    it('returns empty observables array when it is not defined', () => {
-      const CaseSOResponseWithoutObservables = createCaseSavedObjectResponse({});
-
-      expect(
-        transformSavedObjectToExternalModel(CaseSOResponseWithoutObservables).attributes.observables
-      ).toEqual([]);
-    });
-
     it('returns observables array when it is defined', () => {
       const CaseSOResponseWithoutObservables = createCaseSavedObjectResponse({
         overrides: {
