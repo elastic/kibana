@@ -23,6 +23,8 @@ import { embeddableService, presentationUtilService } from '../../../services/ki
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
 export interface Props extends DivProps {
+  appFixedViewport?: HTMLElement;
+  dashboardContainer?: HTMLElement;
   id: DashboardPanelState['explicitInput']['id'];
   index?: number;
   type: DashboardPanelState['type'];
@@ -35,6 +37,8 @@ export interface Props extends DivProps {
 export const Item = React.forwardRef<HTMLDivElement, Props>(
   (
     {
+      appFixedViewport,
+      dashboardContainer,
       expandedPanelId,
       focusedPanelId,
       id,
@@ -92,10 +96,8 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
-    const dashboardContainerTopOffset =
-      (document.querySelector('.dashboardContainer') as HTMLDivElement)?.offsetTop || 0;
-    const globalNavTopOffset =
-      (document.querySelector('#app-fixed-viewport') as HTMLDivElement)?.offsetTop || 0;
+    const dashboardContainerTopOffset = dashboardContainer?.offsetTop || 0;
+    const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
 
     const focusStyles = blurPanel
       ? css`
