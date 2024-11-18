@@ -9,11 +9,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, visEditor, lens, timePicker, header } = getPageObjects([
+  const { visualize, visEditor, lens, header } = getPageObjects([
     'visualize',
     'lens',
     'visEditor',
-    'timePicker',
     'header',
   ]);
 
@@ -29,7 +28,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToNewAggBasedVisualization();
       await visualize.clickPieChart();
       await visualize.clickNewSearch();
-      await timePicker.setDefaultAbsoluteRange();
     });
 
     it('should hide the "Edit Visualization in Lens" menu item if no split slices were defined', async () => {

@@ -997,7 +997,7 @@
           "\nInterface for features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantKnowledgeBaseByDefault: boolean; readonly assistantModelEvaluation: boolean; }"
+          "{ readonly assistantModelEvaluation: boolean; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -1954,51 +1954,6 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.DeleteKnowledgeBaseRequestParams",
-        "type": "Type",
-        "tags": [],
-        "label": "DeleteKnowledgeBaseRequestParams",
-        "description": [],
-        "signature": [
-          "{ resource?: string | undefined; }"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.DeleteKnowledgeBaseRequestParamsInput",
-        "type": "Type",
-        "tags": [],
-        "label": "DeleteKnowledgeBaseRequestParamsInput",
-        "description": [],
-        "signature": [
-          "{ resource?: string | undefined; }"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.DeleteKnowledgeBaseResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "DeleteKnowledgeBaseResponse",
-        "description": [],
-        "signature": [
-          "{ success?: boolean | undefined; }"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.DocumentEntry",
         "type": "Type",
         "tags": [],
@@ -2772,7 +2727,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "{ assistantKnowledgeBaseByDefault: boolean; assistantModelEvaluation: boolean; }"
+          "{ assistantModelEvaluation: boolean; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
@@ -4767,7 +4722,7 @@
           "\nDefault features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantKnowledgeBaseByDefault: true; readonly assistantModelEvaluation: false; }"
+          "{ readonly assistantModelEvaluation: false; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -4830,36 +4785,6 @@
           "Zod.ZodDiscriminatedUnion<\"type\", [Zod.ZodObject<Zod.objectUtil.extendShape<Zod.objectUtil.extendShape<Zod.objectUtil.extendShape<{ name: Zod.ZodString; }, { namespace: Zod.ZodString; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; }>, { id: Zod.ZodString; createdAt: Zod.ZodString; createdBy: Zod.ZodString; updatedAt: Zod.ZodString; updatedBy: Zod.ZodString; }>, Zod.objectUtil.extendShape<{ type: Zod.ZodLiteral<\"document\">; kbResource: Zod.ZodString; source: Zod.ZodString; text: Zod.ZodString; }, { required: Zod.ZodOptional<Zod.ZodBoolean>; vector: Zod.ZodOptional<Zod.ZodObject<{ modelId: Zod.ZodString; tokens: Zod.ZodObject<{}, \"strip\", Zod.ZodNumber, Zod.objectOutputType<{}, Zod.ZodNumber, \"strip\">, Zod.objectInputType<{}, Zod.ZodNumber, \"strip\">>; }, \"strip\", Zod.ZodTypeAny, { modelId: string; tokens: {} & { [k: string]: number; }; }, { modelId: string; tokens: {} & { [k: string]: number; }; }>>; }>>, \"strip\", Zod.ZodTypeAny, { source: string; id: string; type: \"document\"; namespace: string; text: string; name: string; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; users: { id?: string | undefined; name?: string | undefined; }[]; kbResource: string; required?: boolean | undefined; vector?: { modelId: string; tokens: {} & { [k: string]: number; }; } | undefined; }, { source: string; id: string; type: \"document\"; namespace: string; text: string; name: string; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; users: { id?: string | undefined; name?: string | undefined; }[]; kbResource: string; required?: boolean | undefined; vector?: { modelId: string; tokens: {} & { [k: string]: number; }; } | undefined; }>, Zod.ZodObject<Zod.objectUtil.extendShape<Zod.objectUtil.extendShape<Zod.objectUtil.extendShape<{ name: Zod.ZodString; }, { namespace: Zod.ZodString; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; }>, { id: Zod.ZodString; createdAt: Zod.ZodString; createdBy: Zod.ZodString; updatedAt: Zod.ZodString; updatedBy: Zod.ZodString; }>, Zod.objectUtil.extendShape<{ type: Zod.ZodLiteral<\"index\">; index: Zod.ZodString; field: Zod.ZodString; description: Zod.ZodString; queryDescription: Zod.ZodString; }, { inputSchema: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ fieldName: Zod.ZodString; fieldType: Zod.ZodString; description: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { description: string; fieldName: string; fieldType: string; }, { description: string; fieldName: string; fieldType: string; }>, \"many\">>; outputFields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }>>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"index\"; namespace: string; name: string; index: string; field: string; description: string; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; users: { id?: string | undefined; name?: string | undefined; }[]; queryDescription: string; inputSchema?: { description: string; fieldName: string; fieldType: string; }[] | undefined; outputFields?: string[] | undefined; }, { id: string; type: \"index\"; namespace: string; name: string; index: string; field: string; description: string; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; users: { id?: string | undefined; name?: string | undefined; }[]; queryDescription: string; inputSchema?: { description: string; fieldName: string; fieldType: string; }[] | undefined; outputFields?: string[] | undefined; }>]>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/entries/crud_knowledge_base_entries_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.DeleteKnowledgeBaseRequestParams",
-        "type": "Object",
-        "tags": [],
-        "label": "DeleteKnowledgeBaseRequestParams",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{ resource: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { resource?: string | undefined; }, { resource?: string | undefined; }>"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.DeleteKnowledgeBaseResponse",
-        "type": "Object",
-        "tags": [],
-        "label": "DeleteKnowledgeBaseResponse",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{ success: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { success?: boolean | undefined; }, { success?: boolean | undefined; }>"
-        ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5232,7 +5157,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ assistantKnowledgeBaseByDefault: Zod.ZodBoolean; assistantModelEvaluation: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantKnowledgeBaseByDefault: boolean; assistantModelEvaluation: boolean; }, { assistantKnowledgeBaseByDefault: boolean; assistantModelEvaluation: boolean; }>"
+          "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; }, { assistantModelEvaluation: boolean; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
