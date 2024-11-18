@@ -20,6 +20,7 @@ export const IndexSettingsWithContext: React.FC<IndexSettingWithContextProps> = 
   dependencies,
   indexName,
   usageCollection,
+  hasUpdateSettingsPrivilege,
 }) => {
   // this normally happens when the index management app is rendered
   // but if components are embedded elsewhere that setup is skipped, so we have to do it here
@@ -46,7 +47,10 @@ export const IndexSettingsWithContext: React.FC<IndexSettingWithContextProps> = 
   };
   return (
     <IndexManagementAppContext core={core} dependencies={newDependencies}>
-      <DetailsPageSettings indexName={indexName} />
+      <DetailsPageSettings
+        indexName={indexName}
+        hasUpdateSettingsPrivilege={hasUpdateSettingsPrivilege}
+      />
     </IndexManagementAppContext>
   );
 };

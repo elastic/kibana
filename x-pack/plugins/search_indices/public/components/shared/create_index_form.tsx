@@ -73,7 +73,7 @@ export const CreateIndexForm = ({
             name="indexName"
             value={indexName}
             isInvalid={indexNameHasError}
-            disabled={userPrivileges?.privileges?.canCreateIndex === false}
+            disabled={userPrivileges?.privileges?.canManageIndex === false}
             onChange={onIndexNameChange}
             placeholder={i18n.translate('xpack.searchIndices.shared.createIndex.name.placeholder', {
               defaultMessage: 'Enter a name for your index',
@@ -85,7 +85,7 @@ export const CreateIndexForm = ({
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={
-                userPrivileges?.privileges?.canCreateIndex === false ? (
+                userPrivileges?.privileges?.canManageIndex === false ? (
                   <p>
                     {i18n.translate('xpack.searchIndices.shared.createIndex.permissionTooltip', {
                       defaultMessage: 'You do not have permission to create an index.',
@@ -101,7 +101,7 @@ export const CreateIndexForm = ({
                 iconType="sparkles"
                 data-test-subj="createIndexBtn"
                 disabled={
-                  userPrivileges?.privileges?.canCreateIndex === false ||
+                  userPrivileges?.privileges?.canManageIndex === false ||
                   indexNameHasError ||
                   isLoading
                 }

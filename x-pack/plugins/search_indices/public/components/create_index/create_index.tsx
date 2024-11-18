@@ -7,10 +7,11 @@
 
 import React, { useCallback, useState } from 'react';
 
-import type { IndicesStatusResponse, UserStartPrivilegesResponse } from '../../../common';
+import type { IndicesStatusResponse } from '../../../common';
 
 import { AnalyticsEvents } from '../../analytics/constants';
 import { AvailableLanguages } from '../../code_examples';
+import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 import { useKibana } from '../../hooks/use_kibana';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { CreateIndexFormState } from '../../types';
@@ -31,9 +32,8 @@ function initCreateIndexState() {
   };
 }
 
-export interface CreateIndexProps {
+interface CreateIndexProps {
   indicesData?: IndicesStatusResponse;
-  userPrivileges?: UserStartPrivilegesResponse;
 }
 
 enum CreateIndexViewMode {
@@ -41,14 +41,15 @@ enum CreateIndexViewMode {
   Code = 'code',
 }
 
-export const CreateIndex = ({ indicesData, userPrivileges }: CreateIndexProps) => {
+export const CreateIndex = ({ indicesData }: CreateIndexProps) => {
   const { application } = useKibana().services;
+  const [formState, setFormState] = useState<CreateIndexFormState>(initCreateIndexState);
+  const { data: userPrivileges } = useUserPrivilegesQuery(formState.defaultIndexName);
   const [createIndexView, setCreateIndexView] = useState<CreateIndexViewMode>(
-    userPrivileges?.privileges.canCreateIndex === false
+    userPrivileges?.privileges.canManageIndex === false
       ? CreateIndexViewMode.Code
       : CreateIndexViewMode.UI
   );
-  const [formState, setFormState] = useState<CreateIndexFormState>(initCreateIndexState);
   const usageTracker = useUsageTracker();
   const onChangeView = useCallback(
     (id: string) => {
