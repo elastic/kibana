@@ -50,6 +50,7 @@ describe('Bulk actions knowledge base entry route', () => {
     jest.useRealTimers();
   });
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 

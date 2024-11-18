@@ -28,10 +28,6 @@ describe('getKnowledgeBaseEntry', () => {
     loggerMock = loggingSystemMock.createLogger();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   test('it returns an entry as expected if the entry is found', async () => {
     const data = getKnowledgeBaseEntrySearchEsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
