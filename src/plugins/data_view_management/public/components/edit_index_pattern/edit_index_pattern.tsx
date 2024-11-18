@@ -28,14 +28,16 @@ import {
   SavedObjectManagementTypeInfo,
 } from '@kbn/saved-objects-management-plugin/public';
 import { pickBy } from 'lodash';
+import type * as CSS from 'csstype';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
 import { getTags } from '../utils';
 import { removeDataView, RemoveDataViewProps } from './remove_data_view';
 
-const codeStyle = {
+const codeStyle: CSS.Properties = {
   marginLeft: '8px',
+  overflowWrap: 'anywhere',
 };
 
 export interface EditIndexPatternProps extends RouteComponentProps {
