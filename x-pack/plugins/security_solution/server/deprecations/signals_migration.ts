@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { ConfigType } from '../config';
 
-import { getNonMigratedSignalsInfo } from '../lib/detection_engine/migrations/utils/get_non_migrated_signals_info';
+import { getNonMigratedSignalsInfo } from '../lib/detection_engine/migrations/get_non_migrated_signals_info';
 
 export const getSignalsMigrationDeprecationsInfo = async (
   ctx: GetDeprecationsContext,

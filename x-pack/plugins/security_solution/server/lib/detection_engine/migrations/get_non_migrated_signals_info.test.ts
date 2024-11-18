@@ -8,14 +8,14 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { getNonMigratedSignalsInfo } from './get_non_migrated_signals_info';
-import { getIndexVersionsByIndex } from '../get_index_versions_by_index';
-import { getSignalVersionsByIndex } from '../get_signal_versions_by_index';
+import { getIndexVersionsByIndex } from './get_index_versions_by_index';
+import { getSignalVersionsByIndex } from './get_signal_versions_by_index';
 import { getLatestIndexTemplateVersion } from './get_latest_index_template_version';
 import { getIndexAliasPerSpace } from './get_index_alias_per_space';
 import { getOldestSignalTimestamp } from './get_oldest_signal_timestamp';
 
-jest.mock('../get_index_versions_by_index', () => ({ getIndexVersionsByIndex: jest.fn() }));
-jest.mock('../get_signal_versions_by_index', () => ({ getSignalVersionsByIndex: jest.fn() }));
+jest.mock('./get_index_versions_by_index', () => ({ getIndexVersionsByIndex: jest.fn() }));
+jest.mock('./get_signal_versions_by_index', () => ({ getSignalVersionsByIndex: jest.fn() }));
 jest.mock('./get_latest_index_template_version', () => ({
   getLatestIndexTemplateVersion: jest.fn(),
 }));

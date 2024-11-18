@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { getNonMigratedSignalsInfo } from '../../../lib/detection_engine/migrations/utils/get_non_migrated_signals_info';
+import { getNonMigratedSignalsInfo } from '../../../lib/detection_engine/migrations/get_non_migrated_signals_info';
 import type { LegacySiemSignals } from './types';
 
 export interface GetLegacySiemSignalsUsageOptions {
