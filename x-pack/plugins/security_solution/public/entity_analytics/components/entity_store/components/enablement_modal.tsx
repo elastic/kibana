@@ -66,6 +66,9 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
   if (!visible) {
     return null;
   }
+  const hasRiskEnginePrivileges =
+    !riskEnginePrivileges.isLoading && riskEnginePrivileges?.hasAllRequiredPrivileges;
+
   return (
     <EuiModal onClose={() => toggle(false)}>
       <EuiModalHeader>
@@ -87,11 +90,8 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
                   defaultMessage="Risk Score"
                 />
               }
-              checked={enablements.riskScore}
-              disabled={
-                riskScore.disabled ||
-                (!riskEnginePrivileges.isLoading && !riskEnginePrivileges?.hasAllRequiredPrivileges)
-              }
+              checked={enablements.riskScore && hasRiskEnginePrivileges}
+              disabled={riskScore.disabled || !hasRiskEnginePrivileges}
               onChange={() => setEnablements((prev) => ({ ...prev, riskScore: !prev.riskScore }))}
             />
           </EuiFlexItem>
