@@ -131,29 +131,29 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           it('return the correct data', () => {
             expect(omit(response.body, '@timestamp')).to.eql({
               agent: {
-                name: "java",
+                name: 'java',
               },
               container: {
-                id: "123",
+                id: '123',
               },
               host: {
-                name: "multiple-env-service-production",
+                name: 'multiple-env-service-production',
               },
               kubernetes: {
                 container: {},
                 deployment: {},
                 pod: {
-                  uid: "234",
+                  uid: '234',
                 },
                 replicaset: {},
               },
               service: {
-                environment: "production",
-                name: "service1",
+                environment: 'production',
+                name: 'service1',
                 node: {
-                  name: "multiple-env-service-production",
-                }
-              }
+                  name: 'multiple-env-service-production',
+                },
+              },
             });
           });
         });
