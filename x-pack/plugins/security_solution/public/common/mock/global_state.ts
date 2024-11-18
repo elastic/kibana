@@ -358,7 +358,6 @@ export const mockGlobalState: State = {
         historyIds: [],
         isFavorite: false,
         isLive: false,
-        isLoading: false,
         kqlMode: 'filter',
         kqlQuery: { filterQuery: null },
         loadingEventIds: [],

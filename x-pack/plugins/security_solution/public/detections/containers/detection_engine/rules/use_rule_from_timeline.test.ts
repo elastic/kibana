@@ -121,7 +121,6 @@ describe('useRuleFromTimeline', () => {
       expect(result.current.loading).toEqual(true);
       await waitForNextUpdate();
       expect(setRuleQuery).toHaveBeenCalled();
-      expect(mockDispatch).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -153,28 +152,13 @@ describe('useRuleFromTimeline', () => {
       await waitForNextUpdate();
       expect(setRuleQuery).toHaveBeenCalled();
 
-      expect(mockDispatch).toHaveBeenCalledTimes(4);
+      expect(mockDispatch).toHaveBeenCalledTimes(2);
       expect(mockDispatch).toHaveBeenNthCalledWith(1, {
-        type: 'x-pack/security_solution/local/timeline/UPDATE_LOADING',
-        payload: {
-          id: 'timeline-1',
-          isLoading: true,
-        },
-      });
-
-      expect(mockDispatch).toHaveBeenNthCalledWith(2, {
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'timeline',
           selectedDataViewId: selectedTimeline.data.timeline.dataViewId,
           selectedPatterns: selectedTimeline.data.timeline.indexNames,
-        },
-      });
-      expect(mockDispatch).toHaveBeenNthCalledWith(3, {
-        type: 'x-pack/security_solution/local/timeline/UPDATE_LOADING',
-        payload: {
-          id: 'timeline-1',
-          isLoading: false,
         },
       });
     });
@@ -347,7 +331,7 @@ describe('useRuleFromTimeline', () => {
       const { waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       await waitForNextUpdate();
       expect(setRuleQuery).toHaveBeenCalled();
-      expect(mockDispatch).toHaveBeenNthCalledWith(4, {
+      expect(mockDispatch).toHaveBeenNthCalledWith(2, {
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
         payload: {
           id: 'timeline',

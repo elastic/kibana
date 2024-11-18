@@ -23,7 +23,6 @@ import { useTimelineEventsHandler } from '../../../../timelines/containers';
 import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
 import type { State } from '../../../../common/store/types';
 import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
-import { timelineActions } from '../../../../timelines/store';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { INVESTIGATE_BULK_IN_TIMELINE } from '../translations';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -141,18 +140,11 @@ export const useAddBulkToTimelineAction = ({
     timelineType: TimelineTypeEnum.default,
   });
 
-  const updateTimelineIsLoading = useCallback(
-    (payload: Parameters<typeof timelineActions.updateIsLoading>[0]) =>
-      dispatch(timelineActions.updateIsLoading(payload)),
-    [dispatch]
-  );
-
   const updateTimeline = useUpdateTimeline();
 
   const createTimeline = useCallback(
     async ({ timeline, ruleNote, timeline: { filters: eventIdFilters } }: CreateTimelineProps) => {
       await clearActiveTimeline();
-      updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       updateTimeline({
         duplicate: true,
         from,
@@ -168,7 +160,7 @@ export const useAddBulkToTimelineAction = ({
         ruleNote,
       });
     },
-    [updateTimeline, updateTimelineIsLoading, clearActiveTimeline, from, to]
+    [updateTimeline, clearActiveTimeline, from, to]
   );
 
   const sendBulkEventsToTimelineHandler = useCallback(
