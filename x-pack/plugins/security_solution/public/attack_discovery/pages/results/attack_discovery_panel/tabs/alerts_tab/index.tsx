@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
-import React, { useMemo } from 'react';
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsTableComponent } from '../../../../../../detections/components/alerts_table';
 
 interface Props {
