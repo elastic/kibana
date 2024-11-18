@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subject, Observable, withLatestFrom } from 'rxjs';
+import { Subject, Observable, withLatestFrom, BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map as mapOptional, none } from 'fp-ts/lib/Option';
@@ -108,7 +108,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
   private currentPollInterval: number;
-  private currentTmUtilization$ = new Subject<number>();
+  private currentTmUtilization$ = new BehaviorSubject<number>(0);
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
