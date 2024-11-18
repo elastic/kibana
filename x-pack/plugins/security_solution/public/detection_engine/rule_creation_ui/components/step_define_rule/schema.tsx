@@ -52,7 +52,8 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
-import { newTermsFieldsValidationFactory } from '../../validators/new_terms_fields_validator_factory';
+import { newTermsFieldsValidatorFactory } from '../../validators/new_terms_fields_validator_factory';
+import { historyWindowStartValidationFactory } from '../../validators/history_window_start_validator_factory';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -580,7 +581,7 @@ export const schema: FormSchema<DefineStepRule> = {
             return;
           }
 
-          return newTermsFieldsValidationFactory(...args);
+          return newTermsFieldsValidatorFactory(...args);
         },
       },
     ],
@@ -603,27 +604,14 @@ export const schema: FormSchema<DefineStepRule> = {
         validator: (
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ path, formData }] = args;
+          const [{ formData }] = args;
           const needsValidation = isNewTermsRule(formData.ruleType);
 
           if (!needsValidation) {
             return;
           }
 
-          const filterTimeVal = formData.historyWindowSize.match(/\d+/g);
-
-          if (filterTimeVal <= 0) {
-            return {
-              code: 'ERR_MIN_LENGTH',
-              path,
-              message: i18n.translate(
-                'xpack.securitySolution.detectionEngine.validations.stepDefineRule.historyWindowSize.errMin',
-                {
-                  defaultMessage: 'History window size must be greater than 0.',
-                }
-              ),
-            };
-          }
+          return historyWindowStartValidationFactory(...args);
         },
       },
     ],

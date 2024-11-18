@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { fieldValidators, type ERROR_CODE, type ValidationFunc } from '../../../shared_imports';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../common/constants';
 
-export function newTermsFieldsValidationFactory(
+export function newTermsFieldsValidatorFactory(
   ...args: Parameters<ValidationFunc>
 ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined {
   return (

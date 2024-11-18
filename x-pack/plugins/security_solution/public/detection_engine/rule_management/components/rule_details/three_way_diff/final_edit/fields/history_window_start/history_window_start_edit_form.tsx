@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { ERROR_CODE, ValidationFunc } from '../../../../../../../../shared_imports';
 import { type FormData, type FormSchema } from '../../../../../../../../shared_imports';
 import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
 import { HistoryWindowStartEditAdapter } from './history_window_start_edit_adapter';
@@ -16,6 +17,7 @@ import {
   convertHistoryStartToSize,
 } from '../../../../../../../../common/utils/history_window';
 import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../../../../../../../common/constants';
+import { historyWindowStartValidationFactory } from '../../../../../../../rule_creation_ui/validators/history_window_start_validator_factory';
 
 export function HistoryWindowStartEditForm(): JSX.Element {
   return (
@@ -47,7 +49,20 @@ function serializer(formData: FormData): { history_window_start: HistoryWindowSt
 }
 
 export const historyWindowFormSchema = {
-  historyWindowSize: schema.historyWindowSize,
+  historyWindowSize: {
+    /*
+      For some reason, TS complains that schema.historyWindowSize can be a string, which is incorrect. Nevertheless, adding a runtime check to ensure it's an object and make TS happy.
+    */
+    ...(typeof schema.historyWindowSize === 'object' ? schema.historyWindowSize : {}),
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined =>
+          historyWindowStartValidationFactory(...args),
+      },
+    ],
+  },
 } as FormSchema<{
   historyWindowSize: HistoryWindowStart;
 }>;
