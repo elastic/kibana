@@ -71,7 +71,7 @@ export const LogRateAnalysisAttachmentsMenu = () => {
     [dataView.id, embeddable, applyTimeRange, timeRange]
   );
 
-  const panels = useMemo<EuiContextMenuProps['panels']>(() => {
+  const panels = useMemo<Exclude<EuiContextMenuProps['panels'], undefined>>(() => {
     return [
       {
         id: 'attachMainPanel',
@@ -135,27 +135,29 @@ export const LogRateAnalysisAttachmentsMenu = () => {
 
   return (
     <>
-      <EuiFlexItem>
-        <EuiPopover
-          button={
-            <EuiButtonIcon
-              data-test-subj="aiopsLogRateAnalysisAttachmentsMenuButton"
-              aria-label={i18n.translate('xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel', {
-                defaultMessage: 'Attachments',
-              })}
-              iconType="boxesHorizontal"
-              color="text"
-              onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-            />
-          }
-          isOpen={isActionMenuOpen}
-          closePopover={() => setIsActionMenuOpen(false)}
-          panelPaddingSize="none"
-          anchorPosition="downRight"
-        >
-          <EuiContextMenu panels={panels} initialPanelId="attachMainPanel" />
-        </EuiPopover>
-      </EuiFlexItem>
+      {!!panels[0]?.items?.length && (
+        <EuiFlexItem>
+          <EuiPopover
+            button={
+              <EuiButtonIcon
+                data-test-subj="aiopsLogRateAnalysisAttachmentsMenuButton"
+                aria-label={i18n.translate('xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel', {
+                  defaultMessage: 'Attachments',
+                })}
+                iconType="boxesHorizontal"
+                color="text"
+                onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
+              />
+            }
+            isOpen={isActionMenuOpen}
+            closePopover={() => setIsActionMenuOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downRight"
+          >
+            <EuiContextMenu panels={panels} initialPanelId="attachMainPanel" />
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
       {dashboardAttachmentReady ? (
         <SavedObjectSaveModalDashboard
           canSaveByReference={false}
