@@ -6,9 +6,9 @@
  */
 
 import React, { memo } from 'react';
-import { CellComponentProps } from '../types';
+import { CellComponent } from '../types';
 
-const DefaultCellComponent: React.FC<CellComponentProps> = ({ columnId, alert }) => {
+export const DefaultCell: CellComponent = memo(({ columnId, alert }) => {
   const value = (alert && alert[columnId]) ?? [];
 
   if (Array.isArray(value)) {
@@ -16,8 +16,4 @@ const DefaultCellComponent: React.FC<CellComponentProps> = ({ columnId, alert })
   }
 
   return <>{value}</>;
-};
-
-DefaultCellComponent.displayName = 'DefaultCell';
-
-export const DefaultCell = memo(DefaultCellComponent);
+});

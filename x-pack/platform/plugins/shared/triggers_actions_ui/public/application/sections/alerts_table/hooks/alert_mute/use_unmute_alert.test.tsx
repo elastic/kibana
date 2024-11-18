@@ -24,7 +24,7 @@ describe('useUnmuteAlert', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer(AlertsQueryContext);
+    appMockRender = createAppMockRenderer({ queryClientContext: AlertsQueryContext });
   });
 
   it('calls the api when invoked with the correct parameters', async () => {

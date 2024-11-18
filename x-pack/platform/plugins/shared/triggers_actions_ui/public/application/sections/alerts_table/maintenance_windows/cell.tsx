@@ -9,7 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiSkeletonText, EuiToolTip } from '@elastic/eui';
 import { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { ALERT_MAINTENANCE_WINDOW_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
-import { CellComponentProps } from '../types';
+import { CellComponent } from '../types';
 import { TooltipContent } from './tooltip_content';
 
 const isMaintenanceWindowValid = (mw: MaintenanceWindow | undefined): mw is MaintenanceWindow => {
@@ -31,25 +31,21 @@ export const MaintenanceWindowBaseCell = memo((props: MaintenanceWindowBaseCellP
     return (
       <>
         {maintenanceWindows.map((mw, index) => (
-          <>
-            <EuiToolTip
-              key={`${mw.id}_tooltip`}
-              content={<TooltipContent maintenanceWindow={mw} timestamp={timestamp} />}
-            >
-              <span key={`${mw.id}_title`}>
-                {mw.title}
-                {index !== totalLength - 1 && <>, &nbsp;</>}
-              </span>
-            </EuiToolTip>
-          </>
+          <EuiToolTip
+            key={`${mw.id}_tooltip`}
+            content={<TooltipContent maintenanceWindow={mw} timestamp={timestamp} />}
+          >
+            <span key={`${mw.id}_title`}>
+              {mw.title}
+              {index !== totalLength - 1 && <>, &nbsp;</>}
+            </span>
+          </EuiToolTip>
         ))}
         {maintenanceWindowIds.map((id, index) => (
-          <>
-            <span key={`${id}_id`}>
-              {id}
-              {index + maintenanceWindows.length !== totalLength - 1 && <>, &nbsp;</>}
-            </span>
-          </>
+          <span key={`${id}_id`}>
+            {id}
+            {index + maintenanceWindows.length !== totalLength - 1 && <>, &nbsp;</>}
+          </span>
         ))}
       </>
     );
@@ -67,19 +63,19 @@ export const MaintenanceWindowBaseCell = memo((props: MaintenanceWindowBaseCellP
   );
 });
 
-export const MaintenanceWindowCell = memo((props: CellComponentProps) => {
+export const MaintenanceWindowCell: CellComponent = memo((props) => {
   const { alert, maintenanceWindows, isLoading } = props;
 
   const validMaintenanceWindows = useMemo(() => {
     const maintenanceWindowIds = (alert && alert[ALERT_MAINTENANCE_WINDOW_IDS]) || [];
     return maintenanceWindowIds
-      .map((id) => maintenanceWindows.get(id))
+      .map((id) => maintenanceWindows?.get(id))
       .filter(isMaintenanceWindowValid);
   }, [alert, maintenanceWindows]);
 
   const idsWithoutMaintenanceWindow = useMemo(() => {
     const maintenanceWindowIds = (alert && alert[ALERT_MAINTENANCE_WINDOW_IDS]) || [];
-    return maintenanceWindowIds.filter((id) => !maintenanceWindows.get(id));
+    return maintenanceWindowIds.filter((id) => !maintenanceWindows?.get(id));
   }, [alert, maintenanceWindows]);
 
   if (validMaintenanceWindows.length === 0 && idsWithoutMaintenanceWindow.length === 0) {
@@ -95,5 +91,3 @@ export const MaintenanceWindowCell = memo((props: CellComponentProps) => {
     />
   );
 });
-
-MaintenanceWindowCell.displayName = 'maintenanceWindowCell';

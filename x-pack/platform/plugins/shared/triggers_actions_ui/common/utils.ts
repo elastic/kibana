@@ -5,4 +5,12 @@
  * 2.0.
  */
 
+import React, { forwardRef, ReactElement } from 'react';
+
 export const nonNullable = <T>(v: T): v is NonNullable<T> => v != null;
+
+export function typedForwardRef<T, P = {}>(
+  render: (props: P, ref: React.Ref<T>) => ReactElement
+): (props: P & React.RefAttributes<T>) => ReactElement {
+  return forwardRef(render) as any;
+}

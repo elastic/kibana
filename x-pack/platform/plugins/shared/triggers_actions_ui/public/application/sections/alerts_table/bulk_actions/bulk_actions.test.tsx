@@ -5,35 +5,37 @@
  * 2.0.
  */
 import React, { useMemo, useReducer } from 'react';
-import { identity } from 'lodash';
-import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { render, screen, within, waitFor, act } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { AlertsTable } from '../alerts_table';
+import { AlertsDataGrid } from '../alerts_data_grid';
 import {
   Alerts,
   AlertsField,
-  AlertsTableProps,
   BulkActionsConfig,
   BulkActionsState,
-  FetchAlertData,
-  InspectQuery,
-  RowSelectionState,
+  RenderContext,
+  AdditionalContext,
+  Alert,
 } from '../../../../types';
 import { bulkActionsReducer } from './reducer';
-import { createAppMockRenderer } from '../../test_utils';
-import { getCasesMockMap } from '../cases/index.mock';
-import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
+import { createAppMockRenderer, getJsDomPerformanceFix } from '../../test_utils';
 import { createCasesServiceMock } from '../index.mock';
-import { AlertsTableContext } from '../contexts/alerts_table_context';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import {
+  TestAlertsDataGridProps,
+  mockBulkActionsState,
+  mockDataGridProps,
+  mockRenderContext,
+  BaseAlertsDataGridProps,
+} from '../alerts_data_grid.mock';
+import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting$: jest.fn((value: string) => ['0,0']),
 }));
-
-const refreshMockFn = jest.fn();
 
 const columns = [
   {
@@ -46,134 +48,44 @@ const columns = [
   },
 ];
 
-const mockFieldFormatsRegistry = {
-  deserialize: jest.fn().mockImplementation(() => ({
-    id: 'string',
-    convert: jest.fn().mockImplementation(identity),
-  })),
-} as unknown as FieldFormatsRegistry;
-
 const mockCaseService = createCasesServiceMock();
-
-const mockKibana = jest.fn().mockReturnValue({
-  services: {
-    cases: mockCaseService,
-    notifications: {
-      toasts: {
-        addDanger: jest.fn(),
-        addSuccess: jest.fn(),
-      },
-    },
-  },
-});
-
-const oldAlertsData = [
-  [
-    {
-      field: AlertsField.name,
-      value: ['one'],
-    },
-    {
-      field: AlertsField.reason,
-      value: ['two'],
-    },
-  ],
-  [
-    {
-      field: AlertsField.name,
-      value: ['three'],
-    },
-    {
-      field: AlertsField.reason,
-      value: ['four'],
-    },
-  ],
-] as FetchAlertData['oldAlertsData'];
-
-const ecsAlertsData = [
-  [
-    {
-      '@timestamp': ['2023-01-28T10:48:49.559Z'],
-      _id: 'SomeId',
-      _index: 'SomeIndex',
-      kibana: {
-        alert: {
-          rule: {
-            name: ['one'],
-          },
-          reason: ['two'],
-        },
-      },
-    },
-  ],
-  [
-    {
-      '@timestamp': ['2023-01-27T10:48:49.559Z'],
-      _id: 'SomeId2',
-      _index: 'SomeIndex',
-      kibana: {
-        alert: {
-          rule: {
-            name: ['three'],
-          },
-          reason: ['four'],
-        },
-      },
-    },
-  ],
-] as FetchAlertData['ecsAlertsData'];
-
+const mockApplication = applicationServiceMock.createStartContract();
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   return {
     ...original,
-    useKibana: () => mockKibana(),
+    useKibana: () => ({
+      services: {
+        application: mockApplication,
+        cases: mockCaseService,
+        notifications: {
+          toasts: {
+            addDanger: jest.fn(),
+            addSuccess: jest.fn(),
+          },
+        },
+      },
+    }),
   };
 });
 
-const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
-
-type AlertsTableWithBulkActionsContextProps = AlertsTableProps & {
+type AlertsTableWithBulkActionsContextProps = TestAlertsDataGridProps & {
   initialBulkActionsState?: BulkActionsState;
+  renderContext?: Partial<RenderContext<AdditionalContext>>;
 };
 
-describe('AlertsTable.BulkActions', () => {
-  beforeAll(() => {
-    // The JSDOM implementation is too slow
-    // Especially for dropdowns that try to position themselves
-    // perf issue - https://github.com/jsdom/jsdom/issues/3234
-    Object.defineProperty(window, 'getComputedStyle', {
-      value: (el: HTMLElement) => {
-        /**
-         * This is based on the jsdom implementation of getComputedStyle
-         * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
-         *
-         * It is missing global style parsing and will only return styles applied directly to an element.
-         * Will not return styles that are global or from emotion
-         */
-        const declaration = new CSSStyleDeclaration();
-        const { style } = el;
+const mockRefresh = jest.mocked(mockRenderContext.refresh);
 
-        Array.prototype.forEach.call(style, (property: string) => {
-          declaration.setProperty(
-            property,
-            style.getPropertyValue(property),
-            style.getPropertyPriority(property)
-          );
-        });
+const { fix, cleanup } = getJsDomPerformanceFix();
+beforeAll(() => {
+  fix();
+});
+afterAll(() => {
+  cleanup();
+});
 
-        return declaration;
-      },
-      configurable: true,
-      writable: true,
-    });
-  });
-
-  afterAll(() => {
-    Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
-  });
-
+describe('AlertsDataGrid bulk actions', () => {
   const alerts = [
     {
       [AlertsField.name]: ['one'],
@@ -191,177 +103,122 @@ describe('AlertsTable.BulkActions', () => {
     },
   ] as unknown as Alerts;
 
-  const alertsData: FetchAlertData = {
-    activePage: 0,
-    alerts,
-    ecsAlertsData: [],
-    oldAlertsData: [],
-    alertsCount: alerts.length,
-    isInitializing: false,
-    isLoading: false,
-    getInspectQuery: () => ({ request: {}, response: {} } as InspectQuery),
-    onPageChange: () => {},
-    onSortChange: () => {},
-    refresh: refreshMockFn,
-    sort: [],
+  const dataGridProps: TestAlertsDataGridProps = {
+    ...mockDataGridProps,
+    getBulkActions: undefined,
   };
 
-  const casesConfig = { featureId: 'test-feature-id', owner: ['test-owner'] };
-
-  const alertsTableConfiguration = {
-    id: '',
-    casesConfig,
-    columns,
-    sort: [],
-    useInternalFlyout: jest.fn().mockImplementation(() => ({
-      header: jest.fn(),
-      body: jest.fn(),
-      footer: jest.fn(),
-    })),
-    getRenderCellValue: jest.fn().mockImplementation((props) => {
-      return `${props.colIndex}:${props.rowIndex}`;
-    }),
-  };
-
-  const casesMap = getCasesMockMap();
-
-  const maintenanceWindowsMap = getMaintenanceWindowMockMap();
-
-  const tableProps: AlertsTableProps = {
-    alertsTableConfiguration,
-    cases: { data: casesMap, isLoading: false },
-    maintenanceWindows: { data: maintenanceWindowsMap, isLoading: false },
-    columns,
-    deletedEventIds: [],
-    disabledCellActions: [],
-    pageSizeOptions: [2, 4],
-    leadingControlColumns: [],
-    trailingControlColumns: [],
-    visibleColumns: columns.map((c) => c.id),
-    'data-test-subj': 'testTable',
-    onToggleColumn: () => {},
-    onResetColumns: () => {},
-    onChangeVisibleColumns: () => {},
-    browserFields: {},
-    query: {},
-    pageIndex: 0,
-    pageSize: 1,
-    sort: [],
-    isLoading: false,
-    alerts,
-    oldAlertsData,
-    ecsAlertsData,
-    querySnapshot: { request: [], response: [] },
-    refetchAlerts: refreshMockFn,
-    alertsCount: alerts.length,
-    onSortChange: () => {},
-    onPageChange: () => {},
-    fieldFormats: mockFieldFormatsRegistry,
-  };
-
-  const tablePropsWithBulkActions: AlertsTableWithBulkActionsContextProps = {
-    ...tableProps,
-    pageIndex: 0,
+  const baseRenderContext = {
+    ...mockRenderContext,
+    showAlertStatusWithFlapping: false,
     pageSize: 10,
-    alertsTableConfiguration: {
-      ...alertsTableConfiguration,
+    alerts,
+    renderActionsCell: undefined,
+    columns,
+    alertsCount: alerts.length,
+  };
 
-      useBulkActions: () => [
-        {
-          id: 0,
-          items: [
-            {
-              label: 'Fake Bulk Action',
-              key: 'fakeBulkAction',
-              'data-test-subj': 'fake-bulk-action',
-              disableOnQuery: false,
-              onClick: () => {},
+  const dataGridPropsWithBulkActions: AlertsTableWithBulkActionsContextProps = {
+    ...dataGridProps,
+    getBulkActions: () => [
+      {
+        id: 0,
+        items: [
+          {
+            label: 'Fake Bulk Action',
+            key: 'fakeBulkAction',
+            'data-test-subj': 'fake-bulk-action',
+            disableOnQuery: false,
+            onClick: () => {},
+          },
+          {
+            label: 'Fake Bulk Action with clear selection',
+            key: 'fakeBulkActionClear',
+            'data-test-subj': 'fake-bulk-action-clear',
+            disableOnQuery: false,
+            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
+              clearSelection();
             },
-            {
-              label: 'Fake Bulk Action with clear selection',
-              key: 'fakeBulkActionClear',
-              'data-test-subj': 'fake-bulk-action-clear',
-              disableOnQuery: false,
-              onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
-                clearSelection();
-              },
+          },
+          {
+            label: 'Fake Bulk Action with loading and clear selection',
+            key: 'fakeBulkActionLoadingClear',
+            'data-test-subj': 'fake-bulk-action-loading',
+            disableOnQuery: false,
+            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
+              setIsBulkActionLoading(true);
             },
-            {
-              label: 'Fake Bulk Action with loading and clear selection',
-              key: 'fakeBulkActionLoadingClear',
-              'data-test-subj': 'fake-bulk-action-loading',
-              disableOnQuery: false,
-              onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
-                setIsBulkActionLoading(true);
-              },
+          },
+          {
+            label: 'Fake Bulk Action with refresh Action',
+            key: 'fakeBulkActionRefresh',
+            'data-test-subj': 'fake-bulk-action-refresh',
+            disableOnQuery: false,
+            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
+              refresh();
             },
-            {
-              label: 'Fake Bulk Action with refresh Action',
-              key: 'fakeBulkActionRefresh',
-              'data-test-subj': 'fake-bulk-action-refresh',
-              disableOnQuery: false,
-              onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
-                refresh();
-              },
-            },
-          ] as BulkActionsConfig[],
-        },
-        {
-          id: 1,
-          renderContent: () => <></>,
-        },
-      ],
-    },
+          },
+        ] as BulkActionsConfig[],
+      },
+      {
+        id: 1,
+        renderContent: () => <></>,
+      },
+    ],
   };
 
   const defaultBulkActionsState = {
-    rowSelection: new Map<number, RowSelectionState>(),
-    isAllSelected: false,
-    areAllVisibleRowsSelected: false,
+    ...mockBulkActionsState,
     rowCount: 2,
-    updatedAt: Date.now(),
   };
 
-  const AlertsTableWithBulkActionsContext: React.FunctionComponent<
-    AlertsTableWithBulkActionsContextProps
-  > = (props) => {
-    const renderer = useMemo(() => createAppMockRenderer(AlertsQueryContext), []);
-    const AppWrapper = renderer.AppWrapper;
+  const TestComponent = ({
+    initialBulkActionsState,
+    renderContext: renderContextOverrides,
+    ...props
+  }: AlertsTableWithBulkActionsContextProps) => {
+    const { AppWrapper } = useMemo(
+      () => createAppMockRenderer({ queryClientContext: AlertsQueryContext }),
+      []
+    );
 
-    const initialBulkActionsState = useReducer(
+    const bulkActionsStore = useReducer(
       bulkActionsReducer,
-      props.initialBulkActionsState || defaultBulkActionsState
+      initialBulkActionsState || defaultBulkActionsState
+    );
+    const renderContext = useMemo(
+      () => ({
+        ...baseRenderContext,
+        bulkActionsStore,
+        ...renderContextOverrides,
+      }),
+      [bulkActionsStore, renderContextOverrides]
     );
 
     return (
       <AppWrapper>
-        <AlertsTableContext.Provider
-          value={{
-            mutedAlerts: {},
-            bulkActions: initialBulkActionsState,
-          }}
-        >
-          <AlertsTable {...props} />
-        </AlertsTableContext.Provider>
+        <AlertsTableContextProvider value={renderContext}>
+          <AlertsDataGrid {...({ ...props, renderContext } as BaseAlertsDataGridProps)} />
+        </AlertsTableContextProvider>
       </AppWrapper>
     );
   };
 
-  describe('when the bulk action hook is not set', () => {
+  describe('when the getBulkActions option is not set', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
     it('should not show the bulk actions column', () => {
-      const { queryByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
-      expect(queryByTestId('bulk-actions-header')).toBeNull();
+      render(<TestComponent {...dataGridProps} />);
+      expect(screen.queryByTestId('bulk-actions-header')).not.toBeInTheDocument();
     });
   });
 
   describe('Cases', () => {
     beforeAll(() => {
-      mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
-      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(() => 'Cases context');
+      mockCaseService.helpers.canUseCases.mockReturnValue({ create: true, read: true });
+      mockCaseService.ui.getCasesContext.mockReturnValue(() => <>Cases context</>);
     });
 
     beforeEach(() => {
@@ -369,95 +226,87 @@ describe('AlertsTable.BulkActions', () => {
     });
 
     afterAll(() => {
-      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(() => null);
+      mockCaseService.ui.getCasesContext.mockReturnValue(() => null);
     });
 
     it('should show the bulk actions column when the cases service is defined', () => {
-      mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
+      mockCaseService.helpers.canUseCases.mockReturnValue({ create: true, read: true });
 
-      const { getByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
-      expect(getByTestId('bulk-actions-header')).toBeDefined();
+      render(<TestComponent {...dataGridProps} />);
+      expect(screen.getByTestId('bulk-actions-header')).toBeInTheDocument();
     });
 
     it('should not show the bulk actions column when the case service is defined and the user does not have write access', () => {
-      mockCaseService.helpers.canUseCases = jest
-        .fn()
-        .mockReturnValue({ create: false, read: true });
+      mockCaseService.helpers.canUseCases.mockReturnValue({ create: false, read: true });
 
-      const { queryByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
+      render(<TestComponent {...dataGridProps} />);
 
-      expect(queryByTestId('bulk-actions-header')).toBeNull();
+      expect(screen.queryByTestId('bulk-actions-header')).not.toBeInTheDocument();
     });
 
     it('should not show the bulk actions column when the case service is defined and the user does not have read access', () => {
-      mockCaseService.helpers.canUseCases = jest
-        .fn()
-        .mockReturnValue({ create: true, read: false });
+      mockCaseService.helpers.canUseCases.mockReturnValue({ create: true, read: false });
 
-      const { queryByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
+      render(<TestComponent {...dataGridProps} />);
 
-      expect(queryByTestId('bulk-actions-header')).toBeNull();
+      expect(screen.queryByTestId('bulk-actions-header')).not.toBeInTheDocument();
     });
 
     it('should not show the bulk actions when the cases context is missing', () => {
-      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(() => null);
+      mockCaseService.ui.getCasesContext.mockReturnValue(() => null);
 
-      const { queryByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
-      expect(queryByTestId('bulk-actions-header')).toBeNull();
+      render(<TestComponent {...dataGridProps} />);
+      expect(screen.queryByTestId('bulk-actions-header')).not.toBeInTheDocument();
     });
 
     it('should pass the case ids when selecting alerts', async () => {
-      const mockedFn = jest.fn();
-      const newAlertsData = {
-        ...alertsData,
-        alerts: [
-          {
-            [AlertsField.name]: ['one'],
-            [AlertsField.reason]: ['two'],
-            [AlertsField.uuid]: ['uuidone'],
-            [AlertsField.case_ids]: ['test-case'],
-            _id: 'alert0',
-            _index: 'idx0',
-          },
-        ] as unknown as Alerts,
-      };
+      const mockOnClick = jest.fn();
+      const newAlerts = [
+        {
+          [AlertsField.name]: ['one'],
+          [AlertsField.reason]: ['two'],
+          [AlertsField.uuid]: ['uuidone'],
+          [AlertsField.case_ids]: ['test-case'],
+          _id: 'alert0',
+          _index: 'idx0',
+        } as Alert,
+      ];
 
       const props: AlertsTableWithBulkActionsContextProps = {
-        ...tablePropsWithBulkActions,
+        ...dataGridPropsWithBulkActions,
         initialBulkActionsState: {
           ...defaultBulkActionsState,
           isAllSelected: true,
           rowCount: 1,
           rowSelection: new Map([[0, { isLoading: false }]]),
         },
-        alerts: newAlertsData.alerts,
-        alertsTableConfiguration: {
-          ...alertsTableConfiguration,
-          useBulkActions: () => [
-            {
-              id: 0,
-              items: [
-                {
-                  label: 'Fake Bulk Action',
-                  key: 'fakeBulkAction',
-                  'data-test-subj': 'fake-bulk-action',
-                  disableOnQuery: false,
-                  onClick: mockedFn,
-                },
-              ],
-            },
-          ],
+        getBulkActions: () => [
+          {
+            id: 0,
+            items: [
+              {
+                label: 'Fake Bulk Action',
+                key: 'fakeBulkAction',
+                'data-test-subj': 'fake-bulk-action',
+                disableOnQuery: false,
+                onClick: mockOnClick,
+              },
+            ],
+          },
+        ],
+        renderContext: {
+          alerts: newAlerts,
         },
       };
 
-      render(<AlertsTableWithBulkActionsContext {...props} />);
+      render(<TestComponent {...props} />);
 
-      fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
+      userEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
       await waitForEuiPopoverOpen();
 
-      fireEvent.click(await screen.findByText('Fake Bulk Action'));
+      userEvent.click(await screen.findByText('Fake Bulk Action'));
 
-      expect(mockedFn.mock.calls[0][0]).toEqual([
+      expect(mockOnClick.mock.calls[0][0]).toEqual([
         {
           _id: 'alert0',
           _index: 'idx0',
@@ -492,26 +341,24 @@ describe('AlertsTable.BulkActions', () => {
     });
   });
 
-  describe('when the bulk action hook is set', () => {
+  describe('when the getBulkActions option is set', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    it('should show the bulk actions column', () => {
-      const { getByTestId } = render(
-        <AlertsTableWithBulkActionsContext {...tablePropsWithBulkActions} />
-      );
-      expect(getByTestId('bulk-actions-header')).toBeDefined();
+    it('should show the bulk actions column', async () => {
+      render(<TestComponent {...dataGridPropsWithBulkActions} />);
+      expect(await screen.findByTestId('bulk-actions-header')).toBeInTheDocument();
     });
 
-    describe('and click on select all', () => {
+    describe('and triggering the "select all" action', () => {
       it('should check that all rows are selected', async () => {
-        render(<AlertsTableWithBulkActionsContext {...tablePropsWithBulkActions} />);
+        render(<TestComponent {...dataGridPropsWithBulkActions} />);
         let bulkActionsCells = screen.getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
         expect(bulkActionsCells[0].checked).toBeFalsy();
         expect(bulkActionsCells[1].checked).toBeFalsy();
 
-        fireEvent.click(screen.getByTestId('bulk-actions-header'));
+        userEvent.click(screen.getByTestId('bulk-actions-header'));
 
         bulkActionsCells = screen.getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
         expect(bulkActionsCells[0].checked).toBeTruthy();
@@ -520,7 +367,7 @@ describe('AlertsTable.BulkActions', () => {
 
       it('should show the right amount of alerts selected', async () => {
         const props = {
-          ...tablePropsWithBulkActions,
+          ...dataGridPropsWithBulkActions,
           initialBulkActionsState: {
             ...defaultBulkActionsState,
             areAllVisibleRowsSelected: true,
@@ -531,15 +378,15 @@ describe('AlertsTable.BulkActions', () => {
           },
         };
 
-        render(<AlertsTableWithBulkActionsContext {...props} />);
-        expect(await screen.findByText('Selected 2 alerts')).toBeDefined();
+        render(<TestComponent {...props} />);
+        expect(await screen.findByText('Selected 2 alerts')).toBeInTheDocument();
       });
 
       describe('and clicking on a single row', () => {
         it('should uncheck the select all header column', () => {
-          // state after having already clicked on select all before
+          // State after having already clicked on select all before
           const props = {
-            ...tablePropsWithBulkActions,
+            ...dataGridPropsWithBulkActions,
             initialBulkActionsState: {
               ...defaultBulkActionsState,
               areAllVisibleRowsSelected: true,
@@ -549,7 +396,7 @@ describe('AlertsTable.BulkActions', () => {
               ]),
             },
           };
-          render(<AlertsTableWithBulkActionsContext {...props} />);
+          render(<TestComponent {...props} />);
           const bulkActionsCells = screen.getAllByTestId(
             'bulk-actions-row-cell'
           ) as HTMLInputElement[];
@@ -557,7 +404,7 @@ describe('AlertsTable.BulkActions', () => {
             (screen.getByTestId('bulk-actions-header') as HTMLInputElement).checked
           ).toBeTruthy();
 
-          fireEvent.click(bulkActionsCells[1]);
+          userEvent.click(bulkActionsCells[1]);
           expect(
             (screen.getByTestId('bulk-actions-header') as HTMLInputElement).checked
           ).toBeFalsy();
@@ -575,20 +422,22 @@ describe('AlertsTable.BulkActions', () => {
           ] as unknown as Alerts;
           const allAlerts = [...alerts, ...secondPageAlerts];
           const props: AlertsTableWithBulkActionsContextProps = {
-            ...tablePropsWithBulkActions,
-            alerts: allAlerts,
-            alertsCount: allAlerts.length,
+            ...dataGridPropsWithBulkActions,
+            renderContext: {
+              alerts: allAlerts,
+              alertsCount: allAlerts.length,
+              pageIndex: 1,
+              pageSize: 2,
+            },
             initialBulkActionsState: {
               ...defaultBulkActionsState,
               areAllVisibleRowsSelected: true,
               rowSelection: new Map([[0, { isLoading: false }]]),
             },
-            pageIndex: 1,
-            pageSize: 2,
           };
-          render(<AlertsTableWithBulkActionsContext {...props} />);
+          render(<TestComponent {...props} />);
 
-          expect(await screen.findByText('Selected 1 alert')).toBeDefined();
+          expect(await screen.findByText('Selected 1 alert')).toBeInTheDocument();
           expect((await screen.findAllByTestId('bulk-actions-row-cell')).length).toBe(1);
         });
       });
@@ -598,7 +447,7 @@ describe('AlertsTable.BulkActions', () => {
       it('should uncheck all rows', async () => {
         // state after having already clicked on select all before
         const props = {
-          ...tablePropsWithBulkActions,
+          ...dataGridPropsWithBulkActions,
           initialBulkActionsState: {
             ...defaultBulkActionsState,
             areAllVisibleRowsSelected: true,
@@ -608,7 +457,7 @@ describe('AlertsTable.BulkActions', () => {
             ]),
           },
         };
-        render(<AlertsTableWithBulkActionsContext {...props} />);
+        render(<TestComponent {...props} />);
         expect(
           ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0].checked
         ).toBeTruthy();
@@ -616,7 +465,7 @@ describe('AlertsTable.BulkActions', () => {
           ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[1].checked
         ).toBeTruthy();
 
-        fireEvent.click(await screen.findByTestId('bulk-actions-header'));
+        userEvent.click(await screen.findByTestId('bulk-actions-header'));
 
         expect(
           ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0].checked
@@ -629,7 +478,7 @@ describe('AlertsTable.BulkActions', () => {
 
     describe('and a row is selected', () => {
       it('should show the toolbar', async () => {
-        render(<AlertsTableWithBulkActionsContext {...tablePropsWithBulkActions} />);
+        render(<TestComponent {...dataGridPropsWithBulkActions} />);
 
         expect(screen.queryByTestId('selectedShowBulkActionsButton')).toBeNull();
         expect(screen.queryByTestId('selectAllAlertsButton')).toBeNull();
@@ -637,7 +486,7 @@ describe('AlertsTable.BulkActions', () => {
         const bulkActionsCells = screen.getAllByTestId(
           'bulk-actions-row-cell'
         ) as HTMLInputElement[];
-        fireEvent.click(bulkActionsCells[0]);
+        userEvent.click(bulkActionsCells[0]);
 
         expect(await screen.findByTestId('selectedShowBulkActionsButton')).toBeDefined();
         expect(await screen.findByTestId('selectAllAlertsButton')).toBeDefined();
@@ -647,21 +496,21 @@ describe('AlertsTable.BulkActions', () => {
         it('should hide the toolbar', () => {
           // state after having already clicked on select all before
           const props = {
-            ...tablePropsWithBulkActions,
+            ...dataGridPropsWithBulkActions,
             initialBulkActionsState: {
               ...defaultBulkActionsState,
               rowSelection: new Map([[0, { isLoading: false }]]),
             },
           };
           const { queryByTestId, getAllByTestId, getByTestId } = render(
-            <AlertsTableWithBulkActionsContext {...props} />
+            <TestComponent {...props} />
           );
 
           expect(getByTestId('selectedShowBulkActionsButton')).toBeDefined();
           expect(getByTestId('selectAllAlertsButton')).toBeDefined();
 
           const bulkActionsCells = getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
-          fireEvent.click(bulkActionsCells[0]);
+          userEvent.click(bulkActionsCells[0]);
 
           expect(queryByTestId('selectAllAlertsButton')).toBeNull();
           expect(queryByTestId('selectedShowBulkActionsButton')).toBeNull();
@@ -672,39 +521,36 @@ describe('AlertsTable.BulkActions', () => {
     describe('and the toolbar is on ', () => {
       describe('and a bulk action is executed', () => {
         it('should return the selected alert ids', async () => {
-          const mockedFn = jest.fn();
+          const mockOnClick = jest.fn();
           const props = {
-            ...tablePropsWithBulkActions,
+            ...dataGridPropsWithBulkActions,
             initialBulkActionsState: {
               ...defaultBulkActionsState,
               rowSelection: new Map([[1, { isLoading: false }]]),
             },
-            alertsTableConfiguration: {
-              ...alertsTableConfiguration,
-              useBulkActions: () => [
-                {
-                  id: 0,
-                  items: [
-                    {
-                      label: 'Fake Bulk Action',
-                      key: 'fakeBulkAction',
-                      'data-test-subj': 'fake-bulk-action',
-                      disableOnQuery: false,
-                      onClick: mockedFn,
-                    },
-                  ],
-                },
-              ],
-            },
+            getBulkActions: () => [
+              {
+                id: 0,
+                items: [
+                  {
+                    label: 'Fake Bulk Action',
+                    key: 'fakeBulkAction',
+                    'data-test-subj': 'fake-bulk-action',
+                    disableOnQuery: false,
+                    onClick: mockOnClick,
+                  },
+                ],
+              },
+            ],
           };
 
-          render(<AlertsTableWithBulkActionsContext {...props} />);
+          render(<TestComponent {...props} />);
 
-          fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
+          userEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
           await waitForEuiPopoverOpen();
 
-          fireEvent.click(await screen.findByText('Fake Bulk Action'));
-          expect(mockedFn.mock.calls[0][0]).toEqual([
+          userEvent.click(await screen.findByText('Fake Bulk Action'));
+          expect(mockOnClick.mock.calls[0][0]).toEqual([
             {
               _id: 'alert1',
               _index: 'idx1',
@@ -736,65 +582,54 @@ describe('AlertsTable.BulkActions', () => {
               },
             },
           ]);
-          expect(mockedFn.mock.calls[0][1]).toEqual(false);
-          expect(mockedFn.mock.calls[0][2]).toBeDefined(); // it's a callback
+          expect(mockOnClick.mock.calls[0][1]).toEqual(false);
+          expect(mockOnClick.mock.calls[0][2]).toBeDefined(); // it's a callback
         });
 
         describe('and the callback to represent the loading state is executed', () => {
-          let mockedFn: jest.Mock;
-          let props: AlertsTableProps;
-
-          beforeEach(() => {
-            mockedFn = jest.fn();
-            props = {
-              ...tablePropsWithBulkActions,
-              alertsTableConfiguration: {
-                ...alertsTableConfiguration,
-                useBulkActions: () => [
+          const mockOnClick = jest.fn();
+          const props: TestAlertsDataGridProps = {
+            ...dataGridPropsWithBulkActions,
+            getBulkActions: () => [
+              {
+                id: 0,
+                items: [
                   {
-                    id: 0,
-                    items: [
-                      {
-                        label: 'Fake Bulk Action',
-                        key: 'fakeBulkAction',
-                        'data-test-subj': 'fake-bulk-action',
-                        disableOnQuery: false,
-                        onClick: mockedFn,
-                      },
-                    ],
+                    label: 'Fake Bulk Action',
+                    key: 'fakeBulkAction',
+                    'data-test-subj': 'fake-bulk-action',
+                    disableOnQuery: false,
+                    onClick: mockOnClick,
                   },
                 ],
               },
-            };
-          });
+            ],
+          };
 
           it('should show the loading state on each selected row', async () => {
             const initialBulkActionsState = {
               ...defaultBulkActionsState,
               rowSelection: new Map([[1, { isLoading: false }]]),
             };
-            render(
-              <AlertsTableWithBulkActionsContext
-                {...props}
-                initialBulkActionsState={initialBulkActionsState}
-              />
-            );
+            render(<TestComponent {...props} initialBulkActionsState={initialBulkActionsState} />);
 
-            fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
+            userEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
-            fireEvent.click(await screen.findByText('Fake Bulk Action'));
+            userEvent.click(await screen.findByTestId('fake-bulk-action'));
 
-            // the callback given to our clients to run when they want to update the loading state
-            mockedFn.mock.calls[0][2](true);
+            // The callback given to our clients to run when they want to update the loading state
+            act(() => {
+              mockOnClick.mock.calls[0][2](true);
+            });
 
             expect(await screen.findAllByTestId('row-loader')).toHaveLength(1);
             const selectedOptions = await screen.findAllByTestId('dataGridRowCell');
-            // first row, first column
+            // First row, first column
             expect(within(selectedOptions[0]).queryByLabelText('Loading')).not.toBeInTheDocument();
-            expect(within(selectedOptions[0]).getByRole('checkbox')).toBeDefined();
+            expect(within(selectedOptions[0]).getByRole('checkbox')).toBeInTheDocument();
 
-            // second row, first column
+            // Second row, first column
             expect(within(selectedOptions[3]).getByLabelText('Loading')).toBeDefined();
             expect(within(selectedOptions[3]).queryByRole('checkbox')).not.toBeInTheDocument();
           });
@@ -804,19 +639,14 @@ describe('AlertsTable.BulkActions', () => {
               ...defaultBulkActionsState,
               rowSelection: new Map([[1, { isLoading: true }]]),
             };
-            render(
-              <AlertsTableWithBulkActionsContext
-                {...props}
-                initialBulkActionsState={initialBulkActionsState}
-              />
-            );
-            fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
+            render(<TestComponent {...props} initialBulkActionsState={initialBulkActionsState} />);
+            userEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
-            fireEvent.click(await screen.findByText('Fake Bulk Action'));
+            userEvent.click(await screen.findByText('Fake Bulk Action'));
 
             // the callback given to our clients to run when they want to update the loading state
-            mockedFn.mock.calls[0][2](false);
+            mockOnClick.mock.calls[0][2](false);
 
             expect(screen.queryByTestId('row-loader')).not.toBeInTheDocument();
           });
@@ -826,14 +656,14 @@ describe('AlertsTable.BulkActions', () => {
       describe('and select all is clicked', () => {
         it('should check all the visible rows', async () => {
           const props = {
-            ...tablePropsWithBulkActions,
+            ...dataGridPropsWithBulkActions,
             initialBulkActionsState: {
               ...defaultBulkActionsState,
               rowSelection: new Map([[0, { isLoading: false }]]),
             },
           };
 
-          render(<AlertsTableWithBulkActionsContext {...props} />);
+          render(<TestComponent {...props} />);
 
           expect(
             ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0]
@@ -844,7 +674,7 @@ describe('AlertsTable.BulkActions', () => {
               .checked
           ).toBeFalsy();
 
-          fireEvent.click(screen.getByTestId('selectAllAlertsButton'));
+          userEvent.click(screen.getByTestId('selectAllAlertsButton'));
 
           expect(
             ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0]
@@ -859,7 +689,7 @@ describe('AlertsTable.BulkActions', () => {
         describe('and clear the selection is clicked', () => {
           it('should turn off the toolbar', async () => {
             const props = {
-              ...tablePropsWithBulkActions,
+              ...dataGridPropsWithBulkActions,
               initialBulkActionsState: {
                 ...defaultBulkActionsState,
                 areAllVisibleRowsSelected: true,
@@ -871,7 +701,7 @@ describe('AlertsTable.BulkActions', () => {
               },
             };
 
-            render(<AlertsTableWithBulkActionsContext {...props} />);
+            render(<TestComponent {...props} />);
 
             expect(
               ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0]
@@ -882,7 +712,7 @@ describe('AlertsTable.BulkActions', () => {
                 .checked
             ).toBeTruthy();
 
-            fireEvent.click(screen.getByTestId('selectAllAlertsButton'));
+            userEvent.click(screen.getByTestId('selectAllAlertsButton'));
 
             expect(
               ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0]
@@ -897,9 +727,9 @@ describe('AlertsTable.BulkActions', () => {
 
         describe('and executing a bulk action', () => {
           it('should return the are all selected flag set to true', async () => {
-            const mockedFn = jest.fn();
+            const mockOnClick = jest.fn();
             const props = {
-              ...tablePropsWithBulkActions,
+              ...dataGridPropsWithBulkActions,
               initialBulkActionsState: {
                 ...defaultBulkActionsState,
                 isAllSelected: true,
@@ -909,34 +739,29 @@ describe('AlertsTable.BulkActions', () => {
                   [1, { isLoading: false }],
                 ]),
               },
-              alertsTableConfiguration: {
-                ...alertsTableConfiguration,
-                useBulkActions: () => [
-                  {
-                    id: 0,
-                    items: [
-                      {
-                        label: 'Fake Bulk Action',
-                        key: 'fakeBulkAction',
-                        'data-test-subj': 'fake-bulk-action',
-                        disableOnQuery: false,
-                        onClick: mockedFn,
-                      },
-                    ],
-                  },
-                ],
-              },
+              getBulkActions: () => [
+                {
+                  id: 0,
+                  items: [
+                    {
+                      label: 'Fake Bulk Action',
+                      key: 'fakeBulkAction',
+                      'data-test-subj': 'fake-bulk-action',
+                      disableOnQuery: false,
+                      onClick: mockOnClick,
+                    },
+                  ],
+                },
+              ],
             };
 
-            const { getByText, getByTestId } = render(
-              <AlertsTableWithBulkActionsContext {...props} />
-            );
+            render(<TestComponent {...props} />);
 
-            fireEvent.click(getByTestId('selectedShowBulkActionsButton'));
+            userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
-            fireEvent.click(getByText('Fake Bulk Action'));
-            expect(mockedFn.mock.calls[0][0]).toEqual([
+            userEvent.click(screen.getByText('Fake Bulk Action'));
+            expect(mockOnClick.mock.calls[0][0]).toEqual([
               {
                 _id: 'alert0',
                 _index: 'idx0',
@@ -998,13 +823,13 @@ describe('AlertsTable.BulkActions', () => {
                 },
               },
             ]);
-            expect(mockedFn.mock.calls[0][1]).toEqual(true);
-            expect(mockedFn.mock.calls[0][2]).toBeDefined();
+            expect(mockOnClick.mock.calls[0][1]).toEqual(true);
+            expect(mockOnClick.mock.calls[0][2]).toBeDefined();
           });
 
           it('should first set all to loading, then clears the selection', async () => {
             const props = {
-              ...tablePropsWithBulkActions,
+              ...dataGridPropsWithBulkActions,
 
               initialBulkActionsState: {
                 ...defaultBulkActionsState,
@@ -1012,13 +837,13 @@ describe('AlertsTable.BulkActions', () => {
                 rowSelection: new Map(),
               },
             };
-            render(<AlertsTableWithBulkActionsContext {...props} />);
+            render(<TestComponent {...props} />);
 
             let bulkActionsCells = screen.getAllByTestId(
               'bulk-actions-row-cell'
             ) as HTMLInputElement[];
 
-            fireEvent.click(screen.getByTestId('bulk-actions-header'));
+            userEvent.click(screen.getByTestId('bulk-actions-header'));
 
             await waitFor(async () => {
               bulkActionsCells = screen.getAllByTestId(
@@ -1029,10 +854,10 @@ describe('AlertsTable.BulkActions', () => {
               expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeDefined();
             });
 
-            fireEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+            userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
-            fireEvent.click(screen.getByTestId('fake-bulk-action-loading'));
+            userEvent.click(screen.getByTestId('fake-bulk-action-loading'));
 
             await waitFor(() => {
               expect(screen.queryAllByTestId('row-loader')).toHaveLength(2);
@@ -1041,20 +866,20 @@ describe('AlertsTable.BulkActions', () => {
 
           it('should call refresh function of use fetch alerts when bulk action 3 is clicked', async () => {
             const props = {
-              ...tablePropsWithBulkActions,
+              ...dataGridPropsWithBulkActions,
               initialBulkActionsState: {
                 ...defaultBulkActionsState,
                 areAllVisibleRowsSelected: false,
                 rowSelection: new Map(),
               },
             };
-            render(<AlertsTableWithBulkActionsContext {...props} />);
+            render(<TestComponent {...props} />);
 
             let bulkActionsCells = screen.getAllByTestId(
               'bulk-actions-row-cell'
             ) as HTMLInputElement[];
 
-            fireEvent.click(screen.getByTestId('bulk-actions-header'));
+            userEvent.click(screen.getByTestId('bulk-actions-header'));
 
             await waitFor(async () => {
               bulkActionsCells = screen.getAllByTestId(
@@ -1065,18 +890,18 @@ describe('AlertsTable.BulkActions', () => {
               expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeDefined();
             });
 
-            fireEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+            userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
-            refreshMockFn.mockClear();
-            expect(refreshMockFn.mock.calls.length).toBe(0);
-            fireEvent.click(screen.getByTestId('fake-bulk-action-refresh'));
-            expect(refreshMockFn.mock.calls.length).toBeGreaterThan(0);
+            mockRefresh.mockClear();
+            expect(mockRefresh.mock.calls.length).toBe(0);
+            userEvent.click(screen.getByTestId('fake-bulk-action-refresh'));
+            expect(mockRefresh.mock.calls.length).toBeGreaterThan(0);
           });
 
           it('should clear all selection on bulk action click', async () => {
             const props = {
-              ...tablePropsWithBulkActions,
+              ...dataGridPropsWithBulkActions,
 
               initialBulkActionsState: {
                 ...defaultBulkActionsState,
@@ -1084,20 +909,20 @@ describe('AlertsTable.BulkActions', () => {
                 rowSelection: new Map([[0, { isLoading: true }]]),
               },
             };
-            render(<AlertsTableWithBulkActionsContext {...props} />);
+            render(<TestComponent {...props} />);
 
             let bulkActionsCells = screen.getAllByTestId(
               'bulk-actions-row-cell'
             ) as HTMLInputElement[];
 
-            fireEvent.click(screen.getByTestId('bulk-actions-header'));
+            userEvent.click(screen.getByTestId('bulk-actions-header'));
 
             expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeVisible();
 
-            fireEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+            userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
-            fireEvent.click(screen.getByTestId('fake-bulk-action-clear'));
+            userEvent.click(screen.getByTestId('fake-bulk-action-clear'));
 
             // clear Selection happens after 150ms
             await waitFor(() => {

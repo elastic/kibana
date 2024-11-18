@@ -16,12 +16,10 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
-import {
-  FIELD_FORMAT_IDS,
-  FieldFormatParams,
-  FieldFormatsRegistry,
-} from '@kbn/field-formats-plugin/common';
-import { EuiBadge, EuiLink, RenderCellValue } from '@elastic/eui';
+import { FIELD_FORMAT_IDS, FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import { EuiBadge, EuiLink } from '@elastic/eui';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { AlertsTableProps } from '../../../../types';
 import { alertProducersData, observabilityFeatureIds } from '../constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AlertsTableSupportedConsumers } from '../types';
@@ -53,16 +51,11 @@ const getRenderValue = (mappedNonEcsValue: any) => {
   return '—';
 };
 
-export const getRenderCellValue: RenderCellValue = ({ columnId, data, fieldFormats }) => {
+export const renderCellValue: AlertsTableProps['renderCellValue'] = (props) => {
+  const { columnId, data, fieldFormats } = props;
   const alertValueFormatter = getAlertFormatters(fieldFormats);
-  if (data == null) return null;
-
-  const mappedNonEcsValue = getMappedNonEcsValue({
-    data,
-    fieldName: columnId,
-  });
-  const value = getRenderValue(mappedNonEcsValue);
-
+  const rawValue = props.alert[columnId]?.[0];
+  const value = getRenderValue(rawValue);
   return alertValueFormatter(columnId, value, data);
 };
 
@@ -77,7 +70,7 @@ const defaultParam: Record<string, FieldFormatParams> = {
 };
 
 export const getFieldFormatterProvider =
-  (fieldFormats: FieldFormatsRegistry) =>
+  (fieldFormats: FieldFormatsStart) =>
   (fieldType: FIELD_FORMAT_IDS, params?: FieldFormatParams) => {
     const fieldFormatter = fieldFormats.deserialize({
       id: fieldType,
@@ -88,7 +81,7 @@ export const getFieldFormatterProvider =
 
 export function useFieldFormatter(fieldType: FIELD_FORMAT_IDS) {
   const { fieldFormats } = useKibana().services;
-  return getFieldFormatterProvider(fieldFormats as FieldFormatsRegistry)(fieldType);
+  return getFieldFormatterProvider(fieldFormats)(fieldType);
 }
 
 const AlertRuleLink = ({ alertFields }: { alertFields: Array<{ field: string; value: any }> }) => {
@@ -111,7 +104,7 @@ const AlertRuleLink = ({ alertFields }: { alertFields: Array<{ field: string; va
   );
 };
 
-export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
+export function getAlertFormatters(fieldFormats: FieldFormatsStart) {
   const getFormatter = getFieldFormatterProvider(fieldFormats);
 
   return (

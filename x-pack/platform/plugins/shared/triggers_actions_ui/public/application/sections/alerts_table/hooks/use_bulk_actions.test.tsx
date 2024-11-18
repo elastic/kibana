@@ -9,8 +9,9 @@ import { renderHook } from '@testing-library/react';
 import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { createCasesServiceMock } from '../index.mock';
-import { BulkActionsVerbs } from '../../../../types';
+import { AdditionalContext, BulkActionsVerbs, RenderContext } from '../../../../types';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 jest.mock('./apis/bulk_get_cases');
 jest.mock('../../../../common/lib/kibana');
@@ -31,6 +32,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
+jest.mock('../contexts/alerts_table_context');
+jest.mocked(useAlertsTableContext).mockReturnValue({
+  bulkActionsStore: [{}, jest.fn()],
+} as unknown as RenderContext<AdditionalContext>);
+
 const caseId = 'test-case';
 
 describe('bulk action hooks', () => {
@@ -39,28 +45,29 @@ describe('bulk action hooks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer(AlertsQueryContext);
+    appMockRender = createAppMockRenderer({ queryClientContext: AlertsQueryContext });
   });
 
   const refresh = jest.fn();
   const clearSelection = jest.fn();
-  const openNewCase = jest.fn();
+  const mockOpenNewCase = jest.fn();
   const setIsBulkActionsLoading = jest.fn();
 
-  const openExistingCase = jest.fn().mockImplementation(({ getAttachments }) => {
+  const mockOpenExistingCase = jest.fn().mockImplementation(({ getAttachments }) => {
     getAttachments({ theCase: { id: caseId } });
   });
 
   mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
   mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(() => 'Cases context');
 
-  const addNewCaseMock = (
-    mockCaseService.hooks.useCasesAddToNewCaseFlyout as jest.Mock
-  ).mockReturnValue({ open: openNewCase });
-
-  const addExistingCaseMock = (
-    mockCaseService.hooks.useCasesAddToExistingCaseModal as jest.Mock
-  ).mockReturnValue({ open: openExistingCase });
+  const mockAddNewCase = mockCaseService.hooks.useCasesAddToNewCaseFlyout.mockReturnValue({
+    open: mockOpenNewCase,
+    close: jest.fn(),
+  });
+  const mockAddExistingCase = mockCaseService.hooks.useCasesAddToExistingCaseModal.mockReturnValue({
+    open: mockOpenExistingCase,
+    close: jest.fn(),
+  });
 
   describe('useBulkAddToCaseActions', () => {
     beforeEach(() => {
@@ -72,7 +79,7 @@ describe('bulk action hooks', () => {
         wrapper: appMockRender.AppWrapper,
       });
 
-      addNewCaseMock.mock.calls[0][0].onSuccess();
+      mockAddNewCase.mock.calls[0][0]!.onSuccess();
       expect(refresh).toHaveBeenCalled();
     });
 
@@ -81,7 +88,7 @@ describe('bulk action hooks', () => {
         wrapper: appMockRender.AppWrapper,
       });
 
-      addExistingCaseMock.mock.calls[0][0].onSuccess();
+      mockAddExistingCase.mock.calls[0][0]!.onSuccess();
       expect(refresh).toHaveBeenCalled();
     });
 
@@ -90,7 +97,7 @@ describe('bulk action hooks', () => {
         wrapper: appMockRender.AppWrapper,
       });
 
-      expect(addExistingCaseMock).toHaveBeenCalledWith({
+      expect(mockAddExistingCase).toHaveBeenCalledWith({
         noAttachmentsToaster: {
           title: 'No alerts added to the case',
           content: 'All selected alerts are already attached to the case',
@@ -111,7 +118,7 @@ describe('bulk action hooks', () => {
       result.current[0].onClick([]);
 
       expect(mockCaseService.helpers.groupAlertsByRule).toHaveBeenCalled();
-      expect(openNewCase).toHaveBeenCalled();
+      expect(mockOpenNewCase).toHaveBeenCalled();
     });
 
     it('should open the case modal', async () => {
@@ -126,11 +133,11 @@ describe('bulk action hooks', () => {
       result.current[1].onClick([]);
 
       expect(mockCaseService.helpers.groupAlertsByRule).toHaveBeenCalled();
-      expect(openExistingCase).toHaveBeenCalled();
+      expect(mockOpenExistingCase).toHaveBeenCalled();
     });
 
     it('should open the flyout from the case modal', async () => {
-      openExistingCase.mockImplementationOnce(({ getAttachments }) => {
+      mockOpenExistingCase.mockImplementationOnce(({ getAttachments }) => {
         getAttachments({ theCase: undefined });
       });
 
@@ -452,7 +459,13 @@ describe('bulk action hooks', () => {
       const useBulkActionsConfig = () => customBulkActionConfig;
       const { result, rerender } = renderHook(
         () =>
-          useBulkActions({ alertsCount: 0, query: {}, casesConfig, refresh, useBulkActionsConfig }),
+          useBulkActions({
+            alertsCount: 0,
+            query: {},
+            casesConfig,
+            refresh,
+            getBulkActions: useBulkActionsConfig,
+          }),
         {
           wrapper: appMockRender.AppWrapper,
         }

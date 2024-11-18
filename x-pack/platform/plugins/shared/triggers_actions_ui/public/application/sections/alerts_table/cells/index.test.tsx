@@ -11,14 +11,14 @@ import { SystemCellFactory } from '.';
 import { CellComponentProps } from '../types';
 import { Alert } from '../../../../types';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
-import { getCasesMockMap } from '../cases/index.mock';
-import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
+import { getCasesMapMock } from '../cases/index.mock';
+import { getMaintenanceWindowsMapMock } from '../maintenance_windows/index.mock';
 
 jest.mock('../../../../common/lib/kibana');
 
 describe('SystemCellFactory', () => {
-  const casesMap = getCasesMockMap();
-  const maintenanceWindowsMap = getMaintenanceWindowMockMap();
+  const casesMap = getCasesMapMock();
+  const maintenanceWindowsMap = getMaintenanceWindowsMapMock();
 
   const alert = {
     _id: 'alert-id',
@@ -28,14 +28,14 @@ describe('SystemCellFactory', () => {
     'kibana.alert.maintenance_window_ids': ['test-mw-id-1'],
   } as Alert;
 
-  const props: CellComponentProps = {
+  const props = {
     isLoading: false,
     alert,
     cases: casesMap,
     maintenanceWindows: maintenanceWindowsMap,
     columnId: 'kibana.alert.status',
     showAlertStatusWithFlapping: true,
-  };
+  } as CellComponentProps;
 
   let appMockRender: AppMockRenderer;
 
@@ -61,7 +61,6 @@ describe('SystemCellFactory', () => {
   });
 
   it('shows the cell if the columnId is not registered to the map', async () => {
-    // @ts-expect-error: columnId is typed to accept only status & case_ids
     appMockRender.render(<SystemCellFactory {...props} columnId="kibana.alert.end" />);
     expect(screen.getByText('--')).toBeInTheDocument();
   });
