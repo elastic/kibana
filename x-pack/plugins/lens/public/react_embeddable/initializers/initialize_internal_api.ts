@@ -16,7 +16,6 @@ import type {
 } from '../types';
 import { apiHasAbortController } from '../type_guards';
 import type { UserMessage } from '../../types';
-import { isTextBasedLanguage } from '../helper';
 
 export function initializeInternalApi(
   initialState: LensRuntimeState,
@@ -45,7 +44,9 @@ export function initializeInternalApi(
   // This other set of messages is for non-blocking messages that can be displayed in the UI
   const messages$ = new BehaviorSubject<UserMessage[]>([]);
 
-  const isNewlyCreated$ = new BehaviorSubject<boolean>(isTextBasedLanguage(initialState));
+  // This should settle the thing once and for all
+  // the isNewPanel won't be serialized so it will be always false after the edit panel closes applying the changes
+  const isNewlyCreated$ = new BehaviorSubject<boolean>(initialState.isNewPanel || false);
 
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it

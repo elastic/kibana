@@ -128,6 +128,7 @@ export async function executeCreateAction({
     initialState: {
       attributes: attrs,
       id: generateId(),
+      isNewPanel: true,
     },
   });
   // open the flyout if embeddable has been created successfully

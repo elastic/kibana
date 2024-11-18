@@ -274,7 +274,7 @@ export type LensSerializedState = Simplify<
     LensPanelProps &
     SerializedTitles &
     LensSharedProps &
-    Partial<DynamicActionsSerializedState>
+    Partial<DynamicActionsSerializedState> & { isNewPanel?: boolean }
 >;
 
 /**
