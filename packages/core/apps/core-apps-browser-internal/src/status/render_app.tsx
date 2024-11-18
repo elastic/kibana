@@ -13,21 +13,23 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { AppMountParameters } from '@kbn/core-application-browser';
 import { StatusApp } from './status_app';
 
 interface Deps {
   http: InternalHttpSetup;
   notifications: NotificationsSetup;
+  userProfile: UserProfileService;
 }
 
 export const renderApp = (
   { element, theme$ }: AppMountParameters,
-  { http, notifications }: Deps
+  { http, notifications, userProfile }: Deps
 ) => {
   ReactDOM.render(
     <I18nProvider>
-      <KibanaThemeProvider theme={{ theme$ }}>
+      <KibanaThemeProvider theme={{ theme$ }} userProfile={userProfile}>
         <StatusApp http={http} notifications={notifications} />
       </KibanaThemeProvider>
     </I18nProvider>,
