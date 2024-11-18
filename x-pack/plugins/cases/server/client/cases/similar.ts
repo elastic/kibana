@@ -6,7 +6,7 @@
  */
 
 import { intersection } from 'lodash';
-import { OBSERVABLE_TYPES_BUILTIN, OWNER_FIELD } from '../../../common/constants';
+import { OWNER_FIELD } from '../../../common/constants';
 import type { CasesSimilarResponse, SimilarCasesSearchRequest } from '../../../common/types/api';
 import { SimilarCasesSearchRequestRt, CasesSimilarResponseRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
@@ -18,6 +18,7 @@ import { Operations } from '../../authorization';
 import { buildFilter, buildObservablesFieldsFilter, combineFilters } from '../utils';
 import { combineFilterWithAuthorizationFilter } from '../../authorization/utils';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import { getAvailableObservableTypesSet } from '../observable_types';
 
 interface Similarity {
   typeKey: string;
@@ -70,13 +71,9 @@ export const similar = async (
     const paramArgs = decodeWithExcessOrThrow(SimilarCasesSearchRequestRt)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
 
-    const configurations = await casesClient.configure.get({
-      owner: retrievedCase.attributes.owner,
-    });
-    const observableTypes = configurations[0]?.observableTypes ?? [];
-
-    const availableObservableTypesSet = new Set(
-      [...observableTypes, ...OBSERVABLE_TYPES_BUILTIN].map(({ key }) => key)
+    const availableObservableTypesSet = await getAvailableObservableTypesSet(
+      casesClient,
+      retrievedCase.attributes.owner
     );
 
     if (!retrievedCase.attributes.observables.length) {

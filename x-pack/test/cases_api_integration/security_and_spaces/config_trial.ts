@@ -11,7 +11,6 @@ import { createTestConfig } from '../common/config';
 export default createTestConfig('security_and_spaces', {
   license: 'trial',
   ssl: true,
-  // FIXME: revert this
-  testFiles: [require.resolve('./tests/trial/cases/observables.ts')],
+  testFiles: [require.resolve('./tests/trial')],
   publicBaseUrl: true,
 });

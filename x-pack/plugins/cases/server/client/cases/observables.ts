@@ -26,7 +26,10 @@ import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
-import { validateDuplicatedObservablesInRequest } from '../validators';
+import {
+  validateDuplicatedObservablesInRequest,
+  validateObservableTypeKeyExists,
+} from '../validators';
 
 const ensureUpdateAuthorized = async (
   authorization: PublicMethodsOf<Authorization>,
@@ -69,6 +72,11 @@ export const addObservable = async (
     const paramArgs = decodeWithExcessOrThrow(AddObservableRequestRt)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
+
+    await validateObservableTypeKeyExists(casesClient, {
+      caseOwner: retrievedCase.attributes.owner,
+      observableTypeKey: params.observable.typeKey,
+    });
 
     const currentObservables = retrievedCase.attributes.observables ?? [];
 
