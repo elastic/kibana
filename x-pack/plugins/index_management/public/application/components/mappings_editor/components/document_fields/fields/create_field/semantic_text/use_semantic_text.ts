@@ -62,7 +62,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
         form.setFieldValue('reference_field', referenceField);
       }
       if (!form.getFormData().inference_id) {
-        form.setFieldValue('inference_id', 'elser_model_2');
+        form.setFieldValue('inference_id', '.elser-2-elasticsearch');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
