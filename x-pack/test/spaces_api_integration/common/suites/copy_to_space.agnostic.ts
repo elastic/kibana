@@ -830,7 +830,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
         after(async () => {
           await testDataLoader.deleteFtrSpaces();
           if (user) {
-            (supertest as SupertestWithRoleScopeType).destroy();
+            await (supertest as SupertestWithRoleScopeType).destroy();
           }
         });
 

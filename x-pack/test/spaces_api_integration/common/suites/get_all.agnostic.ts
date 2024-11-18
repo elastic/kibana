@@ -153,11 +153,11 @@ export function getAllTestSuiteFactory(context: DeploymentAgnosticFtrProviderCon
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           );
         });
-        after(() => {
+        after(async () => {
           esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           );
-          maybeDestroySupertest(supertest);
+          await maybeDestroySupertest(supertest);
         });
 
         getTestScenariosForSpace(spaceId).forEach(({ scenario, urlPrefix }) => {
