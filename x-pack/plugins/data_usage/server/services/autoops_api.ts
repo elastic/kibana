@@ -26,6 +26,11 @@ import { appContextService } from './app_context';
 const AGENT_CREATION_FAILED_ERROR = 'AutoOps API could not create the autoops agent';
 const AUTO_OPS_AGENT_CREATION_PREFIX = '[AutoOps API] Creating autoops agent failed';
 const AUTO_OPS_MISSING_CONFIG_ERROR = 'Missing autoops configuration';
+
+const getAutoOpsAPIRequestUrl = (url?: string, projectId?: string): string =>
+  `${url}/monitoring/serverless/v1/projects/${projectId}/metrics`;
+
+const dateParser = (date: string) => dateMath.parse(date)?.toISOString();
 export class AutoOpsAPIService {
   private logger: Logger;
   constructor(logger: Logger) {
@@ -56,16 +61,14 @@ export class AutoOpsAPIService {
     const tlsConfig = this.createTlsConfig(autoopsConfig);
     const cloudSetup = appContextService.getCloud();
 
-    const from = dateMath.parse(requestBody.from)?.toISOString();
-    const to = dateMath.parse(requestBody.to)?.toISOString();
     const requestConfig: AxiosRequestConfig = {
-      url: `${autoopsConfig.api?.url}/monitoring/serverless/v1/projects/${cloudSetup?.serverless.projectId}/metrics`,
+      url: getAutoOpsAPIRequestUrl(autoopsConfig.api?.url, cloudSetup?.serverless.projectId),
       data: {
-        from,
-        to,
+        from: dateParser(requestBody.from),
+        to: dateParser(requestBody.to),
         size: requestBody.dataStreams.length,
         level: 'datastream',
-        metric_types: ['storage_retained', 'ingest_rate'],
+        metric_types: requestBody.metricTypes,
         allowed_indices: requestBody.dataStreams,
       },
       method: 'POST',
