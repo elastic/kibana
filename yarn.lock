@@ -5810,6 +5810,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/health-gateway-server@link:packages/kbn-health-gateway-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/hello-world-plugin@link:examples/hello_world":
   version "0.0.0"
   uid ""
@@ -6691,6 +6695,10 @@
   uid ""
 
 "@kbn/reporting-export-types-png@link:packages/kbn-reporting/export_types/png":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-mocks-server@link:packages/kbn-reporting/mocks_server":
   version "0.0.0"
   uid ""
 
