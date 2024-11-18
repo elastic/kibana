@@ -80,6 +80,15 @@ const LinuxEntrySchema = schema.object({
 
 const MacEntrySchema = schema.object({
   ...CommonEntrySchema,
+  field: schema.oneOf([
+    schema.literal(ConditionEntryField.HASH),
+    schema.literal(ConditionEntryField.PATH),
+    schema.literal(ConditionEntryField.SIGNER_MAC),
+  ]),
+  value: schema.string({
+    validate: (field: string) =>
+      field.length > 0 ? undefined : `invalidField.${ConditionEntryField.SIGNER_MAC}`,
+  }),
 });
 
 const entriesSchemaOptions = {
