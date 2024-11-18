@@ -16,7 +16,7 @@ import { VISUALIZATIONS_TEST_ID } from './test_ids';
 import { GraphPreviewContainer } from './graph_preview_container';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useGraphPreview } from '../hooks/use_graph_preview';
+import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { GRAPH_VISUALIZATION_EXPERIMENTAL_FEATURE } from '../../shared/constants/feature_flags';
 
 const KEY = 'visualizations';

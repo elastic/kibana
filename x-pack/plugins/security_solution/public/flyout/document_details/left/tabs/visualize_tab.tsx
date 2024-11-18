@@ -30,7 +30,7 @@ import { SESSION_VIEW_ID, SessionView } from '../components/session_view';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { GRAPH_VISUALIZATION_ID, GraphVisualization } from '../components/graph_visualization';
-import { useGraphPreview } from '../../right/hooks/use_graph_preview';
+import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { GRAPH_VISUALIZATION_EXPERIMENTAL_FEATURE } from '../../shared/constants/feature_flags';
 
 const visualizeButtons: EuiButtonGroupOptionProps[] = [

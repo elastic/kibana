@@ -9,8 +9,8 @@ import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import type { UseGraphPreviewParams, UseGraphPreviewResult } from './use_graph_preview';
 import { useGraphPreview } from './use_graph_preview';
-import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
-import { mockFieldData } from '../../shared/mocks/mock_get_fields_data';
+import type { GetFieldsData } from './use_get_fields_data';
+import { mockFieldData } from '../mocks/mock_get_fields_data';
 
 const mockGetFieldsData: GetFieldsData = (field: string) => {
   if (field === 'kibana.alert.original_event.id') {

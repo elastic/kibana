@@ -7,8 +7,8 @@
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { get } from 'lodash/fp';
-import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
-import { getField, getFieldArray } from '../../shared/utils';
+import type { GetFieldsData } from './use_get_fields_data';
+import { getField, getFieldArray } from '../utils';
 
 export interface UseGraphPreviewParams {
   /**

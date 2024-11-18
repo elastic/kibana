@@ -12,8 +12,8 @@ import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/c
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
 import { GraphPreview } from './graph_preview';
-import { useFetchGraphData } from '../hooks/use_fetch_graph_data';
-import { useGraphPreview } from '../hooks/use_graph_preview';
+import { useFetchGraphData } from '../../shared/hooks/use_fetch_graph_data';
+import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 

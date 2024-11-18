@@ -23,8 +23,8 @@ import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
-import { useFetchGraphData } from '../../right/hooks/use_fetch_graph_data';
-import { useGraphPreview } from '../../right/hooks/use_graph_preview';
+import { useFetchGraphData } from '../../shared/hooks/use_fetch_graph_data';
+import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useGraphNodeExpandPopover } from './use_graph_node_expand_popover';
 
 export const GRAPH_VISUALIZATION_ID = 'graph_visualization';
