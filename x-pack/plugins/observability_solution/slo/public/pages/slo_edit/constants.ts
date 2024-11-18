@@ -210,6 +210,7 @@ export const SYNTHETICS_AVAILABILITY_DEFAULT_VALUES: SyntheticsAvailabilityIndic
 export const SETTINGS_DEFAULT_VALUES = {
   preventInitialBackfill: false,
   syncDelay: 1,
+  frequency: 1,
 };
 
 export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {

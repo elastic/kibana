@@ -171,10 +171,16 @@ export function Overview({ slo }: Props) {
         )}
 
         <OverviewItem
-          title={i18n.translate('xpack.slo.sloDetails.overview.syncDelay', {
+          title={i18n.translate('xpack.slo.sloDetails.overview.settings.syncDelay', {
             defaultMessage: 'Sync delay',
           })}
           subtitle={slo.settings.syncDelay}
+        />
+        <OverviewItem
+          title={i18n.translate('xpack.slo.sloDetails.overview.settings.frequency', {
+            defaultMessage: 'Frequency',
+          })}
+          subtitle={slo.settings.frequency}
         />
       </EuiFlexGrid>
     </EuiPanel>

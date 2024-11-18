@@ -56,6 +56,9 @@ export function transformSloResponseToCreateSloForm(
       syncDelay: values.settings?.syncDelay
         ? toMinutes(toDuration(values.settings.syncDelay))
         : SETTINGS_DEFAULT_VALUES.syncDelay,
+      frequency: values.settings?.frequency
+        ? toMinutes(toDuration(values.settings.frequency))
+        : SETTINGS_DEFAULT_VALUES.frequency,
     },
   };
 }
@@ -86,6 +89,7 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
     settings: {
       preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
       syncDelay: `${values.settings?.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
+      frequency: `${values.settings?.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
     },
   };
 }
@@ -116,6 +120,7 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
     settings: {
       preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
       syncDelay: `${values.settings?.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
+      frequency: `${values.settings?.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
     },
   };
 }
@@ -232,6 +237,9 @@ export function transformPartialSLOStateToFormState(
     }
     if (values.settings.syncDelay) {
       state.settings.syncDelay = toMinutes(toDuration(values.settings.syncDelay));
+    }
+    if (values.settings.frequency) {
+      state.settings.frequency = toMinutes(toDuration(values.settings.frequency));
     }
   }
 

@@ -26,5 +26,6 @@ export interface CreateSLOForm<IndicatorType = Indicator> {
   settings: {
     preventInitialBackfill: boolean;
     syncDelay: number; // in minutes
+    frequency: number; // in minutes
   };
 }

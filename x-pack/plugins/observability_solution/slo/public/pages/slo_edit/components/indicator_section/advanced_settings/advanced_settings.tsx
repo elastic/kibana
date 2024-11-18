@@ -59,7 +59,7 @@ export function AdvancedSettings() {
             <EuiIconTip
               content={i18n.translate('xpack.slo.sloEdit.settings.syncDelay.tooltip', {
                 defaultMessage:
-                  'The time delay in minutes between the current time and the latest source data time. Increasing the value will delay any alerting. The default value is 1 minute.',
+                  'The time delay in minutes between the current time and the latest source data time. Increasing the value will delay any alerting. The default value is 1 minute. The minimum value is 1m and the maximum is 359m.',
               })}
               position="top"
             />
@@ -80,6 +80,44 @@ export function AdvancedSettings() {
               value={field.value}
               min={1}
               max={359}
+              step={1}
+              onChange={(event) => onChange(parseInt(event.target.value, 10))}
+            />
+          )}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        isInvalid={getFieldState('settings.frequency').invalid}
+        label={
+          <span>
+            {i18n.translate('xpack.slo.sloEdit.settings.frequency.label', {
+              defaultMessage: 'Frequency (in minutes)',
+            })}
+            <EuiIconTip
+              content={i18n.translate('xpack.slo.sloEdit.settings.frequency.tooltip', {
+                defaultMessage:
+                  'The interval between checks for changes in the source indices. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.',
+              })}
+              position="top"
+            />
+          </span>
+        }
+      >
+        <Controller
+          name="settings.frequency"
+          defaultValue={1}
+          control={control}
+          rules={{ required: false, min: 1, max: 59 }}
+          render={({ field: { ref, onChange, ...field }, fieldState }) => (
+            <EuiFieldNumber
+              {...field}
+              data-test-subj="sloAdvancedSettingsFrequency"
+              isInvalid={fieldState.invalid}
+              required
+              value={field.value}
+              min={1}
+              max={59}
               step={1}
               onChange={(event) => onChange(parseInt(event.target.value, 10))}
             />
