@@ -10,8 +10,8 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ChatCompleteAPI, OutputAPI } from '@kbn/inference-common';
-import { InferenceConnector } from '../common/connectors';
+import type { StaticChatCompleteOptions } from '@kbn/inference-common';
+import type { InferenceClient, BoundInferenceClient } from './inference_client';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -25,27 +25,9 @@ export interface InferenceStartDependencies {
 
 export interface InferenceServerSetup {}
 
-export interface InferenceClient {
-  /**
-   * `chatComplete` requests the LLM to generate a response to
-   * a prompt or conversation, which might be plain text
-   * or a tool call, or a combination of both.
-   */
-  chatComplete: ChatCompleteAPI;
-  /**
-   * `output` asks the LLM to generate a structured (JSON)
-   * response based on a schema and a prompt or conversation.
-   */
-  output: OutputAPI;
-  /**
-   * `getConnectorById` returns an inference connector by id.
-   * Non-inference connectors will throw an error.
-   */
-  getConnectorById: (id: string) => Promise<InferenceConnector>;
-}
-
-interface InferenceClientCreateOptions {
+export interface InferenceClientCreateOptions<T extends StaticChatCompleteOptions | undefined> {
   request: KibanaRequest;
+  bindTo?: T;
 }
 
 export interface InferenceServerStart {
@@ -55,5 +37,7 @@ export interface InferenceServerStart {
    * @param options {@link InferenceClientCreateOptions}
    * @returns {@link InferenceClient}
    */
-  getClient: (options: InferenceClientCreateOptions) => InferenceClient;
+  getClient: <T extends StaticChatCompleteOptions | undefined>(
+    options: InferenceClientCreateOptions<T>
+  ) => T extends StaticChatCompleteOptions ? BoundInferenceClient : InferenceClient;
 }

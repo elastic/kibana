@@ -6,3 +6,4 @@
  */
 
 export { createChatCompleteApi } from './api';
+export { createScopedChatCompleteAPI } from './scoped';

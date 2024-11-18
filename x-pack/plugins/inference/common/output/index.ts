@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { createClient } from './create_client';
-export type { InferenceClient, BoundInferenceClient } from './types';
+export { createOutputApi } from './create_output_api';
+export { createScopedOutputAPI } from './create_scoped_output';

@@ -140,3 +140,4 @@ export interface ChatCompleteResponse<TToolOptions extends ToolOptions = ToolOpt
  * - simulated: will emulate function calling with function calling instructions
  */
 export type FunctionCallingMode = 'native' | 'simulated';
+
