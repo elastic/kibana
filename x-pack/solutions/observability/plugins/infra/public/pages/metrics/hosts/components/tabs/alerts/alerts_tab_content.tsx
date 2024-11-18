@@ -6,9 +6,9 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AlertConsumers, OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
-import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
+import { useSummaryTimeRange, ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
 import type { TimeRange } from '@kbn/es-query';
 import { INFRA_ALERT_CONSUMERS } from '../../../../../../../common/constants';
@@ -30,7 +30,6 @@ import { usePluginConfig } from '../../../../../../containers/plugin_config_cont
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 
 export const AlertsTabContent = () => {
-  const { services } = useKibanaContextForPlugin();
   const { featureFlags } = usePluginConfig();
   const { hostNodes } = useHostsViewContext();
 
@@ -39,10 +38,6 @@ export const AlertsTabContent = () => {
 
   const { onDateRangeChange, searchCriteria } = useUnifiedSearchContext();
 
-  const { triggersActionsUi } = services;
-
-  const { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable } =
-    triggersActionsUi;
   const hostNamesKuery = hostNodes.map((host) => `host.name: "${host.name}"`).join(' OR ');
 
   return (
@@ -79,15 +74,12 @@ export const AlertsTabContent = () => {
         </EuiFlexItem>
         {alertsEsQueryByStatus && (
           <EuiFlexItem>
-            <AlertsStateTable
-              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-              configurationId={AlertConsumers.OBSERVABILITY}
+            <ObservabilityAlertsTable
+              id={ALERTS_TABLE_ID}
               ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
               consumers={INFRA_ALERT_CONSUMERS}
-              id={ALERTS_TABLE_ID}
               initialPageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
-              showAlertStatusWithFlapping
             />
           </EuiFlexItem>
         )}

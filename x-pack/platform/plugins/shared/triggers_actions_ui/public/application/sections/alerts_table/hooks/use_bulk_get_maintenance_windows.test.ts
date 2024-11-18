@@ -11,7 +11,7 @@ import * as api from './apis/bulk_get_maintenance_windows';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { Capabilities } from '@kbn/core/public';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useBulkGetMaintenanceWindows } from './use_bulk_get_maintenance_windows';
+import { useBulkGetMaintenanceWindowsQuery } from './use_bulk_get_maintenance_windows';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { useLicense } from '../../../hooks/use_license';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
@@ -97,9 +97,8 @@ describe('useBulkGetMaintenanceWindows', () => {
 
     const { result } = renderHook(
       () =>
-        useBulkGetMaintenanceWindows({
+        useBulkGetMaintenanceWindowsQuery({
           ids: ['test-id'],
-          canFetchMaintenanceWindows: true,
         }),
       {
         wrapper: appMockRender.AppWrapper,
@@ -120,10 +119,14 @@ describe('useBulkGetMaintenanceWindows', () => {
 
     renderHook(
       () =>
-        useBulkGetMaintenanceWindows({
-          ids: ['test-id'],
-          canFetchMaintenanceWindows: false,
-        }),
+        useBulkGetMaintenanceWindowsQuery(
+          {
+            ids: ['test-id'],
+          },
+          {
+            enabled: false,
+          }
+        ),
       {
         wrapper: appMockRender.AppWrapper,
       }
@@ -140,9 +143,8 @@ describe('useBulkGetMaintenanceWindows', () => {
 
     renderHook(
       () =>
-        useBulkGetMaintenanceWindows({
+        useBulkGetMaintenanceWindowsQuery({
           ids: ['test-id'],
-          canFetchMaintenanceWindows: true,
         }),
       {
         wrapper: appMockRender.AppWrapper,
@@ -165,9 +167,8 @@ describe('useBulkGetMaintenanceWindows', () => {
 
     renderHook(
       () =>
-        useBulkGetMaintenanceWindows({
+        useBulkGetMaintenanceWindowsQuery({
           ids: ['test-id'],
-          canFetchMaintenanceWindows: true,
         }),
       {
         wrapper: appMockRender.AppWrapper,
@@ -184,9 +185,8 @@ describe('useBulkGetMaintenanceWindows', () => {
 
     renderHook(
       () =>
-        useBulkGetMaintenanceWindows({
+        useBulkGetMaintenanceWindowsQuery({
           ids: ['test-id'],
-          canFetchMaintenanceWindows: true,
         }),
       {
         wrapper: appMockRender.AppWrapper,

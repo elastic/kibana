@@ -5,761 +5,618 @@
  * 2.0.
  */
 
-import { ALERT_UUID } from '@kbn/rule-data-utils';
 import React, {
   useState,
-  Suspense,
-  lazy,
   useCallback,
-  useMemo,
-  useEffect,
   useRef,
+  useMemo,
+  useReducer,
+  useEffect,
+  useImperativeHandle,
+  forwardRef,
+  Ref,
   memo,
+  FC,
 } from 'react';
+import { isEmpty } from 'lodash';
 import {
-  EuiDataGrid,
-  EuiDataGridStyle,
-  EuiSkeletonText,
+  EuiDataGridColumn,
+  EuiProgress,
+  EuiDataGridSorting,
+  EuiEmptyPrompt,
+  EuiButton,
+  EuiCode,
+  EuiCopy,
+  EuiDataGridControlColumn,
   EuiDataGridRefProps,
-  EuiFlexGroup,
-  EuiDataGridProps,
-  RenderCellValue,
-  EuiDataGridCellPopoverElementProps,
-  EuiCodeBlock,
-  EuiText,
-  EuiIcon,
-  EuiSpacer,
-  EuiFlexItem,
 } from '@elastic/eui';
-import { useQueryClient } from '@tanstack/react-query';
-import styled from '@emotion/styled';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
+import {
+  ALERT_CASE_IDS,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_RULE_UUID,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
+import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
+import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
-import type {
+import deepEqual from 'fast-deep-equal';
+import { typedForwardRef } from '../../../../common/utils';
+import { useKibana } from '../../../common/lib/kibana';
+import { useGetMutedAlertsQuery } from './hooks/alert_mute/use_get_muted_alerts';
+import { AlertsDataGrid } from './alerts_data_grid';
+import { EmptyState } from './empty_state';
+import {
+  AdditionalContext,
+  Alert,
+  Alerts,
+  AlertsDataGridProps,
+  AlertsTableImperativeApi,
   AlertsTableProps,
-  FetchAlertData,
-  AlertsTableConfigurationRegistry,
+  RenderContext,
+  RowSelectionState,
 } from '../../../types';
-import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
-
-import './alerts_table.scss';
-import { useGetToolbarVisibility } from './toolbar';
+import {
+  ALERTS_TABLE_UNKNOWN_ERROR_TITLE,
+  ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE,
+  ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL,
+} from './translations';
+import { bulkActionsReducer } from './bulk_actions/reducer';
+import { useColumns } from './hooks/use_columns';
 import { InspectButtonContainer } from './toolbar/components/inspect';
-import { SystemCellId } from './types';
-import { SystemCellFactory, systemCells } from './cells';
+import { alertsTableQueryClient } from './query_client';
+import { useBulkGetCasesQuery } from './hooks/use_bulk_get_cases';
+import { useBulkGetMaintenanceWindowsQuery } from './hooks/use_bulk_get_maintenance_windows';
+import { CasesService } from './types';
+import { AlertsTableContextProvider } from './contexts/alerts_table_context';
+import { ErrorBoundary, FallbackComponent } from '../common/components/error_boundary';
+import { usePagination } from './hooks/use_pagination';
 import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
-const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 
-const DefaultGridStyle: EuiDataGridStyle = {
-  border: 'none',
-  header: 'underline',
-  fontSize: 's',
+export interface AlertsTableStorage {
+  columns: EuiDataGridColumn[];
+  visibleColumns?: string[];
+  sort: SortCombinations[];
+}
+
+type AlertWithCaseIds = Alert & Required<Pick<Alert, typeof ALERT_CASE_IDS>>;
+type AlertWithMaintenanceWindowIds = Alert &
+  Required<Pick<Alert, typeof ALERT_MAINTENANCE_WINDOW_IDS>>;
+
+const getCaseIdsFromAlerts = (alerts: Alerts) => [
+  ...new Set(
+    alerts
+      .filter((alert): alert is AlertWithCaseIds => {
+        const caseIds = alert[ALERT_CASE_IDS];
+        return caseIds != null && caseIds.length > 0;
+      })
+      .map((alert) => alert[ALERT_CASE_IDS])
+      .flat()
+  ),
+];
+
+const getRuleIdsFromAlerts = (alerts: Alerts) => [
+  ...new Set(alerts.map((a) => a[ALERT_RULE_UUID]![0])),
+];
+
+const getMaintenanceWindowIdsFromAlerts = (alerts: Alerts) => [
+  ...new Set(
+    alerts
+      .filter((alert): alert is AlertWithMaintenanceWindowIds => {
+        const maintenanceWindowIds = alert[ALERT_MAINTENANCE_WINDOW_IDS];
+        return maintenanceWindowIds != null && maintenanceWindowIds.length > 0;
+      })
+      .map((alert) => alert[ALERT_MAINTENANCE_WINDOW_IDS])
+      .flat()
+  ),
+];
+
+const isCasesColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
+  columns.some(({ id }) => id === ALERT_CASE_IDS);
+
+const isMaintenanceWindowColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
+  columns.some(({ id }) => id === ALERT_MAINTENANCE_WINDOW_IDS);
+
+const emptyRowSelection = new Map<number, RowSelectionState>();
+
+const initialBulkActionsState = {
+  rowSelection: emptyRowSelection,
+  isAllSelected: false,
+  areAllVisibleRowsSelected: false,
+  rowCount: 0,
+  updatedAt: Date.now(),
 };
 
-const getCellActionsStub = {
-  getCellActions: () => null,
-  visibleCellActions: undefined,
-  disabledCellActions: [],
-};
-
-const fieldBrowserStub = () => ({});
-const stableMappedRowClasses: EuiDataGridStyle['rowClasses'] = {};
-
-const BasicRenderCellValue: React.FC<{
-  data: Array<{ field: string; value: string[] }>;
-  columnId: string;
-}> = memo(({ data, columnId }) => {
-  const value = (Array.isArray(data) && data.find((d) => d.field === columnId)?.value) ?? [];
-  if (Array.isArray(value)) {
-    return <>{value.length ? value.join() : '--'}</>;
-  }
-  return <>{value}</>;
-});
-
-const FullFeaturedRenderCellValue: RenderCellValue = memo((props) => {
-  const {
-    columnId,
-    cases,
-    maintenanceWindows,
-    showAlertStatusWithFlapping,
-    isLoading,
-    isLoadingCases,
-    isLoadingMaintenanceWindows,
-    casesConfig,
-    rowIndex,
-    pagination,
-    RenderCell,
-    ecsData,
-    alerts,
-  } = props;
-  const idx = rowIndex - pagination.pageSize * pagination.pageIndex;
-  const alert = alerts[idx];
-  if (isSystemCell(columnId)) {
-    return (
-      <SystemCellFactory
-        alert={alert}
-        columnId={columnId}
-        isLoading={isLoading || isLoadingCases || isLoadingMaintenanceWindows}
-        cases={cases}
-        maintenanceWindows={maintenanceWindows}
-        showAlertStatusWithFlapping={showAlertStatusWithFlapping}
-        caseAppId={casesConfig?.appId}
-      />
-    );
-  } else if (alert) {
-    // ecsAlert is needed for security solution
-    const ecsAlert = ecsData[idx];
-    const data: Array<{ field: string; value: string[] }> = [];
-    Object.entries(alert ?? {}).forEach(([key, value]) => {
-      data.push({ field: key, value: value as string[] });
-    });
-    if (RenderCell && ecsAlert) {
-      return <RenderCell {...props} data={data} ecsData={ecsAlert} />;
-    } else {
-      return <BasicRenderCellValue data={data} columnId={columnId} />;
-    }
-  } else if (isLoading) {
-    return <EuiSkeletonText lines={1} />;
-  }
-  return null;
-});
-
-const ControlColumnHeaderRenderCell = memo(() => {
+const ErrorBoundaryFallback: FallbackComponent = ({ error }) => {
   return (
-    <span data-test-subj="expandColumnHeaderLabel">
-      {ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL}
-    </span>
+    <EuiEmptyPrompt
+      iconType="error"
+      color="danger"
+      title={<h2>{ALERTS_TABLE_UNKNOWN_ERROR_TITLE}</h2>}
+      body={
+        <>
+          <p>{ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE}</p>
+          {error.message && <EuiCode>{error.message}</EuiCode>}
+        </>
+      }
+      actions={
+        <EuiCopy textToCopy={[error.message, error.stack].filter(Boolean).join('\n')}>
+          {(copy) => (
+            <EuiButton onClick={copy} color="danger" fill>
+              {ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL}
+            </EuiButton>
+          )}
+        </EuiCopy>
+      }
+    />
   );
-});
-
-const ControlColumnRowRenderCell: RenderCellValue = memo((props) => {
-  const {
-    visibleRowIndex,
-    alerts,
-    ecsData,
-    setFlyoutAlert,
-    oldAlertsData,
-    id,
-    getSetIsActionLoadingCallback,
-    refresh,
-    clearSelection,
-    renderCustomActionsRow,
-  } = props;
-  if (!ecsData[visibleRowIndex]) {
-    return null;
-  }
-
-  return (
-    <EuiFlexGroup gutterSize="none" responsive={false}>
-      {renderCustomActionsRow({
-        alert: alerts[visibleRowIndex],
-        ecsAlert: ecsData[visibleRowIndex],
-        nonEcsData: oldAlertsData[visibleRowIndex],
-        rowIndex: visibleRowIndex,
-        setFlyoutAlert,
-        id,
-        cveProps: props,
-        setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
-        refresh,
-        clearSelection,
-      })}
-    </EuiFlexGroup>
-  );
-});
-
-const isSystemCell = (columnId: string): columnId is SystemCellId => {
-  return systemCells.includes(columnId as SystemCellId);
 };
 
-const useFieldBrowserOptionsOrDefault = (
-  useFieldBrowserOptions:
-    | NonNullable<AlertsTableConfigurationRegistry['useFieldBrowserOptions']>
-    | (() => undefined),
-  onToggleColumn: (columnId: string) => void
-) => {
-  const args = useMemo(() => ({ onToggleColumn }), [onToggleColumn]);
-  return useFieldBrowserOptions(args);
-};
-
-// Here we force the error callout to be the same height as the cell content
-// so that the error detail gets hidden in the overflow area and only shown in
-// the cell popover
-const errorCalloutStyles = css`
-  height: 1lh;
-`;
-
-/**
- * An error callout that displays the error stack in a code block
- */
-const ViewError = ({ error }: { error: Error }) => (
-  <>
-    <EuiFlexGroup gutterSize="s" alignItems="center" css={errorCalloutStyles}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="error" color="danger" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText
-          color="subdued"
-          size="xs"
-          css={css`
-            line-height: unset;
-          `}
-        >
-          <strong>
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertTable.viewError"
-              defaultMessage="An error occurred"
-            />
-          </strong>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer />
-    <EuiCodeBlock isCopyable>{error.stack}</EuiCodeBlock>
-  </>
-);
-
-const Row = styled.div`
-  display: flex;
-  min-width: fit-content;
-`;
-
-type CustomGridBodyProps = Pick<
-  Parameters<NonNullable<EuiDataGridProps['renderCustomGridBody']>>['0'],
-  'Cell' | 'visibleColumns'
-> & {
-  alertsData: FetchAlertData['oldAlertsData'];
-  isLoading: boolean;
-  pageIndex: number;
-  pageSize: number;
-  actualGridStyle: EuiDataGridStyle;
-  stripes?: boolean;
-};
-
-const CustomGridBody = memo(
-  ({
-    alertsData,
-    isLoading,
-    pageIndex,
-    pageSize,
-    actualGridStyle,
-    visibleColumns,
-    Cell,
-    stripes,
-  }: CustomGridBodyProps) => {
+export const AlertsTable = memo(
+  forwardRef((props, ref) => {
     return (
-      <>
-        {alertsData
-          .concat(isLoading ? Array.from({ length: pageSize - alertsData.length }) : [])
-          .map((_row, rowIndex) => (
-            <Row
-              role="row"
-              key={`${rowIndex},${pageIndex}`}
-              // manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
-              // overrides the props.gridStyle.stripes option. And rowClasses will always be there.
-              // Adding stripes only on even rows. It will be replaced by alertsTableHighlightedRow if
-              // shouldHighlightRow is correct
-              className={`euiDataGridRow ${
-                stripes && rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''
-              } ${actualGridStyle.rowClasses?.[rowIndex] ?? ''}`}
-            >
-              {visibleColumns.map((_col, colIndex) => (
-                <Cell
-                  colIndex={colIndex}
-                  visibleRowIndex={rowIndex}
-                  key={`${rowIndex},${colIndex}`}
-                />
-              ))}
-            </Row>
-          ))}
-      </>
+      <QueryClientProvider client={alertsTableQueryClient} context={AlertsQueryContext}>
+        <ErrorBoundary fallback={ErrorBoundaryFallback}>
+          <AlertsTableContent {...props} ref={ref} />
+        </ErrorBoundary>
+      </QueryClientProvider>
     );
-  }
-);
+  })
+) as typeof AlertsTableContent;
 
-const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: AlertsTableProps) => {
-  const {
-    visibleColumns,
-    onToggleColumn,
-    onResetColumns,
-    browserFields,
-    onChangeVisibleColumns,
-    onColumnResize,
-    showAlertStatusWithFlapping = false,
-    showInspectButton = false,
-    cellContext: passedCellContext,
-    leadingControlColumns: passedControlColumns,
-    trailingControlColumns,
-    alertsTableConfiguration,
-    pageIndex,
-    pageSize,
-    columns,
-    alerts,
-    alertsCount,
-    isLoading,
-    oldAlertsData,
-    ecsAlertsData,
-    onSortChange,
-    onPageChange,
-    sort: sortingFields,
-    refetchAlerts,
-    rowHeightsOptions,
-    dynamicRowHeight,
-    query,
-    querySnapshot,
-    ruleTypeIds,
-    cases: { data: cases, isLoading: isLoadingCases },
-    maintenanceWindows: { data: maintenanceWindows, isLoading: isLoadingMaintenanceWindows },
-    controls,
-    toolbarVisibility: toolbarVisibilityProp,
-    shouldHighlightRow,
-    fieldFormats,
-    height,
-  } = props;
+(AlertsTable as FC).displayName = 'AlertsTable';
 
-  const dataGridRef = useRef<EuiDataGridRefProps>(null);
-  const [activeRowClasses, setActiveRowClasses] = useState<
-    NonNullable<EuiDataGridStyle['rowClasses']>
-  >({});
+const DEFAULT_LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [];
+const DEFAULT_SORT: SortCombinations[] = [];
+const DEFAULT_COLUMNS: EuiDataGridColumn[] = [];
 
-  const queryClient = useQueryClient({ context: AlertsQueryContext });
-
-  const { sortingColumns, onSort } = useSorting(onSortChange, visibleColumns, sortingFields);
-
-  const { renderCustomActionsRow, actionsColumnWidth, getSetIsActionLoadingCallback } =
-    useActionsColumn({
-      options: alertsTableConfiguration.useActionsColumn,
-    });
-
-  const userAssigneeContext = alertsTableConfiguration.useFetchPageContext?.({
-    alerts,
-    columns,
-  });
-
-  const bulkActionArgs = useMemo(() => {
-    return {
-      alertsCount: alerts.length,
-      casesConfig: alertsTableConfiguration.cases,
-      query,
-      useBulkActionsConfig: alertsTableConfiguration.useBulkActions,
-      refresh: refetchAlerts,
+const AlertsTableContent = typedForwardRef(
+  <AC extends AdditionalContext>(
+    {
+      id,
       ruleTypeIds,
-      hideBulkActions: Boolean(alertsTableConfiguration.hideBulkActions),
+      consumers,
+      query,
+      initialSort = DEFAULT_SORT,
+      initialPageSize = DEFAULT_ALERTS_PAGE_SIZE,
+      leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
+      trailingControlColumns,
+      rowHeightsOptions,
+      columns: initialColumns,
+      gridStyle,
+      browserFields: propBrowserFields,
+      onUpdate,
+      onLoaded,
+      runtimeMappings,
+      showAlertStatusWithFlapping,
+      toolbarVisibility,
+      shouldHighlightRow,
+      dynamicRowHeight = false,
+      emptyStateHeight,
+      additionalContext,
+      renderCellValue,
+      renderCellPopover,
+      renderActionsCell,
+      renderFlyoutHeader,
+      renderFlyoutBody,
+      renderFlyoutFooter,
+      renderAdditionalToolbarControls: AdditionalToolbarControlsComponent,
+      lastReloadRequestTime,
+      ...publicDataGridProps
+    }: AlertsTableProps<AC>,
+    ref: Ref<AlertsTableImperativeApi>
+  ) => {
+    const { casesConfiguration, showInspectButton } = publicDataGridProps;
+    const {
+      data,
+      cases: casesService,
+      fieldFormats,
+    } = useKibana().services as ReturnType<typeof useKibana>['services'] & {
+      cases?: CasesService;
     };
-  }, [
-    alerts.length,
-    alertsTableConfiguration.cases,
-    alertsTableConfiguration.useBulkActions,
-    alertsTableConfiguration.hideBulkActions,
-    query,
-    refetchAlerts,
-    ruleTypeIds,
-  ]);
+    const queryClient = useQueryClient({ context: AlertsQueryContext });
+    const storage = useRef(new Storage(window.localStorage));
+    const dataGridRef = useRef<EuiDataGridRefProps>(null);
+    const localStorageAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
 
-  const {
-    isBulkActionsColumnActive,
-    getBulkActionsLeadingControlColumn,
-    bulkActionsState,
-    bulkActions,
-    setIsBulkActionsLoading,
-    clearSelection,
-  } = useBulkActions(bulkActionArgs);
+    const columnsLocal = useMemo(
+      () =>
+        !isEmpty(localStorageAlertsTableConfig?.columns)
+          ? localStorageAlertsTableConfig!.columns!
+          : !isEmpty(initialColumns)
+          ? initialColumns!
+          : [],
+      [initialColumns, localStorageAlertsTableConfig]
+    );
 
-  const refreshData = useCallback(() => {
-    refetchAlerts();
-    queryClient.invalidateQueries(triggersActionsUiQueriesKeys.cases());
-    queryClient.invalidateQueries(triggersActionsUiQueriesKeys.mutedAlerts());
-    queryClient.invalidateQueries(triggersActionsUiQueriesKeys.maintenanceWindows());
-  }, [refetchAlerts, queryClient]);
+    const getStorageConfig = useCallback(
+      () => ({
+        columns: columnsLocal,
+        sort: !isEmpty(localStorageAlertsTableConfig?.sort)
+          ? localStorageAlertsTableConfig!.sort!
+          : initialSort ?? [],
+        visibleColumns: !isEmpty(localStorageAlertsTableConfig?.visibleColumns)
+          ? localStorageAlertsTableConfig!.visibleColumns!
+          : columnsLocal.map((c) => c.id),
+      }),
+      [columnsLocal, localStorageAlertsTableConfig, initialSort]
+    );
+    const storageAlertsTable = useRef<AlertsTableStorage>(getStorageConfig());
 
-  const refresh = useCallback(() => {
-    refreshData();
-    clearSelection();
-  }, [clearSelection, refreshData]);
+    storageAlertsTable.current = getStorageConfig();
 
-  const {
-    pagination: updatedPagination,
-    onChangePageSize,
-    onChangePageIndex,
-    onPaginateFlyout,
-    flyoutAlertIndex,
-    setFlyoutAlertIndex,
-  } = usePagination({
-    onPageChange,
-    pageIndex,
-    pageSize,
-  });
+    const [sort, setSort] = useState<SortCombinations[]>(storageAlertsTable.current.sort);
 
-  // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
-  const handleFlyoutAlert = useCallback(
-    (alertId: string) => {
-      const idx = alerts.findIndex((a) => (a as any)[ALERT_UUID].includes(alertId));
-      setFlyoutAlertIndex(idx);
-    },
-    [alerts, setFlyoutAlertIndex]
-  );
+    const onPageChange = useCallback((pagination: RuleRegistrySearchRequestPagination) => {
+      setQueryParams((prevQueryParams) => ({
+        ...prevQueryParams,
+        pageSize: pagination.pageSize,
+        pageIndex: pagination.pageIndex,
+      }));
+    }, []);
 
-  const fieldBrowserOptions = useFieldBrowserOptionsOrDefault(
-    alertsTableConfiguration.useFieldBrowserOptions ?? fieldBrowserStub,
-    onToggleColumn
-  );
-
-  const toolbarVisibilityArgs = useMemo(() => {
-    return {
-      bulkActions,
-      alertsCount,
-      rowSelection: bulkActionsState.rowSelection,
-      alerts,
-      isLoading,
-      columnIds: columns.map((column) => column.id),
+    const {
+      columns,
+      browserFields,
+      isBrowserFieldDataLoading,
       onToggleColumn,
       onResetColumns,
-      browserFields,
-      controls,
-      setIsBulkActionsLoading,
-      clearSelection,
-      refresh,
-      fieldBrowserOptions,
-      querySnapshot,
-      showInspectButton,
-      toolbarVisibilityProp,
-    };
-  }, [
-    bulkActions,
-    alertsCount,
-    bulkActionsState,
-    isLoading,
-    columns,
-    onToggleColumn,
-    onResetColumns,
-    browserFields,
-    setIsBulkActionsLoading,
-    clearSelection,
-    refresh,
-    fieldBrowserOptions,
-    querySnapshot,
-    showInspectButton,
-    toolbarVisibilityProp,
-    alerts,
-    controls,
-  ]);
-
-  const toolbarVisibility = useGetToolbarVisibility(toolbarVisibilityArgs);
-
-  const customActionsRow = useMemo(() => {
-    return renderCustomActionsRow
-      ? {
-          id: 'expandColumn',
-          width: actionsColumnWidth,
-          headerCellRender: ControlColumnHeaderRenderCell,
-          rowCellRender: ControlColumnRowRenderCell,
-        }
-      : undefined;
-  }, [renderCustomActionsRow, actionsColumnWidth]);
-  const bulkActionsColumn = useMemo(() => {
-    return isBulkActionsColumnActive ? getBulkActionsLeadingControlColumn() : undefined;
-  }, [isBulkActionsColumnActive, getBulkActionsLeadingControlColumn]);
-
-  const leadingControlColumns = useMemo(() => {
-    const controlColumns = passedControlColumns ?? [];
-    const usedBulkActionsColumn = bulkActionsColumn ? [bulkActionsColumn] : [];
-    const usedCustomActionsRow = customActionsRow ? [customActionsRow] : [];
-    const mergedControlColumns = [
-      ...controlColumns,
-      ...usedBulkActionsColumn,
-      ...usedCustomActionsRow,
-    ];
-    if (mergedControlColumns.length) {
-      return mergedControlColumns;
-    } else {
-      return undefined;
-    }
-  }, [bulkActionsColumn, customActionsRow, passedControlColumns]);
-
-  const rowIndex = flyoutAlertIndex + pageIndex * pageSize;
-  useEffect(() => {
-    // Row classes do not deal with visible row indices, so we need to handle page offset
-    setActiveRowClasses({
-      [rowIndex]: 'alertsTableActiveRow',
+      visibleColumns,
+      onChangeVisibleColumns,
+      onColumnResize,
+      fields,
+    } = useColumns({
+      ruleTypeIds,
+      storageAlertsTable,
+      storage,
+      id,
+      defaultColumns: initialColumns ?? DEFAULT_COLUMNS,
+      alertsFields: propBrowserFields,
     });
-  }, [rowIndex]);
 
-  const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
+    const [queryParams, setQueryParams] = useState({
+      ruleTypeIds,
+      consumers,
+      fields,
+      query,
+      sort,
+      runtimeMappings,
+      pageIndex: 0,
+      pageSize: initialPageSize,
+    });
 
-  const RenderCell = useMemo(() => {
-    if (props.alertsTableConfiguration?.getRenderCellValue) {
-      return props.alertsTableConfiguration.getRenderCellValue;
-    } else {
-      return FullFeaturedRenderCellValue;
-    }
-  }, [props.alertsTableConfiguration]);
-
-  const renderCellContext = useMemo(() => {
-    const additionalContext = passedCellContext ? passedCellContext : {};
-    return {
-      ...additionalContext,
-      ...alertsTableConfiguration,
-      ecsData: ecsAlertsData,
-      oldAlertsData,
-      context: userAssigneeContext,
-      alerts,
-      browserFields,
-      pagination: updatedPagination,
-      isLoading,
-      setFlyoutAlert: handleFlyoutAlert,
-      RenderCell,
-      isLoadingCases,
-      isLoadingMaintenanceWindows,
-      getSetIsActionLoadingCallback,
-      cases,
-      maintenanceWindows,
-      showAlertStatusWithFlapping,
-      refresh,
-      clearSelection,
-      renderCustomActionsRow,
-      fieldFormats,
-    };
-  }, [
-    passedCellContext,
-    alertsTableConfiguration,
-    ecsAlertsData,
-    oldAlertsData,
-    refresh,
-    clearSelection,
-    renderCustomActionsRow,
-    handleFlyoutAlert,
-    RenderCell,
-    browserFields,
-    isLoading,
-    updatedPagination,
-    alerts,
-    isLoadingCases,
-    isLoadingMaintenanceWindows,
-    cases,
-    maintenanceWindows,
-    showAlertStatusWithFlapping,
-    getSetIsActionLoadingCallback,
-    userAssigneeContext,
-    fieldFormats,
-  ]);
-
-  const renderCellPopover = useMemo(
-    () =>
-      props.alertsTableConfiguration?.getRenderCellPopover?.({
-        context: renderCellContext,
-      }) ?? props.renderCellPopover,
-    [props.alertsTableConfiguration, props.renderCellPopover, renderCellContext]
-  );
-
-  const handleRenderCellPopover = useMemo(
-    () =>
-      renderCellPopover
-        ? (_props: EuiDataGridCellPopoverElementProps) => {
-            try {
-              const idx = _props.rowIndex - pageSize * pageIndex;
-              const alert = alerts[idx];
-              if (alert) {
-                return renderCellPopover({
-                  ..._props,
-                  alert,
-                });
-              }
-              return null;
-            } catch (e) {
-              return <ViewError error={e} />;
-            }
-          }
-        : undefined,
-    [alerts, pageIndex, pageSize, renderCellPopover]
-  );
-
-  const dataGridPagination = useMemo(
-    () => ({
-      pageIndex: updatedPagination.pageIndex,
-      pageSize: updatedPagination.pageSize,
-      pageSizeOptions: props.pageSizeOptions,
-      onChangeItemsPerPage: onChangePageSize,
-      onChangePage: onChangePageIndex,
-    }),
-    [
-      onChangePageIndex,
-      onChangePageSize,
-      updatedPagination.pageIndex,
-      updatedPagination.pageSize,
-      props.pageSizeOptions,
-    ]
-  );
-
-  const { getCellActions, visibleCellActions, disabledCellActions } =
-    alertsTableConfiguration?.useCellActions
-      ? alertsTableConfiguration?.useCellActions({
-          columns,
-          data: oldAlertsData,
-          ecsData: ecsAlertsData,
-          dataGridRef,
-          pageSize,
-          pageIndex,
+    useEffect(() => {
+      setQueryParams(({ pageIndex: oldPageIndex, pageSize: oldPageSize, ...prevQueryParams }) => ({
+        ruleTypeIds,
+        consumers,
+        fields,
+        query,
+        sort,
+        runtimeMappings,
+        // Go back to the first page if the query changes
+        pageIndex: !deepEqual(prevQueryParams, {
+          ruleTypeIds,
+          consumers,
+          fields,
+          query,
+          sort,
+          runtimeMappings,
         })
-      : getCellActionsStub;
-
-  const columnsWithCellActions = useMemo(() => {
-    if (getCellActions) {
-      return columns.map((col, idx) => ({
-        ...col,
-        ...(!(disabledCellActions ?? []).includes(col.id)
-          ? {
-              cellActions: getCellActions(col.id, idx) ?? [],
-              visibleCellActions,
-            }
-          : {}),
+          ? 0
+          : oldPageIndex,
+        pageSize: oldPageSize,
       }));
-    }
-    return columns;
-  }, [getCellActions, disabledCellActions, columns, visibleCellActions]);
+    }, [ruleTypeIds, fields, query, runtimeMappings, sort, consumers]);
 
-  // // Update highlighted rows when alerts or pagination changes
-  const highlightedRowClasses = useMemo(() => {
-    if (shouldHighlightRow) {
-      const emptyShouldHighlightRow: EuiDataGridStyle['rowClasses'] = {};
-      return alerts.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
-        (rowClasses, alert, index) => {
-          if (shouldHighlightRow(alert)) {
-            rowClasses[index + pageIndex * pageSize] = 'alertsTableHighlightedRow';
-          }
+    const {
+      data: alertsData,
+      refetch: refetchAlerts,
+      isSuccess,
+      isFetching: isLoadingAlerts,
+    } = useSearchAlertsQuery({
+      data,
+      ...queryParams,
+    });
+    const {
+      alerts = [],
+      oldAlertsData = [],
+      ecsAlertsData = [],
+      total: alertsCount = -1,
+      querySnapshot: alertsQuerySnapshot,
+    } = alertsData ?? {};
 
-          return rowClasses;
-        },
-        emptyShouldHighlightRow
+    useEffect(() => {
+      if (onLoaded && !isLoadingAlerts && isSuccess) {
+        onLoaded(alerts, columns);
+      }
+    }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded]);
+
+    const ruleIds = useMemo(() => getRuleIdsFromAlerts(alerts), [alerts]);
+    const mutedAlertsQuery = useGetMutedAlertsQuery({
+      ruleIds,
+    });
+
+    const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
+    const casesPermissions = useMemo(() => {
+      return casesService?.helpers.canUseCases(casesConfiguration?.owner ?? []);
+    }, [casesConfiguration?.owner, casesService?.helpers]);
+    const casesQuery = useBulkGetCasesQuery(
+      { caseIds },
+      {
+        enabled: isCasesColumnEnabled(columns) && !!casesPermissions?.read,
+      }
+    );
+
+    const maintenanceWindowIds = useMemo(() => getMaintenanceWindowIdsFromAlerts(alerts), [alerts]);
+    const maintenanceWindowsQuery = useBulkGetMaintenanceWindowsQuery(
+      { ids: maintenanceWindowIds },
+      { enabled: isMaintenanceWindowColumnEnabled(columns), context: AlertsQueryContext }
+    );
+
+    const refresh = useCallback(() => {
+      if (queryParams.pageIndex !== 0) {
+        // Refetch from the first page
+        setQueryParams((prevQueryParams) => ({ ...prevQueryParams, pageIndex: 0 }));
+      } else {
+        refetchAlerts();
+      }
+      queryClient.invalidateQueries(triggersActionsUiQueriesKeys.casesBulkGet(caseIds));
+      queryClient.invalidateQueries(triggersActionsUiQueriesKeys.mutedAlerts(ruleIds));
+      queryClient.invalidateQueries(
+        triggersActionsUiQueriesKeys.maintenanceWindowsBulkGet(maintenanceWindowIds)
       );
-    } else {
-      return stableMappedRowClasses;
-    }
-  }, [shouldHighlightRow, alerts, pageIndex, pageSize]);
+    }, [caseIds, maintenanceWindowIds, queryClient, queryParams.pageIndex, refetchAlerts, ruleIds]);
 
-  const mergedGridStyle = useMemo(() => {
-    const propGridStyle: NonNullable<EuiDataGridStyle> = props.gridStyle ?? {};
-    // Merges default row classes, custom ones and adds the active row class style
-    return {
-      ...DefaultGridStyle,
-      ...propGridStyle,
-      rowClasses: {
-        // We're spreadind the highlighted row classes first, so that the active
-        // row classed can override the highlighted row classes.
-        ...highlightedRowClasses,
-        ...activeRowClasses,
+    useEffect(() => {
+      if (lastReloadRequestTime) {
+        refresh();
+      }
+    }, [lastReloadRequestTime, refresh]);
+
+    useImperativeHandle(ref, () => ({
+      refresh,
+      toggleColumn: onToggleColumn,
+    }));
+
+    const bulkActionsStore = useReducer(bulkActionsReducer, initialBulkActionsState);
+
+    const onSortChange = useCallback(
+      (_sort: EuiDataGridSorting['columns']) => {
+        const newSort = _sort.map((sortItem) => {
+          return {
+            [sortItem.id]: {
+              order: sortItem.direction,
+            },
+          };
+        });
+
+        storageAlertsTable.current = {
+          ...storageAlertsTable.current,
+          sort: newSort,
+        };
+        storage.current.set(id, storageAlertsTable.current);
+        setSort(newSort);
       },
-    };
-  }, [activeRowClasses, highlightedRowClasses, props.gridStyle]);
+      [id]
+    );
 
-  // Merges the default grid style with the grid style that comes in through props.
-  const actualGridStyle = useMemo(() => {
-    const propGridStyle: NonNullable<EuiDataGridStyle> = props.gridStyle ?? {};
-    // If ANY additional rowClasses have been provided, we need to merge them with our internal ones
-    if (propGridStyle.rowClasses) {
-      // Get all row indices with a rowClass.
-      const mergedKeys = [
-        ...Object.keys(mergedGridStyle.rowClasses || {}),
-        ...Object.keys(propGridStyle.rowClasses || {}),
-      ];
-      // Deduplicate keys to avoid extra iterations
-      const dedupedKeys = Array.from(new Set(mergedKeys));
+    const CasesContext = useMemo(() => {
+      return casesService?.ui.getCasesContext();
+    }, [casesService?.ui]);
 
-      // For each index, merge row classes
-      const mergedRowClasses = dedupedKeys.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
-        (rowClasses, key) => {
-          const intKey = parseInt(key, 10);
-          // Use internal row classes over custom row classes.
-          rowClasses[intKey] =
-            mergedGridStyle.rowClasses?.[intKey] || propGridStyle.rowClasses?.[intKey] || '';
-          return rowClasses;
-        },
-        {}
-      );
-      mergedGridStyle.rowClasses = mergedRowClasses;
-    }
-    return mergedGridStyle;
-  }, [props.gridStyle, mergedGridStyle]);
+    const isCasesContextAvailable = casesService && CasesContext;
 
-  const renderCustomGridBody = useCallback<NonNullable<EuiDataGridProps['renderCustomGridBody']>>(
-    ({ visibleColumns: _visibleColumns, Cell, headerRow, footerRow }) => (
-      <>
-        {headerRow}
-        <CustomGridBody
-          visibleColumns={_visibleColumns}
-          Cell={Cell}
-          actualGridStyle={actualGridStyle}
-          alertsData={oldAlertsData}
-          pageIndex={pageIndex}
-          pageSize={pageSize}
-          isLoading={isLoading}
-          stripes={props.gridStyle?.stripes}
-        />
-        {footerRow}
-      </>
-    ),
-    [actualGridStyle, oldAlertsData, pageIndex, pageSize, isLoading, props.gridStyle?.stripes]
-  );
+    const {
+      pagination,
+      onChangePageSize,
+      onChangePageIndex,
+      onPaginateFlyout,
+      flyoutAlertIndex,
+      setFlyoutAlertIndex,
+    } = usePagination({
+      bulkActionsStore,
+      onPageChange,
+      pageIndex: queryParams.pageIndex,
+      pageSize: queryParams.pageSize,
+    });
 
-  const sortProps = useMemo(() => {
-    return { columns: sortingColumns, onSort };
-  }, [sortingColumns, onSort]);
+    // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
+    const openAlertInFlyout = useCallback(
+      (alertId: string) => {
+        const idx = alerts.findIndex((a) => (a as any)[ALERT_UUID].includes(alertId));
+        setFlyoutAlertIndex(idx);
+      },
+      [alerts, setFlyoutAlertIndex]
+    );
 
-  const columnVisibility = useMemo(() => {
-    return { visibleColumns, setVisibleColumns: onChangeVisibleColumns };
-  }, [visibleColumns, onChangeVisibleColumns]);
-  return (
-    <InspectButtonContainer>
-      <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
-        <Suspense fallback={null}>
-          {flyoutAlertIndex > -1 && (
-            <AlertsFlyout
-              alert={alerts[flyoutAlertIndex]}
-              alertsCount={alertsCount}
-              onClose={handleFlyoutClose}
-              alertsTableConfiguration={alertsTableConfiguration}
-              flyoutIndex={flyoutAlertIndex + pageIndex * pageSize}
-              onPaginate={onPaginateFlyout}
-              isLoading={isLoading}
-              id={props.id}
+    const renderContext = useMemo(
+      () =>
+        ({
+          ...additionalContext,
+          columns,
+          tableId: id,
+          dataGridRef,
+
+          refresh,
+
+          isLoading:
+            isLoadingAlerts ||
+            casesQuery.isFetching ||
+            maintenanceWindowsQuery.isFetching ||
+            mutedAlertsQuery.isFetching,
+
+          isLoadingAlerts,
+          alerts,
+          alertsCount,
+          // TODO deprecate
+          ecsAlertsData,
+          oldAlertsData,
+
+          browserFields,
+
+          isLoadingCases: casesQuery.isFetching,
+          cases: casesQuery.data,
+
+          isLoadingMaintenanceWindows: maintenanceWindowsQuery.isFetching,
+          maintenanceWindows: maintenanceWindowsQuery.data,
+
+          isLoadingMutedAlerts: mutedAlertsQuery.isFetching,
+          mutedAlerts: mutedAlertsQuery.data,
+
+          pageIndex: pagination.pageIndex,
+          pageSize: pagination.pageSize,
+
+          showAlertStatusWithFlapping,
+          fieldFormats,
+          openAlertInFlyout,
+
+          bulkActionsStore,
+
+          renderCellValue,
+          renderCellPopover,
+          renderActionsCell,
+          renderFlyoutHeader,
+          renderFlyoutBody,
+          renderFlyoutFooter,
+        } as RenderContext<AC>),
+      [
+        additionalContext,
+        columns,
+        id,
+        refresh,
+        isLoadingAlerts,
+        alerts,
+        alertsCount,
+        ecsAlertsData,
+        oldAlertsData,
+        browserFields,
+        casesQuery.isFetching,
+        casesQuery.data,
+        maintenanceWindowsQuery.isFetching,
+        maintenanceWindowsQuery.data,
+        mutedAlertsQuery.isFetching,
+        mutedAlertsQuery.data,
+        pagination.pageIndex,
+        pagination.pageSize,
+        showAlertStatusWithFlapping,
+        fieldFormats,
+        openAlertInFlyout,
+        bulkActionsStore,
+        renderCellValue,
+        renderCellPopover,
+        renderActionsCell,
+        renderFlyoutHeader,
+        renderFlyoutBody,
+        renderFlyoutFooter,
+      ]
+    );
+
+    useEffect(() => {
+      if (onUpdate) {
+        onUpdate(renderContext);
+      }
+    }, [onUpdate, renderContext]);
+
+    const additionalToolbarControls = useMemo(
+      () =>
+        AdditionalToolbarControlsComponent ? (
+          <AdditionalToolbarControlsComponent {...renderContext} />
+        ) : undefined,
+      [AdditionalToolbarControlsComponent, renderContext]
+    );
+
+    const dataGridProps: AlertsDataGridProps<AC> = useMemo(
+      () => ({
+        ...publicDataGridProps,
+        renderContext,
+        additionalToolbarControls,
+        leadingControlColumns,
+        trailingControlColumns,
+        visibleColumns,
+        'data-test-subj': 'internalAlertsState',
+        onToggleColumn,
+        onResetColumns,
+        onChangeVisibleColumns,
+        onColumnResize,
+        query,
+        rowHeightsOptions,
+        gridStyle,
+        toolbarVisibility,
+        shouldHighlightRow,
+        dynamicRowHeight,
+        ruleTypeIds,
+        alertsQuerySnapshot,
+        onChangePageIndex,
+        onChangePageSize,
+        onPaginateFlyout,
+        flyoutAlertIndex,
+        setFlyoutAlertIndex,
+        sort,
+        onSortChange,
+      }),
+      [
+        publicDataGridProps,
+        renderContext,
+        additionalToolbarControls,
+        leadingControlColumns,
+        trailingControlColumns,
+        visibleColumns,
+        onToggleColumn,
+        onResetColumns,
+        onChangeVisibleColumns,
+        onColumnResize,
+        query,
+        rowHeightsOptions,
+        gridStyle,
+        toolbarVisibility,
+        shouldHighlightRow,
+        dynamicRowHeight,
+        ruleTypeIds,
+        alertsQuerySnapshot,
+        onChangePageIndex,
+        onChangePageSize,
+        onPaginateFlyout,
+        flyoutAlertIndex,
+        setFlyoutAlertIndex,
+        sort,
+        onSortChange,
+      ]
+    );
+
+    return (
+      <AlertsTableContextProvider value={renderContext}>
+        {!isLoadingAlerts && alertsCount === 0 && (
+          <InspectButtonContainer>
+            <EmptyState
+              additionalToolbarControls={additionalToolbarControls}
+              alertsQuerySnapshot={alertsQuerySnapshot}
+              showInspectButton={showInspectButton}
+              height={emptyStateHeight}
             />
-          )}
-        </Suspense>
-        {alertsCount > 0 && (
-          <EuiDataGrid
-            // As per EUI docs, it is not recommended to switch between undefined and defined height.
-            // If user changes height, it is better to unmount and mount the component.
-            // Ref: https://eui.elastic.co/#/tabular-content/data-grid#virtualization
-            key={height ? 'fixedHeight' : 'autoHeight'}
-            aria-label="Alerts table"
-            data-test-subj="alertsTable"
-            columns={columnsWithCellActions}
-            columnVisibility={columnVisibility}
-            trailingControlColumns={trailingControlColumns}
-            leadingControlColumns={leadingControlColumns}
-            rowCount={alertsCount}
-            renderCellValue={FullFeaturedRenderCellValue}
-            gridStyle={actualGridStyle}
-            sorting={sortProps}
-            toolbarVisibility={toolbarVisibility}
-            cellContext={renderCellContext}
-            pagination={dataGridPagination}
-            rowHeightsOptions={rowHeightsOptions}
-            onColumnResize={onColumnResize}
-            ref={dataGridRef}
-            renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
-            renderCellPopover={handleRenderCellPopover}
-            height={height}
-          />
+          </InspectButtonContainer>
         )}
-      </section>
-    </InspectButtonContainer>
-  );
-});
+        {(isLoadingAlerts || isBrowserFieldDataLoading) && (
+          <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
+        )}
+        {alertsCount > 0 &&
+          (isCasesContextAvailable ? (
+            <CasesContext
+              owner={casesConfiguration?.owner ?? []}
+              permissions={casesPermissions}
+              features={{ alerts: { sync: casesConfiguration?.syncAlerts ?? false } }}
+            >
+              <AlertsDataGrid {...dataGridProps} />
+            </CasesContext>
+          ) : (
+            <AlertsDataGrid {...dataGridProps} />
+          ))}
+      </AlertsTableContextProvider>
+    );
+  }
+);
 
-AlertsTable.displayName = 'AlertsTable';
-
-export { AlertsTable };
 // eslint-disable-next-line import/no-default-export
 export { AlertsTable as default };

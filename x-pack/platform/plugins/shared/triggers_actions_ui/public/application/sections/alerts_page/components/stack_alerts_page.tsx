@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBetaBadge,
@@ -29,7 +29,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERTS_PAGE_ID } from '../../../../common/constants';
 import { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
-import { ALERT_TABLE_GLOBAL_CONFIG_ID } from '../../../constants';
 import { useRuleStats } from '../hooks/use_rule_stats';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { alertProducersData } from '../../alerts_table/constants';
@@ -53,10 +52,16 @@ import {
   useRuleTypeIdsByFeatureId,
 } from '../hooks/use_rule_type_ids_by_feature_id';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
+import {
+  defaultAlertsTableColumns,
+  defaultAlertsTableSort,
+} from '../../alerts_table/configuration';
+import { DefaultAlertsFlyoutBody } from '../../alerts_table/alerts_flyout/default_alerts_flyout';
+import { AlertActionsCell } from '../../alerts_table/row_actions/alert_actions_cell';
+import { AlertsTable } from '../../alerts_table/alerts_table';
+import { renderCellValue } from '../../alerts_table/cells/render_cell_value';
 import { AlertsTableSupportedConsumers } from '../../alerts_table/types';
 import { NON_SIEM_CONSUMERS } from '../../alerts_search_bar/constants';
-
-const AlertsTable = lazy(() => import('../../alerts_table/alerts_table_state'));
 
 /**
  * A unified view for all types of alerts
@@ -119,7 +124,6 @@ const PageContentComponent: React.FC<PageContentProps> = ({
   authorizedToReadAnyRules,
   ruleTypeIdsByFeatureId,
 }) => {
-  const { alertsTableConfigurationRegistry } = useKibana().services;
   const ruleTypeIdsByFeatureIdEntries = Object.entries(ruleTypeIdsByFeatureId);
 
   const [esQuery, setEsQuery] = useState({ bool: {} } as { bool: BoolQuery });
@@ -262,13 +266,16 @@ const PageContentComponent: React.FC<PageContentProps> = ({
               // columns alignment from breaking after a change in the number of columns
               key={ruleTypeIds.join()}
               id="stack-alerts-page-table"
-              configurationId={ALERT_TABLE_GLOBAL_CONFIG_ID}
-              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               ruleTypeIds={ruleTypeIds}
               consumers={consumers}
               query={esQuery}
+              initialSort={defaultAlertsTableSort}
               showAlertStatusWithFlapping
+              columns={defaultAlertsTableColumns}
               initialPageSize={20}
+              renderCellValue={renderCellValue}
+              renderFlyoutBody={DefaultAlertsFlyoutBody}
+              renderActionsCell={AlertActionsCell}
             />
           </Suspense>
         </EuiFlexGroup>

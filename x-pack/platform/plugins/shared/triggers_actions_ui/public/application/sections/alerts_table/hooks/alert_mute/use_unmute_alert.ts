@@ -28,7 +28,7 @@ export const useUnmuteAlert = () => {
       context: AlertsQueryContext,
       onSuccess() {
         toasts.addSuccess(
-          i18n.translate('xpack.triggersActionsUI.alertsTable.alertUnuted', {
+          i18n.translate('xpack.triggersActionsUI.alertsTable.alertUnmuted', {
             defaultMessage: 'Alert unmuted',
           })
         );

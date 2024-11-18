@@ -5,38 +5,44 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { ComponentProps, useMemo } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useRouteMatch } from 'react-router-dom';
+import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
+import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
+import { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 import { useKibana } from '../../utils/kibana_react';
-import { paths } from '../../../common/locators/paths';
-import type { TopAlert } from '../../typings/alerts';
+import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
 
-interface FlyoutProps {
-  alert: TopAlert;
-  id?: string;
-}
+export type AlertsFlyoutFooterProps = Pick<
+  ComponentProps<GetObservabilityAlertsTableProp<'renderFlyoutFooter'>>,
+  'alert' | 'tableId' | 'observabilityRuleTypeRegistry'
+>;
 
-export function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { isInApp: boolean }) {
+export function AlertsFlyoutFooter({
+  alert,
+  tableId,
+  observabilityRuleTypeRegistry,
+}: AlertsFlyoutFooterProps) {
   const {
     http: {
       basePath: { prepend },
     },
   } = useKibana().services;
-  const [viewInAppUrl, setViewInAppUrl] = useState<string>();
-
-  useEffect(() => {
-    if (!alert.hasBasePath) {
-      setViewInAppUrl(prepend(alert.link ?? ''));
-    } else {
-      setViewInAppUrl(alert.link);
+  const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
+  const parsedAlert = parseAlert(observabilityRuleTypeRegistry)(alert);
+  const viewInAppUrl = useMemo(() => {
+    if (!parsedAlert.hasBasePath) {
+      return prepend(parsedAlert.link ?? '');
     }
-  }, [alert.hasBasePath, alert.link, prepend]);
+    return parsedAlert.link;
+  }, [parsedAlert.hasBasePath, parsedAlert.link, prepend]);
 
   return (
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="flexEnd">
-        {!alert.link || isInApp ? null : (
+        {!parsedAlert.link || (isSLODetailsPage && tableId === SLO_ALERTS_TABLE_ID) ? null : (
           <EuiFlexItem grow={false}>
             <EuiButton data-test-subj="alertsFlyoutViewInAppButton" fill href={viewInAppUrl}>
               {i18n.translate('xpack.observability.alertsFlyout.viewInAppButtonText', {
@@ -51,7 +57,7 @@ export function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { isInApp: 
             fill
             href={
               prepend &&
-              prepend(paths.observability.alertDetails(alert.fields['kibana.alert.uuid']))
+              prepend(paths.observability.alertDetails(parsedAlert.fields['kibana.alert.uuid']))
             }
           >
             {i18n.translate('xpack.observability.alertsFlyout.alertsDetailsButtonText', {

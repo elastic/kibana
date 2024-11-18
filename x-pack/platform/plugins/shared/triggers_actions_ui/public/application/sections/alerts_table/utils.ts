@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { registerAlertsTableConfiguration } from './register_alerts_table_configuration';
+import { memo } from 'react';
+
+export const typedMemo: <T>(c: T) => T = memo;

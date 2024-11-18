@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import React, { ComponentProps } from 'react';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { render } from '../../../utils/test_helper';
-import { getRenderCellValue } from './render_cell_value';
+import { AlertsTableCellValue } from './cell_value';
+import { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 interface AlertsTableRow {
   alertStatus: typeof ALERT_STATUS_ACTIVE | typeof ALERT_STATUS_RECOVERED;
@@ -17,10 +19,11 @@ describe('getRenderCellValue', () => {
   describe('when column is alert status', () => {
     it('should return an active indicator when alert status is active', async () => {
       const cell = render(
-        getRenderCellValue({
-          columnId: ALERT_STATUS,
-          data: makeAlertsTableRow({ alertStatus: ALERT_STATUS_ACTIVE }),
-        })
+        <AlertsTableCellValue
+          {...requiredProperties}
+          columnId={ALERT_STATUS}
+          alert={makeAlertsTableRow({ alertStatus: ALERT_STATUS_ACTIVE })}
+        />
       );
 
       expect(cell.getByText('Active')).toBeInTheDocument();
@@ -28,10 +31,11 @@ describe('getRenderCellValue', () => {
 
     it('should return a recovered indicator when alert status is recovered', async () => {
       const cell = render(
-        getRenderCellValue({
-          columnId: ALERT_STATUS,
-          data: makeAlertsTableRow({ alertStatus: ALERT_STATUS_RECOVERED }),
-        })
+        <AlertsTableCellValue
+          {...requiredProperties}
+          columnId={ALERT_STATUS}
+          alert={makeAlertsTableRow({ alertStatus: ALERT_STATUS_RECOVERED })}
+        />
       );
 
       expect(cell.getByText('Recovered')).toBeInTheDocument();
@@ -40,10 +44,26 @@ describe('getRenderCellValue', () => {
 });
 
 function makeAlertsTableRow({ alertStatus }: AlertsTableRow) {
-  return [
-    {
-      field: ALERT_STATUS,
-      value: [alertStatus],
-    },
-  ];
+  return {
+    [ALERT_STATUS]: [alertStatus],
+  } as unknown as Alert;
 }
+
+const requiredProperties = {
+  rowIndex: 0,
+  colIndex: 0,
+  columnId: '',
+  setCellProps: jest.fn(),
+  isExpandable: false,
+  isExpanded: false,
+  isDetails: false,
+  data: [],
+  eventId: '',
+  header: {
+    id: '',
+    columnHeaderType: 'not-filtered',
+  },
+  isDraggable: false,
+  linkValues: [],
+  scopeId: '',
+} as unknown as ComponentProps<typeof AlertsTableCellValue>;

@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import {
-  QueryDslQueryContainer,
-  SortCombinations,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Moment } from 'moment';
+import React, {
+  ComponentClass,
+  ComponentType,
+  Dispatch,
+  Key,
+  MutableRefObject,
+  ReactNode,
+  RefAttributes,
+  SetStateAction,
+} from 'react';
 import type {
-  EuiDataGridCellPopoverElementProps,
-  EuiDataGridCellProps,
   EuiDataGridCellValueElementProps,
   EuiDataGridColumnCellAction,
-  EuiDataGridOnColumnResizeHandler,
   EuiDataGridProps,
-  EuiDataGridRefProps,
-  EuiDataGridToolBarAdditionalControlsOptions,
   EuiDataGridToolBarVisibilityOptions,
   EuiSuperSelectOption,
-  RenderCellValue,
+  EuiDataGridOnColumnResizeHandler,
+  EuiDataGridRefProps,
 } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import {
@@ -50,12 +53,25 @@ import {
   RuleTypeParams,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
+import type {
+  RuleRegistrySearchRequestPagination,
+  EcsFieldsResponse,
+  BrowserFields,
+} from '@kbn/rule-registry-plugin/common';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import {
+  type MappingRuntimeFields,
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
+import {
+  ValidationResult,
+  UserConfiguredActionConnector,
   ActionConnector,
   ActionTypeRegistryContract,
   EsQuerySnapshot,
-  UserConfiguredActionConnector,
+  type LegacyField,
 } from '@kbn/alerts-ui-shared/src/common/types';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DocLinksStart } from '@kbn/core/public';
@@ -64,24 +80,14 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { KueryNode } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { ValidationResult } from '@kbn/response-ops-rule-form';
+import { SetRequired } from 'type-fest';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import type {
-  EcsFieldsResponse,
-  RuleRegistrySearchRequestPagination,
-} from '@kbn/rule-registry-plugin/common';
-import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { Moment } from 'moment';
-import type { ComponentType, ReactNode, RefObject } from 'react';
-import React from 'react';
-import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
-import { Case } from './application/sections/alerts_table/hooks/apis/bulk_get_cases';
 import type {
   BrowserFieldItem,
   CreateFieldComponent,
@@ -95,6 +101,8 @@ import type {
   RuleEventLogListProps,
 } from './application/sections/rule_details/components/rule_event_log_list';
 import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
+import { Case } from './application/sections/alerts_table/hooks/apis/bulk_get_cases';
+import { MutedAlerts } from './application/sections/alerts_table/types';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
 import type {
@@ -202,7 +210,6 @@ export type {
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
-export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<AlertTableConfigRegistry>;
 
 export enum RuleFlyoutCloseReason {
   SAVED,
@@ -225,10 +232,12 @@ interface BulkOperationAttributesByIds {
   ids: string[];
   filter?: never;
 }
+
 interface BulkOperationAttributesByFilter {
   ids?: never;
   filter: KueryNode | null;
 }
+
 export type BulkOperationAttributesWithoutHttp =
   | BulkOperationAttributesByIds
   | BulkOperationAttributesByFilter;
@@ -264,8 +273,6 @@ export type ActionConnectorTableItem = ActionConnector & {
   actionType: ActionType['name'];
   compatibility: string[];
 };
-
-export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
 
 export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus' | 'lastRun' | 'nextRun'>;
 
@@ -308,11 +315,6 @@ export interface RuleTypeParamsExpressionProps<
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
-
-export type RuleParamsForRules = Record<
-  string,
-  Array<{ label: string; value: string | number | object }>
->;
 
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
@@ -391,6 +393,7 @@ export interface RuleAddProps<
   useRuleProducer?: boolean;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
+
 export interface RuleDefinitionProps<Params extends RuleTypeParams = RuleTypeParams> {
   rule: Rule<Params>;
   ruleTypeRegistry: RuleTypeRegistryContract;
@@ -426,6 +429,7 @@ export interface InspectQuery {
   request: string[];
   response: string[];
 }
+
 export type GetInspectQuery = () => InspectQuery;
 
 export type Alert = EcsFieldsResponse;
@@ -454,35 +458,215 @@ export interface FetchAlertData {
   ecsAlertsData: unknown[];
 }
 
-export type AlertsTableProps = {
-  alertsTableConfiguration: AlertsTableConfigurationRegistry;
-  cases: {
-    data: Map<string, Case>;
-    isLoading: boolean;
-  };
-  maintenanceWindows: {
-    data: Map<string, MaintenanceWindow>;
-    isLoading: boolean;
-  };
-  columns: EuiDataGridColumn[];
-  // defaultCellActions: TGridCellAction[];
-  deletedEventIds: string[];
-  disabledCellActions: string[];
-  pageSizeOptions: number[];
-  id?: string;
-  leadingControlColumns?: EuiDataGridControlColumn[];
+type MergeProps<T, AP> = T extends (args: infer Props) => unknown
+  ? (args: Props & AP) => ReactNode
+  : T extends ComponentClass<infer Props>
+  ? ComponentClass<Props & AP>
+  : never;
+
+export interface SelectedAlertWithLegacyFormats {
+  alert: Alert;
+  /**
+   * @deprecated
+   */
+  legacyAlert: LegacyField[];
+  /**
+   * @deprecated
+   */
+  ecsAlert: any;
+}
+
+export interface AlertsTableProps<AC extends AdditionalContext = AdditionalContext>
+  extends PublicAlertsDataGridProps {
+  id: string;
+  columns?: EuiDataGridProps['columns'];
+  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  initialSort?: SortCombinations[];
+  initialPageSize?: number;
+  browserFields?: BrowserFields;
+  onUpdate?: (context: RenderContext<AC>) => void;
+  onLoaded?: (alerts: Alerts, columns: EuiDataGridColumn[]) => void;
+  runtimeMappings?: MappingRuntimeFields;
   showAlertStatusWithFlapping?: boolean;
+  toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
+  /**
+   * Allows to consumers of the table to decide to highlight a row based on the current alert.
+   */
+  shouldHighlightRow?: (alert: Alert) => boolean;
+  /**
+   * Enable when rows may have variable heights (disables virtualization)
+   */
+  dynamicRowHeight?: boolean;
+  emptyStateHeight?: 'tall' | 'short';
+  /**
+   * An object that will be passed along with the renderContext to all render functions.
+   */
+  additionalContext?: AC;
+  /**
+   * Cell content render function
+   */
+  renderCellValue?: MergeProps<
+    EuiDataGridProps['renderCellValue'],
+    RenderContext<AC> & SelectedAlertWithLegacyFormats
+  >;
+  renderCellPopover?: MergeProps<
+    EuiDataGridProps['renderCellPopover'],
+    RenderContext<AC> & { alert: Alert }
+  >;
+  renderActionsCell?: MergeProps<
+    EuiDataGridControlColumn['rowCellRender'],
+    RenderContext<AC> &
+      SelectedAlertWithLegacyFormats & { setIsActionLoading?: (isLoading: boolean) => void }
+  >;
+  renderAdditionalToolbarControls?: ComponentRenderer<AC>;
+  renderFlyoutHeader?: FlyoutSectionRenderer<AC>;
+  renderFlyoutBody?: FlyoutSectionRenderer<AC>;
+  renderFlyoutFooter?: FlyoutSectionRenderer<AC>;
+
+  lastReloadRequestTime?: number;
+}
+
+/**
+ * A utility type to extract the type of a prop from `AlertsTableProps`, excluding `undefined`.
+ */
+export type GetAlertsTableProp<Key extends keyof AlertsTableProps> = NonNullable<
+  AlertsTableProps[Key]
+>;
+
+export interface AlertsTableImperativeApi {
+  refresh: () => void;
+  toggleColumn: (columnId: string) => void;
+}
+
+export type AlertsTablePropsWithRef<AC extends AdditionalContext> = AlertsTableProps<AC> &
+  RefAttributes<AlertsTableImperativeApi>;
+
+export type FlyoutSectionRenderer<AC extends AdditionalContext = AdditionalContext> =
+  ComponentRenderer<
+    AC & {
+      alert: Alert;
+      flyoutIndex: number;
+      isLoading: boolean;
+      onClose: () => void;
+      onPaginate: (pageIndex: number) => void;
+    }
+  >;
+
+export interface BaseRenderContext
+  extends SetRequired<
+    Pick<
+      AlertsTableProps,
+      | 'columns'
+      | 'renderCellValue'
+      | 'renderCellPopover'
+      | 'renderActionsCell'
+      | 'renderFlyoutHeader'
+      | 'renderFlyoutBody'
+      | 'renderFlyoutFooter'
+    >,
+    'columns'
+  > {
+  tableId?: string;
+  dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
+
+  /**
+   * Refetches all the queries, resetting the alerts pagination if necessary
+   */
+  refresh: () => void;
+
+  /**
+   * True if any of the active queries is fetching
+   */
+  isLoading: boolean;
+
+  isLoadingAlerts: boolean;
+  alerts: Alerts;
+  ecsAlertsData: any[];
+  oldAlertsData: any[];
+  alertsCount: number;
+  browserFields: BrowserFields;
+
+  isLoadingMutedAlerts: boolean;
+  mutedAlerts?: MutedAlerts;
+
+  isLoadingCases: boolean;
+  cases?: Map<string, Case>;
+
+  isLoadingMaintenanceWindows: boolean;
+  maintenanceWindows?: Map<string, MaintenanceWindow>;
+
+  pageIndex: number;
+  pageSize: number;
+
+  fieldFormats: FieldFormatsStart;
+  openAlertInFlyout: (alertId: string) => void;
+
+  showAlertStatusWithFlapping?: boolean;
+
+  bulkActionsStore: [BulkActionsState, Dispatch<BulkActionsReducerAction>];
+}
+
+export type AdditionalContext = object;
+
+export type RenderContext<AC extends AdditionalContext> = BaseRenderContext & AC;
+
+export type ComponentRenderer<AC extends AdditionalContext> = ComponentType<RenderContext<AC>>;
+
+export interface CellActionsOptions {
+  /**
+   * Resolves the cell actions for a given column
+   */
+  getCellActionsForColumn: (columnId: string, columnIndex: number) => EuiDataGridColumnCellAction[];
+  visibleCellActions?: number;
+  disabledCellActions?: string[];
+}
+
+export interface PublicAlertsDataGridProps
+  extends Omit<
+    EuiDataGridProps,
+    | 'renderCellPopover'
+    | 'renderCellValue'
+    | 'aria-labelledby'
+    | 'columnVisibility'
+    | 'rowCount'
+    | 'sorting'
+    | 'cellContext'
+    | 'pagination'
+    | 'columns'
+  > {
+  ruleTypeIds: string[];
+  consumers?: string[];
+  showInspectButton?: boolean;
+  casesConfiguration?: {
+    featureId: string;
+    owner: string[];
+    appId?: string;
+    syncAlerts?: boolean;
+  };
+  hideBulkActions?: boolean;
+  getBulkActions?: (
+    query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>,
+    refresh: () => void
+  ) => BulkActionsPanelConfig[];
+  actionsColumnWidth?: number;
+  fieldsBrowserOptions?: FieldBrowserOptions;
+  cellActionsOptions?: CellActionsOptions;
+}
+
+export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalContext>
+  extends PublicAlertsDataGridProps {
+  renderContext: RenderContext<AC>;
+  additionalToolbarControls?: ReactNode;
+  pageSizeOptions?: number[];
+  leadingControlColumns?: EuiDataGridControlColumn[];
   trailingControlColumns?: EuiDataGridControlColumn[];
-  cellContext?: EuiDataGridCellProps['cellContext'];
   visibleColumns: string[];
   'data-test-subj': string;
-  browserFields: any;
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
   onChangeVisibleColumns: (newColumns: string[]) => void;
   onColumnResize?: EuiDataGridOnColumnResizeHandler;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
-  controls?: EuiDataGridToolBarAdditionalControlsOptions;
   showInspectButton?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
   /**
@@ -493,45 +677,20 @@ export type AlertsTableProps = {
    * Enable when rows may have variable heights (disables virtualization)
    */
   dynamicRowHeight?: boolean;
-  ruleTypeIds?: string[];
-  pageIndex: number;
-  pageSize: number;
   sort: SortCombinations[];
-  isLoading: boolean;
-  alerts: Alerts;
-  oldAlertsData: FetchAlertData['oldAlertsData'];
-  ecsAlertsData: FetchAlertData['ecsAlertsData'];
-  querySnapshot?: EsQuerySnapshot;
-  refetchAlerts: () => void;
-  alertsCount: number;
+  alertsQuerySnapshot?: EsQuerySnapshot;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
-  onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
-  renderCellPopover?: ReturnType<GetRenderCellPopover>;
-  fieldFormats: FieldFormatsStart;
-} & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions' | 'height'>>;
-
-export type SetFlyoutAlert = (alertId: string) => void;
+  flyoutAlertIndex: number;
+  setFlyoutAlertIndex: Dispatch<SetStateAction<number>>;
+  onPaginateFlyout: (nextPageIndex: number) => void;
+  onChangePageSize: (size: number) => void;
+  onChangePageIndex: (index: number) => void;
+}
 
 export interface TimelineNonEcsData {
   field: string;
   value?: string[] | null;
 }
-
-export type GetRenderCellPopover<T = unknown> = ({
-  context,
-}: {
-  context?: T;
-}) => (
-  props: EuiDataGridCellPopoverElementProps & { alert: Alert }
-) => React.ReactNode | JSX.Element;
-
-export type PreFetchPageContext<T = unknown> = ({
-  alerts,
-  columns,
-}: {
-  alerts: Alerts;
-  columns: EuiDataGridColumn[];
-}) => T;
 
 export type AlertTableFlyoutComponent =
   | React.FunctionComponent<AlertsTableFlyoutBaseProps>
@@ -587,25 +746,6 @@ interface ItemsPanelConfig extends PanelConfig {
 
 export type BulkActionsPanelConfig = ItemsPanelConfig | ContentPanelConfig;
 
-export type UseBulkActionsRegistry = (
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>,
-  refresh: () => void
-) => BulkActionsPanelConfig[];
-
-export type UseCellActions = (props: {
-  columns: EuiDataGridColumn[];
-  data: unknown[][];
-  dataGridRef: RefObject<EuiDataGridRefProps>;
-  ecsData: unknown[];
-  pageSize: number;
-  pageIndex: number;
-}) => {
-  // getCellAction function for system to return cell actions per Id
-  getCellActions: (columnId: string, columnIndex: number) => EuiDataGridColumnCellAction[];
-  visibleCellActions?: number;
-  disabledCellActions?: string[];
-};
-
 export interface RenderCustomActionsRowArgs {
   ecsAlert: FetchAlertData['ecsAlertsData'][number];
   nonEcsData: FetchAlertData['oldAlertsData'][number];
@@ -619,7 +759,9 @@ export interface RenderCustomActionsRowArgs {
   clearSelection: () => void;
 }
 
-export interface AlertActionsProps extends RenderCustomActionsRowArgs {
+export interface AlertActionsProps extends RenderContext<AdditionalContext> {
+  key?: Key;
+  alert: Alert;
   onActionExecuted?: () => void;
   isAlertDetailsEnabled?: boolean;
   /**
@@ -636,45 +778,6 @@ export type UseActionsColumnRegistry = () => {
   renderCustomActionsRow: (args: RenderCustomActionsRowArgs) => JSX.Element;
   width?: number;
 };
-
-export interface UseFieldBrowserOptionsArgs {
-  onToggleColumn: (columnId: string) => void;
-}
-
-export type UseFieldBrowserOptions = (args: UseFieldBrowserOptionsArgs) => FieldBrowserOptions;
-
-export interface AlertsTableConfigurationRegistry {
-  id: string;
-  cases?: {
-    featureId: string;
-    owner: string[];
-    appId?: string;
-    syncAlerts?: boolean;
-  };
-  columns: EuiDataGridColumn[];
-  useInternalFlyout?: () => {
-    header: AlertTableFlyoutComponent;
-    body: AlertTableFlyoutComponent;
-    footer: AlertTableFlyoutComponent;
-  };
-  sort?: SortCombinations[];
-  getRenderCellValue?: RenderCellValue;
-  getRenderCellPopover?: GetRenderCellPopover;
-  useActionsColumn?: UseActionsColumnRegistry;
-  useBulkActions?: UseBulkActionsRegistry;
-  useCellActions?: UseCellActions;
-  usePersistentControls?: () => {
-    right?: ReactNode;
-  };
-  useFieldBrowserOptions?: UseFieldBrowserOptions;
-  showInspectButton?: boolean;
-  hideBulkActions?: boolean;
-  ruleTypeIds?: string[];
-  useFetchPageContext?: PreFetchPageContext;
-  actions?: {
-    toggleColumn: (columnId: string) => void;
-  };
-}
 
 export enum BulkActionsVerbs {
   add = 'add',
@@ -774,11 +877,6 @@ export type UpdateFiltersProps =
       value: KueryNode;
     };
 
-export interface RulesPageContainerState {
-  lastResponse: string[];
-  status: RuleStatus[];
-}
-
 export type BulkEditActions =
   | 'snooze'
   | 'unsnooze'
@@ -791,12 +889,6 @@ export interface UpdateRulesToBulkEditProps {
   action: BulkEditActions;
   rules?: RuleTableItem[];
   filter?: KueryNode | null;
-}
-
-export interface TableUpdateHandlerArgs {
-  totalCount: number;
-  isLoading: boolean;
-  refresh: () => void;
 }
 
 export interface LazyLoadProps {
