@@ -5,66 +5,60 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { AbortError, abortSignalToPromise } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
+import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import type {
   RuleMigrationAllTaskStats,
   RuleMigrationTaskStats,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { RuleMigrationDataStats } from '../data_stream/rule_migrations_data_client';
+import type {
+  RuleMigrationDataStats,
+  RuleMigrationsDataClient,
+} from '../data/rule_migrations_data_client';
 import type {
   RuleMigrationTaskStartParams,
   RuleMigrationTaskStartResult,
-  RuleMigrationTaskStatsParams,
-  RuleMigrationTaskStopParams,
   RuleMigrationTaskStopResult,
   RuleMigrationTaskPrepareParams,
   RuleMigrationTaskRunParams,
   MigrationAgent,
-  RuleMigrationAllTaskStatsParams,
 } from './types';
 import { getRuleMigrationAgent } from './agent';
 import type { MigrateRuleState } from './agent/types';
 import { retrievePrebuiltRulesMap } from './util/prebuilt_rules';
 import { ActionsClientChat } from './util/actions_client_chat';
-
-interface TaskLogger {
-  info: (msg: string) => void;
-  debug: (msg: string) => void;
-  error: (msg: string, error: Error) => void;
-}
-const getTaskLogger = (logger: Logger): TaskLogger => {
-  const prefix = '[ruleMigrationsTask]: ';
-  return {
-    info: (msg) => logger.info(`${prefix}${msg}`),
-    debug: (msg) => logger.debug(`${prefix}${msg}`),
-    error: (msg, error) => logger.error(`${prefix}${msg}: ${error.message}`),
-  };
-};
+import { RuleResourceRetriever } from './util/rule_resource_retriever';
 
 const ITERATION_BATCH_SIZE = 50 as const;
 const ITERATION_SLEEP_SECONDS = 10 as const;
 
-export class RuleMigrationsTaskRunner {
-  private migrationsRunning: Map<string, { user: string; abortController: AbortController }>;
-  private taskLogger: TaskLogger;
+type MigrationsRunning = Map<string, { user: string; abortController: AbortController }>;
 
-  constructor(private logger: Logger) {
-    this.migrationsRunning = new Map();
-    this.taskLogger = getTaskLogger(logger);
-  }
+export class RuleMigrationsTaskClient {
+  constructor(
+    private migrationsRunning: MigrationsRunning,
+    private logger: Logger,
+    private data: RuleMigrationsDataClient,
+    private currentUser: AuthenticatedUser
+  ) {}
 
   /** Starts a rule migration task */
   async start(params: RuleMigrationTaskStartParams): Promise<RuleMigrationTaskStartResult> {
-    const { migrationId, dataClient } = params;
+    const { migrationId } = params;
     if (this.migrationsRunning.has(migrationId)) {
       return { exists: true, started: false };
     }
-    // Just in case some previous execution was interrupted without releasing
-    await dataClient.releaseProcessable(migrationId);
+    // Just in case some previous execution was interrupted without cleaning up
+    await this.data.rules.updateStatus(
+      migrationId,
+      SiemMigrationStatus.PROCESSING,
+      SiemMigrationStatus.PENDING,
+      { refresh: true }
+    );
 
-    const { rules } = await dataClient.getStats(migrationId);
+    const { rules } = await this.data.rules.getStats(migrationId);
     if (rules.total === 0) {
       return { exists: false, started: false };
     }
@@ -80,13 +74,14 @@ export class RuleMigrationsTaskRunner {
     // not awaiting the `run` promise to execute the task in the background
     this.run({ ...params, agent, abortController }).catch((err) => {
       // All errors in the `run` method are already catch, this should never happen, but just in case
-      this.taskLogger.error(`Unexpected error running the migration ID:${migrationId}`, err);
+      this.logger.error(`Unexpected error running the migration ID:${migrationId}`, err);
     });
 
     return { exists: true, started: true };
   }
 
   private async prepare({
+    migrationId,
     connectorId,
     inferenceClient,
     actionsClient,
@@ -95,6 +90,7 @@ export class RuleMigrationsTaskRunner {
     abortController,
   }: RuleMigrationTaskPrepareParams): Promise<MigrationAgent> {
     const prebuiltRulesMap = await retrievePrebuiltRulesMap({ soClient, rulesClient });
+    const resourceRetriever = new RuleResourceRetriever(migrationId, this.data);
 
     const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
     const model = await actionsClientChat.createModel({
@@ -107,6 +103,7 @@ export class RuleMigrationsTaskRunner {
       model,
       inferenceClient,
       prebuiltRulesMap,
+      resourceRetriever,
       logger: this.logger,
     });
     return agent;
@@ -115,8 +112,6 @@ export class RuleMigrationsTaskRunner {
   private async run({
     migrationId,
     agent,
-    dataClient,
-    currentUser,
     invocationConfig,
     abortController,
   }: RuleMigrationTaskRunParams): Promise<void> {
@@ -124,9 +119,9 @@ export class RuleMigrationsTaskRunner {
       // This should never happen, but just in case
       throw new Error(`Task already running for migration ID:${migrationId} `);
     }
-    this.taskLogger.info(`Starting migration ID:${migrationId}`);
+    this.logger.info(`Starting migration ID:${migrationId}`);
 
-    this.migrationsRunning.set(migrationId, { user: currentUser.username, abortController });
+    this.migrationsRunning.set(migrationId, { user: this.currentUser.username, abortController });
     const config: RunnableConfig = {
       ...invocationConfig,
       // signal: abortController.signal, // not working properly https://github.com/langchain-ai/langgraphjs/issues/319
@@ -136,7 +131,7 @@ export class RuleMigrationsTaskRunner {
 
     try {
       const sleep = async (seconds: number) => {
-        this.taskLogger.debug(`Sleeping ${seconds}s for migration ID:${migrationId}`);
+        this.logger.debug(`Sleeping ${seconds}s for migration ID:${migrationId}`);
         await Promise.race([
           new Promise((resolve) => setTimeout(resolve, seconds * 1000)),
           abortPromise.promise,
@@ -145,44 +140,42 @@ export class RuleMigrationsTaskRunner {
 
       let isDone: boolean = false;
       do {
-        const ruleMigrations = await dataClient.takePending(migrationId, ITERATION_BATCH_SIZE);
-        this.taskLogger.debug(
+        const ruleMigrations = await this.data.rules.takePending(migrationId, ITERATION_BATCH_SIZE);
+        this.logger.debug(
           `Processing ${ruleMigrations.length} rules for migration ID:${migrationId}`
         );
 
         await Promise.all(
           ruleMigrations.map(async (ruleMigration) => {
-            this.taskLogger.debug(
-              `Starting migration of rule "${ruleMigration.original_rule.title}"`
-            );
+            this.logger.debug(`Starting migration of rule "${ruleMigration.original_rule.title}"`);
             try {
               const start = Date.now();
 
-              const ruleMigrationResult: MigrateRuleState = await Promise.race([
+              const migrationResult: MigrateRuleState = await Promise.race([
                 agent.invoke({ original_rule: ruleMigration.original_rule }, config),
                 abortPromise.promise, // workaround for the issue with the langGraph signal
               ]);
 
               const duration = (Date.now() - start) / 1000;
-              this.taskLogger.debug(
+              this.logger.debug(
                 `Migration of rule "${ruleMigration.original_rule.title}" finished in ${duration}s`
               );
 
-              await dataClient.saveFinished({
+              await this.data.rules.saveCompleted({
                 ...ruleMigration,
-                elastic_rule: ruleMigrationResult.elastic_rule,
-                translation_result: ruleMigrationResult.translation_result,
-                comments: ruleMigrationResult.comments,
+                elastic_rule: migrationResult.elastic_rule,
+                translation_result: migrationResult.translation_result,
+                comments: migrationResult.comments,
               });
             } catch (error) {
               if (error instanceof AbortError) {
                 throw error;
               }
-              this.taskLogger.error(
+              this.logger.error(
                 `Error migrating rule "${ruleMigration.original_rule.title}"`,
                 error
               );
-              await dataClient.saveError({
+              await this.data.rules.saveError({
                 ...ruleMigration,
                 comments: [`Error migrating rule: ${error.message}`],
               });
@@ -190,24 +183,24 @@ export class RuleMigrationsTaskRunner {
           })
         );
 
-        this.taskLogger.debug(`Batch processed successfully for migration ID:${migrationId}`);
+        this.logger.debug(`Batch processed successfully for migration ID:${migrationId}`);
 
-        const { rules } = await dataClient.getStats(migrationId);
+        const { rules } = await this.data.rules.getStats(migrationId);
         isDone = rules.pending === 0;
         if (!isDone) {
           await sleep(ITERATION_SLEEP_SECONDS);
         }
       } while (!isDone);
 
-      this.taskLogger.info(`Finished migration ID:${migrationId}`);
+      this.logger.info(`Finished migration ID:${migrationId}`);
     } catch (error) {
-      await dataClient.releaseProcessing(migrationId);
+      await this.data.rules.releaseProcessing(migrationId);
 
       if (error instanceof AbortError) {
-        this.taskLogger.info(`Abort signal received, stopping migration ID:${migrationId}`);
+        this.logger.info(`Abort signal received, stopping migration ID:${migrationId}`);
         return;
       } else {
-        this.taskLogger.error(`Error processing migration ID:${migrationId}`, error);
+        this.logger.error(`Error processing migration ID:${migrationId}`, error);
       }
     } finally {
       this.migrationsRunning.delete(migrationId);
@@ -215,21 +208,28 @@ export class RuleMigrationsTaskRunner {
     }
   }
 
+  /** Updates all the rules in a migration to be re-executed */
+  public async updateToRetry(migrationId: string): Promise<{ updated: boolean }> {
+    if (this.migrationsRunning.has(migrationId)) {
+      return { updated: false };
+    }
+    // Update all the rules in the migration to pending
+    await this.data.rules.updateStatus(migrationId, undefined, SiemMigrationStatus.PENDING, {
+      refresh: true,
+    });
+    return { updated: true };
+  }
+
   /** Returns the stats of a migration */
-  async getStats({
-    migrationId,
-    dataClient,
-  }: RuleMigrationTaskStatsParams): Promise<RuleMigrationTaskStats> {
-    const dataStats = await dataClient.getStats(migrationId);
+  public async getStats(migrationId: string): Promise<RuleMigrationTaskStats> {
+    const dataStats = await this.data.rules.getStats(migrationId);
     const status = this.getTaskStatus(migrationId, dataStats.rules);
     return { status, ...dataStats };
   }
 
   /** Returns the stats of all migrations */
-  async getAllStats({
-    dataClient,
-  }: RuleMigrationAllTaskStatsParams): Promise<RuleMigrationAllTaskStats> {
-    const allDataStats = await dataClient.getAllStats();
+  async getAllStats(): Promise<RuleMigrationAllTaskStats> {
+    const allDataStats = await this.data.rules.getAllStats();
     return allDataStats.map((dataStats) => {
       const status = this.getTaskStatus(dataStats.migration_id, dataStats.rules);
       return { status, ...dataStats };
@@ -253,10 +253,7 @@ export class RuleMigrationsTaskRunner {
   }
 
   /** Stops one running migration */
-  async stop({
-    migrationId,
-    dataClient,
-  }: RuleMigrationTaskStopParams): Promise<RuleMigrationTaskStopResult> {
+  async stop(migrationId: string): Promise<RuleMigrationTaskStopResult> {
     try {
       const migrationRunning = this.migrationsRunning.get(migrationId);
       if (migrationRunning) {
@@ -264,22 +261,14 @@ export class RuleMigrationsTaskRunner {
         return { exists: true, stopped: true };
       }
 
-      const { rules } = await dataClient.getStats(migrationId);
+      const { rules } = await this.data.rules.getStats(migrationId);
       if (rules.total > 0) {
         return { exists: true, stopped: false };
       }
       return { exists: false, stopped: false };
     } catch (err) {
-      this.taskLogger.error(`Error stopping migration ID:${migrationId}`, err);
+      this.logger.error(`Error stopping migration ID:${migrationId}`, err);
       return { exists: true, stopped: false };
     }
-  }
-
-  /** Stops all running migrations */
-  stopAll() {
-    this.migrationsRunning.forEach((migrationRunning) => {
-      migrationRunning.abortController.abort();
-    });
-    this.migrationsRunning.clear();
   }
 }

@@ -10,19 +10,21 @@ import {
   httpServerMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
-import { SiemRuleMigrationsService } from './siem_rule_migrations_service';
+import {
+  SiemRuleMigrationsService,
+  type SiemRuleMigrationsCreateClientParams,
+} from './siem_rule_migrations_service';
 import { Subject } from 'rxjs';
 import {
-  MockRuleMigrationsDataStream,
+  MockRuleMigrationsDataService,
   mockInstall,
-  mockCreateClient,
-} from './data_stream/__mocks__/mocks';
-import type { SiemRuleMigrationsCreateClientParams } from './types';
+  mockCreateClient as mockDataCreateClient,
+} from './data/__mocks__/mocks';
+import { mockCreateClient as mockTaskCreateClient, mockStopAll } from './task/__mocks__/mocks';
+import { waitFor } from '@testing-library/dom';
 
-jest.mock('./data_stream/rule_migrations_data_stream');
-jest.mock('./task/rule_migrations_task_runner', () => ({
-  RuleMigrationsTaskRunner: jest.fn(),
-}));
+jest.mock('./data/rule_migrations_data_service');
+jest.mock('./task/rule_migrations_task_service');
 
 describe('SiemRuleMigrationsService', () => {
   let ruleMigrationsService: SiemRuleMigrationsService;
@@ -30,16 +32,17 @@ describe('SiemRuleMigrationsService', () => {
 
   const esClusterClient = elasticsearchServiceMock.createClusterClient();
   const currentUser = securityServiceMock.createMockAuthenticatedUser();
-  const logger = loggingSystemMock.createLogger();
+  const loggerFactory = loggingSystemMock.create();
+  const logger = loggerFactory.get('siemRuleMigrations');
   const pluginStop$ = new Subject<void>();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    ruleMigrationsService = new SiemRuleMigrationsService(logger, kibanaVersion);
+    ruleMigrationsService = new SiemRuleMigrationsService(loggerFactory, kibanaVersion);
   });
 
   it('should instantiate the rule migrations data stream adapter', () => {
-    expect(MockRuleMigrationsDataStream).toHaveBeenCalledWith(logger, kibanaVersion);
+    expect(MockRuleMigrationsDataService).toHaveBeenCalledWith(logger, kibanaVersion);
   });
 
   describe('when setup is called', () => {
@@ -49,6 +52,16 @@ describe('SiemRuleMigrationsService', () => {
       expect(mockInstall).toHaveBeenCalledWith({
         esClient: esClusterClient.asInternalUser,
         pluginStop$,
+      });
+    });
+
+    it('should log error when data installation fails', async () => {
+      const error = 'Failed to install';
+      mockInstall.mockRejectedValueOnce(error);
+      ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
+
+      await waitFor(() => {
+        expect(logger.error).toHaveBeenCalledWith('Error installing data service.', error);
       });
     });
   });
@@ -77,12 +90,20 @@ describe('SiemRuleMigrationsService', () => {
         ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
       });
 
-      it('should call installSpace', () => {
+      it('should create data client', () => {
         ruleMigrationsService.createClient(createClientParams);
-        expect(mockCreateClient).toHaveBeenCalledWith({
+        expect(mockDataCreateClient).toHaveBeenCalledWith({
           spaceId: createClientParams.spaceId,
           currentUser: createClientParams.currentUser,
-          esClient: esClusterClient.asScoped().asCurrentUser,
+          esClient: esClusterClient.asInternalUser,
+        });
+      });
+
+      it('should create task client', () => {
+        ruleMigrationsService.createClient(createClientParams);
+        expect(mockTaskCreateClient).toHaveBeenCalledWith({
+          currentUser: createClientParams.currentUser,
+          dataClient: mockDataCreateClient(),
         });
       });
 
@@ -91,6 +112,13 @@ describe('SiemRuleMigrationsService', () => {
 
         expect(client).toHaveProperty('data');
         expect(client).toHaveProperty('task');
+      });
+    });
+
+    describe('stop', () => {
+      it('should call taskService stopAll', () => {
+        ruleMigrationsService.stop();
+        expect(mockStopAll).toHaveBeenCalled();
       });
     });
   });
