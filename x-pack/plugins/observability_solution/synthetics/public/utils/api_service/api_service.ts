@@ -54,7 +54,7 @@ class ApiService {
       if (isRight(decoded)) {
         return decoded.right as T;
       } else {
-        // This was changed from using template literals to using %s string 
+        // This was changed from using template literals to using %s string
         // interpolation, but the previous version included the apiUrl value
         // twice. To ensure the log output doesn't change, this continues.
         //
