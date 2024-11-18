@@ -21,8 +21,8 @@ import { RuleSummary, AlertStatus, RuleType, RuleTypeModel } from '../../../../t
 import { mockRule, mockLogResponse } from './test_helpers';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useBulkGetMaintenanceWindows } from '../../alerts_table/hooks/use_bulk_get_maintenance_windows';
-import { getMaintenanceWindowMockMap } from '../../alerts_table/maintenance_windows/index.mock';
+import { useBulkGetMaintenanceWindowsQuery } from '../../alerts_table/hooks/use_bulk_get_maintenance_windows';
+import { getMaintenanceWindowsMock } from '../../alerts_table/maintenance_windows/index.mock';
 import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
 
 jest.mock('../../../lib/rule_api/rule_types');
@@ -71,7 +71,7 @@ const ruleTypeR: RuleTypeModel = {
 };
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const useBulkGetMaintenanceWindowsMock = useBulkGetMaintenanceWindows as jest.Mock;
+const useBulkGetMaintenanceWindowsMock = useBulkGetMaintenanceWindowsQuery as jest.Mock;
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
@@ -89,7 +89,7 @@ const mockAPIs = {
 };
 
 let capabilities: Capabilities;
-const maintenanceWindowsMap = getMaintenanceWindowMockMap();
+const maintenanceWindowsMap = getMaintenanceWindowsMock();
 
 beforeAll(async () => {
   jest.clearAllMocks();

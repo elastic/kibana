@@ -21,7 +21,6 @@ import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../../timelines/components/timel
 import type { SecurityCellAction } from '../../types';
 import { SecurityCellActionType } from '../../constants';
 import type { StartServices } from '../../../../types';
-import { getAlertConfigIdByScopeId } from '../../../../common/lib/triggers_actions_ui/alert_table_scope_config';
 
 const ICON = 'listAdd';
 const COLUMN_TOGGLE = i18n.translate('xpack.securitySolution.actions.toggleColumnToggle.label', {
@@ -65,14 +64,6 @@ export const createToggleColumnCellActionFactory = createCellActionFactory(
 
       const scopedActions = getScopedActions(scopeId);
       if (!scopedActions) {
-        return;
-      }
-
-      const alertTableConfigurationId = getAlertConfigIdByScopeId(scopeId);
-      if (alertTableConfigurationId) {
-        services.triggersActionsUi.alertsTableConfigurationRegistry
-          .getActions(alertTableConfigurationId)
-          ?.toggleColumn(field.name);
         return;
       }
 

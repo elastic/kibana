@@ -10,8 +10,8 @@ import { screen } from '@testing-library/react';
 import { CasesCell } from './cell';
 import { CellComponentProps } from '../types';
 import { Alert } from '../../../../types';
-import { getCasesMockMap } from './index.mock';
-import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
+import { getCasesMapMock } from './index.mock';
+import { getMaintenanceWindowsMapMock } from '../maintenance_windows/index.mock';
 import userEvent from '@testing-library/user-event';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { useCaseViewNavigation } from './use_case_view_navigation';
@@ -29,22 +29,23 @@ jest.mock('./use_case_view_navigation');
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 
 describe('CasesCell', () => {
-  const casesMap = getCasesMockMap();
-  const maintenanceWindowsMap = getMaintenanceWindowMockMap();
+  const casesMap = getCasesMapMock();
+  const maintenanceWindowsMap = getMaintenanceWindowsMapMock();
   const alert = {
     _id: 'alert-id',
     _index: 'alert-index',
     'kibana.alert.case_ids': ['test-id'],
   } as Alert;
 
-  const props: CellComponentProps = {
+  const props = {
     isLoading: false,
     alert,
     cases: casesMap,
     maintenanceWindows: maintenanceWindowsMap,
     columnId: 'kibana.alert.case_ids',
     showAlertStatusWithFlapping: false,
-  };
+    // Assertion used to avoid defining all the (numerous) context properties
+  } as CellComponentProps;
 
   let appMockRender: AppMockRenderer;
 

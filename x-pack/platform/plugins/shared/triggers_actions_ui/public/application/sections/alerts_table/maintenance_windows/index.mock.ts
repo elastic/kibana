@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MaintenanceWindowStatus, MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import { MaintenanceWindowStatus } from '@kbn/alerting-plugin/common';
 
 const mockMaintenanceWindow = {
-  id: 'test-id',
+  id: 'test-mw-id-1',
   title: 'test-title',
   duration: 60 * 60 * 1000,
   enabled: true,
@@ -37,14 +37,16 @@ const mockMaintenanceWindow = {
   expirationDate: '2024-02-26T00:00:00.000Z',
 };
 
-export const getMaintenanceWindowMockMap = (): Map<string, MaintenanceWindow> => {
-  const maintenanceWindowMap = new Map();
-
-  maintenanceWindowMap.set('test-mw-id-1', mockMaintenanceWindow);
-  maintenanceWindowMap.set('test-mw-id-2', {
-    ...mockMaintenanceWindow,
-    title: 'test-title-2',
-  });
-
-  return maintenanceWindowMap;
+export const getMaintenanceWindowsMock = () => {
+  return [
+    mockMaintenanceWindow,
+    {
+      ...mockMaintenanceWindow,
+      id: 'test-mw-id-2',
+      title: 'test-title-2',
+    },
+  ];
 };
+
+export const getMaintenanceWindowsMapMock = () =>
+  getMaintenanceWindowsMock().reduce((acc, val) => acc.set(val.id, val), new Map());

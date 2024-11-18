@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RenderCellValueContext } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
+import type { AlertsUserProfilesData } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import type { ColumnRenderer } from './column_renderer';
 
@@ -17,7 +17,7 @@ export const getColumnRenderer = (
   columnName: string,
   columnRenderers: ColumnRenderer[],
   data: TimelineNonEcsData[],
-  context?: RenderCellValueContext
+  context?: AlertsUserProfilesData
 ): ColumnRenderer => {
   const renderer = columnRenderers.find((columnRenderer) =>
     columnRenderer.isInstance(columnName, data, context)

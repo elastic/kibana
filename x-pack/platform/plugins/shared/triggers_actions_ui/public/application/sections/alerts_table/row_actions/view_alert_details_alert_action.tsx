@@ -18,11 +18,11 @@ import type { AlertActionsProps } from '../../../../types';
 export const ViewAlertDetailsAlertAction = memo(
   ({
     alert,
-    setFlyoutAlert,
+    openAlertInFlyout,
     onActionExecuted,
     isAlertDetailsEnabled,
     resolveAlertPagePath,
-    id: pageId,
+    tableId,
   }: AlertActionsProps) => {
     const {
       http: {
@@ -30,7 +30,7 @@ export const ViewAlertDetailsAlertAction = memo(
       },
     } = useKibana().services;
     const alertId = alert[ALERT_UUID]?.[0] ?? null;
-    const pagePath = alertId && pageId && resolveAlertPagePath?.(alertId, pageId);
+    const pagePath = alertId && tableId && resolveAlertPagePath?.(alertId, tableId);
     const linkToAlert = pagePath ? prepend(pagePath) : null;
 
     if (isAlertDetailsEnabled && linkToAlert) {
@@ -55,7 +55,7 @@ export const ViewAlertDetailsAlertAction = memo(
         size="s"
         onClick={() => {
           onActionExecuted?.();
-          setFlyoutAlert(alert._id);
+          openAlertInFlyout(alert._id);
         }}
       >
         {i18n.translate('xpack.triggersActionsUI.alertsTable.viewAlertDetails', {

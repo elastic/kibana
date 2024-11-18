@@ -15,7 +15,6 @@ import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_re
 
 const services = createStartServicesMock();
 const mockAlertConfigGetActions = jest.fn();
-services.triggersActionsUi.alertsTableConfigurationRegistry.getActions = mockAlertConfigGetActions;
 const mockToggleColumn = jest.fn();
 mockAlertConfigGetActions.mockImplementation(() => ({
   toggleColumn: mockToggleColumn,

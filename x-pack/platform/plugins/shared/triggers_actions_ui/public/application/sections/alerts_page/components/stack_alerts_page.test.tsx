@@ -6,19 +6,18 @@
  */
 
 import * as React from 'react';
-import { waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import { StackAlertsPage } from './stack_alerts_page';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import { createAppMockRenderer } from '../../test_utils';
 import { ruleTypesIndex } from '../../../mock/rule_types_index';
+import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
 
-jest.mock('../../../../common/get_experimental_features');
-jest.mock('../../../../common/lib/kibana');
-
-jest.mock('../../../hooks/use_load_rule_types_query', () => ({
-  useLoadRuleTypesQuery: jest.fn(),
-}));
+jest.mock('../../../lib/rule_api/rule_types');
+const mockLoadRuleTypes = jest
+  .mocked(loadRuleTypes)
+  .mockResolvedValue(Array.from(ruleTypesIndex.values()));
 
 jest.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => ({
   UrlSyncedAlertsSearchBar: () => (
@@ -26,46 +25,30 @@ jest.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => ({
   ),
 }));
 
-const mockAlertsTable = jest.fn(() => <div data-test-subj="alertsTable">{'Alerts table'}</div>);
-jest.mock('../../alerts_table/alerts_table_state', () => mockAlertsTable);
+jest.mock('../../alerts_table/alerts_data_grid', () => ({
+  AlertsDataGrid: jest.fn(() => <div data-test-subj="alertsTable">{'Alerts table'}</div>),
+}));
+
+jest.mock('../../../../common/get_experimental_features');
+jest.mocked(getIsExperimentalFeatureEnabled).mockReturnValue(false);
 
 describe('StackAlertsPage', () => {
-  let appMockRender: AppMockRenderer;
-
-  beforeEach(() => {
-    appMockRender = createAppMockRenderer();
-    (getIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(() => false);
+  const appMockRender = createAppMockRenderer({
+    additionalServices: {},
   });
 
   it('renders the stack alerts page with the correct permissions', async () => {
-    const { useLoadRuleTypesQuery } = jest.requireMock('../../../hooks/use_load_rule_types_query');
-    useLoadRuleTypesQuery.mockReturnValue({
-      ruleTypesState: {
-        data: ruleTypesIndex,
-        initialLoad: false,
-      },
-      authorizedToReadAnyRules: true,
-    });
-    const { getByTestId } = appMockRender.render(<StackAlertsPage />);
+    appMockRender.render(<StackAlertsPage />);
 
-    await waitFor(() => {
-      expect(getByTestId('stackAlertsPageContent')).toBeInTheDocument();
-      expect(getByTestId('alertsTable')).toBeInTheDocument();
-      expect(getByTestId('urlSyncedAlertsSearchBar')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('stackAlertsPageContent')).toBeInTheDocument();
+    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
+    expect(await screen.findByTestId('urlSyncedAlertsSearchBar')).toBeInTheDocument();
   });
 
   it('shows the missing permission prompt if the user is not allowed to read any rules', async () => {
-    const { useLoadRuleTypesQuery } = jest.requireMock('../../../hooks/use_load_rule_types_query');
-    useLoadRuleTypesQuery.mockReturnValue({
-      ruleTypesState: {
-        data: ruleTypesIndex,
-        initialLoad: false,
-      },
-      authorizedToReadAnyRules: false,
-    });
-    const { getByTestId } = appMockRender.render(<StackAlertsPage />);
+    mockLoadRuleTypes.mockResolvedValue([]);
+    appMockRender.render(<StackAlertsPage />);
 
-    await waitFor(() => expect(getByTestId('noPermissionPrompt')).toBeInTheDocument());
+    expect(await screen.findByTestId('noPermissionPrompt')).toBeInTheDocument();
   });
 });

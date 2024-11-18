@@ -12,7 +12,7 @@ import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } f
 import { isEmpty } from 'lodash';
 import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import { AlertsTableStorage } from '../../alerts_table_state';
+import { AlertsTableStorage } from '../../alerts_table';
 import { toggleColumn } from './toggle_column';
 import { useKibana } from '../../../../../common';
 

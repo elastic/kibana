@@ -4,28 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { usePagination } from './use_pagination';
-
 import { renderHook, act } from '@testing-library/react';
+import { PaginationProps, usePagination } from './use_pagination';
 
 describe('usePagination', () => {
   const onPageChange = jest.fn();
   const pageIndex = 0;
   const pageSize = 10;
+  const bulkActionsStore = [{}, jest.fn()] as unknown as PaginationProps['bulkActionsStore'];
 
   beforeEach(() => {
     onPageChange.mockClear();
   });
 
   it('should return the pagination information and callback functions', () => {
-    const { result } = renderHook(() => usePagination({ onPageChange, pageIndex, pageSize }));
+    const { result } = renderHook(() =>
+      usePagination({ onPageChange, pageIndex, pageSize, bulkActionsStore })
+    );
     expect(result.current.pagination).toStrictEqual({ pageIndex, pageSize });
     expect(result.current.onChangePageSize).toBeDefined();
     expect(result.current.onChangePageIndex).toBeDefined();
   });
 
   it('should change the pagination when `onChangePageSize` is called', () => {
-    const { result } = renderHook(() => usePagination({ onPageChange, pageIndex, pageSize }));
+    const { result } = renderHook(() =>
+      usePagination({ onPageChange, pageIndex, pageSize, bulkActionsStore })
+    );
 
     act(() => {
       result.current.onChangePageSize(20);
@@ -35,7 +39,9 @@ describe('usePagination', () => {
   });
 
   it('should change the pagination when `onChangePageIndex` is called', () => {
-    const { result } = renderHook(() => usePagination({ onPageChange, pageIndex, pageSize }));
+    const { result } = renderHook(() =>
+      usePagination({ onPageChange, pageIndex, pageSize, bulkActionsStore })
+    );
 
     act(() => {
       result.current.onChangePageIndex(1);
@@ -45,7 +51,9 @@ describe('usePagination', () => {
   });
 
   it('should paginate the alert flyout', () => {
-    const { result } = renderHook(() => usePagination({ onPageChange, pageIndex, pageSize }));
+    const { result } = renderHook(() =>
+      usePagination({ onPageChange, pageIndex, pageSize, bulkActionsStore })
+    );
 
     expect(result.current.flyoutAlertIndex).toBe(-1);
 
@@ -69,7 +77,9 @@ describe('usePagination', () => {
   });
 
   it('should paginate the flyout when we need to change the page index going forward', () => {
-    const { result } = renderHook(() => usePagination({ onPageChange, pageIndex: 0, pageSize: 1 }));
+    const { result } = renderHook(() =>
+      usePagination({ onPageChange, pageIndex: 0, pageSize: 1, bulkActionsStore })
+    );
 
     act(() => {
       result.current.onPaginateFlyout(1);
@@ -83,7 +93,9 @@ describe('usePagination', () => {
   });
 
   it('should paginate the flyout when we need to change the page index going forward using odd-count data', () => {
-    const { result } = renderHook(() => usePagination({ onPageChange, pageIndex: 0, pageSize: 7 }));
+    const { result } = renderHook(() =>
+      usePagination({ onPageChange, pageIndex: 0, pageSize: 7, bulkActionsStore })
+    );
 
     act(() => {
       result.current.onPaginateFlyout(1);
@@ -118,7 +130,9 @@ describe('usePagination', () => {
   });
 
   it('should paginate the flyout when we need to change the page index going back', () => {
-    const { result } = renderHook(() => usePagination({ onPageChange, pageIndex: 0, pageSize: 1 }));
+    const { result } = renderHook(() =>
+      usePagination({ onPageChange, pageIndex: 0, pageSize: 1, bulkActionsStore })
+    );
 
     act(() => {
       result.current.onPaginateFlyout(-1);
