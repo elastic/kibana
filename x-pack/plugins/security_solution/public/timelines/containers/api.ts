@@ -67,26 +67,30 @@ const createToasterPlainError = (message: string) => new ToasterError([message])
 
 const parseOrThrow = parseOrThrowErrorFactory(createToasterPlainError);
 
-const decodeTimelineResponse = (respTimeline?: PersistTimelineResponse | TimelineErrorResponse) =>
-  parseOrThrow(PersistTimelineResponse)(respTimeline);
+const decodeTimelineResponse = (
+  respTimeline?: PersistTimelineResponse | TimelineErrorResponse
+): PersistTimelineResponse => parseOrThrow(PersistTimelineResponse)(respTimeline);
 
-const decodeSingleTimelineResponse = (respTimeline?: GetTimelineResponse) =>
+const decodeSingleTimelineResponse = (respTimeline?: GetTimelineResponse): GetTimelineResponse =>
   parseOrThrow(GetTimelineResponse)(respTimeline);
 
-const decodeResolvedSingleTimelineResponse = (respTimeline?: ResolveTimelineResponse) =>
-  parseOrThrow(ResolveTimelineResponse)(respTimeline);
+const decodeResolvedSingleTimelineResponse = (
+  respTimeline?: ResolveTimelineResponse
+): ResolveTimelineResponse => parseOrThrow(ResolveTimelineResponse)(respTimeline);
 
-const decodeGetTimelinesResponse = (respTimeline: GetTimelinesResponse) =>
+const decodeGetTimelinesResponse = (respTimeline: GetTimelinesResponse): GetTimelinesResponse =>
   parseOrThrow(GetTimelinesResponse)(respTimeline);
 
-const decodeTimelineErrorResponse = (respTimeline?: TimelineErrorResponse) =>
+const decodeTimelineErrorResponse = (respTimeline?: TimelineErrorResponse): TimelineErrorResponse =>
   parseOrThrow(TimelineErrorResponse)(respTimeline);
 
-const decodePrepackedTimelineResponse = (respTimeline?: ImportTimelineResult) =>
-  parseOrThrow(ImportTimelineResult)(respTimeline);
+const decodePrepackedTimelineResponse = (
+  respTimeline?: ImportTimelineResult
+): ImportTimelineResult => parseOrThrow(ImportTimelineResult)(respTimeline);
 
-const decodeResponseFavoriteTimeline = (respTimeline?: PersistFavoriteRouteResponse) =>
-  parseOrThrow(PersistFavoriteRouteResponse)(respTimeline);
+const decodeResponseFavoriteTimeline = (
+  respTimeline?: PersistFavoriteRouteResponse
+): PersistFavoriteRouteResponse => parseOrThrow(PersistFavoriteRouteResponse)(respTimeline);
 
 const postTimeline = async ({
   timeline,
