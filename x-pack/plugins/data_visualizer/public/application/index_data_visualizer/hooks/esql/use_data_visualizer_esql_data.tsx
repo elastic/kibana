@@ -231,22 +231,19 @@ export const useESQLDataVisualizerData = (
       }
 
       // Ensure that we don't query frozen data
-      if (filter.bool && Array.isArray(filter.bool?.must_not)) {
-        filter.bool.must_not.push({
-          term: {
-            _tier: 'data_frozen',
-          },
-        });
-      } else {
-        filter.bool = {
-          must_not: [
-            {
-              term: { _tier: 'data_frozen' },
-            },
-          ],
-        };
+      if (filter.bool === undefined) {
+        filter.bool = Object.create(null);
       }
 
+      if (filter.bool && filter.bool.must_not === undefined) {
+        filter.bool.must_not = [];
+      }
+
+      if (filter.bool && Array.isArray(filter?.bool?.must_not)) {
+        filter.bool.must_not!.push({
+          term: { _tier: 'data_frozen' },
+        });
+      }
       return {
         id: input.id,
         earliest,
