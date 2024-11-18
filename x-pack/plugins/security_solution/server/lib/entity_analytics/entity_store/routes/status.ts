@@ -48,7 +48,6 @@ export const getEntityStoreStatusRoute = (
       ): Promise<IKibanaResponse<GetEntityStoreStatusResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const secSol = await context.securitySolution;
-        const { pipelineDebugMode } = config.entityAnalytics.entityStore.developer;
 
         await checkAndInitAssetCriticalityResources(context, logger);
 
