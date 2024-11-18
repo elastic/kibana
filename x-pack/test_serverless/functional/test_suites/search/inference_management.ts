@@ -36,7 +36,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlCommonPage.loginWithRole('developer');
     });
 
-    after(async () => {});
+    after(async () => {
+      await ml.api.cleanMlIndices();
+    });
 
     beforeEach(async () => {
       await svlSearchNavigation.navigateToInferenceManagementPage();
@@ -80,15 +82,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('delete action', () => {
+      const usageIndex = 'elser_index';
       beforeEach(async () => {
         await ml.api.createInferenceEndpoint(endpoint, taskType, modelConfig);
         await browser.refresh();
       });
 
       after(async () => {
-        await ml.api.deleteIndices('elser_index');
+        await ml.api.deleteIndices(usageIndex);
         await ml.api.deleteIngestPipeline(endpoint);
-        await ml.api.cleanMlIndices();
       });
 
       it('deletes modal successfully without any usage', async () => {
@@ -108,7 +110,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
         };
         await ml.api.createIngestPipeline(endpoint);
-        await ml.api.createIndex('elser_index', indexMapping);
+        await ml.api.createIndex(usageIndex, indexMapping);
 
         await pageObjects.svlSearchInferenceManagementPage.InferenceTabularPage.expectEndpointWithUsageTobeDelete();
       });

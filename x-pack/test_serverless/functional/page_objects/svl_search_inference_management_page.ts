@@ -70,6 +70,8 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
             .then(() => true)
             .catch(() => false)
         );
+
+        await testSubjects.existOrFail('createFirstInferenceEndpointDescription');
       },
 
       async expectEndpointWithUsageTobeDelete() {
@@ -99,6 +101,8 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
             .then(() => true)
             .catch(() => false)
         );
+
+        await testSubjects.existOrFail('createFirstInferenceEndpointDescription');
       },
 
       async expectToCopyEndpoint() {
