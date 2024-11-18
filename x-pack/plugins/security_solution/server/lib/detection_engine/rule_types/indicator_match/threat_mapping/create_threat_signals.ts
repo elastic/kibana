@@ -142,6 +142,9 @@ export const createThreatSignals = async ({
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
       index: threatIndex,
       keep_alive: THREAT_PIT_KEEP_ALIVE,
+      // @ts-expect-error client support this option, but it is not documented and typed yet, but we need this fix in 8.16.2.
+      // once support added we should remove this expected type error
+      allow_partial_search_results: true,
     })
   ).id;
   const reassignThreatPitId = (newPitId: OpenPointInTimeResponse['id'] | undefined) => {
