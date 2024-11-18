@@ -41,7 +41,7 @@ export const waitUntilTaskCompleted = async ({
   taskId: string;
   timeout?: number;
   interval?: number;
-}): Promise<boolean> => {
+}): Promise<void> => {
   const start = Date.now();
   const max = start + timeout;
   let now = start;
@@ -53,12 +53,12 @@ export const waitUntilTaskCompleted = async ({
         await sleep(interval);
         now = Date.now();
       } else {
-        return false;
+        return;
       }
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         // not found means the task was completed and the entry removed
-        return true;
+        return;
       }
     }
   }
