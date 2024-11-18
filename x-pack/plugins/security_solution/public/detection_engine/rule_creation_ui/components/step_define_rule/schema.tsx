@@ -20,7 +20,6 @@ import {
   isEqlRule,
   isEqlSequenceQuery,
   isEsqlRule,
-  isNewTermsRule,
   isThreatMatchRule,
   isThresholdRule,
   isSuppressionRuleConfiguredWithGroupBy,
@@ -52,8 +51,6 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
-import { newTermsFieldsValidatorFactory } from '../../validators/new_terms_fields_validator_factory';
-import { historyWindowStartValidationFactory } from '../../validators/history_window_start_validator_factory';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -556,66 +553,8 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  newTermsFields: {
-    type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsFieldsLabel',
-      {
-        defaultMessage: 'Fields',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldNewTermsFieldHelpText',
-      {
-        defaultMessage: 'Select a field to check for new terms.',
-      }
-    ),
-    validations: [
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData }] = args;
-          const needsValidation = isNewTermsRule(formData.ruleType);
-          if (!needsValidation) {
-            return;
-          }
-
-          return newTermsFieldsValidatorFactory(...args);
-        },
-      },
-    ],
-  },
-  historyWindowSize: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.historyWindowSizeLabel',
-      {
-        defaultMessage: 'History Window Size',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.historyWindowSizeHelpText',
-      {
-        defaultMessage: "New terms rules only alert if terms don't appear in historical data.",
-      }
-    ),
-    validations: [
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData }] = args;
-          const needsValidation = isNewTermsRule(formData.ruleType);
-
-          if (!needsValidation) {
-            return;
-          }
-
-          return historyWindowStartValidationFactory(...args);
-        },
-      },
-    ],
-  },
+  newTermsFields: {},
+  historyWindowSize: {},
   [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: {
     validations: [
       {

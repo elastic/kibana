@@ -94,6 +94,7 @@ import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppr
 import { useTermsAggregationFields } from '../../../../common/hooks/use_terms_aggregation_fields';
 import { HistoryWindowStartEdit } from '../../../rule_creation/components/history_window_start_edit';
 import { NewTermsFieldsEdit } from '../../../rule_creation/components/new_terms_fields_edit';
+import { usePersistentNewTermsState } from './use_persistent_new_terms_state';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -368,6 +369,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [ruleType, previousRuleType, getFields]);
 
   usePersistentAlertSuppressionState({ form });
+  usePersistentNewTermsState({
+    form,
+    ruleTypePath: 'ruleType',
+    newTermsFieldsPath: 'newTermsFields',
+    historyWindowStartPath: 'historyWindowSize',
+  });
 
   // if saved query failed to load:
   // - reset shouldLoadFormDynamically to false, as non existent query cannot be used for loading and execution
@@ -910,16 +917,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </>
           </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow
-            $isVisible={isNewTermsRule(ruleType)}
-            data-test-subj="newTermsInput"
-            fullWidth
-          >
-            <>
-              <NewTermsFieldsEdit path="newTermsFields" fieldNames={termsAggregationFieldNames} />
-              <HistoryWindowStartEdit path="historyWindowSize" />
-            </>
-          </RuleTypeEuiFormRow>
+          {isNewTermsRule(ruleType) && (
+            <EuiFormRow data-test-subj="newTermsInput" fullWidth>
+              <>
+                <NewTermsFieldsEdit path="newTermsFields" fieldNames={termsAggregationFieldNames} />
+                <HistoryWindowStartEdit path="historyWindowSize" />
+              </>
+            </EuiFormRow>
+          )}
           <EuiSpacer size="m" />
 
           <RuleTypeEuiFormRow $isVisible={isAlertSuppressionEnabled} fullWidth>
