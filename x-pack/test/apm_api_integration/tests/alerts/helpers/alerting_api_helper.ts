@@ -38,13 +38,14 @@ export async function createApmRule<T extends ApmRuleType>({
         params,
         consumer: 'apm',
         schedule: {
-          interval: '5s',
+          interval: '1m',
         },
         tags: ['apm'],
         name,
         rule_type_id: ruleTypeId,
         actions,
       });
+
     return body;
   } catch (error: any) {
     throw new Error(`[Rule] Creating a rule failed: ${error}`);

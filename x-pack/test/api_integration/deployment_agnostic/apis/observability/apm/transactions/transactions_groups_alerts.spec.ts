@@ -13,19 +13,22 @@ import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createApmRule, runRuleSoon, ApmAlertFields } from '../alerts/helpers/alerting_api_helper';
-import { waitForActiveRule } from '../alerts/helpers/wait_for_active_rule';
-import { cleanupRuleAndAlertState } from '../alerts/helpers/cleanup_rule_and_alert_state';
-
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { waitForAlertsForRule } from '../../../../../../apm_api_integration/tests/alerts/helpers/wait_for_alerts_for_rule';
+import {
+  createApmRule,
+  runRuleSoon,
+  ApmAlertFields,
+} from '../../../../../../apm_api_integration/tests/alerts/helpers/alerting_api_helper';
+import { waitForActiveRule } from '../../../../../../apm_api_integration/tests/alerts/helpers/wait_for_active_rule';
+import { cleanupRuleAndAlertState } from '../../../../../../apm_api_integration/tests/alerts/helpers/cleanup_rule_and_alert_state';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 type TransactionsGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
   const supertest = getService('supertest');
   const es = getService('es');
   const serviceName = 'synth-go';
@@ -72,9 +75,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return response.body as TransactionsGroupsMainStatistics;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177617
-  registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
-    describe('Alerts', () => {
+  describe('Transaction groups alerts', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/177617
+    describe('when data is loaded', () => {
       const transactions = [
         {
           name: 'GET /api/task/avg',
@@ -102,7 +105,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           type: 'request',
         },
       ];
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
       before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
@@ -138,7 +144,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       after(() => apmSynthtraceEsClient.clean());
 
       // FLAKY: https://github.com/elastic/kibana/issues/198866
-      describe.skip('Transaction groups with avg transaction duration alerts', () => {
+      describe('Transaction groups with avg transaction duration alerts', () => {
         let ruleId: string;
         let alerts: ApmAlertFields[];
 
