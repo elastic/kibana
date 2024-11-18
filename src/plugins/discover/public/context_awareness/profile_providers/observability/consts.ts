@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createLogDocumentProfileProvider } from './profile';
+export const OBSERVABILITY_ROOT_PROFILE_ID = 'observability-root-profile';
