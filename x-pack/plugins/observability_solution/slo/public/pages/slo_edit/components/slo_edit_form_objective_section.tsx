@@ -167,7 +167,8 @@ export function SloEditFormObjectiveSection() {
         </EuiFlexItem>
       </EuiFlexGrid>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
+
       {indicator === 'sli.metric.timeslice' && (
         <EuiFlexItem>
           <EuiCallOut color="warning">
@@ -178,7 +179,7 @@ export function SloEditFormObjectiveSection() {
               />
             </p>
           </EuiCallOut>
-          <EuiSpacer size="l" />
+          <EuiSpacer size="m" />
         </EuiFlexItem>
       )}
 
@@ -192,7 +193,7 @@ export function SloEditFormObjectiveSection() {
               />
             </p>
           </EuiCallOut>
-          <EuiSpacer size="l" />
+          <EuiSpacer size="m" />
         </EuiFlexItem>
       )}
 
@@ -240,7 +241,7 @@ export function SloEditFormObjectiveSection() {
         ) : null}
       </EuiFlexGrid>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
 
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
@@ -286,7 +287,7 @@ export function SloEditFormObjectiveSection() {
         </EuiFlexItem>
       </EuiFlexGrid>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
 
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>

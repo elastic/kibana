@@ -56,8 +56,8 @@ export function ApmAvailabilityIndicatorTypeForm() {
   });
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexGroup direction="row" gutterSize="l">
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="row" gutterSize="m">
         <FieldSelector
           allowAllOption={false}
           label={i18n.translate('xpack.slo.sloEdit.apmAvailability.serviceName', {
@@ -94,7 +94,7 @@ export function ApmAvailabilityIndicatorTypeForm() {
         />
       </EuiFlexGroup>
 
-      <EuiFlexGroup direction="row" gutterSize="l">
+      <EuiFlexGroup direction="row" gutterSize="m">
         <FieldSelector
           label={i18n.translate('xpack.slo.sloEdit.apmAvailability.transactionType', {
             defaultMessage: 'Transaction type',
@@ -125,7 +125,7 @@ export function ApmAvailabilityIndicatorTypeForm() {
         />
       </EuiFlexGroup>
 
-      <EuiFlexGroup direction="row" gutterSize="l">
+      <EuiFlexGroup direction="row" gutterSize="m">
         <EuiFlexItem>
           <QueryBuilder
             dataTestSubj="apmLatencyFilterInput"

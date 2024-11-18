@@ -74,8 +74,8 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
   }, [currentMonitors, setValue]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexGroup direction="column" gutterSize="l">
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="m">
         <FieldSelector
           required
           allowAllOption
@@ -130,7 +130,7 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
         />
       </EuiFlexGroup>
 
-      <EuiFlexGroup direction="row" gutterSize="l">
+      <EuiFlexGroup direction="row" gutterSize="m">
         <EuiFlexItem>
           <QueryBuilder
             dataTestSubj="syntheticsAvailabilityFilterInput"

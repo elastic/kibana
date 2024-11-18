@@ -55,7 +55,7 @@ export function CustomMetricIndicatorTypeForm() {
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup direction="column" gutterSize="l">
+      <EuiFlexGroup direction="column" gutterSize="m">
         <IndexAndTimestampField dataView={dataView} isLoading={isIndexFieldsLoading} />
 
         <EuiFlexItem>

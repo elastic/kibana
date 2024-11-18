@@ -79,7 +79,7 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
               )}
             />
           </EuiFormRow>
-          <EuiSpacer size="xxl" />
+          <EuiSpacer size="xl" />
         </>
       )}
       {indicatorTypeForm}

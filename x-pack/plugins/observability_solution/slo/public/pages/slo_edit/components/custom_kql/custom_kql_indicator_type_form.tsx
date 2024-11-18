@@ -28,7 +28,7 @@ export function CustomKqlIndicatorTypeForm() {
   });
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
+    <EuiFlexGroup direction="column" gutterSize="m">
       <IndexAndTimestampField dataView={dataView} isLoading={isIndexFieldsLoading} />
 
       <EuiFlexItem>

@@ -117,54 +117,56 @@ export function MetricIndicator({ indexFields, isLoadingIndex, dataView }: Metri
       <EuiFlexItem>
         {fields?.map((metric, index, arr) => (
           <React.Fragment key={metric.id}>
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
-              <input hidden {...register(`indicator.params.metric.metrics.${index}.name`)} />
-              <MetricInput
-                isLoadingIndex={isLoadingIndex}
-                metricIndex={index}
-                indexPattern={indexPattern}
-                indexFields={indexFields}
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiFlexGroup alignItems="center" gutterSize="xs">
+                <input hidden {...register(`indicator.params.metric.metrics.${index}.name`)} />
+                <MetricInput
+                  isLoadingIndex={isLoadingIndex}
+                  metricIndex={index}
+                  indexPattern={indexPattern}
+                  indexFields={indexFields}
+                />
+                <EuiFlexItem grow={0}>
+                  <EuiButtonIcon
+                    data-test-subj="o11yMetricIndicatorButton"
+                    iconType="trash"
+                    color="danger"
+                    style={{ marginTop: '1.5em' }}
+                    onClick={handleDeleteMetric(index)}
+                    disabled={disableDelete}
+                    title={i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.deleteLabel', {
+                      defaultMessage: 'Delete metric',
+                    })}
+                    aria-label={i18n.translate(
+                      'xpack.slo.sloEdit.sliType.timesliceMetric.deleteLabel',
+                      { defaultMessage: 'Delete metric' }
+                    )}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <QueryBuilder
+                dataTestSubj="timesliceMetricIndicatorFormMetricQueryInput"
+                dataView={dataView}
+                label={`${filterLabel} ${metric.name}`}
+                name={`indicator.params.metric.metrics.${index}.filter`}
+                placeholder={i18n.translate(
+                  'xpack.slo.sloEdit.sliType.timesliceMetric.goodQuery.placeholder',
+                  { defaultMessage: 'KQL filter' }
+                )}
+                required={false}
+                tooltip={
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.slo.sloEdit.sliType.timesliceMetric.goodQuery.tooltip',
+                      {
+                        defaultMessage: 'This KQL query should return a subset of events.',
+                      }
+                    )}
+                    position="top"
+                  />
+                }
               />
-              <EuiFlexItem grow={0}>
-                <EuiButtonIcon
-                  data-test-subj="o11yMetricIndicatorButton"
-                  iconType="trash"
-                  color="danger"
-                  style={{ marginTop: '1.5em' }}
-                  onClick={handleDeleteMetric(index)}
-                  disabled={disableDelete}
-                  title={i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.deleteLabel', {
-                    defaultMessage: 'Delete metric',
-                  })}
-                  aria-label={i18n.translate(
-                    'xpack.slo.sloEdit.sliType.timesliceMetric.deleteLabel',
-                    { defaultMessage: 'Delete metric' }
-                  )}
-                />
-              </EuiFlexItem>
             </EuiFlexGroup>
-            <QueryBuilder
-              dataTestSubj="timesliceMetricIndicatorFormMetricQueryInput"
-              dataView={dataView}
-              label={`${filterLabel} ${metric.name}`}
-              name={`indicator.params.metric.metrics.${index}.filter`}
-              placeholder={i18n.translate(
-                'xpack.slo.sloEdit.sliType.timesliceMetric.goodQuery.placeholder',
-                { defaultMessage: 'KQL filter' }
-              )}
-              required={false}
-              tooltip={
-                <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.slo.sloEdit.sliType.timesliceMetric.goodQuery.tooltip',
-                    {
-                      defaultMessage: 'This KQL query should return a subset of events.',
-                    }
-                  )}
-                  position="top"
-                />
-              }
-            />
             {index !== arr.length - 1 && <EuiHorizontalRule size="quarter" />}
           </React.Fragment>
         ))}

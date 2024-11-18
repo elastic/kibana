@@ -58,8 +58,8 @@ export function ApmLatencyIndicatorTypeForm() {
   });
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexGroup direction="row" gutterSize="l">
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="row" gutterSize="m">
         <FieldSelector
           allowAllOption={false}
           label={i18n.translate('xpack.slo.sloEdit.apmLatency.serviceName', {
@@ -96,7 +96,7 @@ export function ApmLatencyIndicatorTypeForm() {
         />
       </EuiFlexGroup>
 
-      <EuiFlexGroup direction="row" gutterSize="l">
+      <EuiFlexGroup direction="row" gutterSize="m">
         <FieldSelector
           label={i18n.translate('xpack.slo.sloEdit.apmLatency.transactionType', {
             defaultMessage: 'Transaction type',
