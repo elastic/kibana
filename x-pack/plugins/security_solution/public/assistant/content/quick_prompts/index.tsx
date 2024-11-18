@@ -12,7 +12,6 @@ import {
 import { APP_UI_ID } from '../../../../common';
 import * as i18n from './translations';
 import {
-  // KNOWLEDGE_BASE_CATEGORY,
   PROMPT_CONTEXT_ALERT_CATEGORY,
   PROMPT_CONTEXT_DETECTION_RULES_CATEGORY,
   PROMPT_CONTEXT_EVENT_CATEGORY,
