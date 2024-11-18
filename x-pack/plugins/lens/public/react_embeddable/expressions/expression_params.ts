@@ -166,21 +166,23 @@ export async function getExpressionRendererParams(
     activeDatasourceState,
   } = await getExpressionFromDocument(state.attributes, documentToExpression);
 
+  // Apparently this change produces had lots of issues with solutions not using
+  // the Embeddable incorrectly. Will comment for now and later on will restore it when
+  // https://github.com/elastic/kibana/issues/200236 is resolved
+  //
   // if at least one indexPattern is time based, then the Lens embeddable requires the timeRange prop
   // this is necessary for the dataview embeddable but not the ES|QL one
-  if (
-    // restore the legacy behavior for now to not break things
-    renderCount < 2 &&
-    isSearchContextIncompatibleWithDataViews(
-      api,
-      getExecutionContext(),
-      searchContext,
-      indexPatternRefs,
-      indexPatterns
-    )
-  ) {
-    addUserMessages([getSearchContextIncompatibleMessage()]);
-  }
+  // if (
+  //   isSearchContextIncompatibleWithDataViews(
+  //     api,
+  //     getExecutionContext(),
+  //     searchContext,
+  //     indexPatternRefs,
+  //     indexPatterns
+  //   )
+  // ) {
+  //   addUserMessages([getSearchContextIncompatibleMessage()]);
+  // }
 
   if (expression) {
     const params: ExpressionWrapperProps = {
