@@ -102,7 +102,7 @@ const mergeVersions = ({
       // TS does not realize that in ABC scenario, baseVersion cannot be missing
       // Missing baseVersion scenarios were handled as -AA and -AB.
       const mergedVersion = merge(currentVersion, baseVersion ?? '', targetVersion, {
-        stringSeparator: /(\S+|\s+)/g, // Retains all whitespace, which we keep to preserve formatting
+        stringSeparator: /(\r\n|\n|\r)/g, // Separates strings by new lines
       });
 
       return mergedVersion.conflict
