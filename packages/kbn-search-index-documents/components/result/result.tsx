@@ -121,6 +121,7 @@ export const Result: React.FC<ResultProps> = ({
       <EuiHorizontalRule margin="none" />
       <EuiSplitPanel.Inner paddingSize="m">
         <ResultFields
+          documentId={metaData.id}
           isExpanded={isExpanded}
           fields={isExpanded ? fields : fields.slice(0, defaultVisibleFields)}
         />
