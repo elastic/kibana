@@ -53,12 +53,10 @@ export const getKnowledgeBaseIndicesRoute = (router: ElasticAssistantPluginRoute
             include_unmapped: true,
           });
 
-          const allIndices: string[] = [];
-          for (const [, value] of Object.entries(res.fields)) {
-            const indices = value.semantic_text?.indices ?? [];
-            allIndices.push(...(Array.isArray(indices) ? indices : [indices]));
-          }
-          body.indices = [...new Set([...allIndices])].sort();
+          body.indices = Object.values(res.fields)
+            .flatMap((value) => value.semantic_text?.indices ?? [])
+            .filter((value, index, self) => self.indexOf(value) === index)
+            .sort();
 
           return response.ok({ body });
         } catch (err) {
