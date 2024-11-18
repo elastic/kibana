@@ -55,6 +55,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   describe('Time range metadata', () => {
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     describe('without data', () => {
       it('handles empty state', async () => {
         const response = await getTimeRangeMedata({
@@ -76,7 +77,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('when generating data with multiple APM server versions', () => {
       describe('data loaded with and without summary field', () => {
-        let apmSynthtraceEsClient: ApmSynthtraceEsClient;
         const withoutSummaryFieldStart = moment('2023-04-28T00:00:00.000Z');
         const withoutSummaryFieldEnd = moment(withoutSummaryFieldStart).add(2, 'hours');
 
@@ -261,7 +261,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('when generating data', () => {
-      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
       before(async () => {
         const instance = apm.service('my-service', 'production', 'java').instance('instance');
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
