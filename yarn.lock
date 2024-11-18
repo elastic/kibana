@@ -3670,6 +3670,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-favorites-common@link:packages/content-management/favorites/favorites_common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-favorites-public@link:packages/content-management/favorites/favorites_public":
   version "0.0.0"
   uid ""
