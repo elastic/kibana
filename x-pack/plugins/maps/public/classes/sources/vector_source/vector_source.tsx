@@ -218,7 +218,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   // Allow source to filter and format feature properties before displaying to user
   async getTooltipProperties(
-    properties: any,
+    properties: GeoJsonProperties,
     executionContext: KibanaExecutionContext
   ): Promise<ITooltipProperty[]> {
     const tooltipProperties: ITooltipProperty[] = [];
