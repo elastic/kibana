@@ -148,8 +148,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.removePanel();
       await queryBar.setQuery('');
-      await filterBarService.removeAllFilters();
       await queryBar.submitQuery();
+      await filterBarService.removeAllFilters();
 
       // Create a new panel
       await dashboardAddPanel.clickEditorMenuButton();
@@ -161,6 +161,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await monacoEditor.setCodeEditorValue(ESQL_QUERY);
       await testSubjects.click('ESQLEditor-run-query-button');
       await header.waitUntilLoadingHasFinished();
+
+      const lensQuery = await monacoEditor.getCodeEditorValue();
+      expect(lensQuery).to.equal(ESQL_QUERY);
       await testSubjects.click('applyFlyoutButton');
 
       // Save the dashboard
