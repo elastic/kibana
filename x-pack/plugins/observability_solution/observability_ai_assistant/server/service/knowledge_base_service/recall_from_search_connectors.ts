@@ -128,6 +128,7 @@ async function recallFromLegacyConnectors({
 }): Promise<RecalledEntry[]> {
   const ML_INFERENCE_PREFIX = 'ml.inference.';
 
+  const modelIdPromise = getElserModelId(core, logger); // pre-fetch modelId in parallel with fieldCaps
   const fieldCaps = await esClient.asCurrentUser.fieldCaps({
     index: connectorIndices,
     fields: `${ML_INFERENCE_PREFIX}*`,
@@ -144,7 +145,7 @@ async function recallFromLegacyConnectors({
     return [];
   }
 
-  const modelId = await getElserModelId(core, logger);
+  const modelId = await modelIdPromise;
   const esQueries = fieldsWithVectors.flatMap((field) => {
     const vectorField = `${ML_INFERENCE_PREFIX}${field}_expanded.predicted_value`;
     const modelField = `${ML_INFERENCE_PREFIX}${field}_expanded.model_id`;
