@@ -149,12 +149,12 @@ export function getAllTestSuiteFactory(context: DeploymentAgnosticFtrProviderCon
         let supertest: SupertestWithRoleScopeType | SuperTestAgent;
         before(async () => {
           supertest = await getSupertest(context, user);
-          esArchiver.load(
+          await esArchiver.load(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           );
         });
         after(async () => {
-          esArchiver.unload(
+          await esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           );
           await maybeDestroySupertest(supertest);
