@@ -263,7 +263,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
             undefined,
             false,
             false,
-            true
+            false
           );
         }
       }
@@ -281,7 +281,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           undefined,
           false,
           false,
-          true
+          false
         );
       }
 
