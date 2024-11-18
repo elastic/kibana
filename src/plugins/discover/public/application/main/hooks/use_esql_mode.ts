@@ -114,11 +114,13 @@ export function useEsqlMode({
             stateContainer.internalState.transitions.setResetDefaultProfileState({
               columns: true,
               rowHeight: true,
+              breakdownField: true,
             });
           } else if (allColumnsChanged) {
             stateContainer.internalState.transitions.setResetDefaultProfileState({
               columns: true,
               rowHeight: false,
+              breakdownField: true,
             });
           }
 

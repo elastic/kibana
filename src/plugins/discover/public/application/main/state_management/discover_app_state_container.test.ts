@@ -272,11 +272,13 @@ describe('Test discover app state container', () => {
       expect(internalState.get().resetDefaultProfileState).toEqual({
         columns: false,
         rowHeight: false,
+        breakdownField: false,
       });
       state.initAndSync();
       expect(internalState.get().resetDefaultProfileState).toEqual({
         columns: true,
         rowHeight: true,
+        breakdownField: true,
       });
     });
 
@@ -287,11 +289,13 @@ describe('Test discover app state container', () => {
       expect(internalState.get().resetDefaultProfileState).toEqual({
         columns: false,
         rowHeight: false,
+        breakdownField: false,
       });
       state.initAndSync();
       expect(internalState.get().resetDefaultProfileState).toEqual({
         columns: false,
         rowHeight: true,
+        breakdownField: true,
       });
     });
 
@@ -302,11 +306,13 @@ describe('Test discover app state container', () => {
       expect(internalState.get().resetDefaultProfileState).toEqual({
         columns: false,
         rowHeight: false,
+        breakdownField: false,
       });
       state.initAndSync();
       expect(internalState.get().resetDefaultProfileState).toEqual({
         columns: true,
         rowHeight: false,
+        breakdownField: true,
       });
     });
 
@@ -323,11 +329,13 @@ describe('Test discover app state container', () => {
       expect(internalState.get().resetDefaultProfileState).toEqual({
         columns: false,
         rowHeight: false,
+        breakdownField: false,
       });
       state.initAndSync();
       expect(internalState.get().resetDefaultProfileState).toEqual({
         columns: false,
         rowHeight: false,
+        breakdownField: false,
       });
     });
   });

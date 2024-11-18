@@ -28,6 +28,7 @@ describe('getDefaultProfileState', () => {
       resetDefaultProfileState: {
         columns: true,
         rowHeight: false,
+        breakdownField: false,
       },
       defaultColumns: ['messsage', 'bytes'],
       dataView: dataViewWithTimefieldMock,
@@ -51,6 +52,7 @@ describe('getDefaultProfileState', () => {
       resetDefaultProfileState: {
         columns: true,
         rowHeight: false,
+        breakdownField: false,
       },
       defaultColumns: ['messsage', 'bytes'],
       dataView: emptyDataView,
@@ -77,6 +79,7 @@ describe('getDefaultProfileState', () => {
       resetDefaultProfileState: {
         columns: false,
         rowHeight: true,
+        breakdownField: false,
       },
       defaultColumns: [],
       dataView: dataViewWithTimefieldMock,
@@ -87,12 +90,30 @@ describe('getDefaultProfileState', () => {
     });
   });
 
+  it('should return expected breakdownField', () => {
+    const appState = getDefaultProfileState({
+      profilesManager: profilesManagerMock,
+      resetDefaultProfileState: {
+        columns: false,
+        rowHeight: false,
+        breakdownField: true,
+      },
+      defaultColumns: [],
+      dataView: dataViewWithTimefieldMock,
+      esqlQueryColumns: undefined,
+    });
+    expect(appState).toEqual({
+      breakdownField: 'log.level',
+    });
+  });
+
   it('should return undefined', () => {
     const appState = getDefaultProfileState({
       profilesManager: profilesManagerMock,
       resetDefaultProfileState: {
         columns: false,
         rowHeight: false,
+        breakdownField: false,
       },
       defaultColumns: [],
       dataView: dataViewWithTimefieldMock,

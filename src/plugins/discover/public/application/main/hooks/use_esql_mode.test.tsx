@@ -497,6 +497,7 @@ describe('useEsqlMode', () => {
     expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
       columns: false,
       rowHeight: false,
+      breakdownField: false,
     });
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -506,11 +507,13 @@ describe('useEsqlMode', () => {
       expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
         columns: true,
         rowHeight: true,
+        breakdownField: true,
       })
     );
     stateContainer.internalState.transitions.setResetDefaultProfileState({
       columns: false,
       rowHeight: false,
+      breakdownField: false,
     });
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -520,6 +523,7 @@ describe('useEsqlMode', () => {
       expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
         columns: false,
         rowHeight: false,
+        breakdownField: false,
       })
     );
     documents$.next({
@@ -530,6 +534,7 @@ describe('useEsqlMode', () => {
       expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
         columns: true,
         rowHeight: true,
+        breakdownField: true,
       })
     );
   });
@@ -542,6 +547,7 @@ describe('useEsqlMode', () => {
     expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
       columns: false,
       rowHeight: false,
+      breakdownField: false,
     });
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -552,11 +558,13 @@ describe('useEsqlMode', () => {
       expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
         columns: true,
         rowHeight: true,
+        breakdownField: true,
       })
     );
     stateContainer.internalState.transitions.setResetDefaultProfileState({
       columns: false,
       rowHeight: false,
+      breakdownField: false,
     });
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -567,6 +575,7 @@ describe('useEsqlMode', () => {
       expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
         columns: false,
         rowHeight: false,
+        breakdownField: false,
       })
     );
     documents$.next({
@@ -578,6 +587,7 @@ describe('useEsqlMode', () => {
       expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
         columns: true,
         rowHeight: false,
+        breakdownField: false,
       })
     );
   });

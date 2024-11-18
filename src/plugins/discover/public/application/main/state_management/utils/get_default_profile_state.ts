@@ -63,6 +63,10 @@ export const getDefaultProfileState = ({
     stateUpdate.rowHeight = defaultState.rowHeight;
   }
 
+  if (resetDefaultProfileState.breakdownField && defaultState.breakdownField !== undefined) {
+    stateUpdate.breakdownField = defaultState.breakdownField;
+  }
+
   return Object.keys(stateUpdate).length ? stateUpdate : undefined;
 };
 

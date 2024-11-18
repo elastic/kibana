@@ -26,7 +26,7 @@ export interface InternalState {
   customFilters: Filter[];
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
   isESQLToDataViewTransitionModalVisible?: boolean;
-  resetDefaultProfileState: { columns: boolean; rowHeight: boolean };
+  resetDefaultProfileState: { columns: boolean; rowHeight: boolean; breakdownField: boolean };
 }
 
 export interface InternalStateTransitions {
@@ -77,7 +77,7 @@ export function getInternalStateContainer() {
       expandedDoc: undefined,
       customFilters: [],
       overriddenVisContextAfterInvalidation: undefined,
-      resetDefaultProfileState: { columns: false, rowHeight: false },
+      resetDefaultProfileState: { columns: false, rowHeight: false, breakdownField: false },
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
