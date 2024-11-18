@@ -36,12 +36,12 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   const flyoutService = getService('flyout');
 
   async function deleteConversations() {
-    const response = await observabilityAIAssistantAPIClient.editorUser({
+    const response = await observabilityAIAssistantAPIClient.editor({
       endpoint: 'POST /internal/observability_ai_assistant/conversations',
     });
 
     for (const conversation of response.body.conversations) {
-      await observabilityAIAssistantAPIClient.editorUser({
+      await observabilityAIAssistantAPIClient.editor({
         endpoint: `DELETE /internal/observability_ai_assistant/conversation/{conversationId}`,
         params: {
           path: {
@@ -53,7 +53,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   }
 
   async function deleteConnectors() {
-    const response = await observabilityAIAssistantAPIClient.editorUser({
+    const response = await observabilityAIAssistantAPIClient.editor({
       endpoint: 'GET /internal/observability_ai_assistant/connectors',
     });
 
@@ -66,7 +66,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   }
 
   async function createOldConversation() {
-    await observabilityAIAssistantAPIClient.editorUser({
+    await observabilityAIAssistantAPIClient.editor({
       endpoint: 'POST /internal/observability_ai_assistant/conversation',
       params: {
         body: {
@@ -204,7 +204,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
           });
 
           it('creates a connector', async () => {
-            const response = await observabilityAIAssistantAPIClient.editorUser({
+            const response = await observabilityAIAssistantAPIClient.editor({
               endpoint: 'GET /internal/observability_ai_assistant/connectors',
             });
 
@@ -259,7 +259,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
               });
 
               it('creates a conversation and updates the URL', async () => {
-                const response = await observabilityAIAssistantAPIClient.editorUser({
+                const response = await observabilityAIAssistantAPIClient.editor({
                   endpoint: 'POST /internal/observability_ai_assistant/conversations',
                 });
 
@@ -325,7 +325,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                 });
 
                 it('does not create another conversation', async () => {
-                  const response = await observabilityAIAssistantAPIClient.editorUser({
+                  const response = await observabilityAIAssistantAPIClient.editor({
                     endpoint: 'POST /internal/observability_ai_assistant/conversations',
                   });
 
@@ -333,7 +333,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                 });
 
                 it('appends to the existing one', async () => {
-                  const response = await observabilityAIAssistantAPIClient.editorUser({
+                  const response = await observabilityAIAssistantAPIClient.editor({
                     endpoint: 'POST /internal/observability_ai_assistant/conversations',
                   });
 

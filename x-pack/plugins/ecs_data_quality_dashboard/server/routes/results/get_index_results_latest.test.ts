@@ -16,6 +16,24 @@ import { resultDocument } from './results.mock';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ResultDocument } from '../../schemas/result';
 import type { CheckIndicesPrivilegesParam } from './privileges';
+import { getRangeFilteredIndices } from '../../helpers/get_range_filtered_indices';
+
+const mockCheckIndicesPrivileges = jest.fn(({ indices }: CheckIndicesPrivilegesParam) =>
+  Promise.resolve(Object.fromEntries(indices.map((index) => [index, true])))
+);
+jest.mock('./privileges', () => ({
+  checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
+    mockCheckIndicesPrivileges(params),
+}));
+
+jest.mock('../../helpers/get_range_filtered_indices', () => ({
+  getRangeFilteredIndices: jest.fn(),
+}));
+
+const mockGetRangeFilteredIndices = getRangeFilteredIndices as jest.Mock;
+
+const startDate = 'now-7d';
+const endDate = 'now';
 
 const searchResponse = {
   aggregations: {
@@ -32,14 +50,6 @@ const searchResponse = {
   ResultDocument,
   Record<string, { buckets: LatestAggResponseBucket[] }>
 >;
-
-const mockCheckIndicesPrivileges = jest.fn(({ indices }: CheckIndicesPrivilegesParam) =>
-  Promise.resolve(Object.fromEntries(indices.map((index) => [index, true])))
-);
-jest.mock('./privileges', () => ({
-  checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
-    mockCheckIndicesPrivileges(params),
-}));
 
 describe('getIndexResultsLatestRoute route', () => {
   describe('querying', () => {
@@ -68,7 +78,7 @@ describe('getIndexResultsLatestRoute route', () => {
       getIndexResultsLatestRoute(server.router, logger);
     });
 
-    it('gets result', async () => {
+    it('gets result without startDate and endDate', async () => {
       const mockSearch = context.core.elasticsearch.client.asInternalUser.search;
       mockSearch.mockResolvedValueOnce(searchResponse);
 
@@ -76,6 +86,159 @@ describe('getIndexResultsLatestRoute route', () => {
       expect(mockSearch).toHaveBeenCalledWith({
         index: expect.any(String),
         ...getQuery([resultDocument.indexName]),
+      });
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([resultDocument]);
+
+      expect(mockGetRangeFilteredIndices).not.toHaveBeenCalled();
+    });
+
+    it('gets result with startDate and endDate', async () => {
+      const reqWithDate = requestMock.create({
+        method: 'get',
+        path: GET_INDEX_RESULTS_LATEST,
+        params: { pattern: 'logs-*' },
+        query: { startDate, endDate },
+      });
+
+      const filteredIndices = ['filtered-index-1', 'filtered-index-2'];
+      mockGetRangeFilteredIndices.mockResolvedValueOnce(filteredIndices);
+      const mockSearch = context.core.elasticsearch.client.asInternalUser.search;
+      mockSearch.mockResolvedValueOnce(searchResponse);
+
+      const response = await server.inject(reqWithDate, requestContextMock.convertContext(context));
+
+      expect(mockGetRangeFilteredIndices).toHaveBeenCalledWith({
+        client: context.core.elasticsearch.client,
+        authorizedIndexNames: [resultDocument.indexName],
+        startDate,
+        endDate,
+        logger,
+        pattern: 'logs-*',
+      });
+
+      expect(mockSearch).toHaveBeenCalledWith({
+        index: expect.any(String),
+        ...getQuery(filteredIndices),
+      });
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([resultDocument]);
+    });
+
+    it('handles getRangeFilteredIndices error', async () => {
+      const errorMessage = 'Range Filter Error';
+
+      const reqWithDate = requestMock.create({
+        method: 'get',
+        path: GET_INDEX_RESULTS_LATEST,
+        params: { pattern: 'logs-*' },
+        query: { startDate, endDate },
+      });
+
+      mockGetRangeFilteredIndices.mockRejectedValueOnce(new Error(errorMessage));
+
+      const response = await server.inject(reqWithDate, requestContextMock.convertContext(context));
+
+      expect(mockGetRangeFilteredIndices).toHaveBeenCalledWith({
+        client: context.core.elasticsearch.client,
+        authorizedIndexNames: [resultDocument.indexName],
+        startDate,
+        endDate,
+        logger,
+        pattern: 'logs-*',
+      });
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({ message: errorMessage, status_code: 500 });
+      expect(logger.error).toHaveBeenCalledWith(errorMessage);
+    });
+
+    it('gets result with startDate and endDate and multiple filtered indices', async () => {
+      const filteredIndices = ['filtered-index-1', 'filtered-index-2', 'filtered-index-3'];
+      const filteredIndicesSearchResponse = {
+        aggregations: {
+          latest: {
+            buckets: filteredIndices.map((indexName) => ({
+              key: indexName,
+              latest_doc: { hits: { hits: [{ _source: { indexName } }] } },
+            })),
+          },
+        },
+      } as unknown as SearchResponse<
+        ResultDocument,
+        Record<string, { buckets: LatestAggResponseBucket[] }>
+      >;
+
+      const reqWithDate = requestMock.create({
+        method: 'get',
+        path: GET_INDEX_RESULTS_LATEST,
+        params: { pattern: 'logs-*' },
+        query: { startDate, endDate },
+      });
+
+      mockGetRangeFilteredIndices.mockResolvedValueOnce(filteredIndices);
+      context.core.elasticsearch.client.asInternalUser.search.mockResolvedValueOnce(
+        filteredIndicesSearchResponse
+      );
+
+      const response = await server.inject(reqWithDate, requestContextMock.convertContext(context));
+
+      expect(mockGetRangeFilteredIndices).toHaveBeenCalledWith({
+        client: context.core.elasticsearch.client,
+        authorizedIndexNames: [resultDocument.indexName],
+        startDate,
+        endDate,
+        logger,
+        pattern: 'logs-*',
+      });
+
+      expect(context.core.elasticsearch.client.asInternalUser.search).toHaveBeenCalledWith({
+        index: expect.any(String),
+        ...getQuery(filteredIndices),
+      });
+
+      const expectedResults = filteredIndices.map((indexName) => ({
+        indexName,
+      })) as ResultDocument[];
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual(expectedResults);
+    });
+
+    it('handles partial authorization when using startDate and endDate', async () => {
+      const authorizationResult = {
+        'filtered-index-1': true,
+        'filtered-index-2': false,
+      };
+
+      mockGetRangeFilteredIndices.mockResolvedValueOnce(['filtered-index-1']);
+      mockCheckIndicesPrivileges.mockResolvedValueOnce(authorizationResult);
+
+      const mockSearch = context.core.elasticsearch.client.asInternalUser.search;
+      mockSearch.mockResolvedValueOnce(searchResponse);
+
+      const reqWithDate = requestMock.create({
+        method: 'get',
+        path: GET_INDEX_RESULTS_LATEST,
+        params: { pattern: 'logs-*' },
+        query: { startDate, endDate },
+      });
+
+      const response = await server.inject(reqWithDate, requestContextMock.convertContext(context));
+
+      expect(mockGetRangeFilteredIndices).toHaveBeenCalledWith({
+        client: context.core.elasticsearch.client,
+        authorizedIndexNames: ['filtered-index-1'],
+        startDate,
+        endDate,
+        logger,
+        pattern: 'logs-*',
+      });
+
+      expect(context.core.elasticsearch.client.asInternalUser.search).toHaveBeenCalledWith({
+        index: expect.any(String),
+        ...getQuery(['filtered-index-1']),
       });
 
       expect(response.status).toEqual(200);

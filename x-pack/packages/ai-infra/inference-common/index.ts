@@ -81,3 +81,5 @@ export {
   isInferenceInternalError,
   isInferenceRequestError,
 } from './src/errors';
+
+export { truncateList } from './src/truncate_list';

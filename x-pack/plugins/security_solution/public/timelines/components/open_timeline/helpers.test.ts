@@ -35,7 +35,7 @@ import {
   mockTemplate as mockSelectedTemplate,
 } from './__mocks__';
 import { resolveTimeline } from '../../containers/api';
-import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
+import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 

@@ -133,6 +133,20 @@ export async function installKibanaAssets(options: {
     return [];
   }
 
+  await createDefaultIndexPatterns(savedObjectsImporter);
+  await makeManagedIndexPatternsGlobal(savedObjectsClient);
+
+  return await installKibanaSavedObjects({
+    logger,
+    savedObjectsImporter,
+    kibanaAssets: assetsToInstall,
+    assetsChunkSize: MAX_ASSETS_TO_INSTALL_IN_PARALLEL,
+  });
+}
+
+export async function createDefaultIndexPatterns(
+  savedObjectsImporter: SavedObjectsImporterContract
+) {
   // Create index patterns separately with `overwrite: false` to prevent blowing away users' runtime fields.
   // These don't get retried on conflict, because we expect that they exist once an integration has been installed.
   const indexPatternSavedObjects = getIndexPatternSavedObjects() as ArchiveAsset[];
@@ -142,15 +156,6 @@ export async function installKibanaAssets(options: {
     createNewCopies: false,
     refresh: false,
     managed: true,
-  });
-
-  await makeManagedIndexPatternsGlobal(savedObjectsClient);
-
-  return await installKibanaSavedObjects({
-    logger,
-    savedObjectsImporter,
-    kibanaAssets: assetsToInstall,
-    assetsChunkSize: MAX_ASSETS_TO_INSTALL_IN_PARALLEL,
   });
 }
 

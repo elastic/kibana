@@ -51,19 +51,30 @@ type PackageWithInputAndStreamIndexed = Record<
 
 // Function based off storedPackagePolicyToAgentInputs, it only creates the `streams` section instead of the FullAgentPolicyInput
 export const templatePackagePolicyToFullInputStreams = (
-  packagePolicyInputs: PackagePolicyInput[]
+  packagePolicyInputs: PackagePolicyInput[],
+  inputAndStreamsIdsMap?: Map<string, { originalId: string; streams: Map<string, string> }>
 ): TemplateAgentPolicyInput[] => {
   const fullInputsStreams: TemplateAgentPolicyInput[] = [];
 
   if (!packagePolicyInputs || packagePolicyInputs.length === 0) return fullInputsStreams;
 
   packagePolicyInputs.forEach((input) => {
+    const streamsIdsMap = new Map();
+
+    const inputId = input.policy_template
+      ? `${input.policy_template}-${input.type}`
+      : `${input.type}`;
     const fullInputStream = {
       // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
-      id: input.policy_template ? `${input.policy_template}-${input.type}` : `${input.type}`,
+      id: inputId,
       type: input.type,
-      ...getFullInputStreams(input, true),
+      ...getFullInputStreams(input, true, streamsIdsMap),
     };
+
+    inputAndStreamsIdsMap?.set(fullInputStream.id, {
+      originalId: inputId,
+      streams: streamsIdsMap,
+    });
 
     // deeply merge the input.config values with the full policy input stream
     merge(
@@ -167,8 +178,13 @@ export async function getTemplateInputs(
     ...emptyPackagePolicy,
     inputs: compiledInputs,
   };
+  const inputIdsDestinationMap = new Map<
+    string,
+    { originalId: string; streams: Map<string, string> }
+  >();
   const inputs = templatePackagePolicyToFullInputStreams(
-    packagePolicyWithInputs.inputs as PackagePolicyInput[]
+    packagePolicyWithInputs.inputs as PackagePolicyInput[],
+    inputIdsDestinationMap
   );
 
   if (format === 'json') {
@@ -181,7 +197,7 @@ export async function getTemplateInputs(
         sortKeys: _sortYamlKeys,
       }
     );
-    return addCommentsToYaml(yaml, buildIndexedPackage(packageInfo));
+    return addCommentsToYaml(yaml, buildIndexedPackage(packageInfo), inputIdsDestinationMap);
   }
 
   return { inputs: [] };
@@ -247,7 +263,8 @@ function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStrea
 
 function addCommentsToYaml(
   yaml: string,
-  packageIndexInputAndStreams: PackageWithInputAndStreamIndexed
+  packageIndexInputAndStreams: PackageWithInputAndStreamIndexed,
+  inputIdsDestinationMap: Map<string, { originalId: string; streams: Map<string, string> }>
 ) {
   const doc = yamlDoc.parseDocument(yaml);
   // Add input and streams comments
@@ -261,28 +278,16 @@ function addCommentsToYaml(
       if (!yamlDoc.isScalar(inputIdNode)) {
         return;
       }
-      const inputId = inputIdNode.value as string;
+      const inputId =
+        inputIdsDestinationMap.get(inputIdNode.value as string)?.originalId ??
+        (inputIdNode.value as string);
       const pkgInput = packageIndexInputAndStreams[inputId];
       if (pkgInput) {
         inputItem.commentBefore = ` ${pkgInput.title}${
           pkgInput.description ? `: ${pkgInput.description}` : ''
         }`;
 
-        yamlDoc.visit(inputItem, {
-          Scalar(key, node) {
-            if (node.value) {
-              const val = node.value.toString();
-              for (const varDef of pkgInput.vars ?? []) {
-                const placeholder = getPlaceholder(varDef);
-                if (val.includes(placeholder)) {
-                  node.comment = ` ${varDef.title}${
-                    varDef.description ? `: ${varDef.description}` : ''
-                  }`;
-                }
-              }
-            }
-          },
-        });
+        commentVariablesInYaml(inputItem, pkgInput.vars ?? []);
 
         const yamlStreams = inputItem.get('streams');
         if (!yamlDoc.isCollection(yamlStreams)) {
@@ -294,27 +299,16 @@ function addCommentsToYaml(
           }
           const streamIdNode = streamItem.get('id', true);
           if (yamlDoc.isScalar(streamIdNode)) {
-            const streamId = streamIdNode.value as string;
+            const streamId =
+              inputIdsDestinationMap
+                .get(inputIdNode.value as string)
+                ?.streams?.get(streamIdNode.value as string) ?? (streamIdNode.value as string);
             const pkgStream = pkgInput.streams[streamId];
             if (pkgStream) {
               streamItem.commentBefore = ` ${pkgStream.title}${
                 pkgStream.description ? `: ${pkgStream.description}` : ''
               }`;
-              yamlDoc.visit(streamItem, {
-                Scalar(key, node) {
-                  if (node.value) {
-                    const val = node.value.toString();
-                    for (const varDef of pkgStream.vars ?? []) {
-                      const placeholder = getPlaceholder(varDef);
-                      if (val.includes(placeholder)) {
-                        node.comment = ` ${varDef.title}${
-                          varDef.description ? `: ${varDef.description}` : ''
-                        }`;
-                      }
-                    }
-                  }
-                },
-              });
+              commentVariablesInYaml(streamItem, pkgStream.vars ?? []);
             }
           }
         });
@@ -323,4 +317,72 @@ function addCommentsToYaml(
   }
 
   return doc.toString();
+}
+
+function commentVariablesInYaml(rootNode: yamlDoc.Node, vars: RegistryVarsEntry[] = []) {
+  // Node need to be deleted after the end of the visit to be able to visit every node
+  const toDeleteFn: Array<() => void> = [];
+  yamlDoc.visit(rootNode, {
+    Scalar(key, node, path) {
+      if (node.value) {
+        const val = node.value.toString();
+        for (const varDef of vars) {
+          const placeholder = getPlaceholder(varDef);
+          if (val.includes(placeholder)) {
+            node.comment = ` ${varDef.title}${varDef.description ? `: ${varDef.description}` : ''}`;
+
+            const paths = [...path].reverse();
+
+            let prevPart: yamlDoc.Node | yamlDoc.Document | yamlDoc.Pair = node;
+
+            for (const pathPart of paths) {
+              if (yamlDoc.isCollection(pathPart)) {
+                // If only one items in the collection comment the whole collection
+                if (pathPart.items.length === 1) {
+                  continue;
+                }
+              }
+              if (yamlDoc.isSeq(pathPart)) {
+                const commentDoc = new yamlDoc.Document(new yamlDoc.YAMLSeq());
+                commentDoc.add(prevPart);
+                const commentStr = commentDoc.toString().trimEnd();
+                pathPart.comment = pathPart.comment
+                  ? `${pathPart.comment} ${commentStr}`
+                  : ` ${commentStr}`;
+                const keyToDelete = prevPart;
+
+                toDeleteFn.push(() => {
+                  pathPart.items.forEach((item, index) => {
+                    if (item === keyToDelete) {
+                      pathPart.delete(new yamlDoc.Scalar(index));
+                    }
+                  });
+                });
+                return;
+              }
+
+              if (yamlDoc.isMap(pathPart)) {
+                if (yamlDoc.isPair(prevPart)) {
+                  const commentDoc = new yamlDoc.Document(new yamlDoc.YAMLMap());
+                  commentDoc.add(prevPart);
+                  const commentStr = commentDoc.toString().trimEnd();
+
+                  pathPart.comment = pathPart.comment
+                    ? `${pathPart.comment}\n ${commentStr.toString()}`
+                    : ` ${commentStr.toString()}`;
+                  const keyToDelete = prevPart.key;
+                  toDeleteFn.push(() => pathPart.delete(keyToDelete));
+                }
+                return;
+              }
+
+              prevPart = pathPart;
+            }
+          }
+        }
+      }
+    },
+  });
+
+  toDeleteFn.forEach((deleteFn) => deleteFn());
 }

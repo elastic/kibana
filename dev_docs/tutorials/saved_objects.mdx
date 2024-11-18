@@ -18,7 +18,7 @@ import { SavedObjectsType } from 'src/core/server';
 
 export const dashboardVisualization: SavedObjectsType = {
   name: 'dashboard_visualization', [1]
-  hidden: true,
+  hidden: true, [3]
   switchToModelVersionAt: '8.10.0', // this is the default, feel free to omit it unless you intend to switch to using model versions before 8.10.0
   namespaceType: 'multiple-isolated', [2]
   mappings: {
@@ -45,6 +45,9 @@ these should follow our API URL path convention and always be written in snake c
 [2] This field determines "space behavior" -- whether these objects can exist in one space, multiple spaces, or all spaces. This value means
 that objects of this type can only exist in a single space. See
 <DocLink id="kibDevDocsSavedObjectsIntro" section="sharing-saved-objects" text="Sharing Saved Objects"/> for more information.
+
+[3] This field determines whether repositories have access to the type by default. Hidden types will not be automatically exposed via the Saved Objects Client APIs.
+Hidden types must be listed in `SavedObjectsClientProviderOptions[includedHiddenTypes]` to be accessible by the client.
 
 **src/plugins/my_plugin/server/saved_objects/index.ts**
 
