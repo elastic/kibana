@@ -1,0 +1,44 @@
+openapi: 3.0.0
+
+info:
+  title: Enable Entity Store
+  version: '2023-10-31'
+paths:
+  /api/entity_store/status:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetEntityStoreStatus
+      summary: Get the status of the Entity Store
+            
+      parameters:
+        - name: withComponents          
+          in: query  
+          schema:
+            type: boolean
+          description: If true returns a detailed status of the engine including all it's components
+
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - engines
+                properties:
+                  status: 
+                    $ref: './common.schema.yaml#/components/schemas/StoreStatus'
+                  engines:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: './common.schema.yaml#/components/schemas/EngineDescriptor'
+                        - type: object
+                          properties:
+                            components:
+                              type: array
+                              items:
+                                $ref: './common.schema.yaml#/components/schemas/EngineComponentStatus'

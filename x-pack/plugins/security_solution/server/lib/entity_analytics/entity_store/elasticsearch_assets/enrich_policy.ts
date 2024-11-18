@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EnrichPutPolicyRequest } from '@elastic/elasticsearch/lib/api/types';
+import { EntityStoreResource } from '../../../../../common/entity_analytics/entity_store/constants';
 import { getEntitiesIndexName } from '../utils';
 import type { UnitedEntityDefinition } from '../united_entity_definitions';
 
@@ -104,4 +105,22 @@ export const deleteFieldRetentionEnrichPolicy = async ({
       currentAttempt++;
     }
   }
+};
+
+export const getFieldRetentionEnrichPolicyStatus = async ({
+  definitionMetadata,
+  esClient,
+}: {
+  definitionMetadata: DefinitionMetadata;
+  esClient: ElasticsearchClient;
+}) => {
+  const name = getFieldRetentionEnrichPolicyName(definitionMetadata);
+  const policy = await esClient.enrich.getPolicy({ name }, { ignore: [404] });
+  const policies = policy.policies;
+
+  return {
+    installed: policies.length > 0,
+    id: name,
+    resource: EntityStoreResource.ENRICH_POLICY,
+  };
 };

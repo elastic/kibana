@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { useMemo } from 'react';
+import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
 import type {
   DeleteEntityEngineResponse,
   EntityType,
-  GetEntityEngineResponse,
   InitEntityEngineResponse,
   ListEntityEnginesResponse,
   StopEntityEngineResponse,
@@ -36,13 +36,6 @@ export const useEntityStoreRoutes = () => {
       });
     };
 
-    const getEntityEngine = async (entityType: EntityType) => {
-      return http.fetch<GetEntityEngineResponse>(`/api/entity_store/engines/${entityType}`, {
-        method: 'GET',
-        version: API_VERSIONS.public.v1,
-      });
-    };
-
     const deleteEntityEngine = async (entityType: EntityType, deleteData: boolean) => {
       return http.fetch<DeleteEntityEngineResponse>(`/api/entity_store/engines/${entityType}`, {
         method: 'DELETE',
@@ -58,12 +51,20 @@ export const useEntityStoreRoutes = () => {
       });
     };
 
+    const getEntityStoreStatus = async (withComponents = false) => {
+      return http.fetch<GetEntityStoreStatusResponse>('/api/entity_store/status', {
+        method: 'GET',
+        version: API_VERSIONS.public.v1,
+        query: { withComponents },
+      });
+    };
+
     return {
       initEntityStore,
       stopEntityStore,
-      getEntityEngine,
       deleteEntityEngine,
       listEntityEngines,
+      getEntityStoreStatus,
     };
   }, [http]);
 };

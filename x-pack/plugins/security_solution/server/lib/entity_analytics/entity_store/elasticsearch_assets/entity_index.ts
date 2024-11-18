@@ -6,7 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { EntityType } from '../../../../../common/api/entity_analytics';
+import { EntityStoreResource } from '../../../../../common/entity_analytics/entity_store/constants';
+import type { EngineComponentStatus, EntityType } from '../../../../../common/api/entity_analytics';
 import { getEntitiesIndexName } from '../utils';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 
@@ -36,3 +37,21 @@ export const deleteEntityIndex = ({ entityType, esClient, namespace }: Options) 
       ignore: [404],
     }
   );
+
+export const getEntityIndexStatus = async ({
+  entityType,
+  esClient,
+  namespace,
+}: Pick<Options, 'entityType' | 'namespace' | 'esClient'>): Promise<EngineComponentStatus> => {
+  const index = getEntitiesIndexName(entityType, namespace);
+  const exists = await esClient.indices.exists(
+    {
+      index,
+    },
+    {
+      ignore: [404],
+    }
+  );
+
+  return { id: index, installed: exists, resource: EntityStoreResource.INDEX };
+};

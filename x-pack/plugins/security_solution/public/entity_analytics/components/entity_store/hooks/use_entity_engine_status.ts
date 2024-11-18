@@ -7,6 +7,8 @@
 
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
+import type { IHttpFetchError } from '@kbn/core/public';
+import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
 import type { ListEntityEnginesResponse } from '../../../../../common/api/entity_analytics';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
 
@@ -15,11 +17,25 @@ export const ENTITY_STORE_ENGINE_STATUS = 'ENTITY_STORE_ENGINE_STATUS';
 interface Options {
   disabled?: boolean;
   polling?: UseQueryOptions<ListEntityEnginesResponse>['refetchInterval'];
+  withComponents?: boolean;
 }
 
 interface EngineError {
   message: string;
 }
+
+export const useEntityEngineStatusNew = (opts: Options = {}) => {
+  const { getEntityStoreStatus } = useEntityStoreRoutes();
+
+  return useQuery<GetEntityStoreStatusResponse | null, IHttpFetchError>({
+    queryKey: ['GET_ENTITY_STORE_STATUS', opts.withComponents],
+    queryFn: () => getEntityStoreStatus(opts.withComponents),
+    cacheTime: 0,
+    // enabled: !skip,
+    refetchOnWindowFocus: true,
+    keepPreviousData: true,
+  });
+};
 
 export const useEntityEngineStatus = (opts: Options = {}) => {
   // QUESTION: Maybe we should have an `EnablementStatus` API route for this?

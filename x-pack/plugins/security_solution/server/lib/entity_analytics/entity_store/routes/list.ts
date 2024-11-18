@@ -39,6 +39,7 @@ export const listEntityEnginesRoute = (
 
         try {
           const secSol = await context.securitySolution;
+          // should includeStatus be snake case?
           const body = await secSol.getEntityStoreDataClient().list();
 
           return response.ok({ body });

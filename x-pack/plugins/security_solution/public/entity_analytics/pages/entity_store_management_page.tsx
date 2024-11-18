@@ -21,14 +21,16 @@ import {
   EuiCode,
   EuiSwitch,
   EuiHealth,
-  EuiButton,
   EuiLoadingSpinner,
   EuiToolTip,
   EuiBetaBadge,
+  EuiTabs,
+  EuiTab,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useEntityEngineStatus } from '../components/entity_store/hooks/use_entity_engine_status';
+
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../common/entity_analytics/asset_criticality';
 import { useKibana } from '../../common/lib/kibana';
@@ -43,10 +45,18 @@ import {
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/translations';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { MissingPrivilegesCallout } from '../components/entity_store/components/missing_privileges_callout';
+import { EngineStatus } from '../components/entity_store/components/engines_status';
+import { useEntityEngineStatus } from '../components/entity_store/hooks/use_entity_engine_status';
 
 const entityStoreEnabledStatuses = ['enabled'];
 const switchDisabledStatuses = ['error', 'loading', 'installing'];
 const entityStoreInstallingStatuses = ['installing', 'loading'];
+const installedStatuses = ['stopped', 'enabled', 'error'];
+
+enum TabId {
+  Import = 'import',
+  Resources = 'resources',
+}
 
 export const EntityStoreManagementPage = () => {
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
@@ -59,6 +69,8 @@ export const EntityStoreManagementPage = () => {
   const hasAssetCriticalityWritePermissions = assetCriticalityPrivileges?.has_write_permissions;
 
   const [polling, setPolling] = useState(false);
+  const [selectedTabId, setSelectedTabId] = useState(TabId.Import);
+
   const entityStoreStatus = useEntityEngineStatus({
     disabled: false,
     polling: !polling
@@ -134,46 +146,22 @@ export const EntityStoreManagementPage = () => {
     );
   };
 
-  const ClearEntityDataPanel: React.FC = () => {
+  const ClearEntityDataButton: React.FC = () => {
     return (
       <>
-        <EuiPanel
-          paddingSize="l"
-          grow={false}
-          color="subdued"
-          borderRadius="none"
-          hasShadow={false}
+        <EuiButtonEmpty
+          color="danger"
+          iconType="trash"
+          onClick={() => {
+            showClearModal();
+          }}
         >
-          <EuiText size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.clearEntityData"
-                defaultMessage="Clear entity data"
-              />
-            </h3>
-            <EuiSpacer size="s" />
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.clearEntityData"
-              defaultMessage={`Remove all extracted entity data from the store. This action will
-            permanently delete persisted user and host records, and data will no longer be available for analysis.
-            Proceed with caution, as this cannot be undone. Note that this operation will not delete source data,
-            Entity risk scores, or Asset Criticality assignments.`}
-            />
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiButton
-            color="danger"
-            iconType="trash"
-            onClick={() => {
-              showClearModal();
-            }}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.clear"
-              defaultMessage="Clear"
-            />
-          </EuiButton>
-        </EuiPanel>
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.clear"
+            defaultMessage="Clear Entity Data"
+          />
+        </EuiButtonEmpty>
+
         {isClearModalVisible && (
           <EuiConfirmModal
             isLoading={deleteEntityEngineMutation.isLoading}
@@ -226,14 +214,6 @@ export const EntityStoreManagementPage = () => {
     }
     return (
       <EuiFlexItem grow={3}>
-        <EuiTitle size="s">
-          <h2>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.subTitle"
-              defaultMessage="Import entities using a text file"
-            />
-          </h2>
-        </EuiTitle>
         <EuiSpacer size="m" />
         <EuiText size="s">
           <FormattedMessage
@@ -289,7 +269,8 @@ export const EntityStoreManagementPage = () => {
         alignItems="center"
         rightSideItems={
           !isEntityStoreFeatureFlagDisabled && privileges?.has_all_required
-            ? [
+            ? // !isEntityStoreFeatureFlagDisabled && true
+              [
                 <EnablementButton
                   isLoading={
                     isMutationLoading ||
@@ -301,6 +282,7 @@ export const EntityStoreManagementPage = () => {
                   onSwitch={onSwitchClick}
                   status={entityStoreStatus.status}
                 />,
+                canDeleteEntityEngine ? <ClearEntityDataButton /> : null,
               ]
             : []
         }
@@ -321,10 +303,32 @@ export const EntityStoreManagementPage = () => {
         </>
       )}
 
-      <EuiHorizontalRule />
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
+
+      <EuiTabs data-test-subj="tabs">
+        <EuiTab
+          key={TabId.Import}
+          isSelected={selectedTabId === TabId.Import}
+          onClick={() => setSelectedTabId(TabId.Import)}
+        >
+          {'Import Entities'}
+        </EuiTab>
+
+        {installedStatuses.includes(entityStoreStatus.status) && privileges?.has_all_required && (
+          <EuiTab
+            key={TabId.Resources}
+            isSelected={selectedTabId === TabId.Resources}
+            onClick={() => setSelectedTabId(TabId.Resources)}
+          >
+            {'Engine Status'}
+          </EuiTab>
+        )}
+      </EuiTabs>
+
+      <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="xl">
-        <FileUploadSection />
+        {selectedTabId === TabId.Import && <FileUploadSection />}
+        {selectedTabId === TabId.Resources && <EngineStatus />}
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column">
             {initEntityEngineMutation.isError && (
@@ -360,10 +364,7 @@ export const EntityStoreManagementPage = () => {
               </EuiCallOut>
             )}
             {callouts}
-            <WhatIsAssetCriticalityPanel />
-            {!isEntityStoreFeatureFlagDisabled &&
-              privileges?.has_all_required &&
-              canDeleteEntityEngine && <ClearEntityDataPanel />}
+            {selectedTabId === TabId.Import && <WhatIsAssetCriticalityPanel />}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
