@@ -55,12 +55,12 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
 
   function deleteAgent(
-    query: APIClientRequestParamsOf<'DELETE /api/apm/settings/agent-configuration 2023-10-31'>['params']['query']
+    query: APIClientRequestParamsOf<'DELETE /api/apm/settings/agent-configuration 2023-10-31'>['params']['body']
   ) {
     return apmApiClient.writeUser({
       endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
       params: {
-        query,
+        body,
       },
     });
   }
@@ -283,10 +283,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
     after(async () => {
       log.info('deleting agent configuration');
-      await deleteAgent({
-        serviceName: config.service.name,
-        serviceEnvironment: config.service.environment,
-      });
+      await deleteAgent({ service: config.service });
       log.info('Agent configuration deleted');
     });
 

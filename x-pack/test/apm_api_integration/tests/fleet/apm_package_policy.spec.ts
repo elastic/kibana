@@ -53,14 +53,23 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     });
   }
 
-  async function deleteConfiguration(configuration: any) {
+  async function deleteConfigurationQuery(configuration: any) {
     return apmApiClient.writeUser({
       endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
       params: {
         query: {
-          serviceName: configuration.service.name,
-          serviceEnvironment: configuration.service.environment,
+          name: configuration.service.name,
+          environment: configuration.service.environment,
         },
+      },
+    });
+  }
+
+  async function deleteConfiguration(configuration: any) {
+    return apmApiClient.writeUser({
+      endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
+      params: {
+        body: { service: configuration.service },
       },
     });
   }
@@ -191,6 +200,29 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
         after(async () => {
           await deleteConfiguration(testConfiguration);
+        });
+
+        it('sets the expected agent configs on the new package policy object', async () => {
+          const agentConfigs = get(packagePolicyWithAgentConfig, AGENT_CONFIG_PATH)!;
+          const { service, config } = agentConfigs[0];
+          expect(service).to.eql({});
+          expect(config).to.eql({ transaction_sample_rate: '0.55' });
+        });
+      });
+
+      describe('Agent config with query DELETE', () => {
+        let packagePolicyWithAgentConfig: PackagePolicy;
+        const testConfiguration = {
+          service: {},
+          settings: { transaction_sample_rate: '0.55' },
+        };
+        before(async () => {
+          await createConfiguration(testConfiguration);
+          packagePolicyWithAgentConfig = await getPackagePolicy(bettertest, packagePolicyId);
+        });
+
+        after(async () => {
+          await deleteConfigurationQuery(testConfiguration);
         });
 
         it('sets the expected agent configs on the new package policy object', async () => {

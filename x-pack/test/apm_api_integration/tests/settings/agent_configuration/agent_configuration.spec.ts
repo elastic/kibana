@@ -87,7 +87,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
     return supertestClient({
       endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
-      params: { query: { service } },
+      params: { body: { service } },
     });
   }
 
@@ -95,9 +95,9 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     return apmApiClient.readUser({
       endpoint: 'GET /api/apm/settings/agent-configuration/view 2023-10-31',
       params: {
-        query: {
-          serviceName: name,
-          serviceEnvironment: environment,
+        body: {
+          name,
+          environment,
         },
       },
     });

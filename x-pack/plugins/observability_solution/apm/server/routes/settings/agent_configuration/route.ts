@@ -96,7 +96,64 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
 });
 
 // delete configuration
-const deleteAgentConfigurationRoute = createApmServerRoute({
+const deleteAgentConfigurationBodyRoute = createApmServerRoute({
+  endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
+  options: {
+    tags: ['access:apm', 'access:apm_settings_write'],
+    access: 'public',
+  },
+  params: t.type({
+    body: t.type({
+      service: serviceRt,
+    }),
+  }),
+  handler: async (resources): Promise<{ result: string }> => {
+    throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
+
+    const { service } = params.body;
+
+    const apmIndices = await resources.getApmIndices();
+    const [internalESClient, apmEventClient] = await Promise.all([
+      createInternalESClientWithResources(resources),
+      getApmEventClient(resources),
+    ]);
+    const exactConfig = await findExactConfiguration({
+      service,
+      internalESClient,
+      apmEventClient,
+    });
+    if (!exactConfig) {
+      logger.info(`Config was not found for ${service.name}/${service.environment}`);
+
+      throw Boom.notFound();
+    }
+
+    logger.info(`Deleting config ${service.name}/${service.environment} (${exactConfig.id})`);
+
+    const deleteConfigurationResult = await deleteConfiguration({
+      configurationId: exactConfig.id!,
+      internalESClient,
+    });
+
+    if (resources.plugins.fleet) {
+      await syncAgentConfigsToApmPackagePolicies({
+        coreStartPromise: core.start(),
+        fleetPluginStart: await resources.plugins.fleet.start(),
+        internalESClient,
+        apmIndices,
+        telemetryUsageCounter,
+      });
+      logger.info(
+        `Updated Fleet integration policy for APM to remove the deleted agent configuration.`
+      );
+    }
+
+    return deleteConfigurationResult;
+  },
+});
+
+// delete configuration
+const deleteAgentConfigurationQueryRoute = createApmServerRoute({
   endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
   options: {
     tags: ['access:apm', 'access:apm_settings_write'],
@@ -355,7 +412,8 @@ const agentConfigurationAgentNameRoute = createApmServerRoute({
 export const agentConfigurationRouteRepository = {
   ...agentConfigurationRoute,
   ...getSingleAgentConfigurationRoute,
-  ...deleteAgentConfigurationRoute,
+  ...deleteAgentConfigurationBodyRoute,
+  ...deleteAgentConfigurationQueryRoute,
   ...createOrUpdateAgentConfigurationRoute,
   ...agentConfigurationSearchRoute,
   ...listAgentConfigurationEnvironmentsRoute,
