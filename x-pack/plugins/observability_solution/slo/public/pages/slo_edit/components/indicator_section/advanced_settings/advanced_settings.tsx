@@ -59,7 +59,7 @@ export function AdvancedSettings() {
             <EuiIconTip
               content={i18n.translate('xpack.slo.sloEdit.settings.syncDelay.tooltip', {
                 defaultMessage:
-                  'The time delay in minutes between the current time and the latest input data time. The default value is 1 minute.',
+                  'The time delay in minutes between the current time and the latest source data time. Increasing the value will delay any alerting. The default value is 1 minute.',
               })}
               position="top"
             />
