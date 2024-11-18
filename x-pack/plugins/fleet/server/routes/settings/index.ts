@@ -40,7 +40,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             authz.fleet.allAgentPolicies
           );
         },
-        description: `Get space settings`,
+        summary: `Get space settings`,
       })
       .addVersion(
         {
@@ -56,7 +56,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         fleetAuthz: {
           fleet: { allSettings: true },
         },
-        description: `Put space settings`,
+        summary: `Create space settings`,
       })
       .addVersion(
         {
@@ -73,7 +73,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       fleetAuthz: {
         fleet: { readSettings: true },
       },
-      description: `Get settings`,
+      summary: `Get settings`,
+      options: {
+        tags: ['oas-tag:Fleet internals'],
+      },
     })
     .addVersion(
       {
@@ -88,7 +91,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       fleetAuthz: {
         fleet: { allSettings: true },
       },
-      description: `Update settings`,
+      summary: `Update settings`,
+      options: {
+        tags: ['oas-tag:Fleet internals'],
+      },
     })
     .addVersion(
       {
@@ -103,7 +109,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       fleetAuthz: (authz) => {
         return authz.fleet.addAgents || authz.fleet.addFleetServers;
       },
-      description: `Get enrollment settings`,
+      summary: `Get enrollment settings`,
+      options: {
+        tags: ['oas-tag:Fleet internals'],
+      },
     })
     .addVersion(
       {

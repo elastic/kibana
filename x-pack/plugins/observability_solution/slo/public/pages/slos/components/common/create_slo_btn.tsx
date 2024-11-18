@@ -8,7 +8,7 @@
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { paths } from '../../../../../common/locators/paths';
 import { usePermissions } from '../../../../hooks/use_permissions';
 
