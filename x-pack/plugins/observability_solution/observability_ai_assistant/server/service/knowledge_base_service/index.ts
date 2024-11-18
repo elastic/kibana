@@ -6,7 +6,7 @@
  */
 
 import { serverUnavailable } from '@hapi/boom';
-import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
@@ -26,15 +26,17 @@ import {
   getInferenceEndpoint,
   isInferenceEndpointMissingOrUnavailable,
 } from '../inference_endpoint';
-import { recallFromConnectors } from './recall_from_connectors';
+import { recallFromSearchConnectors } from './recall_from_search_connectors';
+import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import { ObservabilityAIAssistantConfig } from '../../config';
 
 interface Dependencies {
+  core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   esClient: {
     asInternalUser: ElasticsearchClient;
   };
   logger: Logger;
-  getSearchConnectorModelId: () => Promise<string>;
-  enabled: boolean;
+  config: ObservabilityAIAssistantConfig;
 }
 
 export interface RecalledEntry {
@@ -141,14 +143,13 @@ export class KnowledgeBaseService {
     esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
     uiSettingsClient: IUiSettingsClient;
   }): Promise<RecalledEntry[]> => {
-    if (!this.dependencies.enabled) {
+    if (!this.dependencies.config.enableKnowledgeBase) {
       return [];
     }
 
     this.dependencies.logger.debug(
       () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
     );
-    const modelId = await this.dependencies.getSearchConnectorModelId();
 
     const [documentsFromKb, documentsFromConnectors] = await Promise.all([
       this.recallFromKnowledgeBase({
@@ -162,11 +163,11 @@ export class KnowledgeBaseService {
         }
         throw error;
       }),
-      recallFromConnectors({
+      recallFromSearchConnectors({
         esClient,
         uiSettingsClient,
         queries,
-        modelId,
+        core: this.dependencies.core,
         logger: this.dependencies.logger,
       }).catch((error) => {
         this.dependencies.logger.debug('Error getting data from search indices');
@@ -214,7 +215,7 @@ export class KnowledgeBaseService {
     namespace: string,
     user?: { name: string }
   ): Promise<Array<Instruction & { public?: boolean }>> => {
-    if (!this.dependencies.enabled) {
+    if (!this.dependencies.config.enableKnowledgeBase) {
       return [];
     }
     try {
@@ -257,7 +258,7 @@ export class KnowledgeBaseService {
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
-    if (!this.dependencies.enabled) {
+    if (!this.dependencies.config.enableKnowledgeBase) {
       return { entries: [] };
     }
     try {
@@ -330,7 +331,7 @@ export class KnowledgeBaseService {
     user?: { name: string; id?: string };
     namespace?: string;
   }) => {
-    if (!this.dependencies.enabled) {
+    if (!this.dependencies.config.enableKnowledgeBase) {
       return null;
     }
     const res = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
@@ -393,7 +394,7 @@ export class KnowledgeBaseService {
     user?: { name: string; id?: string };
     namespace?: string;
   }): Promise<void> => {
-    if (!this.dependencies.enabled) {
+    if (!this.dependencies.config.enableKnowledgeBase) {
       return;
     }
 
@@ -448,7 +449,7 @@ export class KnowledgeBaseService {
       errorMessage = error.message;
     });
 
-    const enabled = this.dependencies.enabled;
+    const enabled = this.dependencies.config.enableKnowledgeBase;
     if (!endpoint) {
       return { ready: false, enabled, errorMessage };
     }
