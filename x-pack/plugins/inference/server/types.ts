@@ -25,17 +25,54 @@ export interface InferenceStartDependencies {
 
 export interface InferenceServerSetup {}
 
+/**
+ * Options to create an inference client using the {@link InferenceServerStart.getClient} API.
+ */
 export interface InferenceClientCreateOptions<T extends StaticChatCompleteOptions | undefined> {
+  /**
+   * The request to scope the client to.
+   */
   request: KibanaRequest;
+  /**
+   * If specified, will return a client bound to the provided options, instead of an unbound one.
+   */
   bindTo?: T;
 }
 
+/**
+ * Start contract of the inference plugin, exposing APIs to interact with LLMs.
+ */
 export interface InferenceServerStart {
   /**
-   * Creates an inference client, scoped to a request.
+   * Creates an {@link InferenceClient}, scoped to a request.
    *
-   * @param options {@link InferenceClientCreateOptions}
-   * @returns {@link InferenceClient}
+   * @example
+   * ```ts
+   * const inferenceClient = myStartDeps.inference.getClient({ request });
+   *
+   * const chatResponse = inferenceClient.chatComplete({
+   *   connectorId: 'my-connector-id',
+   *   messages: [{ role: MessageRole.User, content: 'Do something' }],
+   * });
+   * ```
+   *
+   * It is also possible to bind a client to its configuration parameters, to avoid passing connectorId
+   * to every call, for example. Defining the `bindTo` parameter will return a {@link BoundInferenceClient}
+   *
+   * @example
+   * ```ts
+   * const inferenceClient = myStartDeps.inference.getClient({
+   *   request,
+   *   bindTo: {
+   *    connectorId: 'my-connector-id',
+   *    functionCalling: 'simulated',
+   *   }
+   * });
+   *
+   * const chatResponse = inferenceClient.chatComplete({
+   *   messages: [{ role: MessageRole.User, content: 'Do something' }],
+   * });
+   * ```
    */
   getClient: <T extends StaticChatCompleteOptions | undefined>(
     options: InferenceClientCreateOptions<T>

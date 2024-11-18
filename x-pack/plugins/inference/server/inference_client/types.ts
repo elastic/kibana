@@ -13,6 +13,9 @@ import type {
 } from '@kbn/inference-common';
 import type { InferenceConnector } from '../../common/connectors';
 
+/**
+ * An inference client, scoped to a request, that can be used to interact with LLMs.
+ */
 export interface InferenceClient {
   /**
    * `chatComplete` requests the LLM to generate a response to
@@ -32,6 +35,9 @@ export interface InferenceClient {
   getConnectorById: (id: string) => Promise<InferenceConnector>;
 }
 
+/**
+ * A version of the {@link InferenceClient} that was pre-bound to a set of parameters.
+ */
 export interface BoundInferenceClient {
   /**
    * `chatComplete` requests the LLM to generate a response to
