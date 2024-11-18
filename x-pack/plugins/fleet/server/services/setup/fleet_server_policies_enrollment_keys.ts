@@ -38,8 +38,6 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
   });
 
   const outdatedAgentPolicyIds: Array<{ id: string; spaceId?: string }> = [];
-  const matchingRevisionAgentPolicyIds: Array<{ id: string; spaceId?: string }> = [];
-
   await pMap(
     agentPolicies,
     async (agentPolicy) => {
@@ -50,11 +48,6 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
 
       if ((latestFleetPolicy?.revision_idx ?? -1) < agentPolicy.revision) {
         outdatedAgentPolicyIds.push({ id: agentPolicy.id, spaceId: agentPolicy.space_ids?.[0] });
-      } else if ((latestFleetPolicy?.revision_idx ?? -1) === agentPolicy.revision) {
-        matchingRevisionAgentPolicyIds.push({
-          id: agentPolicy.id,
-          spaceId: agentPolicy.space_ids?.[0],
-        });
       }
     },
     {
@@ -62,12 +55,7 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
     }
   );
 
-  if (matchingRevisionAgentPolicyIds.length) {
-    scheduleBumpAgentPoliciesTask(
-      appContextService.getTaskManagerStart()!,
-      matchingRevisionAgentPolicyIds
-    );
-  }
+  await scheduleBumpAgentPoliciesTask(appContextService.getTaskManagerStart()!);
 
   if (outdatedAgentPolicyIds.length) {
     if (appContextService.getExperimentalFeatures().asyncDeployPolicies) {

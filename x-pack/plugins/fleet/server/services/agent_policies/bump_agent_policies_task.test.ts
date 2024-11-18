@@ -6,84 +6,50 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { agentPolicyService } from '../agent_policy';
 
-import { _bumpPolicyIfDiffers } from './bump_agent_policies_task';
+import { packagePolicyService } from '../package_policy';
+import type { PackagePolicy } from '../../types';
+
+import { _updatePackagePoliciesThatNeedBump } from './bump_agent_policies_task';
 
 jest.mock('../app_context');
 jest.mock('../agent_policy');
+jest.mock('../package_policy');
 
 const mockedAgentPolicyService = jest.mocked(agentPolicyService);
+const mockedPackagePolicyService = jest.mocked(packagePolicyService);
 
-describe('_bumpPolicyIfDiffers', () => {
+describe('_updatePackagePoliciesThatNeedBump', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedAgentPolicyService.getLatestFleetPolicy.mockImplementation(async (_, agentPolicyId) => {
-      if (agentPolicyId === 'policy1') {
-        return {
-          revision_idx: 1,
-          data: {
-            id: agentPolicyId,
-            revision: 1,
-            signed: {
-              signature: 'signature',
-              data: 'data',
-            },
-            outputs: {},
-            inputs: [],
-          },
-        } as any;
-      }
-      return null;
+    mockedPackagePolicyService.list.mockResolvedValueOnce({
+      total: 1,
+      items: [
+        {
+          id: 'packagePolicy1',
+          bump_agent_policy_revision: true,
+        } as PackagePolicy,
+      ],
+      page: 1,
+      perPage: 100,
+    });
+    mockedPackagePolicyService.list.mockResolvedValueOnce({
+      total: 0,
+      items: [],
+      page: 1,
+      perPage: 100,
     });
   });
 
-  it('should bump policy if same revision but content differs, ignore signature', async () => {
+  it('should update package policy if bump agent policy revision needed', async () => {
     const logger = loggingSystemMock.createLogger();
-    const esClient = elasticsearchServiceMock.createInternalClient();
-    const soClient = savedObjectsClientMock.create();
 
-    mockedAgentPolicyService.getFullAgentPolicy.mockImplementation((_, id) =>
-      Promise.resolve({
-        id,
-        revision: 1,
-        signed: {
-          signature: 'signature2',
-          data: 'data',
-        },
-        outputs: {},
-        inputs: [],
-        ...(id === 'policy1' ? { namespaces: [] } : {}),
-      })
-    );
+    await _updatePackagePoliciesThatNeedBump(logger);
 
-    await _bumpPolicyIfDiffers(logger, soClient, esClient, 'policy1');
-
-    expect(mockedAgentPolicyService.bumpRevision).toHaveBeenCalledTimes(1);
-  });
-
-  it('should not bump policy if same revision and content', async () => {
-    const logger = loggingSystemMock.createLogger();
-    const esClient = elasticsearchServiceMock.createInternalClient();
-    const soClient = savedObjectsClientMock.create();
-
-    mockedAgentPolicyService.getFullAgentPolicy.mockImplementation((_, id) =>
-      Promise.resolve({
-        id,
-        revision: 1,
-        signed: {
-          signature: 'signature',
-          data: 'data',
-        },
-        outputs: {},
-        inputs: [],
-      })
-    );
-
-    await _bumpPolicyIfDiffers(logger, soClient, esClient, 'policy1');
-
-    expect(mockedAgentPolicyService.bumpRevision).toHaveBeenCalledTimes(0);
+    expect(mockedPackagePolicyService.bulkUpdate).toHaveBeenCalledWith(undefined, undefined, [
+      { bump_agent_policy_revision: false, id: 'packagePolicy1' },
+    ]);
   });
 });

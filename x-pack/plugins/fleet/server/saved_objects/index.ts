@@ -619,6 +619,7 @@ export const getSavedObjectTypes = (
           updated_by: { type: 'keyword' },
           created_at: { type: 'date' },
           created_by: { type: 'keyword' },
+          bump_agent_policy_revision: { type: 'boolean' },
         },
       },
       modelVersions: {
@@ -763,6 +764,26 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '15': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                bump_agent_policy_revision: { type: 'boolean' },
+              },
+            },
+          ],
+        },
+        // '16': {
+        //   changes: [
+        //     {
+        //       type: 'data_backfill',
+        //       backfillFn: (doc) => {
+        //         return { attributes: { ...doc.attributes, bump_agent_policy_revision: true } };
+        //       },
+        //     },
+        //   ],
+        // },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
