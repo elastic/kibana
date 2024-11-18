@@ -1344,7 +1344,6 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /test/functional/screenshots/baseline/tsvb_dashboard.png @elastic/kibana-presentation
 /test/functional/screenshots/baseline/dashboard_*.png @elastic/kibana-presentation
 /test/functional/screenshots/baseline/area_chart.png @elastic/kibana-presentation
-/test/functional/page_objects/share_page.ts @elastic/kibana-presentation
 /x-pack/test/disable_ems @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/165986
 /x-pack/test/functional/fixtures/kbn_archiver/dashboard* @elastic/kibana-presentation
 /test/functional/page_objects/dashboard_page* @elastic/kibana-presentation
