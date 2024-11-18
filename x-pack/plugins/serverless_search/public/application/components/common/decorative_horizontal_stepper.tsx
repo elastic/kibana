@@ -30,7 +30,7 @@ export const DecorativeHorizontalStepper: React.FC<DecorativeHorizontalStepperPr
     pointer-events: none, prevents user interaction with the component.
     inert prevents click, focus, and other interactive events, removing it from the tab order.
     role="presentation" indicates that this component is purely decorative and not interactive for assistive technologies.
-    Together, these attributes help ensure the component passes an accessibility audit. */
+    Together, these attributes help ensure the component is accesible. */
     <EuiStepsHorizontal
       css={css`
         pointer-events: none;
@@ -38,7 +38,7 @@ export const DecorativeHorizontalStepper: React.FC<DecorativeHorizontalStepperPr
       steps={horizontalSteps}
       size="s"
       role="presentation"
-      // @ts-ignore overriding a compiler error
+      // @ts-ignore due to React 18 and TypeScript doesn't have native HTML inert attribute support yet
       inert=""
     />
   );
