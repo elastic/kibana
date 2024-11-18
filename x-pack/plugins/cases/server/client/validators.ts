@@ -114,6 +114,6 @@ export const validateObservableTypeKeyExists = async (
 ) => {
   const observableTypesSet = await getAvailableObservableTypesSet(casesClient, caseOwner);
   if (!observableTypesSet.has(observableTypeKey)) {
-    throw Boom.badRequest(`Invalid observable type key does not exist: ${observableTypeKey}`);
+    throw Boom.badRequest(`Invalid observable type, key does not exist: ${observableTypeKey}`);
   }
 };

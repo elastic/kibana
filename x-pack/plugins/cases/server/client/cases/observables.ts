@@ -20,7 +20,6 @@ import {
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
-import { createCaseError } from '../../common/error';
 import type { Authorization } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
@@ -54,7 +53,6 @@ export const addObservable = async (
 ) => {
   const {
     services: { caseService, licensingService },
-    logger,
     authorization,
   } = clientArgs;
 
@@ -117,11 +115,7 @@ export const addObservable = async (
 
     return decodeOrThrow(CaseRt)(res);
   } catch (error) {
-    throw createCaseError({
-      message: `Failed to add observable: ${JSON.stringify(params)}: ${error}`,
-      error,
-      logger,
-    });
+    throw Boom.badRequest(`Failed to add observable: ${JSON.stringify(params)}: ${error}`);
   }
 };
 
@@ -183,11 +177,7 @@ export const updateObservable = async (
 
     return decodeOrThrow(CaseRt)(res);
   } catch (error) {
-    throw createCaseError({
-      message: `Failed to update observable: ${JSON.stringify(params)}: ${error}`,
-      error,
-      logger,
-    });
+    throw Boom.badRequest(`Failed to update observable: ${JSON.stringify(params)}: ${error}`);
   }
 };
 
@@ -199,7 +189,6 @@ export const deleteObservable = async (
 ) => {
   const {
     services: { caseService },
-    logger,
     authorization,
   } = clientArgs;
 
@@ -222,10 +211,8 @@ export const deleteObservable = async (
       updatedAttributes: { observables: updatedObservables },
     });
   } catch (error) {
-    throw createCaseError({
-      message: `Failed to delete observable id: ${JSON.stringify(observableId)}: ${error}`,
-      error,
-      logger,
-    });
+    throw Boom.badRequest(
+      `Failed to delete observable id: ${JSON.stringify(observableId)}: ${error}`
+    );
   }
 };

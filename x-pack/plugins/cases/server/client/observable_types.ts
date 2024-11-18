@@ -12,7 +12,7 @@ export const getAvailableObservableTypesSet = async (casesClient: CasesClient, o
   const configurations = await casesClient.configure.get({
     owner,
   });
-  const observableTypes = configurations[0]?.observableTypes ?? [];
+  const observableTypes = configurations?.[0]?.observableTypes ?? [];
 
   const availableObservableTypesSet = new Set(
     [...observableTypes, ...OBSERVABLE_TYPES_BUILTIN].map(({ key }) => key)
