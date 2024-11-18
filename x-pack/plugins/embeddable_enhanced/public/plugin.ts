@@ -148,8 +148,8 @@ export class EmbeddableEnhancedPlugin
     );
     const api: DynamicActionStorageApi = {
       dynamicActionsState$,
-      setDynamicActions: (newState) => {
-        dynamicActionsState$.next(newState);
+      setDynamicActions: (enhancements) => {
+        dynamicActionsState$.next(getDynamicActionsState(enhancements));
       },
     };
     const storage = new DynamicActionStorage(uuid, getTitle, api);

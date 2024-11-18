@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { FC } from 'react';
@@ -81,10 +82,13 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
   const [selectedRoles, setSelectedRoles] = useState<ReturnType<typeof createRolesComboBoxOptions>>(
     createRolesComboBoxOptions(defaultSelected)
   );
+  const manageRoleLinkId = useGeneratedHtmlId();
   const isEditOperation = useRef(Boolean(defaultSelected.length));
 
-  useEffect(() => {
-    async function fetchRequiredData(spaceId: string) {
+  const userInvokedPageVisibilityChange = useRef<boolean | null>(null);
+
+  const fetchRequiredData = useCallback(
+    async (spaceId: string) => {
       setFetchingDataDeps(true);
 
       const [systemRoles, _kibanaPrivileges] = await invokeClient((clients) =>
@@ -109,10 +113,28 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       );
 
       setKibanaPrivileges(_kibanaPrivileges);
+    },
+    [invokeClient]
+  );
+
+  useEffect(() => {
+    fetchRequiredData(space.id!).finally(() => setFetchingDataDeps(false));
+  }, [fetchRequiredData, invokeClient, space.id]);
+
+  useEffect(() => {
+    async function visibilityChangeHandler() {
+      // page just transitioned back to visible state from hidden state caused by user interaction
+      if (userInvokedPageVisibilityChange.current && !document.hidden) {
+        await fetchRequiredData(space.id!).finally(() => setFetchingDataDeps(false));
+      }
     }
 
-    fetchRequiredData(space.id!).finally(() => setFetchingDataDeps(false));
-  }, [invokeClient, space.id]);
+    document.addEventListener('visibilitychange', visibilityChangeHandler);
+
+    return () => {
+      document.removeEventListener('visibilitychange', visibilityChangeHandler);
+    };
+  }, [fetchRequiredData, invokeClient, space.id]);
 
   const selectedRolesCombinedPrivileges = useMemo(() => {
     const combinedPrivilege = new Set(
@@ -345,12 +367,23 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         <React.Fragment>
           {!isEditOperation.current && (
             <EuiFormRow
+              onClick={(event: React.MouseEvent<HTMLFieldSetElement>) => {
+                // leverage event propagation, check if manage role link element was clicked
+                if ((event.target as HTMLFieldSetElement).id === manageRoleLinkId) {
+                  userInvokedPageVisibilityChange.current = true;
+                }
+              }}
               label={i18n.translate(
                 'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabel',
                 { defaultMessage: 'Select roles' }
               )}
               labelAppend={
-                <EuiLink href={getUrlForApp('management', { deepLinkId: 'roles' })}>
+                <EuiLink
+                  id={manageRoleLinkId}
+                  href={getUrlForApp('management', { deepLinkId: 'roles' })}
+                  external={false}
+                  target="_blank"
+                >
                   {i18n.translate(
                     'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabelAnchor',
                     { defaultMessage: 'Manage roles' }

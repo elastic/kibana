@@ -77,7 +77,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(res.body.ready).to.be(false);
       expect(res.body.enabled).to.be(true);
       expect(res.body.errorMessage).to.include.string(
-        'Inference endpoint not found [ai_assistant_kb_inference]'
+        'Inference endpoint not found [obs_ai_assistant_kb_inference]'
       );
     });
   });

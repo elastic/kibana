@@ -72,8 +72,8 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
     mergedQuery.bool.filter.push({
       range: {
         [dataView.timeFieldName!]: {
-          from: searchBounds.min?.valueOf(),
-          to: searchBounds.max?.valueOf(),
+          gte: searchBounds.min?.valueOf(),
+          lte: searchBounds.max?.valueOf(),
           format: 'epoch_millis',
         },
       },

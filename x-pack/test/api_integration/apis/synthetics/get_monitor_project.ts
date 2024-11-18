@@ -95,6 +95,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         const firstPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .query({
+            per_page: 500,
+          })
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -185,6 +188,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         const firstPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .query({
+            per_page: 500,
+          })
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -279,6 +285,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         const firstPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .query({
+            per_page: 500,
+          })
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -372,6 +381,9 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const firstPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .query({
+            per_page: 500,
+          })
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -481,6 +493,9 @@ export default function ({ getService }: FtrProviderContext) {
               encodeURI(projectName)
             )
           )
+          .query({
+            per_page: 500,
+          })
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);

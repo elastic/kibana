@@ -33,6 +33,9 @@ import { UserDetailsPanelKey } from '../user_details_left';
 import { useObservedUser } from './hooks/use_observed_user';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { UserPreviewPanelFooter } from '../user_preview/footer';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useAlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export interface UserPanelProps extends Record<string, unknown> {
@@ -112,6 +115,21 @@ export const UserPanel = ({
 
   const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
 
+  const { signalIndexName } = useSignalIndex();
+
+  const entityFilter = useMemo(() => ({ field: 'user.name', value: userName }), [userName]);
+
+  const { items: alertsData } = useAlertsByStatus({
+    entityFilter,
+    signalIndexName,
+    queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}USER_NAME_RIGHT`,
+    to,
+    from,
+  });
+
+  const hasNonClosedAlerts =
+    (alertsData?.acknowledged?.total || 0) + (alertsData?.open?.total || 0) > 0;
+
   useQueryInspector({
     deleteQuery,
     inspect,
@@ -139,6 +157,7 @@ export const UserPanel = ({
           },
           path: tab ? { tab } : undefined,
           hasMisconfigurationFindings,
+          hasNonClosedAlerts,
         },
       });
     },
@@ -150,6 +169,7 @@ export const UserPanel = ({
       userName,
       email,
       hasMisconfigurationFindings,
+      hasNonClosedAlerts,
     ]
   );
   const openPanelFirstTab = useCallback(
@@ -191,7 +211,8 @@ export const UserPanel = ({
           <>
             <FlyoutNavigation
               flyoutIsExpandable={
-                !isPreviewMode && (hasUserDetailsData || hasMisconfigurationFindings)
+                !isPreviewMode &&
+                (hasUserDetailsData || hasMisconfigurationFindings || hasNonClosedAlerts)
               }
               expandDetails={openPanelFirstTab}
             />

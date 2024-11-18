@@ -9,12 +9,13 @@
 
 import { RootProfileProvider, SolutionType } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 import { createGetAppMenu } from './accessors';
 
 export const createObservabilityRootProfileProvider = (
   services: ProfileProviderServices
 ): RootProfileProvider => ({
-  profileId: 'observability-root-profile',
+  profileId: OBSERVABILITY_ROOT_PROFILE_ID,
   profile: {
     getAppMenu: createGetAppMenu(services),
   },

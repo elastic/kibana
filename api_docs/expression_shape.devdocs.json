@@ -35,7 +35,7 @@
         "label": "getProgressRenderer",
         "description": [],
         "signature": [
-          "(theme$?: ",
+          "(theme$: ",
           "Observable",
           "<",
           {
@@ -103,7 +103,7 @@
         "label": "getShapeRenderer",
         "description": [],
         "signature": [
-          "(theme$?: ",
+          "(theme$: ",
           "Observable",
           "<",
           {
