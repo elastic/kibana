@@ -12,7 +12,6 @@ import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { PLUGIN_ID } from '../../../common';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createLiveQueryRequestBodySchema } from '../../../common/api';
 import { API_VERSIONS } from '../../../common/constants';
@@ -28,14 +27,15 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
     .post({
       access: 'public',
       path: '/api/osquery/live_queries',
-      options: { authRequired: true },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
         security: {
           authz: {
-            requiredPrivileges: [`${PLUGIN_ID}-writeLiveQueries`],
+            enabled: false,
+            reason:
+              'We do the check for 2 different scenarios below (const isInvalid): writeLiveQueries and runSavedQueries with saved_query_id, or pack_id',
           },
         },
         validate: {
