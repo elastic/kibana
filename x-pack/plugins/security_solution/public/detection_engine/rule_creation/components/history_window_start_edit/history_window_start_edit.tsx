@@ -9,7 +9,7 @@ import React from 'react';
 import { ScheduleItemField } from '../schedule_item_field';
 import { UseField } from '../../../../shared_imports';
 
-const componentProps = {
+const COMPONENT_PROPS = {
   idAria: 'historyWindowSize',
   dataTestSubj: 'historyWindowSize',
   timeTypes: ['m', 'h', 'd'],
@@ -20,5 +20,5 @@ interface HistoryWindowStartEditProps {
 }
 
 export function HistoryWindowStartEdit({ path }: HistoryWindowStartEditProps): JSX.Element {
-  return <UseField path={path} component={ScheduleItemField} componentProps={componentProps} />;
+  return <UseField path={path} component={ScheduleItemField} componentProps={COMPONENT_PROPS} />;
 }

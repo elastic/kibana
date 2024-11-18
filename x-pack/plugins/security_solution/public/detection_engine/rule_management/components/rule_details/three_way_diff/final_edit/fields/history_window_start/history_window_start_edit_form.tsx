@@ -13,9 +13,9 @@ import { HistoryWindowStartEditAdapter } from './history_window_start_edit_adapt
 import type { HistoryWindowStart } from '../../../../../../../../../common/api/detection_engine';
 import { schema } from '../../../../../../../rule_creation_ui/components/step_define_rule/schema';
 import {
-  convertHistorySizeToStart,
-  convertHistoryStartToSize,
-} from '../../../../../../../../common/utils/history_window';
+  convertDurationToDateMath,
+  convertDateMathToDuration,
+} from '../../../../../../../../common/utils/date_math';
 import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../../../../../../../common/constants';
 import { historyWindowStartValidationFactory } from '../../../../../../../rule_creation_ui/validators/history_window_start_validator_factory';
 
@@ -37,14 +37,14 @@ interface HistoryWindowFormData {
 function deserializer(defaultValue: FormData): HistoryWindowFormData {
   return {
     historyWindowSize: defaultValue.history_window_start
-      ? convertHistoryStartToSize(defaultValue.history_window_start)
+      ? convertDateMathToDuration(defaultValue.history_window_start)
       : DEFAULT_HISTORY_WINDOW_SIZE,
   };
 }
 
 function serializer(formData: FormData): { history_window_start: HistoryWindowStart } {
   return {
-    history_window_start: convertHistorySizeToStart(formData.historyWindowSize),
+    history_window_start: convertDurationToDateMath(formData.historyWindowSize),
   };
 }
 

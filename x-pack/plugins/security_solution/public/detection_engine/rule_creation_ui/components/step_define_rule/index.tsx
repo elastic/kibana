@@ -258,6 +258,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   );
 
   const termsAggregationFields = useTermsAggregationFields(indexPattern.fields);
+  const termsAggregationFieldNames = useMemo(
+    () => termsAggregationFields.map((field) => field.name),
+    [termsAggregationFields]
+  );
 
   const [threatIndexPatternsLoading, { indexPatterns: threatIndexPatterns }] =
     useFetchIndex(threatIndex);
@@ -912,7 +916,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             fullWidth
           >
             <>
-              <NewTermsFieldsEdit path="newTermsFields" browserFields={termsAggregationFields} />
+              <NewTermsFieldsEdit path="newTermsFields" fieldNames={termsAggregationFieldNames} />
               <HistoryWindowStartEdit path="historyWindowSize" />
             </>
           </RuleTypeEuiFormRow>

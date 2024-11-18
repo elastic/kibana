@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import type { DataViewFieldBase } from '@kbn/es-query';
+import React, { memo } from 'react';
 import { UseField } from '../../../../shared_imports';
-import { NewTermsFieldsEditField } from './new_terms_fields_edit_field';
+import { NewTermsFieldsField } from './new_terms_fields_field';
 
 interface NewTermsFieldsEditProps {
   path: string;
-  browserFields: DataViewFieldBase[];
+  fieldNames: string[];
 }
 
-export function NewTermsFieldsEdit({ path, browserFields }: NewTermsFieldsEditProps): JSX.Element {
-  const componentProps = useMemo(() => ({ browserFields }), [browserFields]);
-
-  return (
-    <UseField path={path} component={NewTermsFieldsEditField} componentProps={componentProps} />
-  );
-}
+export const NewTermsFieldsEdit = memo(function NewTermsFieldsEdit({
+  path,
+  fieldNames,
+}: NewTermsFieldsEditProps): JSX.Element {
+  return <UseField path={path} component={NewTermsFieldsField} componentProps={{ fieldNames }} />;
+});

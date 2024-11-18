@@ -19,7 +19,8 @@ export function NewTermsFieldsEditAdapter({
   finalDiffableRule,
 }: NewTermsFieldsEditAdapterProps): JSX.Element {
   const { dataView } = useDiffableRuleDataView(finalDiffableRule);
-  const termsAggregationFields = useTermsAggregationFields(dataView?.fields || []);
+  const termsAggregationFields = useTermsAggregationFields(dataView?.fields ?? []);
+  const fieldNames = termsAggregationFields.map((field) => field.name);
 
-  return <NewTermsFieldsEdit path="newTermsFields" browserFields={termsAggregationFields} />;
+  return <NewTermsFieldsEdit path="new_terms_fields" fieldNames={fieldNames} />;
 }

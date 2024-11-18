@@ -58,7 +58,8 @@ import {
 } from './rule_definition_section.styles';
 import { getQueryLanguageLabel } from './helpers';
 import { useDefaultIndexPattern } from '../../hooks/use_default_index_pattern';
-import { convertHistoryStartToSize } from '../../../../common/utils/history_window';
+import { convertDateMathToDuration } from '../../../../common/utils/date_math';
+import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../../../common/constants';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -404,7 +405,9 @@ interface HistoryWindowSizeProps {
 }
 
 export const HistoryWindowSize = ({ historyWindowStart }: HistoryWindowSizeProps) => {
-  const size = historyWindowStart ? convertHistoryStartToSize(historyWindowStart) : '7d';
+  const size = historyWindowStart
+    ? convertDateMathToDuration(historyWindowStart)
+    : DEFAULT_HISTORY_WINDOW_SIZE;
 
   return (
     <EuiText size="s" data-test-subj={`newTermsWindowSizePropertyValue-${historyWindowStart}`}>

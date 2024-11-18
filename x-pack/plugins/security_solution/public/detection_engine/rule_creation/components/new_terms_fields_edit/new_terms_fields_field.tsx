@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '../../../../shared_imports';
@@ -13,7 +13,7 @@ import { Field } from '../../../../shared_imports';
 import { NEW_TERMS_FIELD_PLACEHOLDER } from './translations';
 
 interface NewTermsFieldsProps {
-  browserFields: DataViewFieldBase[];
+  fieldNames: DataViewFieldBase[];
   field: FieldHook;
 }
 
@@ -21,22 +21,20 @@ const FIELD_COMBO_BOX_WIDTH = 410;
 
 const fieldDescribedByIds = 'newTermsFieldEdit';
 
-export const NewTermsFieldsEditFieldComponent: React.FC<NewTermsFieldsProps> = ({
-  browserFields,
+const NewTermsFieldsEditFieldComponent: React.FC<NewTermsFieldsProps> = ({
+  fieldNames,
   field,
 }: NewTermsFieldsProps) => {
-  const fieldEuiFieldProps = useMemo(
-    () => ({
-      fullWidth: true,
-      noSuggestions: false,
-      options: browserFields.map((browserField) => ({ label: browserField.name })),
-      placeholder: NEW_TERMS_FIELD_PLACEHOLDER,
-      onCreateOption: undefined,
-      style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
-    }),
-    [browserFields]
-  );
+  const fieldEuiFieldProps = {
+    fullWidth: true,
+    noSuggestions: false,
+    options: fieldNames.map((name) => ({ label: name })),
+    placeholder: NEW_TERMS_FIELD_PLACEHOLDER,
+    onCreateOption: undefined,
+    style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
+  };
+
   return <Field field={field} idAria={fieldDescribedByIds} euiFieldProps={fieldEuiFieldProps} />;
 };
 
-export const NewTermsFieldsEditField = React.memo(NewTermsFieldsEditFieldComponent);
+export const NewTermsFieldsField = React.memo(NewTermsFieldsEditFieldComponent);

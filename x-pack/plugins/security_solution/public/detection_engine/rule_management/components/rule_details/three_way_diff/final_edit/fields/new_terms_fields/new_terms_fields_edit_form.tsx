@@ -8,7 +8,6 @@
 import React from 'react';
 import type {
   ERROR_CODE,
-  FormData,
   FormSchema,
   ValidationFunc,
 } from '../../../../../../../../shared_imports';
@@ -23,30 +22,12 @@ export function NewTermsFieldsEditForm(): JSX.Element {
     <RuleFieldEditFormWrapper
       component={NewTermsFieldsEditAdapter}
       ruleFieldFormSchema={newTermsFormSchema}
-      deserializer={deserializer}
-      serializer={serializer}
     />
   );
 }
 
-interface NewTermsFieldsFormData {
-  newTermsFields: string[];
-}
-
-function deserializer(defaultValue: FormData): NewTermsFieldsFormData {
-  return {
-    newTermsFields: defaultValue.new_terms_fields,
-  };
-}
-
-function serializer(formData: FormData): { new_terms_fields: NewTermsFields } {
-  return {
-    new_terms_fields: formData.newTermsFields,
-  };
-}
-
 export const newTermsFormSchema = {
-  newTermsFields: {
+  new_terms_fields: {
     ...schema.newTermsFields,
     validations: [
       {
@@ -59,5 +40,5 @@ export const newTermsFormSchema = {
     ],
   },
 } as FormSchema<{
-  newTermsFields: NewTermsFields;
+  new_terms_fields: NewTermsFields;
 }>;
