@@ -72,10 +72,10 @@ describe('observableIntoEventSourceStream', () => {
 
     const events: Array<Record<string, any>> = [];
 
-    const parser = createParser((event) => {
-      if (event.type === 'event') {
+    const parser = createParser({
+      onEvent: (event) => {
         events.push(JSON.parse(event.data));
-      }
+      },
     });
 
     chunks.forEach((chunk) => {
