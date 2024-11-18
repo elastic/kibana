@@ -48,6 +48,7 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
         },
       ],
     } as any);
+    mockedAgentPolicyService.bumpRevision.mockReset();
   });
 
   it('should do nothing with policies already deployed', async () => {
@@ -162,5 +163,56 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       'Error deploying policies: test rejection',
       expect.anything()
     );
+  });
+
+  it('should bump policy if same revision but content differs, ignore signature', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    const soClient = savedObjectsClientMock.create();
+    mockedAgentPolicyService.getLatestFleetPolicy.mockImplementation(async (_, agentPolicyId) => {
+      if (agentPolicyId === 'policy1') {
+        return {
+          revision_idx: 1,
+          data: {
+            signed: {
+              signature: 'signature',
+              data: 'data',
+            },
+            outputs: {},
+            inputs: [],
+          },
+        } as any;
+      }
+
+      if (agentPolicyId === 'policy2') {
+        return {
+          revision_idx: 1,
+        } as any;
+      }
+
+      return null;
+    });
+
+    mockedAgentPolicyService.getFullAgentPolicy.mockImplementation((_, id) =>
+      Promise.resolve({
+        id,
+        revision: 1,
+        signed: {
+          signature: 'signature2',
+          data: 'data',
+        },
+        outputs: {},
+        inputs: [],
+        ...(id === 'policy1' ? { namespaces: [] } : {}),
+      })
+    );
+
+    await ensureAgentPoliciesFleetServerKeysAndPolicies({
+      logger,
+      esClient,
+      soClient,
+    });
+
+    expect(mockedAgentPolicyService.bumpRevision).toHaveBeenCalledTimes(1);
   });
 });
