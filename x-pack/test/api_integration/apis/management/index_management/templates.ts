@@ -92,6 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'hasSettings',
           'hasAliases',
           'hasMappings',
@@ -115,6 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedLegacyKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'hasSettings',
           'hasAliases',
           'hasMappings',
@@ -138,6 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedWithDSLKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'lifecycle',
           'hasSettings',
           'hasAliases',
@@ -163,6 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedWithILMKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'ilmPolicy',
           'hasSettings',
           'hasAliases',
@@ -190,6 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'template',
           'composedOf',
           'ignoreMissingComponentTemplates',
@@ -213,6 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'template',
           'order',
           'version',
@@ -375,6 +381,7 @@ export default function ({ getService }: FtrProviderContext) {
           _kbnMeta: { hasDatastream: false, type: 'default' },
           name: templateName,
           indexPatterns: [getRandomString()],
+          indexMode: 'standard',
           template: {},
           deprecated: true,
           allowAutoCreate: 'TRUE',
