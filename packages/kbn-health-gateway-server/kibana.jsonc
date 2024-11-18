@@ -1,5 +1,8 @@
 {
   "type": "shared-server",
   "id": "@kbn/health-gateway-server",
-  "owner": "@elastic/kibana-core"
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true,
 }
