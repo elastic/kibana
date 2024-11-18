@@ -17,7 +17,11 @@ const useCases = [
       filter: '',
       name: '',
     },
-    'sum(system.cpu.user.pct)',
+    {
+      operation: 'sum',
+      operationWithField: 'sum(system.cpu.user.pct)',
+      sourceField: 'system.cpu.user.pct',
+    },
   ],
   [
     {
@@ -26,7 +30,11 @@ const useCases = [
       filter: '',
       name: '',
     },
-    'max(system.cpu.user.pct)',
+    {
+      operation: 'max',
+      operationWithField: 'max(system.cpu.user.pct)',
+      sourceField: 'system.cpu.user.pct',
+    },
   ],
   [
     {
@@ -35,7 +43,11 @@ const useCases = [
       filter: '',
       name: '',
     },
-    'min(system.cpu.user.pct)',
+    {
+      operation: 'min',
+      operationWithField: 'min(system.cpu.user.pct)',
+      sourceField: 'system.cpu.user.pct',
+    },
   ],
   [
     {
@@ -44,16 +56,24 @@ const useCases = [
       filter: '',
       name: '',
     },
-    'average(system.cpu.user.pct)',
+    {
+      operation: 'average',
+      operationWithField: 'average(system.cpu.user.pct)',
+      sourceField: 'system.cpu.user.pct',
+    },
   ],
   [
     {
       aggType: Aggregators.COUNT,
-      field: 'system.cpu.user.pct',
-      filter: '',
+      field: '',
+      filter: 'system.cpu.user.pct: *',
       name: '',
     },
-    'count(___records___)',
+    {
+      operation: 'count',
+      operationWithField: `count(kql='system.cpu.user.pct: *')`,
+      sourceField: '',
+    },
   ],
   [
     {
@@ -62,7 +82,11 @@ const useCases = [
       filter: '',
       name: '',
     },
-    'unique_count(system.cpu.user.pct)',
+    {
+      operation: 'unique_count',
+      operationWithField: 'unique_count(system.cpu.user.pct)',
+      sourceField: 'system.cpu.user.pct',
+    },
   ],
   [
     {
@@ -71,7 +95,11 @@ const useCases = [
       filter: '',
       name: '',
     },
-    'percentile(system.cpu.user.pct, percentile=95)',
+    {
+      operation: 'percentile',
+      operationWithField: 'percentile(system.cpu.user.pct, percentile=95)',
+      sourceField: 'system.cpu.user.pct',
+    },
   ],
   [
     {
@@ -80,7 +108,11 @@ const useCases = [
       filter: '',
       name: '',
     },
-    'percentile(system.cpu.user.pct, percentile=99)',
+    {
+      operation: 'percentile',
+      operationWithField: 'percentile(system.cpu.user.pct, percentile=99)',
+      sourceField: 'system.cpu.user.pct',
+    },
   ],
   [
     {
@@ -89,7 +121,11 @@ const useCases = [
       filter: '',
       name: '',
     },
-    `counter_rate(max(system.network.in.bytes), kql='')`,
+    {
+      operation: 'counter_rate',
+      operationWithField: `counter_rate(max(system.network.in.bytes), kql='')`,
+      sourceField: 'system.network.in.bytes',
+    },
   ],
   [
     {
@@ -98,7 +134,11 @@ const useCases = [
       filter: 'host.name : "foo"',
       name: '',
     },
-    `counter_rate(max(system.network.in.bytes), kql='host.name : foo')`,
+    {
+      operation: 'counter_rate',
+      operationWithField: `counter_rate(max(system.network.in.bytes), kql='host.name : foo')`,
+      sourceField: 'system.network.in.bytes',
+    },
   ],
 ];
 
