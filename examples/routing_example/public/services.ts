@@ -12,6 +12,7 @@ import type {
   CoreStart,
   I18nStart,
   ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
@@ -25,6 +26,7 @@ interface StartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
   i18n: I18nStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
+  userProfile: UserProfileService;
 }
 
 export interface Services {
@@ -37,8 +39,8 @@ export interface Services {
 }
 
 export function getServices(core: CoreStart): Services {
-  const { analytics, i18n, theme } = core;
-  const startServices = { analytics, i18n, theme };
+  const { analytics, i18n, theme, userProfile } = core;
+  const startServices = { analytics, i18n, theme, userProfile };
 
   return {
     startServices,

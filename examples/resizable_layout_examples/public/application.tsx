@@ -8,7 +8,7 @@
  */
 
 import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
-import type { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import React, { ReactNode, useState } from 'react';
 import ReactDOM from 'react-dom';
@@ -98,10 +98,10 @@ const ResizableSection = ({
   );
 };
 
-export const renderApp = ({ element, theme$ }: AppMountParameters) => {
+export const renderApp = (coreStart: CoreStart, { element, theme$ }: AppMountParameters) => {
   ReactDOM.render(
     <I18nProvider>
-      <CoreThemeProvider theme$={theme$}>
+      <CoreThemeProvider {...coreStart} theme$={theme$}>
         <div
           css={css`
             height: calc(100vh - var(--euiFixedHeadersOffset, 0));

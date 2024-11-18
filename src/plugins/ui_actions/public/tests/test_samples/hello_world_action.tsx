@@ -14,7 +14,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ActionDefinition } from '../../actions';
 
-type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 
 const getMenuItem = (core: StartServices) => {
   return () => {

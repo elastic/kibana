@@ -121,6 +121,7 @@ export const SettingsApplicationKibanaProvider: FC<
   const {
     docLinks,
     notifications,
+    userProfile,
     theme,
     i18n,
     settings,
@@ -194,7 +195,7 @@ export const SettingsApplicationKibanaProvider: FC<
 
   return (
     <SettingsApplicationContext.Provider value={services}>
-      <FormKibanaProvider {...{ docLinks, notifications, theme, i18n, settings }}>
+      <FormKibanaProvider {...{ docLinks, notifications, userProfile, theme, i18n, settings }}>
         {children}
       </FormKibanaProvider>
     </SettingsApplicationContext.Provider>

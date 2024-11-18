@@ -11,6 +11,7 @@ import type {
   HttpStart,
   I18nStart,
   ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 
 export interface StartServices {
@@ -18,6 +19,7 @@ export interface StartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
   i18n: I18nStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
+  userProfile: UserProfileService;
 }
 
 export const AppContext = createContext<StartServices | undefined>(undefined);
