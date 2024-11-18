@@ -16,7 +16,7 @@ import {
   EuiIcon,
   EuiSpacer,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { ENTERPRISE_SEARCH_CONTENT_APP_ID } from '@kbn/deeplinks-search';
 
 import { SEARCH_INDICES } from '@kbn/deeplinks-search/constants';
@@ -32,7 +32,7 @@ export const IndexItem: React.FC<UsageProps> = ({ usageItem }) => {
   const {
     services: { application, serverless },
   } = useKibana();
-  const navigateToIndex = async () => {
+  const navigateToIndex = useCallback(() => {
     if (serverless) {
       application?.navigateToApp(SEARCH_INDICES, {
         path: `${SERVERLESS_INDEX_MANAGEMENT_URL}/${usageItem.id}/data`,
@@ -44,7 +44,7 @@ export const IndexItem: React.FC<UsageProps> = ({ usageItem }) => {
         openInNewTab: true,
       });
     }
-  };
+  }, [application, serverless, usageItem.id]);
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="usageItem">
@@ -65,7 +65,7 @@ export const IndexItem: React.FC<UsageProps> = ({ usageItem }) => {
           <EuiFlexItem grow={false}>
             <EuiLink data-test-subj="navigateToIndexPage" onClick={navigateToIndex}>
               <EuiIcon size="s" type="popout" />
-            </EuiLink>{' '}
+            </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
