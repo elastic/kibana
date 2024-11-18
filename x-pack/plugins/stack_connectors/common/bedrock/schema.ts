@@ -26,7 +26,11 @@ export const RunActionParamsSchema = schema.object({
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
   raw: schema.maybe(schema.boolean()),
-  apiType: schema.maybe(schema.string()),
+  apiType: schema.maybe(
+    schema.oneOf([schema.literal('converse'), schema.literal('invoke')], {
+      defaultValue: 'invoke',
+    })
+  ),
 });
 
 export const BedrockMessageSchema = schema.object(
