@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { OBSERVABLE_TYPES_BUILTIN } from '@kbn/cases-plugin/common/constants';
+import { OBSERVABLE_TYPES_BUILTIN, OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
+import { secOnlyRead } from '../../../../common/lib/authentication/users';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   createCase,
@@ -37,8 +38,8 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(postedCase.observables).to.eql([]);
 
         const newObservableData = {
-          value: 'test',
-          typeKey: '0ad4bf8e-575f-49ad-87ea-8bcafd5173e4',
+          value: '127.0.0.1',
+          typeKey: OBSERVABLE_TYPE_IPV4.key,
           description: '',
         };
 
@@ -51,6 +52,26 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(updatedCase.observables.length).to.be.greaterThan(0);
+      });
+
+      it('returns bad request when using unknown observable type', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        expect(postedCase.observables).to.eql([]);
+
+        const newObservableData = {
+          value: 'test',
+          typeKey: 'unknown type',
+          description: '',
+        };
+
+        await addObservable({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            observable: newObservableData,
+          },
+          expectedHttpCode: 400,
+        });
       });
     });
 
@@ -108,8 +129,8 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
 
         const newObservableData = {
-          value: '{"foo": "bar"}',
-          typeKey: OBSERVABLE_TYPES_BUILTIN[0].key,
+          value: '127.0.0.1',
+          typeKey: OBSERVABLE_TYPE_IPV4.key,
           description: '',
         };
 
@@ -151,8 +172,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
 
         const newObservableData = {
-          value: 'test',
-          typeKey: '0ad4bf8e-575f-49ad-87ea-8bcafd5173e4',
+          value: '127.0.0.1',
+          typeKey: OBSERVABLE_TYPE_IPV4.key,
           description: '',
         };
 
@@ -168,12 +189,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const updatedObservable = await updateObservable({
           supertest,
-          params: { observable: { ...newObservableData, value: 'updated' } },
+          params: { observable: { description: '', value: '192.168.68.1' } },
           caseId: postedCase.id,
           observableId: observable.id as string,
         });
 
-        expect(updatedObservable.observables[0].value).to.be('updated');
+        expect(updatedObservable.observables[0].value).to.be('192.168.68.1');
       });
     });
 
@@ -182,8 +203,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
 
         const newObservableData = {
-          value: 'test',
-          typeKey: '0ad4bf8e-575f-49ad-87ea-8bcafd5173e4',
+          value: '127.0.0.1',
+          typeKey: OBSERVABLE_TYPE_IPV4.key,
           description: '',
         };
 
@@ -201,11 +222,38 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           observableId: observable.id as string,
+          expectedHttpCode: 204,
         });
 
         const { observables } = await getCase({ supertest, caseId: postedCase.id });
 
         expect(observables.length).to.be(0);
+      });
+    });
+
+    // TODO: discuss how this should be configured exactly
+    describe.skip('rbac', () => {
+      const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+      it('should not allow creating observables without permissions', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        expect(postedCase.observables).to.eql([]);
+
+        const newObservableData = {
+          value: '127.0.0.1',
+          typeKey: OBSERVABLE_TYPE_IPV4.key,
+          description: '',
+        };
+
+        await addObservable({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          params: {
+            observable: newObservableData,
+          },
+          auth: { user: secOnlyRead, space: 'space1' },
+          expectedHttpCode: 403,
+        });
       });
     });
   });
