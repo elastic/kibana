@@ -11,11 +11,11 @@ import { similar } from './similar';
 import { mockCase } from '../../../public/containers/mock';
 import { OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
 
-describe('similar', () => {
-  describe('find similar cases', () => {
-    const clientArgs = createCasesClientMockArgs();
-    const casesClient = createCasesClientMock();
+const clientArgs = createCasesClientMockArgs();
+const casesClient = createCasesClientMock();
 
+describe('similar', () => {
+  beforeEach(() => {
     jest.mocked(clientArgs.services.caseService.getCase).mockResolvedValue({
       ...mockCases[0],
       attributes: {
@@ -46,26 +46,27 @@ describe('similar', () => {
       per_page: 10,
       total: mockCases.length,
     });
+  });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-    it('should execute query with observable type key and value and proper filters', async () => {
-      await similar(
-        mockCase.id,
-        {
-          page: 1,
-          perPage: 10,
-        },
-        clientArgs,
-        casesClient
-      );
-      expect(clientArgs.services.caseService.findCases).toHaveBeenCalled();
+  it('should execute query with observable type key and value and proper filters', async () => {
+    await similar(
+      mockCase.id,
+      {
+        page: 1,
+        perPage: 10,
+      },
+      clientArgs,
+      casesClient
+    );
+    expect(clientArgs.services.caseService.findCases).toHaveBeenCalled();
 
-      const call = clientArgs.services.caseService.findCases.mock.calls[0][0];
+    const call = clientArgs.services.caseService.findCases.mock.calls[0][0];
 
-      expect(call).toMatchInlineSnapshot(`
+    expect(call).toMatchInlineSnapshot(`
         Object {
           "filter": Object {
             "arguments": Array [
@@ -147,6 +148,26 @@ describe('similar', () => {
           "sortField": "created_at",
         }
       `);
+  });
+
+  it('should not call find when the case has no observables', async () => {
+    jest.mocked(clientArgs.services.caseService.getCase).mockResolvedValue({
+      ...mockCases[0],
+      attributes: {
+        ...mockCases[0].attributes,
+        observables: [],
+      },
     });
+
+    await similar(
+      mockCase.id,
+      {
+        page: 1,
+        perPage: 10,
+      },
+      clientArgs,
+      casesClient
+    );
+    expect(clientArgs.services.caseService.findCases).not.toHaveBeenCalled();
   });
 });
