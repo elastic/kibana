@@ -73,10 +73,10 @@
     "@kbn/datemath",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-logging-browser-mocks",
-    "@kbn/core-http-router-server-internal",
     "@kbn/presentation-publishing",
     "@kbn/alerts-ui-shared",
     "@kbn/cloud-plugin",
+    "@kbn/core-http-server-mocks",
   ],
   "exclude": [
     "target/**/*",

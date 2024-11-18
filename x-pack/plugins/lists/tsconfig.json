@@ -42,7 +42,8 @@
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-saved-objects-server",
     "@kbn/zod-helpers",
-    "@kbn/core-security-server"
+    "@kbn/core-security-server",
+    "@kbn/core-http-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }
