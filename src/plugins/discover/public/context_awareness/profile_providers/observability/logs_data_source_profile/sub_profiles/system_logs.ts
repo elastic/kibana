@@ -10,18 +10,23 @@
 import { DataSourceProfileProvider } from '../../../../profiles';
 import { extendProfileProvider } from '../../../extend_profile_provider';
 import { createGetDefaultAppState } from '../accessors';
-import { CLIENT_IP_COLUMN, LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
+import { HOST_NAME_COLUMN, LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
 import { createResolve } from './create_resolve';
 
-export const createApacheErrorLogsDataSourceProfileProvider = (
+export const createSystemLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'apache-error-logs-data-source',
+    profileId: 'observability-system-logs-data-source-profile',
     profile: {
       getDefaultAppState: createGetDefaultAppState({
-        defaultColumns: [LOG_LEVEL_COLUMN, CLIENT_IP_COLUMN, MESSAGE_COLUMN],
+        defaultColumns: [
+          LOG_LEVEL_COLUMN,
+          { name: 'process.name', width: 150 },
+          HOST_NAME_COLUMN,
+          MESSAGE_COLUMN,
+        ],
       }),
     },
-    resolve: createResolve('logs-apache.error'),
+    resolve: createResolve('logs-system'),
   });

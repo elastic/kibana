@@ -19,7 +19,9 @@ import {
   createWindowsLogsDataSourceProfileProvider,
 } from './sub_profiles';
 
-export const createLogsDataSourceProfileProviders = (providerServices: ProfileProviderServices) => {
+export const createObservabilityLogsDataSourceProfileProviders = (
+  providerServices: ProfileProviderServices
+) => {
   const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(providerServices);
 
   return [

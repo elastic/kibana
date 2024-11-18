@@ -10,6 +10,7 @@
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../../profiles';
 import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 
 export const createResolve = (baseIndexPattern: string): DataSourceProfileProvider['resolve'] => {
   const testIndexPattern = testPatternAgainstAllowedList([
@@ -17,6 +18,10 @@ export const createResolve = (baseIndexPattern: string): DataSourceProfileProvid
   ]);
 
   return (params) => {
+    if (params.rootContext.profileId !== OBSERVABILITY_ROOT_PROFILE_ID) {
+      return { isMatch: false };
+    }
+
     const indexPattern = extractIndexPatternFrom(params);
 
     if (!indexPattern || !testIndexPattern(indexPattern)) {

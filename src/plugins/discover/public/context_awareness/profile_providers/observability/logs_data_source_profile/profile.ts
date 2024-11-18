@@ -15,17 +15,22 @@ import {
   getRowAdditionalLeadingControls,
 } from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider => ({
-  profileId: 'logs-data-source-profile',
+  profileId: 'observability-logs-data-source-profile',
   profile: {
     getCellRenderers,
     getRowIndicatorProvider,
     getRowAdditionalLeadingControls,
   },
   resolve: (params) => {
+    if (params.rootContext.profileId !== OBSERVABILITY_ROOT_PROFILE_ID) {
+      return { isMatch: false };
+    }
+
     const indexPattern = extractIndexPatternFrom(params);
 
     if (!services.logsContextService.isLogsIndexPattern(indexPattern)) {

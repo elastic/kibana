@@ -7,10 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({}: FtrProviderContext) {
-  describe('extension getRowIndicatorProvider', () => {
-    // TODO: Add an example profile implementation to test here
-  });
-}
+export { createObservabilityLogDocumentProfileProvider } from './profile';
