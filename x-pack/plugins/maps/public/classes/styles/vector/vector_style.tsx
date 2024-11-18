@@ -721,13 +721,18 @@ export class VectorStyle implements IVectorStyle {
   };
 
   async hasLegendDetails() {
+    if(this._source.hasLegendDetails){
+      return await this._source.hasLegendDetails()
+    }
     return this._getLegendDetailStyleProperties().length > 0;
   }
 
   renderLegendDetails() {
     const symbolId = this._getSymbolId();
     const svg = symbolId ? this.getIconSvg(symbolId) : undefined;
-
+    if(this._source.renderLegendDetails){
+      return this._source.renderLegendDetails(this) || <></>
+    }
     return (
       <VectorStyleLegend
         masks={this._layer.getMasks()}

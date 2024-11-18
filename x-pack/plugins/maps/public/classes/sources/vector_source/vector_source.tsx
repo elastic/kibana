@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import {
   FeatureCollection,
   GeoJsonProperties,
@@ -17,7 +17,7 @@ import {
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/data-plugin/common';
-import type { MapGeoJSONFeature } from '@kbn/mapbox-gl';
+import type { MapGeoJSONFeature,  Map as MbMap, } from '@kbn/mapbox-gl';
 import { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
@@ -36,6 +36,7 @@ import {
 } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
 import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/tooltip_control/features_tooltip';
+import { IVectorStyle } from '../../styles/vector/vector_style';
 
 export function hasVectorSourceMethod(
   source: ISource,
@@ -145,9 +146,27 @@ export interface IVectorSource extends ISource {
    * Provide unique ids for managing source requests in Inspector
    */
   getInspectorRequestIds(): string[];
+
+  /**
+   * Syncs source specific styling with mbMap this allows custom sources to further style the map layers/filters
+   */
+  syncSourceStyle(mbMap:MbMap,layers:string[]):void
+
+  /**
+   * specifies if a source provides its own legend details or if the default vector_style is used if the source has this method it must also implement renderLegendDetails
+   */
+  hasLegendDetails?(): Promise<boolean>
+  /**
+   * specifies if a source provides its own legend details or if the default vector_style is used
+   */
+  renderLegendDetails?(vectorStyle:IVectorStyle): ReactElement<any> | null
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
+
+  syncSourceStyle(mbMap: MbMap, layers: string[]): void {
+    //Nothing internal currently implements this
+  }
   isMvt() {
     return false;
   }
@@ -199,7 +218,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   // Allow source to filter and format feature properties before displaying to user
   async getTooltipProperties(
-    properties: GeoJsonProperties,
+    properties: any,
     executionContext: KibanaExecutionContext
   ): Promise<ITooltipProperty[]> {
     const tooltipProperties: ITooltipProperty[] = [];
