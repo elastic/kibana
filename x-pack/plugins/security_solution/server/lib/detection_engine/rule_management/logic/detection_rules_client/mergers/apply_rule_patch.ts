@@ -92,7 +92,9 @@ export const applyRulePatch = async ({
     meta: rulePatch.meta ?? existingRule.meta,
     max_signals: rulePatch.max_signals ?? existingRule.max_signals,
     related_integrations: rulePatch.related_integrations ?? existingRule.related_integrations,
-    required_fields: addEcsToRequiredFields(rulePatch.required_fields),
+    required_fields: rulePatch.required_fields
+      ? addEcsToRequiredFields(rulePatch.required_fields)
+      : existingRule.required_fields,
     risk_score: rulePatch.risk_score ?? existingRule.risk_score,
     risk_score_mapping: rulePatch.risk_score_mapping ?? existingRule.risk_score_mapping,
     rule_name_override: rulePatch.rule_name_override ?? existingRule.rule_name_override,
