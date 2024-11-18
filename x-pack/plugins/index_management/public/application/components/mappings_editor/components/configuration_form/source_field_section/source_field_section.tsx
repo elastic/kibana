@@ -67,7 +67,7 @@ export const SourceFieldSection = ({ defaultOption, isEnterpriseLicense }: Props
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription1"
-          defaultMessage="Disabling {source} is not recommended. If storage overhead is a concer, consider using synthetic {source} instead. Disabling {source} will disable important features, such as the ability to reindex or debug queries by viewing the original document."
+          defaultMessage="Disabling {source} is not recommended. If storage overhead is a concern, consider using synthetic {source} instead. Disabling {source} will disable important features, such as the ability to reindex or debug queries by viewing the original document."
           values={{
             source: (
               <code>
