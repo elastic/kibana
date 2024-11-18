@@ -11,7 +11,8 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import { isEmpty } from 'lodash/fp';
 import type { GraphNode } from '../../types';
 import { getEsqlKnowledgeBase } from './esql_knowledge_base_caller';
-import { getEsqlTranslationPrompt, getInlineQueryPrompt } from './prompt';
+import { getReplaceQueryResourcesPrompt } from './prompts/replace_resources_prompt';
+import { getEsqlTranslationPrompt } from './prompts/esql_translation_prompt';
 import { SiemMigrationRuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { RuleResourceRetriever } from '../../../util/rule_resource_retriever';
 import type { ChatModel } from '../../../util/actions_client_chat';
@@ -37,10 +38,9 @@ export const getTranslateQueryNode = ({
 
     const resources = await resourceRetriever.getResources(state.original_rule);
     if (!isEmpty(resources)) {
-      const inlineQueryPrompt = getInlineQueryPrompt(state, resources);
+      const replaceQueryResourcesPrompt = getReplaceQueryResourcesPrompt(state, resources);
       const stringParser = new StringOutputParser();
-      query = await model.pipe(stringParser).invoke(inlineQueryPrompt);
-      logger.info(`Inline query prompt: ${query}`);
+      query = await model.pipe(stringParser).invoke(replaceQueryResourcesPrompt);
     }
 
     const prompt = getEsqlTranslationPrompt(state, query);

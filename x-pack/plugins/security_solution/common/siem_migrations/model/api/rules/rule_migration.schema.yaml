@@ -209,7 +209,7 @@ paths:
                 $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceData'
       responses:
         200:
-          description: Indicates migration have been created correctly.
+          description: Indicates migration resources have been created or updated correctly.
           content:
             application/json:
               schema:
@@ -251,7 +251,7 @@ paths:
               type: string
       responses:
         200:
-          description: Indicates migration have been created correctly.
+          description: Indicates migration resources have been retrieved correctly
           content:
             application/json:
               schema:

@@ -16,6 +16,7 @@ import {
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsStartRoute = (
   router: SecuritySolutionPluginRouter,
@@ -37,55 +38,46 @@ export const registerSiemRuleMigrationsStartRoute = (
           },
         },
       },
-      async (context, req, res): Promise<IKibanaResponse<StartRuleMigrationResponse>> => {
-        const migrationId = req.params.migration_id;
-        const { langsmith_options: langsmithOptions, connector_id: connectorId } = req.body;
+      withLicense(
+        async (context, req, res): Promise<IKibanaResponse<StartRuleMigrationResponse>> => {
+          const migrationId = req.params.migration_id;
+          const { langsmith_options: langsmithOptions, connector_id: connectorId } = req.body;
 
-        try {
-          const ctx = await context.resolve([
-            'core',
-            'actions',
-            'alerting',
-            'securitySolution',
-            'licensing',
-          ]);
-          if (!ctx.licensing.license.hasAtLeast('enterprise')) {
-            return res.forbidden({
-              body: 'You must have a trial or enterprise license to use this feature',
+          try {
+            const ctx = await context.resolve(['core', 'actions', 'alerting', 'securitySolution']);
+
+            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+            const inferenceClient = ctx.securitySolution.getInferenceClient();
+            const actionsClient = ctx.actions.getActionsClient();
+            const soClient = ctx.core.savedObjects.client;
+            const rulesClient = ctx.alerting.getRulesClient();
+
+            const invocationConfig = {
+              callbacks: [
+                new APMTracer({ projectName: langsmithOptions?.project_name ?? 'default' }, logger),
+                ...getLangSmithTracer({ ...langsmithOptions, logger }),
+              ],
+            };
+
+            const { exists, started } = await ruleMigrationsClient.task.start({
+              migrationId,
+              connectorId,
+              invocationConfig,
+              inferenceClient,
+              actionsClient,
+              soClient,
+              rulesClient,
             });
+
+            if (!exists) {
+              return res.noContent();
+            }
+            return res.ok({ body: { started } });
+          } catch (err) {
+            logger.error(err);
+            return res.badRequest({ body: err.message });
           }
-
-          const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-          const inferenceClient = ctx.securitySolution.getInferenceClient();
-          const actionsClient = ctx.actions.getActionsClient();
-          const soClient = ctx.core.savedObjects.client;
-          const rulesClient = ctx.alerting.getRulesClient();
-
-          const invocationConfig = {
-            callbacks: [
-              new APMTracer({ projectName: langsmithOptions?.project_name ?? 'default' }, logger),
-              ...getLangSmithTracer({ ...langsmithOptions, logger }),
-            ],
-          };
-
-          const { exists, started } = await ruleMigrationsClient.task.start({
-            migrationId,
-            connectorId,
-            invocationConfig,
-            inferenceClient,
-            actionsClient,
-            soClient,
-            rulesClient,
-          });
-
-          if (!exists) {
-            return res.noContent();
-          }
-          return res.ok({ body: { started } });
-        } catch (err) {
-          logger.error(err);
-          return res.badRequest({ body: err.message });
         }
-      }
+      )
     );
 };

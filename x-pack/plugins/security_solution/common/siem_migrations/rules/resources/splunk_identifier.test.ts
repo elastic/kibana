@@ -10,11 +10,11 @@ import { splResourceIdentifier } from './splunk_identifier';
 describe('splResourceIdentifier', () => {
   it('should extract macros correctly', () => {
     const query =
-      '`macro_one` some search command `macro_two(arg1, arg2)` another command `macro_three`';
+      '`macro_zero`, `macro_one(arg1)`, some search command `macro_two(arg1, arg2)` another command `macro_three(arg1, arg2, arg3)`';
 
     const result = splResourceIdentifier(query);
 
-    expect(result.macro).toEqual(['macro_one', 'macro_two', 'macro_three']);
+    expect(result.macro).toEqual(['macro_zero', 'macro_one(1)', 'macro_two(2)', 'macro_three(3)']);
     expect(result.list).toEqual([]);
   });
 
@@ -55,5 +55,35 @@ describe('splResourceIdentifier', () => {
 
     expect(result.macro).toEqual(['macro_one', 'my_lookup_table', 'third_macro']);
     expect(result.list).toEqual(['real_lookup_list']);
+  });
+
+  it('should ignore macros or lookup tables inside string literals with double quotes', () => {
+    const query =
+      '`macro_one` | lookup my_lookup_table | search title="`macro_two` and lookup another_table"';
+
+    const result = splResourceIdentifier(query);
+
+    expect(result.macro).toEqual(['macro_one']);
+    expect(result.list).toEqual(['my_lookup_table']);
+  });
+
+  it('should ignore macros or lookup tables inside string literals with single quotes', () => {
+    const query =
+      "`macro_one` | lookup my_lookup_table | search title='`macro_two` and lookup another_table'";
+
+    const result = splResourceIdentifier(query);
+
+    expect(result.macro).toEqual(['macro_one']);
+    expect(result.list).toEqual(['my_lookup_table']);
+  });
+
+  it('should ignore macros or lookup tables inside comments wrapped by ```', () => {
+    const query =
+      '`macro_one` | ```this is a comment with `macro_two` and lookup another_table``` lookup my_lookup_table';
+
+    const result = splResourceIdentifier(query);
+
+    expect(result.macro).toEqual(['macro_one']);
+    expect(result.list).toEqual(['my_lookup_table']);
   });
 });

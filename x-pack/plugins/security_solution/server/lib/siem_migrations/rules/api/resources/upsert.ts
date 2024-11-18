@@ -15,6 +15,7 @@ import {
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { withLicense } from '../util/with_license';
 
 export const registerSiemRuleMigrationsResourceUpsertRoute = (
   router: SecuritySolutionPluginRouter,
@@ -36,25 +37,31 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
           },
         },
       },
-      async (context, req, res): Promise<IKibanaResponse<UpsertRuleMigrationResourcesResponse>> => {
-        const resources = req.body;
-        const migrationId = req.params.migration_id;
-        try {
-          const ctx = await context.resolve(['securitySolution']);
-          const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+      withLicense(
+        async (
+          context,
+          req,
+          res
+        ): Promise<IKibanaResponse<UpsertRuleMigrationResourcesResponse>> => {
+          const resources = req.body;
+          const migrationId = req.params.migration_id;
+          try {
+            const ctx = await context.resolve(['securitySolution']);
+            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-          const ruleMigrations = resources.map<RuleMigrationResource>((resource) => ({
-            migration_id: migrationId,
-            ...resource,
-          }));
+            const ruleMigrations = resources.map<RuleMigrationResource>((resource) => ({
+              migration_id: migrationId,
+              ...resource,
+            }));
 
-          await ruleMigrationsClient.data.resources.upsert(ruleMigrations);
+            await ruleMigrationsClient.data.resources.upsert(ruleMigrations);
 
-          return res.ok({ body: { acknowledged: true } });
-        } catch (err) {
-          logger.error(err);
-          return res.badRequest({ body: err.message });
+            return res.ok({ body: { acknowledged: true } });
+          } catch (err) {
+            logger.error(err);
+            return res.badRequest({ body: err.message });
+          }
         }
-      }
+      )
     );
 };

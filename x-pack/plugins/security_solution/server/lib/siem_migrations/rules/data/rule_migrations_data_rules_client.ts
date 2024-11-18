@@ -24,6 +24,9 @@ export type CreateRuleMigrationInput = Omit<RuleMigration, '@timestamp' | 'statu
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
 export type RuleMigrationAllDataStats = Array<RuleMigrationDataStats & { migration_id: string }>;
 
+/* BULK_MAX_SIZE defines the number to break down the bulk operations by.
+ * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
+ */
 const BULK_MAX_SIZE = 500 as const;
 
 export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient {

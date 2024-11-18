@@ -14,6 +14,7 @@ import {
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { withLicense } from '../util/with_license';
 
 export const registerSiemRuleMigrationsResourceGetRoute = (
   router: SecuritySolutionPluginRouter,
@@ -35,20 +36,26 @@ export const registerSiemRuleMigrationsResourceGetRoute = (
           },
         },
       },
-      async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationResourcesResponse>> => {
-        const migrationId = req.params.migration_id;
-        const { type, names } = req.query;
-        try {
-          const ctx = await context.resolve(['securitySolution']);
-          const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+      withLicense(
+        async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationResourcesResponse>> => {
+          const migrationId = req.params.migration_id;
+          const { type, names } = req.query;
+          try {
+            const ctx = await context.resolve(['securitySolution']);
+            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-          const resources = await ruleMigrationsClient.data.resources.get(migrationId, type, names);
+            const resources = await ruleMigrationsClient.data.resources.get(
+              migrationId,
+              type,
+              names
+            );
 
-          return res.ok({ body: resources });
-        } catch (err) {
-          logger.error(err);
-          return res.badRequest({ body: err.message });
+            return res.ok({ body: resources });
+          } catch (err) {
+            logger.error(err);
+            return res.badRequest({ body: err.message });
+          }
         }
-      }
+      )
     );
 };

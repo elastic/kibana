@@ -9,6 +9,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import type { GetAllStatsRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATIONS_ALL_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsStatsAllRoute = (
   router: SecuritySolutionPluginRouter,
@@ -25,18 +26,20 @@ export const registerSiemRuleMigrationsStatsAllRoute = (
         version: '1',
         validate: {},
       },
-      async (context, req, res): Promise<IKibanaResponse<GetAllStatsRuleMigrationResponse>> => {
-        try {
-          const ctx = await context.resolve(['securitySolution']);
-          const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+      withLicense(
+        async (context, req, res): Promise<IKibanaResponse<GetAllStatsRuleMigrationResponse>> => {
+          try {
+            const ctx = await context.resolve(['securitySolution']);
+            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-          const allStats = await ruleMigrationsClient.task.getAllStats();
+            const allStats = await ruleMigrationsClient.task.getAllStats();
 
-          return res.ok({ body: allStats });
-        } catch (err) {
-          logger.error(err);
-          return res.badRequest({ body: err.message });
+            return res.ok({ body: allStats });
+          } catch (err) {
+            logger.error(err);
+            return res.badRequest({ body: err.message });
+          }
         }
-      }
+      )
     );
 };

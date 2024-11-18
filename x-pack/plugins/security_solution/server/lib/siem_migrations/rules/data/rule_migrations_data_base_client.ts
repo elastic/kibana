@@ -27,7 +27,7 @@ export class RuleMigrationsDataBaseClient {
   }
 
   protected processHits<T extends object>(
-    hits: Array<SearchHit<T>>,
+    hits: Array<SearchHit<T>> = [],
     override: Partial<T> = {}
   ): Array<Stored<T>> {
     return hits.map(({ _id, _source }) => {

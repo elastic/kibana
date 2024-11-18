@@ -191,8 +191,8 @@ components:
       type: string
       description: The type of the rule migration resource.
       enum:
-        - macro
-        - list
+        - macro # Reusable part a query that can be customized and called from multiple rules
+        - list # A list of values that can be used inside queries reused in different rules
 
     RuleMigrationResourceData:
       type: object

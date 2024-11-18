@@ -13,6 +13,7 @@ import {
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsGetRoute = (
   router: SecuritySolutionPluginRouter,
@@ -31,7 +32,7 @@ export const registerSiemRuleMigrationsGetRoute = (
           request: { params: buildRouteValidationWithZod(GetRuleMigrationRequestParams) },
         },
       },
-      async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationResponse>> => {
+      withLicense(async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationResponse>> => {
         const migrationId = req.params.migration_id;
         try {
           const ctx = await context.resolve(['securitySolution']);
@@ -44,6 +45,6 @@ export const registerSiemRuleMigrationsGetRoute = (
           logger.error(err);
           return res.badRequest({ body: err.message });
         }
-      }
+      })
     );
 };

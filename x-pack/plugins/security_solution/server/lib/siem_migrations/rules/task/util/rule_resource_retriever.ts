@@ -19,7 +19,10 @@ export type RuleMigrationResources = Partial<
   Record<RuleMigrationResourceType, RuleMigrationResource[]>
 >;
 
-export const MAX_RECURSION_DEPTH = 10;
+/* It's not a common practice to have more than 2-3 nested levels of resources.
+ * This limit is just to prevent infinite recursion in case something goes wrong.
+ */
+export const MAX_RECURSION_DEPTH = 30;
 
 export class RuleResourceRetriever {
   constructor(
@@ -93,10 +96,5 @@ export class RuleResourceRetriever {
 }
 
 const withContent = (resources: RuleMigrationResource[]) => {
-  return resources.reduce<RuleMigrationResource[]>((acc, resource) => {
-    if (!isEmpty(resource.content)) {
-      acc.push(resource);
-    }
-    return acc;
-  }, []);
+  return resources.filter((resource) => !isEmpty(resource.content));
 };

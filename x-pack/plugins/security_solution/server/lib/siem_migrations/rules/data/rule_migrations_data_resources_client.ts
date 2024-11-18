@@ -14,6 +14,9 @@ import type {
 import type { StoredRuleMigrationResource } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
+/* BULK_MAX_SIZE defines the number to break down the bulk operations by.
+ * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
+ */
 const BULK_MAX_SIZE = 500 as const;
 
 export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseClient {

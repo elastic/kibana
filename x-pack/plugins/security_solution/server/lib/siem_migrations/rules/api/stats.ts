@@ -13,6 +13,7 @@ import {
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsStatsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -31,19 +32,21 @@ export const registerSiemRuleMigrationsStatsRoute = (
           request: { params: buildRouteValidationWithZod(GetRuleMigrationStatsRequestParams) },
         },
       },
-      async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationStatsResponse>> => {
-        const migrationId = req.params.migration_id;
-        try {
-          const ctx = await context.resolve(['securitySolution']);
-          const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+      withLicense(
+        async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationStatsResponse>> => {
+          const migrationId = req.params.migration_id;
+          try {
+            const ctx = await context.resolve(['securitySolution']);
+            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-          const stats = await ruleMigrationsClient.task.getStats(migrationId);
+            const stats = await ruleMigrationsClient.task.getStats(migrationId);
 
-          return res.ok({ body: stats });
-        } catch (err) {
-          logger.error(err);
-          return res.badRequest({ body: err.message });
+            return res.ok({ body: stats });
+          } catch (err) {
+            logger.error(err);
+            return res.badRequest({ body: err.message });
+          }
         }
-      }
+      )
     );
 };
