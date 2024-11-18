@@ -520,8 +520,8 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
           expect(['default', 'space_1']).to.contain(spaceId);
         });
 
-        after(() => {
-          maybeDestroySupertest(supertest);
+        after(async () => {
+          await maybeDestroySupertest(supertest);
         });
 
         describe('single-namespace types', () => {

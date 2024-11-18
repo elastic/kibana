@@ -39,9 +39,11 @@ export async function getSupertest(
   return supertestWithoutAuth;
 }
 
-export function maybeDestroySupertest(supertest: SupertestWithRoleScopeType | SuperTestAgent) {
+export async function maybeDestroySupertest(
+  supertest: SupertestWithRoleScopeType | SuperTestAgent
+) {
   // @ts-expect-error
   if (typeof supertest.destroy === 'function') {
-    (supertest as SupertestWithRoleScopeType).destroy();
+    await (supertest as SupertestWithRoleScopeType).destroy();
   }
 }

@@ -181,7 +181,7 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         });
         after(async () => {
           if (user) {
-            (supertest as SupertestWithRoleScopeType).destroy();
+            await (supertest as SupertestWithRoleScopeType).destroy();
           }
         });
 
