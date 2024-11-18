@@ -42,16 +42,17 @@ export const OverallDetails: FC<{
 }> = ({ overallDetails }) => (
   <EuiFlexGroup alignItems="center" wrap data-test-subj={overallDetails.dataTestSubj}>
     {overallDetails.items.map((item) => {
+      const key = item.title;
       if (item.title === 'badge') {
         return (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} key={key}>
             <EuiBetaBadge label={item.description} color="subdued" title={item.title} />
           </EuiFlexItem>
         );
       }
 
       return (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} key={key}>
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiDescriptionListDescription className="descriptionListTitle">
@@ -82,7 +83,7 @@ export const Stats = ({ section }: { section: SectionConfig }) => (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup>
         {section.items.map((item) => (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} key={item.title}>
             <EuiDescriptionListDescription className="descriptionListTitle">
               <EuiText size="xs">{item.title}</EuiText>
             </EuiDescriptionListDescription>
@@ -200,10 +201,10 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({
               </EuiTitle>
               <EuiSpacer size="xs" />
               {progress.items.map((item) => (
-                <>
+                <span key={item.title}>
                   {item.description}
                   <EuiSpacer size="s" />
-                </>
+                </span>
               ))}
             </EuiFlexItem>
             <EuiFlexItem grow={3}>
