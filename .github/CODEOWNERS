@@ -1349,7 +1349,6 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /test/functional/page_objects/dashboard_page* @elastic/kibana-presentation
 /test/functional/firefox/dashboard.config.ts @elastic/kibana-presentation # Assigned per: https://github.com/elastic/kibana/issues/15023
 /test/functional/fixtures/es_archiver/dashboard @elastic/kibana-presentation # Assigned per: https://github.com/elastic/kibana/issues/15023
-/test/api_integration/apis/short_url/**/*.ts @elastic/kibana-presentation # Assigned per: https://github.com/elastic/kibana/issues/15023
 /test/accessibility/apps/dashboard.ts @elastic/kibana-presentation
 /test/accessibility/apps/filter_panel.ts @elastic/kibana-presentation
 /x-pack/test/functional/apps/dashboard @elastic/kibana-presentation
