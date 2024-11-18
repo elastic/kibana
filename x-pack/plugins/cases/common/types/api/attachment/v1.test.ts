@@ -6,7 +6,11 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { MAX_BULK_CREATE_ATTACHMENTS, MAX_COMMENT_LENGTH } from '../../../constants';
+import {
+  MAX_BULK_CREATE_ATTACHMENTS,
+  MAX_COMMENT_LENGTH,
+  MAX_FILENAME_LENGTH,
+} from '../../../constants';
 import { AttachmentType } from '../../domain/attachment/v1';
 import {
   AttachmentPatchRequestRt,
@@ -17,6 +21,7 @@ import {
   BulkGetAttachmentsRequestRt,
   BulkGetAttachmentsResponseRt,
   FindAttachmentsQueryParamsRt,
+  PostFileAttachmentRequestRt,
 } from './v1';
 
 describe('Attachments', () => {
@@ -386,6 +391,51 @@ describe('Attachments', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+  });
+
+  describe('PostFileAttachmentRequestRt', () => {
+    const defaultRequest = {
+      file: 'Solve this fast!',
+      filename: 'filename',
+    };
+
+    it('has the expected attributes in request', () => {
+      const query = PostFileAttachmentRequestRt.decode(defaultRequest);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = PostFileAttachmentRequestRt.decode({ ...defaultRequest, foo: 'bar' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
+
+    describe('errors', () => {
+      it('throws an error when the filename is too long', () => {
+        const longFilename = 'x'.repeat(MAX_FILENAME_LENGTH + 1);
+
+        expect(
+          PathReporter.report(
+            PostFileAttachmentRequestRt.decode({ ...defaultRequest, filename: longFilename })
+          )
+        ).toContain('The length of the filename is too long. The maximum length is 160.');
+      });
+
+      it('throws an error when the filename is too small', () => {
+        expect(
+          PathReporter.report(
+            PostFileAttachmentRequestRt.decode({ ...defaultRequest, filename: '' })
+          )
+        ).toContain('The filename field cannot be an empty string.');
       });
     });
   });

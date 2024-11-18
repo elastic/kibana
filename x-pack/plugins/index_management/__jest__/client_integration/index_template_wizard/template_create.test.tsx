@@ -52,6 +52,15 @@ jest.mock('@elastic/eui', () => {
         }}
       />
     ),
+    EuiSuperSelect: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
+        value={props.valueOfSelected}
+        onChange={(e) => {
+          props.onChange(e.target.value);
+        }}
+      />
+    ),
   };
 });
 
@@ -301,6 +310,15 @@ describe('<TemplateCreate />', () => {
         expect(find('stepTitle').text()).toEqual('Index settings (optional)');
       });
 
+      it('should display a warning callout displaying the selected index mode', async () => {
+        const { exists, find } = testBed;
+
+        expect(exists('indexModeCallout')).toBe(true);
+        expect(find('indexModeCallout').text()).toContain(
+          'The index.mode setting has been set to Standard within template Logistics.'
+        );
+      });
+
       it('should not allow invalid json', async () => {
         const { form, actions } = testBed;
 
@@ -426,6 +444,53 @@ describe('<TemplateCreate />', () => {
     });
   });
 
+  describe('logistics (step 1)', () => {
+    beforeEach(async () => {
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
+    });
+
+    it('setting index pattern to logs-*-* should set the index mode to logsdb', async () => {
+      const { component, actions } = testBed;
+      // Logistics
+      await actions.completeStepOne({ name: 'my_logs_template', indexPatterns: ['logs-*-*'] });
+      // Component templates
+      await actions.completeStepTwo();
+      // Index settings
+      await actions.completeStepThree('{}');
+      // Mappings
+      await actions.completeStepFour();
+      // Aliases
+      await actions.completeStepFive();
+
+      await act(async () => {
+        actions.clickNextButton();
+      });
+      component.update();
+
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/index_templates`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: 'my_logs_template',
+            indexPatterns: ['logs-*-*'],
+            allowAutoCreate: 'NO_OVERWRITE',
+            indexMode: 'logsdb',
+            dataStream: {},
+            _kbnMeta: {
+              type: 'default',
+              hasDatastream: false,
+              isLegacy: false,
+            },
+            template: {},
+          }),
+        })
+      );
+    });
+  });
+
   describe('review (step 6)', () => {
     beforeEach(async () => {
       await act(async () => {
@@ -529,6 +594,7 @@ describe('<TemplateCreate />', () => {
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
         allowAutoCreate: 'TRUE',
+        indexMode: 'time_series',
       });
       // Component templates
       await actions.completeStepTwo('test_component_template_1');
@@ -557,6 +623,7 @@ describe('<TemplateCreate />', () => {
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
             allowAutoCreate: 'TRUE',
+            indexMode: 'time_series',
             dataStream: {},
             _kbnMeta: {
               type: 'default',
