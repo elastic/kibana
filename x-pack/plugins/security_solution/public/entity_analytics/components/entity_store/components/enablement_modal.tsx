@@ -62,6 +62,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
     entityStore: !!entityStore.checked,
   });
   const riskEnginePrivileges = useMissingRiskEnginePrivileges();
+
   if (!visible) {
     return null;
   }
