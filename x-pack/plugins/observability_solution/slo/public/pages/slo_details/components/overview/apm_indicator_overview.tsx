@@ -14,7 +14,7 @@ import {
   SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import React from 'react';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { OverviewItem } from './overview_item';
 

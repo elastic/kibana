@@ -69,7 +69,8 @@ export const getTimelineNonValidQuery = (): CompleteTimeline => ({
 });
 
 export const expectedExportedTimelineTemplate = (
-  templateResponse: Cypress.Response<PersistTimelineResponse>
+  templateResponse: Cypress.Response<PersistTimelineResponse>,
+  username: string
 ) => {
   const timelineTemplateBody = templateResponse.body.data.persistTimeline.timeline;
 
@@ -102,9 +103,9 @@ export const expectedExportedTimelineTemplate = (
     templateTimelineVersion: 1,
     timelineType: 'template',
     created: timelineTemplateBody.created,
-    createdBy: Cypress.env('ELASTICSEARCH_USERNAME'),
+    createdBy: username,
     updated: timelineTemplateBody.updated,
-    updatedBy: Cypress.env('ELASTICSEARCH_USERNAME'),
+    updatedBy: username,
     sort: [],
     eventNotes: [],
     globalNotes: [],
@@ -114,7 +115,8 @@ export const expectedExportedTimelineTemplate = (
 };
 
 export const expectedExportedTimeline = (
-  timelineResponse: Cypress.Response<PersistTimelineResponse>
+  timelineResponse: Cypress.Response<PersistTimelineResponse>,
+  username: string
 ) => {
   const timelineBody = timelineResponse.body.data.persistTimeline.timeline;
 
@@ -140,9 +142,9 @@ export const expectedExportedTimeline = (
     description: timelineBody.description,
     title: timelineBody.title,
     created: timelineBody.created,
-    createdBy: Cypress.env('ELASTICSEARCH_USERNAME'),
+    createdBy: username,
     updated: timelineBody.updated,
-    updatedBy: Cypress.env('ELASTICSEARCH_USERNAME'),
+    updatedBy: username,
     timelineType: 'default',
     sort: [],
     eventNotes: [],

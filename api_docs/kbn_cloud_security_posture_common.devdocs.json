@@ -1547,7 +1547,7 @@
         "label": "VulnSeverity",
         "description": [],
         "signature": [
-          "\"UNKNOWN\" | \"LOW\" | \"MEDIUM\" | \"HIGH\" | \"CRITICAL\""
+          "\"MEDIUM\" | \"UNKNOWN\" | \"LOW\" | \"HIGH\" | \"CRITICAL\""
         ],
         "path": "x-pack/packages/kbn-cloud-security-posture/common/types/vulnerabilities.ts",
         "deprecated": false,
