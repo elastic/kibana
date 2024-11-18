@@ -812,6 +812,54 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.truncateList",
+        "type": "Function",
+        "tags": [],
+        "label": "truncateList",
+        "description": [],
+        "signature": [
+          "(values: T[], limit: number) => (string | T)[]"
+        ],
+        "path": "x-pack/packages/ai-infra/inference-common/src/truncate_list.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.truncateList.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "values",
+            "description": [],
+            "signature": [
+              "T[]"
+            ],
+            "path": "x-pack/packages/ai-infra/inference-common/src/truncate_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.truncateList.$2",
+            "type": "number",
+            "tags": [],
+            "label": "limit",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ai-infra/inference-common/src/truncate_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.withoutChunkEvents",
         "type": "Function",
         "tags": [],
