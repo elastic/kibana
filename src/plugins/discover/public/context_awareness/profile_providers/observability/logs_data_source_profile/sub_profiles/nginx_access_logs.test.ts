@@ -13,8 +13,13 @@ import { DataSourceCategory, RootContext, SolutionType } from '../../../../profi
 import { createContextAwarenessMocks } from '../../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from '../profile';
 import { createNginxAccessLogsDataSourceProfileProvider } from './nginx_access_logs';
+import { ContextWithProfileId } from '../../../../profile_service';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 
-const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Default };
+const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
+  profileId: OBSERVABILITY_ROOT_PROFILE_ID,
+  solutionType: SolutionType.Observability,
+};
 const { profileProviderServices } = createContextAwarenessMocks();
 const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(profileProviderServices);
 const dataSourceProfileProvider = createNginxAccessLogsDataSourceProfileProvider(
