@@ -43,11 +43,11 @@ const ImageEditor = (props: Partial<ImageEditorFlyoutProps>) => {
   );
 };
 
-test('should call onCancel when "Close" clicked', async () => {
+test('should call onCancel when "Cancel" clicked', async () => {
   const onCancel = jest.fn();
   const { getByText } = render(<ImageEditor onCancel={onCancel} />);
-  expect(getByText('Close')).toBeVisible();
-  await userEvent.click(getByText('Close'));
+  expect(getByText('Cancel')).toBeVisible();
+  await userEvent.click(getByText('Cancel'));
   expect(onCancel).toBeCalled();
 });
 

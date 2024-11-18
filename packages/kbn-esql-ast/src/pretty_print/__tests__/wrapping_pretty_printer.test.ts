@@ -19,6 +19,83 @@ const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
   return { text };
 };
 
+describe('commands', () => {
+  describe('GROK', () => {
+    test('two basic arguments', () => {
+      const { text } = reprint('FROM search-movies | GROK Awards "text"');
+
+      expect(text).toBe('FROM search-movies | GROK Awards "text"');
+    });
+
+    test('two long arguments', () => {
+      const { text } = reprint(
+        'FROM search-movies | GROK AwardsAwardsAwardsAwardsAwardsAwardsAwardsAwards "texttexttexttexttexttexttexttexttexttexttexttexttexttexttext"'
+      );
+
+      expect('\n' + text).toBe(`
+FROM search-movies
+  | GROK
+      AwardsAwardsAwardsAwardsAwardsAwardsAwardsAwards
+      "texttexttexttexttexttexttexttexttexttexttexttexttexttexttext"`);
+    });
+  });
+
+  describe('DISSECT', () => {
+    test('two basic arguments', () => {
+      const { text } = reprint('FROM index | DISSECT input "pattern"');
+
+      expect(text).toBe('FROM index | DISSECT input "pattern"');
+    });
+
+    test('two long arguments', () => {
+      const { text } = reprint(
+        'FROM index | DISSECT InputInputInputInputInputInputInputInputInputInputInputInputInputInput "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern"'
+      );
+
+      expect('\n' + text).toBe(`
+FROM index
+  | DISSECT
+      InputInputInputInputInputInputInputInputInputInputInputInputInputInput
+      "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern"`);
+    });
+
+    test('with APPEND_SEPARATOR option', () => {
+      const { text } = reprint(
+        'FROM index | DISSECT input "pattern" APPEND_SEPARATOR="<separator>"'
+      );
+
+      expect(text).toBe('FROM index | DISSECT input "pattern" APPEND_SEPARATOR = "<separator>"');
+    });
+
+    test('two long arguments with short APPEND_SEPARATOR option', () => {
+      const { text } = reprint(
+        'FROM index | DISSECT InputInputInputInputInputInputInputInputInputInputInputInputInputInput "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern" APPEND_SEPARATOR="sep"'
+      );
+
+      expect('\n' + text).toBe(`
+FROM index
+  | DISSECT
+      InputInputInputInputInputInputInputInputInputInputInputInputInputInput
+      "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern"
+        APPEND_SEPARATOR = "sep"`);
+    });
+
+    test('two long arguments with long APPEND_SEPARATOR option', () => {
+      const { text } = reprint(
+        'FROM index | DISSECT InputInputInputInputInputInputInputInputInputInputInputInputInputInput "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern" APPEND_SEPARATOR="<SeparatorSeparatorSeparatorSeparatorSeparatorSeparatorSeparatorSeparator>"'
+      );
+
+      expect('\n' + text).toBe(`
+FROM index
+  | DISSECT
+      InputInputInputInputInputInputInputInputInputInputInputInputInputInput
+      "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern"
+        APPEND_SEPARATOR =
+          "<SeparatorSeparatorSeparatorSeparatorSeparatorSeparatorSeparatorSeparator>"`);
+    });
+  });
+});
+
 describe('casing', () => {
   test('can chose command name casing', () => {
     const query = 'FROM index | WHERE a == 123';

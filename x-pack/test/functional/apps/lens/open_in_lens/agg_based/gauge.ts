@@ -10,10 +10,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, lens, timePicker, visEditor, visChart } = getPageObjects([
+  const { visualize, lens, visEditor, visChart } = getPageObjects([
     'visualize',
     'lens',
-    'timePicker',
     'visEditor',
     'visChart',
   ]);
@@ -30,7 +29,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToNewAggBasedVisualization();
       await visualize.clickGauge();
       await visualize.clickNewSearch();
-      await timePicker.setDefaultAbsoluteRange();
       await elasticChart.setNewChartUiDebugFlag(true);
     });
 

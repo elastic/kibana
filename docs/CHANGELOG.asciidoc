@@ -22,6 +22,47 @@ include::upgrade-notes.asciidoc[]
 
 For information about the {kib} 9.0.0 release, review the following information.
 
+The 8.16.0 release includes the following known issues.
+
+[float]
+[[known-issues-8.16.0]]
+=== Known issues
+
+[discrete]
+[[known-199902]]
+.Stack Monitoring shows "Unable to load page" error
+[%collapsible]
+====
+*Details* +
+The Overview, Nodes, and Logs pages in Stack Monitoring show an "Unable to load page" error. The Stack trace mentions `TypeError: Cannot read properties of undefined (reading 'logsLocator')`.
+
+*Workaround* +
+Disabling the `Set feature visibility > Logs` feature at the Kibana Space settings level will prevent the error from occurring. Please note the `Logs` feature will not be available on those spaces.
+
+It's also possible to set the `Observability > Logs` feature privilege to `None` at the role level. This will hide the `Logs` feature from individual users and prevent the error for these users as well.
+
+For more information, refer to {kibana-issue}199902[#199902].
+====
+
+[discrete]
+[[known-199891-199892]]
+.Onboarding, tutorial of APM and OpenTelemetry and some "Beats Only" integrations shows "Unable to load page" error
+[%collapsible]
+====
+*Details* +
+Tutorials linked from the {kib} home page show an "Unable to load page" error. The Stack trace mentions `The above error occurred in tutorial_TutorialUi`.
+
+*Workaround* +
+The APM / OpenTelemetry tutorials represented a shortcut to quickly add important parameters to the configuration files.
+It is still possible to obtain the same parameters following the tutorials in the APM documentation.
+
+More information can be found in the {observability-guide}/apm-collect-application-data.html[APM documentation] and the {observability-guide}/get-started-with-fleet-apm-server.html[Fleet documentation].
+
+For information about how to create APM API keys, please check the {observability-guide}/apm-api-key.html#apm-create-an-api-key[API key documentation].
+
+For more information, refer to {kibana-issue}199891[#199891] and {kibana-issue}199892[#199892].
+====
+
 [float]
 [[breaking-changes-9.0.0]]
 === Breaking changes

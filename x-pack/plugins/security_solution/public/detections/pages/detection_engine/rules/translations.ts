@@ -1435,6 +1435,13 @@ export const UPDATE_RULE_BUTTON = i18n.translate(
   }
 );
 
+export const UPDATE_RULE_BUTTON_TOOLTIP_CONFLICTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.button.conflicts',
+  {
+    defaultMessage: 'Rule has conflicts. Resolve them manually.',
+  }
+);
+
 export const GO_BACK_TO_RULES_TABLE_BUTTON = i18n.translate(
   'xpack.securitySolution.addRules.goBackToRulesTableButton',
   {

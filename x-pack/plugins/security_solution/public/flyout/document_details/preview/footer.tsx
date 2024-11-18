@@ -16,6 +16,7 @@ import { DocumentDetailsRightPanelKey } from '../shared/constants/panel_keys';
 import { useDocumentDetailsContext } from '../shared/context';
 import { PREVIEW_FOOTER_TEST_ID, PREVIEW_FOOTER_LINK_TEST_ID } from './test_ids';
 import { useKibana } from '../../../common/lib/kibana';
+import { DocumentEventTypes } from '../../../common/lib/telemetry';
 
 /**
  * Footer at the bottom of preview panel with a link to open document details flyout
@@ -41,7 +42,7 @@ export const PreviewPanelFooter = () => {
         },
       },
     });
-    telemetry.reportDetailsFlyoutOpened({
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: scopeId,
       panel: 'right',
     });

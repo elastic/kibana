@@ -5,23 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTextAlign,
-  EuiTitle,
-} from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { IndicesStatusResponse, UserStartPrivilegesResponse } from '../../../common';
-import { docLinks } from '../../../common/doc_links';
 
 import { AnalyticsEvents } from '../../analytics/constants';
 import { AvailableLanguages } from '../../code_examples';
@@ -29,9 +16,11 @@ import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { generateRandomIndexName } from '../../utils/indices';
 import { getDefaultCodingLanguage } from '../../utils/language';
 
-import { CreateIndexForm } from './create_index';
-import { CreateIndexCodeView } from './create_index_code';
-import { CreateIndexFormState } from './types';
+import { CreateIndexUIView } from './create_index';
+import { CreateIndexCodeView } from '../shared/create_index_code_view';
+import { CreateIndexFormState, CreateIndexViewMode } from '../../types';
+
+import { CreateIndexPanel } from '../shared/create_index_panel';
 import { useKibana } from '../../hooks/use_kibana';
 
 function initCreateIndexState(): CreateIndexFormState {
@@ -43,21 +32,17 @@ function initCreateIndexState(): CreateIndexFormState {
   };
 }
 
-const MAX_WIDTH = '650px';
-
-enum CreateIndexView {
-  UI = 'ui',
-  Code = 'code',
-}
 export interface ElasticsearchStartProps {
   indicesData?: IndicesStatusResponse;
   userPrivileges?: UserStartPrivilegesResponse;
 }
 
 export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) => {
-  const { cloud, http } = useKibana().services;
-  const [createIndexView, setCreateIndexView] = useState<CreateIndexView>(
-    userPrivileges?.privileges.canCreateIndex === false ? CreateIndexView.Code : CreateIndexView.UI
+  const { application } = useKibana().services;
+  const [createIndexView, setCreateIndexViewMode] = useState<CreateIndexViewMode>(
+    userPrivileges?.privileges.canCreateIndex === false
+      ? CreateIndexViewMode.Code
+      : CreateIndexViewMode.UI
   );
   const [formState, setFormState] = useState<CreateIndexFormState>(initCreateIndexState);
   const usageTracker = useUsageTracker();
@@ -68,28 +53,20 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
   useEffect(() => {
     if (userPrivileges === undefined) return;
     if (userPrivileges.privileges.canCreateIndex === false) {
-      setCreateIndexView(CreateIndexView.Code);
+      setCreateIndexViewMode(CreateIndexViewMode.Code);
     }
   }, [userPrivileges]);
-
-  const o11yTrialLink = useMemo(() => {
-    if (cloud && cloud.isServerlessEnabled) {
-      const baseUrl = cloud?.projectsUrl ?? 'https://cloud.elastic.co/projects/';
-      return `${baseUrl}create/observability/start`;
-    }
-    return http.basePath.prepend('/app/observability/onboarding');
-  }, [cloud, http]);
 
   const onChangeView = useCallback(
     (id: string) => {
       switch (id) {
-        case CreateIndexView.UI:
+        case CreateIndexViewMode.UI:
           usageTracker.click(AnalyticsEvents.startPageShowCreateIndexUIClick);
-          setCreateIndexView(CreateIndexView.UI);
+          setCreateIndexViewMode(CreateIndexViewMode.UI);
           return;
-        case CreateIndexView.Code:
+        case CreateIndexViewMode.Code:
           usageTracker.click(AnalyticsEvents.startPageShowCodeClick);
-          setCreateIndexView(CreateIndexView.Code);
+          setCreateIndexViewMode(CreateIndexViewMode.Code);
           return;
       }
     },
@@ -101,178 +78,48 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
         ...formState,
         codingLanguage: language,
       });
+      usageTracker.count([
+        AnalyticsEvents.startCreateIndexLanguageSelect,
+        `${AnalyticsEvents.startCreateIndexLanguageSelect}_${language}`,
+      ]);
     },
-    [formState, setFormState]
+    [usageTracker, formState, setFormState]
   );
+  const onClose = useCallback(() => {
+    application.navigateToApp('management', { deepLinkId: 'index_management' });
+  }, [application]);
 
   return (
-    <EuiPanel
-      color="subdued"
-      hasShadow={false}
-      hasBorder
-      paddingSize="l"
-      style={{ maxWidth: MAX_WIDTH, margin: '0 auto' }}
+    <CreateIndexPanel
+      title={i18n.translate('xpack.searchIndices.startPage.createIndex.title', {
+        defaultMessage: 'Create your first index',
+      })}
+      createIndexView={createIndexView}
+      onChangeView={onChangeView}
+      onClose={onClose}
+      showSkip
+      showCallouts
     >
-      <EuiPanel color="transparent" paddingSize="m">
-        <EuiFlexGroup alignItems="center" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="logoElasticsearch" size="xl" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h1>
-                {i18n.translate('xpack.searchIndices.startPage.pageTitle', {
-                  defaultMessage: 'Elasticsearch',
-                })}
-              </h1>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiTitle size="l">
-          <h2>
-            {i18n.translate('xpack.searchIndices.startPage.pageDescription', {
-              defaultMessage: 'Vectorize, search, and visualize your data',
-            })}
-          </h2>
-        </EuiTitle>
-      </EuiPanel>
-      <EuiSpacer />
-      <EuiPanel>
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h4>
-                  {i18n.translate('xpack.searchIndices.startPage.createIndex.title', {
-                    defaultMessage: 'Create your first index',
-                  })}
-                </h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonGroup
-                legend={i18n.translate(
-                  'xpack.searchIndices.startPage.createIndex.viewSelec.legend',
-                  { defaultMessage: 'Create index view selection' }
-                )}
-                options={[
-                  {
-                    id: CreateIndexView.UI,
-                    label: i18n.translate(
-                      'xpack.searchIndices.startPage.createIndex.viewSelect.ui',
-                      { defaultMessage: 'UI' }
-                    ),
-                    'data-test-subj': 'createIndexUIViewBtn',
-                  },
-                  {
-                    id: CreateIndexView.Code,
-                    label: i18n.translate(
-                      'xpack.searchIndices.startPage.createIndex.viewSelect.code',
-                      { defaultMessage: 'Code' }
-                    ),
-                    'data-test-subj': 'createIndexCodeViewBtn',
-                  },
-                ]}
-                buttonSize="compressed"
-                idSelected={createIndexView}
-                onChange={onChangeView}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiText color="subdued">
-            <p>
-              {i18n.translate('xpack.searchIndices.startPage.createIndex.description', {
-                defaultMessage:
-                  'An index stores your data and defines the schema, or field mappings, for your searches',
-              })}
-            </p>
-          </EuiText>
-          {createIndexView === CreateIndexView.UI && (
-            <CreateIndexForm
-              userPrivileges={userPrivileges}
-              formState={formState}
-              setFormState={setFormState}
-            />
-          )}
-          {createIndexView === CreateIndexView.Code && (
-            <CreateIndexCodeView
-              createIndexForm={formState}
-              changeCodingLanguage={onChangeCodingLanguage}
-              canCreateApiKey={userPrivileges?.privileges.canCreateApiKeys}
-            />
-          )}
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiSpacer />
-      <EuiPanel color="transparent">
-        <EuiTextAlign textAlign="center">
-          <EuiTitle size="xs">
-            <h5>
-              {i18n.translate('xpack.searchIndices.startPage.observabilityCallout.title', {
-                defaultMessage: 'Looking to store your logs or metrics data?',
-              })}
-            </h5>
-          </EuiTitle>
-        </EuiTextAlign>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup alignItems="center" justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="text"
-              iconSide="right"
-              iconType="popout"
-              data-test-subj="analyzeLogsBtn"
-              href={docLinks.analyzeLogs}
-              target="_blank"
-            >
-              {i18n.translate('xpack.searchIndices.startPage.observabilityCallout.logs.button', {
-                defaultMessage: 'Collect and analyze logs',
-              })}
-            </EuiButtonEmpty>
-            <EuiText color="subdued" size="s" textAlign="center">
-              <small>
-                {i18n.translate(
-                  'xpack.searchIndices.startPage.observabilityCallout.logs.subTitle',
-                  {
-                    defaultMessage: 'Explore Logstash and Beats',
-                  }
-                )}
-              </small>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText>or</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="text"
-              iconSide="right"
-              iconType="popout"
-              data-test-subj="startO11yTrialBtn"
-              href={o11yTrialLink}
-              target="_blank"
-            >
-              {i18n.translate(
-                'xpack.searchIndices.startPage.observabilityCallout.o11yTrial.button',
-                {
-                  defaultMessage: 'Start an Observability trial',
-                }
-              )}
-            </EuiButtonEmpty>
-            <EuiText color="subdued" size="s" textAlign="center">
-              <small>
-                {i18n.translate(
-                  'xpack.searchIndices.startPage.observabilityCallout.o11yTrial.subTitle',
-                  {
-                    defaultMessage: 'Powerful performance monitoring',
-                  }
-                )}
-              </small>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </EuiPanel>
+      {createIndexView === CreateIndexViewMode.UI && (
+        <CreateIndexUIView
+          userPrivileges={userPrivileges}
+          formState={formState}
+          setFormState={setFormState}
+        />
+      )}
+      {createIndexView === CreateIndexViewMode.Code && (
+        <CreateIndexCodeView
+          selectedLanguage={formState.codingLanguage}
+          indexName={formState.indexName}
+          changeCodingLanguage={onChangeCodingLanguage}
+          canCreateApiKey={userPrivileges?.privileges.canCreateApiKeys}
+          analyticsEvents={{
+            runInConsole: AnalyticsEvents.startCreateIndexRunInConsole,
+            installCommands: AnalyticsEvents.startCreateIndexCodeCopyInstall,
+            createIndex: AnalyticsEvents.startCreateIndexCodeCopy,
+          }}
+        />
+      )}
+    </CreateIndexPanel>
   );
 };
