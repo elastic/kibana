@@ -91,11 +91,7 @@ describe('get draft timelines', () => {
 
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
-          data: {
-            persistTimeline: {
-              timeline: createTimelineWithTimelineId,
-            },
-          },
+          createTimelineWithTimelineId,
         });
       });
 
@@ -111,11 +107,7 @@ describe('get draft timelines', () => {
         expect(mockPersistTimeline).not.toHaveBeenCalled();
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
-          data: {
-            persistTimeline: {
-              timeline: mockGetDraftTimelineValue,
-            },
-          },
+          mockGetDraftTimelineValue,
         });
       });
     });

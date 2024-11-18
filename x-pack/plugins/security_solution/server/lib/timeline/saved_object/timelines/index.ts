@@ -307,74 +307,61 @@ export const persistFavorite = async (
 ): Promise<FavoriteTimelineResponse> => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
   const fullName = request.user?.full_name ?? '';
-  try {
-    let timeline: SavedTimeline = {};
-    if (timelineId != null) {
-      const {
-        eventIdToNoteIds,
-        notes,
-        noteIds,
-        pinnedEventIds,
-        pinnedEventsSaveObject,
-        savedObjectId,
-        version,
-        ...savedTimeline
-      } = await getBasicSavedTimeline(request, timelineId);
-      timelineId = savedObjectId; // eslint-disable-line no-param-reassign
-      timeline = savedTimeline;
-    }
-
-    const userFavoriteTimeline = {
-      keySearch: userName != null ? convertStringToBase64(userName) : null,
-      favoriteDate: new Date().valueOf(),
-      fullName,
-      userName,
-    };
-    if (timeline.favorite != null) {
-      const alreadyExistsTimelineFavoriteByUser = timeline.favorite.findIndex(
-        (user) => user.userName === userName
-      );
-
-      timeline.favorite =
-        alreadyExistsTimelineFavoriteByUser > -1
-          ? [
-              ...timeline.favorite.slice(0, alreadyExistsTimelineFavoriteByUser),
-              ...timeline.favorite.slice(alreadyExistsTimelineFavoriteByUser + 1),
-            ]
-          : [...timeline.favorite, userFavoriteTimeline];
-    } else if (timeline.favorite == null) {
-      timeline.favorite = [userFavoriteTimeline];
-    }
-
-    const persistResponse = await persistTimeline(request, timelineId, null, {
-      ...timeline,
-      templateTimelineId,
-      templateTimelineVersion,
-      timelineType,
-    });
-    return {
-      savedObjectId: persistResponse.timeline.savedObjectId,
-      version: persistResponse.timeline.version,
-      favorite:
-        persistResponse.timeline.favorite != null
-          ? persistResponse.timeline.favorite.filter((fav) => fav.userName === userName)
-          : [],
-      templateTimelineId,
-      templateTimelineVersion,
-      timelineType,
-    };
-  } catch (err) {
-    if (getOr(null, 'output.statusCode', err) === 403) {
-      return {
-        savedObjectId: '',
-        version: '',
-        favorite: [],
-        code: 403,
-        message: err.message,
-      };
-    }
-    throw err;
+  let timeline: SavedTimeline = {};
+  if (timelineId != null) {
+    const {
+      eventIdToNoteIds,
+      notes,
+      noteIds,
+      pinnedEventIds,
+      pinnedEventsSaveObject,
+      savedObjectId,
+      version,
+      ...savedTimeline
+    } = await getBasicSavedTimeline(request, timelineId);
+    timelineId = savedObjectId; // eslint-disable-line no-param-reassign
+    timeline = savedTimeline;
   }
+
+  const userFavoriteTimeline = {
+    keySearch: userName != null ? convertStringToBase64(userName) : null,
+    favoriteDate: new Date().valueOf(),
+    fullName,
+    userName,
+  };
+  if (timeline.favorite != null) {
+    const alreadyExistsTimelineFavoriteByUser = timeline.favorite.findIndex(
+      (user) => user.userName === userName
+    );
+
+    timeline.favorite =
+      alreadyExistsTimelineFavoriteByUser > -1
+        ? [
+            ...timeline.favorite.slice(0, alreadyExistsTimelineFavoriteByUser),
+            ...timeline.favorite.slice(alreadyExistsTimelineFavoriteByUser + 1),
+          ]
+        : [...timeline.favorite, userFavoriteTimeline];
+  } else if (timeline.favorite == null) {
+    timeline.favorite = [userFavoriteTimeline];
+  }
+
+  const persistResponse = await persistTimeline(request, timelineId, null, {
+    ...timeline,
+    templateTimelineId,
+    templateTimelineVersion,
+    timelineType,
+  });
+  return {
+    savedObjectId: persistResponse.timeline.savedObjectId,
+    version: persistResponse.timeline.version,
+    favorite:
+      persistResponse.timeline.favorite != null
+        ? persistResponse.timeline.favorite.filter((fav) => fav.userName === userName)
+        : [],
+    templateTimelineId,
+    templateTimelineVersion,
+    timelineType,
+  };
 };
 
 export interface InternalTimelineResponse {

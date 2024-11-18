@@ -64,13 +64,7 @@ export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) =
             );
 
             return response.ok({
-              body: {
-                data: {
-                  persistTimeline: {
-                    timeline: cleanedDraftTimeline,
-                  },
-                },
-              },
+              body: cleanedDraftTimeline,
             });
           }
           const templateTimelineData =
@@ -89,17 +83,14 @@ export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) =
 
           if (newTimelineResponse.code === 200) {
             return response.ok({
-              body: {
-                data: {
-                  persistTimeline: {
-                    timeline: newTimelineResponse.timeline,
-                  },
-                },
-              },
+              body: newTimelineResponse.timeline,
+            });
+          } else {
+            return siemResponse.error({
+              body: newTimelineResponse.message,
+              statusCode: newTimelineResponse.code,
             });
           }
-
-          return response.ok({});
         } catch (err) {
           const error = transformError(err);
 

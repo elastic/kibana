@@ -38,8 +38,4 @@ export const PersistNoteRouteRequestBody = z.object({
 export type PersistNoteRouteRequestBodyInput = z.input<typeof PersistNoteRouteRequestBody>;
 
 export type PersistNoteRouteResponse = z.infer<typeof PersistNoteRouteResponse>;
-export const PersistNoteRouteResponse = z.object({
-  data: z.object({
-    persistNote: ResponseNote,
-  }),
-});
+export const PersistNoteRouteResponse = ResponseNote;

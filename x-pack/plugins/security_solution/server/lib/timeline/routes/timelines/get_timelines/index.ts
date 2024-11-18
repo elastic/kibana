@@ -57,7 +57,6 @@ export const getTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
                   sortOrder,
                 }
               : null;
-          let res = null;
           let totalCount = null;
 
           if (pageSize == null && pageIndex == null) {
@@ -73,7 +72,7 @@ export const getTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
             totalCount = allActiveTimelines.totalCount;
           }
 
-          res = await getAllTimeline(
+          const res = await getAllTimeline(
             frameworkRequest,
             onlyUserFavorite,
             {
@@ -86,7 +85,7 @@ export const getTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
             timelineType
           );
 
-          return response.ok({ body: res ?? {} });
+          return response.ok({ body: res });
         } catch (err) {
           const error = transformError(err);
           const siemResponse = buildSiemResponse(response);

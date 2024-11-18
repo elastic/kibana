@@ -58,14 +58,8 @@ export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter) => {
             timelineType || TimelineTypeEnum.default
           );
 
-          const body: PersistFavoriteRouteResponse = {
-            data: {
-              persistFavorite: timeline,
-            },
-          };
-
           return response.ok({
-            body,
+            body: timeline,
           });
         } catch (err) {
           const error = transformError(err);
