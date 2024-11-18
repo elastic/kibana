@@ -542,6 +542,8 @@
       "@kbn/core-preboot-server-mocks/*": ["packages/core/preboot/core-preboot-server-mocks/*"],
       "@kbn/core-provider-plugin": ["test/plugin_functional/plugins/core_provider_plugin"],
       "@kbn/core-provider-plugin/*": ["test/plugin_functional/plugins/core_provider_plugin/*"],
+      "@kbn/core-rendering-browser": ["packages/core/rendering/core-rendering-browser"],
+      "@kbn/core-rendering-browser/*": ["packages/core/rendering/core-rendering-browser/*"],
       "@kbn/core-rendering-browser-internal": ["packages/core/rendering/core-rendering-browser-internal"],
       "@kbn/core-rendering-browser-internal/*": ["packages/core/rendering/core-rendering-browser-internal/*"],
       "@kbn/core-rendering-browser-mocks": ["packages/core/rendering/core-rendering-browser-mocks"],
