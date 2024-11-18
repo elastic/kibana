@@ -41,7 +41,6 @@
       "kibanaUtils",
       "alerting",
       "kibanaReact",
-      "logsShared"
     ]
   }
 }

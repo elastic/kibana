@@ -7,7 +7,7 @@
 
 import { ApmMetric, ApmMetricFields } from '../metrics';
 import { createQuery } from '../create_query';
-import { getBeatDataset } from '../cluster/get_index_patterns';
+import { getBeatDataset } from '../../../common/get_index_patterns';
 
 /**
  * {@code createQuery} for all APM instances.

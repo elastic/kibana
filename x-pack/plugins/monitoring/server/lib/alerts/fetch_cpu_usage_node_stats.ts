@@ -11,7 +11,7 @@ import moment from 'moment';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../common/constants';
 import { AlertCluster, AlertCpuUsageNodeStats } from '../../../common/types/alerts';
 import { createDatasetFilter } from './create_dataset_query_filter';
-import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 
