@@ -15,19 +15,16 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import { GraphNodeExpandPopover } from './graph_node_expand_popover';
 
 interface UseGraphNodeExpandPopoverArgs {
-  onExploreRelatedEntitiesClick?: (node: NodeProps) => void;
-  onShowActionsByEntityClick?: (node: NodeProps) => void;
-  onShowActionsOnEntityClick?: (node: NodeProps) => void;
-  onViewEntityDetailsClick?: (node: NodeProps) => void;
+  onExploreRelatedEntitiesClick: (node: NodeProps) => void;
+  onShowActionsByEntityClick: (node: NodeProps) => void;
+  onShowActionsOnEntityClick: (node: NodeProps) => void;
 }
 
-export const useGraphNodeExpandPopover = (args: UseGraphNodeExpandPopoverArgs = {}) => {
-  const {
-    onExploreRelatedEntitiesClick,
-    onShowActionsByEntityClick,
-    onShowActionsOnEntityClick,
-    onViewEntityDetailsClick,
-  } = args;
+export const useGraphNodeExpandPopover = ({
+  onExploreRelatedEntitiesClick,
+  onShowActionsByEntityClick,
+  onShowActionsOnEntityClick,
+}: UseGraphNodeExpandPopoverArgs) => {
   const { id, state, actions } = useGraphPopover('node-expand-popover');
   const { openPopover, closePopover } = actions;
 
@@ -81,19 +78,15 @@ export const useGraphNodeExpandPopover = (args: UseGraphNodeExpandPopoverArgs = 
       anchorElement={state.anchorElement}
       closePopover={closePopoverHandler}
       onExploreRelatedEntitiesClick={() => {
-        onExploreRelatedEntitiesClick?.(selectedNode.current as NodeProps);
+        onExploreRelatedEntitiesClick(selectedNode.current as NodeProps);
         closePopoverHandler();
       }}
       onShowActionsByEntityClick={() => {
-        onShowActionsByEntityClick?.(selectedNode.current as NodeProps);
+        onShowActionsByEntityClick(selectedNode.current as NodeProps);
         closePopoverHandler();
       }}
       onShowActionsOnEntityClick={() => {
-        onShowActionsOnEntityClick?.(selectedNode.current as NodeProps);
-        closePopoverHandler();
-      }}
-      onViewEntityDetailsClick={() => {
-        onViewEntityDetailsClick?.(selectedNode.current as NodeProps);
+        onShowActionsOnEntityClick(selectedNode.current as NodeProps);
         closePopoverHandler();
       }}
     />

@@ -44,8 +44,6 @@ export const GraphPreviewContainer: React.FC = () => {
     ecsData: dataAsNestedObject,
   });
 
-  const timestamp = getFieldsData('@timestamp')[0];
-
   // TODO: default start and end might not capture the original event
   const { isLoading, isError, data } = useFetchGraphData({
     req: {

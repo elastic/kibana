@@ -90,6 +90,11 @@
         "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
       },
       "related": {
+        "entity": [
+          "10.0.0.1",
+          "projects/your-project-id/roles/customRole",
+          "admin@example.com"
+        ],
         "ip": [
           "10.0.0.1"
         ],
@@ -215,6 +220,11 @@
         "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
       },
       "related": {
+        "entity": [
+          "10.0.0.1",
+          "projects/your-project-id/roles/customRole",
+          "admin2@example.com"
+        ],
         "ip": [
           "10.0.0.1"
         ],
@@ -340,6 +350,11 @@
         "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
       },
       "related": {
+        "entity": [
+          "10.0.0.1",
+          "projects/your-project-id/roles/customRole",
+          "admin3@example.com"
+        ],
         "ip": [
           "10.0.0.1"
         ],
@@ -465,6 +480,11 @@
         "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
       },
       "related": {
+        "entity": [
+          "10.0.0.1",
+          "projects/your-project-id/roles/customRole",
+          "admin3@example.com"
+        ],
         "ip": [
           "10.0.0.1"
         ],
@@ -599,6 +619,11 @@
         "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
       },
       "related": {
+        "entity": [
+          "10.0.0.1",
+          "projects/your-project-id/roles/customRole",
+          "admin4@example.com"
+        ],
         "ip": [
           "10.0.0.1"
         ],

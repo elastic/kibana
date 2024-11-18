@@ -7,19 +7,22 @@
 
 import React, { memo } from 'react';
 import { GraphPopover } from '@kbn/cloud-security-posture-graph';
-import { EuiHorizontalRule, EuiListGroup, useEuiTheme } from '@elastic/eui';
+import { EuiListGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ExpandPopoverListItem } from '@kbn/cloud-security-posture-graph/src/components/styles';
-import { css } from '@emotion/react';
+import {
+  GRAPH_NODE_POPOVER_EXPLORE_RELATED_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
+} from './test_ids';
 
 interface GraphNodeExpandPopoverProps {
   isOpen: boolean;
   anchorElement: HTMLElement | null;
   closePopover: () => void;
-  onExploreRelatedEntitiesClick?: () => void;
-  onShowActionsByEntityClick?: () => void;
-  onShowActionsOnEntityClick?: () => void;
-  onViewEntityDetailsClick?: () => void;
+  onExploreRelatedEntitiesClick: () => void;
+  onShowActionsByEntityClick: () => void;
+  onShowActionsOnEntityClick: () => void;
 }
 
 export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = memo(
@@ -30,70 +33,43 @@ export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = mem
     onExploreRelatedEntitiesClick,
     onShowActionsByEntityClick,
     onShowActionsOnEntityClick,
-    onViewEntityDetailsClick,
   }) => {
-    const { euiTheme } = useEuiTheme();
-
     return (
       <GraphPopover
         panelPaddingSize="s"
-        panelProps={{
-          css: css`
-            .euiPopover__arrow:before {
-              border-inline-end-color: ${euiTheme.colors?.body};
-            }
-            background-color: ${euiTheme.colors?.body};
-          `,
-        }}
         anchorPosition="rightCenter"
         isOpen={isOpen}
         anchorElement={anchorElement}
         closePopover={closePopover}
       >
         <EuiListGroup gutterSize="none" bordered={false} flush={true}>
-          {onExploreRelatedEntitiesClick && (
-            <ExpandPopoverListItem
-              iconType="visTagCloud"
-              label={i18n.translate(
-                'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.exploreRelatedEntities',
-                { defaultMessage: 'Explore related entities' }
-              )}
-              onClick={onExploreRelatedEntitiesClick}
-            />
-          )}
-          {onShowActionsByEntityClick && (
-            <ExpandPopoverListItem
-              iconType="users"
-              label={i18n.translate(
-                'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.showActionsByEntity',
-                { defaultMessage: 'Show actions by this entity' }
-              )}
-              onClick={onShowActionsByEntityClick}
-            />
-          )}
-          {onShowActionsOnEntityClick && (
-            <ExpandPopoverListItem
-              iconType="storage"
-              label={i18n.translate(
-                'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.showActionsOnEntity',
-                { defaultMessage: 'Show actions on this entity' }
-              )}
-              onClick={onShowActionsOnEntityClick}
-            />
-          )}
-          {onViewEntityDetailsClick && (
-            <>
-              <EuiHorizontalRule margin="xs" />
-              <ExpandPopoverListItem
-                iconType="expand"
-                label={i18n.translate(
-                  'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.viewEntityDetails',
-                  { defaultMessage: 'View entity details' }
-                )}
-                onClick={onViewEntityDetailsClick}
-              />
-            </>
-          )}
+          <ExpandPopoverListItem
+            iconType="visTagCloud"
+            label={i18n.translate(
+              'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.exploreRelatedEntities',
+              { defaultMessage: 'Explore related entities' }
+            )}
+            onClick={onExploreRelatedEntitiesClick}
+            data-test-subj={GRAPH_NODE_POPOVER_EXPLORE_RELATED_ITEM_ID}
+          />
+          <ExpandPopoverListItem
+            iconType="users"
+            label={i18n.translate(
+              'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.showActionsByEntity',
+              { defaultMessage: 'Show actions by this entity' }
+            )}
+            onClick={onShowActionsByEntityClick}
+            data-test-subj={GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID}
+          />
+          <ExpandPopoverListItem
+            iconType="storage"
+            label={i18n.translate(
+              'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.showActionsOnEntity',
+              { defaultMessage: 'Show actions on this entity' }
+            )}
+            onClick={onShowActionsOnEntityClick}
+            data-test-subj={GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID}
+          />
         </EuiListGroup>
       </GraphPopover>
     );

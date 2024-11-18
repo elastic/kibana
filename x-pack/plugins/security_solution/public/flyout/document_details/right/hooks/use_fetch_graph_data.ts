@@ -49,11 +49,11 @@ export interface UseFetchGraphDataParams {
  */
 export interface UseFetchGraphDataResult {
   /**
-   * Indicates if the query is currently loading.
+   * Indicates if the query is currently being fetched for the first time.
    */
   isLoading: boolean;
   /**
-   * Indicates if the query is currently fetching.
+   * Indicates if the query is currently being fetched. Regardless of whether it is the initial fetch or a refetch.
    */
   isFetching: boolean;
   /**
