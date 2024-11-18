@@ -84,12 +84,6 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
       categories: getAllCategoriesFromIntegrations(pkg),
     };
 
-    const policyTemplatesBehavior = pkg.policy_templates_behavior || 'all';
-    if (policyTemplatesBehavior === 'combined_policy') {
-      // console.log(`Just combined policy for ${pkg.name}`);
-      return [...acc, topPackage];
-    }
-
     const integrationsPolicyTemplates = doesPackageHaveIntegrations(pkg)
       ? policyTemplates.map((policyTemplate) => {
           const { name, title, description, icons } = policyTemplate;
