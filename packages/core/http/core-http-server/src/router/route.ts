@@ -525,3 +525,12 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    */
   options?: RouteConfigOptions<Method>;
 }
+
+/**
+ * Post Validation Route emitter metadata.
+ */
+export interface PostValidationMetadata {
+  deprecated?: RouteDeprecationInfo;
+  isInternalApiRequest: boolean;
+  isPublicAccess: boolean;
+}

@@ -9,7 +9,7 @@
 
 import { DashboardContainerInput } from '../../../../common';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
-import { DashboardCrudTypes } from '../../../../common/content_management';
+import type { DashboardUpdateIn, DashboardUpdateOut } from '../../../../server/content_management';
 import { findDashboardsByIds } from './find_dashboards';
 import { contentManagementService, savedObjectsTaggingService } from '../../kibana_services';
 
@@ -35,10 +35,7 @@ export const updateDashboardMeta = async ({
       ? savedObjectsTaggingApi.ui.updateTagsReferences(dashboard.references, tags)
       : dashboard.references;
 
-  await contentManagementService.client.update<
-    DashboardCrudTypes['UpdateIn'],
-    DashboardCrudTypes['UpdateOut']
-  >({
+  await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
     contentTypeId: DASHBOARD_CONTENT_ID,
     id,
     data: { title, description },

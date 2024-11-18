@@ -6,7 +6,6 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import type { TypeOf } from '@kbn/config-schema';
 
 import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
 import { stringify } from '../../utils/stringify';
@@ -24,7 +23,6 @@ import {
   GetProcessesRouteRequestSchema,
   IsolateRouteRequestSchema,
   KillProcessRouteRequestSchema,
-  type NoParametersRequestSchema,
   type ResponseActionGetFileRequestBody,
   type ResponseActionsRequestBody,
   type ScanActionRequestBody,
@@ -39,12 +37,10 @@ import {
   EXECUTE_ROUTE,
   GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
-  ISOLATE_HOST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
   SCAN_ROUTE,
   SUSPEND_PROCESS_ROUTE,
-  UNISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
@@ -73,53 +69,16 @@ export function registerResponseActionRoutes(
 ) {
   const logger = endpointContext.logFactory.get('hostIsolation');
 
-  /**
-   * @deprecated use ISOLATE_HOST_ROUTE_V2 instead
-   */
-  router.versioned
-    .post({
-      access: 'public',
-      path: ISOLATE_HOST_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: IsolateRouteRequestSchema,
-        },
-      },
-      withEndpointAuthz({ all: ['canIsolateHost'] }, logger, redirectHandler(ISOLATE_HOST_ROUTE_V2))
-    );
-
-  /**
-   * @deprecated use RELEASE_HOST_ROUTE instead
-   */
-  router.versioned
-    .post({
-      access: 'public',
-      path: UNISOLATE_HOST_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: UnisolateRouteRequestSchema,
-        },
-      },
-      withEndpointAuthz(
-        { all: ['canUnIsolateHost'] },
-        logger,
-        redirectHandler(UNISOLATE_HOST_ROUTE_V2)
-      )
-    );
-
   router.versioned
     .post({
       access: 'public',
       path: ISOLATE_HOST_ROUTE_V2,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -139,7 +98,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: UNISOLATE_HOST_ROUTE_V2,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -159,7 +123,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: KILL_PROCESS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -182,7 +151,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: SUSPEND_PROCESS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -205,7 +179,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: GET_PROCESSES_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -225,7 +204,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: GET_FILE_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -245,7 +229,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: EXECUTE_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -265,9 +254,14 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: UPLOAD_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
         authRequired: true,
-        tags: ['access:securitySolution'],
+
         body: {
           accepts: ['multipart/form-data'],
           output: 'stream',
@@ -293,7 +287,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: SCAN_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -419,21 +418,4 @@ async function handleActionCreation(
         501
       );
   }
-}
-
-function redirectHandler(
-  location: string
-): RequestHandler<
-  unknown,
-  unknown,
-  TypeOf<typeof NoParametersRequestSchema.body>,
-  SecuritySolutionRequestHandlerContext
-> {
-  return async (context, _req, res) => {
-    const basePath = (await context.securitySolution).getServerBasePath();
-    return res.custom({
-      statusCode: 308,
-      headers: { location: `${basePath}${location}` },
-    });
-  };
 }

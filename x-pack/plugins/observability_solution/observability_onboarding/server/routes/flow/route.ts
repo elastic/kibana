@@ -20,7 +20,7 @@ import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_o
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
-import { getAgentVersion } from '../../lib/get_agent_version';
+import { getAgentVersionInfo } from '../../lib/get_agent_version';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { ElasticAgentStepPayload, InstalledIntegration, StepProgressPayloadRT } from '../types';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
@@ -220,21 +220,22 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
 
     const fleetPluginStart = await plugins.fleet.start();
 
-    const [onboardingFlow, ingestApiKey, installApiKey, elasticAgentVersion] = await Promise.all([
-      saveObservabilityOnboardingFlow({
-        savedObjectsClient,
-        observabilityOnboardingState: {
-          type: 'autoDetect',
-          state: undefined,
-          progress: {},
-        },
-      }),
-      createShipperApiKey(client.asCurrentUser, `onboarding_ingest_${name}`),
-      (
-        await context.resolve(['core'])
-      ).core.security.authc.apiKeys.create(createInstallApiKey(`onboarding_install_${name}`)),
-      getAgentVersion(fleetPluginStart, kibanaVersion),
-    ]);
+    const [onboardingFlow, ingestApiKey, installApiKey, elasticAgentVersionInfo] =
+      await Promise.all([
+        saveObservabilityOnboardingFlow({
+          savedObjectsClient,
+          observabilityOnboardingState: {
+            type: 'autoDetect',
+            state: undefined,
+            progress: {},
+          },
+        }),
+        createShipperApiKey(client.asCurrentUser, `onboarding_ingest_${name}`),
+        (
+          await context.resolve(['core'])
+        ).core.security.authc.apiKeys.create(createInstallApiKey(`onboarding_install_${name}`)),
+        getAgentVersionInfo(fleetPluginStart, kibanaVersion),
+      ]);
 
     if (!installApiKey) {
       throw Boom.notFound('License does not allow API key creation.');
@@ -250,7 +251,7 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       onboardingFlow,
       ingestApiKey: ingestApiKey.encoded,
       installApiKey: installApiKey.encoded,
-      elasticAgentVersion,
+      elasticAgentVersionInfo,
       kibanaUrl,
       scriptDownloadUrl,
     };
@@ -300,7 +301,8 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
  *  --header "Accept: application/x-tar" \
  *  --header "Content-Type: text/tab-separated-values" \
  *  --header "kbn-xsrf: true" \
- *  --data $'system\tregistry\nproduct_service\tcustom\t/path/to/access.log\ncheckout_service\tcustom\t/path/to/access.log' \
+ *  --header "x-elastic-internal-origin: Kibana" \
+ *  --data $'system\tregistry\twebserver01\nproduct_service\tcustom\t/path/to/access.log\ncheckout_service\tcustom\t/path/to/access.log' \
  *  --output - | tar -tvf -
  * ```
  */
@@ -456,6 +458,16 @@ async function ensureInstalledIntegrations(
                   id: `filestream-${pkgName}`,
                   data_stream: dataStream,
                   paths: integration.logFilePaths,
+                  processors: [
+                    {
+                      add_fields: {
+                        target: 'service',
+                        fields: {
+                          name: pkgName,
+                        },
+                      },
+                    },
+                  ],
                 },
               ],
             },

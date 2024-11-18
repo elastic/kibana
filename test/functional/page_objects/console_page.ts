@@ -217,6 +217,10 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('sendRequestButton');
   }
 
+  public async isPlayButtonVisible() {
+    return await this.testSubjects.exists('sendRequestButton');
+  }
+
   public async clickCopyOutput() {
     await this.testSubjects.click('copyOutputButton');
   }
