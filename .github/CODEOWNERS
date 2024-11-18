@@ -1348,7 +1348,6 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /test/plugin_functional/test_suites/panel_actions @elastic/kibana-presentation
 /x-pack/test/functional/es_archives/canvas/logstash_lens @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
-/x-pack/plugins/maps/ @elastic/kibana-presentation
 /x-pack/test/upgrade/services/maps_upgrade_services.ts @elastic/kibana-presentation
 /x-pack/test/stack_functional_integration/apps/maps @elastic/kibana-presentation
 /x-pack/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-presentation
@@ -1359,7 +1358,6 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-presentation
 /x-pack/plugins/stack_alerts/server/rule_types/geo_containment @elastic/kibana-presentation
 /x-pack/plugins/stack_alerts/public/rule_types/geo_containment @elastic/kibana-presentation
-/x-pack/plugins/file_upload @elastic/kibana-presentation
 
 
 # Machine Learning
