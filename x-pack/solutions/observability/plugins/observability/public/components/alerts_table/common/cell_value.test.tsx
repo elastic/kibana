@@ -15,7 +15,7 @@ interface AlertsTableRow {
   alertStatus: typeof ALERT_STATUS_ACTIVE | typeof ALERT_STATUS_RECOVERED;
 }
 
-describe('getRenderCellValue', () => {
+describe('AlertsTableCellValue', () => {
   describe('when column is alert status', () => {
     it('should return an active indicator when alert status is active', async () => {
       const cell = render(
