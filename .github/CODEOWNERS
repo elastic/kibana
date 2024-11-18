@@ -1382,6 +1382,17 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /test/plugin_functional/test_suites/panel_actions @elastic/kibana-presentation
 /x-pack/test/functional/es_archives/canvas/logstash_lens @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
+/x-pack/test/upgrade/services/maps_upgrade_services.ts @elastic/kibana-presentation
+/x-pack/test/stack_functional_integration/apps/maps @elastic/kibana-presentation
+/x-pack/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-presentation
+/x-pack/test/functional/page_objects/gis_page.ts @elastic/kibana-presentation
+/x-pack/test/upgrade/apps/maps @elastic/kibana-presentation
+/x-pack/test/api_integration/apis/maps/ @elastic/kibana-presentation
+/x-pack/test/functional/apps/maps/ @elastic/kibana-presentation
+/x-pack/test/functional/es_archives/maps/ @elastic/kibana-presentation
+/x-pack/plugins/stack_alerts/server/rule_types/geo_containment @elastic/kibana-presentation
+/x-pack/plugins/stack_alerts/public/rule_types/geo_containment @elastic/kibana-presentation
+
 
 # Machine Learning
 /x-pack/test/stack_functional_integration/apps/ml @elastic/ml-ui
@@ -1420,15 +1431,6 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/functional/services/transform/ @elastic/ml-ui
 /x-pack/test/functional/services/aiops @elastic/ml-ui
 /x-pack/test/functional_basic/apps/transform/ @elastic/ml-ui
-
-# Maps
-#CC# /x-pack/plugins/maps/ @elastic/kibana-gis
-/x-pack/test/api_integration/apis/maps/ @elastic/kibana-gis
-/x-pack/test/functional/apps/maps/ @elastic/kibana-gis
-/x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
-/x-pack/plugins/stack_alerts/server/rule_types/geo_containment @elastic/kibana-gis
-/x-pack/plugins/stack_alerts/public/rule_types/geo_containment @elastic/kibana-gis
-#CC# /x-pack/plugins/file_upload @elastic/kibana-gis
 
 # Operations
 /test/package @elastic/kibana-operations
