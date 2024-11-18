@@ -17,7 +17,6 @@ import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiButtonEmpty,
-  Criteria,
   EuiButtonIcon,
   CustomItemAction,
   EuiCopy,
@@ -32,6 +31,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
 import { FAVORITES_LIMIT as ESQL_STARRED_QUERIES_LIMIT } from '@kbn/content-management-favorites-common';
 import { css, Interpolation, Theme } from '@emotion/react';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import {
   type QueryHistoryItem,
   getHistoryItems,
@@ -254,8 +254,15 @@ export function QueryList({
 }) {
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [isDiscardQueryModalVisible, setIsDiscardQueryModalVisible] = useState(false);
+
+  const { sorting, onTableChange } = useEuiTablePersist<QueryHistoryItem>({
+    tableId: 'esqlQueryHistory',
+    initialSort: {
+      field: 'timeRan',
+      direction: 'desc',
+    },
+  });
 
   const actions: Array<CustomItemAction<QueryHistoryItem>> = useMemo(() => {
     return [
@@ -325,19 +332,6 @@ export function QueryList({
     );
   }, [containerWidth, isOnReducedSpaceLayout, actions, isStarredTab, starredQueriesService]);
 
-  const onTableChange = ({ page, sort }: Criteria<QueryHistoryItem>) => {
-    if (sort) {
-      const { direction } = sort;
-      setSortDirection(direction);
-    }
-  };
-
-  const sorting = {
-    sort: {
-      field: 'timeRan',
-      direction: sortDirection,
-    },
-  };
   const { euiTheme } = theme;
   const extraStyling = isOnReducedSpaceLayout ? getReducedSpaceStyling() : '';
 
