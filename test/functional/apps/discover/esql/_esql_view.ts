@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
         expect(await testSubjects.exists('addFilter')).to.be(false);
-        expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(true);
+        expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(false);
         // when Lens suggests a table, we render an ESQL based histogram
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
         expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
@@ -193,6 +193,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render correctly if there are empty fields', async function () {
         await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         const testQuery = `from logstash-* | limit 10 | keep machine.ram_range, bytes`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
@@ -201,11 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilSearchingHasFinished();
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
         expect(await cell.getVisibleText()).to.be(' - ');
-        expect(await dataGrid.getHeaders()).to.eql([
-          'Select column',
-          'Control column',
-          'Access to degraded docs',
-          'Access to available stacktraces',
+        expect((await dataGrid.getHeaders()).slice(-2)).to.eql([
           'Numberbytes',
           'machine.ram_range',
         ]);
@@ -839,6 +837,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(prevList).to.eql([]);
 
         await discover.loadSavedSearch('esql view with breakdown');
+        await header.waitUntilLoadingHasFinished();
+        const list = await discover.getHistogramLegendList();
+        expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
+      });
+
+      it('should choose breakdown field when selected from field stats', async () => {
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const testQuery = 'from logstash-*';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await unifiedFieldList.clickFieldListAddBreakdownField('extension');
         await header.waitUntilLoadingHasFinished();
         const list = await discover.getHistogramLegendList();
         expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);

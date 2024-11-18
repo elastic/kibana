@@ -22,7 +22,7 @@ import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_m
 import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { useResetSlo } from '../../../../hooks/use_reset_slo';
 import { BurnRateRuleParams } from '../../../../typings';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { useSloFormattedSummary } from '../../hooks/use_slo_summary';

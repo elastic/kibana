@@ -22,8 +22,10 @@ export function alertingRoutes(
     .post({
       access: 'internal',
       path: `${ML_INTERNAL_BASE_PATH}/alerting/preview`,
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Previews an alerting condition',
       description: 'Returns a preview of the alerting condition',
