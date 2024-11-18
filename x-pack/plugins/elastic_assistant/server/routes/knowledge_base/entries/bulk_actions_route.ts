@@ -53,8 +53,6 @@ export type BulkResponse = KnowledgeBaseEntryBulkCrudActionResults & {
   errors?: BulkOperationError[];
 };
 
-export type BulkActionError = BulkOperationError | unknown;
-
 const buildBulkResponse = (
   response: KibanaResponseFactory,
   {
