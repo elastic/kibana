@@ -63,11 +63,5 @@ export async function deleteInferenceEndpoint({
   es: Client;
   name?: string;
 }) {
-  return es.transport.request({
-    method: 'DELETE',
-    path: `_inference/sparse_embedding/${name}`,
-    querystring: {
-      force: true,
-    },
-  });
+  return es.inference.delete({ inference_id: name, force: true });
 }
