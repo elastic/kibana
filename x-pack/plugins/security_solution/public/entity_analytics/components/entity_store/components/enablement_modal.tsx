@@ -88,7 +88,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
     </EuiCallOut>
   );
   return (
-    <EuiModal onClose={() => toggle(false)}>
+    <EuiModal onClose={() => toggle(false)} data-test-subj="entityStoreEnablementModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
@@ -114,6 +114,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
                 (!riskEnginePrivileges.isLoading && !riskEnginePrivileges?.hasAllRequiredPrivileges)
               }
               onChange={() => setEnablements((prev) => ({ ...prev, riskScore: !prev.riskScore }))}
+              data-test-subj="enablementRiskScoreSwitch"
             />
           </EuiFlexItem>
           {!riskEnginePrivileges.isLoading && !riskEnginePrivileges.hasAllRequiredPrivileges && (
@@ -142,6 +143,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
                 onChange={() =>
                   setEnablements((prev) => ({ ...prev, entityStore: !prev.entityStore }))
                 }
+                data-test-subj="enablementEntityStoreSwitch"
               />
               <EuiToolTip content={TECHNICAL_PREVIEW_TOOLTIP}>
                 <EuiBetaBadge label={TECHNICAL_PREVIEW} />
@@ -170,6 +172,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
                 fill
                 isDisabled={!enablementOptions}
                 aria-disabled={!enablementOptions}
+                data-test-subj="entityStoreEnablementModalButton"
               >
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.enablements.modal.enable"

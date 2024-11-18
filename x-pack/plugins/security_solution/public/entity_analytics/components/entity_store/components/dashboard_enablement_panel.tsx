@@ -150,7 +150,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
               color="primary"
               fill
               onClick={() => setModalState({ visible: true })}
-              data-test-subj={`enable_entity_store_btn`}
+              data-test-subj={`entityStoreEnablementButton`}
             >
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.entityStore.enablement.enableButton"
@@ -160,6 +160,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
           </EuiToolTip>
         }
         icon={<EuiImage size="l" hasShadow src={dashboardEnableImg} alt={title} />}
+        data-test-subj="entityStoreEnablementPanel"
       />
 
       <EntityStoreEnablementModal
