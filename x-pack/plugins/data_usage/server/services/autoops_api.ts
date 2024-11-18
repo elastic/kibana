@@ -58,6 +58,7 @@ export class AutoOpsAPIService {
       } and TLS key: ${autoopsConfig?.api?.tls?.key ? '[REDACTED]' : 'undefined'}
       and TLS ca: ${autoopsConfig?.api?.tls?.ca ? '[REDACTED]' : 'undefined'}`
     );
+    const controller = new AbortController();
     const tlsConfig = this.createTlsConfig(autoopsConfig);
     const cloudSetup = appContextService.getCloud();
 
@@ -71,6 +72,7 @@ export class AutoOpsAPIService {
         metric_types: requestBody.metricTypes,
         allowed_indices: requestBody.dataStreams,
       },
+      signal: controller.signal,
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
