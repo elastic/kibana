@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 const GALAXY_DURATION = 500;
 const HUAWEI_DURATION = 20;
@@ -126,10 +125,11 @@ async function generateData({
   ]);
 }
 
-export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiClient = getService('apmApiClient');
-  const registry = getService('registry');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+
+  const synthtrace = getService('synthtrace');
+  let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
@@ -162,91 +162,88 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       .then(({ body }) => body);
   }
 
-  registry.when(
-    'Mobile main statistics when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
-      describe('when no data', () => {
-        it('handles empty state', async () => {
-          const response = await getMobileMainStatisticsByField({
-            serviceName: 'foo',
-            field: 'service.version',
-          });
-          expect(response.mainStatistics.length).to.be(0);
+  describe('Mobile main statistics', () => {
+    describe('when no data', () => {
+      it('handles empty state', async () => {
+        const response = await getMobileMainStatisticsByField({
+          serviceName: 'foo',
+          field: 'service.version',
         });
-      });
-    }
-  );
-
-  // FLAKY: https://github.com/elastic/kibana/issues/177395
-  registry.when.skip('Mobile main statistics', { config: 'basic', archives: [] }, () => {
-    before(async () => {
-      await generateData({
-        apmSynthtraceEsClient,
-        start,
-        end,
+        expect(response.mainStatistics.length).to.be(0);
       });
     });
 
-    after(() => apmSynthtraceEsClient.clean());
+    describe('Mobile main statistics', () => {
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
-    describe('when data is loaded', () => {
-      const huaweiLatency = calculateLatency(HUAWEI_DURATION);
-      const galaxyLatency = calculateLatency(GALAXY_DURATION);
-      const huaweiThroughput = calculateThroughput({ start, end });
-      const galaxyThroughput = calculateThroughput({ start, end });
-
-      it('returns the correct data for App version', async () => {
-        const response = await getMobileMainStatisticsByField({
-          serviceName: 'synth-android',
-          environment: 'production',
-          field: 'service.version',
+        await generateData({
+          apmSynthtraceEsClient,
+          start,
+          end,
         });
-        const fieldValues = response.mainStatistics.map((item) => item.name);
-
-        expect(fieldValues).to.be.eql(SERVICE_VERSIONS);
-
-        const latencyValues = response.mainStatistics.map((item) => item.latency);
-
-        expect(latencyValues).to.be.eql([galaxyLatency, huaweiLatency]);
-
-        const throughputValues = response.mainStatistics.map((item) => item.throughput);
-        expect(throughputValues).to.be.eql([galaxyThroughput, huaweiThroughput]);
       });
-      it('returns the correct data for Os version', async () => {
-        const response = await getMobileMainStatisticsByField({
-          serviceName: 'synth-android',
-          environment: 'production',
-          field: 'host.os.version',
+
+      after(() => apmSynthtraceEsClient.clean());
+
+      describe('when data is loaded', () => {
+        const huaweiLatency = calculateLatency(HUAWEI_DURATION);
+        const galaxyLatency = calculateLatency(GALAXY_DURATION);
+        const huaweiThroughput = calculateThroughput({ start, end });
+        const galaxyThroughput = calculateThroughput({ start, end });
+
+        it('returns the correct data for App version', async () => {
+          const response = await getMobileMainStatisticsByField({
+            serviceName: 'synth-android',
+            environment: 'production',
+            field: 'service.version',
+          });
+          const fieldValues = response.mainStatistics.map((item) => item.name);
+
+          expect(fieldValues).to.be.eql(SERVICE_VERSIONS);
+
+          const latencyValues = response.mainStatistics.map((item) => item.latency);
+
+          expect(latencyValues).to.be.eql([galaxyLatency, huaweiLatency]);
+
+          const throughputValues = response.mainStatistics.map((item) => item.throughput);
+          expect(throughputValues).to.be.eql([galaxyThroughput, huaweiThroughput]);
         });
+        it('returns the correct data for Os version', async () => {
+          const response = await getMobileMainStatisticsByField({
+            serviceName: 'synth-android',
+            environment: 'production',
+            field: 'host.os.version',
+          });
 
-        const fieldValues = response.mainStatistics.map((item) => item.name);
+          const fieldValues = response.mainStatistics.map((item) => item.name);
 
-        expect(fieldValues).to.be.eql(OS_VERSIONS);
+          expect(fieldValues).to.be.eql(OS_VERSIONS);
 
-        const latencyValues = response.mainStatistics.map((item) => item.latency);
+          const latencyValues = response.mainStatistics.map((item) => item.latency);
 
-        expect(latencyValues).to.be.eql([galaxyLatency, huaweiLatency]);
+          expect(latencyValues).to.be.eql([galaxyLatency, huaweiLatency]);
 
-        const throughputValues = response.mainStatistics.map((item) => item.throughput);
-        expect(throughputValues).to.be.eql([galaxyThroughput, huaweiThroughput]);
-      });
-      it('returns the correct data for Devices', async () => {
-        const response = await getMobileMainStatisticsByField({
-          serviceName: 'synth-android',
-          environment: 'production',
-          field: 'device.model.identifier',
+          const throughputValues = response.mainStatistics.map((item) => item.throughput);
+          expect(throughputValues).to.be.eql([galaxyThroughput, huaweiThroughput]);
         });
-        const fieldValues = response.mainStatistics.map((item) => item.name);
+        it('returns the correct data for Devices', async () => {
+          const response = await getMobileMainStatisticsByField({
+            serviceName: 'synth-android',
+            environment: 'production',
+            field: 'device.model.identifier',
+          });
+          const fieldValues = response.mainStatistics.map((item) => item.name);
 
-        expect(fieldValues).to.be.eql(['HUAWEI P2-0000', 'SM-G973F']);
+          expect(fieldValues).to.be.eql(['HUAWEI P2-0000', 'SM-G973F']);
 
-        const latencyValues = response.mainStatistics.map((item) => item.latency);
+          const latencyValues = response.mainStatistics.map((item) => item.latency);
 
-        expect(latencyValues).to.be.eql([huaweiLatency, galaxyLatency]);
+          expect(latencyValues).to.be.eql([huaweiLatency, galaxyLatency]);
 
-        const throughputValues = response.mainStatistics.map((item) => item.throughput);
-        expect(throughputValues).to.be.eql([huaweiThroughput, galaxyThroughput]);
+          const throughputValues = response.mainStatistics.map((item) => item.throughput);
+          expect(throughputValues).to.be.eql([huaweiThroughput, galaxyThroughput]);
+        });
       });
     });
   });
