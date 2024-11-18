@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Data Usage', function () {
     loadTestFile(require.resolve('./main'));
+    loadTestFile(require.resolve('./privileges'));
   });
 };

@@ -9,28 +9,22 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EntityName } from '.';
 import { useDetailViewRedirect } from '../../../hooks/use_detail_view_redirect';
-import { Entity } from '../../../../common/entities';
-import {
-  ENTITY_DEFINITION_ID,
-  ENTITY_DISPLAY_NAME,
-  ENTITY_ID,
-  ENTITY_IDENTITY_FIELDS,
-  ENTITY_LAST_SEEN,
-  ENTITY_TYPE,
-} from '@kbn/observability-shared-plugin/common';
+import type { InventoryEntity } from '../../../../common/entities';
 
 jest.mock('../../../hooks/use_detail_view_redirect');
 
 const useDetailViewRedirectMock = useDetailViewRedirect as jest.Mock;
 
 describe('EntityName', () => {
-  const mockEntity: Entity = {
-    [ENTITY_LAST_SEEN]: '2023-10-09T00:00:00Z',
-    [ENTITY_ID]: '1',
-    [ENTITY_DISPLAY_NAME]: 'entity_name',
-    [ENTITY_DEFINITION_ID]: 'entity_definition_id',
-    [ENTITY_IDENTITY_FIELDS]: ['service.name', 'service.environment'],
-    [ENTITY_TYPE]: 'service',
+  const mockEntity: InventoryEntity = {
+    entityLastSeenTimestamp: '2023-10-09T00:00:00Z',
+    entityId: '1',
+    entityType: 'service',
+    entityDisplayName: 'entity_name',
+    entityIdentityFields: ['service.name', 'service.environment'],
+    entityDefinitionId: 'entity_definition_id',
+    entitySchemaVersion: '1',
+    entityDefinitionVersion: '1',
   };
 
   beforeEach(() => {
