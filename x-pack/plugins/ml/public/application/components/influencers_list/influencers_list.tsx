@@ -88,8 +88,8 @@ const Influencer: FC<InfluencerProps> = ({ influencerFieldName, influencerFilter
         />
       </div>
       <div css={styles.progress}>
-        <div css={styles.progressBarHolder(barScore)}>
-          <div css={styles.progressBar(severity.id)} />
+        <div css={styles.progressBarHolder}>
+          <div css={styles.progressBar(severity.id, barScore)} />
         </div>
         <div css={styles.scoreLabel(severity.id)}>
           <EuiToolTip

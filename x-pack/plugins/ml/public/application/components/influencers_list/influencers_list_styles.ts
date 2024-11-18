@@ -35,21 +35,19 @@ export const useInfluencersListStyles = () => {
       color: euiTheme.euiColorDarkShade,
       backgroundColor: 'transparent',
     }),
-    progressBarHolder: (barScore: number) =>
-      css({
-        width: `${barScore}%`,
-        display: 'inline-block',
-        maxWidth: `calc(100% - 28px)`,
-      }),
-    progressBar: (severity: string) =>
+    progressBarHolder: css({
+      width: `calc(100% - 28px)`,
+    }),
+    progressBar: (severity: string, barScore: number) =>
       css({
         height: `calc(${euiTheme.euiSizeXS} / 2)`,
+        float: 'left',
         marginTop: euiTheme.euiSizeM,
         textAlign: 'right',
         lineHeight: '18px',
         display: 'inline-block',
         transition: 'none',
-        width: `100%`,
+        width: `${barScore}%`,
         backgroundColor:
           severity === 'critical'
             ? mlColors.critical
@@ -66,7 +64,7 @@ export const useInfluencersListStyles = () => {
         whiteSpace: 'nowrap',
         fontSize: euiTheme.euiFontSizeXS,
         marginLeft: euiTheme.euiSizeXS,
-        display: 'inline-block',
+        display: 'inline',
         borderColor:
           severity === 'critical'
             ? mlColors.critical
