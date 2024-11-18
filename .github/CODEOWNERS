@@ -47,6 +47,7 @@ packages/cloud @elastic/kibana-core
 packages/content-management/content_editor @elastic/appex-sharedux
 packages/content-management/content_insights/content_insights_public @elastic/appex-sharedux
 packages/content-management/content_insights/content_insights_server @elastic/appex-sharedux
+packages/content-management/favorites/favorites_common @elastic/appex-sharedux
 packages/content-management/favorites/favorites_public @elastic/appex-sharedux
 packages/content-management/favorites/favorites_server @elastic/appex-sharedux
 packages/content-management/tabbed_table_list_view @elastic/appex-sharedux

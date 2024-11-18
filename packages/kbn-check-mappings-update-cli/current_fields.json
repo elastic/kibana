@@ -443,6 +443,7 @@
   ],
   "favorites": [
     "favoriteIds",
+    "favoriteMetadata",
     "type",
     "userId"
   ],

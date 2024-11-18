@@ -8,7 +8,6 @@
  */
 
 import React, { memo, useState, useCallback, useMemo } from 'react';
-
 import { i18n } from '@kbn/i18n';
 import {
   EuiText,
@@ -27,7 +26,7 @@ import {
 import { getLimitFromESQLQuery } from '@kbn/esql-utils';
 import { type MonacoMessage } from '../helpers';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
-import { QueryHistoryAction, QueryHistory } from './query_history';
+import { QueryHistoryAction, HistoryAndStarredQueriesTabs } from './history_starred_queries';
 import { SubmitFeedbackComponent } from './feedback_component';
 import { QueryWrapComponent } from './query_wrap_component';
 import type { ESQLEditorDeps } from '../types';
@@ -60,7 +59,6 @@ interface EditorFooterProps {
   isSpaceReduced?: boolean;
   hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
-  isInCompactMode?: boolean;
   displayDocumentationAsFlyout?: boolean;
 }
 
@@ -84,7 +82,6 @@ export const EditorFooter = memo(function EditorFooter({
   isLanguageComponentOpen,
   setIsLanguageComponentOpen,
   hideQueryHistory,
-  isInCompactMode,
   displayDocumentationAsFlyout,
   measuredContainerWidth,
   code,
@@ -310,7 +307,7 @@ export const EditorFooter = memo(function EditorFooter({
       </EuiFlexItem>
       {isHistoryOpen && (
         <EuiFlexItem grow={false}>
-          <QueryHistory
+          <HistoryAndStarredQueriesTabs
             containerCSS={styles.historyContainer}
             onUpdateAndSubmit={onUpdateAndSubmit}
             containerWidth={measuredContainerWidth}
