@@ -10,7 +10,6 @@ import type { CoreSetup } from '@kbn/core/server';
 import { registerDataStreamsRoute } from './data_streams';
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { DataUsageService } from '../../services';
 import type {
   DataUsageRequestHandlerContext,
   DataUsageRouter,
@@ -27,8 +26,8 @@ const mockGetMeteringStats = getMeteringStats as jest.Mock;
 describe('registerDataStreamsRoute', () => {
   let mockCore: MockedKeys<CoreSetup<{}, DataUsageServerStart>>;
   let router: DataUsageRouter;
-  let dataUsageService: DataUsageService;
   let context: DataUsageRequestHandlerContext;
+  let mockedDataUsageContext: ReturnType<typeof createMockedDataUsageContext>;
 
   beforeEach(() => {
     mockCore = coreMock.createSetup();
@@ -37,11 +36,10 @@ describe('registerDataStreamsRoute', () => {
       coreMock.createRequestHandlerContext()
     ) as unknown as DataUsageRequestHandlerContext;
 
-    const mockedDataUsageContext = createMockedDataUsageContext(
+    mockedDataUsageContext = createMockedDataUsageContext(
       coreMock.createPluginInitializerContext()
     );
-    dataUsageService = new DataUsageService(mockedDataUsageContext);
-    registerDataStreamsRoute(router, dataUsageService);
+    registerDataStreamsRoute(router, mockedDataUsageContext);
   });
 
   it('should request correct API', () => {

@@ -32,6 +32,7 @@
     "@kbn/cloud-plugin",
     "@kbn/server-http-tools",
     "@kbn/utility-types-jest",
+    "@kbn/datemath",
   ],
   "exclude": ["target/**/*"]
 }

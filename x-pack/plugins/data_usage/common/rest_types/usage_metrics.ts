@@ -88,6 +88,7 @@ export const UsageMetricsResponseSchema = {
         schema.arrayOf(
           schema.object({
             name: schema.string(),
+            error: schema.nullable(schema.string()),
             data: schema.arrayOf(
               schema.object({
                 x: schema.number(),
@@ -117,6 +118,7 @@ export const UsageMetricsAutoOpsResponseSchema = {
         schema.arrayOf(
           schema.object({
             name: schema.string(),
+            error: schema.nullable(schema.string()),
             data: schema.arrayOf(schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 })),
           })
         )
