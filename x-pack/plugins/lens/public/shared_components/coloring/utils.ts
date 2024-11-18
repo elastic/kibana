@@ -42,7 +42,7 @@ export function getColorStops(
     ? palette?.params?.stops?.map(({ color }) => color) ?? []
     : paletteService
         .get(palette?.name || DEFAULT_FALLBACK_PALETTE)
-        .getCategoricalColors(10, palette);
+        .getCategoricalColors(palette?.params?.steps || 10, palette);
 }
 
 /**

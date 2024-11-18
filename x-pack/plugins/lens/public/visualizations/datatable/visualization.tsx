@@ -8,8 +8,15 @@
 import React from 'react';
 import { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry, CUSTOM_PALETTE, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
+import {
+  PaletteRegistry,
+  CUSTOM_PALETTE,
+  PaletteOutput,
+  CustomPaletteParams,
+  applyPaletteParams,
+  getDefaultColorStops,
+} from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { getOriginalId } from '@kbn/transpose-utils';
@@ -46,7 +53,6 @@ import {
   DEFAULT_ROW_HEIGHT,
 } from './components/constants';
 import {
-  applyPaletteParams,
   defaultPaletteParams,
   findMinMaxByColumnId,
   getColorStops,
@@ -574,13 +580,14 @@ export const getDatatableVisualization = ({
       columns: columns
         .filter((c) => !c.collapseFn)
         .map((column) => {
+          const colorStops = getDefaultColorStops(paletteService, column.palette);
           const paletteParams = {
             ...column.palette?.params,
             // rewrite colors and stops as two distinct arguments
-            colors: (column.palette?.params?.stops || []).map(({ color }) => color),
+            colors: colorStops?.map(({ color }) => color),
             stops:
               column.palette?.params?.name === RowHeightMode.custom
-                ? (column.palette?.params?.stops || []).map(({ stop }) => stop)
+                ? colorStops?.map(({ stop }) => stop)
                 : [],
             reverse: false, // managed at UI level
           };

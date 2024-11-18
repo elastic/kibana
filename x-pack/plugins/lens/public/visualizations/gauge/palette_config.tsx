@@ -40,7 +40,7 @@ export const transparentizePalettes = (palettes: PaletteRegistry) => {
       state?: unknown
     ) => addAlpha(palette.getCategoricalColor(series, chartConfiguration, state)),
     getCategoricalColors: (size: number, state?: unknown): string[] =>
-      palette.getCategoricalColors(size, state).map(addAlpha),
+      palette.getCategoricalColors(size, state),
   });
 
   return {

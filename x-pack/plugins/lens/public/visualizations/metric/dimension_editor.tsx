@@ -24,6 +24,7 @@ import {
   CustomizablePalette,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
+  applyPaletteParams,
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
@@ -31,7 +32,7 @@ import { css } from '@emotion/react';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
-import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
+import { PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
