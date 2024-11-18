@@ -1576,6 +1576,7 @@ x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
 x-pack/test/**/deployment_agnostic/ @elastic/appex-qa #temporarily to monitor tests migration
 
 # Core
+/test/api_integration/apis/general/*.js @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/199795/files/894a8ede3f9d0398c5af56bf5a82654a9bc0610b#r1846691639
 /x-pack/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-core
 /test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
 /test/plugin_functional/plugins/session_notifications @elastic/kibana-core
@@ -1634,7 +1635,6 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 
 # Kibana Platform Security
 # security
-/test/api_integration/apis/general/*.js @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/199767#discussion_r1840492130
 /x-pack/test_serverless/functional/test_suites/observability/role_management @elastic/kibana-security
 /x-pack/test/functional/config_security_basic.ts @elastic/kibana-security
 /x-pack/test/functional/page_objects/user_profile_page.ts @elastic/kibana-security
