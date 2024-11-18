@@ -39,6 +39,7 @@
     "@kbn/presentation-panel-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/std",
+    "@kbn/react-hooks",
   ],
   "exclude": ["target/**/*"]
 }
