@@ -6,13 +6,14 @@
  */
 
 import { mockCases } from '../../mocks';
-import { createCasesClientMockArgs } from '../mocks';
+import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { similar } from './similar';
 import { mockCase } from '../../../public/containers/mock';
 
 describe('similar', () => {
   describe('find similar cases', () => {
     const clientArgs = createCasesClientMockArgs();
+    const casesClient = createCasesClientMock();
 
     jest.mocked(clientArgs.services.caseService.getCase).mockResolvedValue({
       ...mockCases[0],
@@ -56,7 +57,8 @@ describe('similar', () => {
           page: 1,
           perPage: 10,
         },
-        clientArgs
+        clientArgs,
+        casesClient
       );
       expect(clientArgs.services.caseService.findCases).toHaveBeenCalled();
 
@@ -65,8 +67,30 @@ describe('similar', () => {
       expect(call).toMatchInlineSnapshot(`
         Object {
           "filter": Object {
-            "arguments": Array [],
-            "function": "or",
+            "arguments": Array [
+              Object {
+                "arguments": Array [],
+                "function": "or",
+                "type": "function",
+              },
+              Object {
+                "arguments": Array [
+                  Object {
+                    "isQuoted": false,
+                    "type": "literal",
+                    "value": "cases.attributes.owner",
+                  },
+                  Object {
+                    "isQuoted": false,
+                    "type": "literal",
+                    "value": "securitySolution",
+                  },
+                ],
+                "function": "is",
+                "type": "function",
+              },
+            ],
+            "function": "and",
             "type": "function",
           },
           "page": 1,
