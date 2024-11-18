@@ -17,7 +17,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - group 4', () => {
+  describe('lens app - group 7', () => {
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
@@ -71,16 +71,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    // total run time ~19m 30s
-    loadTestFile(require.resolve('./colors')); // 1m 15s
-    loadTestFile(require.resolve('./color_mapping')); // 25s
-    loadTestFile(require.resolve('./chart_data')); // 1m 10s
-    loadTestFile(require.resolve('./time_shift')); // 1m
-    loadTestFile(require.resolve('./dashboard')); // 6m 45s
-    loadTestFile(require.resolve('./show_underlying_data')); // 2m
-    loadTestFile(require.resolve('./show_underlying_data_dashboard')); // 3m 45s
-    loadTestFile(require.resolve('./share')); // 1m 20s
-    // keep it last in the group
-    loadTestFile(require.resolve('./tsdb')); // 3m 55s
+    // total run time ~30m
+    loadTestFile(require.resolve('./logsdb')); // 30m
   });
 };

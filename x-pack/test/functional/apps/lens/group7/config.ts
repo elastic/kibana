@@ -8,13 +8,10 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseTestConfig = await readConfigFile(require.resolve('../config.ts'));
+  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
 
   return {
-    ...baseTestConfig.getAll(),
-    testFiles: [require.resolve('../../common/visualizations/group1/logsdb')],
-    junit: {
-      reportName: 'Serverless Observability Functional Tests - Common Group 2',
-    },
+    ...functionalConfig.getAll(),
+    testFiles: [require.resolve('.')],
   };
 }
