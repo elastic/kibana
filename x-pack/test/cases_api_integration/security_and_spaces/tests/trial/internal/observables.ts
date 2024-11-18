@@ -112,13 +112,21 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        const { cases: casesAfterObservablesAreAdded } = await similarCases({
+        const { cases: casesSimilarToA } = await similarCases({
           supertest,
           body: { perPage: 10, page: 1 },
           caseId: caseA.id,
         });
 
-        expect(casesAfterObservablesAreAdded.length).to.be(1);
+        expect(casesSimilarToA.length).to.be(1);
+
+        const { cases: casesSimilarToB } = await similarCases({
+          supertest,
+          body: { perPage: 10, page: 1 },
+          caseId: caseB.id,
+        });
+
+        expect(casesSimilarToB.length).to.be(1);
       });
 
       it('returns cases similar to given case with json in the value', async () => {
