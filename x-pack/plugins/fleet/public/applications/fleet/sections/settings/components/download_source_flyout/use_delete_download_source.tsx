@@ -67,7 +67,7 @@ const ConfirmDeleteDescription: React.FunctionComponent<ConfirmDeleteDescription
   ) : (
     <FormattedMessage
       id="xpack.fleet.settings.deleteDowloadSource.confirmModalTextWithoutCount"
-      defaultMessage="This action will delete {downloadSourceName} agent binary source. It will update related policies and agents. This action can not be undone. Are you sure you wish to continue?"
+      defaultMessage="This action will delete {downloadSourceName} agent binary sourceand it will update its related policies and agents. This action can not be undone. Are you sure you wish to continue?"
       values={{
         downloadSourceName: <strong>{downloadSource.name}</strong>,
       }}
