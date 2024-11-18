@@ -7,6 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ServiceStatusLevels } from './service_status';
-export type { ServiceStatus, ServiceStatusLevel, ServiceStatusLevelId } from './service_status';
-export type { CoreStatus } from './core_status';
+import { EuiThemeSystem, EuiThemeAmsterdam } from '@elastic/eui';
+
+export interface ThemeConfig {
+  euiTheme: EuiThemeSystem;
+}
+
+const THEMES: Record<string, ThemeConfig> = {
+  amsterdam: {
+    euiTheme: EuiThemeAmsterdam,
+  },
+};
+
+export const getThemeConfigByName = (name: string): ThemeConfig | null => {
+  return THEMES[name as keyof typeof THEMES] || null;
+};
+
+export const DEFAULT_THEME_CONFIG = THEMES.amsterdam;
