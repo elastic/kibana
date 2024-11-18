@@ -28,8 +28,6 @@ import {
   ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY,
   ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY,
 } from '../translations';
-import { useEntityEnginePrivileges } from '../hooks/use_entity_engine_privileges';
-import { MissingPrivilegesCallout } from './missing_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../../../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from '../../risk_engine_privileges_callout';
 
@@ -63,10 +61,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
     riskScore: !!riskScore.checked,
     entityStore: !!entityStore.checked,
   });
-  const { data: entityEnginePrivileges, isLoading: isLoadingEntityEnginePrivileges } =
-    useEntityEnginePrivileges();
   const riskEnginePrivileges = useMissingRiskEnginePrivileges();
-  const enablementOptions = enablements.riskScore || enablements.entityStore;
 
   if (!visible) {
     return null;
@@ -119,10 +114,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
                   />
                 }
                 checked={enablements.entityStore}
-                disabled={
-                  entityStore.disabled ||
-                  (!isLoadingEntityEnginePrivileges && !entityEnginePrivileges?.has_all_required)
-                }
+                disabled={entityStore.disabled}
                 onChange={() =>
                   setEnablements((prev) => ({ ...prev, entityStore: !prev.entityStore }))
                 }
@@ -132,11 +124,6 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
               </EuiToolTip>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {!entityEnginePrivileges || entityEnginePrivileges.has_all_required ? null : (
-            <EuiFlexItem>
-              <MissingPrivilegesCallout privileges={entityEnginePrivileges} />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem>
             <EuiText>{ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY}</EuiText>
           </EuiFlexItem>
