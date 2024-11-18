@@ -5,22 +5,23 @@
  * 2.0.
  */
 
+import type { ComponentProps } from 'react';
 import React from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { CellValueElementProps } from '../../../../../common/types';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
-import { RenderCellValue } from '../../../../detections/configurations/security_solution_detections';
+import { CellValue } from '../../../../detections/configurations/security_solution_detections';
 
 export const PreviewRenderCellValue: React.FC<
   EuiDataGridCellValueElementProps & CellValueElementProps
 > = (props) => {
   return (
-    <RenderCellValue
-      {...props}
+    <CellValue
+      {...(props as unknown as ComponentProps<typeof CellValue>)}
       asPlainText={true}
       scopeId={SourcererScopeName.detections}
-      tableId={TableId.rulePreview}
+      tableType={TableId.rulePreview}
     />
   );
 };

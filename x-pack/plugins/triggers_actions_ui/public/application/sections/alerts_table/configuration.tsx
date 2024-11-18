@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
@@ -20,18 +19,11 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FEATURE_LABEL } from '../translations';
-import { getDefaultAlertFlyout } from './alerts_flyout/default_alerts_flyout';
-import { AlertActionsCell } from './row_actions/alert_actions_cell';
-import { AlertsTableConfigurationRegistry, RenderCustomActionsRowArgs } from '../../../types';
-import { getAlertFormatters, getRenderCellValue } from './cells/render_cell_value';
-import { ALERT_TABLE_GENERIC_CONFIG_ID, ALERT_TABLE_GLOBAL_CONFIG_ID } from '../../constants';
 
 const columns = [
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.statusColumnDescription', {
       defaultMessage: 'Alert Status',
     }),
@@ -45,7 +37,6 @@ const columns = [
     initialWidth: 180,
   },
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
       'xpack.triggersActionsUI.alertsTable.lastUpdatedColumnDescription',
       {
@@ -57,7 +48,6 @@ const columns = [
     schema: 'datetime',
   },
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.startedColumnDescription', {
       defaultMessage: 'Started',
     }),
@@ -66,7 +56,6 @@ const columns = [
     schema: 'datetime',
   },
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
       'xpack.triggersActionsUI.alertsTable.ruleCategoryColumnDescription',
       {
@@ -77,7 +66,6 @@ const columns = [
     initialWidth: 160,
   },
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.ruleColumnDescription', {
       defaultMessage: 'Rule',
     }),
@@ -85,7 +73,6 @@ const columns = [
     initialWidth: 230,
   },
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.ruleTagsColumnDescription', {
       defaultMessage: 'Rule tags',
     }),
@@ -93,7 +80,6 @@ const columns = [
     initialWidth: 120,
   },
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
       'xpack.triggersActionsUI.alertsTable.evaluationValuesColumnDescription',
       {
@@ -104,7 +90,6 @@ const columns = [
     initialWidth: 120,
   },
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
       'xpack.triggersActionsUI.alertsTable.evaluationThresholdColumnDescription',
       {
@@ -115,7 +100,6 @@ const columns = [
     initialWidth: 120,
   },
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.reasonColumnDescription', {
       defaultMessage: 'Reason',
     }),
@@ -124,7 +108,6 @@ const columns = [
     initialWidth: 260,
   },
   {
-    columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
       'xpack.triggersActionsUI.alertsTable.maintenanceWindowsColumnDescription',
       {
@@ -137,6 +120,8 @@ const columns = [
   },
 ];
 
+export { columns as defaultAlertsTableColumns };
+
 const sort: SortCombinations[] = [
   {
     [TIMESTAMP]: {
@@ -145,32 +130,4 @@ const sort: SortCombinations[] = [
   },
 ];
 
-const useActionsColumn = () => ({
-  renderCustomActionsRow: (props: RenderCustomActionsRowArgs) => {
-    return <AlertActionsCell {...props} />;
-  },
-});
-
-export const createGenericAlertsTableConfigurations = (
-  fieldFormats: FieldFormatsRegistry
-): AlertsTableConfigurationRegistry[] => {
-  const [firstColumn, _, ...genericColumns] = columns;
-  return [
-    {
-      id: ALERT_TABLE_GENERIC_CONFIG_ID,
-      columns: [firstColumn, ...genericColumns],
-      getRenderCellValue,
-      useInternalFlyout: getDefaultAlertFlyout(columns, getAlertFormatters(fieldFormats)),
-      sort,
-      useActionsColumn,
-    },
-    {
-      id: ALERT_TABLE_GLOBAL_CONFIG_ID,
-      columns,
-      getRenderCellValue,
-      useInternalFlyout: getDefaultAlertFlyout(columns, getAlertFormatters(fieldFormats)),
-      sort,
-      useActionsColumn,
-    },
-  ];
-};
+export { sort as defaultAlertsTableSort };

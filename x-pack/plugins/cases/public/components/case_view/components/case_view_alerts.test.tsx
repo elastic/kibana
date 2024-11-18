@@ -32,11 +32,6 @@ describe('CaseUI View Page activity tab', () => {
     appMockRender = createAppMockRenderer();
     appMockRender.coreStart.triggersActionsUi.getAlertsStateTable =
       getAlertsStateTableMock.mockReturnValue(<div data-test-subj="alerts-table" />);
-    appMockRender.coreStart.triggersActionsUi.alertsTableConfigurationRegistry.register({
-      id: 'case-details-alerts-observability',
-      columns: [],
-      ruleTypeIds: ['log-threshold'],
-    });
   });
 
   afterEach(() => {
@@ -53,8 +48,6 @@ describe('CaseUI View Page activity tab', () => {
     appMockRender.render(<CaseViewAlerts caseData={caseData} />);
     await waitFor(async () => {
       expect(getAlertsStateTableMock).toHaveBeenCalledWith({
-        alertsTableConfigurationRegistry: expect.anything(),
-        configurationId: 'securitySolution-case',
         ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS,
         id: 'case-details-alerts-securitySolution',
         query: {
@@ -87,8 +80,6 @@ describe('CaseUI View Page activity tab', () => {
 
     await waitFor(async () => {
       expect(getAlertsStateTableMock).toHaveBeenCalledWith({
-        alertsTableConfigurationRegistry: expect.anything(),
-        configurationId: 'case-details-alerts-observability',
         ruleTypeIds: ['log-threshold'],
         consumers: ['observability'],
         id: 'case-details-alerts-observability',

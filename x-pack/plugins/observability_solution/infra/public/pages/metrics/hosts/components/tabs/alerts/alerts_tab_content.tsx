@@ -7,12 +7,11 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
-  AlertConsumers,
   INFRA_RULE_TYPE_IDS,
   OBSERVABILITY_RULE_TYPE_IDS,
 } from '@kbn/rule-data-utils';
 import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
-import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
+import { useSummaryTimeRange, ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
 import type { TimeRange } from '@kbn/es-query';
 import { INFRA_ALERT_CONSUMERS } from '../../../../../../../common/constants';
@@ -34,7 +33,6 @@ import { usePluginConfig } from '../../../../../../containers/plugin_config_cont
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 
 export const AlertsTabContent = () => {
-  const { services } = useKibanaContextForPlugin();
   const { featureFlags } = usePluginConfig();
   const { hostNodes } = useHostsViewContext();
 
@@ -42,11 +40,6 @@ export const AlertsTabContent = () => {
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
 
   const { onDateRangeChange, searchCriteria } = useUnifiedSearchContext();
-
-  const { triggersActionsUi } = services;
-
-  const { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable } =
-    triggersActionsUi;
 
   const hostsWithAlertsKuery = hostNodes
     .filter((host) => host.alertsCount)
@@ -87,15 +80,12 @@ export const AlertsTabContent = () => {
         </EuiFlexItem>
         {alertsEsQueryByStatus && (
           <EuiFlexItem>
-            <AlertsStateTable
-              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-              configurationId={AlertConsumers.OBSERVABILITY}
+            <ObservabilityAlertsTable
+              id={ALERTS_TABLE_ID}
               ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
               consumers={INFRA_ALERT_CONSUMERS}
-              id={ALERTS_TABLE_ID}
               initialPageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
-              showAlertStatusWithFlapping
             />
           </EuiFlexItem>
         )}

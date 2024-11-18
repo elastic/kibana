@@ -10,26 +10,26 @@ import { ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import { MaintenanceWindowCell } from './cell';
 import { CellComponentProps } from '../types';
 import { Alert } from '../../../../types';
-import { getMaintenanceWindowMockMap } from './index.mock';
-import { getCasesMockMap } from '../cases/index.mock';
+import { getMaintenanceWindowsMapMock } from './index.mock';
+import { getCasesMapMock } from '../cases/index.mock';
 import userEvent from '@testing-library/user-event';
 
-const casesMap = getCasesMockMap();
-const maintenanceWindowsMap = getMaintenanceWindowMockMap();
+const casesMap = getCasesMapMock();
+const maintenanceWindowsMap = getMaintenanceWindowsMapMock();
 const alert = {
   _id: 'alert-id',
   _index: 'alert-index',
   [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-mw-id-1', 'test-mw-id-2'],
 } as Alert;
 
-const props: CellComponentProps = {
+const props = {
   isLoading: false,
   alert,
   cases: casesMap,
   maintenanceWindows: maintenanceWindowsMap,
   columnId: ALERT_MAINTENANCE_WINDOW_IDS,
   showAlertStatusWithFlapping: false,
-};
+} as CellComponentProps;
 
 describe('MaintenanceWindowCell', () => {
   it('renders the maintenance window cell', async () => {

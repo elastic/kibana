@@ -21,7 +21,7 @@ const DATE_WITHOUT_DATA = {
 const ALERTS_TITLE = 'Alerts';
 const ALERTS_ACCORDION_SELECTOR = `accordion-${ALERTS_TITLE}`;
 const ALERTS_SECTION_BUTTON_CSS_SELECTOR = `[data-test-subj=${ALERTS_ACCORDION_SELECTOR}] button.euiAccordion__button`;
-const ALERTS_TABLE_NO_DATA_SELECTOR = 'alertsStateTableEmptyState';
+const ALERTS_TABLE_NO_DATA_SELECTOR = 'alertsTableEmptyState';
 const ALERTS_TABLE_WITH_DATA_SELECTOR = 'alertsTable';
 const ALERTS_TABLE_LOADING_SELECTOR = 'internalAlertsPageLoading';
 

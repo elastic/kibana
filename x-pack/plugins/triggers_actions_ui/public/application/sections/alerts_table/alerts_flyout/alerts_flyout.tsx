@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { Suspense, lazy, useCallback, useMemo, useRef, useEffect } from 'react';
+import React, { Suspense, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
@@ -15,9 +15,10 @@ import {
   EuiPagination,
   EuiProgress,
 } from '@elastic/eui';
-import type { Alert, AlertsTableConfigurationRegistry } from '../../../../types';
+import usePrevious from 'react-use/lib/usePrevious';
+import { DefaultAlertsFlyoutHeader } from './default_alerts_flyout';
+import { FlyoutSectionRenderer } from '../../../../types';
 
-const AlertsFlyoutHeader = lazy(() => import('./alerts_flyout_header'));
 const PAGINATION_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.paginationLabel',
   {
@@ -25,93 +26,63 @@ const PAGINATION_LABEL = i18n.translate(
   }
 );
 
-function usePrevious(alert: Alert) {
-  const ref = useRef<Alert | null>(null);
-  useEffect(() => {
-    if (alert) {
-      ref.current = alert;
-    }
-  });
-  return ref.current;
-}
-
-interface AlertsFlyoutProps {
-  alert: Alert;
-  alertsTableConfiguration: AlertsTableConfigurationRegistry;
-  flyoutIndex: number;
-  alertsCount: number;
-  isLoading: boolean;
-  onClose: () => void;
-  onPaginate: (pageIndex: number) => void;
-  id?: string;
-}
-export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
-  alert,
-  alertsTableConfiguration,
-  flyoutIndex,
-  alertsCount,
-  isLoading,
-  onClose,
-  onPaginate,
-  id,
-}: AlertsFlyoutProps) => {
+export const AlertsFlyout: FlyoutSectionRenderer = ({ alert, ...renderContext }) => {
   const {
-    header: Header,
-    body: Body,
-    footer: Footer,
-  } = alertsTableConfiguration?.useInternalFlyout?.() ?? {
-    header: AlertsFlyoutHeader,
-    body: null,
-    footer: null,
-  };
+    flyoutIndex,
+    alertsCount,
+    onClose,
+    onPaginate,
+    isLoading,
+    renderFlyoutHeader: Header = DefaultAlertsFlyoutHeader,
+    renderFlyoutBody: Body,
+    renderFlyoutFooter: Footer,
+  } = renderContext;
   const prevAlert = usePrevious(alert);
-  const passedProps = useMemo(
+  const props = useMemo(
     () => ({
+      ...renderContext,
+      // Show the previous alert while loading the next one
       alert: alert === undefined && prevAlert != null ? prevAlert : alert,
-      id,
-      isLoading,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [alert, id, isLoading]
-  );
-
-  const FlyoutBody = useCallback(
-    () =>
-      Body ? (
-        <Suspense fallback={null}>
-          <Body {...passedProps} />
-        </Suspense>
-      ) : null,
-    [Body, passedProps]
-  );
-
-  const FlyoutFooter = useCallback(
-    () =>
-      Footer ? (
-        <Suspense fallback={null}>
-          <Footer {...passedProps} />
-        </Suspense>
-      ) : null,
-    [Footer, passedProps]
+    [alert, renderContext]
   );
 
   const FlyoutHeader = useCallback(
     () =>
       Header ? (
         <Suspense fallback={null}>
-          <Header {...passedProps} />
+          <Header {...props} />
         </Suspense>
       ) : null,
-    [Header, passedProps]
+    [Header, props]
+  );
+
+  const FlyoutBody = useCallback(
+    () =>
+      Body ? (
+        <Suspense fallback={null}>
+          <Body {...props} />
+        </Suspense>
+      ) : null,
+    [Body, props]
+  );
+
+  const FlyoutFooter = useCallback(
+    () =>
+      Footer ? (
+        <Suspense fallback={null}>
+          <Footer {...props} />
+        </Suspense>
+      ) : null,
+    [Footer, props]
   );
 
   return (
     <EuiFlyout onClose={onClose} size="m" data-test-subj="alertsFlyout" ownFocus={false}>
       {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
       <EuiFlyoutHeader hasBorder>
-        <Suspense fallback={null}>
-          <FlyoutHeader />
-        </Suspense>
+        <FlyoutHeader />
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>

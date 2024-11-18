@@ -70,6 +70,8 @@
     "@kbn/alerting-types",
     "@kbn/visualization-utils",
     "@kbn/core-ui-settings-browser",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-application-browser-mocks",
     "@kbn/observability-alerting-rule-utils",
     "@kbn/core-application-browser",
     "@kbn/cloud-plugin",

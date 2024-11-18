@@ -17,11 +17,7 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { TriggersAndActionsUiServices } from '../../../application/rules_app';
-import {
-  RuleTypeRegistryContract,
-  ActionTypeRegistryContract,
-  AlertsTableConfigurationRegistryContract,
-} from '../../../types';
+import { RuleTypeRegistryContract, ActionTypeRegistryContract } from '../../../types';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 
@@ -60,15 +56,6 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       get: jest.fn(),
       list: jest.fn(),
     } as ActionTypeRegistryContract,
-    alertsTableConfigurationRegistry: {
-      has: jest.fn(),
-      register: jest.fn(),
-      get: jest.fn(),
-      getActions: jest.fn(),
-      list: jest.fn(),
-      update: jest.fn(),
-      getAlertConfigIdPerRuleTypes: jest.fn(),
-    } as AlertsTableConfigurationRegistryContract,
     charts: chartPluginMock.createStartContract(),
     isCloud: false,
     kibanaFeatures: [],

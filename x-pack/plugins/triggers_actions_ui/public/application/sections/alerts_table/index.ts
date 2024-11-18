@@ -7,4 +7,4 @@
 import { lazy } from 'react';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 
-export const AlertsTable = suspendedComponentWithProps(lazy(() => import('./alerts_table')));
+export const AlertsTable = suspendedComponentWithProps(lazy(() => import('./alerts_data_grid')));

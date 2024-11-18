@@ -8,10 +8,11 @@
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import type { ReactWrapper } from 'enzyme';
-import React from 'react';
+import React, { ComponentProps } from 'react';
 
-import { getDefaultAlertFlyout } from './default_alerts_flyout';
 import { AlertsTableFlyoutBaseProps } from '../../../..';
+import { DefaultAlertsFlyoutBody } from './default_alerts_flyout';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 const columns = [
   {
@@ -87,8 +88,16 @@ const tabsData = [
 describe('DefaultAlertsFlyout', () => {
   let wrapper: ReactWrapper;
   beforeAll(async () => {
-    const { body: FlyoutBody } = getDefaultAlertFlyout(columns, (_columnId, value) => value)();
-    wrapper = mount(<FlyoutBody alert={alert} isLoading={false} />) as ReactWrapper;
+    wrapper = mount(
+      <DefaultAlertsFlyoutBody
+        {...({
+          alert,
+          isLoading: false,
+          columns,
+          fieldFormats: fieldFormatsMock,
+        } as unknown as ComponentProps<typeof DefaultAlertsFlyoutBody>)}
+      />
+    ) as ReactWrapper;
     await waitFor(() => wrapper.update());
   });
 

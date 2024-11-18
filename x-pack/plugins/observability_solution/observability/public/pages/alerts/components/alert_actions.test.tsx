@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act } from '@testing-library/react-hooks';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-import { AlertActions, ObservabilityAlertActionsProps } from './alert_actions';
+import { AlertActions } from './alert_actions';
 import { inventoryThresholdAlertEs } from '../../../rules/fixtures/example_alerts';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import * as pluginContext from '../../../hooks/use_plugin_context';
@@ -25,6 +25,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import type { GetObservabilityAlertsTableProp } from '../../../components/alerts_table/types';
 
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -112,7 +113,8 @@ describe('ObservabilityActions component', () => {
       },
     });
 
-    const props: ObservabilityAlertActionsProps = {
+    const props = {
+      tableId: pageId,
       config,
       alert: inventoryThresholdAlertEs,
       ecsAlert: [],
@@ -120,11 +122,10 @@ describe('ObservabilityActions component', () => {
       rowIndex: 1,
       cveProps: {} as unknown as EuiDataGridCellValueElementProps,
       clearSelection: noop,
-      id: pageId,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      setFlyoutAlert: jest.fn(),
+      openAlertInFlyout: jest.fn(),
       refresh,
-    };
+    } as unknown as ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>;
 
     const wrapper = mountWithIntl(
       <Router history={createMemoryHistory()}>

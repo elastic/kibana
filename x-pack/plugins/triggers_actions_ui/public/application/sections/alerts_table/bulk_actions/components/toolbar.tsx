@@ -7,7 +7,7 @@
 
 import { EuiPopover, EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { useState, useCallback, useMemo, useContext, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
   ALERT_CASE_IDS,
@@ -23,7 +23,7 @@ import {
   RowSelection,
 } from '../../../../../types';
 import * as i18n from '../translations';
-import { AlertsTableContext } from '../../contexts/alerts_table_context';
+import { useAlertsTableContext } from '../../contexts/alerts_table_context';
 
 interface BulkActionsProps {
   totalItems: number;
@@ -88,8 +88,8 @@ const useBulkActionsToMenuPanelMapper = (
   closeIfPopoverIsOpen: () => void
 ) => {
   const {
-    bulkActions: [{ isAllSelected, rowSelection }],
-  } = useContext(AlertsTableContext);
+    bulkActionsStore: [{ isAllSelected, rowSelection }],
+  } = useAlertsTableContext();
 
   const bulkActionsPanels = useMemo(() => {
     const bulkActionPanelsToReturn = [];
@@ -155,8 +155,8 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   refresh,
 }) => {
   const {
-    bulkActions: [{ rowSelection, isAllSelected }, updateSelectedRows],
-  } = useContext(AlertsTableContext);
+    bulkActionsStore: [{ rowSelection, isAllSelected }, updateSelectedRows],
+  } = useAlertsTableContext();
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const [showClearSelection, setShowClearSelectiong] = useState(false);

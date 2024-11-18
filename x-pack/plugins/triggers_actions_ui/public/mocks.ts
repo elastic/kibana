@@ -19,13 +19,14 @@ import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
 import {
   ActionTypeModel,
   RuleTypeModel,
-  AlertsTableProps,
+  AlertsDataGridProps,
   FieldBrowserProps,
   RuleTagBadgeOptions,
   RuleTagBadgeProps,
   RuleEventLogListOptions,
   RuleEventLogListProps,
   RuleUiAction,
+  AdditionalContext,
 } from './types';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -38,7 +39,6 @@ import { getRulesListLazy } from './common/get_rules_list';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
-import { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
@@ -50,19 +50,16 @@ import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
-import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 import { AlertActionsProps } from './types';
 import { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
-  const alertsTableConfigurationRegistry = new AlertTableConfigRegistry();
   const connectorServices = { validateEmailAddresses: jest.fn() };
   return {
     actionTypeRegistry,
     ruleTypeRegistry,
-    alertsTableConfigurationRegistry,
     getActionForm: (
       props: Omit<ActionAccordionFormProps, 'actionTypeRegistry' | 'setActions'> & {
         setActions: (actions: RuleAction[]) => void;
@@ -102,13 +99,11 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         connectorServices,
       });
     },
-    getAlertsStateTable: (props: AlertsTableStateProps) => {
-      return getAlertsTableStateLazy(props);
-    },
+    getAlertsStateTable: getAlertsTableStateLazy,
     getAlertsSearchBar: (props: AlertsSearchBarProps) => {
       return getAlertsSearchBarLazy(props);
     },
-    getAlertsTable: (props: AlertsTableProps) => {
+    getAlertsTable: <AC extends AdditionalContext>(props: AlertsDataGridProps<AC>) => {
       return getAlertsTableLazy(props);
     },
     getAlertsTableDefaultAlertActions: (props: AlertActionsProps) => {

@@ -10,7 +10,7 @@ import { EuiLink, EuiSkeletonText } from '@elastic/eui';
 import { Tooltip as CaseTooltip } from '@kbn/cases-components';
 import type { CaseTooltipContentProps } from '@kbn/cases-components';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
-import { CellComponentProps } from '../types';
+import type { CellComponent } from '../types';
 import { useCaseViewNavigation } from './use_case_view_navigation';
 import { Case } from '../hooks/apis/bulk_get_cases';
 
@@ -26,14 +26,14 @@ const formatCase = (theCase: Case): CaseTooltipContentProps => ({
   totalComments: theCase.totalComment,
 });
 
-const CasesCellComponent: React.FC<CellComponentProps> = (props) => {
+export const CasesCell: CellComponent = memo((props) => {
   const { isLoading, alert, cases, caseAppId } = props;
   const { navigateToCaseView } = useCaseViewNavigation(caseAppId);
 
   const caseIds = (alert && alert[ALERT_CASE_IDS]) ?? [];
 
   const validCases = caseIds
-    .map((id) => cases.get(id))
+    .map((id) => cases?.get(id))
     .filter((theCase): theCase is Case => theCase != null);
 
   return (
@@ -53,8 +53,4 @@ const CasesCellComponent: React.FC<CellComponentProps> = (props) => {
         : '--'}
     </EuiSkeletonText>
   );
-};
-
-CasesCellComponent.displayName = 'CasesCell';
-
-export const CasesCell = memo(CasesCellComponent);
+});

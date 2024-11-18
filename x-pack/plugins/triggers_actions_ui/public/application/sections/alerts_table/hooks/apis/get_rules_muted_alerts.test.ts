@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { getMutedAlerts } from './get_rules_muted_alerts';
+import { getRulesWithMutedAlerts } from './get_rules_with_muted_alerts';
 
 const http = httpServiceMock.createStartContract();
 
-describe('getMutedAlerts', () => {
+describe('getRulesWithMutedAlerts', () => {
   const apiRes = {
     page: 1,
     per_page: 10,
@@ -24,7 +24,7 @@ describe('getMutedAlerts', () => {
   });
 
   test('should call find API with correct params', async () => {
-    const result = await getMutedAlerts(http, { ruleIds: ['foo'] });
+    const result = await getRulesWithMutedAlerts({ http, ruleIds: ['foo'] });
 
     expect(result).toEqual({
       page: 1,

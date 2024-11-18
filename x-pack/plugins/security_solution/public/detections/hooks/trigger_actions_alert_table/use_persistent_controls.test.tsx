@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { getPersistentControlsHook } from './use_persistent_controls';
+import { AdditionalToolbarControls } from './use_persistent_controls';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { renderHook } from '@testing-library/react-hooks';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -63,7 +62,7 @@ const groups = {
   [tableId]: { options: mockOptions, activeGroups: ['kibana.alert.rule.name'] },
 };
 
-describe('usePersistentControls', () => {
+describe('AdditionalToolbarControls', () => {
   beforeEach(() => {
     (useDeepEqualSelector as jest.Mock).mockImplementation(() => groups[tableId]);
     (useShallowEqualSelector as jest.Mock).mockReturnValue({
@@ -87,18 +86,14 @@ describe('usePersistentControls', () => {
       ...mockGlobalState,
       groups,
     });
-    const usePersistentControls = getPersistentControlsHook(tableId);
-    const { result } = renderHook(() => usePersistentControls(), {
-      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-        <TestProviders store={store}>{children}</TestProviders>
-      ),
-    });
+    render(
+      <TestProviders store={store}>
+        <AdditionalToolbarControls tableType={tableId} />
+      </TestProviders>
+    );
 
-    const groupSelector = result.current.right.props.additionalMenuOptions[0];
-    const { getByTestId } = render(<TestProviders store={store}>{groupSelector}</TestProviders>);
-
-    fireEvent.click(getByTestId('group-selector-dropdown'));
-    fireEvent.click(getByTestId('panel-user.name'));
+    fireEvent.click(screen.getByTestId('group-selector-dropdown'));
+    fireEvent.click(screen.getByTestId('panel-user.name'));
     expect(mockDispatch.mock.calls[0][0].payload).toEqual({
       activeGroups: ['user.name'],
       tableId,

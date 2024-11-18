@@ -13,7 +13,7 @@ import { UsersAvatarsPanel } from '../../../../../common/components/user_profile
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
 import type { ColumnRenderer } from './column_renderer';
 import { profileUidColumns } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
-import type { RenderCellValueContext } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
+import type { AlertsUserProfilesData } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
 
 export const userProfileColumnRenderer: ColumnRenderer = {
   isInstance: (columnName, _, context) => profileUidColumns.includes(columnName) && !!context,
@@ -42,7 +42,7 @@ export const userProfileColumnRenderer: ColumnRenderer = {
     scopeId: string;
     truncate?: boolean;
     values: string[] | undefined | null;
-    context?: RenderCellValueContext;
+    context?: AlertsUserProfilesData;
   }) => {
     // Show spinner if loading profiles or if there are no fetched profiles yet
     // Do not show the loading spinner if context is not provided at all

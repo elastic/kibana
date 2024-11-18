@@ -68,8 +68,7 @@ export function Cases({ permissions }: CasesProps) {
       {alertDetail && selectedAlertId !== '' && !alertLoading ? (
         <Suspense fallback={null}>
           <LazyAlertsFlyout
-            alert={alertDetail.formatted}
-            rawAlert={alertDetail.raw}
+            alert={alertDetail.raw}
             observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
             onClose={handleFlyoutClose}
           />

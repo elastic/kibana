@@ -22,7 +22,7 @@ import { Pagination } from '../../../../types';
 import { AlertListItem } from './types';
 import { AlertMutedSwitch } from './alert_muted_switch';
 import { AlertLifecycleStatusBadge } from '../../../components/alert_lifecycle_status_badge';
-import { useBulkGetMaintenanceWindows } from '../../alerts_table/hooks/use_bulk_get_maintenance_windows';
+import { useBulkGetMaintenanceWindowsQuery } from '../../alerts_table/hooks/use_bulk_get_maintenance_windows';
 import { MaintenanceWindowBaseCell } from '../../alerts_table/maintenance_windows/cell';
 
 export const getConvertedAlertStatus = (
@@ -125,9 +125,8 @@ export const RuleAlertList = (props: RuleAlertListProps) => {
   }, [pageOfAlerts]);
 
   const { data: maintenanceWindows, isFetching: isLoadingMaintenanceWindows } =
-    useBulkGetMaintenanceWindows({
+    useBulkGetMaintenanceWindowsQuery({
       ids: Array.from(maintenanceWindowIds.values()),
-      canFetchMaintenanceWindows: true,
     });
 
   const alertsTableColumns = useMemo(

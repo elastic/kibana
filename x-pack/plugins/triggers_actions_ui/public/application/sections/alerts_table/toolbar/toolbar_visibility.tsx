@@ -9,11 +9,11 @@ import {
   EuiDataGridToolBarAdditionalControlsOptions,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
-import React, { lazy, Suspense, memo, useMemo, useContext } from 'react';
+import React, { lazy, memo, ReactNode, Suspense, useMemo } from 'react';
 import { BrowserFields } from '@kbn/alerting-types';
 import { EsQuerySnapshot } from '@kbn/alerts-ui-shared';
 import { AlertsCount } from './components/alerts_count/alerts_count';
-import { AlertsTableContext } from '../contexts/alerts_table_context';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type { Alerts, BulkActionsPanelConfig, RowSelection } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
 import { FieldBrowser } from '../../field_browser';
@@ -25,24 +25,27 @@ const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar
 
 const RightControl = memo(
   ({
-    controls,
-    querySnapshot,
+    additionalToolbarControls,
+    alertsQuerySnapshot,
     showInspectButton,
   }: {
-    controls?: EuiDataGridToolBarAdditionalControlsOptions;
-    querySnapshot: EsQuerySnapshot;
+    additionalToolbarControls?: ReactNode;
+    alertsQuerySnapshot?: EsQuerySnapshot;
     showInspectButton: boolean;
   }) => {
     const {
-      bulkActions: [bulkActionsState],
-    } = useContext(AlertsTableContext);
+      bulkActionsStore: [bulkActionsState],
+    } = useAlertsTableContext();
     return (
       <>
-        {showInspectButton && (
-          <InspectButton inspectTitle={ALERTS_TABLE_TITLE} querySnapshot={querySnapshot} />
+        {showInspectButton && alertsQuerySnapshot && (
+          <InspectButton
+            inspectTitle={ALERTS_TABLE_TITLE}
+            alertsQuerySnapshot={alertsQuerySnapshot}
+          />
         )}
         <LastUpdatedAt updatedAt={bulkActionsState.updatedAt} />
-        {controls?.right}
+        {additionalToolbarControls}
       </>
     );
   }
@@ -56,14 +59,14 @@ const LeftAppendControl = memo(
     browserFields,
     onResetColumns,
     onToggleColumn,
-    fieldBrowserOptions,
+    fieldsBrowserOptions,
   }: {
     alertsCount: number;
     columnIds: string[];
     onToggleColumn: (columnId: string) => void;
     onResetColumns: () => void;
     controls?: EuiDataGridToolBarAdditionalControlsOptions;
-    fieldBrowserOptions?: FieldBrowserOptions;
+    fieldsBrowserOptions?: FieldBrowserOptions;
     hasBrowserFields: boolean;
     browserFields: BrowserFields;
   }) => {
@@ -76,7 +79,7 @@ const LeftAppendControl = memo(
             browserFields={browserFields}
             onResetColumns={onResetColumns}
             onToggleColumn={onToggleColumn}
-            options={fieldBrowserOptions}
+            options={fieldsBrowserOptions}
           />
         )}
       </>
@@ -90,9 +93,9 @@ const useGetDefaultVisibility = ({
   onToggleColumn,
   onResetColumns,
   browserFields,
-  controls,
-  fieldBrowserOptions,
-  querySnapshot,
+  additionalToolbarControls,
+  fieldsBrowserOptions,
+  alertsQuerySnapshot,
   showInspectButton,
   toolbarVisibilityProp,
 }: {
@@ -101,20 +104,20 @@ const useGetDefaultVisibility = ({
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
   browserFields: BrowserFields;
-  controls?: EuiDataGridToolBarAdditionalControlsOptions;
-  fieldBrowserOptions?: FieldBrowserOptions;
-  querySnapshot?: EsQuerySnapshot;
+  additionalToolbarControls?: ReactNode;
+  fieldsBrowserOptions?: FieldBrowserOptions;
+  alertsQuerySnapshot?: EsQuerySnapshot;
   showInspectButton: boolean;
   toolbarVisibilityProp?: EuiDataGridToolBarVisibilityOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
-  const defaultVisibility = useMemo(() => {
+  return useMemo(() => {
     const hasBrowserFields = Object.keys(browserFields).length > 0;
     return {
       additionalControls: {
-        right: querySnapshot && (
+        right: (
           <RightControl
-            controls={controls}
-            querySnapshot={querySnapshot}
+            additionalToolbarControls={additionalToolbarControls}
+            alertsQuerySnapshot={alertsQuerySnapshot}
             showInspectButton={showInspectButton}
           />
         ),
@@ -127,7 +130,7 @@ const useGetDefaultVisibility = ({
               browserFields={browserFields}
               onResetColumns={onResetColumns}
               onToggleColumn={onToggleColumn}
-              fieldBrowserOptions={fieldBrowserOptions}
+              fieldsBrowserOptions={fieldsBrowserOptions}
             />
           ),
         },
@@ -141,14 +144,13 @@ const useGetDefaultVisibility = ({
     alertsCount,
     browserFields,
     columnIds,
-    fieldBrowserOptions,
-    querySnapshot,
+    fieldsBrowserOptions,
+    alertsQuerySnapshot,
     onResetColumns,
     onToggleColumn,
     showInspectButton,
-    controls,
+    additionalToolbarControls,
   ]);
-  return defaultVisibility;
 };
 
 export const useGetToolbarVisibility = ({
@@ -163,10 +165,10 @@ export const useGetToolbarVisibility = ({
   browserFields,
   setIsBulkActionsLoading,
   clearSelection,
-  controls,
+  additionalToolbarControls,
   refresh,
-  fieldBrowserOptions,
-  querySnapshot,
+  fieldsBrowserOptions,
+  alertsQuerySnapshot,
   showInspectButton,
   toolbarVisibilityProp,
 }: {
@@ -181,10 +183,10 @@ export const useGetToolbarVisibility = ({
   browserFields: any;
   setIsBulkActionsLoading: (isLoading: boolean) => void;
   clearSelection: () => void;
-  controls?: EuiDataGridToolBarAdditionalControlsOptions;
+  additionalToolbarControls?: ReactNode;
   refresh: () => void;
-  fieldBrowserOptions?: FieldBrowserOptions;
-  querySnapshot?: EsQuerySnapshot;
+  fieldsBrowserOptions?: FieldBrowserOptions;
+  alertsQuerySnapshot?: EsQuerySnapshot;
   showInspectButton: boolean;
   toolbarVisibilityProp?: EuiDataGridToolBarVisibilityOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
@@ -196,9 +198,9 @@ export const useGetToolbarVisibility = ({
       onToggleColumn,
       onResetColumns,
       browserFields,
-      controls,
-      fieldBrowserOptions,
-      querySnapshot,
+      additionalToolbarControls,
+      fieldsBrowserOptions,
+      alertsQuerySnapshot,
       showInspectButton,
     };
   }, [
@@ -207,9 +209,9 @@ export const useGetToolbarVisibility = ({
     onToggleColumn,
     onResetColumns,
     browserFields,
-    controls,
-    fieldBrowserOptions,
-    querySnapshot,
+    additionalToolbarControls,
+    fieldsBrowserOptions,
+    alertsQuerySnapshot,
     showInspectButton,
   ]);
   const defaultVisibility = useGetDefaultVisibility(defaultVisibilityProps);
@@ -227,10 +229,10 @@ export const useGetToolbarVisibility = ({
         showColumnSelector: false,
         showSortSelector: false,
         additionalControls: {
-          right: querySnapshot && (
+          right: (
             <RightControl
-              controls={controls}
-              querySnapshot={querySnapshot}
+              additionalToolbarControls={additionalToolbarControls}
+              alertsQuerySnapshot={alertsQuerySnapshot}
               showInspectButton={showInspectButton}
             />
           ),
@@ -265,8 +267,8 @@ export const useGetToolbarVisibility = ({
     clearSelection,
     refresh,
     setIsBulkActionsLoading,
-    controls,
-    querySnapshot,
+    additionalToolbarControls,
+    alertsQuerySnapshot,
     showInspectButton,
   ]);
 

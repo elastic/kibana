@@ -29,7 +29,7 @@ import * as i18n from './translations';
 
 export interface ModalInspectProps {
   closeModal: () => void;
-  querySnapshot: EsQuerySnapshot;
+  alertsQuerySnapshot: EsQuerySnapshot;
   title: string;
 }
 
@@ -77,8 +77,12 @@ const stringify = (object: Request | Response): string => {
   }
 };
 
-const ModalInspectQueryComponent = ({ closeModal, querySnapshot, title }: ModalInspectProps) => {
-  const { request, response } = querySnapshot;
+const ModalInspectQueryComponent = ({
+  closeModal,
+  alertsQuerySnapshot,
+  title,
+}: ModalInspectProps) => {
+  const { request, response } = alertsQuerySnapshot;
   // using index 0 as there will be only one request and response for now
   const parsedRequest: Request = parse(request[0]);
   const parsedResponse: Response = parse(response[0]);

@@ -23,7 +23,7 @@ const MenuItem = styled(EuiContextMenuItem)`
  * Alerts table row action to open the rule to which the selected alert is associated
  */
 export const ViewRuleDetailsAlertAction = memo(
-  ({ alert, resolveRulePagePath, id: pageId }: AlertActionsProps) => {
+  ({ alert, resolveRulePagePath, tableId }: AlertActionsProps) => {
     const {
       http: {
         basePath: { prepend },
@@ -31,7 +31,7 @@ export const ViewRuleDetailsAlertAction = memo(
     } = useKibana().services;
 
     const ruleId = alert[ALERT_RULE_UUID]?.[0] ?? null;
-    const pagePath = ruleId && pageId && resolveRulePagePath?.(ruleId, pageId);
+    const pagePath = ruleId && tableId && resolveRulePagePath?.(ruleId, tableId);
     const linkToRule = pagePath ? prepend(pagePath) : null;
 
     if (!linkToRule) {

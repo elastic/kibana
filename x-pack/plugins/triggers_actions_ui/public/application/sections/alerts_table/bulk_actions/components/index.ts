@@ -6,4 +6,4 @@
  */
 
 export { BulkActionsHeader } from './column_header';
-export { BulkActionsRowCell } from './row_cell';
+export { BulkActionsCell } from './row_cell';
