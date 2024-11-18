@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
@@ -29,42 +29,55 @@ export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent']
   isValid,
   errorMessageType,
 }) => {
-  const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string }>>(
-    aggConfig.percents?.map((p) => ({ label: p.toString() })) ?? []
+  const selectedOptions = useMemo(
+    () => aggConfig.percents?.map((p) => ({ label: p.toString() })) ?? [],
+    [aggConfig.percents]
   );
 
-  // This is used to prevent race condition when user is creating a new option, and the search value is cleared.
-  const isCreatingOption = useRef(false);
+  const handleCreateOption = useCallback(
+    (inputValue: string) => {
+      if (!isValid) return false;
 
-  const handleCreateOption = (inputValue: string) => {
-    if (!isValid) return false;
-    isCreatingOption.current = true;
+      const newValue = Number(inputValue.replace(',', '.'));
 
-    const newOption = {
-      label: Number(inputValue.replace(',', '.')).toString(),
-    };
-    const updatedOptions = [...selectedOptions, newOption];
-    setSelectedOptions(updatedOptions);
-    onChange({ percents: updatedOptions.map((option) => Number(option.label)) });
+      // Skip if this percentile value already exists after normalizing number formats
+      // e.g. "+12" and "12" are considered the same value
+      if (aggConfig.percents?.includes(newValue)) {
+        return false;
+      }
 
-    setTimeout(() => {
-      isCreatingOption.current = false;
-    }, 100);
-  };
+      const newOption = {
+        label: newValue.toString(),
+      };
+      const updatedOptions = [...selectedOptions, newOption];
 
-  const handleOptionsChange = (newOptions: Array<EuiComboBoxOptionOption<string>>) => {
-    setSelectedOptions(newOptions);
-    onChange({ percents: newOptions.map((option) => Number(option.label)) });
-  };
+      onChange({
+        percents: updatedOptions.map((option) => Number(option.label)),
+      });
+    },
+    [isValid, onChange, selectedOptions, aggConfig.percents]
+  );
 
-  const handleSearchChange = (searchValue: string) => {
-    if (isCreatingOption.current) return;
+  const handleOptionsChange = useCallback(
+    (newOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      onChange({ percents: newOptions.map((option) => Number(option.label)) });
+    },
+    [onChange]
+  );
 
-    onChange({
-      ...aggConfig,
-      pendingPercentileInput: searchValue,
-    });
-  };
+  const handleSearchChange = useCallback(
+    (searchValue: string) => {
+      // If we're clearing the input after a valid creation,
+      // this is the post-creation cleanup
+      if (searchValue === '' && aggConfig.pendingPercentileInput && isValid) return;
+
+      onChange({
+        ...aggConfig,
+        pendingPercentileInput: searchValue,
+      });
+    },
+    [aggConfig, onChange, isValid]
+  );
 
   const getErrorMessage = () => {
     if (!isValid && errorMessageType) {
