@@ -10,24 +10,24 @@
 import { DataSourceProfileProvider } from '../../../../profiles';
 import { extendProfileProvider } from '../../../extend_profile_provider';
 import { createGetDefaultAppState } from '../accessors';
-import { CLIENT_IP_COLUMN, HOST_NAME_COLUMN, MESSAGE_COLUMN } from '../consts';
+import { CLIENT_IP_COLUMN, MESSAGE_COLUMN } from '../consts';
 import { createResolve } from './create_resolve';
 
-export const createNginxAccessLogsDataSourceProfileProvider = (
+export const createAwsS3accessLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'nginx-access-logs-data-source',
+    profileId: 'observability-aws-s3access-logs-data-source-profile',
     profile: {
       getDefaultAppState: createGetDefaultAppState({
         defaultColumns: [
-          { name: 'url.path', width: 150 },
-          { name: 'http.response.status_code', width: 200 },
+          { name: 'aws.s3.bucket.name', width: 200 },
+          { name: 'aws.s3.object.key', width: 200 },
+          { name: 'aws.s3access.operation', width: 200 },
           CLIENT_IP_COLUMN,
-          HOST_NAME_COLUMN,
           MESSAGE_COLUMN,
         ],
       }),
     },
-    resolve: createResolve('logs-nginx.access'),
+    resolve: createResolve('logs-aws.s3access'),
   });

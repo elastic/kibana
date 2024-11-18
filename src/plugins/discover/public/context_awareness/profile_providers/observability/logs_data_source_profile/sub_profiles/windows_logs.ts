@@ -10,24 +10,18 @@
 import { DataSourceProfileProvider } from '../../../../profiles';
 import { extendProfileProvider } from '../../../extend_profile_provider';
 import { createGetDefaultAppState } from '../accessors';
-import { CLIENT_IP_COLUMN, MESSAGE_COLUMN } from '../consts';
+import { HOST_NAME_COLUMN, LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
 import { createResolve } from './create_resolve';
 
-export const createAwsS3accessLogsDataSourceProfileProvider = (
+export const createWindowsLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'aws-s3access-logs-data-source',
+    profileId: 'observability-windows-logs-data-source-profile',
     profile: {
       getDefaultAppState: createGetDefaultAppState({
-        defaultColumns: [
-          { name: 'aws.s3.bucket.name', width: 200 },
-          { name: 'aws.s3.object.key', width: 200 },
-          { name: 'aws.s3access.operation', width: 200 },
-          CLIENT_IP_COLUMN,
-          MESSAGE_COLUMN,
-        ],
+        defaultColumns: [LOG_LEVEL_COLUMN, HOST_NAME_COLUMN, MESSAGE_COLUMN],
       }),
     },
-    resolve: createResolve('logs-aws.s3access'),
+    resolve: createResolve('logs-windows'),
   });

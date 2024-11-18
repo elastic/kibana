@@ -17,7 +17,7 @@ export const createNginxErrorLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'nginx-error-logs-data-source',
+    profileId: 'observability-nginx-error-logs-data-source-profile',
     profile: {
       getDefaultAppState: createGetDefaultAppState({
         defaultColumns: [LOG_LEVEL_COLUMN, MESSAGE_COLUMN],
