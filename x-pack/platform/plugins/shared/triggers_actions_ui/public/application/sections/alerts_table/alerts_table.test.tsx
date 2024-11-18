@@ -487,6 +487,11 @@ describe('AlertsTable', () => {
       expect(mockCaseService.helpers.canUseCases).toHaveBeenCalledWith(['test-owner']);
     });
 
+    it('calls canUseCases with an empty array if the case configuration is not defined', async () => {
+      render(<TestComponent {...tableProps} />);
+      expect(mockCaseService.helpers.canUseCases).toHaveBeenCalledWith([]);
+    });
+
     it('should call the cases context with the correct props', async () => {
       const props: BaseAlertsTableProps = {
         ...tableProps,

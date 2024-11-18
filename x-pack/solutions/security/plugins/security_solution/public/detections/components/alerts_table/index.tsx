@@ -15,10 +15,8 @@ import type {
   AlertsTableProps,
   RenderContext,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { SetOptional } from 'type-fest';
-import { noop } from 'lodash';
-import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { ALERT_BUILDING_BLOCK_TYPE, AlertConsumers } from '@kbn/rule-data-utils';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
@@ -28,15 +26,17 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import { ActionsCell } from '../../hooks/trigger_actions_alert_table/actions_cell';
+import type { SetOptional } from 'type-fest';
+import { noop } from 'lodash';
+import { useAlertsTableFieldsBrowserOptions } from '../../hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
+import { getBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type {
   SecurityAlertsTableContext,
   GetSecurityAlertsTableProp,
   SecurityAlertsTableProps,
 } from './types';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { getBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
-import { useAlertsTableFieldsBrowserOptions } from '../../hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
+import { ActionsCell } from '../../hooks/trigger_actions_alert_table/actions_cell';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import {

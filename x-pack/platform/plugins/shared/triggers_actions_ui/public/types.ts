@@ -73,17 +73,16 @@ import {
   EsQuerySnapshot,
   type LegacyField,
 } from '@kbn/alerts-ui-shared/src/common/types';
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import type { DocLinksStart } from '@kbn/core/public';
-import { HttpSetup } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DocLinksStart, HttpSetup } from '@kbn/core/public';
 import { KueryNode } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SetRequired } from 'type-fest';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
