@@ -8,9 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import type {
-  MacosLinuxConditionEntry,
+  LinuxConditionEntry,
   WindowsConditionEntry,
   OperatorFieldIds,
+  MacosConditionEntry,
 } from '../../../../../common/endpoint/types';
 
 export const NAME_LABEL = i18n.translate('xpack.securitySolution.trustedApps.name.label', {
@@ -68,6 +69,10 @@ export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.signature',
     { defaultMessage: 'Signature' }
   ),
+  [ConditionEntryField.SIGNER_MAC]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.signatureMac',
+    { defaultMessage: 'Signature' }
+  ),
 };
 
 export const CONDITION_FIELD_DESCRIPTION: { [K in ConditionEntryField]: string } = {
@@ -83,6 +88,10 @@ export const CONDITION_FIELD_DESCRIPTION: { [K in ConditionEntryField]: string }
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.description.signature',
     { defaultMessage: 'The signer of the application' }
   ),
+  [ConditionEntryField.SIGNER_MAC]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.description.signatureMac',
+    { defaultMessage: 'The signer of the application' }
+  ),
 };
 
 export const OPERATOR_TITLES: { [K in OperatorFieldIds]: string } = {
@@ -95,7 +104,10 @@ export const OPERATOR_TITLES: { [K in OperatorFieldIds]: string } = {
 };
 
 export const ENTRY_PROPERTY_TITLES: Readonly<{
-  [K in keyof Omit<MacosLinuxConditionEntry | WindowsConditionEntry, 'type'>]: string;
+  [K in keyof Omit<
+    LinuxConditionEntry | WindowsConditionEntry | MacosConditionEntry,
+    'type'
+  >]: string;
 }> = {
   field: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.entry.field', {
     defaultMessage: 'Field',
