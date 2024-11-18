@@ -113,9 +113,11 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
 
     const { params, logger, core, telemetryUsageCounter } = resources;
     const { serviceName, serviceEnvironment } = params.query;
+    const name = serviceName ? decodeURIComponent(serviceName) : undefined;
+    const environment = serviceEnvironment ? decodeURIComponent(serviceEnvironment) : undefined;
     const service = {
-      name: serviceName ? decodeURIComponent(serviceName) : null,
-      environment: serviceEnvironment ? decodeURIComponent(serviceEnvironment) : null,
+      name,
+      environment,
     };
 
     const apmIndices = await resources.getApmIndices();
