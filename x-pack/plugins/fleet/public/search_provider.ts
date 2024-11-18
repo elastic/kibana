@@ -74,10 +74,19 @@ export const toSearchResult = (
     })
   );
 
-  return [
-    packageResult,
-    ...(policyTemplateResults && policyTemplateResults.length > 1 ? policyTemplateResults : []),
-  ];
+  switch (pkg.policy_templates_behavior || 'all') {
+    case 'combined_policy':
+      return [packageResult];
+    case 'individual_policies':
+      return [
+        ...(policyTemplateResults && policyTemplateResults.length > 1 ? policyTemplateResults : []),
+      ];
+    default:
+      return [
+        packageResult,
+        ...(policyTemplateResults && policyTemplateResults.length > 1 ? policyTemplateResults : []),
+      ];
+  }
 };
 
 export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResultProvider => {

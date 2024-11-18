@@ -83,30 +83,41 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
       categories: getAllCategoriesFromIntegrations(pkg),
     };
 
-    return [
-      ...acc,
-      topPackage,
-      ...(doesPackageHaveIntegrations(pkg)
-        ? policyTemplates.map((policyTemplate) => {
-            const { name, title, description, icons } = policyTemplate;
+    const policyTemplatesBehavior = pkg.policy_templates_behavior || 'all';
+    if (policyTemplatesBehavior === 'combined_policy') {
+      // console.log(`Just combined policy for ${pkg.name}`);
+      return [...acc, topPackage];
+    }
 
-            const categories =
-              isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.categories
-                ? policyTemplate.categories
-                : [];
-            const allCategories = [...topCategories, ...categories];
-            return {
-              ...restOfPackage,
-              id: `${restOfPackage.id}-${name}`,
-              integration: name,
-              title,
-              description,
-              icons: icons || restOfPackage.icons,
-              categories: uniq(allCategories),
-            };
-          })
-        : []),
-    ];
+    const integrationsPolicyTemplates = doesPackageHaveIntegrations(pkg)
+      ? policyTemplates.map((policyTemplate) => {
+          const { name, title, description, icons } = policyTemplate;
+
+          const categories =
+            isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.categories
+              ? policyTemplate.categories
+              : [];
+          const allCategories = [...topCategories, ...categories];
+          return {
+            ...restOfPackage,
+            id: `${restOfPackage.id}-${name}`,
+            integration: name,
+            title,
+            description,
+            icons: icons || restOfPackage.icons,
+            categories: uniq(allCategories),
+          };
+        })
+      : [];
+
+    switch (pkg.policy_templates_behavior || 'all') {
+      case 'combined_policy':
+        return [...acc, topPackage];
+      case 'individual_policies':
+        return [...acc, ...integrationsPolicyTemplates];
+      default:
+        return [...acc, topPackage, ...integrationsPolicyTemplates];
+    }
   }, []);
 };
 
