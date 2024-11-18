@@ -36,8 +36,8 @@ describe('apm_user deprecation', () => {
   describe('users assigned to a removed role', () => {
     test('logs a deprecation when a user was found with a removed apm_user role', async () => {
       esClient.asCurrentUser.security.getUser = jest.fn().mockResolvedValue({
-        reportron: {
-          username: 'reportron',
+        foo: {
+          username: 'foo',
           roles: ['kibana_admin', 'apm_user'],
         },
       });
@@ -82,7 +82,7 @@ describe('apm_user deprecation', () => {
           "documentationUrl": "https://www.elastic.co/guide/en/kibana/main/xpack-security.html#_required_permissions_7",
           "level": "fetch_error",
           "message": "You do not have enough permissions to fix this deprecation.",
-          "title": "The \\"apm_user\\" role has been removed: check user roles",
+          "title": "Check for users assigned the deprecated \\"apm_user\\" role",
         },
         Object {
           "correctiveActions": Object {
@@ -94,7 +94,7 @@ describe('apm_user deprecation', () => {
           "documentationUrl": "https://www.elastic.co/guide/en/kibana/main/xpack-security.html#_required_permissions_7",
           "level": "fetch_error",
           "message": "You do not have enough permissions to fix this deprecation.",
-          "title": "The \\"apm_user\\" role has been removed: check role mappings",
+          "title": "Check for role mappings using the deprecated \\"apm_user\\" role",
         },
       ]
     `);

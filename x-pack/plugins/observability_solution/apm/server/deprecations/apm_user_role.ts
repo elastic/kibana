@@ -50,28 +50,10 @@ async function getUsersDeprecations(
   apmDeps: DeprecationApmDeps,
   docLinks: DocLinksServiceSetup
 ): Promise<DeprecationsDetails[]> {
-  const strings = {
-    title: i18n.translate('xpack.apm.deprecations.apmUser.title', {
-      defaultMessage: `The "{apmUserRoleName}" role has been removed: check user roles`,
-      values: { apmUserRoleName: APM_USER_ROLE_NAME },
-    }),
-    message: i18n.translate('xpack.apm.deprecations.apmUser.description', {
-      defaultMessage: `The "{apmUserRoleName}" has been removed and this cluster has users with the removed role.`,
-      values: { apmUserRoleName: APM_USER_ROLE_NAME },
-    }),
-    manualSteps: (usersRoles: string) => [
-      i18n.translate('xpack.apm.deprecations.apmUser.manualStepOne', {
-        defaultMessage: `Go to Management > Security > Users to find users with the "{apmUserRoleName}" role.`,
-        values: { apmUserRoleName: APM_USER_ROLE_NAME },
-      }),
-      i18n.translate('xpack.apm.deprecations.apmUser.manualStepTwo', {
-        defaultMessage:
-          `Remove the "{apmUserRoleName}" role from all users and add the built-in "viewer" role.` +
-          ` The affected users are: {usersRoles}.`,
-        values: { apmUserRoleName: APM_USER_ROLE_NAME, usersRoles },
-      }),
-    ],
-  };
+  const title = i18n.translate('xpack.apm.deprecations.apmUser.title', {
+    defaultMessage: `Check for users assigned the deprecated "{apmUserRoleName}" role`,
+    values: { apmUserRoleName: APM_USER_ROLE_NAME },
+  });
 
   let users: SecurityGetUserResponse;
   try {
@@ -89,17 +71,12 @@ async function getUsersDeprecations(
           ` unexpected error: ${deprecations.getDetailedErrorMessage(err)}.`
       );
     }
-    return deprecations.deprecationError(strings.title, err, docLinks);
+    return deprecations.deprecationError(title, err, docLinks);
   }
 
-  const reportingUsers = Object.entries(users).reduce((userSet, current) => {
-    const [userName, user] = current;
-    const foundRole = user.roles.find(hasApmUserRole);
-    if (foundRole) {
-      userSet.push(`${userName}[${foundRole}]`);
-    }
-    return userSet;
-  }, [] as string[]);
+  const reportingUsers = Object.entries(users)
+    .filter(([_, user]) => user.roles.find(hasApmUserRole))
+    .map(([userName]) => userName);
 
   if (reportingUsers.length === 0) {
     return [];
@@ -107,9 +84,24 @@ async function getUsersDeprecations(
 
   return [
     {
-      title: strings.title,
-      message: strings.message,
-      correctiveActions: { manualSteps: strings.manualSteps(reportingUsers.join(', ')) },
+      title,
+      message: i18n.translate('xpack.apm.deprecations.apmUser.description', {
+        defaultMessage: `The "{apmUserRoleName}" role has been deprecated. Remove the "{apmUserRoleName}" role from affected users in this cluster including: {users}`,
+        values: { apmUserRoleName: APM_USER_ROLE_NAME, users: reportingUsers.join(', ') },
+      }),
+      correctiveActions: {
+        manualSteps: [
+          i18n.translate('xpack.apm.deprecations.apmUser.manualStepOne', {
+            defaultMessage: `Go to Management > Security > Users to find users with the "{apmUserRoleName}" role.`,
+            values: { apmUserRoleName: APM_USER_ROLE_NAME },
+          }),
+          i18n.translate('xpack.apm.deprecations.apmUser.manualStepTwo', {
+            defaultMessage:
+              'Remove the "{apmUserRoleName}" role from all users and add the built-in "viewer" role.',
+            values: { apmUserRoleName: APM_USER_ROLE_NAME },
+          }),
+        ],
+      },
       level: 'critical',
       deprecationType: 'feature',
       documentationUrl: getKibanaPrivilegesDocumentationUrl(docLinks.version),
@@ -122,28 +114,10 @@ async function getRoleMappingsDeprecations(
   apmDeps: DeprecationApmDeps,
   docLinks: DocLinksServiceSetup
 ): Promise<DeprecationsDetails[]> {
-  const strings = {
-    title: i18n.translate('xpack.apm.deprecations.apmUserRoleMappings.title', {
-      defaultMessage: `The "{apmUserRoleName}" role has been removed: check role mappings`,
-      values: { apmUserRoleName: APM_USER_ROLE_NAME },
-    }),
-    message: i18n.translate('xpack.apm.deprecations.apmUser.description', {
-      defaultMessage: `The "{apmUserRoleName}" role has been removed.`,
-      values: { apmUserRoleName: APM_USER_ROLE_NAME },
-    }),
-    manualSteps: (roleMappings: string) => [
-      i18n.translate('xpack.apm.deprecations.apmUser.manualStepOne', {
-        defaultMessage: `Go to Management > Security > Roles to find roles with the "{apmUserRoleName}" role.`,
-        values: { apmUserRoleName: APM_USER_ROLE_NAME },
-      }),
-      i18n.translate('xpack.apm.deprecations.apmUserRoleMappings.manualStepFive', {
-        defaultMessage:
-          `Remove the "{apmUserRoleName}" role from all role mappings and add the built-in "viewer" role.` +
-          ` The affected role mappings are: {roleMappings}.`,
-        values: { apmUserRoleName: APM_USER_ROLE_NAME, roleMappings },
-      }),
-    ],
-  };
+  const title = i18n.translate('xpack.apm.deprecations.apmUserRoleMappings.title', {
+    defaultMessage: `Check for role mappings using the deprecated "apm_user" role`,
+    values: { apmUserRoleName: APM_USER_ROLE_NAME },
+  });
 
   let roleMappings: SecurityGetRoleMappingResponse;
   try {
@@ -161,20 +135,12 @@ async function getRoleMappingsDeprecations(
           ` unexpected error: ${deprecations.getDetailedErrorMessage(err)}.`
       );
     }
-    return deprecations.deprecationError(strings.title, err, docLinks);
+    return deprecations.deprecationError(title, err, docLinks);
   }
 
-  const roleMappingsWithReportingRole: string[] = Object.entries(roleMappings).reduce(
-    (roleSet, current) => {
-      const [roleName, role] = current;
-      const foundMapping = role.roles?.find(hasApmUserRole);
-      if (foundMapping) {
-        roleSet.push(`${roleName}[${foundMapping}]`);
-      }
-      return roleSet;
-    },
-    [] as string[]
-  );
+  const roleMappingsWithReportingRole: string[] = Object.entries(roleMappings)
+    .filter(([_, role]) => role.roles?.find(hasApmUserRole))
+    ?.map(([roleName]) => roleName);
 
   if (roleMappingsWithReportingRole.length === 0) {
     return [];
@@ -182,10 +148,25 @@ async function getRoleMappingsDeprecations(
 
   return [
     {
-      title: strings.title,
-      message: strings.message,
+      title,
+      message: i18n.translate('xpack.apm.deprecations.apmUserRoleMappings.description', {
+        defaultMessage: `The "{apmUserRoleName}" role has been deprecated. Remove the "{apmUserRoleName}" role from affected role mappings in this cluster including: {roles}`,
+        values: {
+          apmUserRoleName: APM_USER_ROLE_NAME,
+          roles: roleMappingsWithReportingRole.join(', '),
+        },
+      }),
       correctiveActions: {
-        manualSteps: strings.manualSteps(roleMappingsWithReportingRole.join(', ')),
+        manualSteps: [
+          i18n.translate('xpack.apm.deprecations.apmUserRoleMappings.manualStepOne', {
+            defaultMessage: `Go to Management > Security > Roles to find roles with the "{apmUserRoleName}" role.`,
+            values: { apmUserRoleName: APM_USER_ROLE_NAME },
+          }),
+          i18n.translate('xpack.apm.deprecations.apmUserRoleMappings.manualStepFive', {
+            defaultMessage:
+              'Remove the "{apmUserRoleName} role from all role mappings and add the built-in "viewer" role',
+          }),
+        ],
       },
       level: 'critical',
       deprecationType: 'feature',
