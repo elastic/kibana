@@ -134,9 +134,9 @@ export function disableLegacyUrlAliasesTestSuiteFactory({
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           );
         });
-        after(() => {
+        after(async () => {
           if (user) {
-            (supertest as SupertestWithRoleScopeType).destroy();
+            await (supertest as SupertestWithRoleScopeType).destroy();
           }
           esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'

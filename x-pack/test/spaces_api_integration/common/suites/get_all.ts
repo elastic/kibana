@@ -25,7 +25,7 @@ interface GetAllTests {
 }
 
 interface GetAllTestDefinition {
-  user?: TestDefinitionAuthentication;
+  user?: Omit<TestDefinitionAuthentication, 'role'>;
   spaceId: string;
   tests: GetAllTests;
 }
