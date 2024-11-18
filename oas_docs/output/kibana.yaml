@@ -163,7 +163,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -262,7 +262,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -354,7 +354,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -440,7 +440,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -562,7 +562,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -658,7 +658,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -750,7 +750,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -838,7 +838,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response.
+                      omitted from the response. 
                     type: boolean
                   is_system_action:
                     description: >-
@@ -19491,7 +19491,7 @@ paths:
           description: >
             Indicates a successful call. NOTE: This HTTP response code indicates
             that the bulk operation succeeded.  Errors pertaining to individual
-            objects will be returned in the response body.
+            objects will be returned in the response body. 
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -19525,7 +19525,7 @@ paths:
           description: >
             Indicates a successful call. NOTE: This HTTP response code indicates
             that the bulk operation succeeded. Errors pertaining to individual
-            objects will be returned in the response body.
+            objects will be returned in the response body. 
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -21081,7 +21081,7 @@ paths:
                               members have read access to. A document within the
                               specified data streams and indices must match this
                               query in order for it to be accessible by the role
-                              members.
+                              members. 
                             type: string
                         required:
                           - clusters
@@ -21360,7 +21360,7 @@ paths:
                                     document within the specified data streams
                                     and indices must match this query in order
                                     for it to be accessible by the role
-                                    members.
+                                    members. 
                                   type: string
                               required:
                                 - clusters
@@ -24437,7 +24437,7 @@ components:
           runtimeFieldMap:
             runtime_shape_name:
               script:
-                source: "emit(doc['shape_name'].value)"
+                source: 'emit(doc[''shape_name''].value)'
               type: keyword
           title: logstash-*
     Data_views_create_runtime_field_request:
@@ -25757,7 +25757,7 @@ components:
               readFromDocValues: false
               runtimeField:
                 script:
-                  source: "emit(doc['timestamp'].value.getHour());"
+                  source: 'emit(doc[''timestamp''].value.getHour());'
                 type: long
               scripted: false
               searchable: true
@@ -25882,7 +25882,7 @@ components:
           runtimeFieldMap:
             hour_of_day:
               script:
-                source: "emit(doc['timestamp'].value.getHour());"
+                source: 'emit(doc[''timestamp''].value.getHour());'
               type: long
           sourceFilters: []
           timeFieldName: timestamp
@@ -25897,7 +25897,7 @@ components:
             readFromDocValues: false
             runtimeField:
               script:
-                source: "emit(doc['timestamp'].value.getHour());"
+                source: 'emit(doc[''timestamp''].value.getHour());'
               type: long
             scripted: false
             searchable: true
@@ -26667,7 +26667,7 @@ components:
           description: >
             The scaling factor to use when encoding values. This property is
             applicable when `type` is `scaled_float`. Values will be multiplied
-            by this factor at index time and rounded to the closest long value.
+            by this factor at index time and rounded to the closest long value. 
           type: integer
         type:
           description: Specifies the data type for the field.
@@ -42450,7 +42450,7 @@ components:
           example: Bad Request
           type: string
         message:
-          example: "Invalid value 'foo' supplied to: [...]"
+          example: 'Invalid value ''foo'' supplied to: [...]'
           type: string
         statusCode:
           example: 400
@@ -43417,7 +43417,7 @@ components:
             - $ref: '#/components/schemas/SLOs_indicator_properties_histogram'
             - $ref: '#/components/schemas/SLOs_indicator_properties_timeslice_metric'
         instanceId:
-          description: "the value derived from the groupBy field, if present, otherwise '*'"
+          description: 'the value derived from the groupBy field, if present, otherwise ''*'''
           example: host-abcde
           type: string
         name:
