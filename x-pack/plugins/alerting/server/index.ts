@@ -82,4 +82,10 @@ export const config: PluginConfigDescriptor<AlertingConfig> = {
   exposeToBrowser: {
     rules: { run: { alerts: { max: true } } },
   },
+  deprecations: ({ renameFromRoot, deprecate }) => [
+    deprecate('maxEphemeralActionsPerAlert', 'a future version', {
+      level: 'warning',
+      message: `Configuring "xpack.alerting.maxEphemeralActionsPerAlert" is deprecated and will be removed in a future version. Remove this setting to increase action execution resiliency.`,
+    }),
+  ],
 };
