@@ -24,7 +24,6 @@ import {
   CASE_TAGS_URL,
   CASE_USER_ACTION_SAVED_OBJECT,
   INTERNAL_CASE_METRICS_URL,
-  INTERNAL_CASE_OBSERVABLES_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   INTERNAL_CASE_OBSERVABLES_PATCH_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
@@ -56,6 +55,7 @@ import {
   SimilarCasesSearchRequest,
   CasesSimilarResponse,
 } from '@kbn/cases-plugin/common/types/api';
+import { getCaseCreateObservableUrl } from '@kbn/cases-plugin/common/api';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -870,7 +870,7 @@ export const addObservable = async ({
   caseId: string;
 }): Promise<Case> => {
   const apiCall = supertest.post(
-    `${getSpaceUrlPrefix(auth?.space)}${INTERNAL_CASE_OBSERVABLES_URL.replace('{case_id}', caseId)}`
+    `${getSpaceUrlPrefix(auth?.space)}${getCaseCreateObservableUrl(caseId)}`
   );
 
   void setupAuth({ apiCall, headers, auth });
