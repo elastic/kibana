@@ -134,7 +134,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     after(async () => {
       // always invalidate API key for the scoped role in the end
       await supertestViewerWithApiKey.destroy();
-      // supertestEditorWithCookieCredentials.destroy() has no effect because Cookie session is cached per SAML role and valid
+      // supertestEditorWithCookieCredentials.destroy() has no effect because Cookie session is cached per SAML role
       // and valid for the whole FTR config run, no need to call it
     });
     it(`uses compression when there isn't a referer`, async () => {
