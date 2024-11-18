@@ -10,24 +10,18 @@
 import { DataSourceProfileProvider } from '../../../../profiles';
 import { extendProfileProvider } from '../../../extend_profile_provider';
 import { createGetDefaultAppState } from '../accessors';
-import { LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
+import { CLIENT_IP_COLUMN, LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
 import { createResolve } from './create_resolve';
 
-export const createKubernetesContainerLogsDataSourceProfileProvider = (
+export const createApacheErrorLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: DataSourceProfileProvider
 ): DataSourceProfileProvider =>
   extendProfileProvider(logsDataSourceProfileProvider, {
-    profileId: 'kubernetes-container-logs-data-source',
+    profileId: 'observability-apache-error-logs-data-source-profile',
     profile: {
       getDefaultAppState: createGetDefaultAppState({
-        defaultColumns: [
-          LOG_LEVEL_COLUMN,
-          { name: 'kubernetes.pod.name', width: 200 },
-          { name: 'kubernetes.namespace', width: 200 },
-          { name: 'orchestrator.cluster.name', width: 200 },
-          MESSAGE_COLUMN,
-        ],
+        defaultColumns: [LOG_LEVEL_COLUMN, CLIENT_IP_COLUMN, MESSAGE_COLUMN],
       }),
     },
-    resolve: createResolve('logs-kubernetes.container_logs'),
+    resolve: createResolve('logs-apache.error'),
   });

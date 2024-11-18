@@ -12,21 +12,26 @@ import { createEsqlDataSource } from '../../../../../../common/data_sources';
 import { DataSourceCategory, RootContext, SolutionType } from '../../../../profiles';
 import { createContextAwarenessMocks } from '../../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from '../profile';
-import { createApacheErrorLogsDataSourceProfileProvider } from './apache_error_logs';
+import { createWindowsLogsDataSourceProfileProvider } from './windows_logs';
+import { ContextWithProfileId } from '../../../../profile_service';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 
-const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Default };
+const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
+  profileId: OBSERVABILITY_ROOT_PROFILE_ID,
+  solutionType: SolutionType.Observability,
+};
 const { profileProviderServices } = createContextAwarenessMocks();
 const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(profileProviderServices);
-const dataSourceProfileProvider = createApacheErrorLogsDataSourceProfileProvider(
+const dataSourceProfileProvider = createWindowsLogsDataSourceProfileProvider(
   logsDataSourceProfileProvider
 );
 
-describe('createApacheErrorLogsDataSourceProfileProvider', () => {
+describe('createWindowsLogsDataSourceProfileProvider', () => {
   it('should match a valid index pattern', async () => {
     const result = await dataSourceProfileProvider.resolve({
       rootContext: ROOT_CONTEXT,
       dataSource: createEsqlDataSource(),
-      query: { esql: 'FROM logs-apache.error-*' },
+      query: { esql: 'FROM logs-windows.powershell-*' },
     });
     expect(result).toEqual({ isMatch: true, context: { category: DataSourceCategory.Logs } });
   });
@@ -35,7 +40,7 @@ describe('createApacheErrorLogsDataSourceProfileProvider', () => {
     const result = await dataSourceProfileProvider.resolve({
       rootContext: ROOT_CONTEXT,
       dataSource: createEsqlDataSource(),
-      query: { esql: 'FROM logs-apache.access-*' },
+      query: { esql: 'FROM logs-notwindows.powershell-*' },
     });
     expect(result).toEqual({ isMatch: false });
   });
@@ -48,7 +53,7 @@ describe('createApacheErrorLogsDataSourceProfileProvider', () => {
       columns: [
         { name: 'timestamp', width: 212 },
         { name: 'log.level', width: 150 },
-        { name: 'client.ip', width: 150 },
+        { name: 'host.name', width: 250 },
         { name: 'message' },
       ],
     });
