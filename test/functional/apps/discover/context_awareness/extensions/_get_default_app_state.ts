@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
 
-  describe.only('extension getDefaultAppState', () => {
+  describe('extension getDefaultAppState', () => {
     afterEach(async () => {
       await kibanaServer.uiSettings.unset('defaultColumns');
     });
