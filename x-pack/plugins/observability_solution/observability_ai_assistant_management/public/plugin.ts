@@ -6,11 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
-import { EnterpriseSearchPublicStart } from '@kbn/enterprise-search-plugin/public';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
 import type {
   ObservabilityAIAssistantPublicSetup,
@@ -32,7 +31,6 @@ export interface SetupDependencies {
 export interface StartDependencies {
   observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   serverless?: ServerlessPluginStart;
-  enterpriseSearch?: EnterpriseSearchPublicStart;
 }
 
 export interface ConfigSchema {
