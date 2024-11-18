@@ -11,9 +11,9 @@ import {
   ObjectRemover,
   getTestRuleData,
   getUnauthorizedErrorMessage,
-} from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+} from '../../../../../common/lib';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { UserAtSpaceScenarios } from '../../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetAlertStateTests({ getService }: FtrProviderContext) {

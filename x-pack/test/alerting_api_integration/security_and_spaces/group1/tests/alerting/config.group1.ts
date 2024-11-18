@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { createTestConfig } from '../../../../common/config';
 
 // eslint-disable-next-line import/no-default-export
-export default function alertingApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
-  describe('alerting api integration security and spaces enabled', function () {
-    loadTestFile(require.resolve('./alerting'));
-  });
-}
+export default createTestConfig('security_and_spaces', {
+  disabledPlugins: [],
+  license: 'trial',
+  ssl: true,
+  enableActionsProxy: true,
+  publicBaseUrl: true,
+  testFiles: [require.resolve('./group1')],
+  useDedicatedTaskRunner: true,
+});

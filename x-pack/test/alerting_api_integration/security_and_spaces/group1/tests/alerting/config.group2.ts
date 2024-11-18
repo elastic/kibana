@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../common/config';
+import { createTestConfig } from '../../../../common/config';
 
 // eslint-disable-next-line import/no-default-export
 export default createTestConfig('security_and_spaces', {
@@ -14,6 +14,6 @@ export default createTestConfig('security_and_spaces', {
   ssl: true,
   enableActionsProxy: true,
   publicBaseUrl: true,
-  testFiles: [require.resolve('./tests')],
+  testFiles: [require.resolve('./group2')],
   useDedicatedTaskRunner: true,
 });

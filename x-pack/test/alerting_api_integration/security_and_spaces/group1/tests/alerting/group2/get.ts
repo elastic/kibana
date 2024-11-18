@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 import { Agent as SuperTestAgent } from 'supertest';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
-import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
+import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../../scenarios';
 import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
   getUnauthorizedErrorMessage,
-} from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+} from '../../../../../common/lib';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const getTestUtils = (
   describeType: 'internal' | 'public',
