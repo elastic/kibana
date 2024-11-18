@@ -20,7 +20,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { useFetchSLOSuggestions } from '../hooks/use_fetch_suggestions';
 import { CreateSLOForm } from '../types';
 import { OptionalText } from './common/optional_text';
-import { maxWidth } from './slo_edit_form';
+import { MAX_WIDTH } from './constants';
 
 export function SloEditFormDescriptionSection() {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
@@ -35,7 +35,7 @@ export function SloEditFormDescriptionSection() {
       hasBorder={false}
       hasShadow={false}
       paddingSize="none"
-      style={{ maxWidth }}
+      style={{ maxWidth: MAX_WIDTH }}
       data-test-subj="sloEditFormDescriptionSection"
     >
       <EuiFormRow

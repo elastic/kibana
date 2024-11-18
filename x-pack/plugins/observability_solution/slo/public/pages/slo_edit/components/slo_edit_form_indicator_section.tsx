@@ -13,14 +13,15 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { SLI_OPTIONS } from '../constants';
 import { useUnregisterFields } from '../hooks/use_unregister_fields';
 import { CreateSLOForm } from '../types';
-import { ApmAvailabilityIndicatorTypeForm } from './apm_availability/apm_availability_indicator_type_form';
-import { ApmLatencyIndicatorTypeForm } from './apm_latency/apm_latency_indicator_type_form';
-import { CustomKqlIndicatorTypeForm } from './custom_kql/custom_kql_indicator_type_form';
-import { CustomMetricIndicatorTypeForm } from './custom_metric/custom_metric_type_form';
-import { HistogramIndicatorTypeForm } from './histogram/histogram_indicator_type_form';
+import { ApmAvailabilityIndicatorTypeForm } from './indicator_section/apm_availability/apm_availability_indicator_type_form';
+import { ApmLatencyIndicatorTypeForm } from './indicator_section/apm_latency/apm_latency_indicator_type_form';
+import { CustomKqlIndicatorTypeForm } from './indicator_section/custom_kql/custom_kql_indicator_type_form';
+import { CustomMetricIndicatorTypeForm } from './indicator_section/custom_metric/custom_metric_type_form';
+import { HistogramIndicatorTypeForm } from './indicator_section/histogram/histogram_indicator_type_form';
 import { maxWidth } from './slo_edit_form';
-import { SyntheticsAvailabilityIndicatorTypeForm } from './synthetics_availability/synthetics_availability_indicator_type_form';
-import { TimesliceMetricIndicatorTypeForm } from './timeslice_metric/timeslice_metric_indicator';
+import { SyntheticsAvailabilityIndicatorTypeForm } from './indicator_section/synthetics_availability/synthetics_availability_indicator_type_form';
+import { TimesliceMetricIndicatorTypeForm } from './indicator_section/timeslice_metric/timeslice_metric_indicator';
+import { MAX_WIDTH } from './constants';
 
 interface SloEditFormIndicatorSectionProps {
   isEditMode: boolean;
@@ -58,7 +59,7 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
       hasBorder={false}
       hasShadow={false}
       paddingSize="none"
-      style={{ maxWidth }}
+      style={{ maxWidth: MAX_WIDTH }}
       data-test-subj="sloEditFormIndicatorSection"
     >
       {!isEditMode && (

@@ -31,8 +31,6 @@ export interface Props {
   onSave?: () => void;
 }
 
-export const maxWidth = 900;
-
 export function SloEditForm({ slo, initialValues, onSave }: Props) {
   const isEditMode = slo !== undefined;
   const isFlyoutMode = initialValues !== undefined && onSave !== undefined;

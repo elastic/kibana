@@ -30,7 +30,7 @@ import {
   TIMEWINDOW_TYPE_OPTIONS,
 } from '../constants';
 import { CreateSLOForm } from '../types';
-import { maxWidth } from './slo_edit_form';
+import { MAX_WIDTH } from './constants';
 import { SloEditFormObjectiveSectionTimeslices } from './slo_edit_form_objective_section_timeslices';
 
 export function SloEditFormObjectiveSection() {
@@ -91,7 +91,7 @@ export function SloEditFormObjectiveSection() {
       hasBorder={false}
       hasShadow={false}
       paddingSize="none"
-      style={{ maxWidth }}
+      style={{ maxWidth: MAX_WIDTH }}
       data-test-subj="sloEditFormObjectiveSection"
     >
       <EuiFlexGrid columns={3}>
