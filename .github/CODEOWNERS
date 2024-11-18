@@ -1410,6 +1410,9 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
 
 # Operations
+/test/package @elastic/kibana-operations
+/test/package/roles @elastic/kibana-operations
+/test/common/fixtures/plugins/coverage/kibana.json @elastic/kibana-operations
 /src/dev/license_checker/config.ts @elastic/kibana-operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
