@@ -332,5 +332,3 @@ export class RiskScoreDataClient {
     });
   }
 }
-
-  
