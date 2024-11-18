@@ -15,7 +15,6 @@ import type {
   WrapSuppressedHits,
   SignalSourceHit,
   SignalSource,
-  WrapSuppressedSequences,
 } from '../types';
 import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../constants';
 import type { SharedParams } from './utils';
@@ -39,7 +38,6 @@ import { buildAlertGroupFromSequence } from '../eql/build_alert_group_from_seque
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
-  wrapSuppressedSequences: WrapSuppressedSequences;
   alertTimestampOverride: Date | undefined;
   alertWithSuppression: SuppressedAlertService;
   alertSuppression?: AlertSuppressionCamel;
