@@ -21,7 +21,7 @@ export const getInstalledDefinitions = async (
   const { auth, id, includeState = true } = params;
   let req = supertest
     .get(`/internal/entities/definition${id ? `/${id}` : ''}`)
-    .query({ includeState })
+    .query({ includeState, pageSize: 1000 })
     .set('kbn-xsrf', 'xxx');
   if (auth) {
     req = req.auth(auth.username, auth.password);
