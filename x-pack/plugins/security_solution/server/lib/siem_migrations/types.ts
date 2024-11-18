@@ -6,11 +6,8 @@
  */
 
 import type { IClusterClient } from '@kbn/core/server';
-import type { SiemRuleMigrationsCreateClientParams } from './rules/types';
 
 export interface SiemMigrationsSetupParams {
   esClusterClient: IClusterClient;
   tasksTimeoutMs?: number;
 }
-
-export type SiemMigrationsCreateClientParams = SiemRuleMigrationsCreateClientParams;
