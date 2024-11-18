@@ -18,18 +18,29 @@ export type JoinedReturnType<
   }
 >;
 
-type ArrayOrSingle<T> = T | T[];
+function getValueByPath(obj: any, path: string): any {
+  return path.split('.').reduce((acc, keyPart) => {
+    // Check if acc is a valid object and has the key
+    return acc && Object.prototype.hasOwnProperty.call(acc, keyPart) ? acc[keyPart] : undefined;
+  }, obj);
+}
 
+type NestedKeys<T> = T extends object
+  ? { [K in keyof T]: K extends string ? `${K}` | `${K}.${NestedKeys<T[K]>}` : never }[keyof T]
+  : never;
+
+type ArrayOrSingle<T> = T | T[];
+type CombinedNestedKeys<T, U> = (NestedKeys<T> & NestedKeys<U>) | (keyof T & keyof U);
 export function joinByKey<
   T extends Record<string, any>,
   U extends UnionToIntersection<T>,
-  V extends ArrayOrSingle<keyof T & keyof U>
+  V extends ArrayOrSingle<CombinedNestedKeys<T, U>>
 >(items: T[], key: V): JoinedReturnType<T, U>;
 
 export function joinByKey<
   T extends Record<string, any>,
   U extends UnionToIntersection<T>,
-  V extends ArrayOrSingle<keyof T & keyof U>,
+  V extends ArrayOrSingle<CombinedNestedKeys<T, U>>,
   W extends JoinedReturnType<T, U>,
   X extends (a: T, b: T) => ValuesType<W>
 >(items: T[], key: V, mergeFn: X): W;
@@ -45,7 +56,7 @@ export function joinByKey(
   items.forEach((current) => {
     // The key of the map is a stable JSON string of the values from given keys.
     // We need stable JSON string to support plain object values.
-    const stableKey = stableStringify(keys.map((k) => current[k]));
+    const stableKey = stableStringify(keys.map((k) => current[k] ?? getValueByPath(current, k)));
 
     if (map.has(stableKey)) {
       const item = map.get(stableKey);

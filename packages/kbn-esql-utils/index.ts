@@ -31,6 +31,7 @@ export {
   getQueryColumnsFromESQLQuery,
   isESQLColumnSortable,
   isESQLColumnGroupable,
+  isESQLFieldGroupable,
   TextBasedLanguages,
   queryCannotBeSampled,
 } from './src';

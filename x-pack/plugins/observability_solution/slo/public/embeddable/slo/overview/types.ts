@@ -13,15 +13,6 @@ import {
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
-import {
-  type CoreStart,
-  IUiSettingsClient,
-  ApplicationStart,
-  NotificationsStart,
-} from '@kbn/core/public';
-import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 
 export type OverviewMode = 'single' | 'groups';
 export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
@@ -71,18 +62,6 @@ export const apiHasSloGroupOverviewConfig = (
       typeof (api as HasSloGroupOverviewConfig).updateSloGroupOverviewConfig === 'function'
   );
 };
-
-export interface SloEmbeddableDeps {
-  uiSettings: IUiSettingsClient;
-  http: CoreStart['http'];
-  i18n: CoreStart['i18n'];
-  theme: CoreStart['theme'];
-  application: ApplicationStart;
-  notifications: NotificationsStart;
-  observability: ObservabilityPublicStart;
-  observabilityShared: ObservabilitySharedPluginStart;
-  uiActions: UiActionsStart;
-}
 
 export type SloOverviewEmbeddableActionContext = EmbeddableApiContext & {
   embeddable: SloOverviewApi;
