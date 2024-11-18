@@ -6,16 +6,11 @@
  */
 
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import {
-  CoreKibanaRequest,
-  FakeRawRequest,
-  Headers,
-  Logger,
-  SavedObject,
-  SavedObjectReference,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { type FakeRawRequest, type Headers, kibanaRequestFactory } from '@kbn/core-http-server';
+import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/logging';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { RunRuleParams, TaskRunnerContext } from './types';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -174,7 +169,7 @@ export function getFakeKibanaRequest(
     path: '/',
   };
 
-  const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
+  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
   context.basePathService.set(fakeRequest, path);
 
   return fakeRequest;

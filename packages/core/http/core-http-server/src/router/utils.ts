@@ -7,14 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import type { KibanaRequest } from './request';
 import {
   RouteValidator,
   RouteValidatorFullConfigRequest,
   RouteValidatorFullConfigResponse,
   RouteValidatorRequestAndResponses,
 } from './route_validator';
+import type { RawRequest } from './raw_request';
 
 type AnyRouteValidator = RouteValidator<unknown, unknown, unknown>;
+
+/**
+ * Allows building a KibanaRequest from a RawRequest, leveraging internal CoreKibanaRequest.
+ * @param req The raw request to build from
+ * @param routeSchemas The route schemas
+ * @param withoutSecretHeaders Whether we want to exclude secret headers
+ * @returns A KibanaRequest object
+ */
+export function kibanaRequestFactory<P, Q, B>(
+  req: RawRequest,
+  routeSchemas?: RouteValidator<P, Q, B> | RouteValidatorFullConfigRequest<P, Q, B>,
+  withoutSecretHeaders: boolean = true
+): KibanaRequest<P, Q, B> {
+  return CoreKibanaRequest.from<P, Q, B>(req, routeSchemas, withoutSecretHeaders);
+}
 
 /**
  * {@link RouteValidator} is a union type of all possible ways that validation

@@ -9,8 +9,7 @@ import type {
   CreateRestAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
 } from '@kbn/security-plugin/server';
-import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import { kibanaRequestFactory, type FakeRawRequest, type Headers } from '@kbn/core-http-server';
 
 import type { Logger } from '@kbn/logging';
 
@@ -43,7 +42,7 @@ function createKibanaRequestFromAuth(authorizationHeader: HTTPAuthorizationHeade
 
   // Since we're using API keys and accessing elasticsearch can only be done
   // via a request, we're faking one with the proper authorization headers.
-  const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
+  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
 
   return fakeRequest;
 }
