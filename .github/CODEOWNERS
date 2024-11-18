@@ -1334,6 +1334,10 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 ### END Observability Plugins
 
 # Presentation
+/test/interpreter_functional/snapshots/session/step_output_test0.json @elastic/kibana-presentation
+/test/interpreter_functional/snapshots/session/combined_test0.json @elastic/kibana-presentation
+/test/interpreter_functional/snapshots/baseline/step_output_test0.json @elastic/kibana-presentation
+/test/interpreter_functional/snapshots/baseline/combined_test0.json @elastic/kibana-presentation
 /test/functional/services/inspector.ts @elastic/kibana-presentation
 /x-pack/test/functional/services/canvas_element.ts @elastic/kibana-presentation
 /x-pack/test/functional/page_objects/canvas_page.ts @elastic/kibana-presentation
