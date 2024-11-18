@@ -94,7 +94,7 @@ export function SloEditFormObjectiveSection() {
       data-test-subj="sloEditFormObjectiveSection"
     >
       <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexGrid columns={3}>
+        <EuiFlexGrid columns={3} gutterSize="m">
           <EuiFlexItem>
             <EuiFormRow
               label={
@@ -193,7 +193,7 @@ export function SloEditFormObjectiveSection() {
           </EuiFlexItem>
         )}
 
-        <EuiFlexGrid columns={3}>
+        <EuiFlexGrid columns={3} gutterSize="m">
           <EuiFlexItem>
             <EuiFormRow
               label={
@@ -237,7 +237,7 @@ export function SloEditFormObjectiveSection() {
           ) : null}
         </EuiFlexGrid>
 
-        <EuiFlexGrid columns={3}>
+        <EuiFlexGrid columns={3} gutterSize="m">
           <EuiFlexItem>
             <EuiFormRow
               isInvalid={getFieldState('objective.target').invalid}
