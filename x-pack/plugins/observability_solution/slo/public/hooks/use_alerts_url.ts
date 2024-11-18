@@ -7,7 +7,7 @@
 
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import rison from '@kbn/rison';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from './use_kibana';
 
 export const useAlertsUrl = () => {
   const { basePath } = useKibana().services.http;

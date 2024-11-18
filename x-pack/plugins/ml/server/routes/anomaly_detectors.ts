@@ -36,8 +36,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Gets anomaly detectors',
       description: 'Returns the list of anomaly detection jobs.',
@@ -67,8 +69,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Gets anomaly detector by ID',
       description: 'Returns the anomaly detection job by ID',
@@ -99,8 +103,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/_stats`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Gets anomaly detectors stats',
       description: 'Returns the anomaly detection jobs statistics.',
@@ -126,8 +132,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_stats`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Gets anomaly detector stats by ID',
       description: 'Returns the anomaly detection job statistics by ID',
@@ -158,8 +166,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Creates an anomaly detection job',
       description: 'Creates an anomaly detection job.',
@@ -205,8 +215,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_update`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canUpdateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canUpdateJob'],
+        },
       },
       summary: 'Updates an anomaly detection job',
       description: 'Updates certain properties of an anomaly detection job.',
@@ -242,8 +254,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_open`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canOpenJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canOpenJob'],
+        },
       },
       summary: 'Opens an anomaly detection job',
       description: 'Opens an anomaly detection job.',
@@ -274,8 +288,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_close`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCloseJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCloseJob'],
+        },
       },
       summary: 'Closes an anomaly detection job',
       description: 'Closes an anomaly detection job.',
@@ -313,8 +329,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canDeleteJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canDeleteJob'],
+        },
       },
       summary: 'Deletes an anomaly detection job',
       description: 'Deletes specified anomaly detection job.',
@@ -353,8 +371,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_forecast/{forecastId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canDeleteForecast'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canDeleteForecast'],
+        },
       },
       summary: 'Deletes specified forecast for specified job',
       description: 'Deletes a specified forecast for the specified anomaly detection job.',
@@ -388,8 +408,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_forecast`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canForecastJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canForecastJob'],
+        },
       },
       summary: 'Creates forecast for specified job',
       description:
@@ -427,8 +449,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/results/buckets/{timestamp?}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Gets bucket scores',
       description:
@@ -470,8 +494,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/results/overall_buckets`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get overall buckets',
       description:
@@ -510,8 +536,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/results/categories/{categoryId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get categories',
       description: 'Retrieves the categories results for the specified job ID and category ID.',
@@ -544,8 +572,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/model_snapshots`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get model snapshots by job ID',
       description: 'Returns the model snapshots for the specified job ID',
@@ -577,8 +607,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get model snapshots by id',
       description: 'Returns the model snapshots for the specified job ID and snapshot ID',
@@ -611,8 +643,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}/_update`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Updates model snapshot by snapshot ID',
       description: 'Updates the model snapshot for the specified snapshot ID',
@@ -647,8 +681,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Deletes model snapshots by snapshot ID',
       description: 'Deletes the model snapshot for the specified snapshot ID',

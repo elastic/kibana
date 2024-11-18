@@ -9,7 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { useUiTracker, useUrlState } from '@kbn/observability-shared-plugin/public';
 
 import {
   MutationContext,
@@ -23,7 +23,6 @@ import {
   UpdateMetricsExplorerViewAttributesRequestPayload,
 } from '../../common/http_api/latest';
 import { MetricsExplorerView } from '../../common/metrics_explorer_views';
-import { useUrlState } from './use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
 import { useKibanaContextForPlugin } from './use_kibana';

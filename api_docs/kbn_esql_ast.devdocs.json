@@ -896,7 +896,9 @@
         "type": "Class",
         "tags": [],
         "label": "EsqlQuery",
-        "description": [],
+        "description": [
+          "\nRepresents a parsed or programmatically created ES|QL query. Keeps track of\nthe AST, source code, and optionally lexer tokens."
+        ],
         "path": "packages/kbn-esql-ast/src/query/query.ts",
         "deprecated": false,
         "trackAdoption": false,
