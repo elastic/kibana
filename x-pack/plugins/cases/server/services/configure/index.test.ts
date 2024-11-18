@@ -97,7 +97,12 @@ const basicConfigFields = {
       },
     },
   ],
-  observableTypes: [],
+  observableTypes: [
+    {
+      key: '011c2c4e-794f-4837-8d94-22b07722ab14',
+      label: 'test observable type',
+    },
+  ],
 };
 
 const createConfigUpdateParams = (connector?: CaseConnector): Partial<ConfigurationAttributes> => ({
@@ -242,7 +247,12 @@ describe('CaseConfigureService', () => {
                 "type": "text",
               },
             ],
-            "observableTypes": Array [],
+            "observableTypes": Array [
+              Object {
+                "key": "011c2c4e-794f-4837-8d94-22b07722ab14",
+                "label": "test observable type",
+              },
+            ],
             "owner": "securitySolution",
             "templates": Array [
               Object {
@@ -569,7 +579,12 @@ describe('CaseConfigureService', () => {
                 "type": "text",
               },
             ],
-            "observableTypes": Array [],
+            "observableTypes": Array [
+              Object {
+                "key": "011c2c4e-794f-4837-8d94-22b07722ab14",
+                "label": "test observable type",
+              },
+            ],
             "owner": "securitySolution",
             "templates": Array [
               Object {
