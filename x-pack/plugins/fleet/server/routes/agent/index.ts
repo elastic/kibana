@@ -610,14 +610,6 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           version: API_VERSIONS.internal.v1,
           validate: {
             request: {},
-            response: {
-              200: {
-                body: () => schema.string(),
-              },
-              400: {
-                body: genericErrorResponse,
-              },
-            },
           },
         },
         getAgentStatusRuntimeFieldHandler
