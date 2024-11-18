@@ -385,7 +385,9 @@ export const filterEmptyThreats = (threats: Threats): Threats => {
           return {
             ...technique,
             subtechnique:
-              technique.subtechnique != null ? trimThreatsWithNoName(technique.subtechnique) : [],
+              technique.subtechnique != null
+                ? trimThreatsWithNoName(technique.subtechnique)
+                : undefined,
           };
         }),
       };
