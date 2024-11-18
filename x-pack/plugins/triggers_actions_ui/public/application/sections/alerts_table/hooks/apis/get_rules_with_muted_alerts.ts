@@ -31,7 +31,7 @@ export const getRulesWithMutedAlerts = async ({
   signal,
 }: GetRulesWithMutedAlertsParams) => {
   const filterNode = nodeBuilder.or(
-    params.ruleIds.map((id) => nodeBuilder.is('alert.id', `alert:${id}`))
+    ruleIds.map((id) => nodeBuilder.is('alert.id', `alert:${id}`))
   );
   return http.post<FindRulesResponse>(INTERNAL_FIND_RULES_URL, {
     body: JSON.stringify({
