@@ -38,6 +38,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('index with no documents', async () => {
         await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
         await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
+        await pageObjects.indexManagement.indexDetailsPage.expectTabsExists();
+      });
+      it('can add mappings', async () => {
+        await pageObjects.indexManagement.indexDetailsPage.changeTab('indexDetailsTab-mappings');
+        await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsMappingsAddFieldToBeEnabled();
+      });
+      it('can edit settings', async () => {
+        await pageObjects.indexManagement.indexDetailsPage.changeTab('indexDetailsTab-settings');
+        await pageObjects.indexManagement.indexDetailsPage.expectEditSettingsToBeEnabled();
       });
     });
   });
