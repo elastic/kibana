@@ -34,6 +34,7 @@ export function defineCommonRoutes({
   license,
   logger,
   buildFlavor,
+  docLinks,
 }: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
   // For a serverless build, do not register deprecated versioned routes
@@ -61,11 +62,11 @@ export function defineCommonRoutes({
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
           ...(isDeprecated && {
             deprecated: {
-              documentationUrl: 'https://elastic.co', // ToDo: Update with docLink to upgrade note
+              documentationUrl: docLinks.links.security.deprecatedV1Endpoints,
               severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.logoutRouteMessage', {
                 defaultMessage:
-                  'The "{path}" URL is deprecated and will be removed in the next major version, please use "/api/security/logout" instead.',
+                  'The "{path}" URL is deprecated and will be removed in the next major version. Use "/api/security/logout" instead.',
                 values: { path },
               }),
               reason: {
@@ -81,7 +82,7 @@ export function defineCommonRoutes({
         const serverBasePath = basePath.serverBasePath;
         if (isDeprecated) {
           logger.warn(
-            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/logout" URL instead.`,
+            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version. Use "${serverBasePath}/api/security/logout" URL instead.`,
             { tags: ['deprecation'] }
           );
         }
@@ -129,7 +130,7 @@ export function defineCommonRoutes({
           access: isDeprecated ? 'public' : 'internal',
           ...(isDeprecated && {
             deprecated: {
-              documentationUrl: 'https://elastic.co', // ToDo: Update with docLink to upgrade note
+              documentationUrl: docLinks.links.security.deprecatedV1Endpoints,
               severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.meRouteMessage', {
                 defaultMessage:

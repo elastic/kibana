@@ -21,6 +21,7 @@ export function defineSAMLRoutes({
   basePath,
   logger,
   buildFlavor,
+  docLinks,
 }: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
   // For a serverless build, do not register deprecated versioned routes
@@ -52,11 +53,11 @@ export function defineSAMLRoutes({
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
           ...(isDeprecated && {
             deprecated: {
-              documentationUrl: 'https://elastic.co', // ToDo: Update with doc link to upgrade note
+              documentationUrl: docLinks.links.security.deprecatedV1Endpoints,
               severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.samlPostRouteMessage', {
                 defaultMessage:
-                  'The "{path}" URL is deprecated and will be removed in the next major version, please use "/api/security/saml/callback" instead.',
+                  'The "{path}" URL is deprecated and will be removed in the next major version. Use "/api/security/saml/callback" instead.',
                 values: { path },
               }),
               reason: {
@@ -73,7 +74,7 @@ export function defineSAMLRoutes({
           const serverBasePath = basePath.serverBasePath;
           logger.warn(
             // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
-            `The "${serverBasePath}${path}" URL is deprecated and might stop working in a future release. Please use "${serverBasePath}/api/security/saml/callback" URL instead.`
+            `The "${serverBasePath}${path}" URL is deprecated and might stop working in a future release. Use "${serverBasePath}/api/security/saml/callback" URL instead.`
           );
         }
 

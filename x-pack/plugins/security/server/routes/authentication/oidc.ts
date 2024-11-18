@@ -25,6 +25,7 @@ export function defineOIDCRoutes({
   logger,
   getAuthenticationService,
   basePath,
+  docLinks,
 }: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
   for (const path of ['/api/security/oidc/implicit', '/api/security/v1/oidc/implicit']) {
@@ -43,11 +44,11 @@ export function defineOIDCRoutes({
           excludeFromOAS: true,
           ...(isDeprecated && {
             deprecated: {
-              documentationUrl: 'https://elastic.co', // ToDo: Update with docLink to upgrade note
+              documentationUrl: docLinks.links.security.deprecatedV1Endpoints,
               severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.oidcImplicitRouteMessage', {
                 defaultMessage:
-                  'The "{path}" URL is deprecated and will be removed in the next major version, please use "/api/security/oidc/implicit" instead.',
+                  'The "{path}" URL is deprecated and will be removed in the next major version. Use "/api/security/oidc/implicit" instead.',
                 values: { path },
               }),
               reason: {
@@ -63,7 +64,7 @@ export function defineOIDCRoutes({
         const serverBasePath = basePath.serverBasePath;
         if (isDeprecated) {
           logger.warn(
-            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/oidc/implicit" URL instead.`,
+            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version. Use "${serverBasePath}/api/security/oidc/implicit" URL instead.`,
             { tags: ['deprecation'] }
           );
         }
@@ -140,11 +141,11 @@ export function defineOIDCRoutes({
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
           ...(isDeprecated && {
             deprecated: {
-              documentationUrl: 'https://elastic.co', // ToDo: Update with docLink to upgrade note
+              documentationUrl: docLinks.links.security.deprecatedV1Endpoints,
               severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.oidcCallbackRouteMessage', {
                 defaultMessage:
-                  'The "{path}" URL is deprecated and will be removed in the next major version, please use "/api/security/oidc/callback" instead.',
+                  'The "{path}" URL is deprecated and will be removed in the next major version. Use "/api/security/oidc/callback" instead.',
                 values: { path },
               }),
               reason: {
@@ -172,7 +173,7 @@ export function defineOIDCRoutes({
         } else if (request.query.code || request.query.error) {
           if (isDeprecated) {
             logger.warn(
-              `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/oidc/callback" URL instead.`,
+              `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version. Use "${serverBasePath}/api/security/oidc/callback" URL instead.`,
               { tags: ['deprecation'] }
             );
           }
@@ -187,7 +188,7 @@ export function defineOIDCRoutes({
           };
         } else if (request.query.iss) {
           logger.warn(
-            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/oidc/initiate_login" URL for Third-Party Initiated login instead.`,
+            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version. Use "${serverBasePath}/api/security/oidc/initiate_login" URL for Third-Party Initiated login instead.`,
             { tags: ['deprecation'] }
           );
           // An HTTP GET request with a query parameter named `iss` as part of a 3rd party initiated authentication.
@@ -246,11 +247,11 @@ export function defineOIDCRoutes({
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
           ...(isDeprecated && {
             deprecated: {
-              documentationUrl: 'https://elastic.co', // ToDo: Update with docLink to upgrade note
+              documentationUrl: docLinks.links.security.deprecatedV1Endpoints,
               severity: 'warning',
               message: i18n.translate('xpack.security.deprecations.oidcInitiateRouteMessage', {
                 defaultMessage:
-                  'The "{path}" URL is deprecated and will be removed in the next major version, please use "/api/security/oidc/initiate_login" instead.',
+                  'The "{path}" URL is deprecated and will be removed in the next major version. Use "/api/security/oidc/initiate_login" instead.',
                 values: { path },
               }),
               reason: {
@@ -266,7 +267,7 @@ export function defineOIDCRoutes({
         const serverBasePath = basePath.serverBasePath;
         if (isDeprecated) {
           logger.warn(
-            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/oidc/initiate_login" URL for Third-Party Initiated login instead.`,
+            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version. Use "${serverBasePath}/api/security/oidc/initiate_login" URL for Third-Party Initiated login instead.`,
             { tags: ['deprecation'] }
           );
         }
