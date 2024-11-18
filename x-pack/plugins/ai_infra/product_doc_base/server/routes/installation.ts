@@ -73,9 +73,12 @@ export const registerInstallationRoutes = ({
         wait: true,
       });
 
+      // check status after installation in case of failure
+      const { status } = await documentationManager.getStatus();
+
       return res.ok<PerformInstallResponse>({
         body: {
-          installed: true,
+          installed: status === 'installed',
         },
       });
     }

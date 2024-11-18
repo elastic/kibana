@@ -37,17 +37,29 @@ describe('InstallationService', () => {
     });
   });
   describe('#install', () => {
+    beforeEach(() => {
+      http.post.mockResolvedValue({ installed: true });
+    });
+
     it('calls the endpoint with the right parameters', async () => {
       await service.install();
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith(INSTALL_ALL_API_PATH);
     });
     it('returns the value from the server', async () => {
-      const expected = { stubbed: true };
+      const expected = { installed: true };
       http.post.mockResolvedValue(expected);
 
       const response = await service.install();
       expect(response).toEqual(expected);
+    });
+    it('throws when the server returns installed: false', async () => {
+      const expected = { installed: false };
+      http.post.mockResolvedValue(expected);
+
+      await expect(service.install()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Installation did not complete successfully"`
+      );
     });
   });
   describe('#uninstall', () => {
