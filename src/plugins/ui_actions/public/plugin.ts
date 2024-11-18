@@ -16,7 +16,7 @@ import {
   addPanelMenuTrigger,
 } from '@kbn/ui-actions-browser/src/triggers';
 import { UiActionsService } from './service';
-import { setAnalytics, setI18n, setNotifications, setTheme } from './services';
+import { setAnalytics, setI18n, setNotifications, setTheme, setUserProfile } from './services';
 
 export type UiActionsPublicSetup = Pick<
   UiActionsService,
@@ -62,6 +62,7 @@ export class UiActionsPlugin
     setI18n(core.i18n);
     setNotifications(core.notifications);
     setTheme(core.theme);
+    setUserProfile(core.userProfile);
     return this.service;
   }
 
