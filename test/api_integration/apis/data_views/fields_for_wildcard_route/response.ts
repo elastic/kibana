@@ -240,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(404);
     });
 
-    it('returns 200 when index is closed', async () => {
+    it('returns 200 when index is closed and allow_no_index is true', async () => {
       const es = getService('es');
 
       await es.indices.close({ index: 'basic_index' });
@@ -259,6 +259,12 @@ export default function ({ getService }: FtrProviderContext) {
           fields: [],
           indices: [],
         });
+    });
+
+    it('returns 404 when index is closed and allow_no_index is false', async () => {
+      const es = getService('es');
+
+      await es.indices.close({ index: 'basic_index' });
 
       await supertest
         .get(FIELDS_FOR_WILDCARD_PATH)
