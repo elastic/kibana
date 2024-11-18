@@ -11,7 +11,7 @@ import { EntityDetailsLeftPanelTab } from '../../flyout/entity_details/shared/co
 import { HostDetailsPanelKey } from '../../flyout/entity_details/host_details_left';
 import { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
 
-export const useEntityInsight = ({
+export const useNavigateEntityInsight = ({
   isUsingHostName,
   name,
   isRiskScoreExist,

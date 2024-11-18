@@ -21,7 +21,7 @@ import type {
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { useEntityInsight } from '../../hooks/use_entity_insight';
+import { useNavigateEntityInsight } from '../../hooks/use_entity_insight';
 import { useRiskScoreData } from '../../hooks/use_risk_score_data';
 
 const AlertsCount = ({
@@ -104,7 +104,7 @@ export const AlertsPreview = ({
 
   const hasNonClosedAlerts = totalAlertsCount > 0;
 
-  const { goToEntityInsightTab } = useEntityInsight({
+  const { goToEntityInsightTab } = useNavigateEntityInsight({
     isUsingHostName,
     name,
     isRiskScoreExist,

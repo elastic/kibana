@@ -9,9 +9,9 @@ import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-commo
 import { useVulnerabilitiesPreview } from './use_vulnerabilities_preview';
 import { hasVulnerabilitiesData } from '../utils/vulnerability_helpers';
 
-export const useHasVulnerabilities = (fieldName: 'host.name' | 'user.name', name: string) => {
+export const useHasVulnerabilities = (field: 'host.name' | 'user.name', value: string) => {
   const { data: vulnerabilitiesData } = useVulnerabilitiesPreview({
-    query: buildEntityFlyoutPreviewQuery(fieldName, name),
+    query: buildEntityFlyoutPreviewQuery(field, value),
     sort: [],
     enabled: true,
     pageSize: 1,

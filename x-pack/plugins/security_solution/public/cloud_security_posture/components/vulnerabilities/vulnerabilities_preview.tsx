@@ -25,7 +25,7 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { useEntityInsight } from '../../hooks/use_entity_insight';
+import { useNavigateEntityInsight } from '../../hooks/use_entity_insight';
 import { useRiskScoreData } from '../../hooks/use_risk_score_data';
 
 const VulnerabilitiesCount = ({
@@ -102,7 +102,7 @@ export const VulnerabilitiesPreview = ({
     name,
   });
 
-  const { goToEntityInsightTab } = useEntityInsight({
+  const { goToEntityInsightTab } = useNavigateEntityInsight({
     isUsingHostName: true,
     name,
     isRiskScoreExist,
