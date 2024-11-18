@@ -10,7 +10,7 @@ import { BaseChatModelParams } from '@langchain/core/language_models/chat_models
 import { Logger } from '@kbn/logging';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { BedrockRuntimeClient } from './bedrock_runtime_client';
-import { DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_REGION } from '../utils/bedrock';
+import { DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_REGION } from '../../utils/bedrock';
 
 export interface CustomChatModelInput extends BaseChatModelParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
