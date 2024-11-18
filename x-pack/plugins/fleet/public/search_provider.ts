@@ -16,6 +16,7 @@ import type {
 } from '@kbn/global-search-plugin/public';
 
 import { INTEGRATIONS_PLUGIN_ID } from '../common';
+import { filterPolicyTemplatesTiles } from '../common/services';
 
 import { sendGetPackages } from './hooks';
 import type { GetPackagesResponse, PackageListItem } from './types';
@@ -74,19 +75,12 @@ export const toSearchResult = (
     })
   );
 
-  switch (pkg.policy_templates_behavior || 'all') {
-    case 'combined_policy':
-      return [packageResult];
-    case 'individual_policies':
-      return [
-        ...(policyTemplateResults && policyTemplateResults.length > 1 ? policyTemplateResults : []),
-      ];
-    default:
-      return [
-        packageResult,
-        ...(policyTemplateResults && policyTemplateResults.length > 1 ? policyTemplateResults : []),
-      ];
-  }
+  const tiles = filterPolicyTemplatesTiles<GlobalSearchProviderResult>(
+    pkg.policy_templates_behavior,
+    packageResult,
+    policyTemplateResults || []
+  );
+  return [...tiles];
 };
 
 export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResultProvider => {

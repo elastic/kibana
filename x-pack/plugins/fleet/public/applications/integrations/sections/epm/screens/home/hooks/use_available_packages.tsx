@@ -28,6 +28,7 @@ import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../
 import {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
+  filterPolicyTemplatesTiles,
 } from '../../../../../../../../common/services';
 
 import {
@@ -110,14 +111,12 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
         })
       : [];
 
-    switch (pkg.policy_templates_behavior || 'all') {
-      case 'combined_policy':
-        return [...acc, topPackage];
-      case 'individual_policies':
-        return [...acc, ...integrationsPolicyTemplates];
-      default:
-        return [...acc, topPackage, ...integrationsPolicyTemplates];
-    }
+    const tiles = filterPolicyTemplatesTiles<PackageListItem>(
+      pkg.policy_templates_behavior,
+      topPackage,
+      integrationsPolicyTemplates
+    );
+    return [...acc, ...tiles];
   }, []);
 };
 
