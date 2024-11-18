@@ -163,6 +163,47 @@ type CustomGridBodyProps = Pick<
   stripes?: boolean;
 };
 
+const CustomGridBody = memo(
+  ({
+    alertsData,
+    isLoading,
+    pageIndex,
+    pageSize,
+    actualGridStyle,
+    visibleColumns,
+    Cell,
+    stripes,
+  }: CustomGridBodyProps) => {
+    return (
+      <>
+        {alertsData
+          .concat(isLoading ? Array.from({ length: pageSize - alertsData.length }) : [])
+          .map((_row, rowIndex) => (
+            <Row
+              role="row"
+              key={`${rowIndex},${pageIndex}`}
+              // manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
+              // overrides the props.gridStyle.stripes option. And rowClasses will always be there.
+              // Adding stripes only on even rows. It will be replaced by alertsTableHighlightedRow if
+              // shouldHighlightRow is correct
+              className={`euiDataGridRow ${
+                stripes && rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''
+              } ${actualGridStyle.rowClasses?.[rowIndex] ?? ''}`}
+            >
+              {visibleColumns.map((_col, colIndex) => (
+                <Cell
+                  colIndex={colIndex}
+                  visibleRowIndex={rowIndex}
+                  key={`${rowIndex},${colIndex}`}
+                />
+              ))}
+            </Row>
+          ))}
+      </>
+    );
+  }
+);
+
 const CellValueHost: AlertsTableProps['renderCellValue'] = (props) => {
   const {
     columnId,
@@ -229,47 +270,6 @@ const CellPopoverHost = (props: EuiDataGridCellPopoverElementProps) => {
 
   return <DefaultCellPopover {...props} />;
 };
-
-const CustomGridBody = memo(
-  ({
-    alertsData,
-    isLoading,
-    pageIndex,
-    pageSize,
-    actualGridStyle,
-    visibleColumns,
-    Cell,
-    stripes,
-  }: CustomGridBodyProps) => {
-    return (
-      <>
-        {alertsData
-          .concat(isLoading ? Array.from({ length: pageSize - alertsData.length }) : [])
-          .map((_row, rowIndex) => (
-            <Row
-              role="row"
-              key={`${rowIndex},${pageIndex}`}
-              // manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
-              // overrides the props.gridStyle.stripes option. And rowClasses will always be there.
-              // Adding stripes only on even rows. It will be replaced by alertsTableHighlightedRow if
-              // shouldHighlightRow is correct
-              className={`euiDataGridRow ${
-                stripes && rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''
-              } ${actualGridStyle.rowClasses?.[rowIndex] ?? ''}`}
-            >
-              {visibleColumns.map((_col, colIndex) => (
-                <Cell
-                  colIndex={colIndex}
-                  visibleRowIndex={rowIndex}
-                  key={`${rowIndex},${colIndex}`}
-                />
-              ))}
-            </Row>
-          ))}
-      </>
-    );
-  }
-);
 
 export const AlertsDataGrid = typedMemo(
   <AC extends AdditionalContext>(props: AlertsDataGridProps<AC>) => {

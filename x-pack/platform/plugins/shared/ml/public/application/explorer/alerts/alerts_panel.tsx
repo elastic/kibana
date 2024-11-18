@@ -25,7 +25,6 @@ import {
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
-
   type AlertStatus,
 } from '@kbn/rule-data-utils';
 import useObservable from 'react-use/lib/useObservable';
