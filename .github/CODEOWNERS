@@ -1095,6 +1095,7 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 src/plugins/discover/public/context_awareness/profile_providers/security @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 
 # Platform Docs
+/x-pack/test/functional/services/sample_data @elastic/platform-docs
 /x-pack/test_serverless/functional/test_suites/security/screenshot_creation/index.ts @elastic/platform-docs
 /x-pack/test_serverless/functional/test_suites/security/config.screenshots.ts @elastic/platform-docs
 /x-pack/test/screenshot_creation @elastic/platform-docs
