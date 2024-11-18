@@ -301,25 +301,25 @@ export const OverviewPage: React.FC<Props> = memo(
     const [showAVCBanner, setShowAVCBanner] = useState(
       storage.get('securitySolution.showAvcBanner') ?? true
     );
-    const [showCSBidIntBanner, setShowCSBidIntBanner] = useState(
-      storage.get('fleet.showBidIntBannerForCS') ?? true
+    const [showCSResponseSupportBanner, setShowCSResponseSupportBanner] = useState(
+      storage.get('fleet.showCSResponseSupportBanner') ?? true
     );
-    const [showSOCFBidIntBanner, setShowSOCFBidIntBanner] = useState(
-      storage.get('fleet.showBidIntBannerForSOCF') ?? true
+    const [showSOReponseSupportBanner, setShowSOResponseSupportBanner] = useState(
+      storage.get('fleet.showSOReponseSupportBanner') ?? true
     );
     const onAVCBannerDismiss = useCallback(() => {
       setShowAVCBanner(false);
       storage.set('securitySolution.showAvcBanner', false);
     }, [storage]);
 
-    const onCSBidIntBannerDismiss = useCallback(() => {
-      setShowCSBidIntBanner(false);
-      storage.set('fleet.showBidIntBannerForCS', false);
+    const onCSResponseSupportBannerDismiss = useCallback(() => {
+      setShowCSResponseSupportBanner(false);
+      storage.set('fleet.showCSResponseSupportBanner', false);
     }, [storage]);
 
-    const onSOCFBidIntBannerDismiss = useCallback(() => {
-      setShowSOFCBidIntBanner(false);
-      storage.set('fleet.showBidIntBannerForSOCF', false);
+    const onSOResponseSupportBannerDismiss = useCallback(() => {
+      setShowSOResponseSupportBanner(false);
+      storage.set('fleet.showSOReponseSupportBanner', false);
     }, [storage]);
 
     return (
@@ -342,15 +342,15 @@ export const OverviewPage: React.FC<Props> = memo(
               <EuiSpacer size="s" />
             </>
           )}
-          {isCrowdStrike && showCSBidIntBanner && (
+          {isCrowdStrike && showCSResponseSupportBanner && (
             <>
-              <BidirectionalIntegrationsBanner onDismiss={onCSBidIntBannerDismiss} />
+              <BidirectionalIntegrationsBanner onDismiss={onCSResponseSupportBannerDismiss} />
               <EuiSpacer size="s" />
             </>
           )}
-          {isSentinelOneCloudFunnel && showSOCFBidIntBanner && (
+          {isSentinelOneCloudFunnel && showSOReponseSupportBanner && (
             <>
-              <BidirectionalIntegrationsBanner onDismiss={onSOCFBidIntBannerDismiss} />
+              <BidirectionalIntegrationsBanner onDismiss={onSOResponseSupportBannerDismiss} />
               <EuiSpacer size="s" />
             </>
           )}
