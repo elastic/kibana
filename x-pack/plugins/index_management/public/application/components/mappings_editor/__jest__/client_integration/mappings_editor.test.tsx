@@ -28,7 +28,22 @@ describe('Mappings editor: core', () => {
   let onChangeHandler: jest.Mock = jest.fn();
   let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
   let testBed: MappingsEditorTestBed;
-  const appDependencies = { plugins: { ml: { mlApi: {} } } };
+  const appDependencies = {
+    plugins: {
+      ml: { mlApi: {} },
+      licensing: {
+        license$: {
+          subscribe: jest.fn((callback: any) => {
+            callback({
+              isActive: true,
+              hasAtLeast: jest.fn((type: any) => true),
+            });
+            return { unsubscribe: jest.fn() };
+          }),
+        },
+      },
+    },
+  };
 
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
@@ -456,6 +471,11 @@ describe('Mappings editor: core', () => {
       updatedMappings = {
         ...updatedMappings,
         dynamic: false,
+        // The "enabled": true is removed as this is the default in Es
+        _source: {
+          includes: defaultMappings._source.includes,
+          excludes: defaultMappings._source.excludes,
+        },
       };
       delete updatedMappings.date_detection;
       delete updatedMappings.dynamic_date_formats;

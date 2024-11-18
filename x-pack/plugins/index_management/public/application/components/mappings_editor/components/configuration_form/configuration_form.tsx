@@ -50,7 +50,10 @@ const formSerializer = (formData: GenericObject, indexMode?: IndexMode) => {
       ? { mode: SYNTHETIC_SOURCE_OPTION }
       : sourceField?.option === DISABLED_SOURCE_OPTION
       ? { enabled: false }
-      : sourceField?.option === STORED_SOURCE_OPTION
+      : indexMode === LOGSDB_INDEX_MODE ||
+        indexMode === TIME_SERIES_MODE ||
+        sourceField?.includes ||
+        sourceField?.excludes
       ? {
           // Explicitly set stored mode only if index mode is logsdb or time_series
           mode:
