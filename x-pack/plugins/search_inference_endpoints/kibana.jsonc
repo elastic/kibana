@@ -11,9 +11,23 @@
     "id": "searchInferenceEndpoints",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "searchInferenceEndpoints"],
-    "requiredPlugins": ["actions", "features", "ml", "share"],
-    "optionalPlugins": ["cloud", "console", "serverless"],
-    "requiredBundles": ["kibanaReact"]
+    "configPath": [
+      "xpack",
+      "searchInferenceEndpoints"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "features",
+      "ml",
+      "share",
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "console",
+      "serverless"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }
