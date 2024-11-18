@@ -147,6 +147,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.switchToEditMode();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.removePanel();
+      await queryBar.setQuery('');
+      await filterBarService.removeAllFilters();
+      await queryBar.submitQuery();
 
       // Create a new panel
       await dashboardAddPanel.clickEditorMenuButton();
