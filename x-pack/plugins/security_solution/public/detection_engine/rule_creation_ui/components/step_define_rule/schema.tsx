@@ -25,7 +25,6 @@ import {
   isThresholdRule,
   isSuppressionRuleConfiguredWithGroupBy,
 } from '../../../../../common/detection_engine/utils';
-import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import type { FieldValueQueryBar } from '../query_bar';
 import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
@@ -53,6 +52,7 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
+import { newTermsFieldsValidationFactory } from '../../validators/new_terms_fields_validator_factory';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -580,34 +580,7 @@ export const schema: FormSchema<DefineStepRule> = {
             return;
           }
 
-          return fieldValidators.emptyField(
-            i18n.translate(
-              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsFieldsMin',
-              {
-                defaultMessage: 'A minimum of one field is required.',
-              }
-            )
-          )(...args);
-        },
-      },
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData }] = args;
-          const needsValidation = isNewTermsRule(formData.ruleType);
-          if (!needsValidation) {
-            return;
-          }
-          return fieldValidators.maxLengthField({
-            length: MAX_NUMBER_OF_NEW_TERMS_FIELDS,
-            message: i18n.translate(
-              'xpack.securitySolution.detectionEngine.validations.stepDefineRule.newTermsFieldsMax',
-              {
-                defaultMessage: 'Number of fields must be 3 or less.',
-              }
-            ),
-          })(...args);
+          return newTermsFieldsValidationFactory(...args);
         },
       },
     ],
