@@ -7,8 +7,7 @@
 
 import { Entity, EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
-import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import {
@@ -177,19 +176,19 @@ export class EntityClient {
     const entities = await Promise.all(
       sources.map(async (source) => {
         const esClient = createObservabilityEsClient({
-          client: this.options.clusterClient.asCurrentUser,
+          client: this.options.esClient,
           logger: this.options.logger,
           plugin: `@kbn/entityManager-plugin`,
         });
 
-        const requiredFields = [...source.identity_fields, ...source.metadata_fields];
+        const mandatoryFields = ['@timestamp', ...source.identity_fields];
         const { fields } = await esClient.client.fieldCaps({
           index: source.index_patterns,
-          fields: requiredFields,
+          fields: [...mandatoryFields, ...source.metadata_fields],
         });
 
-        const sourceHasIdentityFields = source.identity_fields.every((field) => !!fields[field]);
-        if (!sourceHasIdentityFields) {
+        const sourceHasMandatoryFields = mandatoryFields.every((field) => !!fields[field]);
+        if (!sourceHasMandatoryFields) {
           // we can't build entities without id fields so we ignore the source.
           // filters should likely behave similarly.
           return [];
@@ -204,13 +203,13 @@ export class EntityClient {
         );
         this.options.logger.info(`Entity query: ${query}`);
 
-        return await esClient.esql('search_entities', { query }).then((result) =>
-          esqlResultToPlainObjects(result).map((entity) => {
-            entity['entity.id'] = source.identity_fields.map((field) => entity[field]).join(':');
-            entity['entity.type'] = source.type;
-            return entity as Entity;
-          })
-        );
+        const rawEntities = await esClient.esql<Entity>('search_entities', { query });
+
+        return rawEntities.map((entity) => {
+          entity['entity.id'] = source.identity_fields.map((field) => entity[field]).join(':');
+          entity['entity.type'] = source.type;
+          return entity;
+        });
       })
     ).then((results) => results.flat());
 

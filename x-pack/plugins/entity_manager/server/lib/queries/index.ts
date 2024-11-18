@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-export interface EntitySource {
-  type: string;
-  index_patterns: string[];
-  identity_fields: string[];
-  metadata_fields: string[];
-  filters: string[];
-}
+import z from 'zod';
+
+export const entitySourceSchema = z.object({
+  type: z.string(),
+  index_patterns: z.array(z.string()),
+  identity_fields: z.array(z.string()),
+  metadata_fields: z.array(z.string()),
+  filters: z.array(z.string()),
+});
+
+export type EntitySource = z.infer<typeof entitySourceSchema>;
 
 const sourceCommand = (source: EntitySource) => {
   let query = `FROM ${source.index_patterns}`;

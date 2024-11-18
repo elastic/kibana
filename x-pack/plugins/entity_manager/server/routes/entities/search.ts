@@ -8,19 +8,19 @@
 import moment from 'moment';
 import { z } from '@kbn/zod';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
-import { EntitySource } from '../../lib/queries';
+import { EntitySource, entitySourceSchema } from '../../lib/queries';
 
 export const searchEntitiesRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/_search',
   params: z.object({
     body: z.object({
       type: z.string(),
-      limit: z.optional(z.number()).default(5),
+      limit: z.optional(z.number()).default(10),
     }),
   }),
   handler: async ({ request, response, params, logger, getScopedClient }) => {
     try {
-      const { type, limit = 5 } = params.body;
+      const { type, limit } = params.body;
 
       const client = await getScopedClient({ request });
       const sources = [
@@ -47,23 +47,16 @@ export const searchEntitiesPreviewRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/_search/preview',
   params: z.object({
     body: z.object({
-      filters: z.optional(z.array(z.string())).default([]),
-      metadata_fields: z.optional(z.array(z.string())).default([]),
-      limit: z.optional(z.number()).default(10),
       sources: z.array(
-        z.object({
-          type: z.string(),
-          index_patterns: z.array(z.string()),
-          identity_fields: z.array(z.string()),
-          metadata_fields: z.array(z.string()),
-          filters: z
-            .array(z.string())
-            .transform((filters) => [
-              ...filters,
-              `@timestamp >= "${moment().subtract(5, 'minutes').toISOString()}"`,
-            ]),
-        })
+        entitySourceSchema.transform((source) => ({
+          ...source,
+          filters: [
+            ...source.filters,
+            `@timestamp >= "${moment().subtract(5, 'minutes').toISOString()}"`,
+          ],
+        }))
       ),
+      limit: z.optional(z.number()).default(10),
     }),
   }),
   handler: async ({ request, response, params, logger, getScopedClient }) => {
