@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import moment from 'moment';
 
-export const AI_ASSISTANT_KB_INFERENCE_ID = 'ai_assistant_kb_inference';
+export const AI_ASSISTANT_KB_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
 
 export async function createInferenceEndpoint({
   esClient,
