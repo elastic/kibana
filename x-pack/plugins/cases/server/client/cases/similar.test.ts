@@ -51,7 +51,7 @@ describe('similar', () => {
       jest.clearAllMocks();
     });
 
-    it('search by uuid calls case service correctly', async () => {
+    it('should execute query with observable type key and value and proper filters', async () => {
       await similar(
         mockCase.id,
         {
