@@ -8,7 +8,7 @@
  */
 
 import { RuleActionParams } from '@kbn/alerting-types';
-import { isEmpty, omit } from 'lodash';
+import { isEmpty, omit, isEqual } from 'lodash';
 import { RuleFormActionsErrors, RuleFormParamsErrors, RuleUiAction } from '../../common';
 import { RuleFormData, RuleFormState } from '../types';
 import { validateRuleBase, validateRuleParams } from '../validation';
@@ -119,6 +119,7 @@ const getUpdateWithValidation =
       selectedRuleTypeModel,
       multiConsumerSelection,
       selectedRuleType,
+      formData: originalFormData,
     } = ruleFormState;
 
     const formData = updater();
@@ -149,12 +150,14 @@ const getUpdateWithValidation =
       }
     }
 
+    const touched = !isEqual(originalFormData, formData);
+
     return {
       ...ruleFormState,
       formData,
       baseErrors,
       paramsErrors,
-      touched: true,
+      touched,
     };
   };
 
