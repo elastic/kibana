@@ -126,4 +126,40 @@ describe('Processor: Grok', () => {
 
     expect(processors[0][GROK_TYPE].patterns).toEqual([escapedValue]);
   });
+
+  test('accepts pattern definitions that contains escaped characters', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+      find,
+      component,
+    } = testBed;
+
+    // Add "field" value
+    form.setInputValue('fieldNameField.input', 'test_grok_processor');
+
+    // Add pattern 1
+    form.setInputValue('droppableList.input-0', 'pattern1');
+
+    await act(async () => {
+      find('patternDefinitionsField').simulate('change', {
+        jsonContent: '{"def_1":"""aaa(bbb"""}',
+      });
+
+      // advance timers to allow the form to validate
+      jest.advanceTimersByTime(0);
+    });
+    component.update();
+
+    // Save the field
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, GROK_TYPE);
+
+    expect(processors[0][GROK_TYPE]).toEqual({
+      field: 'test_grok_processor',
+      patterns: ['pattern1'],
+      pattern_definitions: { def_1: 'aaa(bbb' },
+    });
+  });
 });

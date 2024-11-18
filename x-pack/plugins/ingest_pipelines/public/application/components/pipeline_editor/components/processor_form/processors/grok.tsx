@@ -18,13 +18,13 @@ import {
   ArrayItem,
 } from '../../../../../../shared_imports';
 
-import { XJsonEditor, DragAndDropTextList } from '../field_components';
+import { DragAndDropTextList, XJsonAndJsonEditor } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FieldsConfig, to, from, EDITOR_PX_HEIGHT } from './shared';
+import { FieldsConfig, to, from, EDITOR_PX_HEIGHT, isXJsonField } from './shared';
 
-const { isJsonField, emptyField } = fieldValidators;
+const { emptyField } = fieldValidators;
 
 const i18nTexts = {
   addPatternLabel: i18n.translate(
@@ -70,8 +70,8 @@ const fieldsConfig: FieldsConfig = {
   /* Optional field configs */
   pattern_definitions: {
     type: FIELD_TYPES.TEXT,
-    deserializer: to.jsonString,
-    serializer: from.optionalJson,
+    deserializer: to.xJsonString,
+    serializer: from.optionalXJson,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.patternDefinitionsLabel', {
       defaultMessage: 'Pattern definitions (optional)',
     }),
@@ -84,7 +84,7 @@ const fieldsConfig: FieldsConfig = {
     ),
     validations: [
       {
-        validator: isJsonField(
+        validator: isXJsonField(
           i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.grokForm.patternsDefinitionsInvalidJSONError',
             { defaultMessage: 'Invalid JSON' }
@@ -149,10 +149,11 @@ export const Grok: FunctionComponent = () => {
       </UseArray>
 
       <UseField
-        component={XJsonEditor}
+        component={XJsonAndJsonEditor}
         config={fieldsConfig.pattern_definitions}
         componentProps={{
           editorProps: {
+            'data-test-subj': 'patternDefinitionsField',
             height: EDITOR_PX_HEIGHT.medium,
             'aria-label': i18n.translate(
               'xpack.ingestPipelines.pipelineEditor.grokForm.patternDefinitionsAriaLabel',
@@ -163,6 +164,7 @@ export const Grok: FunctionComponent = () => {
           },
         }}
         path="fields.pattern_definitions"
+        data-test-subj="patternDefinitions"
       />
 
       <UseField

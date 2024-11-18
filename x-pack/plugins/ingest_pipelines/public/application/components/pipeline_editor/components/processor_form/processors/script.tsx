@@ -19,11 +19,18 @@ import {
   useFormData,
 } from '../../../../../../shared_imports';
 
-import { XJsonEditor, TextEditor } from '../field_components';
+import { XJsonAndJsonEditor, TextEditor } from '../field_components';
 
-import { FieldsConfig, to, from, FormFieldsComponent, EDITOR_PX_HEIGHT } from './shared';
+import {
+  FieldsConfig,
+  to,
+  from,
+  FormFieldsComponent,
+  EDITOR_PX_HEIGHT,
+  isXJsonField,
+} from './shared';
 
-const { isJsonField, emptyField } = fieldValidators;
+const { emptyField } = fieldValidators;
 
 const fieldsConfig: FieldsConfig = {
   /* Required fields config */
@@ -98,8 +105,8 @@ const fieldsConfig: FieldsConfig = {
 
   params: {
     type: FIELD_TYPES.TEXT,
-    deserializer: to.jsonString,
-    serializer: from.optionalJson,
+    deserializer: to.xJsonString,
+    serializer: from.optionalXJson,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.scriptForm.paramsFieldLabel', {
       defaultMessage: 'Parameters',
     }),
@@ -113,7 +120,7 @@ const fieldsConfig: FieldsConfig = {
       {
         validator: (value) => {
           if (value.value) {
-            return isJsonField(
+            return isXJsonField(
               i18n.translate(
                 'xpack.ingestPipelines.pipelineEditor.scriptForm.processorInvalidJsonError',
                 {
@@ -166,6 +173,7 @@ export const Script: FormFieldsComponent = ({ initialFieldValues }) => {
             component={TextEditor}
             componentProps={{
               editorProps: {
+                'data-test-subj': 'scriptSource',
                 languageId: scriptLanguage,
                 suggestionProvider:
                   scriptLanguage === PainlessLang.ID ? suggestionProvider : undefined,
@@ -188,9 +196,10 @@ export const Script: FormFieldsComponent = ({ initialFieldValues }) => {
       )}
 
       <UseField
-        component={XJsonEditor}
+        component={XJsonAndJsonEditor}
         componentProps={{
           editorProps: {
+            'data-test-subj': 'paramsField',
             height: EDITOR_PX_HEIGHT.medium,
             'aria-label': i18n.translate(
               'xpack.ingestPipelines.pipelineEditor.scriptForm.paramsFieldAriaLabel',

@@ -10,19 +10,19 @@ import { i18n } from '@kbn/i18n';
 
 import { FIELD_TYPES, fieldValidators, UseField } from '../../../../../../shared_imports';
 
-import { XJsonEditor } from '../field_components';
+import { XJsonAndJsonEditor } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
-import { FieldsConfig, to, EDITOR_PX_HEIGHT } from './shared';
+import { FieldsConfig, to, EDITOR_PX_HEIGHT, from, isXJsonField } from './shared';
 
-const { emptyField, isJsonField } = fieldValidators;
+const { emptyField } = fieldValidators;
 
 const fieldsConfig: FieldsConfig = {
   /* Required fields config */
   processor: {
     type: FIELD_TYPES.TEXT,
-    deserializer: to.jsonString,
-    serializer: JSON.parse,
+    deserializer: to.xJsonString,
+    serializer: from.optionalXJson,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.foreachForm.processorFieldLabel', {
       defaultMessage: 'Processor',
     }),
@@ -41,7 +41,7 @@ const fieldsConfig: FieldsConfig = {
         ),
       },
       {
-        validator: isJsonField(
+        validator: isXJsonField(
           i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.foreachForm.processorInvalidJsonError',
             {
@@ -65,9 +65,10 @@ export const Foreach: FunctionComponent = () => {
       />
 
       <UseField
-        component={XJsonEditor}
+        component={XJsonAndJsonEditor}
         componentProps={{
           editorProps: {
+            'data-test-subj': 'processorField',
             height: EDITOR_PX_HEIGHT.medium,
             'aria-label': i18n.translate(
               'xpack.ingestPipelines.pipelineEditor.foreachForm.optionsFieldAriaLabel',

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { getValue, setValue, hasTemplateSnippet } from './utils';
+import {
+  getValue,
+  setValue,
+  hasTemplateSnippet,
+  collapseEscapedStrings,
+  convertProccesorsToJson,
+} from './utils';
 
 describe('get and set values', () => {
   const testObject = Object.freeze([{ onFailure: [{ onFailure: 1 }] }]);
@@ -49,5 +55,41 @@ describe('template snippets', () => {
     expect(hasTemplateSnippet('hello{{{world}}}')).toBe(true);
     expect(hasTemplateSnippet('{{{hello}}}world')).toBe(true);
     expect(hasTemplateSnippet('{{{hello.world}}}')).toBe(true);
+  });
+});
+
+describe('collapse escaped strings', () => {
+  it('returns escaped literal strings', () => {
+    expect(collapseEscapedStrings('{"1": """aaa\bbb""", "2": """ccc"""}')).toBe(
+      '{"1": "aaa\\bbb", "2": "ccc"}'
+    );
+  });
+});
+
+describe('convert processors to json', () => {
+  it('returns converted processors', () => {
+    const obj = {
+      field1: 'mustNotChange',
+      field2: 123,
+      field3: '{1: "mustNotChange"}',
+      pattern_definitions: '{"1": """aaa"bbb"""}',
+      processor: '{"1": """aaa"bbb"""}',
+      inference_config: '{"1": """aaa"bbb"""}',
+      field_map: '{"1": """aaa"bbb"""}',
+    };
+
+    expect(convertProccesorsToJson(obj)).toEqual({
+      field1: 'mustNotChange',
+      field2: 123,
+      field3: '{1: "mustNotChange"}',
+      // eslint-disable-next-line prettier/prettier
+      pattern_definitions: { 1: "aaa\"bbb" },
+      // eslint-disable-next-line prettier/prettier
+      processor: { 1: "aaa\"bbb" },
+      // eslint-disable-next-line prettier/prettier
+      inference_config: { 1: "aaa\"bbb" },
+      // eslint-disable-next-line prettier/prettier
+      field_map: { 1: "aaa\"bbb" },
+    });
   });
 });
