@@ -11,7 +11,8 @@ import {
   TRANSACTION_TYPE,
 } from '@kbn/apm-plugin/common/es_fields/apm';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { generateData } from './generate_data';
 
 const startNumber = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -20,14 +21,16 @@ const endNumber = new Date('2021-01-01T00:05:00.000Z').getTime() - 1;
 const start = new Date(startNumber).toISOString();
 const end = new Date(endNumber).toISOString();
 
-export default function suggestionsTests({ getService }: FtrProviderContext) {
-  const registry = getService('registry');
-  const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+export default function suggestionsTests({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const apmApiClient = getService('apmApi');
+  const synthtrace = getService('synthtrace');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177538
-  registry.when('suggestions when data is loaded', { config: 'basic', archives: [] }, async () => {
+  describe('suggestions when data is loaded', () => {
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
     before(async () => {
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+
       await generateData({
         apmSynthtraceEsClient,
         start: startNumber,
