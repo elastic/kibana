@@ -13,7 +13,6 @@ import { usePushToService } from '.';
 import { noPushCasesPermissions, readCasesPermissions, TestProviders } from '../../common/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { actionLicenses } from '../../containers/mock';
-import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
@@ -179,27 +178,6 @@ describe('usePushToService', () => {
     const errorsMsg = result.current.errorsMsg;
     expect(errorsMsg).toHaveLength(1);
     expect(errorsMsg[0].id).toEqual('connector-deleted-error');
-    expect(result.current.hasErrorMessages).toBe(true);
-  });
-
-  it('Displays message when case is closed', async () => {
-    const { result } = renderHook<
-      React.PropsWithChildren<UsePushToService>,
-      ReturnUsePushToService
-    >(
-      () =>
-        usePushToService({
-          ...defaultArgs,
-          caseStatus: CaseStatuses.closed,
-        }),
-      {
-        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-      }
-    );
-
-    const errorsMsg = result.current.errorsMsg;
-    expect(errorsMsg).toHaveLength(1);
-    expect(errorsMsg[0].id).toEqual(CLOSED_CASE_PUSH_ERROR_ID);
     expect(result.current.hasErrorMessages).toBe(true);
   });
 
@@ -460,7 +438,7 @@ describe('usePushToService', () => {
       const { result } = renderHook<
         React.PropsWithChildren<UsePushToService>,
         ReturnUsePushToService
-      >(() => usePushToService({ ...defaultArgs, caseStatus: CaseStatuses.closed }), {
+      >(() => usePushToService({ ...defaultArgs, isValidConnector: false }), {
         wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
       });
 

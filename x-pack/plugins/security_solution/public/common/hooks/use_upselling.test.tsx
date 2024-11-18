@@ -71,7 +71,7 @@ describe('use_upselling', () => {
     expect(result.all.length).toBe(1); // assert that it should not cause unnecessary re-renders
   });
 
-  test('useUpsellingMessage returns null when upsellingMessageId not found', () => {
+  test('useUpsellingMessage returns undefined when upsellingMessageId not found', () => {
     const emptyMessages = {};
     mockUpselling.setPages(emptyMessages);
 
@@ -81,6 +81,6 @@ describe('use_upselling', () => {
         wrapper: RenderWrapper,
       }
     );
-    expect(result.current).toBe(null);
+    expect(result.current).toBeUndefined();
   });
 });

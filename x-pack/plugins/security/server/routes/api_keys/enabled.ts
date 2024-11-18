@@ -16,6 +16,13 @@ export function defineEnabledApiKeysRoutes({
   router.get(
     {
       path: '/internal/security/api_key/_enabled',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route delegates authorization to the scoped ES cluster client of the internal authentication service',
+        },
+      },
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {

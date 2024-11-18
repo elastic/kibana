@@ -99,7 +99,7 @@
   align-items: start;
 
   .euiDataGridHeaderCell__draggableIcon {
-    padding-block: $euiSizeXS / 2; // to align with a token height
+    padding-block: calc($euiSizeXS / 2); // to align with a token height
   }
 
   .euiDataGridHeaderCell__button {

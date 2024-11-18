@@ -39,6 +39,23 @@ export const createRule = (
   );
 };
 
+export const patchRule = (
+  ruleId: string,
+  updateData: Partial<RuleCreateProps>
+): Cypress.Chainable<Cypress.Response<RuleResponse>> => {
+  return cy.currentSpace().then((spaceId) =>
+    rootRequest<RuleResponse>({
+      method: 'PATCH',
+      url: spaceId ? getSpaceUrl(spaceId, DETECTION_ENGINE_RULES_URL) : DETECTION_ENGINE_RULES_URL,
+      body: {
+        rule_id: ruleId,
+        ...updateData,
+      },
+      failOnStatusCode: false,
+    })
+  );
+};
+
 /**
  * Snoozes a rule via API
  *
