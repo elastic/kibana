@@ -243,23 +243,25 @@ export function loadEmbeddableData(
 
   // Build a custom operator to be resused for various observables
   function waitUntilChanged() {
-    return pipe(distinctUntilChanged(fastIsEqual), skip(1));
+    return pipe(distinctUntilChanged(fastIsEqual), skip(1), debounceTime(0));
   }
 
   const subscriptions: Subscription[] = [
     // on data change from the parentApi, reload
-    fetch$(api).subscribe((data) => {
-      const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
-      unifiedSearch$.next({
-        query: data.query,
-        filters: data.filters,
-        timeRange: data.timeRange,
-        timeslice: data.timeslice,
-        searchSessionId,
-      });
+    fetch$(api)
+      .pipe(debounceTime(0))
+      .subscribe((data) => {
+        const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
+        unifiedSearch$.next({
+          query: data.query,
+          filters: data.filters,
+          timeRange: data.timeRange,
+          timeslice: data.timeslice,
+          searchSessionId,
+        });
 
-      reload('searchContext');
-    }),
+        reload('searchContext');
+      }),
     // make sure to reload on viewMode change
     api.viewMode.subscribe(() => {
       // only reload if drilldowns are set
