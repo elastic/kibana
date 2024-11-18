@@ -114,6 +114,16 @@ export class RiskScoreDataClient {
         namespace,
       };
 
+      // Check if there are any existing component templates with the namespace in the name
+
+      const oldComponentTemplateExists = await esClient.cluster.existsComponentTemplate({
+        name: mappingComponentName,
+      });
+      if (oldComponentTemplateExists) {
+        await this.updateComponentTemplateNamewithNamespace(namespace);
+      }
+
+      // Update the new component template with the required data
       await Promise.all([
         createOrUpdateComponentTemplate({
           logger: this.options.logger,
@@ -155,6 +165,14 @@ export class RiskScoreDataClient {
           },
         },
       });
+
+      // Delete the component template without the namespace in the name
+      await esClient.cluster.deleteComponentTemplate(
+        {
+          name: mappingComponentName,
+        },
+        { ignore: [404] }
+      );
 
       await createDataStream({
         logger: this.options.logger,
@@ -285,5 +303,21 @@ export class RiskScoreDataClient {
         }),
       { logger: this.options.logger }
     );
+  }
+
+  private async updateComponentTemplateNamewithNamespace(namespace: string): Promise<void> {
+    const esClient = this.options.esClient;
+    const oldComponentTemplateResponse = await esClient.cluster.getComponentTemplate(
+      {
+        name: mappingComponentName,
+      },
+      { ignore: [404] }
+    );
+    const oldComponentTemplate = oldComponentTemplateResponse?.component_templates[0];
+    const newComponentTemplateName = nameSpaceAwareMappingsComponentName(namespace);
+    await esClient.cluster.putComponentTemplate({
+      name: newComponentTemplateName,
+      body: oldComponentTemplate.component_template,
+    });
   }
 }
