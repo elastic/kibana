@@ -12,7 +12,7 @@ import type { ESQLCallbacks } from './types';
 import type { ESQLRealField } from '../validation/types';
 import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
 
-const NOT_SUGGESTED_TYPES = ['unsupported'];
+export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
 export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string) {
   const prevCommand = ast[Math.max(ast.length - 2, 0)];
