@@ -22,7 +22,6 @@ export enum AlertsCasesTourSteps {
   addAlertToCase = 4,
   createCase = 5,
   submitCase = 6,
-  viewCase = 7,
 }
 
 export type StepConfig = Pick<
@@ -72,7 +71,6 @@ export const hiddenWhenCaseFlyoutExpanded: Record<string, AlertsCasesTourSteps[]
     AlertsCasesTourSteps.expandEvent,
     AlertsCasesTourSteps.reviewAlertDetailsFlyout,
     AlertsCasesTourSteps.addAlertToCase,
-    AlertsCasesTourSteps.viewCase,
   ],
 };
 
@@ -186,18 +184,6 @@ const alertsCasesConfig: StepConfig[] = [
     offset: 20,
     ownFocus: false,
     initialFocus: `[tour-step="create-case-flyout"] [tour-step="create-case-submit"]`,
-  },
-  {
-    ...defaultConfig,
-    step: AlertsCasesTourSteps.viewCase,
-    title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.viewCase.tourTitle', {
-      defaultMessage: 'View the case',
-    }),
-    content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.viewCase.tourContent', {
-      defaultMessage: 'Cases are shown under Insights, in the alert details.',
-    }),
-    anchorPosition: 'rightUp',
-    dataTestSubj: getTourAnchor(AlertsCasesTourSteps.viewCase, SecurityStepId.alertsCases),
   },
 ];
 

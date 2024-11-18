@@ -353,10 +353,6 @@ export class VisualizeEmbeddable
             );
             return true;
           }
-          if (this.vis.type.suppressWarnings?.()) {
-            // if the vis type wishes to supress all warnings, return true so the default logic won't pick it up
-            return true;
-          }
         });
     }
 

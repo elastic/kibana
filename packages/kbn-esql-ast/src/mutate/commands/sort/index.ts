@@ -49,15 +49,17 @@ export type NewSortExpressionTemplate =
 const createSortExpression = (
   template: string | string[] | NewSortExpressionTemplate
 ): SortExpression => {
+  const parts: string[] =
+    typeof template === 'string'
+      ? [template]
+      : Array.isArray(template)
+      ? template
+      : typeof template.parts === 'string'
+      ? [template.parts]
+      : template.parts;
+  const identifiers = parts.map((part) => Builder.identifier({ name: part }));
   const column = Builder.expression.column({
-    parts:
-      typeof template === 'string'
-        ? [template]
-        : Array.isArray(template)
-        ? template
-        : typeof template.parts === 'string'
-        ? [template.parts]
-        : template.parts,
+    args: identifiers,
   });
 
   if (typeof template === 'string' || Array.isArray(template)) {
@@ -189,12 +191,18 @@ export const find = (
   return findByPredicate(ast, ([node]) => {
     let isMatch = false;
     if (node.type === 'column') {
-      isMatch = util.cmpArr(node.parts, arrParts);
+      isMatch = util.cmpArr(
+        node.args.map((arg) => (arg.type === 'identifier' ? arg.name : '')),
+        arrParts
+      );
     } else if (node.type === 'order') {
-      const columnParts = (node.args[0] as ESQLColumn)?.parts;
+      const columnParts = (node.args[0] as ESQLColumn)?.args;
 
       if (Array.isArray(columnParts)) {
-        isMatch = util.cmpArr(columnParts, arrParts);
+        isMatch = util.cmpArr(
+          columnParts.map((arg) => (arg.type === 'identifier' ? arg.name : '')),
+          arrParts
+        );
       }
     }
 

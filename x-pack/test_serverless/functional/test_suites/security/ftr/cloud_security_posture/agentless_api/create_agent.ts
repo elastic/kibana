@@ -25,8 +25,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
   describe('Agentless API Serverless', function () {
-    // see details: https://github.com/elastic/kibana/issues/199091
-    this.tags(['failsOnMKI']);
     let mockApiServer: http.Server;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
@@ -55,6 +53,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await cisIntegration.selectSetupTechnology('agentless');
       await cisIntegration.selectAwsCredentials('direct');
+
+      if (
+        process.env.TEST_CLOUD &&
+        process.env.CSPM_AWS_ACCOUNT_ID &&
+        process.env.CSPM_AWS_SECRET_KEY
+      ) {
+        await cisIntegration.fillInTextField(
+          cisIntegration.testSubjectIds.DIRECT_ACCESS_KEY_ID_TEST_ID,
+          process.env.CSPM_AWS_ACCOUNT_ID
+        );
+
+        await cisIntegration.fillInTextField(
+          cisIntegration.testSubjectIds.DIRECT_ACCESS_SECRET_KEY_TEST_ID,
+          process.env.CSPM_AWS_SECRET_KEY
+        );
+      }
 
       await pageObjects.header.waitUntilLoadingHasFinished();
 

@@ -62,7 +62,6 @@ export function withSpaceSolutionDisabledFeatures(
     ]).filter((featureId) => !enabledFeaturesPerSolution.es.includes(featureId));
   } else if (spaceSolution === 'oblt') {
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
-      'enterpriseSearch',
       'securitySolution',
     ]).filter((featureId) => !enabledFeaturesPerSolution.oblt.includes(featureId));
   } else if (spaceSolution === 'security') {

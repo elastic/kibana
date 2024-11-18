@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -61,7 +62,7 @@ export const ADD_NOTE_BUTTON = i18n.translate(
 export const Notes = memo(() => {
   const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
-  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
+  const { eventId, indexName, scopeId, isPreview, isPreviewMode } = useDocumentDetailsContext();
   const { addError: addErrorToast } = useAppToasts();
 
   const { openLeftPanel } = useExpandableFlyoutApi();
@@ -80,8 +81,11 @@ export const Notes = memo(() => {
   );
 
   useEffect(() => {
-    dispatch(fetchNotesByDocumentIds({ documentIds: [eventId] }));
-  }, [dispatch, eventId]);
+    // only fetch notes if we are not in a preview panel, or not in a rule preview workflow
+    if (!isPreviewMode && !isPreview) {
+      dispatch(fetchNotesByDocumentIds({ documentIds: [eventId] }));
+    }
+  }, [dispatch, eventId, isPreview, isPreviewMode]);
 
   const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdsStatus(state));
   const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdsError(state));
@@ -107,37 +111,45 @@ export const Notes = memo(() => {
       }
       data-test-subj={NOTES_TITLE_TEST_ID}
     >
-      {fetchStatus === ReqStatus.Loading ? (
-        <EuiLoadingSpinner data-test-subj={NOTES_LOADING_TEST_ID} size="m" />
+      {isPreview ? (
+        getEmptyTagValue()
       ) : (
         <>
-          {notes.length === 0 ? (
-            <EuiButtonEmpty
-              iconType="plusInCircle"
-              onClick={openExpandedFlyoutNotesTab}
-              size="s"
-              aria-label={ADD_NOTE_BUTTON}
-              data-test-subj={NOTES_ADD_NOTE_BUTTON_TEST_ID}
-            >
-              {ADD_NOTE_BUTTON}
-            </EuiButtonEmpty>
+          {fetchStatus === ReqStatus.Loading ? (
+            <EuiLoadingSpinner data-test-subj={NOTES_LOADING_TEST_ID} size="m" />
           ) : (
-            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-              <EuiFlexItem data-test-subj={NOTES_COUNT_TEST_ID}>
-                <FormattedCount count={notes.length} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButtonIcon
-                  onClick={openExpandedFlyoutNotesTab}
+            <>
+              {notes.length === 0 ? (
+                <EuiButtonEmpty
                   iconType="plusInCircle"
-                  css={css`
-                    margin-left: ${euiTheme.size.xs};
-                  `}
+                  onClick={openExpandedFlyoutNotesTab}
+                  size="s"
+                  disabled={isPreviewMode || isPreview}
                   aria-label={ADD_NOTE_BUTTON}
-                  data-test-subj={NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                  data-test-subj={NOTES_ADD_NOTE_BUTTON_TEST_ID}
+                >
+                  {ADD_NOTE_BUTTON}
+                </EuiButtonEmpty>
+              ) : (
+                <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+                  <EuiFlexItem data-test-subj={NOTES_COUNT_TEST_ID}>
+                    <FormattedCount count={notes.length} />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiButtonIcon
+                      onClick={openExpandedFlyoutNotesTab}
+                      iconType="plusInCircle"
+                      disabled={isPreviewMode || isPreview}
+                      css={css`
+                        margin-left: ${euiTheme.size.xs};
+                      `}
+                      aria-label={ADD_NOTE_BUTTON}
+                      data-test-subj={NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </>
           )}
         </>
       )}

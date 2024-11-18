@@ -18,12 +18,13 @@ import { isEqlRule, isEsqlRule } from '../../../../../common/detection_engine/ut
  * Keyword, Numeric, ip, boolean, or binary.
  * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html
  */
-export const getTermsAggregationFields = (fields: FieldSpec[]): FieldSpec[] => {
-  // binary types is excluded, as binary field has property aggregatable === false
-  const allowedTypesSet = new Set(['string', 'number', 'ip', 'boolean']);
+export const getTermsAggregationFields = (fields: FieldSpec[]): FieldSpec[] =>
+  fields.filter(
+    (field) => field.aggregatable === true && ALLOWED_AGGREGATABLE_FIELD_TYPES_SET.has(field.type)
+  );
 
-  return fields.filter((field) => field.aggregatable === true && allowedTypesSet.has(field.type));
-};
+// binary types is excluded, as binary field has property aggregatable === false
+const ALLOWED_AGGREGATABLE_FIELD_TYPES_SET = new Set(['string', 'number', 'ip', 'boolean']);
 
 /**
  * return query is required message depends on a rule type

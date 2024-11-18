@@ -26,7 +26,7 @@ import {
   ElasticsearchClient,
 } from '@kbn/core/server';
 
-import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { RequestTimeoutsConfig } from './config';
 import { asOk, asErr, Result } from './lib/result_type';
 
@@ -427,6 +427,7 @@ export class TaskStore {
       return asOk({
         ...doc,
         id: docId,
+        version: encodeVersion(item.update._seq_no, item.update._primary_term),
       });
     });
   }
