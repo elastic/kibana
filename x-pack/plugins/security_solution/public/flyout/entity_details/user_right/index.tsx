@@ -103,7 +103,7 @@ export const UserPanel = ({
   const { hasMisconfigurationFindings } = useHasMisconfigurations('user.name', userName);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    fieldName: 'user.name',
+    field: 'user.name',
     queryName: userName,
     to,
     from,

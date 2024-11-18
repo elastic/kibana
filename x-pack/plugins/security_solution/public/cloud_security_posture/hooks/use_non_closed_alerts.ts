@@ -12,13 +12,13 @@ import { useAlertsByStatus } from '../../overview/components/detection_response/
 import type { ParsedAlertsData } from '../../overview/components/detection_response/alerts_by_status/types';
 
 export const useNonClosedAlerts = ({
-  fieldName,
+  field,
   queryName,
   to,
   from,
   queryId,
 }: {
-  fieldName: 'host.name' | 'user.name';
+  field: 'host.name' | 'user.name';
   queryName: string;
   to: string;
   from: string;
@@ -26,10 +26,7 @@ export const useNonClosedAlerts = ({
 }) => {
   const { signalIndexName } = useSignalIndex();
 
-  const entityFilter = useMemo(
-    () => ({ field: fieldName, value: queryName }),
-    [fieldName, queryName]
-  );
+  const entityFilter = useMemo(() => ({ field, value: queryName }), [field, queryName]);
 
   const { items: alertsData } = useAlertsByStatus({
     entityFilter,

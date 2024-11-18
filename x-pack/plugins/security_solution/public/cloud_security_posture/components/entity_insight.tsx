@@ -21,38 +21,41 @@ import { useNonClosedAlerts } from '../hooks/use_non_closed_alerts';
 
 export const EntityInsight = <T,>({
   name,
-  fieldName,
+  field,
   isPreviewMode,
 }: {
   name: string;
-  fieldName: 'host.name' | 'user.name';
+  field: 'host.name' | 'user.name';
   isPreviewMode?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const insightContent: React.ReactElement[] = [];
 
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(fieldName, name);
+  const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations(
+    field,
+    name
+  );
 
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(fieldName, name);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, name);
 
-  const isVulnerabilitiesFindingForHost = hasVulnerabilitiesFindings && fieldName === 'host.name';
+  const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && field === 'host.name';
 
   const { to, from } = useGlobalTime();
 
-  const { hasNonClosedAlerts, filteredAlertsData } = useNonClosedAlerts({
-    fieldName,
+  const { hasNonClosedAlerts: showAlertsPreview, filteredAlertsData } = useNonClosedAlerts({
+    field,
     queryName: name,
     to,
     from,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
   });
 
-  if (hasNonClosedAlerts) {
+  if (showAlertsPreview) {
     insightContent.push(
       <>
         <AlertsPreview
           alertsData={filteredAlertsData}
-          fieldName={fieldName}
+          field={field}
           name={name}
           isPreviewMode={isPreviewMode}
         />
@@ -61,34 +64,23 @@ export const EntityInsight = <T,>({
     );
   }
 
-  if (hasMisconfigurationFindings)
+  if (showMisconfigurationsPreview)
     insightContent.push(
       <>
-        <MisconfigurationsPreview
-          name={name}
-          fieldName={fieldName}
-          hasNonClosedAlerts={hasNonClosedAlerts}
-          isPreviewMode={isPreviewMode}
-        />
+        <MisconfigurationsPreview name={name} field={field} isPreviewMode={isPreviewMode} />
         <EuiSpacer size="s" />
       </>
     );
-  if (isVulnerabilitiesFindingForHost && hasVulnerabilitiesFindings)
+  if (showVulnerabilitiesPreview)
     insightContent.push(
       <>
-        <VulnerabilitiesPreview
-          name={name}
-          isPreviewMode={isPreviewMode}
-          hasNonClosedAlerts={hasNonClosedAlerts}
-        />
+        <VulnerabilitiesPreview name={name} field={field} isPreviewMode={isPreviewMode} />
         <EuiSpacer size="s" />
       </>
     );
   return (
     <>
-      {(insightContent.length > 0 ||
-        hasMisconfigurationFindings ||
-        (isVulnerabilitiesFindingForHost && hasVulnerabilitiesFindings)) && (
+      {insightContent.length > 0 && (
         <>
           <EuiAccordion
             initialIsOpen={true}

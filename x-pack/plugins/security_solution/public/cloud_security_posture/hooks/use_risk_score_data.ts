@@ -16,19 +16,20 @@ import {
 import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
 import { FIRST_RECORD_PAGINATION } from '../../entity_analytics/common';
 
-export const useRiskScoreData = ({
-  isUsingHostName,
+export const useHasRiskScore = ({
+  field,
   name,
 }: {
-  isUsingHostName: boolean;
+  field: 'host.name' | 'user.name';
   name: string;
 }) => {
+  const isHostNameField = field === 'host.name';
   const buildFilterQuery = useMemo(
-    () => (isUsingHostName ? buildHostNamesFilter([name]) : buildUserNamesFilter([name])),
-    [isUsingHostName, name]
+    () => (isHostNameField ? buildHostNamesFilter([name]) : buildUserNamesFilter([name])),
+    [isHostNameField, name]
   );
   const { data } = useRiskScore({
-    riskEntity: isUsingHostName ? RiskScoreEntity.host : RiskScoreEntity.user,
+    riskEntity: isHostNameField ? RiskScoreEntity.host : RiskScoreEntity.user,
     filterQuery: buildFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
@@ -36,9 +37,9 @@ export const useRiskScoreData = ({
 
   const riskData = data?.[0];
 
-  const isRiskScoreExist = isUsingHostName
+  const hasRiskScore = isHostNameField
     ? !!(riskData as HostRiskScore)?.host.risk
     : !!(riskData as UserRiskScore)?.user.risk;
 
-  return { isRiskScoreExist };
+  return { hasRiskScore };
 };

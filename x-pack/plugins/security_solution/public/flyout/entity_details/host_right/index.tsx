@@ -103,7 +103,7 @@ export const HostPanel = ({
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', hostName);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    fieldName: 'host.name',
+    field: 'host.name',
     queryName: hostName,
     to,
     from,

@@ -8,7 +8,7 @@
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useMisconfigurationPreview } from './use_misconfiguration_preview';
 
-export const useHasMisconfigurations = (field: string, value: string) => {
+export const useHasMisconfigurations = (field: 'host.name' | 'user.name', value: string) => {
   const { data } = useMisconfigurationPreview({
     query: buildEntityFlyoutPreviewQuery(field, value),
     sort: [],

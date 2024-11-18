@@ -12,31 +12,32 @@ import { HostDetailsPanelKey } from '../../flyout/entity_details/host_details_le
 import { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
 
 export const useNavigateEntityInsight = ({
-  isUsingHostName,
+  field,
   name,
-  isRiskScoreExist,
+  hasRiskScore,
   hasMisconfigurationFindings,
   hasNonClosedAlerts,
   hasVulnerabilitiesFindings,
   subTab,
 }: {
-  isUsingHostName: boolean;
+  field: 'host.name' | 'user.name';
   name: string;
-  isRiskScoreExist: boolean;
+  hasRiskScore: boolean;
   hasMisconfigurationFindings: boolean;
   hasNonClosedAlerts: boolean;
   hasVulnerabilitiesFindings: boolean;
   subTab: string;
 }) => {
+  const isHostNameField = field === 'host.name';
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToEntityInsightTab = useCallback(() => {
     openLeftPanel({
-      id: isUsingHostName ? HostDetailsPanelKey : UserDetailsPanelKey,
-      params: isUsingHostName
+      id: isHostNameField ? HostDetailsPanelKey : UserDetailsPanelKey,
+      params: isHostNameField
         ? {
             name,
-            isRiskScoreExist,
+            hasRiskScore,
             hasMisconfigurationFindings,
             hasVulnerabilitiesFindings,
             hasNonClosedAlerts,
@@ -47,7 +48,7 @@ export const useNavigateEntityInsight = ({
           }
         : {
             user: { name },
-            isRiskScoreExist,
+            hasRiskScore,
             hasMisconfigurationFindings,
             hasNonClosedAlerts,
             path: {
@@ -58,9 +59,9 @@ export const useNavigateEntityInsight = ({
     });
   }, [
     openLeftPanel,
-    isUsingHostName,
+    isHostNameField,
     name,
-    isRiskScoreExist,
+    hasRiskScore,
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,

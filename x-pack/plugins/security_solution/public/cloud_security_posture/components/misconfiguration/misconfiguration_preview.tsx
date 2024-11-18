@@ -20,10 +20,13 @@ import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useNavigateEntityInsight } from '../../hooks/use_entity_insight';
-import { useRiskScoreData } from '../../hooks/use_risk_score_data';
+import { useHasRiskScore } from '../../hooks/use_risk_score_data';
+import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
 
 export const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
@@ -88,38 +91,44 @@ const MisconfigurationPreviewScore = ({
 
 export const MisconfigurationsPreview = ({
   name,
-  fieldName,
-  hasNonClosedAlerts = false,
+  field,
   isPreviewMode,
 }: {
   name: string;
-  fieldName: 'host.name' | 'user.name';
-  hasNonClosedAlerts?: boolean;
+  field: 'host.name' | 'user.name';
   isPreviewMode?: boolean;
 }) => {
   const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
-    fieldName,
+    field,
     name
   );
 
-  const isUsingHostName = fieldName === 'host.name';
+  const { to, from } = useGlobalTime();
+
+  const { hasNonClosedAlerts } = useNonClosedAlerts({
+    field,
+    queryName: name,
+    to,
+    from,
+    queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}MISCONFIGURATION_PREVIEW`,
+  });
 
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT);
   }, []);
   const { euiTheme } = useEuiTheme();
 
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', name);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, name);
 
-  const { isRiskScoreExist } = useRiskScoreData({
-    isUsingHostName,
+  const { hasRiskScore } = useHasRiskScore({
+    field,
     name,
   });
 
   const { goToEntityInsightTab } = useNavigateEntityInsight({
-    isUsingHostName,
+    field,
     name,
-    isRiskScoreExist,
+    hasRiskScore,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
     hasVulnerabilitiesFindings,
