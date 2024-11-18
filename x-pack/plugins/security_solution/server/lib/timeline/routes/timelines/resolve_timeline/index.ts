@@ -48,8 +48,8 @@ export const resolveTimelineRoute = (router: SecuritySolutionPluginRouter) => {
 
           if (templateTimelineId != null && id == null) {
             // Template timelineId is not a SO id, so it does not need to be updated to use resolve
-            const tl = await getTimelineTemplateOrNull(frameworkRequest, templateTimelineId);
-            if (tl) {
+            const timeline = await getTimelineTemplateOrNull(frameworkRequest, templateTimelineId);
+            if (timeline) {
               return response.ok({
                 body: { timeline, outcome: 'exactMatch' },
               });

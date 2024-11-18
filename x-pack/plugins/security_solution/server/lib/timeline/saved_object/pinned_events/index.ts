@@ -151,7 +151,6 @@ const createPinnedEvent = async ({
   // create Pinned Event on Timeline
   return {
     ...convertSavedObjectToSavedPinnedEvent(repopulatedSavedObject),
-    code: 200,
   };
 };
 
