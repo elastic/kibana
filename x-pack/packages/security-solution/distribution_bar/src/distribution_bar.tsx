@@ -12,7 +12,13 @@ import { css } from '@emotion/react';
 /** DistributionBar component props */
 export interface DistributionBarProps {
   /** distribution data points */
-  stats: Array<{ key: string; count: number; color: string; label?: React.ReactNode }>;
+  stats: Array<{
+    key: string;
+    count: number;
+    color: string;
+    label?: React.ReactNode;
+    onClick?: () => void;
+  }>;
   /** hide the label above the bar at first render */
   hideLastTooltip?: boolean;
   /** data-test-subj used for querying the component in tests */
@@ -155,7 +161,12 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
     const prettyNumber = numeral(stat.count).format('0,0a');
 
     return (
-      <div key={stat.key} css={partStyle} data-test-subj={`${dataTestSubj}__part`}>
+      <div
+        key={stat.key}
+        css={partStyle}
+        data-test-subj={`${dataTestSubj}__part`}
+        onClick={stat.onClick}
+      >
         <div css={styles.tooltip}>
           <EuiFlexGroup
             gutterSize={'none'}

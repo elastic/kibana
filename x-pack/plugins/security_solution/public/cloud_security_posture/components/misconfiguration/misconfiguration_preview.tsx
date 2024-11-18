@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
@@ -25,7 +25,11 @@ import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared
 import { useEntityInsight } from '../../hooks/use_entity_insight';
 import { useRiskScoreData } from '../../hooks/use_risk_score_data';
 
-export const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
+export const getFindingsStats = (
+  passedFindingsStats: number,
+  failedFindingsStats: number,
+  stateFunction: (filter: string) => void
+) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
   return [
     {
@@ -37,6 +41,9 @@ export const getFindingsStats = (passedFindingsStats: number, failedFindingsStat
       ),
       count: passedFindingsStats,
       color: statusColors.passed,
+      onClick: () => {
+        stateFunction('Passed');
+      },
     },
     {
       key: i18n.translate(
@@ -47,6 +54,9 @@ export const getFindingsStats = (passedFindingsStats: number, failedFindingsStat
       ),
       count: failedFindingsStats,
       color: statusColors.failed,
+      onClick: () => {
+        stateFunction('Failed');
+      },
     },
   ];
 };
@@ -101,6 +111,8 @@ export const MisconfigurationsPreview = ({
     fieldName,
     name
   );
+
+  const [currentFilter, setCurrentFilter] = useState<string>('*');
 
   const isUsingHostName = fieldName === 'host.name';
 
@@ -167,13 +179,14 @@ export const MisconfigurationsPreview = ({
           failedFindings={failedFindings}
           euiTheme={euiTheme}
         />
-
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem />
             <EuiFlexItem>
               <EuiSpacer />
-              <DistributionBar stats={getFindingsStats(passedFindings, failedFindings)} />
+              <DistributionBar
+                stats={getFindingsStats(passedFindings, failedFindings, setCurrentFilter)}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
