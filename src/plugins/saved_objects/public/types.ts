@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  CoreStart,
-  SavedObjectAttributes,
-  SavedObjectReference,
-} from '@kbn/core/public';
+import { CoreStart, SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
 import { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
