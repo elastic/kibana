@@ -36,5 +36,6 @@ export default function apmApiIntegrationTests({
     loadTestFile(require.resolve('./service_nodes'));
     loadTestFile(require.resolve('./span_links'));
     loadTestFile(require.resolve('./suggestions'));
+    loadTestFile(require.resolve('./throughput'));
   });
 }
