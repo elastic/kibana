@@ -165,7 +165,7 @@ function transformPartialIndicatorState(
   }
 }
 
-export function transformPartialUrlStateToFormState(
+export function transformPartialSLOStateToFormState(
   values: RecursivePartial<CreateSLOInput>
 ): CreateSLOForm {
   let state: CreateSLOForm;
@@ -189,8 +189,8 @@ export function transformPartialUrlStateToFormState(
   if (values.description) {
     state.description = values.description;
   }
-  if (!!values.tags) {
-    state.tags = values.tags as string[];
+  if (values.tags) {
+    state.tags = [values.tags].flat().filter((tag) => !!tag) as string[];
   }
 
   if (values.objective) {

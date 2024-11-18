@@ -13,6 +13,7 @@ import React from 'react';
 import { OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { SloEditForm } from '../components/slo_edit_form';
 import { CreateSLOForm } from '../types';
+import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 
 export const sloEditFormFooterPortal = createHtmlPortalNode();
 
@@ -43,24 +44,7 @@ export default function SloAddFormFlyout({
         <SloEditForm
           onSave={onClose}
           initialValues={
-            initialValues
-              ? merge(
-                  {
-                    indicator: {
-                      type: 'sli.kql.custom',
-                    },
-                    objective: {
-                      target: 99,
-                    },
-                    timeWindow: {
-                      duration: '30d',
-                      type: 'rolling',
-                    },
-                    budgetingMethod: 'occurrences',
-                  },
-                  { ...initialValues }
-                )
-              : undefined
+            initialValues ? merge(SLO_EDIT_FORM_DEFAULT_VALUES, initialValues) : undefined
           }
         />
       </EuiFlyoutBody>

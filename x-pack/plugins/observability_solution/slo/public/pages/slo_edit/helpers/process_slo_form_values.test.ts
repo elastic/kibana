@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { transformPartialUrlStateToFormState as transform } from './process_slo_form_values';
+import { transformPartialSLOStateToFormState as transform } from './process_slo_form_values';
 
 describe('Transform partial URL state into form state', () => {
   describe("with 'indicator' in URL state", () => {

@@ -7,6 +7,7 @@
 
 import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { assertNever } from '@kbn/std';
 import React, { useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { SLI_OPTIONS } from '../constants';
@@ -14,11 +15,11 @@ import { useUnregisterFields } from '../hooks/use_unregister_fields';
 import { CreateSLOForm } from '../types';
 import { ApmAvailabilityIndicatorTypeForm } from './apm_availability/apm_availability_indicator_type_form';
 import { ApmLatencyIndicatorTypeForm } from './apm_latency/apm_latency_indicator_type_form';
-import { SyntheticsAvailabilityIndicatorTypeForm } from './synthetics_availability/synthetics_availability_indicator_type_form';
 import { CustomKqlIndicatorTypeForm } from './custom_kql/custom_kql_indicator_type_form';
 import { CustomMetricIndicatorTypeForm } from './custom_metric/custom_metric_type_form';
 import { HistogramIndicatorTypeForm } from './histogram/histogram_indicator_type_form';
 import { maxWidth } from './slo_edit_form';
+import { SyntheticsAvailabilityIndicatorTypeForm } from './synthetics_availability/synthetics_availability_indicator_type_form';
 import { TimesliceMetricIndicatorTypeForm } from './timeslice_metric/timeslice_metric_indicator';
 
 interface SloEditFormIndicatorSectionProps {
@@ -48,7 +49,7 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
       case 'sli.metric.timeslice':
         return <TimesliceMetricIndicatorTypeForm />;
       default:
-        return null;
+        assertNever(indicatorType);
     }
   }, [indicatorType]);
 
