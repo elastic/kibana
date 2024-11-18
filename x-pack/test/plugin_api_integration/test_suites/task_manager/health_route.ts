@@ -134,7 +134,8 @@ export default function ({ getService }: FtrProviderContext) {
       const health = await getHealth();
       expect(health.status).to.eql('OK');
       expect(health.stats.configuration.value).to.eql({
-        poll_interval: 500,
+        // poll interval is 3000ms bc the task manager utilization is low
+        poll_interval: 3000,
         monitored_aggregated_stats_refresh_rate: monitoredAggregatedStatsRefreshRate,
         monitored_stats_running_average_window: 50,
         monitored_task_execution_thresholds: {
