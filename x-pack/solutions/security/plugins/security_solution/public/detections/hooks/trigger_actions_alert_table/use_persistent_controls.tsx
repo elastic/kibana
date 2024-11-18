@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import type { ComponentProps } from 'react';
+import React, { useCallback, useMemo, memo } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   dataTableSelectors,
   tableDefaults,
   dataTableActions,
 } from '@kbn/securitysolution-data-table';
-import type { ViewSelection, TableId } from '@kbn/securitysolution-data-table';
+import type { ViewSelection } from '@kbn/securitysolution-data-table';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { getTelemetryEvent } from '@kbn/grouping/src/telemetry/const';
+import type { GetSecurityAlertsTableProp } from '../../components/alerts_table/types';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
@@ -28,116 +30,114 @@ import { AdditionalFiltersAction } from '../../components/alerts_table/additiona
 
 const { changeViewMode } = dataTableActions;
 
-export const getPersistentControlsHook = (tableId: TableId) => {
-  const usePersistentControls = () => {
-    const dispatch = useDispatch();
-    const {
-      services: { telemetry },
-    } = useKibana();
+const AdditionalToolbarControlsComponent = ({
+  tableType,
+}: Pick<
+  ComponentProps<GetSecurityAlertsTableProp<'renderAdditionalToolbarControls'>>,
+  'tableType'
+>) => {
+  const dispatch = useDispatch();
+  const {
+    services: { telemetry },
+  } = useKibana();
 
-    const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
-    const groupId = useMemo(() => groupIdSelector(), []);
-    const { options } = useDeepEqualSelector((state) => groupId(state, tableId)) ?? {
-      options: [],
-    };
+  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+  const groupId = useMemo(() => groupIdSelector(), []);
+  const { options } = useDeepEqualSelector((state) => groupId(state, tableType)) ?? {
+    options: [],
+  };
 
-    const trackGroupChange = useCallback(
-      (groupSelection: string) => {
-        track?.(
-          METRIC_TYPE.CLICK,
-          getTelemetryEvent.groupChanged({ groupingId: tableId, selected: groupSelection })
-        );
-        telemetry.reportEvent(AlertsEventTypes.AlertsGroupingChanged, {
-          groupByField: groupSelection,
-          tableId,
-        });
-      },
-      [telemetry]
-    );
+  const trackGroupChange = useCallback(
+    (groupSelection: string) => {
+      track?.(
+        METRIC_TYPE.CLICK,
+        getTelemetryEvent.groupChanged({ groupingId: tableType, selected: groupSelection })
+      );
+      telemetry.reportEvent(AlertsEventTypes.AlertsGroupingChanged, {
+        groupByField: groupSelection,
+        tableId: tableType,
+      });
+    },
+    [tableType, telemetry]
+  );
 
-    const onGroupChange = useCallback(
-      (selectedGroups: string[]) => {
-        selectedGroups.forEach((g) => trackGroupChange(g));
-        dispatch(updateGroups({ activeGroups: selectedGroups, tableId }));
-      },
-      [dispatch, trackGroupChange]
-    );
+  const onGroupChange = useCallback(
+    (selectedGroups: string[]) => {
+      selectedGroups.forEach((g) => trackGroupChange(g));
+      dispatch(updateGroups({ activeGroups: selectedGroups, tableId: tableType }));
+    },
+    [dispatch, tableType, trackGroupChange]
+  );
 
-    const fields = useMemo(() => {
-      return Object.values(sourcererDataView.fields || {});
-    }, [sourcererDataView.fields]);
+  const fields = useMemo(() => {
+    return Object.values(sourcererDataView.fields || {});
+  }, [sourcererDataView.fields]);
 
-    const groupSelector = useGetGroupSelectorStateless({
-      groupingId: tableId,
-      onGroupChange,
-      fields,
-      defaultGroupingOptions: options,
-      maxGroupingLevels: 3,
-    });
+  const groupSelector = useGetGroupSelectorStateless({
+    groupingId: tableType,
+    onGroupChange,
+    fields,
+    defaultGroupingOptions: options,
+    maxGroupingLevels: 3,
+  });
 
-    const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
+  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
-    const tableView = useShallowEqualSelector(
-      (state) => (getTable(state, tableId) ?? tableDefaults).viewMode ?? tableDefaults.viewMode
-    );
+  const tableView = useShallowEqualSelector(
+    (state) => (getTable(state, tableType) ?? tableDefaults).viewMode ?? tableDefaults.viewMode
+  );
 
-    const handleChangeTableView = useCallback(
-      (selectedView: ViewSelection) => {
-        dispatch(
-          changeViewMode({
-            id: tableId,
-            viewMode: selectedView,
-          })
-        );
-      },
-      [dispatch]
-    );
+  const handleChangeTableView = useCallback(
+    (selectedView: ViewSelection) => {
+      dispatch(
+        changeViewMode({
+          id: tableType,
+          viewMode: selectedView,
+        })
+      );
+    },
+    [dispatch, tableType]
+  );
 
-    const {
+  const {
+    showBuildingBlockAlerts,
+    setShowBuildingBlockAlerts,
+    showOnlyThreatIndicatorAlerts,
+    setShowOnlyThreatIndicatorAlerts,
+  } = useDataTableFilters(tableType);
+
+  const additionalFiltersComponent = useMemo(
+    () => (
+      <AdditionalFiltersAction
+        areEventsLoading={false}
+        onShowBuildingBlockAlertsChanged={setShowBuildingBlockAlerts}
+        showBuildingBlockAlerts={showBuildingBlockAlerts}
+        onShowOnlyThreatIndicatorAlertsChanged={setShowOnlyThreatIndicatorAlerts}
+        showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+      />
+    ),
+    [
       showBuildingBlockAlerts,
       setShowBuildingBlockAlerts,
       showOnlyThreatIndicatorAlerts,
       setShowOnlyThreatIndicatorAlerts,
-    } = useDataTableFilters(tableId);
+    ]
+  );
 
-    const additionalFiltersComponent = useMemo(
-      () => (
-        <AdditionalFiltersAction
-          areEventsLoading={false}
-          onShowBuildingBlockAlertsChanged={setShowBuildingBlockAlerts}
-          showBuildingBlockAlerts={showBuildingBlockAlerts}
-          onShowOnlyThreatIndicatorAlertsChanged={setShowOnlyThreatIndicatorAlerts}
-          showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-        />
-      ),
-      [
-        showBuildingBlockAlerts,
-        setShowBuildingBlockAlerts,
-        showOnlyThreatIndicatorAlerts,
-        setShowOnlyThreatIndicatorAlerts,
-      ]
-    );
-
-    const rightTopMenu = useMemo(
-      () => (
-        <RightTopMenu
-          position="relative"
-          tableView={tableView}
-          loading={false}
-          tableId={tableId}
-          title={'Some Title'}
-          onViewChange={handleChangeTableView}
-          hasRightOffset={false}
-          additionalFilters={additionalFiltersComponent}
-          showInspect={false}
-          additionalMenuOptions={groupSelector != null ? [groupSelector] : []}
-        />
-      ),
-      [tableView, handleChangeTableView, additionalFiltersComponent, groupSelector]
-    );
-
-    return useMemo(() => ({ right: rightTopMenu }), [rightTopMenu]);
-  };
-
-  return usePersistentControls;
+  return (
+    <RightTopMenu
+      position="relative"
+      tableView={tableView}
+      loading={false}
+      tableId={tableType}
+      title={'Some Title'}
+      onViewChange={handleChangeTableView}
+      hasRightOffset={false}
+      additionalFilters={additionalFiltersComponent}
+      showInspect={false}
+      additionalMenuOptions={groupSelector != null ? [groupSelector] : []}
+    />
+  );
 };
+
+export const AdditionalToolbarControls = memo(AdditionalToolbarControlsComponent);

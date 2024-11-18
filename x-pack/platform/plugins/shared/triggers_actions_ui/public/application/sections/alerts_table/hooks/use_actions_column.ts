@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useContext, useMemo } from 'react';
-import { AlertsTableContext } from '../contexts/alerts_table_context';
+import { useCallback, useMemo } from 'react';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import { UseActionsColumnRegistry, BulkActionsVerbs } from '../../../../types';
 
 const DEFAULT_ACTIONS_COLUMNS_WIDTH = 75;
@@ -17,8 +17,8 @@ interface UseActionsColumnProps {
 
 export const useActionsColumn = ({ options }: UseActionsColumnProps) => {
   const {
-    bulkActions: [, updateBulkActionsState],
-  } = useContext(AlertsTableContext);
+    bulkActionsStore: [, updateBulkActionsState],
+  } = useAlertsTableContext();
 
   const defaultActionsColum = useCallback(
     () => ({
