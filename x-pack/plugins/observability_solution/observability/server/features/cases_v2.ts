@@ -23,13 +23,13 @@ export const getCasesFeatureV2 = (
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.observability,
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-  app: [casesFeatureIdV2, casesFeatureId, 'kibana'],
+  app: [casesFeatureId, 'kibana'],
   catalogue: [observabilityFeatureId],
   cases: [observabilityFeatureId],
   privileges: {
     all: {
       api: casesApiTags.all,
-      app: [casesFeatureIdV2, casesFeatureId, 'kibana'],
+      app: [casesFeatureId, 'kibana'],
       catalogue: [observabilityFeatureId],
       cases: {
         create: [observabilityFeatureId],
@@ -45,7 +45,7 @@ export const getCasesFeatureV2 = (
     },
     read: {
       api: casesApiTags.read,
-      app: [casesFeatureIdV2, casesFeatureId, 'kibana'],
+      app: [casesFeatureId, 'kibana'],
       catalogue: [observabilityFeatureId],
       cases: {
         read: [observabilityFeatureId],
