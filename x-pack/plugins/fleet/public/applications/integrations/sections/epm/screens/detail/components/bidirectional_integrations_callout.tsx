@@ -28,7 +28,7 @@ export const BidirectionalIntegrationsBanner = memo<BidirectionalIntegrationsBan
     const bannerTitle = (
       <EuiTextColor color="accent">
         <FormattedMessage
-          id="bidirectionalIntegrationsBanner.title"
+          id="xpack.fleet.bidirectionalIntegrationsBanner.title"
           defaultMessage={'NEW: Response enabled integration'}
         />
       </EuiTextColor>
@@ -42,7 +42,7 @@ export const BidirectionalIntegrationsBanner = memo<BidirectionalIntegrationsBan
         data-test-subj={'bidirectionalIntegrationsCallout'}
       >
         <FormattedMessage
-          id="bidirectionalIntegrationsBanner.body"
+          id="xpack.fleet.bidirectionalIntegrationsBanner.body"
           defaultMessage="Orchestrate response actions across endpoint vendors with bidirectional integrations. {learnmore}."
           values={{
             learnmore: (
