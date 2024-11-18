@@ -162,9 +162,10 @@ async function getRoleMappingsDeprecations(
             defaultMessage: `Go to Management > Security > Roles to find roles with the "{apmUserRoleName}" role.`,
             values: { apmUserRoleName: APM_USER_ROLE_NAME },
           }),
-          i18n.translate('xpack.apm.deprecations.apmUserRoleMappings.manualStepFive', {
+          i18n.translate('xpack.apm.deprecations.apmUserRoleMappings.manualStepTwo', {
             defaultMessage:
               'Remove the "{apmUserRoleName} role from all role mappings and add the built-in "viewer" role',
+            values: { apmUserRoleName: APM_USER_ROLE_NAME },
           }),
         ],
       },
