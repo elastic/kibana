@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { useStoredSelectedDashboardsCardItemId } from '../../../../hooks/use_stored_state';
+import { useStoredSelectedCardItemIds } from '../../../../hooks/use_stored_state';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentAssetPanel } from '../common/card_content_asset_panel';
@@ -18,7 +18,6 @@ import * as i18n from './translations';
 import type { CardSelectorListItem } from '../common/card_selector_list';
 import { CardSelectorList } from '../common/card_selector_list';
 import { DASHBOARDS_CARD_ITEMS, DASHBOARDS_CARD_ITEMS_BY_ID } from './dashboards_card_config';
-import { DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED } from './constants';
 import { useOnboardingContext } from '../../../onboarding_context';
 import { useDelayedVisibility } from '../../hooks/use_delayed_visibility';
 
@@ -30,10 +29,10 @@ export const DashboardsCard: OnboardingCardComponent = ({
 }) => {
   const { spaceId } = useOnboardingContext();
   const isCardContentVisible = useDelayedVisibility({ isExpanded });
-  const [toggleIdSelected, setSelectedRulesCardItemIdToStorage] =
-    useStoredSelectedDashboardsCardItemId(spaceId, DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED.id);
+  const { storedSelectedCardItemIds, setStoredSelectedCardItemId } =
+    useStoredSelectedCardItemIds(spaceId);
   const [selectedCardItem, setSelectedCardItem] = useState(
-    DASHBOARDS_CARD_ITEMS_BY_ID[toggleIdSelected]
+    DASHBOARDS_CARD_ITEMS_BY_ID[storedSelectedCardItemIds.dashboardsCard]
   );
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
@@ -47,9 +46,9 @@ export const DashboardsCard: OnboardingCardComponent = ({
   const onSelectCard = useCallback(
     (item: CardSelectorListItem) => {
       setSelectedCardItem(item);
-      setSelectedRulesCardItemIdToStorage(item.id);
+      setStoredSelectedCardItemId('dashboardsCard', item.id);
     },
-    [setSelectedRulesCardItemIdToStorage]
+    [setStoredSelectedCardItemId]
   );
 
   if (!isCardContentVisible) return null;

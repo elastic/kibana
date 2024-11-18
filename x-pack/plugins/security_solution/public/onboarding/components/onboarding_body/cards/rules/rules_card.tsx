@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { useStoredSelectedRulesCardItemId } from '../../../../hooks/use_stored_state';
+import { useStoredSelectedCardItemIds } from '../../../../hooks/use_stored_state';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
@@ -18,7 +18,6 @@ import { CardCallOut } from '../common/card_callout';
 import * as i18n from './translations';
 import type { CardSelectorListItem } from '../common/card_selector_list';
 import { CardSelectorList } from '../common/card_selector_list';
-import { DEFAULT_RULES_CARD_ITEM_SELECTED } from './constants';
 import { useOnboardingContext } from '../../../onboarding_context';
 import { RULES_CARD_ITEMS, RULES_CARD_ITEMS_BY_ID } from './rules_card_config';
 import { useDelayedVisibility } from '../../hooks/use_delayed_visibility';
@@ -30,12 +29,11 @@ export const RulesCard: OnboardingCardComponent = ({
 }) => {
   const { spaceId } = useOnboardingContext();
   const isCardContentVisible = useDelayedVisibility({ isExpanded });
-  const [toggleIdSelected, setSelectedRulesCardItemIdToStorage] = useStoredSelectedRulesCardItemId(
-    spaceId,
-    DEFAULT_RULES_CARD_ITEM_SELECTED.id
-  );
+
+  const { storedSelectedCardItemIds, setStoredSelectedCardItemId } =
+    useStoredSelectedCardItemIds(spaceId);
   const [selectedCardItem, setSelectedCardItem] = useState(
-    RULES_CARD_ITEMS_BY_ID[toggleIdSelected]
+    RULES_CARD_ITEMS_BY_ID[storedSelectedCardItemIds.rulesCard]
   );
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
@@ -49,9 +47,9 @@ export const RulesCard: OnboardingCardComponent = ({
   const onSelectCard = useCallback(
     (item: CardSelectorListItem) => {
       setSelectedCardItem(item);
-      setSelectedRulesCardItemIdToStorage(item.id);
+      setStoredSelectedCardItemId('rulesCard', item.id);
     },
-    [setSelectedRulesCardItemIdToStorage]
+    [setStoredSelectedCardItemId]
   );
 
   if (!isCardContentVisible) return null;

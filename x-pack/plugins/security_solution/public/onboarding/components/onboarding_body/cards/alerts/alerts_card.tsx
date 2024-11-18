@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { useStoredSelectedAlertsCardItemId } from '../../../../hooks/use_stored_state';
+import { useStoredSelectedCardItemIds } from '../../../../hooks/use_stored_state';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
@@ -17,7 +17,6 @@ import { CardCallOut } from '../common/card_callout';
 import * as i18n from './translations';
 import type { CardSelectorListItem } from '../common/card_selector_list';
 import { CardSelectorList } from '../common/card_selector_list';
-import { DEFAULT_ALERTS_CARD_ITEM_SELECTED } from './constants';
 import { ALERTS_CARD_ITEMS, ALERTS_CARD_ITEMS_BY_ID } from './alerts_card_config';
 import { useOnboardingContext } from '../../../onboarding_context';
 import { useDelayedVisibility } from '../../hooks/use_delayed_visibility';
@@ -30,10 +29,11 @@ export const AlertsCard: OnboardingCardComponent = ({
 }) => {
   const { spaceId } = useOnboardingContext();
   const isCardContentVisible = useDelayedVisibility({ isExpanded });
-  const [toggleIdSelected, setSelectedAlertsCardItemIdToStorage] =
-    useStoredSelectedAlertsCardItemId(spaceId, DEFAULT_ALERTS_CARD_ITEM_SELECTED.id);
+  const { storedSelectedCardItemIds, setStoredSelectedCardItemId } =
+    useStoredSelectedCardItemIds(spaceId);
+
   const [selectedCardItem, setSelectedCardItem] = useState(
-    ALERTS_CARD_ITEMS_BY_ID[toggleIdSelected]
+    ALERTS_CARD_ITEMS_BY_ID[storedSelectedCardItemIds.alertsCard]
   );
 
   const isIntegrationsCardComplete = useMemo(
@@ -48,9 +48,9 @@ export const AlertsCard: OnboardingCardComponent = ({
   const onSelectCard = useCallback(
     (item: CardSelectorListItem) => {
       setSelectedCardItem(item);
-      setSelectedAlertsCardItemIdToStorage(item.id);
+      setStoredSelectedCardItemId('alertsCard', item.id);
     },
-    [setSelectedAlertsCardItemIdToStorage]
+    [setStoredSelectedCardItemId]
   );
 
   if (!isCardContentVisible) return null;
