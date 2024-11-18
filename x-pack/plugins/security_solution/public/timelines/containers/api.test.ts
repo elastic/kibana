@@ -108,15 +108,9 @@ describe('persistTimeline', () => {
       status: TimelineStatusEnum.draft,
     };
     const mockDraftResponse = {
-      data: {
-        persistTimeline: {
-          timeline: {
-            ...initialDraftTimeline,
-            savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
-            version: 'WzMzMiwxXQ==',
-          },
-        },
-      },
+      ...initialDraftTimeline,
+      savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
+      version: 'WzMzMiwxXQ==',
     };
 
     const version = null;
@@ -161,14 +155,13 @@ describe('persistTimeline', () => {
 
     test("it should update timeline from clean draft timeline's response", () => {
       expect(JSON.parse(patchMock.mock.calls[0][1].body)).toEqual({
-        timelineId: mockDraftResponse.data.persistTimeline.timeline.savedObjectId,
+        timelineId: mockDraftResponse.savedObjectId,
         timeline: {
           ...initialDraftTimeline,
-          templateTimelineId: mockDraftResponse.data.persistTimeline.timeline.templateTimelineId,
-          templateTimelineVersion:
-            mockDraftResponse.data.persistTimeline.timeline.templateTimelineVersion,
+          templateTimelineId: mockDraftResponse.templateTimelineId,
+          templateTimelineVersion: mockDraftResponse.templateTimelineVersion,
         },
-        version: mockDraftResponse.data.persistTimeline.timeline.version ?? '',
+        version: mockDraftResponse.version ?? '',
       });
     });
   });
@@ -276,7 +269,7 @@ describe('persistTimeline', () => {
       data: {
         persistTimeline: {
           timeline: {
-            ...mockPatchTimelineResponse.data.persistTimeline.timeline,
+            ...mockPatchTimelineResponse,
             version: 'WzMzMiwxXQ==',
             description: 'x',
             created: 1591092702804,

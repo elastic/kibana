@@ -7,7 +7,7 @@
 
 /* eslint-disable complexity */
 
-import { getOr, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
 import dateMath from '@kbn/datemath';
@@ -51,7 +51,6 @@ import {
   isThresholdRule,
 } from '../../../../common/detection_engine/utils';
 import { TimelineId } from '../../../../common/types/timeline';
-import type { TimelineResponse } from '../../../../common/api/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import type {
   SendAlertToTimelineActionProps,
@@ -982,15 +981,9 @@ export const sendAlertToTimelineAction = async ({
           )
         ),
       ]);
-
-      const resultingTimeline: TimelineResponse = getOr(
-        {},
-        'data.getOneTimeline',
-        responseTimeline
-      );
       const eventData: TimelineEventsDetailsItem[] = eventDataResp.data ?? [];
-      if (!isEmpty(resultingTimeline)) {
-        const timelineTemplate = omitTypenameInTimeline(resultingTimeline);
+      if (!isEmpty(responseTimeline)) {
+        const timelineTemplate = omitTypenameInTimeline(responseTimeline);
         const { timeline, notes } = formatTimelineResponseToModel(
           timelineTemplate,
           true,

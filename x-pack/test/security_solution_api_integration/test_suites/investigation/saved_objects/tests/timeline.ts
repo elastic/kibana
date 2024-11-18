@@ -26,8 +26,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       it('Create a timeline just with a title', async () => {
         const titleToSaved = 'hello title';
         const response = await createBasicTimeline(supertest, titleToSaved);
-        const { savedObjectId, title, version } =
-          response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId, title, version } = response.body.data && response.body;
 
         expect(title).to.be(titleToSaved);
         expect(savedObjectId).to.not.be.empty();
@@ -152,8 +151,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
           sort,
           title,
           version,
-        } =
-          response.body.data && omitTypenameInTimeline(response.body.data.persistTimeline.timeline);
+        } = response.body.data && omitTypenameInTimeline(response.body);
 
         expect(columns.map((col: { id: string }) => col.id)).to.eql(
           timelineObject.columns.map((col) => col.id)
@@ -172,8 +170,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       it('Update a timeline with a new title', async () => {
         const titleToSaved = 'hello title';
         const response = await createBasicTimeline(supertest, titleToSaved);
-        const { savedObjectId, version } =
-          response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId, version } = response.body.data && response.body;
 
         const newTitle = 'new title';
 
@@ -200,8 +197,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         const titleToSaved = 'hello title';
         const response = await createBasicTimeline(supertest, titleToSaved);
 
-        const { savedObjectId, version } =
-          response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId, version } = response.body.data && response.body;
 
         const responseToTest = await supertest
           .patch('/api/timeline/_favorite')
@@ -228,8 +224,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         const templateTimelineIdFromStore = 'f4a90a2d-365c-407b-9fef-c1dcb33a6ab3';
         const templateTimelineVersionFromStore = 1;
         const response = await createBasicTimeline(supertest, titleToSaved);
-        const { savedObjectId, version } =
-          response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId, version } = response.body.data && response.body;
 
         const responseToTest = await supertest
           .patch('/api/timeline/_favorite')
@@ -257,8 +252,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       it('to Unfavorite an existing timeline', async () => {
         const titleToSaved = 'hello title';
         const response = await createBasicTimeline(supertest, titleToSaved);
-        const { savedObjectId, version } =
-          response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId, version } = response.body.data && response.body;
 
         await supertest.patch('/api/timeline/_favorite').set('kbn-xsrf', 'true').send({
           timelineId: savedObjectId,
@@ -292,8 +286,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         const templateTimelineIdFromStore = 'f4a90a2d-365c-407b-9fef-c1dcb33a6ab3';
         const templateTimelineVersionFromStore = 1;
         const response = await createBasicTimeline(supertest, titleToSaved);
-        const { savedObjectId, version } =
-          response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId, version } = response.body.data && response.body;
 
         await supertest.patch('/api/timeline/_favorite').set('kbn-xsrf', 'true').send({
           timelineId: savedObjectId,
@@ -380,7 +373,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       it('one timeline', async () => {
         const titleToSaved = 'hello title';
         const response = await createBasicTimeline(supertest, titleToSaved);
-        const { savedObjectId } = response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId } = response.body.data && response.body;
 
         const responseToTest = await supertest
           .delete(TIMELINE_URL)
@@ -396,15 +389,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         const titleToSaved = 'hello title';
         const response1 = await createBasicTimeline(supertest, titleToSaved);
         const savedObjectId1 =
-          response1.body.data && response1.body.data.persistTimeline.timeline
-            ? response1.body.data.persistTimeline.timeline.savedObjectId
-            : '';
+          response1.body.data && response1.body ? response1.body.savedObjectId : '';
 
         const response2 = await createBasicTimeline(supertest, titleToSaved);
         const savedObjectId2 =
-          response2.body.data && response2.body.data.persistTimeline.timeline
-            ? response2.body.data.persistTimeline.timeline.savedObjectId
-            : '';
+          response2.body.data && response2.body ? response2.body.savedObjectId : '';
 
         const responseToTest = await supertest
           .delete(TIMELINE_URL)

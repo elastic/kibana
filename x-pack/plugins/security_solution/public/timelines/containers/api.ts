@@ -219,22 +219,19 @@ export const persistTimeline = async ({
       const templateTimelineInfo =
         timeline.timelineType === TimelineTypeEnum.template
           ? {
-              templateTimelineId:
-                draftTimeline.data.persistTimeline.timeline.templateTimelineId ??
-                timeline.templateTimelineId,
+              templateTimelineId: draftTimeline.templateTimelineId ?? timeline.templateTimelineId,
               templateTimelineVersion:
-                draftTimeline.data.persistTimeline.timeline.templateTimelineVersion ??
-                timeline.templateTimelineVersion,
+                draftTimeline.templateTimelineVersion ?? timeline.templateTimelineVersion,
             }
           : {};
 
       return patchTimeline({
-        timelineId: draftTimeline.data.persistTimeline.timeline.savedObjectId,
+        timelineId: draftTimeline.savedObjectId,
         timeline: {
           ...timeline,
           ...templateTimelineInfo,
         },
-        version: draftTimeline.data.persistTimeline.timeline.version ?? '',
+        version: draftTimeline.version ?? '',
         savedSearch,
       });
     }
@@ -250,19 +247,10 @@ export const persistTimeline = async ({
       savedSearch,
     });
   } catch (err) {
-    if (err.status_code === 403 || err.body.status_code === 403) {
+    if (err.status_code === 403 || err.body?.status_code === 403) {
       return Promise.resolve({
-        data: {
-          persistTimeline: {
-            code: 403,
-            message: err.message || err.body.message,
-            timeline: {
-              ...timeline,
-              savedObjectId: '',
-              version: '',
-            },
-          },
-        },
+        statusCode: 403,
+        message: err.message || err.body.message,
       });
     }
     return Promise.resolve(err);

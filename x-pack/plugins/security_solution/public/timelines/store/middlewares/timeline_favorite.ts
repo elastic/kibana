@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
 import type { Action, Middleware } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
 
@@ -15,9 +14,7 @@ import {
   updateIsFavorite,
   updateTimeline,
   startTimelineSaving,
-  showCallOutUnauthorizedMsg,
 } from '../actions';
-import type { FavoriteTimelineResponse } from '../../../../common/api/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { persistFavorite } from '../../containers/api';
 import { selectTimelineById } from '../selectors';
@@ -42,18 +39,12 @@ export const favoriteTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, S
       store.dispatch(startTimelineSaving({ id }));
 
       try {
-        const result = await persistFavorite({
+        const response = await persistFavorite({
           timelineId: timeline.id,
           templateTimelineId: timeline.templateTimelineId,
           templateTimelineVersion: timeline.templateTimelineVersion,
           timelineType: timeline.timelineType ?? TimelineTypeEnum.default,
         });
-
-        const response: FavoriteTimelineResponse = get('data.persistFavorite', result);
-
-        if (response.code === 403) {
-          store.dispatch(showCallOutUnauthorizedMsg());
-        }
 
         refreshTimelines(store.getState());
 

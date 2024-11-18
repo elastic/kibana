@@ -33,11 +33,11 @@ describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
     }).as('export');
     createTimeline().then((response) => {
       cy.wrap(response).as('timelineResponse1');
-      cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId1');
+      cy.wrap(response.body.savedObjectId).as('timelineId1');
     });
     createTimeline().then((response) => {
       cy.wrap(response).as('timelineResponse2');
-      cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId2');
+      cy.wrap(response.body.savedObjectId).as('timelineId2');
     });
     visit(TIMELINES_URL);
   });

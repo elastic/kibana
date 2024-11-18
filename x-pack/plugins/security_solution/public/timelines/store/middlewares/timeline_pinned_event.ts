@@ -55,7 +55,7 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
           throw new Error('Cannot create a pinned event without a timelineId');
         }
 
-        const result = await persistPinnedEvent({
+        const response = await persistPinnedEvent({
           pinnedEventId:
             timeline.pinnedEventsSaveObject[eventId] != null
               ? timeline.pinnedEventsSaveObject[eventId].pinnedEventId
@@ -64,7 +64,6 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
           timelineId: timeline.savedObjectId,
         });
 
-        const response = result.data.persistPinnedEventOnTimeline;
         if (response && 'code' in response && response.code === 403) {
           store.dispatch(showCallOutUnauthorizedMsg());
         }
@@ -72,9 +71,7 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
         refreshTimelines(store.getState());
 
         const currentTimeline = selectTimelineById(store.getState(), action.payload.id);
-        // The response is null or empty in case we unpinned an event.
-        // In that case we want to remove the locally pinned event.
-        if (!response || !('eventId' in response)) {
+        if ('unpinned' in response) {
           return store.dispatch(
             updateTimeline({
               id: action.payload.id,

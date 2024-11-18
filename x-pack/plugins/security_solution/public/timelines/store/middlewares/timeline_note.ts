@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
 import type { Action, Middleware } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
 
@@ -22,7 +21,6 @@ import {
   pinEvent,
 } from '../actions';
 import { persistNote } from '../../containers/notes/api';
-import type { ResponseNote } from '../../../../common/api/timeline';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
 import { ensureTimelineIsSaved, refreshTimelines } from './helpers';
@@ -64,7 +62,7 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
           throw new Error('Cannot create note without a timelineId');
         }
 
-        const result = await persistNote({
+        const response = await persistNote({
           noteId: null,
           version: null,
           note: {
@@ -74,7 +72,6 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
           },
         });
 
-        const response: ResponseNote = get('data.persistNote', result);
         if (response.code === 403) {
           store.dispatch(showCallOutUnauthorizedMsg());
         }

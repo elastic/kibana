@@ -58,15 +58,13 @@ export class TimelineTestService extends FtrService {
    */
   async createTimeline(title: string): Promise<PatchTimelineResponse> {
     // Create a new timeline draft
-    const createdTimeline = (
-      await this.supertest
-        .post(TIMELINE_DRAFT_URL)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
-        .send({ timelineType: 'default' })
-        .then(this.getHttpResponseFailureHandler())
-        .then((response) => response.body as GetDraftTimelinesResponse)
-    ).data.persistTimeline.timeline;
+    const createdTimeline = await this.supertest
+      .post(TIMELINE_DRAFT_URL)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
+      .send({ timelineType: 'default' })
+      .then(this.getHttpResponseFailureHandler())
+      .then((response) => response.body as GetDraftTimelinesResponse);
 
     this.log.info('Draft timeline:');
     this.log.indent(4, () => {
@@ -183,7 +181,7 @@ export class TimelineTestService extends FtrService {
     const { expression, esQuery } = this.getEndpointAlertsKqlQuery(endpointAgentId);
 
     const updatedTimeline = await this.updateTimeline(
-      newTimeline.data.persistTimeline.timeline.savedObjectId,
+      newTimeline.savedObjectId,
       {
         title,
         kqlQuery: {
@@ -197,7 +195,7 @@ export class TimelineTestService extends FtrService {
         },
         savedSearchId: null,
       },
-      newTimeline.data.persistTimeline.timeline.version
+      newTimeline.version
     );
 
     return updatedTimeline;
