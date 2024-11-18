@@ -5,34 +5,24 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiSpacer, EuiComboBox, EuiFormRow, EuiCallOut, EuiText } from '@elastic/eui';
 
-import { ILicense } from '@kbn/licensing-plugin/common/types';
-import { useAppContext } from '../../../../../app_context';
 import { documentationService } from '../../../../../services/documentation';
 import { UseField, FormDataProvider, FormRow, SuperSelectField } from '../../../shared_imports';
 import { ComboBoxOption } from '../../../types';
 import { sourceOptionLabels, sourceOptionDescriptions } from './i18n_texts';
 import { STORED_SOURCE_OPTION, DISABLED_SOURCE_OPTION, SYNTHETIC_SOURCE_OPTION } from './constants';
 
-export const SourceFieldSection = () => {
-  const {
-    plugins: { licensing },
-  } = useAppContext();
+interface Props {
+  defaultOption: string;
+  isEnterpriseLicense: boolean;
+}
 
-  const [isEnterpriseLicense, setIsEnterpriseLicense] = useState<boolean>(false);
-  useEffect(() => {
-    const subscription = licensing?.license$.subscribe((license: ILicense) => {
-      setIsEnterpriseLicense(license.isActive && license.hasAtLeast('enterprise'));
-    });
-
-    return () => subscription?.unsubscribe();
-  }, [licensing]);
-
+export const SourceFieldSection = ({ defaultOption, isEnterpriseLicense }: Props) => {
   const renderOptionDropdownDisplay = (option) => (
     <Fragment>
       <strong>{sourceOptionLabels[option]}</strong>
@@ -254,23 +244,22 @@ export const SourceFieldSection = () => {
                 options: sourceValueOptions,
               },
             }}
+            defaultValue={defaultOption}
           />
         </>
       }
     >
       <FormDataProvider pathsToWatch={['sourceField.option']}>
         {(formData) => {
-          const {
-            sourceField: { option },
-          } = formData;
+          const { sourceField } = formData;
 
-          if (option === undefined) {
+          if (sourceField?.option === undefined) {
             return null;
           }
 
-          return option === STORED_SOURCE_OPTION
+          return sourceField?.option === STORED_SOURCE_OPTION
             ? renderFormFields()
-            : option === DISABLED_SOURCE_OPTION
+            : sourceField?.option === DISABLED_SOURCE_OPTION
             ? renderDisableWarning()
             : renderSyntheticWarning();
         }}

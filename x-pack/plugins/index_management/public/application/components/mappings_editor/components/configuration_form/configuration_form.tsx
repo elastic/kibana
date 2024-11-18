@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { useAppContext } from '../../../../app_context';
 import { useForm, Form } from '../../shared_imports';
 import { GenericObject, MappingsConfiguration } from '../../types';
@@ -26,6 +27,7 @@ import { MapperSizePluginSection } from './mapper_size_plugin_section';
 import { SubobjectsSection } from './subobjects_section';
 import { configurationFormSchema } from './configuration_form_schema';
 import { IndexMode } from '../../../../../../common/types/data_streams';
+import { LOGSDB_INDEX_MODE, TIME_SERIES_MODE } from '../../../../../../common/constants';
 
 interface Props {
   value?: MappingsConfiguration;
@@ -34,7 +36,7 @@ interface Props {
   indexMode?: IndexMode;
 }
 
-const formSerializer = (formData: GenericObject) => {
+const formSerializer = (formData: GenericObject, indexMode?: IndexMode) => {
   const { dynamicMapping, sourceField, metaField, _routing, _size, subobjects } = formData;
 
   const dynamic = dynamicMapping?.enabled
@@ -48,9 +50,13 @@ const formSerializer = (formData: GenericObject) => {
       ? { mode: SYNTHETIC_SOURCE_OPTION }
       : sourceField?.option === DISABLED_SOURCE_OPTION
       ? { enabled: false }
-      : sourceField?.includes || sourceField?.excludes
+      : sourceField?.option === STORED_SOURCE_OPTION
       ? {
-          enabled: sourceField?.option === STORED_SOURCE_OPTION ? true : undefined,
+          // Explicitly set stored mode only if index mode is logsdb or time_series
+          mode:
+            indexMode === LOGSDB_INDEX_MODE || indexMode === TIME_SERIES_MODE
+              ? 'stored'
+              : undefined,
           includes: sourceField?.includes,
           excludes: sourceField?.excludes,
         }
@@ -101,7 +107,14 @@ const formDeserializer = (formData: GenericObject) => {
       dynamic_date_formats,
     },
     sourceField: {
-      option: mode ?? (enabled === false ? 'disabled' : enabled === true ? 'stored' : undefined),
+      option:
+        mode === 'stored'
+          ? STORED_SOURCE_OPTION
+          : mode === 'synthetic'
+          ? SYNTHETIC_SOURCE_OPTION
+          : enabled === false
+          ? DISABLED_SOURCE_OPTION
+          : undefined,
       includes,
       excludes,
     },
@@ -115,13 +128,25 @@ const formDeserializer = (formData: GenericObject) => {
 export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode }: Props) => {
   const {
     config: { enableMappingsSourceFieldSection },
+    plugins: { licensing },
   } = useAppContext();
+
+  const [isLicenseCheckComplete, setIsLicenseCheckComplete] = useState<boolean>(false);
+  const [isEnterpriseLicense, setIsEnterpriseLicense] = useState<boolean>(false);
+  useEffect(() => {
+    const subscription = licensing?.license$.subscribe((license: ILicense) => {
+      setIsEnterpriseLicense(license.isActive && license.hasAtLeast('enterprise'));
+      setIsLicenseCheckComplete(true);
+    });
+
+    return () => subscription?.unsubscribe();
+  }, [licensing]);
 
   const isMounted = useRef(false);
 
   const { form } = useForm({
-    schema: configurationFormSchema(indexMode),
-    serializer: formSerializer,
+    schema: configurationFormSchema,
+    serializer: useCallback((formData) => formSerializer(formData, indexMode), [indexMode]),
     deserializer: formDeserializer,
     defaultValue: value,
     id: 'configurationForm',
@@ -169,6 +194,11 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode 
     };
   }, [getFormData, dispatch]);
 
+  const defaultSourceFieldOption =
+    isEnterpriseLicense && (indexMode === LOGSDB_INDEX_MODE || indexMode === TIME_SERIES_MODE)
+      ? SYNTHETIC_SOURCE_OPTION
+      : STORED_SOURCE_OPTION;
+
   return (
     <Form
       form={form}
@@ -180,9 +210,13 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode 
       <EuiSpacer size="xl" />
       <MetaFieldSection />
       <EuiSpacer size="xl" />
-      {enableMappingsSourceFieldSection && (
+      {enableMappingsSourceFieldSection && isLicenseCheckComplete && (
         <>
-          <SourceFieldSection /> <EuiSpacer size="xl" />
+          <SourceFieldSection
+            defaultOption={defaultSourceFieldOption}
+            isEnterpriseLicense={isEnterpriseLicense}
+          />
+          <EuiSpacer size="xl" />
         </>
       )}
       <RoutingSection />
