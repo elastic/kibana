@@ -16,6 +16,8 @@ export const Demo = () => {
     openInNewTab: false,
     encodeUrl: true,
     url: { template: '' },
+    overflowEllipsis: true,
+    overflowTextWrap: false,
   });
 
   return (
