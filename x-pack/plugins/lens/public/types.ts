@@ -64,6 +64,7 @@ import type { LensInspector } from './lens_inspector_service';
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
+import { TableInspectorAdapter } from './editor_frame_service/types';
 
 export type StartServices = Pick<
   CoreStart,
@@ -302,7 +303,7 @@ export interface UserMessage {
   severity: 'error' | 'warning' | 'info';
   hidePopoverIcon?: boolean;
   shortMessage: string;
-  longMessage: string | React.ReactNode | ((closePopover: () => void) => React.ReactNode);
+  longMessage: string | React.ReactNode | ((closePopover?: () => void) => React.ReactNode);
   fixableInEditor: boolean;
   displayLocations: UserMessageDisplayLocation[];
 }
@@ -1351,9 +1352,13 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    */
   getReportingLayout?: (state: T) => { height: number; width: number };
   /**
-   * A visualization can share how columns are visually sorted
+   * Get all datatables to be exported as csv
    */
-  getSortedColumns?: (state: T, datasourceLayers?: DatasourceLayers) => string[];
+  getExportDatatables?: (
+    state: T,
+    datasourceLayers?: DatasourceLayers,
+    activeData?: TableInspectorAdapter
+  ) => Datatable[];
   /**
    * returns array of telemetry events for the visualization on save
    */

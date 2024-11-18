@@ -10,8 +10,8 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
-import type { StopEntityStoreResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/stop.gen';
-import { StopEntityStoreRequestParams } from '../../../../../common/api/entity_analytics/entity_store/engine/stop.gen';
+import type { StopEntityEngineResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/stop.gen';
+import { StopEntityEngineRequestParams } from '../../../../../common/api/entity_analytics/entity_store/engine/stop.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { ENGINE_STATUS } from '../constants';
@@ -24,8 +24,10 @@ export const stopEntityEngineRoute = (
     .post({
       access: 'public',
       path: '/api/entity_store/engines/{entityType}/stop',
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(
@@ -33,12 +35,12 @@ export const stopEntityEngineRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(StopEntityStoreRequestParams),
+            params: buildRouteValidationWithZod(StopEntityEngineRequestParams),
           },
         },
       },
 
-      async (context, request, response): Promise<IKibanaResponse<StopEntityStoreResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<StopEntityEngineResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -47,7 +49,7 @@ export const stopEntityEngineRoute = (
 
           return response.ok({ body: { stopped: engine.status === ENGINE_STATUS.STOPPED } });
         } catch (e) {
-          logger.error('Error in StopEntityStore:', e);
+          logger.error(`Error in StopEntityEngine: ${e.message}`);
           const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,

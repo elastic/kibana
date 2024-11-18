@@ -54,43 +54,31 @@ export const FINAL_SUMMARY_FILTER = {
         },
       },
       {
-        bool: {
-          should: [
-            {
-              bool: {
-                should: [
-                  {
-                    match: {
-                      'summary.final_attempt': true,
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-            {
-              bool: {
-                must_not: {
-                  bool: {
-                    should: [
-                      {
-                        exists: {
-                          field: 'summary.final_attempt',
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              },
-            },
-          ],
-          minimum_should_match: 1,
+        term: {
+          'summary.final_attempt': true,
         },
       },
     ],
   },
 };
+
+export const getRangeFilter = ({ from, to }: { from: string; to: string }) => ({
+  range: {
+    '@timestamp': {
+      gte: from,
+      lte: to,
+    },
+  },
+});
+
+export const getTimespanFilter = ({ from, to }: { from: string; to: string }) => ({
+  range: {
+    'monitor.timespan': {
+      gte: from,
+      lte: to,
+    },
+  },
+});
 
 export const SUMMARY_FILTER = { exists: { field: 'summary' } };
 

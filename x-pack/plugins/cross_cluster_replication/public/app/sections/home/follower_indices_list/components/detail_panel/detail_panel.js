@@ -30,8 +30,6 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import 'react-ace';
-import 'brace/theme/textmate';
 
 import { getIndexListUri } from '@kbn/index-management-plugin/public';
 import { routing } from '../../../../../services/routing';

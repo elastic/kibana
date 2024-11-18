@@ -7,11 +7,6 @@
 
 import { handleActions } from 'redux-actions';
 import immutable from 'object-path-immutable';
-import { restoreHistory } from '../actions/history';
-import * as pageActions from '../actions/pages';
-import * as transientActions from '../actions/transient';
-import { removeElements } from '../actions/elements';
-import { setRefreshInterval, enableAutoplay, setAutoplayInterval } from '../actions/workpad';
 
 const { set, del } = immutable;
 
@@ -19,9 +14,9 @@ export const transientReducer = handleActions(
   {
     // clear all the resolved args when restoring the history
     // TODO: we shouldn't need to reset the resolved args for history
-    [restoreHistory]: (transientState) => set(transientState, 'resolvedArgs', {}),
+    ['restoreHistory']: (transientState) => set(transientState, 'resolvedArgs', {}),
 
-    [removeElements]: (transientState, { payload: { elementIds } }) => {
+    ['removeElements']: (transientState, { payload: { elementIds } }) => {
       const { selectedToplevelNodes } = transientState;
       return del(
         {
@@ -32,53 +27,53 @@ export const transientReducer = handleActions(
       );
     },
 
-    [transientActions.setFirstLoad]: (transientState, { payload }) => {
+    ['setFirstLoad']: (transientState, { payload }) => {
       return set(transientState, 'isFirstLoad', Boolean(payload));
     },
 
-    [transientActions.setFullscreen]: (transientState, { payload }) => {
+    ['setFullscreen']: (transientState, { payload }) => {
       return set(transientState, 'fullscreen', Boolean(payload));
     },
 
-    [transientActions.setElementStats]: (transientState, { payload }) => {
+    ['setElementStats']: (transientState, { payload }) => {
       return set(transientState, 'elementStats', payload);
     },
 
-    [transientActions.selectToplevelNodes]: (transientState, { payload }) => {
+    ['selectToplevelNodes']: (transientState, { payload }) => {
       return {
         ...transientState,
         selectedToplevelNodes: payload,
       };
     },
 
-    [transientActions.setZoomScale]: (transientState, { payload }) => {
+    ['setZoomScale']: (transientState, { payload }) => {
       return {
         ...transientState,
         zoomScale: payload || 1,
       };
     },
 
-    [pageActions.setPage]: (transientState) => {
+    ['setPage']: (transientState) => {
       return { ...transientState, selectedToplevelNodes: [] };
     },
 
-    [pageActions.addPage]: (transientState) => {
+    ['addPage']: (transientState) => {
       return { ...transientState, selectedToplevelNodes: [] };
     },
 
-    [pageActions.duplicatePage]: (transientState) => {
+    ['duplicatePage']: (transientState) => {
       return { ...transientState, selectedToplevelNodes: [] };
     },
 
-    [setRefreshInterval]: (transientState, { payload }) => {
+    ['setRefreshInterval']: (transientState, { payload }) => {
       return { ...transientState, refresh: { interval: Number(payload) || 0 } };
     },
 
-    [enableAutoplay]: (transientState, { payload }) => {
+    ['enableAutoplay']: (transientState, { payload }) => {
       return set(transientState, 'autoplay.enabled', Boolean(payload) || false);
     },
 
-    [setAutoplayInterval]: (transientState, { payload }) => {
+    ['setAutoplayInterval']: (transientState, { payload }) => {
       return set(transientState, 'autoplay.interval', Number(payload) || 0);
     },
   },

@@ -25,8 +25,10 @@ export const defineFindCspBenchmarkRuleRoute = (router: CspRouter) =>
     .get({
       access: 'internal',
       path: FIND_CSP_BENCHMARK_RULE_ROUTE_PATH,
-      options: {
-        tags: ['access:cloud-security-posture-read'],
+      security: {
+        authz: {
+          requiredPrivileges: ['cloud-security-posture-read'],
+        },
       },
     })
     .addVersion(
@@ -39,10 +41,6 @@ export const defineFindCspBenchmarkRuleRoute = (router: CspRouter) =>
         },
       },
       async (context, request, response) => {
-        if (!(await context.fleet).authz.fleet.all) {
-          return response.forbidden();
-        }
-
         const requestBody: FindCspBenchmarkRuleRequestV1 = request.query;
         const cspContext = await context.csp;
 
@@ -72,10 +70,6 @@ export const defineFindCspBenchmarkRuleRoute = (router: CspRouter) =>
         },
       },
       async (context, request, response) => {
-        if (!(await context.fleet).authz.fleet.all) {
-          return response.forbidden();
-        }
-
         const requestBody: FindCspBenchmarkRuleRequestV2 = request.query;
         const cspContext = await context.csp;
 
@@ -106,10 +100,6 @@ export const defineFindCspBenchmarkRuleRoute = (router: CspRouter) =>
         },
       },
       async (context, request, response) => {
-        if (!(await context.fleet).authz.fleet.all) {
-          return response.forbidden();
-        }
-
         const requestBody: FindCspBenchmarkRuleRequest = request.query;
         const cspContext = await context.csp;
 

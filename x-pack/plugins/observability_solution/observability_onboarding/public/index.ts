@@ -34,6 +34,7 @@ export interface AppContext {
   isCloud: boolean;
   isServerless: boolean;
   stackVersion: string;
+  cloudServiceProvider?: string;
 }
 
 export interface ObservabilityOnboardingAppServices {

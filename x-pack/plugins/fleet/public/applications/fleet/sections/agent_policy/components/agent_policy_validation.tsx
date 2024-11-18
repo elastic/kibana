@@ -38,20 +38,67 @@ export const agentPolicyFormValidation = (
     errors.namespace = [namespaceValidation.error];
   }
 
-  if (agentPolicy.unenroll_timeout !== undefined && agentPolicy.unenroll_timeout <= 0) {
+  if (agentPolicy.unenroll_timeout && agentPolicy.unenroll_timeout < 0) {
     errors.unenroll_timeout = [
       <FormattedMessage
         id="xpack.fleet.agentPolicyForm.unenrollTimeoutMinValueErrorMessage"
-        defaultMessage="Unenroll timeout must be an integer greater than zero."
+        defaultMessage="Unenroll timeout must be greater than zero."
       />,
     ];
   }
 
-  if (agentPolicy.inactivity_timeout !== undefined && agentPolicy.inactivity_timeout <= 0) {
+  if (agentPolicy.inactivity_timeout && agentPolicy.inactivity_timeout < 0) {
     errors.inactivity_timeout = [
       <FormattedMessage
         id="xpack.fleet.agentPolicyForm.inactivityTimeoutMinValueErrorMessage"
-        defaultMessage="Inactivity timeout must be an integer greater than zero."
+        defaultMessage="Inactivity timeout must be greater than zero."
+      />,
+    ];
+  }
+
+  if (agentPolicy.monitoring_http?.enabled) {
+    if (!agentPolicy.monitoring_http.host?.trim()) {
+      errors['monitoring_http.host'] = [
+        <FormattedMessage
+          id="xpack.fleet.agentPolicyForm.monitoringHttpHostRequiredErrorMessage"
+          defaultMessage="Host is required for HTTP monitoring"
+        />,
+      ];
+    }
+
+    if (
+      !agentPolicy.monitoring_http.port ||
+      (agentPolicy.monitoring_http.port !== undefined && agentPolicy.monitoring_http.port <= 0)
+    ) {
+      errors['monitoring_http.port'] = [
+        <FormattedMessage
+          id="xpack.fleet.agentPolicyForm.monitoringHttpPortRequiredErrorMessage"
+          defaultMessage="Port is required for HTTP monitoring"
+        />,
+      ];
+    }
+  }
+
+  if (
+    agentPolicy.monitoring_diagnostics?.limit?.burst !== undefined &&
+    agentPolicy.monitoring_diagnostics?.limit?.burst <= 0
+  ) {
+    errors['monitoring_diagnostics.limit.burst'] = [
+      <FormattedMessage
+        id="xpack.fleet.agentPolicyForm.diagnosticsLimitBurstMinValueErrorMessage"
+        defaultMessage="Burst must be an integer greater than zero"
+      />,
+    ];
+  }
+
+  if (
+    agentPolicy.monitoring_diagnostics?.uploader?.max_retries !== undefined &&
+    agentPolicy.monitoring_diagnostics?.uploader?.max_retries <= 0
+  ) {
+    errors['monitoring_diagnostics.uploader.max_retries'] = [
+      <FormattedMessage
+        id="xpack.fleet.agentPolicyForm.diagnosticsLimitBurstMinValueErrorMessage"
+        defaultMessage="Max retries must be an integer greater than zero"
       />,
     ];
   }

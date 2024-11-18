@@ -37,7 +37,9 @@
     "@kbn/content-management-utils",
     "@kbn/field-formats-plugin",
     "@kbn/presentation-panel-plugin",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/std",
+    "@kbn/react-hooks",
   ],
   "exclude": ["target/**/*"]
 }

@@ -14,7 +14,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object/src/is_populated_
 
 import type { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
-import { createCategorizeQuery } from './create_categorize_query';
+import { createDefaultQuery } from '@kbn/aiops-common/create_default_query';
 
 const CATEGORY_LIMIT = 1000;
 const EXAMPLE_LIMIT = 4;
@@ -38,7 +38,7 @@ export function createCategoryRequest(
   useStandardTokenizer: boolean = true,
   includeSparkline: boolean = true
 ) {
-  const query = createCategorizeQuery(queryIn, timeField, timeRange);
+  const query = createDefaultQuery(queryIn, timeField, timeRange);
   const aggs = {
     categories: {
       categorize_text: {

@@ -10,7 +10,8 @@ import {
   KSPM_POLICY_TEMPLATE,
   CLOUD_SECURITY_POSTURE_BASE_PATH,
 } from '@kbn/cloud-security-posture-common';
-import { NAV_ITEMS_NAMES } from '@kbn/cloud-security-posture/constants/navigation';
+import { NAV_ITEMS_NAMES } from '@kbn/cloud-security-posture/src/constants/navigation';
+import { CNVM_POLICY_TEMPLATE } from '../../../common/constants';
 import type { CspBenchmarksPage, CspPage, CspPageNavigationItem } from './types';
 
 const CSPM_DASHBOARD_TAB_NAME = 'Cloud';
@@ -70,5 +71,8 @@ export const cspIntegrationDocsNavigation = {
     awsGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started.html`,
     gcpGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-gcp.html`,
     azureGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-azure.html`,
+  },
+  cnvm: {
+    overviewPath: `${ELASTIC_BASE_SHORT_URL}/${CNVM_POLICY_TEMPLATE}`,
   },
 };

@@ -171,7 +171,7 @@ describe('<InsightsSection />', () => {
 
   it('should render the component expanded if guided onboarding tour is shown', () => {
     (useExpandSection as jest.Mock).mockReturnValue(false);
-    mockUseTourContext.mockReturnValue({ activeStep: 7, isTourShown: jest.fn(() => true) });
+    mockUseTourContext.mockReturnValue({ activeStep: 5, isTourShown: jest.fn(() => true) });
 
     const contextValue = {
       eventId: 'some_Id',

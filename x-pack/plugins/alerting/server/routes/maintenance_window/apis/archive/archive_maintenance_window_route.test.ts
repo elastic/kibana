@@ -55,7 +55,14 @@ describe('archiveMaintenanceWindowRoute', () => {
     );
 
     expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/{id}/_archive');
-    expect(config.options?.tags?.[0]).toEqual('access:write-maintenance-window');
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "access": "internal",
+        "tags": Array [
+          "access:write-maintenance-window",
+        ],
+      }
+    `);
 
     await handler(context, req, res);
 
@@ -64,7 +71,6 @@ describe('archiveMaintenanceWindowRoute', () => {
       archive: true,
     });
     expect(res.ok).toHaveBeenLastCalledWith({
-      // @ts-expect-error upgrade typescript v5.1.6
       body: rewritePartialMaintenanceBodyRes(mockMaintenanceWindow),
     });
   });

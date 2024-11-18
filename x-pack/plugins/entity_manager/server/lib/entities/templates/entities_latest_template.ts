@@ -19,7 +19,7 @@ import {
   ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
   ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
 } from '../../../../common/constants_entities';
-import { getCustomLatestTemplateComponents } from '../../../templates/components/helpers';
+import { isBuiltinDefinition } from '../helpers/is_builtin_definition';
 
 export const generateEntitiesLatestIndexTemplateConfig = (
   definition: EntityDefinition
@@ -94,3 +94,16 @@ export const generateEntitiesLatestIndexTemplateConfig = (
     },
   },
 });
+
+function getCustomLatestTemplateComponents(definition: EntityDefinition) {
+  if (isBuiltinDefinition(definition)) {
+    return [];
+  }
+
+  return [
+    `${definition.id}@platform`, // @platform goes before so it can be overwritten by custom
+    `${definition.id}-latest@platform`,
+    `${definition.id}@custom`,
+    `${definition.id}-latest@custom`,
+  ];
+}

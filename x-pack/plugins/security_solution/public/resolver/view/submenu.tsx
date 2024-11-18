@@ -25,6 +25,7 @@ export const NodeSubMenuComponents = React.memo(
     className,
     nodeID,
     nodeStats,
+    onClick,
   }: {
     id: string;
     className?: string;
@@ -35,6 +36,7 @@ export const NodeSubMenuComponents = React.memo(
      */
     nodeID: string;
     nodeStats: EventStats | undefined;
+    onClick?: () => void;
   }) => {
     const relatedEventOptions = useMemo(() => {
       if (nodeStats === undefined) {
@@ -61,7 +63,15 @@ export const NodeSubMenuComponents = React.memo(
             return opta.category.localeCompare(optb.category);
           })
           .map((pill) => {
-            return <NodeSubmenuPill id={id} pill={pill} nodeID={nodeID} key={pill.category} />;
+            return (
+              <NodeSubmenuPill
+                id={id}
+                pill={pill}
+                nodeID={nodeID}
+                key={pill.category}
+                onClick={onClick}
+              />
+            );
           })}
       </ul>
     );
@@ -72,10 +82,12 @@ const NodeSubmenuPill = ({
   id,
   pill,
   nodeID,
+  onClick,
 }: {
   id: string;
   pill: { prefix: JSX.Element; category: string };
   nodeID: string;
+  onClick?: () => void;
 }) => {
   const linkProps = useLinkProps(id, {
     panelView: 'nodeEventsInCategory',
@@ -102,8 +114,13 @@ const NodeSubmenuPill = ({
           time: timestamp(),
         })
       );
+      // onClick call back to open the details panel
+      // only used when in split mode
+      if (onClick) {
+        onClick();
+      }
     },
-    [timestamp, linkProps, dispatch, nodeID, id]
+    [timestamp, linkProps, dispatch, nodeID, id, onClick]
   );
   return (
     <li

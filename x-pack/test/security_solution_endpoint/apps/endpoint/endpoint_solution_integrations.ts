@@ -6,7 +6,7 @@
  */
 
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
+import { PatchTimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { type IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
@@ -64,7 +64,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     // failing tests: https://github.com/elastic/kibana/issues/170705
     describe.skip('from Timeline', () => {
-      let timeline: TimelineResponse;
+      let timeline: PatchTimelineResponse;
 
       before(async () => {
         log.info(

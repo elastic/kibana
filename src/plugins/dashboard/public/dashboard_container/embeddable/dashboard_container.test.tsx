@@ -9,11 +9,11 @@
 
 import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
+  CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
   EMPTY_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import type { TimeRange } from '@kbn/es-query';
@@ -25,13 +25,11 @@ import {
   getSampleDashboardPanel,
   mockControlGroupApi,
 } from '../../mocks';
-import { pluginServices } from '../../services/plugin_services';
+import { embeddableService } from '../../services/kibana_services';
 import { DashboardContainer } from './dashboard_container';
 
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-  .fn()
-  .mockReturnValue(embeddableFactory);
+embeddableService.getEmbeddableFactory = jest.fn().mockReturnValue(embeddableFactory);
 
 test('DashboardContainer initializes embeddables', (done) => {
   const container = buildMockDashboard({
@@ -174,7 +172,14 @@ test('searchSessionId propagates to children', async () => {
     0,
     undefined,
     undefined,
-    { lastSavedInput: sampleInput }
+    {
+      anyMigrationRun: false,
+      isEmbeddedExternally: false,
+      lastSavedInput: sampleInput,
+      lastSavedId: undefined,
+      managed: false,
+      fullScreenMode: false,
+    }
   );
   container?.setControlGroupApi(mockControlGroupApi);
   const embeddable = await container.addNewEmbeddable<

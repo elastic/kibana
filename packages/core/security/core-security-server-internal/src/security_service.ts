@@ -21,6 +21,7 @@ import {
   getDefaultSecurityImplementation,
   convertSecurityApi,
   SecurityServiceConfigType,
+  PKCS12ConfigType,
 } from './utils';
 
 export class SecurityService
@@ -50,8 +51,10 @@ export class SecurityService
   public setup(): InternalSecurityServiceSetup {
     const config = this.getConfig();
     const securityConfig: SecurityServiceConfigType = config.get(['xpack', 'security']);
+    const elasticsearchConfig: PKCS12ConfigType = config.get(['elasticsearch']);
+    const serverConfig: PKCS12ConfigType = config.get(['server']);
 
-    checkFipsConfig(securityConfig, this.log);
+    checkFipsConfig(securityConfig, elasticsearchConfig, serverConfig, this.log);
 
     return {
       registerSecurityDelegate: (api) => {

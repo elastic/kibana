@@ -45,10 +45,10 @@ import { escapeQuotes } from '@kbn/es-query';
 import { isQuery } from '@kbn/data-plugin/public';
 
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import { parseInterval } from '@kbn/ml-parse-interval';
 import { PLUGIN_ID } from '../../../../common/constants/app';
 import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
-import { parseInterval } from '../../../../common/util/parse_interval';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
 
@@ -930,7 +930,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="log_rate_analysis"
-          icon="machineLearningApp"
+          icon="logRateAnalysis"
           href={openInLogRateAnalysisUrl}
           data-test-subj="mlAnomaliesListRowAction_runLogRateAnalysisButton"
         >
@@ -946,7 +946,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="run_pattern_analysis"
-          icon="machineLearningApp"
+          icon="logPatternAnalysis"
           onClick={() => {
             closePopover();
             const additionalField = getAdditionalField(anomaly);

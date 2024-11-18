@@ -6,20 +6,11 @@
  */
 
 import * as z from '@kbn/zod';
-import type { IsEqual } from 'type-fest';
-import type { TypeSpecificCreateProps } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import {
   RuleSignatureId,
   RuleVersion,
   BaseCreateProps,
-  EqlRuleCreateFields,
-  EsqlRuleCreateFields,
-  MachineLearningRuleCreateFields,
-  NewTermsRuleCreateFields,
-  QueryRuleCreateFields,
-  SavedQueryRuleCreateFields,
-  ThreatMatchRuleCreateFields,
-  ThresholdRuleCreateFields,
+  TypeSpecificCreatePropsInternal,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 function zodMaskFor<T>() {
@@ -29,7 +20,6 @@ function zodMaskFor<T>() {
     return Object.assign({}, ...propObjects);
   };
 }
-
 /**
  * The PrebuiltRuleAsset schema is created based on the rule schema defined in our OpenAPI specs.
  * However, we don't need all the rule schema fields to be present in the PrebuiltRuleAsset.
@@ -38,6 +28,7 @@ function zodMaskFor<T>() {
  */
 const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>()([
   'actions',
+  'response_actions',
   'throttle',
   'meta',
   'output_index',
@@ -47,40 +38,7 @@ const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>(
   'outcome',
 ]);
 
-/**
- * Aditionally remove fields which are part only of the optional fields in the rule types that make up
- * the TypeSpecificCreateProps discriminatedUnion, by recreating a discriminated union of the types, but
- * with the necessary fields omitted, in the types where they exist. Fields to extract:
- *  - response_actions: from Query and SavedQuery rules
- */
-const TYPE_SPECIFIC_FIELDS_TO_OMIT = ['response_actions'] as const;
-
-const TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_QUERY_RULES = zodMaskFor<QueryRuleCreateFields>()([
-  ...TYPE_SPECIFIC_FIELDS_TO_OMIT,
-]);
-const TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_SAVED_QUERY_RULES =
-  zodMaskFor<SavedQueryRuleCreateFields>()([...TYPE_SPECIFIC_FIELDS_TO_OMIT]);
-
-export type TypeSpecificFields = z.infer<typeof TypeSpecificFields>;
-export const TypeSpecificFields = z.discriminatedUnion('type', [
-  EqlRuleCreateFields.omit(TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_QUERY_RULES),
-  QueryRuleCreateFields.omit(TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_QUERY_RULES),
-  SavedQueryRuleCreateFields.omit(TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_SAVED_QUERY_RULES),
-  ThresholdRuleCreateFields,
-  ThreatMatchRuleCreateFields,
-  MachineLearningRuleCreateFields,
-  NewTermsRuleCreateFields.omit(TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_QUERY_RULES),
-  EsqlRuleCreateFields.omit(TYPE_SPECIFIC_FIELDS_TO_OMIT_FROM_QUERY_RULES),
-]);
-
-// Make sure the type-specific fields contain all the same rule types as the type-specific rule params.
-// TS will throw a type error if the types are not equal (for example, if a new rule type is added to
-// the TypeSpecificCreateProps and the new type is not reflected in TypeSpecificFields).
-export const areTypesEqual: IsEqual<
-  typeof TypeSpecificCreateProps._type.type,
-  typeof TypeSpecificFields._type.type
-> = true;
-
+export type PrebuiltAssetBaseProps = z.infer<typeof PrebuiltAssetBaseProps>;
 export const PrebuiltAssetBaseProps = BaseCreateProps.omit(
   BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET
 );
@@ -101,37 +59,9 @@ export const PrebuiltAssetBaseProps = BaseCreateProps.omit(
  *  - some fields are omitted because they are not present in https://github.com/elastic/detection-rules
  */
 export type PrebuiltRuleAsset = z.infer<typeof PrebuiltRuleAsset>;
-export const PrebuiltRuleAsset = PrebuiltAssetBaseProps.and(TypeSpecificFields).and(
+export const PrebuiltRuleAsset = PrebuiltAssetBaseProps.and(TypeSpecificCreatePropsInternal).and(
   z.object({
     rule_id: RuleSignatureId,
     version: RuleVersion,
   })
 );
-
-function createUpgradableRuleFieldsPayloadByType() {
-  const baseFields = Object.keys(PrebuiltAssetBaseProps.shape);
-
-  return new Map(
-    TypeSpecificFields.options.map((option) => {
-      const typeName = option.shape.type.value;
-      const typeSpecificFieldsForType = Object.keys(option.shape);
-
-      return [typeName, [...baseFields, ...typeSpecificFieldsForType]];
-    })
-  );
-}
-
-/**
- * Map of the fields payloads to be passed to the `upgradePrebuiltRules()` method during the
- * Upgrade workflow (`/upgrade/_perform` endpoint) by type.
- *
- * Creating this Map dynamically, based on BaseCreateProps and TypeSpecificFields, ensures that we don't need to:
- *  - manually add rule types to this Map if they are created
- *  - manually add or remove any fields if they are added or removed to a specific rule type
- *  - manually add or remove any fields if we decide that they should not be part of the upgradable fields.
- *
- * Notice that this Map includes, for each rule type, all fields that are part of the BaseCreateProps and all fields that
- * are part of the TypeSpecificFields, including those that are not part of RuleUpgradeSpecifierFields schema, where
- * the user of the /upgrade/_perform endpoint can specify which fields to upgrade during the upgrade workflow.
- */
-export const UPGRADABLE_FIELDS_PAYLOAD_BY_RULE_TYPE = createUpgradableRuleFieldsPayloadByType();

@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validateRuleBase, validateRuleParams, hasRuleErrors } from './validate_form';
+import {
+  validateRuleBase,
+  validateRuleParams,
+  hasRuleErrors,
+  validateAction,
+} from './validate_form';
 import { RuleFormData } from '../types';
 import {
   CONSUMER_REQUIRED_TEXT,
@@ -19,6 +24,7 @@ import {
 } from '../translations';
 import { formatDuration } from '../utils';
 import { RuleTypeModel } from '../../common';
+import { getAction } from '../../common/test_utils/actions_test_utils';
 
 const formDataMock: RuleFormData = {
   params: {
@@ -32,6 +38,7 @@ const formDataMock: RuleFormData = {
     index: ['.kibana'],
     timeField: 'alert.executionStatus.lastExecutionDate',
   },
+  actions: [],
   consumer: 'stackAlerts',
   schedule: { interval: '1m' },
   tags: [],
@@ -49,6 +56,23 @@ const ruleTypeModelMock = {
     },
   }),
 };
+
+describe('validateAction', () => {
+  test('should validate filter query', () => {
+    const result = validateAction({
+      action: getAction('1', {
+        alertsFilter: {
+          query: {
+            kql: '',
+            filters: [],
+          },
+        },
+      }),
+    });
+
+    expect(result).toEqual({ filterQuery: ['A custom query is required.'] });
+  });
+});
 
 describe('validateRuleBase', () => {
   test('should validate name', () => {
@@ -153,6 +177,8 @@ describe('hasRuleErrors', () => {
     const result = hasRuleErrors({
       baseErrors: {},
       paramsErrors: {},
+      actionsErrors: {},
+      actionsParamsErrors: {},
     });
 
     expect(result).toBeFalsy();
@@ -164,6 +190,8 @@ describe('hasRuleErrors', () => {
         name: ['error'],
       },
       paramsErrors: {},
+      actionsErrors: {},
+      actionsParamsErrors: {},
     });
 
     expect(result).toBeTruthy();
@@ -175,6 +203,19 @@ describe('hasRuleErrors', () => {
       paramsErrors: {
         someValue: ['error'],
       },
+      actionsErrors: {},
+      actionsParamsErrors: {},
+    });
+
+    expect(result).toBeTruthy();
+
+    result = hasRuleErrors({
+      baseErrors: {},
+      paramsErrors: {
+        someValue: 'error',
+      },
+      actionsErrors: {},
+      actionsParamsErrors: {},
     });
 
     expect(result).toBeTruthy();
@@ -186,6 +227,8 @@ describe('hasRuleErrors', () => {
           someValue: ['error'],
         },
       },
+      actionsErrors: {},
+      actionsParamsErrors: {},
     });
 
     expect(result).toBeTruthy();

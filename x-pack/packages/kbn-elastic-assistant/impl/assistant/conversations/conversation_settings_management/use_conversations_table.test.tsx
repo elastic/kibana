@@ -34,6 +34,8 @@ describe('useConversationsTable', () => {
   it('should return columns', () => {
     const { result } = renderHook(() => useConversationsTable());
     const columns = result.current.getColumns({
+      isDeleteEnabled: jest.fn(),
+      isEditEnabled: jest.fn(),
       onDeleteActionClicked: jest.fn(),
       onEditActionClicked: jest.fn(),
     });

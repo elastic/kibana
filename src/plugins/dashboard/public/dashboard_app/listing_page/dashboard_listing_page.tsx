@@ -9,19 +9,20 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
+import { DashboardRedirect } from '../../dashboard_container/types';
+import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
+import { coreServices, dataService, serverlessService } from '../../services/kibana_services';
+import { getDashboardBreadcrumb } from '../_dashboard_app_strings';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
 } from '../no_data/dashboard_app_no_data';
-import { pluginServices } from '../../services/plugin_services';
-import { getDashboardBreadcrumb } from '../_dashboard_app_strings';
-import { DashboardRedirect } from '../../dashboard_container/types';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
-import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
+import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 
 export interface DashboardListingPageProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -36,13 +37,6 @@ export const DashboardListingPage = ({
   initialFilter,
   kbnUrlStateStorage,
 }: DashboardListingPageProps) => {
-  const {
-    data: { query },
-    serverless,
-    chrome: { setBreadcrumbs },
-    dashboardContentManagement: { findDashboards },
-  } = pluginServices.getServices();
-
   const [showNoDataPage, setShowNoDataPage] = useState<boolean | undefined>();
   useEffect(() => {
     let isMounted = true;
@@ -56,40 +50,47 @@ export const DashboardListingPage = ({
   }, []);
 
   useEffect(() => {
-    setBreadcrumbs([
+    coreServices.chrome.setBreadcrumbs(
+      [
+        {
+          text: getDashboardBreadcrumb(),
+        },
+      ],
       {
-        text: getDashboardBreadcrumb(),
-      },
-    ]);
+        project: { value: [] },
+      }
+    );
 
-    if (serverless?.setBreadcrumbs) {
+    if (serverlessService) {
       // if serverless breadcrumbs available,
       // reset any deeper context breadcrumbs to only keep the main "dashboard" part that comes from the navigation config
-      serverless.setBreadcrumbs([]);
+      serverlessService.setBreadcrumbs([]);
     }
-  }, [setBreadcrumbs, serverless]);
+  }, []);
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
-      query,
+      dataService.query,
       kbnUrlStateStorage
     );
     if (title) {
-      findDashboards.findByTitle(title).then((result) => {
-        if (!result) return;
-        redirectTo({
-          destination: 'dashboard',
-          id: result.id,
-          useReplace: true,
+      getDashboardContentManagementService()
+        .findDashboards.findByTitle(title)
+        .then((result) => {
+          if (!result) return;
+          redirectTo({
+            destination: 'dashboard',
+            id: result.id,
+            useReplace: true,
+          });
         });
-      });
     }
 
     return () => {
       stopSyncingQueryServiceStateWithUrl();
     };
-  }, [title, redirectTo, query, kbnUrlStateStorage, findDashboards]);
+  }, [title, redirectTo, kbnUrlStateStorage]);
 
   const titleFilter = title ? `${title}` : '';
 

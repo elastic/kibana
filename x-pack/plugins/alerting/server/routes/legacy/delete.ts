@@ -20,7 +20,8 @@ const paramSchema = schema.object({
 export const deleteAlertRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.delete(
     {
@@ -29,8 +30,10 @@ export const deleteAlertRoute = (
         params: paramSchema,
       },
       options: {
+        access: isServerless ? 'internal' : 'public',
         summary: 'Delete an alert',
         tags: ['oas-tag:alerting'],
+        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
         deprecated: true,
       },
     },

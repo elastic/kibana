@@ -7,10 +7,13 @@
 
 import { omit, pick } from 'lodash';
 import {
+  ElasticsearchClient,
   SavedObjectsClient,
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateOptions,
 } from '@kbn/core/server';
+import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { RawRule } from '../types';
 
 import {
@@ -19,13 +22,9 @@ import {
   RuleAttributesNotPartiallyUpdatable,
   RULE_SAVED_OBJECT_TYPE,
 } from '.';
-import { RuleAttributes } from '../data/rule/types';
 
-// We have calling code that references both RawRule and RuleAttributes,
-// so we need to support both of these types (they are effectively the same)
 export type PartiallyUpdateableRuleAttributes = Partial<
-  | Omit<RawRule, RuleAttributesNotPartiallyUpdatable>
-  | Omit<RuleAttributes, RuleAttributesNotPartiallyUpdatable>
+  Omit<RawRule, RuleAttributesNotPartiallyUpdatable>
 >;
 
 interface PartiallyUpdateRuleSavedObjectOptions {
@@ -51,7 +50,7 @@ export async function partiallyUpdateRule(
     ...RuleAttributesToEncrypt,
     ...RuleAttributesIncludedInAAD,
   ]);
-  const updateOptions: SavedObjectsUpdateOptions<RuleAttributes> = pick(
+  const updateOptions: SavedObjectsUpdateOptions<RawRule> = pick(
     options,
     'namespace',
     'version',
@@ -65,5 +64,53 @@ export async function partiallyUpdateRule(
       return;
     }
     throw err;
+  }
+}
+
+// Explicit list of attributes that we allow to be partially updated
+// There should be no overlap between this list and RuleAttributesIncludedInAAD or RuleAttributesToEncrypt
+const RuleAttributesAllowedForPartialUpdate = [
+  'executionStatus',
+  'lastRun',
+  'monitoring',
+  'nextRun',
+  'running',
+  'snoozeSchedule',
+];
+
+// direct, partial update to a rule saved object via ElasticsearchClient
+
+// we do this direct partial update to avoid the overhead of the SavedObjectsClient for
+// only these allow-listed fields which don't impact encryption. in addition, because these
+// fields are only updated by the system user at the end of a rule run, they should not
+// need to be included in any (user-centric) audit logs.
+export async function partiallyUpdateRuleWithEs(
+  esClient: ElasticsearchClient,
+  id: string,
+  attributes: PartiallyUpdateableRuleAttributes,
+  options: PartiallyUpdateRuleSavedObjectOptions = {}
+): Promise<void> {
+  // ensure we only have the valid attributes that are not encrypted and are excluded from AAD
+  const attributeUpdates = omit(attributes, [
+    ...RuleAttributesToEncrypt,
+    ...RuleAttributesIncludedInAAD,
+  ]);
+  // ensure we only have attributes that we explicitly allow to be updated
+  const attributesAllowedForUpdate = pick(attributeUpdates, RuleAttributesAllowedForPartialUpdate);
+
+  const updateParams = {
+    id: `alert:${id}`,
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    ...(options.version ? decodeRequestVersion(options.version) : {}),
+    doc: {
+      alert: attributesAllowedForUpdate,
+    },
+    ...(options.refresh ? { refresh: options.refresh } : {}),
+  };
+
+  if (options.ignore404) {
+    await esClient.update(updateParams, { ignore: [404] });
+  } else {
+    await esClient.update(updateParams);
   }
 }

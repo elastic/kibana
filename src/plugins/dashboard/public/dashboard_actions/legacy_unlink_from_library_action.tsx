@@ -19,8 +19,9 @@ import {
   PublishesPanelTitle,
   HasLegacyLibraryTransforms,
 } from '@kbn/presentation-publishing';
-import { pluginServices } from '../services/plugin_services';
 import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';
+import { DASHBOARD_ACTION_GROUP } from '.';
+import { coreServices } from '../services/kibana_services';
 
 export const ACTION_LEGACY_UNLINK_FROM_LIBRARY = 'legacyUnlinkFromLibrary';
 
@@ -37,14 +38,7 @@ export class LegacyUnlinkFromLibraryAction implements Action<EmbeddableApiContex
   public readonly type = ACTION_LEGACY_UNLINK_FROM_LIBRARY;
   public readonly id = ACTION_LEGACY_UNLINK_FROM_LIBRARY;
   public order = 15;
-
-  private toastsService;
-
-  constructor() {
-    ({
-      notifications: { toasts: this.toastsService },
-    } = pluginServices.getServices());
-  }
+  public grouping = [DASHBOARD_ACTION_GROUP];
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!legacyUnlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
@@ -66,12 +60,12 @@ export class LegacyUnlinkFromLibraryAction implements Action<EmbeddableApiContex
     const title = getPanelTitle(embeddable);
     try {
       await embeddable.unlinkFromLibrary();
-      this.toastsService.addSuccess({
+      coreServices.notifications.toasts.addSuccess({
         title: dashboardUnlinkFromLibraryActionStrings.getSuccessMessage(title ? `'${title}'` : ''),
         'data-test-subj': 'unlinkPanelSuccess',
       });
     } catch (e) {
-      this.toastsService.addDanger({
+      coreServices.notifications.toasts.addDanger({
         title: dashboardUnlinkFromLibraryActionStrings.getFailureMessage(title ? `'${title}'` : ''),
         'data-test-subj': 'unlinkPanelFailure',
       });

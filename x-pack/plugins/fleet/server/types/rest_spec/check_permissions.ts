@@ -12,3 +12,14 @@ export const CheckPermissionsRequestSchema = {
     fleetServerSetup: schema.maybe(schema.boolean()),
   }),
 };
+
+export const CheckPermissionsResponseSchema = schema.object({
+  success: schema.boolean(),
+  error: schema.maybe(
+    schema.oneOf([
+      schema.literal('MISSING_SECURITY'),
+      schema.literal('MISSING_PRIVILEGES'),
+      schema.literal('MISSING_FLEET_SERVER_SETUP_PRIVILEGES'),
+    ])
+  ),
+});

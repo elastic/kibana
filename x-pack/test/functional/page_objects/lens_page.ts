@@ -915,6 +915,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         }
       });
     },
+    async getChartTypeFromChartSwitcher() {
+      const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
+      return await chartSwitcher.getVisibleText();
+    },
 
     async openChartSwitchPopover(layerIndex = 0) {
       if (await testSubjects.exists('lnsChartSwitchList', { timeout: 50 })) {
@@ -1255,21 +1259,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async changeTableSortingBy(colIndex = 0, direction: 'none' | 'ascending' | 'descending') {
+    async changeTableSortingBy(colIndex = 0, direction: 'ascending' | 'descending') {
       const el = await this.getDatatableHeader(colIndex);
       await el.moveMouseTo({ xOffset: 0, yOffset: -16 }); // Prevent the first data row's cell actions from overlapping/intercepting the header click
       const popoverToggle = await el.findByClassName('euiDataGridHeaderCell__button');
       await popoverToggle.click();
-      let buttonEl;
-      if (direction !== 'none') {
-        buttonEl = await find.byCssSelector(
-          `[data-test-subj^="dataGridHeaderCellActionGroup"] [title="Sort ${direction}"]`
-        );
-      } else {
-        buttonEl = await find.byCssSelector(
-          `[data-test-subj^="dataGridHeaderCellActionGroup"] li[class*="selected"] [title^="Sort"]`
-        );
-      }
+      const buttonEl = await find.byCssSelector(
+        `[data-test-subj^="dataGridHeaderCellActionGroup"] [title="Sort ${direction}"]`
+      );
       return buttonEl.click();
     },
 

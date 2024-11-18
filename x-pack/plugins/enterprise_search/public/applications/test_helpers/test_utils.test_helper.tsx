@@ -58,12 +58,12 @@ export const mockKibanaProps: KibanaLogicProps = {
     elasticsearch_host: 'https://your_deployment_url',
   },
   getChromeStyle$: jest.fn().mockReturnValue(of('classic')),
+  getNavLinks: jest.fn().mockReturnValue([]),
   guidedOnboarding: {},
   history: mockHistory,
   indexMappingComponent: () => {
     return <></>;
   },
-  isSearchHomepageEnabled: false,
   isSidebarEnabled: true,
   lens: {
     EmbeddableComponent: jest.fn(),
@@ -86,7 +86,6 @@ export const mockKibanaProps: KibanaLogicProps = {
     hasWebCrawler: true,
   },
   renderHeaderActions: jest.fn(),
-  searchHomepage: undefined,
   searchPlayground: searchPlaygroundMock.createStart(),
   security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),

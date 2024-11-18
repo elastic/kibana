@@ -6,13 +6,16 @@
  */
 
 import { useMemo } from 'react';
-import { LIST_ENTITIES_URL } from '../../../common/entity_analytics/entity_store/constants';
-import type { RiskEngineScheduleNowResponse } from '../../../common/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
-import type { DisableRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
+import {
+  ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
+  LIST_ENTITIES_URL,
+} from '../../../common/entity_analytics/entity_store/constants';
 import type { UploadAssetCriticalityRecordsResponse } from '../../../common/api/entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
+import type { DisableRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
 import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import type { InitRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
 import type { EnableRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_enable_route.gen';
+import type { RiskEngineScheduleNowResponse } from '../../../common/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import type {
   RiskScoresPreviewRequest,
   RiskScoresPreviewResponse,
@@ -40,6 +43,7 @@ import {
   ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
   RISK_SCORE_ENTITY_CALCULATION_URL,
   API_VERSIONS,
+  RISK_ENGINE_CLEANUP_URL,
   RISK_ENGINE_SCHEDULE_NOW_URL,
 } from '../../../common/constants';
 import type { SnakeToCamelCase } from '../common/utils';
@@ -172,6 +176,15 @@ export const useEntityAnalyticsRoutes = () => {
       });
 
     /**
+     * Get Entity Store privileges
+     */
+    const fetchEntityStorePrivileges = () =>
+      http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_INTERNAL_PRIVILEGES_URL, {
+        version: '1',
+        method: 'GET',
+      });
+
+    /**
      * Create asset criticality
      */
     const createAssetCriticality = async (
@@ -191,12 +204,18 @@ export const useEntityAnalyticsRoutes = () => {
       });
 
     const deleteAssetCriticality = async (
-      params: Pick<AssetCriticality, 'idField' | 'idValue'> & { refresh?: 'wait_for' }
+      params: Pick<AssetCriticality, 'idField' | 'idValue'> & {
+        refresh?: 'wait_for';
+      }
     ): Promise<{ deleted: true }> => {
       await http.fetch(ASSET_CRITICALITY_PUBLIC_URL, {
         version: API_VERSIONS.public.v1,
         method: 'DELETE',
-        query: { id_value: params.idValue, id_field: params.idField, refresh: params.refresh },
+        query: {
+          id_value: params.idValue,
+          id_field: params.idField,
+          refresh: params.refresh,
+        },
       });
 
       // spoof a response to allow us to better distnguish a delete from a create in use_asset_criticality.ts
@@ -220,7 +239,9 @@ export const useEntityAnalyticsRoutes = () => {
       fileContent: string,
       fileName: string
     ): Promise<UploadAssetCriticalityRecordsResponse> => {
-      const file = new File([new Blob([fileContent])], fileName, { type: 'text/csv' });
+      const file = new File([new Blob([fileContent])], fileName, {
+        type: 'text/csv',
+      });
       const body = new FormData();
       body.append('file', file);
 
@@ -267,6 +288,16 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'GET',
       });
 
+    /**
+     * Deletes Risk engine installation and associated data
+     */
+
+    const cleanUpRiskEngine = () =>
+      http.fetch(RISK_ENGINE_CLEANUP_URL, {
+        version: '1',
+        method: 'DELETE',
+      });
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -276,6 +307,7 @@ export const useEntityAnalyticsRoutes = () => {
       scheduleNowRiskEngine,
       fetchRiskEnginePrivileges,
       fetchAssetCriticalityPrivileges,
+      fetchEntityStorePrivileges,
       createAssetCriticality,
       deleteAssetCriticality,
       fetchAssetCriticality,
@@ -283,6 +315,7 @@ export const useEntityAnalyticsRoutes = () => {
       getRiskScoreIndexStatus,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
+      cleanUpRiskEngine,
       fetchEntitiesList,
     };
   }, [http]);

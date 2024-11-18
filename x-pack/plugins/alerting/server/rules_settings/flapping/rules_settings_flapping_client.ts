@@ -13,14 +13,16 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import {
+  MAX_LOOK_BACK_WINDOW,
+  MAX_STATUS_CHANGE_THRESHOLD,
+  MIN_LOOK_BACK_WINDOW,
+  MIN_STATUS_CHANGE_THRESHOLD,
+} from '@kbn/alerting-types/flapping/latest';
+import {
   RulesSettings,
   RulesSettingsFlapping,
   RulesSettingsFlappingProperties,
   RulesSettingsModificationMetadata,
-  MIN_LOOK_BACK_WINDOW,
-  MAX_LOOK_BACK_WINDOW,
-  MIN_STATUS_CHANGE_THRESHOLD,
-  MAX_STATUS_CHANGE_THRESHOLD,
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID,
   DEFAULT_FLAPPING_SETTINGS,

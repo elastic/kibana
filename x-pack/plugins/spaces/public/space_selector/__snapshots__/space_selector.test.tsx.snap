@@ -8,7 +8,7 @@ exports[`it renders with custom logo 1`] = `
 >
   <EuiPortal>
     <div
-      className="spcSelectorBackground"
+      className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
       role="presentation"
     />
   </EuiPortal>
@@ -69,7 +69,7 @@ exports[`it renders without crashing 1`] = `
 >
   <EuiPortal>
     <div
-      className="spcSelectorBackground"
+      className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
       role="presentation"
     />
   </EuiPortal>

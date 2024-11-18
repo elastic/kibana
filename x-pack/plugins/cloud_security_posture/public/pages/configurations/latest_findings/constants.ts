@@ -126,6 +126,6 @@ export const defaultColumns: CloudSecurityDefaultColumn[] = [
   { id: 'rule.benchmark.rule_number' },
   { id: 'rule.name' },
   { id: 'rule.section' },
-  { id: 'data_stream.dataset' },
+  { id: 'observer.vendor' },
   { id: '@timestamp' },
 ];

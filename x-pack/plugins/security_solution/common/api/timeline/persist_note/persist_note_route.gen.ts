@@ -18,6 +18,13 @@ import { z } from '@kbn/zod';
 
 import { BareNote, Note } from '../model/components.gen';
 
+export type ResponseNote = z.infer<typeof ResponseNote>;
+export const ResponseNote = z.object({
+  code: z.number(),
+  message: z.string(),
+  note: Note,
+});
+
 export type PersistNoteRouteRequestBody = z.infer<typeof PersistNoteRouteRequestBody>;
 export const PersistNoteRouteRequestBody = z.object({
   note: BareNote,
@@ -33,10 +40,6 @@ export type PersistNoteRouteRequestBodyInput = z.input<typeof PersistNoteRouteRe
 export type PersistNoteRouteResponse = z.infer<typeof PersistNoteRouteResponse>;
 export const PersistNoteRouteResponse = z.object({
   data: z.object({
-    persistNote: z.object({
-      code: z.number(),
-      message: z.string(),
-      note: Note,
-    }),
+    persistNote: ResponseNote,
   }),
 });

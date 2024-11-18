@@ -10,29 +10,23 @@
 import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { LANDING_PAGE_PATH } from '../../dashboard_constants';
-import { pluginServices } from '../../services/plugin_services';
+import { coreServices, urlForwardingService } from '../../services/kibana_services';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 
 let bannerId: string | undefined;
 
 export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['history'] }) => {
   const { restorePreviousUrl } = useDashboardMountContext();
-  const {
-    analytics,
-    settings: { i18n: i18nStart, theme },
-    overlays: { banners },
-    urlForwarding: { navigateToLegacyKibanaUrl },
-  } = pluginServices.getServices();
 
   useEffect(() => {
     restorePreviousUrl();
-    const { navigated } = navigateToLegacyKibanaUrl(
+    const { navigated } = urlForwardingService.navigateToLegacyKibanaUrl(
       history.location.pathname + history.location.search
     );
 
@@ -41,7 +35,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
         defaultMessage: 'Page not found',
       });
 
-      bannerId = banners.replace(
+      bannerId = coreServices.overlays.banners.replace(
         bannerId,
         toMountPoint(
           <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
@@ -55,28 +49,20 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
               />
             </p>
           </EuiCallOut>,
-          { analytics, i18n: i18nStart, theme }
+          { analytics: coreServices.analytics, i18n: coreServices.i18n, theme: coreServices.theme }
         )
       );
 
       // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
       setTimeout(() => {
         if (bannerId) {
-          banners.remove(bannerId);
+          coreServices.overlays.banners.remove(bannerId);
         }
       }, 15000);
 
       history.replace(LANDING_PAGE_PATH);
     }
-  }, [
-    restorePreviousUrl,
-    navigateToLegacyKibanaUrl,
-    banners,
-    analytics,
-    i18nStart,
-    theme,
-    history,
-  ]);
+  }, [restorePreviousUrl, history]);
 
   return null;
 };

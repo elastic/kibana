@@ -35,7 +35,7 @@ properties:
       - full_name
       - username
   owner:
-    $ref: 'owners.yaml'
+    $ref: 'owner.yaml'
   payload:
     oneOf:
       - $ref: 'payload_alert_comment.yaml'

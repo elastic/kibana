@@ -134,8 +134,8 @@ export function DataDimensionEditor(
   const { splitAccessor } = layer;
   const splitCategories = getColorCategories(table?.rows ?? [], splitAccessor);
 
-  if (props.groupId === 'breakdown' && !layer.collapseFn) {
-    return (
+  if (props.groupId === 'breakdown') {
+    return !layer.collapseFn ? (
       <ColorMappingByTerms
         isDarkMode={isDarkMode}
         colorMapping={layer.colorMapping}
@@ -147,7 +147,7 @@ export function DataDimensionEditor(
         panelRef={props.panelRef}
         categories={splitCategories}
       />
-    );
+    ) : null;
   }
 
   const isHorizontal = isHorizontalChart(state.layers);

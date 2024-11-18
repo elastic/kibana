@@ -9,7 +9,6 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type { EntityDefinition } from '@kbn/entities-schema';
 import type {
   EngineDescriptor,
   EngineStatus,
@@ -17,52 +16,95 @@ import type {
 } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 
 import { entityEngineDescriptorTypeName } from './engine_descriptor_type';
-import { getByEntityTypeQuery, getEntityDefinition } from '../utils/utils';
+import { getByEntityTypeQuery } from '../utils';
 import { ENGINE_STATUS } from '../constants';
 
-export class EngineDescriptorClient {
-  constructor(private readonly soClient: SavedObjectsClientContract) {}
+interface EngineDescriptorDependencies {
+  soClient: SavedObjectsClientContract;
+  namespace: string;
+}
 
-  async init(entityType: EntityType, definition: EntityDefinition, filter: string) {
+export class EngineDescriptorClient {
+  constructor(private readonly deps: EngineDescriptorDependencies) {}
+
+  getSavedObjectId(entityType: EntityType) {
+    return `entity-engine-descriptor-${entityType}-${this.deps.namespace}`;
+  }
+
+  async init(
+    entityType: EntityType,
+    {
+      filter,
+      fieldHistoryLength,
+      indexPattern,
+    }: { filter: string; fieldHistoryLength: number; indexPattern: string }
+  ) {
     const engineDescriptor = await this.find(entityType);
 
-    if (engineDescriptor.total > 0)
-      throw new Error(`Entity engine for ${entityType} already exists`);
+    if (engineDescriptor.total > 1) {
+      throw new Error(`Found multiple engine descriptors for entity type ${entityType}`);
+    }
 
-    const { attributes } = await this.soClient.create<EngineDescriptor>(
+    if (engineDescriptor.total === 1) {
+      const old = engineDescriptor.saved_objects[0].attributes;
+      const update = {
+        ...old,
+        status: ENGINE_STATUS.INSTALLING,
+        filter,
+        fieldHistoryLength,
+        indexPattern,
+      };
+      await this.deps.soClient.update<EngineDescriptor>(
+        entityEngineDescriptorTypeName,
+        this.getSavedObjectId(entityType),
+        update,
+        { refresh: 'wait_for' }
+      );
+
+      return update;
+    }
+
+    const { attributes } = await this.deps.soClient.create<EngineDescriptor>(
       entityEngineDescriptorTypeName,
       {
         status: ENGINE_STATUS.INSTALLING,
         type: entityType,
-        indexPattern: definition.indexPatterns.join(','),
+        indexPattern,
         filter,
+        fieldHistoryLength,
       },
-      { id: definition.id }
+      { id: this.getSavedObjectId(entityType) }
     );
     return attributes;
   }
 
-  async update(id: string, status: EngineStatus) {
-    const { attributes } = await this.soClient.update<EngineDescriptor>(
+  async update(entityType: EntityType, engine: Partial<EngineDescriptor>) {
+    const id = this.getSavedObjectId(entityType);
+    const { attributes } = await this.deps.soClient.update<EngineDescriptor>(
       entityEngineDescriptorTypeName,
       id,
-      { status },
+      engine,
       { refresh: 'wait_for' }
     );
     return attributes;
   }
 
+  async updateStatus(entityType: EntityType, status: EngineStatus) {
+    return this.update(entityType, { status });
+  }
+
   async find(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {
-    return this.soClient.find<EngineDescriptor>({
+    return this.deps.soClient.find<EngineDescriptor>({
       type: entityEngineDescriptorTypeName,
       filter: getByEntityTypeQuery(entityType),
+      namespaces: [this.deps.namespace],
     });
   }
 
   async get(entityType: EntityType): Promise<EngineDescriptor> {
-    const { id } = getEntityDefinition(entityType);
+    const id = this.getSavedObjectId(entityType);
 
-    const { attributes } = await this.soClient.get<EngineDescriptor>(
+    const { attributes } = await this.deps.soClient.get<EngineDescriptor>(
       entityEngineDescriptorTypeName,
       id
     );
@@ -70,7 +112,32 @@ export class EngineDescriptorClient {
     return attributes;
   }
 
-  async delete(id: string) {
-    return this.soClient.delete(entityEngineDescriptorTypeName, id);
+  async maybeGet(entityType: EntityType): Promise<EngineDescriptor | undefined> {
+    try {
+      const descriptor = await this.get(entityType);
+      return descriptor;
+    } catch (e) {
+      if (e.isBoom && e.output.statusCode === 404) {
+        return undefined;
+      }
+      throw e;
+    }
+  }
+
+  async list() {
+    return this.deps.soClient
+      .find<EngineDescriptor>({
+        type: entityEngineDescriptorTypeName,
+        namespaces: [this.deps.namespace],
+      })
+      .then(({ saved_objects: engines }) => ({
+        engines: engines.map((engine) => engine.attributes),
+        count: engines.length,
+      }));
+  }
+
+  async delete(entityType: EntityType) {
+    const id = this.getSavedObjectId(entityType);
+    return this.deps.soClient.delete(entityEngineDescriptorTypeName, id);
   }
 }

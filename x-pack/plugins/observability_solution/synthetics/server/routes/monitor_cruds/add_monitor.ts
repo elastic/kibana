@@ -13,7 +13,7 @@ import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monit
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
-import { mapSavedObjectToMonitor } from './helper';
+import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -26,13 +26,18 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         id: schema.maybe(schema.string()),
         preserve_namespace: schema.maybe(schema.boolean()),
         gettingStarted: schema.maybe(schema.boolean()),
+        internal: schema.maybe(
+          schema.boolean({
+            defaultValue: false,
+          })
+        ),
       }),
     },
   },
   handler: async (routeContext): Promise<any> => {
     const { request, response, server } = routeContext;
     // usually id is auto generated, but this is useful for testing
-    const { id } = request.query;
+    const { id, internal } = request.query;
 
     const addMonitorAPI = new AddEditMonitorAPI(routeContext);
 
@@ -113,7 +118,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       addMonitorAPI.initDefaultAlerts(newMonitor.attributes.name);
       addMonitorAPI.setupGettingStarted(newMonitor.id);
 
-      return mapSavedObjectToMonitor(newMonitor);
+      return mapSavedObjectToMonitor({ monitor: newMonitor, internal });
     } catch (getErr) {
       server.logger.error(getErr);
       if (getErr instanceof InvalidLocationError) {

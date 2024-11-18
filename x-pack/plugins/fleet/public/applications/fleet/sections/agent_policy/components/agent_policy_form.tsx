@@ -45,12 +45,14 @@ interface Props {
   isEditing?: boolean;
   // form error state is passed up to the form
   updateAdvancedSettingsHasErrors: (hasErrors: boolean) => void;
+  setInvalidSpaceError: (hasErrors: boolean) => void;
 }
 const AgentPolicyFormContext = React.createContext<
   | {
       agentPolicy: Partial<NewAgentPolicy | AgentPolicy> & { [key: string]: any };
       updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
       updateAdvancedSettingsHasErrors: (hasErrors: boolean) => void;
+      setInvalidSpaceError: (hasErrors: boolean) => void;
     }
   | undefined
 >(undefined);
@@ -67,6 +69,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
   validation,
   isEditing = false,
   updateAdvancedSettingsHasErrors,
+  setInvalidSpaceError,
 }) => {
   const authz = useAuthz();
   const isDisabled = !authz.fleet.allAgentPolicies;
@@ -97,7 +100,12 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
 
   return (
     <AgentPolicyFormContext.Provider
-      value={{ agentPolicy, updateAgentPolicy, updateAdvancedSettingsHasErrors }}
+      value={{
+        agentPolicy,
+        updateAgentPolicy,
+        updateAdvancedSettingsHasErrors,
+        setInvalidSpaceError,
+      }}
     >
       <EuiForm>
         {!isEditing ? (
@@ -129,6 +137,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
             <EuiSpacer size="xs" />
             <StyledEuiAccordion
               id="advancedOptions"
+              data-test-subj="advancedOptionsButton"
               buttonContent={
                 <FormattedMessage
                   id="xpack.fleet.agentPolicyForm.advancedOptionsToggleLabel"
@@ -188,7 +197,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
                 <EuiSpacer size="m" />
                 <ConfiguredSettings
                   configuredSettings={AGENT_POLICY_ADVANCED_SETTINGS}
-                  disabled={isDisabled}
+                  disabled={isDisabled || !!agentPolicy?.supports_agentless}
                 />
               </>
             ) : null}

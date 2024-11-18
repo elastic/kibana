@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
+import type { PersistTimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 
 export interface Timeline {
   title: string;
@@ -69,7 +69,8 @@ export const getTimelineNonValidQuery = (): CompleteTimeline => ({
 });
 
 export const expectedExportedTimelineTemplate = (
-  templateResponse: Cypress.Response<TimelineResponse>
+  templateResponse: Cypress.Response<PersistTimelineResponse>,
+  username: string
 ) => {
   const timelineTemplateBody = templateResponse.body.data.persistTimeline.timeline;
 
@@ -102,9 +103,9 @@ export const expectedExportedTimelineTemplate = (
     templateTimelineVersion: 1,
     timelineType: 'template',
     created: timelineTemplateBody.created,
-    createdBy: Cypress.env('ELASTICSEARCH_USERNAME'),
+    createdBy: username,
     updated: timelineTemplateBody.updated,
-    updatedBy: Cypress.env('ELASTICSEARCH_USERNAME'),
+    updatedBy: username,
     sort: [],
     eventNotes: [],
     globalNotes: [],
@@ -113,7 +114,10 @@ export const expectedExportedTimelineTemplate = (
   };
 };
 
-export const expectedExportedTimeline = (timelineResponse: Cypress.Response<TimelineResponse>) => {
+export const expectedExportedTimeline = (
+  timelineResponse: Cypress.Response<PersistTimelineResponse>,
+  username: string
+) => {
   const timelineBody = timelineResponse.body.data.persistTimeline.timeline;
 
   return {
@@ -138,9 +142,9 @@ export const expectedExportedTimeline = (timelineResponse: Cypress.Response<Time
     description: timelineBody.description,
     title: timelineBody.title,
     created: timelineBody.created,
-    createdBy: Cypress.env('ELASTICSEARCH_USERNAME'),
+    createdBy: username,
     updated: timelineBody.updated,
-    updatedBy: Cypress.env('ELASTICSEARCH_USERNAME'),
+    updatedBy: username,
     timelineType: 'default',
     sort: [],
     eventNotes: [],

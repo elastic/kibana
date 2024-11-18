@@ -5,27 +5,31 @@
  * 2.0.
  */
 
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import React from 'react';
-import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
-import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { InventoryContextProvider } from '../inventory_context_provider';
+import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import React from 'react';
+import { InventoryContextProvider } from '../../context/inventory_context_provider';
+import { KibanaEnvironment } from '../../hooks/use_kibana';
+import { UnifiedSearchProvider } from '../../hooks/use_unified_search_context';
 import { inventoryRouter } from '../../routes/config';
-import { HeaderActionMenuItems } from './header_action_menu';
-import { InventoryStartDependencies } from '../../types';
 import { InventoryServices } from '../../services/types';
+import { InventoryStartDependencies } from '../../types';
+import { HeaderActionMenuItems } from './header_action_menu';
 
 export function AppRoot({
   coreStart,
   pluginsStart,
   services,
   appMountParameters,
+  kibanaEnvironment,
 }: {
   coreStart: CoreStart;
   pluginsStart: InventoryStartDependencies;
   services: InventoryServices;
+  kibanaEnvironment: KibanaEnvironment;
 } & { appMountParameters: AppMountParameters }) {
   const { history } = appMountParameters;
 
@@ -33,14 +37,17 @@ export function AppRoot({
     ...coreStart,
     ...pluginsStart,
     ...services,
+    kibanaEnvironment,
   };
 
   return (
     <InventoryContextProvider context={context}>
       <RedirectAppLinks coreStart={coreStart}>
-        <RouterProvider history={history} router={inventoryRouter}>
-          <RouteRenderer />
-          <InventoryHeaderActionMenu appMountParameters={appMountParameters} />
+        <RouterProvider history={history} router={inventoryRouter as any}>
+          <UnifiedSearchProvider>
+            <RouteRenderer />
+            <InventoryHeaderActionMenu appMountParameters={appMountParameters} />
+          </UnifiedSearchProvider>
         </RouterProvider>
       </RedirectAppLinks>
     </InventoryContextProvider>

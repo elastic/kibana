@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
-import type { TagAttributes } from '@kbn/saved-objects-tagging-plugin/common';
+import type { TagAttributes } from '@kbn/saved-objects-tagging-oss-plugin/common';
 
 export const findTagsByName = async ({
   savedObjectsClient,

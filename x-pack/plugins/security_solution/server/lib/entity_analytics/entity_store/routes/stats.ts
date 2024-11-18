@@ -10,8 +10,8 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
-import type { GetEntityStoreStatsResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/stats.gen';
-import { GetEntityStoreStatsRequestParams } from '../../../../../common/api/entity_analytics/entity_store/engine/stats.gen';
+import type { GetEntityEngineStatsResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/stats.gen';
+import { GetEntityEngineStatsRequestParams } from '../../../../../common/api/entity_analytics/entity_store/engine/stats.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
@@ -23,8 +23,10 @@ export const getEntityEngineStatsRoute = (
     .post({
       access: 'public',
       path: '/api/entity_store/engines/{entityType}/stats',
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(
@@ -32,12 +34,16 @@ export const getEntityEngineStatsRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(GetEntityStoreStatsRequestParams),
+            params: buildRouteValidationWithZod(GetEntityEngineStatsRequestParams),
           },
         },
       },
 
-      async (context, request, response): Promise<IKibanaResponse<GetEntityStoreStatsResponse>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<GetEntityEngineStatsResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -46,7 +52,7 @@ export const getEntityEngineStatsRoute = (
 
           // return response.ok({ body });
         } catch (e) {
-          logger.error('Error in GetEntityStoreStats:', e);
+          logger.error('Error in GetEntityEngineStats:', e);
           const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,

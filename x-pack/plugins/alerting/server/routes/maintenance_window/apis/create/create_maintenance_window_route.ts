@@ -33,6 +33,7 @@ export const createMaintenanceWindowRoute = (
         body: createBodySchemaV1,
       },
       options: {
+        access: 'internal',
         tags: [`access:${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
       },
     },

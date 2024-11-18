@@ -10,40 +10,39 @@ import { SearchHit } from '@kbn/es-types';
 import { pageToPagination, Paginate } from '@kbn/search-index-documents';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../use_kibana';
+import { QueryKeys, DEFAULT_DOCUMENT_PAGE_SIZE } from '../../constants';
 
-interface IndexDocuments {
+export interface IndexDocuments {
   meta: Pagination;
   results: Paginate<SearchHit>;
 }
 const DEFAULT_PAGINATION = {
   from: 0,
   has_more_hits_than_total: false,
-  size: 10,
+  size: DEFAULT_DOCUMENT_PAGE_SIZE,
   total: 0,
 };
-const pollingInterval = 5 * 1000;
-export const useIndexDocumentSearch = (
-  indexName: string,
-  pagination: Omit<Pagination, 'totalItemCount'>,
-  searchQuery?: string
-) => {
+export const INDEX_SEARCH_POLLING = 5 * 1000;
+export const useIndexDocumentSearch = (indexName: string) => {
   const {
     services: { http },
   } = useKibana();
   const response = useQuery({
-    queryKey: ['fetchIndexDocuments', pagination, searchQuery],
-    refetchInterval: pollingInterval,
+    queryKey: [QueryKeys.SearchDocuments, indexName],
+    refetchInterval: INDEX_SEARCH_POLLING,
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: 'always',
-    queryFn: async () =>
+    queryFn: async ({ signal }) =>
       http.post<IndexDocuments>(`/internal/serverless_search/indices/${indexName}/search`, {
         body: JSON.stringify({
-          searchQuery,
+          searchQuery: '',
+          trackTotalHits: true,
         }),
         query: {
-          page: pagination.pageIndex,
-          size: pagination.pageSize,
+          page: 0,
+          size: DEFAULT_DOCUMENT_PAGE_SIZE,
         },
+        signal,
       }),
   });
   return {

@@ -8,11 +8,12 @@
  */
 
 import { Capabilities } from '@kbn/core/public';
+import { convertPanelMapToPanelsArray, DashboardContainerInput } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
-import { convertPanelMapToSavedPanels, DashboardContainerInput } from '../../../../common';
 
-import { pluginServices } from '../../../services/plugin_services';
+import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
+import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 
 describe('showPublicUrlSwitch', () => {
   test('returns false if "dashboard" app is not available', () => {
@@ -56,13 +57,11 @@ describe('showPublicUrlSwitch', () => {
 });
 
 describe('ShowShareModal', () => {
+  const dashboardBackupService = getDashboardBackupService();
   const unsavedStateKeys = ['query', 'filters', 'options', 'savedQuery', 'panels'] as Array<
     keyof DashboardLocatorParams
   >;
-  const toggleShareMenuSpy = jest.spyOn(
-    pluginServices.getServices().share,
-    'toggleShareContextMenu'
-  );
+  const toggleShareMenuSpy = jest.spyOn(shareService!, 'toggleShareContextMenu');
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -71,9 +70,7 @@ describe('ShowShareModal', () => {
   const getPropsAndShare = (
     unsavedState?: Partial<DashboardContainerInput>
   ): ShowShareModalProps => {
-    pluginServices.getServices().dashboardBackup.getState = jest
-      .fn()
-      .mockReturnValue({ dashboardState: unsavedState });
+    dashboardBackupService.getState = jest.fn().mockReturnValue({ dashboardState: unsavedState });
     return {
       isDirty: true,
       anchorElement: document.createElement('div'),
@@ -146,7 +143,7 @@ describe('ShowShareModal', () => {
     ).locatorParams.params;
     const rawDashboardState = {
       ...unsavedDashboardState,
-      panels: convertPanelMapToSavedPanels(unsavedDashboardState.panels),
+      panels: convertPanelMapToPanelsArray(unsavedDashboardState.panels),
     };
     unsavedStateKeys.forEach((key) => {
       expect(shareLocatorParams[key]).toStrictEqual(
@@ -169,7 +166,7 @@ describe('ShowShareModal', () => {
       },
     };
     const props = getPropsAndShare(unsavedDashboardState);
-    pluginServices.getServices().dashboardBackup.getState = jest.fn().mockReturnValue({
+    dashboardBackupService.getState = jest.fn().mockReturnValue({
       dashboardState: unsavedDashboardState,
       panels: {
         panel_1: { changedKey1: 'changed' },
@@ -211,8 +208,8 @@ describe('ShowShareModal', () => {
     ).locatorParams.params;
 
     expect(shareLocatorParams.panels).toBeDefined();
-    expect(shareLocatorParams.panels![0].embeddableConfig.changedKey1).toBe('changed');
-    expect(shareLocatorParams.panels![1].embeddableConfig.changedKey2).toBe('definitely changed');
-    expect(shareLocatorParams.panels![2].embeddableConfig.changedKey3).toBe('should still exist');
+    expect(shareLocatorParams.panels![0].panelConfig.changedKey1).toBe('changed');
+    expect(shareLocatorParams.panels![1].panelConfig.changedKey2).toBe('definitely changed');
+    expect(shareLocatorParams.panels![2].panelConfig.changedKey3).toBe('should still exist');
   });
 });

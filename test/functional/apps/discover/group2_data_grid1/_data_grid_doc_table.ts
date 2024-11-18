@@ -179,9 +179,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should allow paginating docs in the flyout by clicking in the doc table', async function () {
         await retry.try(async function () {
           await dataGrid.clickRowToggle({ rowIndex: rowToInspect - 1 });
-          await testSubjects.exists(`docViewerFlyoutNavigationPage0`);
+          await testSubjects.existOrFail('docViewerFlyoutNavigationPage-0');
           await dataGrid.clickRowToggle({ rowIndex: rowToInspect });
-          await testSubjects.exists(`docViewerFlyoutNavigationPage1`);
+          await testSubjects.existOrFail('docViewerFlyoutNavigationPage-1');
           await dataGrid.closeFlyout();
         });
       });

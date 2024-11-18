@@ -10,7 +10,6 @@ import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut } from '@elastic/eui'
 import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
@@ -24,7 +23,6 @@ import type {
   UseRiskContributingAlertsResult,
 } from '../../../../hooks/use_risk_contributing_alerts';
 import { useRiskContributingAlerts } from '../../../../hooks/use_risk_contributing_alerts';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../../../common/constants';
 import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
 
 import { useRiskScore } from '../../../../api/hooks/use_risk_score';
@@ -177,8 +175,6 @@ export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTab
     [isPreviewEnabled, scopeId]
   );
 
-  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
-
   if (riskScoreError) {
     return (
       <EuiCallOut
@@ -229,9 +225,7 @@ export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTab
 
   return (
     <>
-      {isAssetCriticalityEnabled && (
-        <ContextsSection loading={loadingRiskScore} riskScore={riskScore} />
-      )}
+      <ContextsSection loading={loadingRiskScore} riskScore={riskScore} />
       <EuiSpacer size="m" />
       {riskInputsAlertSection}
     </>

@@ -15,15 +15,8 @@ import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
 import { OverviewAlerts } from './overview/overview_alerts';
 import { useEnablement } from '../../../hooks';
-import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
-import {
-  fetchMonitorOverviewAction,
-  quietFetchOverviewAction,
-  selectOverviewState,
-  selectServiceLocationsState,
-} from '../../../state';
+import { selectServiceLocationsState } from '../../../state';
 import { getServiceLocations } from '../../../state/service_locations';
-
 import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
 
 import { useMonitorList } from '../hooks/use_monitor_list';
@@ -43,7 +36,6 @@ export const OverviewPage: React.FC = () => {
 
   const dispatch = useDispatch();
 
-  const { lastRefresh } = useSyntheticsRefreshContext();
   const { search } = useLocation();
 
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
@@ -59,11 +51,7 @@ export const OverviewPage: React.FC = () => {
 
   const { isEnabled, loading: enablementLoading } = useEnablement();
 
-  const {
-    loaded: overviewLoaded,
-    data: { monitors },
-    pageState,
-  } = useSelector(selectOverviewState);
+  const { allConfigs, loaded: overviewLoaded } = useSelector(selectOverviewStatus);
 
   const {
     loading: monitorsLoading,
@@ -71,23 +59,6 @@ export const OverviewPage: React.FC = () => {
     handleFilterChange,
     absoluteTotal,
   } = useMonitorList();
-
-  // fetch overview for all other page state changes
-  useEffect(() => {
-    if (!overviewLoaded) {
-      dispatch(fetchMonitorOverviewAction.get(pageState));
-    }
-    // change only needs to be triggered on pageState change
-  }, [dispatch, pageState, overviewLoaded]);
-
-  // fetch overview for refresh
-  useEffect(() => {
-    if (monitorsLoaded) {
-      dispatch(quietFetchOverviewAction.get(pageState));
-    }
-    // for page state change we don't want quite fetch, see above fetch ^^
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, lastRefresh]);
 
   const hasNoMonitors = !search && !enablementLoading && monitorsLoaded && absoluteTotal === 0;
 
@@ -99,7 +70,7 @@ export const OverviewPage: React.FC = () => {
     return <Redirect to={MONITORS_ROUTE} />;
   }
 
-  const noMonitorFound = monitorsLoaded && overviewLoaded && monitors?.length === 0;
+  const hasMonitors = !(monitorsLoaded && overviewLoaded && allConfigs?.length === 0);
 
   return (
     <>
@@ -117,7 +88,7 @@ export const OverviewPage: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {!noMonitorFound ? (
+      {hasMonitors ? (
         <>
           <EuiFlexGroup gutterSize="m" wrap>
             <EuiFlexItem grow={false}>

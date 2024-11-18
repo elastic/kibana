@@ -56,7 +56,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await discover.getHitCount()).to.be(totalCount);
   }
 
-  async function checkESQLHistogramVis(timespan: string, totalCount: string) {
+  async function checkESQLHistogramVis(
+    timespan: string,
+    totalCount: string,
+    hasTransformationalCommand = false
+  ) {
     await header.waitUntilLoadingHasFinished();
     await discover.waitUntilSearchingHasFinished();
 
@@ -64,7 +68,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.existOrFail('unifiedHistogramSaveVisualization');
     await testSubjects.existOrFail('unifiedHistogramEditFlyoutVisualization');
     await testSubjects.missingOrFail('unifiedHistogramEditVisualization');
-    await testSubjects.missingOrFail('unifiedHistogramBreakdownSelectorButton');
+    if (hasTransformationalCommand) {
+      await testSubjects.missingOrFail('unifiedHistogramBreakdownSelectorButton');
+    } else {
+      await testSubjects.existOrFail('unifiedHistogramBreakdownSelectorButton');
+    }
     await testSubjects.missingOrFail('unifiedHistogramTimeIntervalSelectorButton');
     expect(await discover.getChartTimespan()).to.be(timespan);
     expect(await discover.getHitCount()).to.be(totalCount);
@@ -102,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return seriesType;
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/184600
+  // FLAKY: https://github.com/elastic/kibana/issues/184600
   describe.skip('discover lens vis', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
@@ -174,10 +182,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         hasTimeField: true,
         changeTimestampField: `--- I don't want to use the time filter ---`,
       });
+      await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await checkNoVis(defaultTotalCount);
 
       await dataViews.editFromSearchBar({ newName: 'logs', newTimeField: '@timestamp' });
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await checkHistogramVis(defaultTimespan, defaultTotalCount);
       expect(await discover.getVisContextSuggestionType()).to.be('histogramForDataView');
     });
@@ -278,7 +289,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      expect(await getCurrentVisTitle()).to.be('Bar');
+      // Line has been retained although the query changed!
+      expect(await getCurrentVisTitle()).to.be('Line');
 
       await checkESQLHistogramVis(defaultTimespanESQL, '100');
 
@@ -307,7 +319,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      await checkESQLHistogramVis(defaultTimespanESQL, '5');
+      await checkESQLHistogramVis(defaultTimespanESQL, '5', true);
       await discover.chooseLensSuggestion('pie');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
@@ -356,7 +368,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      await checkESQLHistogramVis(defaultTimespanESQL, '5');
+      await checkESQLHistogramVis(defaultTimespanESQL, '5', true);
       await discover.chooseLensSuggestion('pie');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
@@ -409,7 +421,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      await checkESQLHistogramVis(defaultTimespanESQL, '5');
+      await checkESQLHistogramVis(defaultTimespanESQL, '5', true);
       await discover.chooseLensSuggestion('pie');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
@@ -453,7 +465,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
-      await checkESQLHistogramVis(defaultTimespanESQL, '5');
+      await checkESQLHistogramVis(defaultTimespanESQL, '5', true);
       await discover.chooseLensSuggestion('pie');
 
       await discover.saveSearch('testCustomESQLVis');
@@ -557,15 +569,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
-      await monacoEditor.setCodeEditorValue(
-        'from logstash-* | stats averageB = avg(bytes) by extension.raw'
-      );
+      // reset to histogram
+      await monacoEditor.setCodeEditorValue('from logstash-*');
       await testSubjects.click('querySubmitButton');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
       expect(await getCurrentVisTitle()).to.be('Bar');
-      expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
+      expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
 
@@ -605,8 +616,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
 
-      await discover.chooseLensSuggestion('barVerticalStacked');
-      await changeVisShape('Line');
+      await discover.chooseLensSuggestion('waffle');
+      await changeVisShape('Treemap');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
       await discover.saveUnsavedChanges();
@@ -615,8 +626,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
-      expect(await getCurrentVisTitle()).to.be('Line');
-      await testSubjects.existOrFail('xyVisChart');
+      expect(await getCurrentVisTitle()).to.be('Treemap');
+      await testSubjects.existOrFail('partitionVisChart');
     });
 
     it('should close lens flyout on revert changes', async () => {

@@ -35,7 +35,7 @@
             "section": "def-common.CardsNavigationComponentProps",
             "text": "CardsNavigationComponentProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-management/cards_navigation/src/cards_navigation.tsx",
         "deprecated": false,

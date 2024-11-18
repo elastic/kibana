@@ -94,7 +94,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('data view mode', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/193367
+    describe.skip('data view mode', () => {
       it('should render additional cell actions for logs data source', async () => {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,

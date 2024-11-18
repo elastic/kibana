@@ -12,7 +12,7 @@ import { parse } from 'query-string';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
 
 interface QueryParams {
@@ -46,6 +46,7 @@ export const readLoadFromParam = () => {
  */
 export const useSetInitialValue = (params: SetInitialValueParams) => {
   const { localStorageValue, setValue, toasts } = params;
+  const isInitialValueSet = useRef<boolean>(false);
 
   useEffect(() => {
     const loadBufferFromRemote = async (url: string) => {
@@ -61,7 +62,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
         if (parsedURL.origin === 'https://www.elastic.co') {
           const resp = await fetch(parsedURL);
           const data = await resp.text();
-          setValue(`${localStorageValue}\n\n${data}`);
+          setValue(`${localStorageValue ?? ''}\n\n${data}`);
         } else {
           toasts.addWarning(
             i18n.translate('console.monaco.loadFromDataUnrecognizedUrlErrorMessage', {
@@ -104,10 +105,15 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
 
     const loadFromParam = readLoadFromParam();
 
-    if (loadFromParam) {
-      loadBufferFromRemote(loadFromParam);
-    } else {
-      setValue(localStorageValue || DEFAULT_INPUT_VALUE);
+    // Only set the value in the editor if an initial value hasn't been set yet
+    if (!isInitialValueSet.current) {
+      if (loadFromParam) {
+        loadBufferFromRemote(loadFromParam);
+      } else {
+        // Only set to default input value if the localstorage value is undefined
+        setValue(localStorageValue ?? DEFAULT_INPUT_VALUE);
+      }
+      isInitialValueSet.current = true;
     }
 
     return () => {

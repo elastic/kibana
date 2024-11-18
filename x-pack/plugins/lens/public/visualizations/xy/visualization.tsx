@@ -89,7 +89,6 @@ import {
 } from './annotations/helpers';
 import {
   checkXAccessorCompatibility,
-  defaultSeriesType,
   getAnnotationLayerTitle,
   getAnnotationsLayers,
   getAxisName,
@@ -112,6 +111,7 @@ import {
 } from './visualization_helpers';
 import { getAxesConfiguration, groupAxesByType } from './axes_configuration';
 import type { XYByValueAnnotationLayerConfig, XYState } from './types';
+import { defaultSeriesType } from './types';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import { createAnnotationActions } from './annotations/actions';
@@ -263,14 +263,15 @@ export const getXyVisualization = ({
   getDescription,
 
   switchVisualizationType(seriesType: string, state: State, layerId?: string) {
-    const dataLayer = state.layers.find((l) => l.layerId === layerId);
+    const dataLayer = layerId
+      ? state.layers.find((l) => l.layerId === layerId)
+      : state.layers.at(0);
     if (dataLayer && !isDataLayer(dataLayer)) {
       throw new Error('Cannot switch series type for non-data layer');
     }
     if (!dataLayer) {
       return state;
     }
-    // todo: test how they switch between percentage etc
     const currentStackingType = stackingTypes.find(({ subtypes }) =>
       subtypes.includes(dataLayer.seriesType)
     );
@@ -741,7 +742,10 @@ export const getXyVisualization = ({
       paletteService,
     };
 
-    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, {
+      darkMode: false,
+      name: 'amsterdam',
+    }).darkMode;
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} />

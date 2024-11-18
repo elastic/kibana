@@ -374,6 +374,7 @@ export const UnifiedHistogramLayout = ({
           lensAdapters={lensAdapters}
           lensEmbeddableOutput$={lensEmbeddableOutput$}
           withDefaultActions={withDefaultActions}
+          columns={columns}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>

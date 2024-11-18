@@ -14,11 +14,16 @@ import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import { turnOffPolicyProtectionsIfNotSupported } from './turn_off_policy_protections';
 import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { PolicyData } from '../../../common/endpoint/types';
-import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import type { PromiseResolvedValue } from '../../../common/endpoint/types/utility_types';
-import { ensureOnlyEventCollectionIsAllowed } from '../../../common/endpoint/models/policy_config_helpers';
+import {
+  ensureOnlyEventCollectionIsAllowed,
+  resetCustomNotifications,
+} from '../../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
+import { merge } from 'lodash';
+import { DefaultPolicyNotificationMessage } from '../../../common/endpoint/models/policy_config';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { createEndpointFleetServicesFactoryMock } from '../services/fleet/endpoint_fleet_services_factory.mocks';
 
 describe('Turn Off Policy Protections Migration', () => {
   let esClient: ElasticsearchClient;
@@ -29,306 +34,433 @@ describe('Turn Off Policy Protections Migration', () => {
   const callTurnOffPolicyProtections = () =>
     turnOffPolicyProtectionsIfNotSupported(esClient, fleetServices, productFeatureService, logger);
 
-  const generatePolicyMock = (
-    policyGenerator: FleetPackagePolicyGenerator,
-    withDisabledProtections = false,
-    withDisabledProtectionUpdates = true
-  ): PolicyData => {
-    const policy = policyGenerator.generateEndpointPackagePolicy();
-
-    if (!withDisabledProtections && withDisabledProtectionUpdates) {
-      return policy;
-    } else if (!withDisabledProtections && !withDisabledProtectionUpdates) {
-      policy.inputs[0].config.policy.value.global_manifest_version = '2023-01-01';
-      return policy;
-    } else if (withDisabledProtections && !withDisabledProtectionUpdates) {
-      policy.inputs[0].config.policy.value = ensureOnlyEventCollectionIsAllowed(
-        policy.inputs[0].config.policy.value
-      );
-      policy.inputs[0].config.policy.value.global_manifest_version = '2023-01-01';
-      return policy;
-    } else {
-      policy.inputs[0].config.policy.value = ensureOnlyEventCollectionIsAllowed(
-        policy.inputs[0].config.policy.value
-      );
-      return policy; // This is the only one that shouldn't be updated since it has default values for disabled features
+  const mockPolicyListResponse = (
+    { total, items, page }: { total?: number; items?: PolicyData[]; page?: number } = {
+      total: 1,
+      page: 2,
+      items: [],
     }
+  ) => {
+    const packagePolicyListSrv = fleetServices.packagePolicy.list as jest.Mock;
+    return packagePolicyListSrv.mockResolvedValueOnce({
+      total,
+      page,
+      perPage: 1500,
+      items,
+    });
   };
+
+  const generatePolicyMock = (
+    withDisabledProtections = false,
+    withCustomProtectionUpdates = true,
+    withCustomNotifications = true
+  ): PolicyData => {
+    const policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy();
+    if (withDisabledProtections) {
+      policy.inputs[0].config.policy.value = ensureOnlyEventCollectionIsAllowed(
+        policy.inputs[0].config.policy.value
+      );
+    }
+    if (withCustomProtectionUpdates) {
+      policy.inputs[0].config.policy.value.global_manifest_version = '2023-01-01';
+    }
+    if (!withCustomNotifications) {
+      policy.inputs[0].config.policy.value = merge(
+        {},
+        policy.inputs[0].config.policy.value,
+        resetCustomNotifications()
+      );
+    } else if (withCustomNotifications) {
+      policy.inputs[0].config.policy.value = merge(
+        {},
+        policy.inputs[0].config.policy.value,
+        resetCustomNotifications('custom test')
+      );
+    }
+    return policy;
+  };
+
+  // I’ve decided to keep the content hardcoded for better readability instead of generating it dynamically.
+  const generateExpectedPolicyMock = ({
+    defaultProtections,
+    defaultNotes,
+    defaultUpdates,
+    id,
+  }: {
+    id: string;
+    defaultProtections: boolean;
+    defaultNotes: boolean;
+    defaultUpdates: boolean;
+  }) =>
+    expect.arrayContaining([
+      expect.objectContaining({
+        id,
+        inputs: [
+          expect.objectContaining({
+            config: expect.objectContaining({
+              policy: expect.objectContaining({
+                value: expect.objectContaining({
+                  global_manifest_version: defaultUpdates ? 'latest' : '2023-01-01',
+                  linux: expect.objectContaining({
+                    behavior_protection: expect.objectContaining({
+                      mode: defaultProtections ? 'off' : 'prevent',
+                    }),
+                    memory_protection: expect.objectContaining({
+                      mode: defaultProtections ? 'off' : 'prevent',
+                    }),
+                    malware: expect.objectContaining({
+                      mode: defaultProtections ? 'off' : 'prevent',
+                    }),
+                    popup: expect.objectContaining({
+                      behavior_protection: expect.objectContaining({
+                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                      }),
+                      memory_protection: expect.objectContaining({
+                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                      }),
+                      malware: expect.objectContaining({
+                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                      }),
+                    }),
+                  }),
+                  mac: expect.objectContaining({
+                    behavior_protection: expect.objectContaining({
+                      mode: defaultProtections ? 'off' : 'prevent',
+                    }),
+                    memory_protection: expect.objectContaining({
+                      mode: defaultProtections ? 'off' : 'prevent',
+                    }),
+                    malware: expect.objectContaining({
+                      mode: defaultProtections ? 'off' : 'prevent',
+                    }),
+                    popup: expect.objectContaining({
+                      behavior_protection: expect.objectContaining({
+                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                      }),
+                      memory_protection: expect.objectContaining({
+                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                      }),
+                      malware: expect.objectContaining({
+                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                      }),
+                    }),
+                  }),
+                  windows: expect.objectContaining({
+                    behavior_protection: expect.objectContaining({
+                      mode: defaultProtections ? 'off' : 'prevent',
+                    }),
+                    memory_protection: expect.objectContaining({
+                      mode: defaultProtections ? 'off' : 'prevent',
+                    }),
+                    malware: expect.objectContaining({
+                      mode: defaultProtections ? 'off' : 'prevent',
+                    }),
+                    ransomware: expect.objectContaining({
+                      mode: defaultProtections ? 'off' : 'prevent',
+                    }),
+                    popup: expect.objectContaining({
+                      behavior_protection: expect.objectContaining({
+                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                      }),
+                      memory_protection: expect.objectContaining({
+                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                      }),
+                      malware: expect.objectContaining({
+                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                      }),
+                      ransomware: expect.objectContaining({
+                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                      }),
+                    }),
+                  }),
+                }),
+              }),
+            }),
+          }),
+        ],
+      }),
+    ]);
+
+  const createFilteredProductFeaturesServiceMock = (
+    keysToExclude: string[] = [
+      'endpoint_policy_protections',
+      'endpoint_custom_notification',
+      'endpoint_protection_updates',
+    ]
+  ) =>
+    createProductFeaturesServiceMock(
+      ALL_PRODUCT_FEATURE_KEYS.filter((key) => !keysToExclude.includes(key))
+    );
 
   beforeEach(() => {
     const endpointContextStartContract = createMockEndpointAppContextServiceStartContract();
 
-    ({ esClient, logger } = endpointContextStartContract);
+    logger = loggingSystemMock.createLogger();
+    ({ esClient } = endpointContextStartContract);
+    productFeatureService = createFilteredProductFeaturesServiceMock();
 
-    productFeatureService = endpointContextStartContract.productFeaturesService;
-    fleetServices = endpointContextStartContract.endpointFleetServicesFactory.asInternalUser();
+    // productFeatureService = endpointContextStartContract.productFeaturesService;
+
+    fleetServices = createEndpointFleetServicesFactoryMock().service.asInternalUser();
   });
 
-  describe('and both `endpointPolicyProtections` and `endpointProtectionUpdates` is enabled', () => {
-    it('should do nothing', async () => {
-      await callTurnOffPolicyProtections();
-
-      expect(fleetServices.packagePolicy.list as jest.Mock).not.toHaveBeenCalled();
-      expect(logger.info).toHaveBeenNthCalledWith(
-        1,
-        'App feature [endpoint_policy_protections] is enabled. Nothing to do!'
-      );
-      expect(logger.info).toHaveBeenLastCalledWith(
-        'App feature [endpoint_protection_updates] is enabled. Nothing to do!'
-      );
-    });
-  });
-
-  describe('and `endpointProtectionUpdates` is disabled but `endpointPolicyProtections` is enabled', () => {
-    let policyGenerator: FleetPackagePolicyGenerator;
-    let page1Items: PolicyData[] = [];
-    let page2Items: PolicyData[] = [];
-    let bulkUpdateResponse: PromiseResolvedValue<ReturnType<PackagePolicyClient['bulkUpdate']>>;
-
+  describe('when merging policy updates for different product features', () => {
     beforeEach(() => {
-      policyGenerator = new FleetPackagePolicyGenerator('seed');
-      const packagePolicyListSrv = fleetServices.packagePolicy.list as jest.Mock;
-
-      productFeatureService = createProductFeaturesServiceMock(
-        ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_protection_updates')
-      );
-
-      page1Items = [
-        generatePolicyMock(policyGenerator, false),
-        generatePolicyMock(policyGenerator, false, false),
-      ];
-      page2Items = [
-        generatePolicyMock(policyGenerator, false, false),
-        generatePolicyMock(policyGenerator, false),
-      ];
-
-      packagePolicyListSrv
-        .mockImplementationOnce(async () => {
-          return {
-            total: 1500,
-            page: 1,
-            perPage: 1000,
-            items: page1Items,
-          };
-        })
-        .mockImplementationOnce(async () => {
-          return {
-            total: 1500,
-            page: 2,
-            perPage: 1000,
-            items: page2Items,
-          };
-        });
-
-      bulkUpdateResponse = {
-        updatedPolicies: [page1Items[1], page2Items[0]],
+      // We only check for the `bulkUpdate` call, so we mock it to avoid side effects
+      fleetServices.packagePolicy.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [],
         failedPolicies: [],
+      });
+    });
+    describe('All policies compliant', () => {
+      it('should not update if all all features are enabled', async () => {
+        productFeatureService = createProductFeaturesServiceMock();
+
+        const items = [generatePolicyMock(false, true, true)]; // Custom protections, custom manifest, custom notifications set
+
+        mockPolicyListResponse({ items });
+
+        await callTurnOffPolicyProtections();
+
+        expect(fleetServices.packagePolicy.bulkUpdate).not.toHaveBeenCalled();
+      });
+
+      it('should not update if all policies are compliant', async () => {
+        const items = [generatePolicyMock(true, false, false)]; // Custom protections, default manifest, default notifications set
+
+        mockPolicyListResponse({ items });
+
+        await callTurnOffPolicyProtections();
+
+        expect(fleetServices.packagePolicy.bulkUpdate).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('Single feature not compliant with product features', () => {
+      it('should update properly if only `endpointPolicyProtections` changed', async () => {
+        const items = [
+          generatePolicyMock(false, false, false), // Custom protections, default manifest, default notifications set
+          generatePolicyMock(true, false, false), // Compliant policy
+        ];
+
+        mockPolicyListResponse({ items });
+
+        await callTurnOffPolicyProtections();
+
+        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mock.calls;
+        expect(mockCalls.length).toBeGreaterThan(0);
+        const mockArguments = mockCalls[0][2];
+        expect(mockArguments.length).toBe(1); // Only one policy should be updated
+        expect(mockArguments).toEqual(
+          generateExpectedPolicyMock({
+            id: items[0].id, // Only the first policy should be updated
+            defaultProtections: true,
+            defaultNotes: true,
+            defaultUpdates: true,
+          })
+        );
+      });
+
+      it('should update properly if only `endpointPolicyProtections` changed across 2 result pages', async () => {
+        const packagePolicyListSrv = fleetServices.packagePolicy.list as jest.Mock;
+
+        const allPolicies = [
+          generatePolicyMock(false, false, false), // Custom protections, default manifest, default notifications set
+          generatePolicyMock(false, false, false), // Custom protections, default manifest, default notifications set
+        ];
+
+        mockPolicyListResponse({ total: 1500, items: [allPolicies[0]] });
+        mockPolicyListResponse({ total: 1500, items: [allPolicies[1]] });
+
+        await callTurnOffPolicyProtections();
+        expect(packagePolicyListSrv).toHaveBeenCalledTimes(2);
+        expect(fleetServices.packagePolicy.bulkUpdate).toHaveBeenCalledTimes(1);
+
+        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mock.calls;
+        const mockArguments = mockCalls[0][2];
+        expect(mockArguments.length).toBe(2);
+        expect(mockArguments[0].inputs[0].config.policy.value.global_manifest_version).toBe(
+          'latest'
+        );
+        expect(mockArguments[1].inputs[0].config.policy.value.windows.ransomware.mode).toBe('off');
+        expect(mockArguments[0].inputs[0].config.policy.value.windows.ransomware.mode).toBe('off');
+      });
+
+      it('should update properly if only `endpointProtectionUpdates` not compliant', async () => {
+        const allPolicies = [
+          generatePolicyMock(true, false, false), // Compliant policy
+          generatePolicyMock(true, true, false), // Default protections, custom manifest, default notifications set
+        ];
+
+        mockPolicyListResponse({ total: 2, items: allPolicies });
+
+        await callTurnOffPolicyProtections();
+
+        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mock.calls;
+        expect(mockCalls.length).toBeGreaterThan(0);
+        const mockArguments = mockCalls[0][2];
+        expect(mockArguments.length).toBe(1); // Only one policy should be updated
+        expect(mockArguments).toEqual(
+          generateExpectedPolicyMock({
+            id: allPolicies[1].id, // Only the second policy should be updated
+            defaultProtections: true,
+            defaultNotes: true,
+            defaultUpdates: true,
+          })
+        );
+      });
+
+      it('should update properly if only `endpointCustomNote` not compliant', async () => {
+        const allPolicies = [
+          generatePolicyMock(true, false, true), // Default protections, default manifest, custom notifications set
+          generatePolicyMock(true, false, false), // Compliant policy
+        ];
+
+        mockPolicyListResponse({ total: 2, items: allPolicies });
+
+        await callTurnOffPolicyProtections();
+
+        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mock.calls;
+        expect(mockCalls.length).toBeGreaterThan(0);
+        const mockArguments = mockCalls[0][2];
+        expect(mockArguments.length).toBe(1); // Only one policy should be updated
+        expect(mockArguments).toEqual(
+          generateExpectedPolicyMock({
+            id: allPolicies[0].id, // Only the first policy should be updated
+            defaultProtections: true,
+            defaultNotes: true,
+            defaultUpdates: true,
+          })
+        );
+      });
+
+      it('should update properly if only `endpointCustomNote` and `endpointProtectionUpdates` not compliant across 2 policies', async () => {
+        const allPolicies = [
+          generatePolicyMock(true, false, true), // Default protections, default manifest, custom notifications set
+          generatePolicyMock(true, true, false), // Default protections, custom manifest, default notifications set
+          generatePolicyMock(true, false, false), // Default protections, default manifest, default notifications set
+        ];
+
+        mockPolicyListResponse({ total: 3, items: allPolicies });
+
+        await callTurnOffPolicyProtections();
+
+        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mock.calls;
+        expect(mockCalls.length).toBeGreaterThan(0);
+        const mockArguments = mockCalls[0][2];
+        expect(mockArguments.length).toBe(2); // Two policies should be updated
+        expect(mockArguments[0].inputs[0].config.policy.value.global_manifest_version).toBe(
+          'latest'
+        );
+        expect(mockArguments[1].inputs[0].config.policy.value.global_manifest_version).toBe(
+          'latest'
+        );
+        expect(
+          mockArguments[0].inputs[0].config.policy.value.windows.popup.memory_protection.message
+        ).toBe(DefaultPolicyNotificationMessage);
+        expect(
+          mockArguments[1].inputs[0].config.policy.value.windows.popup.memory_protection.message
+        ).toBe(DefaultPolicyNotificationMessage);
+      });
+    });
+
+    describe('Multiple features not compliant with product features', () => {
+      const verifyGeneratedPolicies = (policies: PolicyData[]) => {
+        expect(policies[0].inputs[0].config.policy.value.global_manifest_version).toBe(
+          '2023-01-01'
+        );
+        expect(policies[0].inputs[0].config.policy.value.windows.memory_protection.mode).toBe(
+          'prevent'
+        );
+        expect(
+          policies[0].inputs[0].config.policy.value.windows.popup.memory_protection.message
+        ).toBe('custom test');
       };
 
-      (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mockImplementation(async () => {
-        return bulkUpdateResponse;
+      it('should merge updates for `endpointPolicyProtections` and `endpointCustomNotification`', async () => {
+        productFeatureService = createFilteredProductFeaturesServiceMock([
+          'endpoint_custom_notification',
+          'endpoint_policy_protections',
+        ]);
+
+        const policiesNeedingUpdate = [
+          generatePolicyMock(false, true, true), // Custom protections, custom manifest, custom notifications set
+        ];
+
+        // Sanity check to ensure the policies are generated correctly
+        verifyGeneratedPolicies(policiesNeedingUpdate);
+
+        mockPolicyListResponse({ total: 1, items: policiesNeedingUpdate });
+
+        await callTurnOffPolicyProtections();
+
+        expect(fleetServices.packagePolicy.bulkUpdate).toHaveBeenCalledWith(
+          fleetServices.savedObjects.createInternalScopedSoClient({ readonly: false }),
+          esClient,
+          generateExpectedPolicyMock({
+            id: policiesNeedingUpdate[0].id,
+            defaultProtections: true,
+            defaultNotes: true,
+            defaultUpdates: false,
+          }),
+          { user: { username: 'elastic' } }
+        );
       });
-    });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
+      it('should merge updates for `endpointProtectionUpdates` and `endpointCustomNotification`', async () => {
+        productFeatureService = createFilteredProductFeaturesServiceMock([
+          'endpoint_custom_notification',
+          'endpoint_protection_updates',
+        ]);
 
-    it('should update only policies that have non default manifest versions set', async () => {
-      await callTurnOffPolicyProtections();
+        const policiesNeedingUpdate = [
+          generatePolicyMock(false, true, true), // Custom protections, custom manifest, custom notifications set
+        ];
 
-      expect(fleetServices.packagePolicy.list as jest.Mock).toHaveBeenCalledTimes(2);
-      expect(fleetServices.packagePolicy.bulkUpdate as jest.Mock).toHaveBeenCalledWith(
-        fleetServices.internalSoClient,
-        esClient,
-        [
-          expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![0].id }),
-          expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![1].id }),
-        ],
-        { user: { username: 'elastic' } }
-      );
-    });
-  });
+        // Sanity check to ensure the policies are generated correctly
+        verifyGeneratedPolicies(policiesNeedingUpdate);
 
-  describe('and `endpointPolicyProtections` is disabled, but `endpointProtectionUpdates` is enabled', () => {
-    let policyGenerator: FleetPackagePolicyGenerator;
-    let page1Items: PolicyData[] = [];
-    let page2Items: PolicyData[] = [];
-    let bulkUpdateResponse: PromiseResolvedValue<ReturnType<PackagePolicyClient['bulkUpdate']>>;
+        mockPolicyListResponse({ total: 1, items: policiesNeedingUpdate });
 
-    beforeEach(() => {
-      policyGenerator = new FleetPackagePolicyGenerator('seed');
-      const packagePolicyListSrv = fleetServices.packagePolicy.list as jest.Mock;
+        await callTurnOffPolicyProtections();
 
-      productFeatureService = createProductFeaturesServiceMock(
-        ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
-      );
-
-      page1Items = [
-        generatePolicyMock(policyGenerator, false, false),
-        generatePolicyMock(policyGenerator, true, false),
-      ];
-      page2Items = [
-        generatePolicyMock(policyGenerator, true, false),
-        generatePolicyMock(policyGenerator, false, false),
-      ];
-
-      packagePolicyListSrv
-        .mockImplementationOnce(async () => {
-          return {
-            total: 1500,
-            page: 1,
-            perPage: 1000,
-            items: page1Items,
-          };
-        })
-        .mockImplementationOnce(async () => {
-          return {
-            total: 1500,
-            page: 2,
-            perPage: 1000,
-            items: page2Items,
-          };
-        });
-
-      bulkUpdateResponse = {
-        updatedPolicies: [page1Items[0], page2Items[1]],
-        failedPolicies: [],
-      };
-
-      (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mockImplementation(async () => {
-        return bulkUpdateResponse;
+        expect(fleetServices.packagePolicy.bulkUpdate).toHaveBeenCalledWith(
+          fleetServices.savedObjects.createInternalScopedSoClient({ readonly: false }),
+          esClient,
+          generateExpectedPolicyMock({
+            id: policiesNeedingUpdate[0].id,
+            defaultProtections: false,
+            defaultNotes: true,
+            defaultUpdates: true,
+          }),
+          { user: { username: 'elastic' } }
+        );
       });
-    });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
+      it('should merge updates for `endpointPolicyProtections`, `endpointProtectionUpdates`, and `endpointCustomNotification`', async () => {
+        const policiesNeedingUpdate = [
+          generatePolicyMock(false, true, true), // Custom protections, custom manifest, custom notifications set
+        ];
 
-    it('should update only policies that have protections turn on', async () => {
-      await callTurnOffPolicyProtections();
+        // Sanity check to ensure the policies are generated correctly
+        verifyGeneratedPolicies(policiesNeedingUpdate);
 
-      expect(fleetServices.packagePolicy.list as jest.Mock).toHaveBeenCalledTimes(2);
-      expect(fleetServices.packagePolicy.bulkUpdate as jest.Mock).toHaveBeenCalledWith(
-        fleetServices.internalSoClient,
-        esClient,
-        [
-          expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![0].id }),
-          expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![1].id }),
-        ],
-        { user: { username: 'elastic' } }
-      );
-      expect(logger.info).toHaveBeenCalledWith(
-        'Found 2 policies that need updates:\n' +
-          `Policy [${bulkUpdateResponse.updatedPolicies![0].id}][${
-            bulkUpdateResponse.updatedPolicies![0].name
-          }] updated to disable protections. Trigger: [property [mac.malware.mode] is set to [prevent]]\n` +
-          `Policy [${bulkUpdateResponse.updatedPolicies![1].id}][${
-            bulkUpdateResponse.updatedPolicies![1].name
-          }] updated to disable protections. Trigger: [property [mac.malware.mode] is set to [prevent]]`
-      );
-      expect(logger.info).toHaveBeenCalledWith('Done. All updates applied successfully');
-    });
+        mockPolicyListResponse({ total: 1, items: policiesNeedingUpdate });
 
-    it('should log failures', async () => {
-      bulkUpdateResponse.failedPolicies.push({
-        error: new Error('oh oh'),
-        packagePolicy: bulkUpdateResponse.updatedPolicies![0],
+        await callTurnOffPolicyProtections();
+
+        expect(fleetServices.packagePolicy.bulkUpdate).toHaveBeenCalledWith(
+          fleetServices.savedObjects.createInternalUnscopedSoClient(),
+          esClient,
+          generateExpectedPolicyMock({
+            id: policiesNeedingUpdate[0].id,
+            defaultProtections: true,
+            defaultNotes: true,
+            defaultUpdates: true,
+          }),
+          { user: { username: 'elastic' } }
+        );
       });
-      await callTurnOffPolicyProtections();
-
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Done. 1 out of 2 failed to update:')
-      );
-    });
-  });
-
-  describe('and both `endpointPolicyProtections` and `endpointProtectionUpdates` is disabled', () => {
-    let policyGenerator: FleetPackagePolicyGenerator;
-    let page1Items: PolicyData[] = [];
-    let page2Items: PolicyData[] = [];
-    let bulkUpdateResponse: PromiseResolvedValue<ReturnType<PackagePolicyClient['bulkUpdate']>>;
-
-    beforeEach(() => {
-      policyGenerator = new FleetPackagePolicyGenerator('seed');
-      const packagePolicyListSrv = fleetServices.packagePolicy.list as jest.Mock;
-
-      productFeatureService = createProductFeaturesServiceMock(
-        ALL_PRODUCT_FEATURE_KEYS.filter(
-          (key) => key !== 'endpoint_policy_protections' && key !== 'endpoint_protection_updates'
-        )
-      );
-
-      page1Items = [
-        generatePolicyMock(policyGenerator),
-        generatePolicyMock(policyGenerator, true), // This is the only one that shouldn't be updated since it has default values for disabled features
-        generatePolicyMock(policyGenerator, true, false),
-        generatePolicyMock(policyGenerator, false, false),
-      ];
-
-      page2Items = [
-        generatePolicyMock(policyGenerator, false, false),
-        generatePolicyMock(policyGenerator, true, false),
-        generatePolicyMock(policyGenerator, true), // This is the only one that shouldn't be updated since it has default values for disabled features
-        generatePolicyMock(policyGenerator),
-      ];
-
-      packagePolicyListSrv
-        .mockImplementationOnce(async () => {
-          return {
-            total: 1500,
-            page: 1,
-            perPage: 1000,
-            items: page1Items,
-          };
-        })
-        .mockImplementationOnce(async () => {
-          return {
-            total: 1500,
-            page: 2,
-            perPage: 1000,
-            items: page2Items,
-          };
-        });
-
-      bulkUpdateResponse = {
-        updatedPolicies: [
-          page1Items[0],
-          page1Items[2],
-          page1Items[3],
-          page2Items[0],
-          page2Items[1],
-          page2Items[3],
-        ],
-        failedPolicies: [],
-      };
-
-      (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mockImplementation(async () => {
-        return bulkUpdateResponse;
-      });
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should update only policies that have protections and protection updates turned on', async () => {
-      await callTurnOffPolicyProtections();
-
-      expect(fleetServices.packagePolicy.list as jest.Mock).toHaveBeenCalledTimes(2);
-      expect(fleetServices.packagePolicy.bulkUpdate as jest.Mock).toHaveBeenCalledWith(
-        fleetServices.internalSoClient,
-        esClient,
-        [
-          expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![0].id }),
-          expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![1].id }),
-          expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![2].id }),
-          expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![3].id }),
-          expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![4].id }),
-          expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![5].id }),
-        ],
-        { user: { username: 'elastic' } }
-      );
     });
   });
 });

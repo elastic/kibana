@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiLink } from '@elastic/eui';
+import { EuiPageTemplate, EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../../common/translations';
 import { docLinks } from '../../common/doc_links';
@@ -21,16 +21,28 @@ export const InferenceEndpointsHeader: React.FC = () => {
       description={i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
       bottomBorder={true}
       rightSideItems={[
-        <EuiLink
-          href={docLinks.createInferenceEndpoint}
+        <EuiButtonEmpty
+          iconType="popout"
+          iconSide="right"
+          iconSize="s"
+          flush="both"
           target="_blank"
           data-test-subj="api-documentation"
+          href={docLinks.createInferenceEndpoint}
         >
           {i18n.API_DOCUMENTATION_LINK}
-        </EuiLink>,
-        <EuiLink href={trainedModelPageUrl} target="_blank" data-test-subj="view-your-models">
+        </EuiButtonEmpty>,
+        <EuiButtonEmpty
+          href={trainedModelPageUrl}
+          iconType="popout"
+          iconSide="right"
+          iconSize="s"
+          flush="both"
+          target="_blank"
+          data-test-subj="view-your-models"
+        >
           {i18n.VIEW_YOUR_MODELS_LINK}
-        </EuiLink>,
+        </EuiButtonEmpty>,
       ]}
     />
   );

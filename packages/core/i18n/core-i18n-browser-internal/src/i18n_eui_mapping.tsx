@@ -163,12 +163,18 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'ARIA label for a button that enters fullscreen view',
       }
     ),
-    'euiCollapsedItemActions.allActions': i18n.translate(
-      'core.euiCollapsedItemActions.allActions',
+    'euiCollapsedItemActions.allActions': ({ index }: EuiValues) =>
+      i18n.translate('core.euiCollapsedItemActions.allActions', {
+        defaultMessage: 'All actions, row {index}',
+        values: { index },
+        description:
+          'ARIA label for a button that is rendered on multiple table rows, that expands an actions menu',
+      }),
+    'euiCollapsedItemActions.allActionsTooltip': i18n.translate(
+      'core.euiCollapsedItemActions.allActionsTooltip',
       {
         defaultMessage: 'All actions',
-        description:
-          'ARIA label and tooltip content describing a button that expands an actions menu',
+        description: 'Tooltip content describing a button that expands an actions menu',
       }
     ),
     'euiCollapsedItemActions.allActionsDisabled': i18n.translate(
@@ -249,6 +255,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnActions.sort': ({ schemaLabel }: EuiValues) =>
       i18n.translate('core.euiColumnActions.sort', {
         defaultMessage: 'Sort {schemaLabel}',
+        values: { schemaLabel },
+      }),
+    'euiColumnActions.unsort': ({ schemaLabel }: EuiValues) =>
+      i18n.translate('core.euiColumnActions.unsort', {
+        defaultMessage: 'Unsort {schemaLabel}',
         values: { schemaLabel },
       }),
     'euiColumnActions.moveLeft': i18n.translate('core.euiColumnActions.moveLeft', {
@@ -529,10 +540,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { page, pageCount },
         description: 'Screen reader text to describe the size of the data grid',
       }),
-    'euiDataGridCell.position': ({ columnId, row, col }: EuiValues) =>
+    'euiDataGridCell.position': ({ columnName, columnIndex, rowIndex }: EuiValues) =>
       i18n.translate('core.euiDataGridCell.position', {
-        defaultMessage: '{columnId}, column {col}, row {row}',
-        values: { columnId, row, col },
+        defaultMessage: '{columnName}, column {columnIndex}, row {rowIndex}',
+        values: { columnName, columnIndex, rowIndex },
       }),
     'euiDataGridCell.expansionEnterPrompt': i18n.translate(
       'core.euiDataGridCell.expansionEnterPrompt',
@@ -713,19 +724,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiDisplaySelector.labelExpanded': i18n.translate('core.euiDisplaySelector.labelExpanded', {
       defaultMessage: 'Expanded',
     }),
-    'euiDisplaySelector.labelSingle': i18n.translate('core.euiDisplaySelector.labelSingle', {
-      defaultMessage: 'Single',
-    }),
     'euiDisplaySelector.labelAuto': i18n.translate('core.euiDisplaySelector.labelAuto', {
-      defaultMessage: 'Auto fit',
+      defaultMessage: 'Auto',
     }),
-    'euiDisplaySelector.labelCustom': i18n.translate('core.euiDisplaySelector.labelCustom', {
-      defaultMessage: 'Custom',
+    'euiDisplaySelector.labelStatic': i18n.translate('core.euiDisplaySelector.labelStatic', {
+      defaultMessage: 'Static',
+    }),
+    'euiDisplaySelector.labelMax': i18n.translate('core.euiDisplaySelector.labelMax', {
+      defaultMessage: 'Max',
     }),
     'euiDisplaySelector.rowHeightLabel': i18n.translate('core.euiDisplaySelector.rowHeightLabel', {
-      defaultMessage: 'Row height',
-    }),
-    'euiDisplaySelector.lineCountLabel': i18n.translate('core.euiDisplaySelector.lineCountLabel', {
       defaultMessage: 'Lines per row',
     }),
     'euiFieldPassword.showPassword': i18n.translate('core.euiFieldPassword.showPassword', {
@@ -849,13 +857,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiInlineEditForm.saveButtonAriaLabel',
       { defaultMessage: 'Save edit' }
     ),
-    'euiExternalLinkIcon.ariaLabel': i18n.translate('core.euiExternalLinkIcon.ariaLabel', {
-      defaultMessage: 'External link',
-    }),
+    'euiExternalLinkIcon.externalTarget.screenReaderOnlyText': i18n.translate(
+      'core.euiExternalLinkIcon.externalTarget.screenReaderOnlyText',
+      {
+        defaultMessage: '(external)',
+      }
+    ),
     'euiExternalLinkIcon.newTarget.screenReaderOnlyText': i18n.translate(
       'core.euiExternalLinkIcon.newTarget.screenReaderOnlyText',
       {
-        defaultMessage: '(opens in a new tab or window)',
+        defaultMessage: '(external, opens in a new tab or window)',
       }
     ),
     'euiLoadingStrings.ariaLabel': i18n.translate('core.euiLoadingStrings.ariaLabel', {

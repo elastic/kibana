@@ -305,7 +305,7 @@ describe('task state validation', () => {
 
     it('should fail the task run when setting allow_reading_invalid_state:false and reading an invalid state', async () => {
       const logSpy = jest.spyOn(pollingLifecycleOpts.logger, 'warn');
-      const updateSpy = jest.spyOn(pollingLifecycleOpts.taskStore, 'bulkUpdate');
+      const updateSpy = jest.spyOn(pollingLifecycleOpts.taskStore, 'bulkPartialUpdate');
 
       const id = uuidV4();
       await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
@@ -332,8 +332,7 @@ describe('task state validation', () => {
         const found = calls.map((arr) => arr[0]).find((message) => message.match(expected) != null);
         expect(found).toMatch(expected);
         expect(updateSpy).toHaveBeenCalledWith(
-          expect.arrayContaining([expect.objectContaining({ id, taskType: 'fooType' })]),
-          { validate: false }
+          expect.arrayContaining([expect.objectContaining({ id })])
         );
       });
     });

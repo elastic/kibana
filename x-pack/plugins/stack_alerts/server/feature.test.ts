@@ -27,26 +27,37 @@ describe('Stack Alerts Feature Privileges', () => {
     const featuresSetup = featuresPluginMock.createSetup();
     plugin.setup(coreSetup, { alerting: alertingSetup, features: featuresSetup });
 
-    const typesInFeaturePrivilege = BUILT_IN_ALERTS_FEATURE.alerting ?? [];
-    const typesInFeaturePrivilegeAll =
-      BUILT_IN_ALERTS_FEATURE.privileges?.all?.alerting?.rule?.all ?? [];
-    const typesInFeaturePrivilegeRead =
-      BUILT_IN_ALERTS_FEATURE.privileges?.read?.alerting?.rule?.read ?? [];
-    // transform alerting rule is initialized during the transform plugin setup
-    expect(alertingSetup.registerType.mock.calls.length).toEqual(
-      typesInFeaturePrivilege.length - 1
-    );
-    expect(alertingSetup.registerType.mock.calls.length).toEqual(
-      typesInFeaturePrivilegeAll.length - 1
-    );
-    expect(alertingSetup.registerType.mock.calls.length).toEqual(
-      typesInFeaturePrivilegeRead.length - 1
-    );
+    expect(BUILT_IN_ALERTS_FEATURE.alerting).toMatchInlineSnapshot(`
+      Array [
+        ".index-threshold",
+        ".geo-containment",
+        ".es-query",
+        "transform_health",
+        "observability.rules.custom_threshold",
+        "xpack.ml.anomaly_detection_alert",
+      ]
+    `);
 
-    alertingSetup.registerType.mock.calls.forEach((call) => {
-      expect(typesInFeaturePrivilege.indexOf(call[0].id)).toBeGreaterThanOrEqual(0);
-      expect(typesInFeaturePrivilegeAll.indexOf(call[0].id)).toBeGreaterThanOrEqual(0);
-      expect(typesInFeaturePrivilegeRead.indexOf(call[0].id)).toBeGreaterThanOrEqual(0);
-    });
+    expect(BUILT_IN_ALERTS_FEATURE.privileges?.all?.alerting?.rule?.all).toMatchInlineSnapshot(`
+      Array [
+        ".index-threshold",
+        ".geo-containment",
+        ".es-query",
+        "transform_health",
+        "observability.rules.custom_threshold",
+        "xpack.ml.anomaly_detection_alert",
+      ]
+    `);
+
+    expect(BUILT_IN_ALERTS_FEATURE.privileges?.read?.alerting?.rule?.read).toMatchInlineSnapshot(`
+      Array [
+        ".index-threshold",
+        ".geo-containment",
+        ".es-query",
+        "transform_health",
+        "observability.rules.custom_threshold",
+        "xpack.ml.anomaly_detection_alert",
+      ]
+    `);
   });
 });

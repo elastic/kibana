@@ -43,7 +43,7 @@
             "section": "def-public.SavedObjectFinderProps",
             "text": "SavedObjectFinderProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/saved_objects_finder/public/finder/index.tsx",
         "deprecated": false,
@@ -133,7 +133,7 @@
             "section": "def-public.SavedObjectFinderProps",
             "text": "SavedObjectFinderProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/saved_objects_finder/public/finder/index.tsx",
         "deprecated": false,

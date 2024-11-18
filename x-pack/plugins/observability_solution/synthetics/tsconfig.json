@@ -18,7 +18,6 @@
     "@kbn/observability-plugin",
     "@kbn/fleet-plugin",
     "@kbn/unified-search-plugin",
-    "@kbn/index-lifecycle-management-plugin",
     "@kbn/i18n",
     "@kbn/core",
     "@kbn/config-schema",
@@ -98,8 +97,15 @@
     "@kbn/presentation-util-plugin",
     "@kbn/core-application-browser",
     "@kbn/dashboard-plugin",
+    "@kbn/search-types",
+    "@kbn/slo-schema",
+    "@kbn/alerting-types",
+    "@kbn/babel-register",
     "@kbn/slo-plugin",
-    "@kbn/ebt-tools"
+    "@kbn/ebt-tools",
+    "@kbn/alerting-types",
+    "@kbn/core-chrome-browser",
+    "@kbn/index-lifecycle-management-common-shared"
   ],
   "exclude": ["target/**/*"]
 }

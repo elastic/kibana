@@ -7,36 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { History } from 'history';
 import _ from 'lodash';
 import { skip } from 'rxjs';
 import semverSatisfies from 'semver/functions/satisfies';
-import { History } from 'history';
 
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import {
+  DashboardContainerInput,
   DashboardPanelMap,
   SharedDashboardState,
-  convertSavedPanelsToPanelMap,
-  DashboardContainerInput,
+  convertPanelsArrayToPanelMap,
 } from '../../../common';
-import { pluginServices } from '../../services/plugin_services';
-import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
-import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../dashboard_constants';
-import { SavedDashboardPanel } from '../../../common/content_management';
-import { migrateLegacyQuery } from '../../services/dashboard_content_management/lib/load_dashboard_state';
+import type { DashboardPanel } from '../../../server/content_management';
+import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
 import { DashboardApi } from '../../dashboard_api/types';
+import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../dashboard_constants';
+import { migrateLegacyQuery } from '../../services/dashboard_content_management_service/lib/load_dashboard_state';
+import { coreServices } from '../../services/kibana_services';
+import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
+
+const panelIsLegacy = (panel: unknown): panel is SavedDashboardPanel => {
+  return (panel as SavedDashboardPanel).embeddableConfig !== undefined;
+};
 
 /**
  * We no longer support loading panels from a version older than 7.3 in the URL.
  * @returns whether or not there is a panel in the URL state saved with a version before 7.3
  */
-export const isPanelVersionTooOld = (panels: SavedDashboardPanel[]) => {
+export const isPanelVersionTooOld = (panels: DashboardPanel[] | SavedDashboardPanel[]) => {
   for (const panel of panels) {
     if (
       !panel.gridData ||
-      !panel.embeddableConfig ||
+      !((panel as DashboardPanel).panelConfig || (panel as SavedDashboardPanel).embeddableConfig) ||
       (panel.version && semverSatisfies(panel.version, '<7.3'))
     )
       return true;
@@ -54,11 +59,23 @@ function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | 
   }
 
   if (isPanelVersionTooOld(appStateInUrl.panels)) {
-    pluginServices.getServices().notifications.toasts.addWarning(getPanelTooOldErrorString());
+    coreServices.notifications.toasts.addWarning(getPanelTooOldErrorString());
     return undefined;
   }
 
-  return convertSavedPanelsToPanelMap(appStateInUrl.panels);
+  // convert legacy embeddableConfig keys to panelConfig
+  const panels = appStateInUrl.panels.map((panel) => {
+    if (panelIsLegacy(panel)) {
+      const { embeddableConfig, ...rest } = panel;
+      return {
+        ...rest,
+        panelConfig: embeddableConfig,
+      };
+    }
+    return panel;
+  });
+
+  return convertPanelsArrayToPanelMap(panels);
 }
 
 /**

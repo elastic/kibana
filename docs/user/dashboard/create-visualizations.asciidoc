@@ -83,7 +83,7 @@ There are also some common options that you can configure on the various types o
 [[save-to-visualize-library]]
 === Save to the Visualize Library
 
-To use a panel on multiple dashboards, you can save it to the *Visualize Library*. Any updates made to a shared panel is replicated to all dashboards where the panel is added.
+To use a panel on multiple dashboards, you can save it to the *Visualize Library*. Any updates made to a shared panel are replicated to all dashboards where the panel is added.
 //When panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the panel header.
 
 If you created the panel from a dashboard:
@@ -92,7 +92,7 @@ If you created the panel from a dashboard:
 
 . Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
 
-. Select *Add to Dashboard after saving* to add the panel to your dashboard at the same time.
+. Select *Add to Dashboards after saving* to add the panel to your dashboard at the same time.
 
 . Click *Save and return*.
 
@@ -107,6 +107,12 @@ If you created the panel from the *Visualize Library*:
 * To save the panel to a dashboard and the *Visualize Library*, select *Add to library*, add any applicable <<managing-tags,*Tags*>>, then click *Save and go to Dashboard*.
 
 * To save the panel only to the *Visualize Library*, select *None*, add any applicable <<managing-tags,*Tags*>>, then click *Save and add to library*.
+
+To add unsaved dashboard panels to the *Visualize Library*:
+
+. Open the panel menu, then select *More > Save to library*.
+
+. Enter the panel title, then click *Save*.
 
 [float]
 [[save-to-the-dashboard]]
@@ -137,12 +143,6 @@ If you created the panel from the *Visualize Library*:
 * If you want to add the panel to an existing dashboard, select *Existing*, select the dashboard from the dropdown, then click *Save and go to Dashboard*.
 
 * If you want to add the panel to a new dashboard, select *New*, then click *Save and go to Dashboard*.
-
-To add unsaved dashboard panels to the *Visualize Library*:
-
-. Open the panel menu, then select *More > Save to library*.
-
-. Enter the panel title, then click *Save*.
 
 [[explore-the-underlying-documents]]
 === Link to Discover
@@ -182,7 +182,7 @@ To make changes without changing the original version, open the panel menu, then
 
 * *Convert to Lens* &mdash; Opens *TSVB* and aggregation-based visualizations in *Lens*.
 
-* *Panel settings* &mdash; Opens the *Panel settings* window to change the *title*, *description*, and *time range*.
+* *Settings* &mdash; Opens the *Settings* window to change the *title*, *description*, and *time range*.
 
 * *More > Replace panel* &mdash; Opens the *Visualize Library* so you can select a new panel to replace the existing panel.
 
@@ -213,7 +213,7 @@ You can then **Save** and add it to an existing or a new dashboard using the sav
 . From your dashboard, select **Add panel**.
 . Choose **ES|QL** under **Visualizations**. An ES|QL editor appears and lets you configure your query and its associated visualization. The **Suggestions** panel can help you find alternative ways to configure the visualization.
 +
-TIP: Check the link:esql-language.html[ES|QL reference] to get familiar with the syntax and optimize your query.
+TIP: Check the link:{ref}/esql-language.html[ES|QL reference] to get familiar with the syntax and optimize your query.
 . When editing your query or its configuration, run the query to update the preview of the visualization.
 +
 image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt69dcceb4f1e12bc1/66c752d6aff77d384dc44209/edit-esql-visualization.gif[Previewing an ESQL visualization]
@@ -227,15 +227,15 @@ The Maps editor has extensive documentation. For your reading comfort, we have m
 [[field-statistics-dashboard]]
 == Field statistics
 
-**Field statistics** panels allow to display a table with additional field information in your dashboards, such as document count, values, and distribution. 
+**Field statistics** panels allow you to display a table with additional field information in your dashboards, such as document count, values, and distribution. 
 
 . From your dashboard, select **Add panel**.
 . Choose **Field statistics** under **Visualizations**. An ES|QL editor appears and lets you configure your query with the fields and information that you want to show.
 +
-TIP: Check the link:esql-language.html[ES|QL reference] to get familiar with the syntax and optimize your query.
+TIP: Check the link:{ref}/esql-language.html[ES|QL reference] to get familiar with the syntax and optimize your query.
 . When editing your query or its configuration, run the query to update the preview of the visualization.
 +
-image:images/dashboards-field-statistics.png[Editing a field statistics dashboard panel]
+image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte2b1371159f5b9ff/66fc6ca13804eb2532b20727/field-statistics-preview-8.16.0.gif[Editing a field statistics dashboard panel and running the query to update the preview]
 . Select **Apply and close** to save the visualization to the dashboard.
 
 include::vega.asciidoc[leveloffset=-1]
@@ -243,11 +243,13 @@ include::vega.asciidoc[leveloffset=-1]
 [[add-text]]
 == Text panels
 
-To provide context to your dashboard panels, add *Text* panels that display important information, instructions, images, and more. You create *Text* panels using GitHub-flavored Markdown text.
+To provide context to your dashboard panels, add *Text* panels that display important information, instructions, images, and more. You can create *Text* panels using GitHub-flavored Markdown text.
 
-. On the dashboard, click image:images/dashboard_createNewTextButton_7.15.0.png[Create New Text button in dashboard toolbar].
+. From your dashboard, select *Add panel*.
 
-. In the *Markdown* field, enter the text, then click *Update*.
+. In the *Add panel* flyout, select *Text*. A Markdown editor appears and lets you configure the information you want to display.
+
+. In the *Markdown* field, enter your text, then click *Update*.
 
 For example, when you enter:
 
@@ -269,7 +271,7 @@ The following image is displayed:
 [role="screenshot"]
 image::images/markdown_example_4.png[Panel with markdown image]
 
-For detailed information about writing on GitHub, click *Help*.
+For detailed information about writing on GitHub, click *Help* on the top-right of the Markdown editor.
 
 
 
@@ -278,13 +280,17 @@ For detailed information about writing on GitHub, click *Help*.
 
 To personalize your dashboards, add your own logos and graphics with the *Image* panel. You can upload images from your computer, select previously uploaded images, or add images from an external link.
 
-. On the dashboard, click image:images/dashboard_createNewImageButton_8.7.0.png[Create New Image button in dashboard toolbar].
-. Use the editor to add an image.
+. From your dashboard, select *Add panel*.
+
+. In the *Add panel* flyout, select *Image*. The *Add image* flyout appears and lets you add and configure the image you want to display.
+
+. Add your image and configure the settings, and then click *Save*.
 
 [role="screenshot"]
 image::images/dashboard_addImageEditor_8.7.0.png[Add image editor]
 
-To manage your uploaded image files, open the main menu, then click *Stack Management > Kibana > Files*. 
+To manage your uploaded image files, go to the *Files* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 
 [WARNING]

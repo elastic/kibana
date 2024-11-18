@@ -43,11 +43,18 @@ export function defineCommonRoutes({
     router.get(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route must remain accessible to 3rd-party IdPs',
+          },
+        },
         // Allow unknown query parameters as this endpoint can be hit by the 3rd-party with any
         // set of query string parameters (e.g. SAML/OIDC logout request/response parameters).
         validate: { query: schema.object({}, { unknowns: 'allow' }) },
         options: {
           access: 'public',
+          excludeFromOAS: true,
           authRequired: false,
           tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
         },
@@ -89,10 +96,21 @@ export function defineCommonRoutes({
     '/internal/security/me',
     ...(buildFlavor !== 'serverless' ? ['/api/security/v1/me'] : []),
   ]) {
+    const deprecated = path === '/api/security/v1/me';
     router.get(
-      { path, validate: false },
+      {
+        path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: `This route delegates authorization to Core's security service; there must be an authenticated user for this route to return information`,
+          },
+        },
+        validate: false,
+        options: { access: deprecated ? 'public' : 'internal' },
+      },
       createLicensedRouteHandler(async (context, request, response) => {
-        if (path === '/api/security/v1/me') {
+        if (deprecated) {
           logger.warn(
             `The "${basePath.serverBasePath}${path}" endpoint is deprecated and will be removed in the next major version.`,
             { tags: ['deprecation'] }
@@ -133,10 +151,16 @@ export function defineCommonRoutes({
   }
 
   // Register the login route for serverless for the time being. Note: This route will move into the buildFlavor !== 'serverless' block below. See next line.
-  // ToDo: In the serverless environment, we do not support API login - the only valid authentication methodology (or maybe just method or mechanism?) is SAML
+  // ToDo: In the serverless environment, we do not support API login - the only valid authentication type is SAML
   router.post(
     {
       path: '/internal/security/login',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route provides basic and token login capbility, which is delegated to the internal authentication service`,
+        },
+      },
       validate: {
         body: schema.object({
           providerType: schema.string(),
@@ -181,7 +205,16 @@ export function defineCommonRoutes({
   if (buildFlavor !== 'serverless') {
     // In the serverless offering, the access agreement functionality isn't available.
     router.post(
-      { path: '/internal/security/access_agreement/acknowledge', validate: false },
+      {
+        path: '/internal/security/access_agreement/acknowledge',
+        security: {
+          authz: {
+            enabled: false,
+            reason: `This route delegates authorization to the internal authentication service; there must be an authenticated user for this route to function`,
+          },
+        },
+        validate: false,
+      },
       createLicensedRouteHandler(async (context, request, response) => {
         // If license doesn't allow access agreement we shouldn't handle request.
         if (!license.getFeatures().allowAccessAgreement) {

@@ -1067,6 +1067,39 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     },
     schema: t.string,
   },
+  priority: {
+    fieldConfig: {
+      defaultValue: '',
+      type: FIELD_TYPES.NUMBER,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.priorityFieldLabel', {
+        defaultMessage: 'Priority',
+      }),
+      formatters: [toInt],
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.priorityIsRequiredErrorMessage',
+              {
+                defaultMessage: 'Specify a priority.',
+              }
+            )
+          ),
+        },
+      ],
+    },
+    schema: t.string,
+  },
+  dynamic_passthrough: {
+    fieldConfig: {
+      defaultValue: false,
+      type: FIELD_TYPES.CHECKBOX,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicFieldLabel', {
+        defaultMessage: 'Dynamic',
+      }),
+    },
+    schema: t.boolean,
+  },
   reference_field: {
     fieldConfig: {
       defaultValue: '',

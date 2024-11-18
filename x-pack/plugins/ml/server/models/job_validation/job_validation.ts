@@ -6,12 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import { VALIDATION_STATUS } from '@kbn/ml-validators';
+
 import { fieldsServiceProvider } from '../fields_service';
 import type { MessageId, JobValidationMessage } from '../../../common/constants/messages';
 import { getMessages } from '../../../common/constants/messages';
-import { VALIDATION_STATUS } from '../../../common/constants/validation';
 
 import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_utils';
 import { validateBucketSpan } from './validate_bucket_span';

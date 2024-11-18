@@ -8,14 +8,12 @@
 import React, { useCallback, useState } from 'react';
 import { EuiCallOut, EuiFilePicker, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { isPlainObject } from 'lodash/fp';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
 import { useActions } from '../../state';
 import type { SamplesFormat } from '../../../../../../common';
-import { partialShuffleArray } from './utils';
-
-const MaxLogsSampleRows = 10;
+import { partialShuffleArray } from '../../../../../../common';
+import { FRONTEND_SAMPLE_ROWS } from '../../../../../../common/constants';
 
 /**
  * Parse the logs sample file content as newiline-delimited JSON (NDJSON).
@@ -83,8 +81,8 @@ export const parseJSONArray = (
  * @returns Whether the array was truncated.
  */
 function trimShuffleLogsSample<T>(array: T[]): boolean {
-  const willTruncate = array.length > MaxLogsSampleRows;
-  const numElements = willTruncate ? MaxLogsSampleRows : array.length;
+  const willTruncate = array.length > FRONTEND_SAMPLE_ROWS;
+  const numElements = willTruncate ? FRONTEND_SAMPLE_ROWS : array.length;
 
   partialShuffleArray(array, 1, numElements);
 
@@ -215,7 +213,6 @@ interface SampleLogsInputProps {
 }
 
 export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSettings }) => {
-  const { notifications } = useKibana().services;
   const { setIntegrationSettings } = useActions();
   const [isParsing, setIsParsing] = useState(false);
   const [sampleFileError, setSampleFileError] = useState<string>();
@@ -266,11 +263,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
           return;
         }
 
-        const { samplesFormat, logSamples, isTruncated } = prepareResult;
-
-        if (isTruncated) {
-          notifications?.toasts.addInfo(i18n.LOGS_SAMPLE_TRUNCATED(MaxLogsSampleRows));
-        }
+        const { samplesFormat, logSamples } = prepareResult;
 
         setIntegrationSettings({
           ...integrationSettings,
@@ -293,7 +286,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
 
       reader.readAsText(logsSampleFile);
     },
-    [integrationSettings, setIntegrationSettings, notifications?.toasts, setIsParsing]
+    [integrationSettings, setIntegrationSettings, setIsParsing]
   );
   return (
     <EuiFormRow
@@ -317,9 +310,6 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
             <>
               <EuiText size="s" textAlign="center">
                 {i18n.LOGS_SAMPLE_DESCRIPTION}
-              </EuiText>
-              <EuiText size="xs" color="subdued" textAlign="center">
-                {i18n.LOGS_SAMPLE_DESCRIPTION_2}
               </EuiText>
             </>
           }

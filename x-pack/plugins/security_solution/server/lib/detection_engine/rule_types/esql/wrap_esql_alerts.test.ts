@@ -44,6 +44,7 @@ describe('wrapSuppressedEsqlAlerts', () => {
         from: moment('2010-10-20 04:43:12'),
         maxSignals: 100,
       },
+      intendedTimestamp: undefined,
     });
 
     expect(alerts[0]._id).toEqual('ed7fbf575371c898e0f0aea48cdf0bf1865939a9');
@@ -71,6 +72,7 @@ describe('wrapSuppressedEsqlAlerts', () => {
         from: moment('2010-10-20 04:43:12'),
         maxSignals: 100,
       },
+      intendedTimestamp: undefined,
     });
 
     expect(alerts[0]._id).toEqual('mocked-alert-id');

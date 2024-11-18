@@ -6,9 +6,14 @@
  */
 
 import { Privileges } from '@kbn/es-ui-shared-plugin/common';
+import { schema } from '@kbn/config-schema';
 import { RouteDependencies } from '../../types';
 import { API_BASE_PATH, APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../../common/constants';
 
+const requiredPrivilegesMap = {
+  ingest_pipelines: APP_CLUSTER_REQUIRED_PRIVILEGES,
+  manage_processors: ['manage'],
+};
 const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } = {}): string[] =>
   Object.keys(privilegesObject).reduce((privileges: string[], privilegeName: string): string[] => {
     if (!privilegesObject[privilegeName]) {
@@ -20,10 +25,18 @@ const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } =
 export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) => {
   router.get(
     {
-      path: `${API_BASE_PATH}/privileges`,
-      validate: false,
+      path: `${API_BASE_PATH}/privileges/{permissions_type}`,
+      validate: {
+        params: schema.object({
+          permissions_type: schema.oneOf([
+            schema.literal('ingest_pipelines'),
+            schema.literal('manage_processors'),
+          ]),
+        }),
+      },
     },
     async (ctx, req, res) => {
+      const permissionsType = req.params.permissions_type;
       const privilegesResult: Privileges = {
         hasAllPrivileges: true,
         missingPrivileges: {
@@ -38,9 +51,10 @@ export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) =
 
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
+      const requiredPrivileges = requiredPrivilegesMap[permissionsType];
       const { has_all_requested: hasAllPrivileges, cluster } =
         await clusterClient.asCurrentUser.security.hasPrivileges({
-          body: { cluster: APP_CLUSTER_REQUIRED_PRIVILEGES },
+          body: { cluster: requiredPrivileges },
         });
 
       if (!hasAllPrivileges) {

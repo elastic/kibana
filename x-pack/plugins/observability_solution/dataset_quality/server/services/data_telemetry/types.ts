@@ -85,3 +85,12 @@ export interface DataTelemetryEvent {
   package_name: string[];
   beat: string[];
 }
+
+export interface DataTelemetryObject {
+  data: DataTelemetryEvent[];
+}
+
+export interface TelemetryTaskState {
+  data: DataTelemetryEvent[] | null;
+  ran: boolean;
+}

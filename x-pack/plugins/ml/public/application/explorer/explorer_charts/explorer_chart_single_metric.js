@@ -368,6 +368,7 @@ export class ExplorerChartSingleMetric extends React.Component {
       // These are used for displaying tooltips on mouseover.
       // Don't render dots where value=null (data gaps, with no anomalies)
       // or for multi-bucket anomalies.
+      // Except for scheduled events.
       const dots = lineChartGroup
         .append('g')
         .attr('class', 'chart-markers')
@@ -375,7 +376,9 @@ export class ExplorerChartSingleMetric extends React.Component {
         .data(
           data.filter(
             (d) =>
-              (d.value !== null || typeof d.anomalyScore === 'number') &&
+              (d.value !== null ||
+                typeof d.anomalyScore === 'number' ||
+                d.scheduledEvents !== undefined) &&
               !showMultiBucketAnomalyMarker(d)
           )
         );
@@ -407,7 +410,11 @@ export class ExplorerChartSingleMetric extends React.Component {
       // Update all dots to new positions.
       dots
         .attr('cx', (d) => lineChartXScale(d.date))
-        .attr('cy', (d) => lineChartYScale(d.value))
+        // Fallback with domain's min value if value is null
+        // To ensure event markers are rendered properly at the bottom of the chart
+        .attr('cy', (d) =>
+          lineChartYScale(d.value !== null ? d.value : lineChartYScale.domain()[0])
+        )
         .attr('class', (d) => {
           let markerClass = 'metric-value';
           if (isAnomalyVisible(d)) {
@@ -470,7 +477,14 @@ export class ExplorerChartSingleMetric extends React.Component {
       // Update all markers to new positions.
       scheduledEventMarkers
         .attr('x', (d) => lineChartXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
-        .attr('y', (d) => lineChartYScale(d.value) - SCHEDULED_EVENT_SYMBOL_HEIGHT / 2);
+        .attr(
+          'y',
+          (d) =>
+            // Fallback with domain's min value if value is null
+            // To ensure event markers are rendered properly at the bottom of the chart
+            lineChartYScale(d.value !== null ? d.value : lineChartYScale.domain()[0]) -
+            SCHEDULED_EVENT_SYMBOL_HEIGHT / 2
+        );
     }
 
     function showAnomalyPopover(marker, circle) {
@@ -596,7 +610,7 @@ export class ExplorerChartSingleMetric extends React.Component {
             });
           }
         }
-      } else {
+      } else if (marker.value !== null) {
         tooltipData.push({
           label: i18n.translate(
             'xpack.ml.explorer.singleMetricChart.valueWithoutAnomalyScoreLabel',

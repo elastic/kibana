@@ -28,7 +28,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useRef } from 'react';
 import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
 import { useErrorDetailsLink } from '../../../common/links/error_details_link';
-import { MonitorOverviewItem, OverviewPing } from '../../../../../../../common/runtime_types';
+import { OverviewPing, OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { isTestRunning, manualTestRunSelector } from '../../../../state/manual_test_runs';
 import { useDateFormat } from '../../../../../../hooks/use_date_format';
 
@@ -47,7 +47,7 @@ export const MetricItemIcon = ({
   timestamp,
   configIdByLocation,
 }: {
-  monitor: MonitorOverviewItem;
+  monitor: OverviewStatusMetaData;
   status: string;
   configIdByLocation: string;
   timestamp?: string;
@@ -69,7 +69,7 @@ export const MetricItemIcon = ({
   const errorLink = useErrorDetailsLink({
     configId: monitor.configId,
     stateId: ping?.state?.id!,
-    locationId: monitor.location.id,
+    locationId: monitor.locationId,
   });
   const euiShadow = useEuiShadow('s');
 

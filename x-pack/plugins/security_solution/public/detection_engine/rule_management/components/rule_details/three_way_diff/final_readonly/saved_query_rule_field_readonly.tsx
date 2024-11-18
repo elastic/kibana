@@ -9,6 +9,9 @@ import React from 'react';
 import type { DiffableSavedQueryFields } from '../../../../../../../common/api/detection_engine';
 import { DataSourceReadOnly } from './fields/data_source/data_source';
 import { KqlQueryReadOnly } from './fields/kql_query';
+import { TypeReadOnly } from './fields/type/type';
+import { AlertSuppressionReadOnly } from './fields/alert_suppression/alert_suppression';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 interface SavedQueryRuleFieldReadOnlyProps {
   fieldName: keyof DiffableSavedQueryFields;
@@ -20,6 +23,13 @@ export function SavedQueryRuleFieldReadOnly({
   finalDiffableRule,
 }: SavedQueryRuleFieldReadOnlyProps) {
   switch (fieldName) {
+    case 'alert_suppression':
+      return (
+        <AlertSuppressionReadOnly
+          alertSuppression={finalDiffableRule.alert_suppression}
+          ruleType={finalDiffableRule.type}
+        />
+      );
     case 'data_source':
       return <DataSourceReadOnly dataSource={finalDiffableRule.data_source} />;
     case 'kql_query':
@@ -31,8 +41,8 @@ export function SavedQueryRuleFieldReadOnly({
         />
       );
     case 'type':
-      return null;
+      return <TypeReadOnly type={finalDiffableRule.type} />;
     default:
-      return null; // Will replace with `assertUnreachable(fieldName)` once all fields are implemented
+      return assertUnreachable(fieldName);
   }
 }

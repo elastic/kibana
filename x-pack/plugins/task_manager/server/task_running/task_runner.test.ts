@@ -539,19 +539,25 @@ describe('TaskManagerRunner', () => {
         `[Error: type: Bad Request]`
       );
 
-      expect(store.update).toHaveBeenCalledWith(
+      expect(store.update).toHaveBeenCalledTimes(1);
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.partialUpdate).toHaveBeenCalledWith(
         {
-          ...mockInstance({
-            id,
-            attempts: initialAttempts + 1,
-            schedule: undefined,
-          }),
+          id,
           status: TaskStatus.Idle,
           startedAt: null,
           retryAt: null,
           ownerId: null,
+          attempts: initialAttempts + 1,
         },
-        { validate: false }
+        {
+          validate: false,
+          doc: mockInstance({
+            id,
+            attempts: initialAttempts,
+            schedule: undefined,
+          }),
+        }
       );
     });
 
@@ -577,7 +583,7 @@ describe('TaskManagerRunner', () => {
       });
 
       store.update.mockRejectedValueOnce(SavedObjectsErrorHelpers.createBadRequestError('type'));
-      store.update.mockRejectedValueOnce({
+      store.partialUpdate.mockRejectedValueOnce({
         type: 'type',
         id: 'id',
         error: {
@@ -596,19 +602,23 @@ describe('TaskManagerRunner', () => {
         `"[Task Runner] Task ${id} failed to release claim after failure: Error: Saved object [type/id] conflict"`
       );
 
-      expect(store.update).toHaveBeenCalledWith(
+      expect(store.partialUpdate).toHaveBeenCalledWith(
         {
-          ...mockInstance({
-            id,
-            attempts: initialAttempts + 1,
-            schedule: undefined,
-          }),
+          id,
           status: TaskStatus.Idle,
           startedAt: null,
           retryAt: null,
           ownerId: null,
+          attempts: initialAttempts + 1,
         },
-        { validate: false }
+        {
+          validate: false,
+          doc: mockInstance({
+            id,
+            attempts: initialAttempts,
+            schedule: undefined,
+          }),
+        }
       );
     });
 
@@ -634,7 +644,9 @@ describe('TaskManagerRunner', () => {
       });
 
       store.update.mockRejectedValueOnce(SavedObjectsErrorHelpers.createBadRequestError('type'));
-      store.update.mockRejectedValueOnce(SavedObjectsErrorHelpers.createBadRequestError('type'));
+      store.partialUpdate.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createBadRequestError('type')
+      );
 
       await expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
         `[Error: type: Bad Request]`
@@ -645,19 +657,23 @@ describe('TaskManagerRunner', () => {
         `"[Task Runner] Task ${id} failed to release claim after failure: Error: type: Bad Request"`
       );
 
-      expect(store.update).toHaveBeenCalledWith(
+      expect(store.partialUpdate).toHaveBeenCalledWith(
         {
-          ...mockInstance({
-            id,
-            attempts: initialAttempts + 1,
-            schedule: undefined,
-          }),
+          id,
           status: TaskStatus.Idle,
           startedAt: null,
           retryAt: null,
           ownerId: null,
+          attempts: initialAttempts + 1,
         },
-        { validate: false }
+        {
+          validate: false,
+          doc: mockInstance({
+            id,
+            attempts: initialAttempts,
+            schedule: undefined,
+          }),
+        }
       );
     });
 
@@ -914,8 +930,32 @@ describe('TaskManagerRunner', () => {
       const loggerCall = logger.error.mock.calls[0][0];
       const loggerMeta = logger.error.mock.calls[0][1];
       expect(loggerCall as string).toMatchInlineSnapshot(`"Task bar \\"foo\\" failed: Error: rar"`);
-      expect(loggerMeta?.tags).toEqual(['bar', 'foo', 'task-run-failed']);
+      expect(loggerMeta?.tags).toEqual(['bar', 'foo', 'task-run-failed', 'framework-error']);
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
+    });
+    test('logs user errors as expected when task fails', async () => {
+      const { runner, logger } = await readyToRunStageSetup({
+        instance: {
+          params: { a: 'b' },
+          state: { hey: 'there' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                throw createTaskRunError(new Error('rar'), TaskErrorSource.USER);
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+
+      const loggerCall = logger.error.mock.calls[0][0];
+      const loggerMeta = logger.error.mock.calls[0][1];
+      expect(loggerCall as string).toMatchInlineSnapshot(`"Task bar \\"foo\\" failed: Error: rar"`);
+      expect(loggerMeta?.tags).toEqual(['bar', 'foo', 'task-run-failed', 'user-error']);
     });
     test('provides execution context on run', async () => {
       const { runner } = await readyToRunStageSetup({
@@ -967,19 +1007,19 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      const instance = store.partialUpdate.mock.calls[0][0];
 
       expect(instance.id).toEqual(id);
 
       const minRunAt = Date.now();
       const maxRunAt = minRunAt + baseDelay * Math.pow(2, initialAttempts - 2);
-      expect(instance.runAt.getTime()).toBeGreaterThanOrEqual(minRunAt);
-      expect(instance.runAt.getTime()).toBeLessThanOrEqual(maxRunAt);
+      expect(instance.runAt?.getTime()).toBeGreaterThanOrEqual(minRunAt);
+      expect(instance.runAt?.getTime()).toBeLessThanOrEqual(maxRunAt);
 
-      expect(instance.params).toEqual({ a: 'b' });
-      expect(instance.state).toEqual({ hey: 'there' });
+      expect(instance.params).not.toBeDefined();
       expect(instance.enabled).not.toBeDefined();
+      expect(instance.state).toEqual({ hey: 'there' });
 
       expect(getNextRunAtSpy).not.toHaveBeenCalled();
     });
@@ -1006,11 +1046,11 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      const instance = store.partialUpdate.mock.calls[0][0];
 
-      expect(instance.runAt.getTime()).toBeGreaterThan(minutesFromNow(9).getTime());
-      expect(instance.runAt.getTime()).toBeLessThanOrEqual(minutesFromNow(10).getTime());
+      expect(instance.runAt?.getTime()).toBeGreaterThan(minutesFromNow(9).getTime());
+      expect(instance.runAt?.getTime()).toBeLessThanOrEqual(minutesFromNow(10).getTime());
       expect(instance.enabled).not.toBeDefined();
 
       expect(getNextRunAtSpy).toHaveBeenCalled();
@@ -1072,7 +1112,7 @@ describe('TaskManagerRunner', () => {
 
     test('reschedules tasks that return a runAt', async () => {
       const runAt = minutesFromNow(_.random(1, 10));
-      const { runner, store } = await readyToRunStageSetup({
+      const { instance, runner, store } = await readyToRunStageSetup({
         definitions: {
           bar: {
             title: 'Bar!',
@@ -1087,9 +1127,10 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.partialUpdate).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
         validate: true,
+        doc: instance,
       });
 
       expect(getNextRunAtSpy).not.toHaveBeenCalled();
@@ -1100,7 +1141,7 @@ describe('TaskManagerRunner', () => {
       const schedule = {
         interval: '1m',
       };
-      const { runner, store } = await readyToRunStageSetup({
+      const { instance, runner, store } = await readyToRunStageSetup({
         instance: {
           status: TaskStatus.Running,
           startedAt: new Date(),
@@ -1119,9 +1160,10 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.partialUpdate).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
         validate: true,
+        doc: instance,
       });
 
       expect(getNextRunAtSpy).toHaveBeenCalledWith(
@@ -1238,7 +1280,7 @@ describe('TaskManagerRunner', () => {
 
     test('tasks that return runAt override the schedule', async () => {
       const runAt = minutesFromNow(_.random(5));
-      const { runner, store } = await readyToRunStageSetup({
+      const { instance, runner, store } = await readyToRunStageSetup({
         instance: {
           schedule: { interval: '20m' },
         },
@@ -1256,9 +1298,10 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.partialUpdate).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
         validate: true,
+        doc: instance,
       });
     });
 
@@ -1340,7 +1383,11 @@ describe('TaskManagerRunner', () => {
       const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
       const id = Date.now().toString();
       const error = new Error('Dangit!');
-      const { runner, store } = await readyToRunStageSetup({
+      const {
+        instance: taskInstance,
+        runner,
+        store,
+      } = await readyToRunStageSetup({
         instance: {
           id,
           attempts: initialAttempts,
@@ -1360,11 +1407,14 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.update).toHaveBeenCalledWith(expect.any(Object), { validate: true });
-      const instance = store.update.mock.calls[0][0];
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.partialUpdate).toHaveBeenCalledWith(expect.any(Object), {
+        validate: true,
+        doc: taskInstance,
+      });
+      const instance = store.partialUpdate.mock.calls[0][0];
 
-      expect(instance.runAt.getTime()).toEqual(nextRetry.getTime());
+      expect(instance.runAt?.getTime()).toEqual(nextRetry.getTime());
       expect(instance.enabled).not.toBeDefined();
     });
 
@@ -1372,7 +1422,11 @@ describe('TaskManagerRunner', () => {
       const initialAttempts = _.random(1, 3);
       const id = Date.now().toString();
       const error = new Error('Dangit!');
-      const { runner, store } = await readyToRunStageSetup({
+      const {
+        instance: taskInstance,
+        runner,
+        store,
+      } = await readyToRunStageSetup({
         instance: {
           id,
           attempts: initialAttempts,
@@ -1392,15 +1446,18 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.update).toHaveBeenCalledWith(expect.any(Object), { validate: true });
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.partialUpdate).toHaveBeenCalledWith(expect.any(Object), {
+        validate: true,
+        doc: taskInstance,
+      });
 
-      const instance = store.update.mock.calls[0][0];
+      const instance = store.partialUpdate.mock.calls[0][0];
 
       const minRunAt = Date.now();
       const maxRunAt = minRunAt + baseDelay * Math.pow(2, initialAttempts - 2);
-      expect(instance.runAt.getTime()).toBeGreaterThanOrEqual(minRunAt);
-      expect(instance.runAt.getTime()).toBeLessThanOrEqual(maxRunAt);
+      expect(instance.runAt?.getTime()).toBeGreaterThanOrEqual(minRunAt);
+      expect(instance.runAt?.getTime()).toBeLessThanOrEqual(maxRunAt);
 
       expect(instance.enabled).not.toBeDefined();
     });
@@ -1438,7 +1495,11 @@ describe('TaskManagerRunner', () => {
       const id = Date.now().toString();
       const getRetryStub = sinon.stub().returns(false);
       const error = new Error('Dangit!');
-      const { runner, store } = await readyToRunStageSetup({
+      const {
+        instance: taskInstance,
+        runner,
+        store,
+      } = await readyToRunStageSetup({
         instance: {
           id,
           attempts: initialAttempts,
@@ -1460,15 +1521,18 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
-      expect(store.update).toHaveBeenCalledWith(expect.any(Object), { validate: true });
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.partialUpdate).toHaveBeenCalledWith(expect.any(Object), {
+        validate: true,
+        doc: taskInstance,
+      });
 
       sinon.assert.notCalled(getRetryStub);
-      const instance = store.update.mock.calls[0][0];
+      const instance = store.partialUpdate.mock.calls[0][0];
 
       const nextIntervalDelay = 60000; // 1m
       const expectedRunAt = new Date(Date.now() + nextIntervalDelay);
-      expect(instance.runAt.getTime()).toEqual(expectedRunAt.getTime());
+      expect(instance.runAt?.getTime()).toEqual(expectedRunAt.getTime());
       expect(instance.enabled).not.toBeDefined();
     });
 
@@ -1498,14 +1562,18 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.remove).toHaveBeenCalled();
-      expect(store.update).not.toHaveBeenCalled();
+      expect(store.partialUpdate).not.toHaveBeenCalled();
     });
 
     test(`Doesn't fail recurring tasks when maxAttempts reached`, async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = 3;
       const intervalSeconds = 10;
-      const { runner, store } = await readyToRunStageSetup({
+      const {
+        instance: taskInstance,
+        runner,
+        store,
+      } = await readyToRunStageSetup({
         instance: {
           id,
           attempts: initialAttempts,
@@ -1528,15 +1596,18 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      const instance = store.partialUpdate.mock.calls[0][0];
       expect(instance.attempts).toEqual(3);
       expect(instance.status).toEqual('idle');
-      expect(instance.runAt.getTime()).toEqual(
+      expect(instance.runAt?.getTime()).toEqual(
         new Date(Date.now() + intervalSeconds * 1000).getTime()
       );
       expect(instance.enabled).not.toBeDefined();
-      expect(store.update).toHaveBeenCalledWith(expect.any(Object), { validate: true });
+      expect(store.partialUpdate).toHaveBeenCalledWith(expect.any(Object), {
+        validate: true,
+        doc: taskInstance,
+      });
     });
 
     test('throws error when the task has invalid state', async () => {
@@ -1551,7 +1622,12 @@ describe('TaskManagerRunner', () => {
         stateVersion: 4,
       };
 
-      const { runner, logger, store } = await readyToRunStageSetup({
+      const {
+        instance: taskInstance,
+        runner,
+        logger,
+        store,
+      } = await readyToRunStageSetup({
         instance: mockTaskInstance,
         definitions: {
           bar: {
@@ -1600,7 +1676,10 @@ describe('TaskManagerRunner', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         'Task (bar/foo) has a validation error: [foo]: expected value of type [string] but got [boolean]'
       );
-      expect(store.update).toHaveBeenCalledWith(expect.any(Object), { validate: false });
+      expect(store.partialUpdate).toHaveBeenCalledWith(expect.any(Object), {
+        validate: false,
+        doc: taskInstance,
+      });
     });
 
     test('does not throw error and runs when the task has invalid state and allowReadingInvalidState = true', async () => {
@@ -1655,8 +1734,8 @@ describe('TaskManagerRunner', () => {
 
       const result = await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      const instance = store.partialUpdate.mock.calls[0][0];
       expect(instance.state).toEqual({
         foo: 'bar',
       });
@@ -2084,7 +2163,7 @@ describe('TaskManagerRunner', () => {
         await runner.run();
 
         expect(store.remove).toHaveBeenCalled();
-        expect(store.update).not.toHaveBeenCalled();
+        expect(store.partialUpdate).not.toHaveBeenCalled();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
           withAnyTiming(
@@ -2130,7 +2209,7 @@ describe('TaskManagerRunner', () => {
 
         const error = new Error('fail');
 
-        store.update.mockImplementation(() => {
+        store.partialUpdate.mockImplementation(() => {
           throw error;
         });
 
@@ -2175,7 +2254,7 @@ describe('TaskManagerRunner', () => {
 
         const error = new Error('fail');
 
-        store.update.mockImplementation(() => {
+        store.partialUpdate.mockImplementation(() => {
           throw error;
         });
 
@@ -2223,7 +2302,7 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).not.toHaveBeenCalled();
+      expect(store.partialUpdate).not.toHaveBeenCalled();
       expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
         counterName: 'taskManagerUpdateSkippedDueToTaskExpiration',
         counterType: 'taskManagerTaskRunner',
@@ -2470,6 +2549,7 @@ describe('TaskManagerRunner', () => {
     const usageCounter = usageCountersServiceMock.createSetupContract().createUsageCounter('test');
 
     store.update.mockResolvedValue(instance);
+    store.partialUpdate.mockResolvedValue(instance);
 
     const definitions = new TaskTypeDictionary(logger);
     definitions.registerTaskDefinitions({

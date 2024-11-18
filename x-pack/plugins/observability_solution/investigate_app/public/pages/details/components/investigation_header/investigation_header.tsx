@@ -6,14 +6,15 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { formatDistance } from 'date-fns';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { InvestigationStatusBadge } from '../../../../components/investigation_status_badge/investigation_status_badge';
 import { InvestigationTag } from '../../../../components/investigation_tag/investigation_tag';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { AlertDetailsButton } from './alert_details_button';
+import { ExternalIncidentButton } from './external_incident_button';
 
 export function InvestigationHeader() {
   const { investigation } = useInvestigation();
@@ -62,6 +63,12 @@ export function InvestigationHeader() {
             />
           </EuiText>
         </EuiFlexItem>
+
+        {!!investigation.externalIncidentUrl && (
+          <EuiFlexItem grow={false}>
+            <ExternalIncidentButton />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiFlexGroup>
   );

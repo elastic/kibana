@@ -36,15 +36,12 @@ const setup = async (caret = '?') => {
 };
 
 describe('autocomplete.suggest', () => {
-  test('does not load fields when suggesting within a single FROM, SHOW, ROW command', async () => {
+  test('does not load fields when suggesting within a single  SHOW, ROW command', async () => {
     const { suggest, callbacks } = await setup();
 
-    await suggest('FROM kib, ? |');
-    await suggest('FROM ?');
-    await suggest('FROM ? |');
     await suggest('sHoW ?');
     await suggest('row ? |');
 
-    expect(callbacks.getFieldsFor.mock.calls.length).toBe(0);
+    expect(callbacks.getColumnsFor.mock.calls.length).toBe(0);
   });
 });

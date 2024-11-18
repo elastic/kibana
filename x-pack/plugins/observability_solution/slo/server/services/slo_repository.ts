@@ -11,14 +11,16 @@ import { ALL_VALUE, Paginated, Pagination, sloDefinitionSchema } from '@kbn/slo-
 import { isLeft } from 'fp-ts/lib/Either';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import { SLODefinition, StoredSLODefinition } from '../domain/models';
-import { SLOIdConflict, SLONotFound } from '../errors';
+import { SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 
 export interface SLORepository {
-  save(slo: SLODefinition, options?: { throwOnConflict: boolean }): Promise<SLODefinition>;
+  exists(id: string): Promise<boolean>;
+  create(slo: SLODefinition): Promise<SLODefinition>;
+  update(slo: SLODefinition): Promise<SLODefinition>;
   findAllByIds(ids: string[]): Promise<SLODefinition[]>;
   findById(id: string): Promise<SLODefinition>;
-  deleteById(id: string): Promise<void>;
+  deleteById(id: string, ignoreNotFound?: boolean): Promise<void>;
   search(
     search: string,
     pagination: Pagination,
@@ -29,19 +31,30 @@ export interface SLORepository {
 export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
 
-  async save(slo: SLODefinition, options = { throwOnConflict: false }): Promise<SLODefinition> {
-    let existingSavedObjectId;
+  async exists(id: string) {
     const findResponse = await this.soClient.find<StoredSLODefinition>({
       type: SO_SLO_TYPE,
-      page: 1,
+      perPage: 0,
+      filter: `slo.attributes.id:(${id})`,
+    });
+
+    return findResponse.total > 0;
+  }
+
+  async create(slo: SLODefinition): Promise<SLODefinition> {
+    await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, toStoredSLO(slo));
+    return slo;
+  }
+
+  async update(slo: SLODefinition): Promise<SLODefinition> {
+    let existingSavedObjectId: string | undefined;
+
+    const findResponse = await this.soClient.find<StoredSLODefinition>({
+      type: SO_SLO_TYPE,
       perPage: 1,
       filter: `slo.attributes.id:(${slo.id})`,
     });
     if (findResponse.total === 1) {
-      if (options.throwOnConflict) {
-        throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
-      }
-
       existingSavedObjectId = findResponse.saved_objects[0].id;
     }
 
@@ -73,7 +86,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     return slo;
   }
 
-  async deleteById(id: string): Promise<void> {
+  async deleteById(id: string, ignoreNotFound = false): Promise<void> {
     const response = await this.soClient.find<StoredSLODefinition>({
       type: SO_SLO_TYPE,
       page: 1,
@@ -82,6 +95,9 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     });
 
     if (response.total === 0) {
+      if (ignoreNotFound) {
+        return;
+      }
       throw new SLONotFound(`SLO [${id}] not found`);
     }
 

@@ -2,21 +2,21 @@ type: object
 properties:
   assignees:
     $ref: 'assignees.yaml'
-  connector: 
+  connector:
     type: object
     properties:
       $ref: 'connector_properties.yaml'
   description:
     type: string
   owner:
-    $ref: 'owners.yaml'
+    $ref: 'owner.yaml'
   settings:
     $ref: 'settings.yaml'
   severity:
     $ref: 'case_severity.yaml'
-  status: 
+  status:
     $ref: 'case_status.yaml'
-  tags: 
+  tags:
     type: array
     items:
       type: string

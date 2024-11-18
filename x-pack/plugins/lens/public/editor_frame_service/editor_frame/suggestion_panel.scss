@@ -6,7 +6,6 @@
 }
 
 .lnsSuggestionPanel__suggestions {
-  @include euiScrollBar;
   @include lnsOverflowShadowHorizontal;
   padding-top: $euiSizeXS;
   overflow-x: scroll;
@@ -18,6 +17,7 @@
   margin-left: -$euiSizeXS;
   padding-right: $euiSizeXS;
   margin-right: -$euiSizeXS;
+  @include euiScrollBar;
 }
 
 .lnsSuggestionPanel__button {
@@ -31,8 +31,8 @@
   box-shadow: none !important; // sass-lint:disable-line no-important
 
   &:focus {
-    @include euiFocusRing;
     transform: none !important; // sass-lint:disable-line no-important
+    @include euiFocusRing;
   }
 
   .lnsSuggestionPanel__expressionRenderer {

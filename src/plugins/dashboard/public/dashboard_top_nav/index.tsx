@@ -8,13 +8,13 @@
  */
 
 import React, { Suspense } from 'react';
-import { servicesReady } from '../plugin';
 import { DashboardTopNavProps } from './dashboard_top_nav_with_context';
+import { untilPluginStartServicesReady } from '../services/kibana_services';
 
 const LazyDashboardTopNav = React.lazy(() =>
   (async () => {
     const modulePromise = import('./dashboard_top_nav_with_context');
-    const [module] = await Promise.all([modulePromise, servicesReady]);
+    const [module] = await Promise.all([modulePromise, untilPluginStartServicesReady()]);
 
     return {
       default: module.DashboardTopNavWithContext,

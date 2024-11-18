@@ -341,7 +341,7 @@ paths:
         - $ref: '#/components/parameters/space_id'
         - $ref: '#/components/parameters/slo_id'
       responses:
-        '200':
+        '204':
           description: Successful request
         '400':
           description: Bad request
@@ -380,7 +380,7 @@ paths:
         - $ref: '#/components/parameters/space_id'
         - $ref: '#/components/parameters/slo_id'
       responses:
-        '204':
+        '200':
           description: Successful request
           content:
             application/json:
@@ -1204,6 +1204,19 @@ components:
           example: 0.9836
         errorBudget:
           $ref: '#/components/schemas/error_budget'
+    group_by:
+      title: Group by
+      description: optional group by field or fields to use to generate an SLO per distinct value
+      example:
+        - - service.name
+        - service.name
+        - - service.name
+          - service.environment
+      oneOf:
+        - type: string
+        - type: array
+          items:
+            type: string
     slo_with_summary_response:
       title: SLO response
       type: object
@@ -1274,9 +1287,7 @@ components:
           type: boolean
           example: true
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          type: string
-          example: some.field
+          $ref: '#/components/schemas/group_by'
         instanceId:
           description: the value derived from the groupBy field, if present, otherwise '*'
           type: string
@@ -1425,9 +1436,7 @@ components:
         settings:
           $ref: '#/components/schemas/settings'
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          type: string
-          example: some.field
+          $ref: '#/components/schemas/group_by'
         tags:
           description: List of tags
           type: array
@@ -1487,6 +1496,8 @@ components:
           $ref: '#/components/schemas/objective'
         settings:
           $ref: '#/components/schemas/settings'
+        groupBy:
+          $ref: '#/components/schemas/group_by'
         tags:
           description: List of tags
           type: array
@@ -1558,9 +1569,7 @@ components:
           type: boolean
           example: true
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          type: string
-          example: some.field
+          $ref: '#/components/schemas/group_by'
         tags:
           description: List of tags
           type: array

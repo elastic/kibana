@@ -34,5 +34,5 @@ export interface TextObject {
    *
    * Used to re-populate a text editor buffer.
    */
-  text: string;
+  text: string | undefined;
 }

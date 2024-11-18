@@ -8,8 +8,10 @@
 import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 import { catchError, distinctUntilChanged, EMPTY, map, switchMap } from 'rxjs';
+
+import { parseInterval } from '@kbn/ml-parse-interval';
+
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
-import { parseInterval } from '../../../common/util/parse_interval';
 import type { ExplorerJob } from '../../application/explorer/explorer_utils';
 import type { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 

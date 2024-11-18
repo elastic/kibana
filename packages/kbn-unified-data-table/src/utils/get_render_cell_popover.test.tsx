@@ -27,10 +27,10 @@ const defaultProps: EuiDataGridCellPopoverElementProps = {
   cellContentsElement: (<div>{'cellContentsElement'}</div>) as unknown as HTMLDivElement,
 };
 
-const renderTestComponent = () => {
+const renderTestComponent = (overrideProps = {}) => {
   const Renderer = getCustomCellPopoverRenderer();
 
-  render(<Renderer {...defaultProps} />);
+  render(<Renderer {...defaultProps} {...overrideProps} />);
 };
 
 describe('getCustomCellPopoverRenderer', () => {
@@ -43,6 +43,19 @@ describe('getCustomCellPopoverRenderer', () => {
 
     expect(setCellPopoverPropsMocks).toHaveBeenCalledWith({
       panelClassName: 'unifiedDataTable__cellPopover',
+    });
+  });
+
+  it('should render a DefaultCellPopover with a wider panel for allowed columns', () => {
+    renderTestComponent({ columnId: '_source' });
+
+    expect(setCellPopoverPropsMocks).toHaveBeenCalledWith({
+      panelClassName: 'unifiedDataTable__cellPopover',
+      panelProps: {
+        css: {
+          maxInlineSize: 'min(75vw, 600px) !important',
+        },
+      },
     });
   });
 });

@@ -9,25 +9,26 @@ import {
   from,
   defer,
   delay,
-  filter,
   tap,
-  take,
-  takeWhile,
   exhaustMap,
   switchMap,
   map,
   of,
-  EMPTY,
+  firstValueFrom,
+  throwError,
 } from 'rxjs';
-import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
+  ConcreteTaskInstance,
   TaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
+import { TelemetryTaskState } from './types';
+import { registerLogsDataUsageCollector } from './register_collector';
 import {
   BREATHE_DELAY_MEDIUM,
   BREATHE_DELAY_SHORT,
@@ -50,25 +51,31 @@ import {
   getIndexFieldStats,
 } from './helpers';
 
-import { DataTelemetryEvent } from './types';
+const SKIP_COLLECTION = 'Skip Collection';
 
 export class DataTelemetryService {
   private readonly logger: Logger;
-  private isStopped = false;
 
+  private taskManagerStart?: TaskManagerStartContract;
   private telemetryStart?: TelemetryPluginStart;
 
-  // @ts-ignore: Unused variable
-  private analytics?: AnalyticsServiceSetup;
-
-  // @ts-ignore: Unused variable
-  private isInProgress = false;
+  private usageCollection?: UsageCollectionSetup;
 
   private isOptedIn?: boolean = true; // Assume true until the first check
   private esClient?: ElasticsearchClient;
 
+  private isStopped = false;
+  private isInProgress = false;
+
   private run$ = defer(() => from(this.shouldCollectTelemetry())).pipe(
-    takeWhile(() => !this.isStopped),
+    switchMap((isOptedIn) => {
+      // If stopped, do not proceed
+      if (this.isStopped) {
+        return this.throwSkipCollection();
+      }
+
+      return of(isOptedIn);
+    }),
     tap((isOptedIn) => {
       if (!isOptedIn) {
         this.logTelemetryNotOptedIn();
@@ -77,8 +84,17 @@ export class DataTelemetryService {
         this.isInProgress = true;
       }
     }),
-    filter((isOptedIn) => isOptedIn),
-    exhaustMap(() => this.collectAndSend()),
+    switchMap((isOptedIn) => {
+      // If not opted in, do not proceed
+      if (!isOptedIn) {
+        return this.throwSkipCollection();
+      }
+
+      return of(isOptedIn);
+    }),
+    exhaustMap(() => {
+      return this.collectTelemetryData();
+    }),
     tap(() => (this.isInProgress = false))
   );
 
@@ -86,29 +102,45 @@ export class DataTelemetryService {
     this.logger = logger;
   }
 
-  public setup(analytics: AnalyticsServiceSetup, taskManager: TaskManagerSetupContract) {
-    this.analytics = analytics;
-    this.registerTask(taskManager);
+  public setup(taskManagerSetup: TaskManagerSetupContract, usageCollection?: UsageCollectionSetup) {
+    this.usageCollection = usageCollection;
+
+    if (usageCollection) {
+      // Register Kibana task
+      this.registerTask(taskManagerSetup);
+    } else {
+      this.logger.warn(
+        `[Logs Data Telemetry] Usage collection service is not available: cannot collect telemetry data`
+      );
+    }
   }
 
   public async start(
     telemetryStart: TelemetryPluginStart,
     core: CoreStart,
-    taskManager: TaskManagerStartContract
+    taskManagerStart: TaskManagerStartContract
   ) {
+    this.taskManagerStart = taskManagerStart;
     this.telemetryStart = telemetryStart;
     this.esClient = core?.elasticsearch.client.asInternalUser;
 
-    if (taskManager) {
-      const taskInstance = await this.scheduleTask(taskManager);
+    if (taskManagerStart && this.usageCollection) {
+      const taskInstance = await this.scheduleTask(taskManagerStart);
       if (taskInstance) {
         this.logger.debug(`Task ${taskInstance.id} scheduled.`);
       }
+
+      // Create and register usage collector for logs data telemetry
+      registerLogsDataUsageCollector(this.usageCollection, this.getCollectorOptions());
     }
   }
 
   public stop() {
     this.isStopped = true;
+  }
+
+  public resume() {
+    this.isStopped = false;
   }
 
   private registerTask(taskManager: TaskManagerSetupContract) {
@@ -117,28 +149,33 @@ export class DataTelemetryService {
       [LOGS_DATA_TELEMETRY_TASK_TYPE]: {
         title: 'Logs Data Telemetry',
         description:
-          'This task collects data telemetry for logs data and sends it to the telemetry service.',
+          'This task collects data telemetry for logs data and sends it to the telemetry service via usage collector plugin.',
         timeout: `${TELEMETRY_TASK_TIMEOUT}m`,
         maxAttempts: 1, // Do not retry
 
-        createTaskRunner: () => {
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             // Perform the work of the task. The return value should fit the TaskResult interface.
             async run() {
-              service.logger.debug(`[Logs Data Telemetry] Running task`);
+              const { state } = taskInstance;
+              let data = state?.data ?? null;
 
               try {
-                service.run$.pipe(take(1)).subscribe({
-                  complete: () => {
-                    service.logger.debug(`[Logs Data Telemetry] Task completed`);
-                  },
-                });
+                data = await firstValueFrom(service.run$);
               } catch (e) {
-                service.logger.error(e);
+                if (e.message === SKIP_COLLECTION) {
+                  data = null; // Collection is skipped, skip reporting
+                } else {
+                  service.logger.error(e);
+                }
               }
+
+              return {
+                state: { ran: true, data },
+              };
             },
             async cancel() {
-              service.logger.debug(`[Logs Data Telemetry] Task cancelled`);
+              service.logger.warn(`[Logs Data Telemetry] Task cancelled`);
             },
           };
         },
@@ -182,7 +219,7 @@ export class DataTelemetryService {
     return this.isOptedIn === true;
   }
 
-  private collectAndSend() {
+  private collectTelemetryData() {
     // Gather data streams and indices related to each stream of log
     if (this.esClient) {
       return getAllIndices({
@@ -196,8 +233,10 @@ export class DataTelemetryService {
             this.logger.debug(
               `[Logs Data Telemetry] Number of data streams exceeds ${MAX_STREAMS_TO_REPORT}. Skipping telemetry collection.`
             );
-            return EMPTY;
+
+            return this.throwSkipCollection();
           }
+
           return of(dataStreamsAndIndicesInfo);
         }),
         delay(BREATHE_DELAY_MEDIUM),
@@ -234,10 +273,6 @@ export class DataTelemetryService {
         }),
         map((statsByPattern) => {
           return indexStatsToTelemetryEvents(statsByPattern);
-        }),
-        delay(BREATHE_DELAY_SHORT),
-        switchMap((dataTelemetryEvents) => {
-          return from(this.reportEvents(dataTelemetryEvents));
         })
       );
     } else {
@@ -246,16 +281,59 @@ export class DataTelemetryService {
         for stream of logs`
       );
 
-      return EMPTY;
+      return this.throwSkipCollection();
     }
   }
 
-  private async reportEvents(events: DataTelemetryEvent[]) {
-    // TODO: Implement reporting events via analytics service
-    return Promise.resolve(events);
+  private getCollectorOptions() {
+    return {
+      fetch: async () => {
+        // Retrieve the latest telemetry data from task manager
+        const taskState = await this.getLatestTaskState();
+
+        return { data: taskState.data ?? [] };
+      },
+      isReady: async () => {
+        const taskState = await this.getLatestTaskState();
+
+        return !this.isStopped && !this.isInProgress && taskState.ran && taskState.data !== null;
+      },
+    };
+  }
+
+  private async getLatestTaskState() {
+    const defaultState: TelemetryTaskState = {
+      data: null,
+      ran: false,
+    };
+
+    if (this.taskManagerStart) {
+      try {
+        const fetchResult = await this.taskManagerStart.fetch({
+          query: { bool: { filter: { term: { _id: `task:${LOGS_DATA_TELEMETRY_TASK_ID}` } } } },
+        });
+
+        return (fetchResult.docs[0]?.state ?? defaultState) as TelemetryTaskState;
+      } catch (err) {
+        const errMessage = err && err.message ? err.message : err.toString();
+        if (!errMessage.includes('NotInitialized')) {
+          throw err;
+        }
+      }
+    } else {
+      this.logger.error(
+        `[Logs Data Telemetry] Task manager is not available: cannot retrieve latest task state`
+      );
+    }
+
+    return defaultState;
   }
 
   private logTelemetryNotOptedIn() {
     this.logger.debug(`[Logs Data Telemetry] Telemetry is not opted-in.`);
+  }
+
+  private throwSkipCollection() {
+    return throwError(() => new Error(SKIP_COLLECTION));
   }
 }

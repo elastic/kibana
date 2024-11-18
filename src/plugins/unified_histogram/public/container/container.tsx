@@ -147,6 +147,7 @@ export const UnifiedHistogramContainer = forwardRef<
     query,
     searchSessionId,
     requestAdapter,
+    columns: containerProps.columns,
   });
 
   const handleVisContextChange: UnifiedHistogramLayoutProps['onVisContextChanged'] | undefined =

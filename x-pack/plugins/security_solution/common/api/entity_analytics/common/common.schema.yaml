@@ -23,20 +23,18 @@ components:
               properties:
                 cluster:
                   type: object
-                  properties:
-                    manage_index_templates:
-                      type: boolean
-                    manage_transform:
-                      type: boolean
+                  additionalProperties:
+                    type: boolean
                 index:
                   type: object
                   additionalProperties:
                     type: object
-                    properties:
-                      read:
-                        type: boolean
-                      write:
-                        type: boolean
+                    additionalProperties:
+                      type: boolean
+            kibana:
+              type: object
+              additionalProperties:
+                type: boolean
           required:
             - elasticsearch
       required:

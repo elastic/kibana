@@ -25,26 +25,20 @@ import { ExperimentalFeatures } from '../common/config';
 import { PluginContext } from './context/plugin_context';
 import { usePluginContext } from './hooks/use_plugin_context';
 import { getRoutes } from './routes/routes';
-import { SloPublicPluginsStart } from './types';
+import { SLORepositoryClient, SLOPublicPluginsStart } from './types';
 
-function App() {
-  const { isServerless } = usePluginContext();
-
-  const routes = getRoutes(isServerless);
-
-  return (
-    <>
-      <Routes>
-        {Object.keys(routes).map((path) => {
-          const { handler, exact } = routes[path];
-          const Wrapper = () => {
-            return handler();
-          };
-          return <Route key={path} path={path} exact={exact} component={Wrapper} />;
-        })}
-      </Routes>
-    </>
-  );
+interface Props {
+  core: CoreStart;
+  plugins: SLOPublicPluginsStart;
+  appMountParameters: AppMountParameters;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
+  usageCollection: UsageCollectionSetup;
+  isDev?: boolean;
+  kibanaVersion: string;
+  isServerless?: boolean;
+  experimentalFeatures: ExperimentalFeatures;
+  sloClient: SLORepositoryClient;
 }
 
 export const renderApp = ({
@@ -58,18 +52,8 @@ export const renderApp = ({
   isServerless,
   observabilityRuleTypeRegistry,
   experimentalFeatures,
-}: {
-  core: CoreStart;
-  plugins: SloPublicPluginsStart;
-  appMountParameters: AppMountParameters;
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-  ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
-  usageCollection: UsageCollectionSetup;
-  isDev?: boolean;
-  kibanaVersion: string;
-  isServerless?: boolean;
-  experimentalFeatures: ExperimentalFeatures;
-}) => {
+  sloClient,
+}: Props) => {
   const { element, history, theme$ } = appMountParameters;
   const isDarkMode = core.theme.getTheme().darkMode;
 
@@ -81,8 +65,6 @@ export const renderApp = ({
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
-
-  const PresentationContextProvider = plugins.presentationUtil?.ContextProvider ?? React.Fragment;
 
   const unregisterPrompts = plugins.observabilityAIAssistant?.service.setScreenContext({
     starterPrompts: [
@@ -109,50 +91,46 @@ export const renderApp = ({
 
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
-      <PresentationContextProvider>
-        <ApplicationUsageTrackingProvider>
-          <KibanaThemeProvider {...{ theme: { theme$ } }}>
-            <CloudProvider>
-              <KibanaContextProvider
-                services={{
-                  ...core,
-                  ...plugins,
-                  storage: new Storage(localStorage),
+      <ApplicationUsageTrackingProvider>
+        <KibanaThemeProvider {...{ theme: { theme$ } }}>
+          <CloudProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                ...plugins,
+                storage: new Storage(localStorage),
+                isDev,
+                kibanaVersion,
+                isServerless,
+              }}
+            >
+              <PluginContext.Provider
+                value={{
                   isDev,
-                  kibanaVersion,
                   isServerless,
+                  appMountParameters,
+                  ObservabilityPageTemplate,
+                  observabilityRuleTypeRegistry,
+                  experimentalFeatures,
+                  sloClient,
                 }}
               >
-                <PluginContext.Provider
-                  value={{
-                    isDev,
-                    isServerless,
-                    appMountParameters,
-                    ObservabilityPageTemplate,
-                    observabilityRuleTypeRegistry,
-                    experimentalFeatures,
-                  }}
-                >
-                  <Router history={history}>
-                    <EuiThemeProvider darkMode={isDarkMode}>
-                      <RedirectAppLinks
-                        coreStart={core}
-                        data-test-subj="observabilityMainContainer"
-                      >
-                        <PerformanceContextProvider>
-                          <QueryClientProvider client={queryClient}>
-                            <App />
-                          </QueryClientProvider>
-                        </PerformanceContextProvider>
-                      </RedirectAppLinks>
-                    </EuiThemeProvider>
-                  </Router>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
-            </CloudProvider>
-          </KibanaThemeProvider>
-        </ApplicationUsageTrackingProvider>
-      </PresentationContextProvider>
+                <Router history={history}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
+                      <PerformanceContextProvider>
+                        <QueryClientProvider client={queryClient}>
+                          <App />
+                        </QueryClientProvider>
+                      </PerformanceContextProvider>
+                    </RedirectAppLinks>
+                  </EuiThemeProvider>
+                </Router>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
+          </CloudProvider>
+        </KibanaThemeProvider>
+      </ApplicationUsageTrackingProvider>
     </KibanaRenderContextProvider>,
     element
   );
@@ -167,3 +145,21 @@ export const renderApp = ({
     ReactDOM.unmountComponentAtNode(element);
   };
 };
+
+function App() {
+  const { isServerless } = usePluginContext();
+
+  const routes = getRoutes(isServerless);
+
+  return (
+    <Routes>
+      {Object.keys(routes).map((path) => {
+        const { handler, exact } = routes[path];
+        const Wrapper = () => {
+          return handler();
+        };
+        return <Route key={path} path={path} exact={exact} component={Wrapper} />;
+      })}
+    </Routes>
+  );
+}

@@ -14,6 +14,12 @@ Array [
     "processors": Array [
       Object {
         "set": Object {
+          "field": "_id",
+          "value": "{{{_id}}}-unique-id-1",
+        },
+      },
+      Object {
+        "set": Object {
           "field": "event.ingested",
           "value": "{{{_ingest.timestamp}}}",
         },
@@ -55,6 +61,13 @@ Array [
           "description": "Generated the instanceId field based on the groupings field",
           "field": "slo.instanceId",
           "value": "*",
+        },
+      },
+      Object {
+        "pipeline": Object {
+          "ignore_failure": true,
+          "ignore_missing_pipeline": true,
+          "name": "slo-unique-id@custom",
         },
       },
     ],

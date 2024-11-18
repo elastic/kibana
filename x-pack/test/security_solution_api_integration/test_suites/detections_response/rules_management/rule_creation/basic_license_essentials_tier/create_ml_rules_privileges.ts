@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@serverless should give a 200 when trying to create a single Machine Learning rule since the license is essentials', async () => {
+      it('@serverless @serverlessQA should give a 200 when trying to create a single Machine Learning rule since the license is essentials', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')

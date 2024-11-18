@@ -10,24 +10,28 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
-import type { InitEntityStoreResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
+import type { InitEntityEngineResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
 import {
-  InitEntityStoreRequestBody,
-  InitEntityStoreRequestParams,
+  InitEntityEngineRequestBody,
+  InitEntityEngineRequestParams,
 } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
 
 export const initEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  config: EntityAnalyticsRoutesDeps['config']
 ) => {
   router.versioned
     .post({
       access: 'public',
       path: '/api/entity_store/engines/{entityType}/init',
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(
@@ -35,26 +39,30 @@ export const initEntityEngineRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(InitEntityStoreRequestParams),
-            body: buildRouteValidationWithZod(InitEntityStoreRequestBody),
+            params: buildRouteValidationWithZod(InitEntityEngineRequestParams),
+            body: buildRouteValidationWithZod(InitEntityEngineRequestBody),
           },
         },
       },
 
-      async (context, request, response): Promise<IKibanaResponse<InitEntityStoreResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<InitEntityEngineResponse>> => {
         const siemResponse = buildSiemResponse(response);
+        const secSol = await context.securitySolution;
+        const { pipelineDebugMode } = config.entityAnalytics.entityStore.developer;
+
+        await checkAndInitAssetCriticalityResources(context, logger);
 
         try {
-          const secSol = await context.securitySolution;
-
-          const body: InitEntityStoreResponse = await secSol
+          const body: InitEntityEngineResponse = await secSol
             .getEntityStoreDataClient()
-            .init(request.params.entityType, request.body);
+            .init(request.params.entityType, request.body, {
+              pipelineDebugMode,
+            });
 
           return response.ok({ body });
         } catch (e) {
-          logger.error('Error in InitEntityStore:', e);
           const error = transformError(e);
+          logger.error(`Error initialising entity engine: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

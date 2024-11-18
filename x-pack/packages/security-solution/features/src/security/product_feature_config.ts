@@ -126,6 +126,7 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
   [ProductFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
   [ProductFeatureSecurityKey.endpointProtectionUpdates]: {},
   [ProductFeatureSecurityKey.endpointAgentTamperProtection]: {},
+  [ProductFeatureSecurityKey.endpointCustomNotification]: {},
   [ProductFeatureSecurityKey.externalRuleActions]: {},
   [ProductFeatureSecurityKey.cloudSecurityPosture]: {},
 

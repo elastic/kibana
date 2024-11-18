@@ -12,7 +12,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/navigation-plugin",
     "@kbn/config-schema",
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
@@ -34,6 +33,13 @@
     "@kbn/cloud-plugin",
     "@kbn/search-index-documents",
     "@kbn/es-types",
+    "@kbn/search-api-keys-server",
+    "@kbn/search-api-keys-components",
+    "@kbn/search-shared-ui",
+    "@kbn/deeplinks-search",
+    "@kbn/core-chrome-browser",
+    "@kbn/serverless",
+    "@kbn/utility-types"
   ],
   "exclude": [
     "target/**/*",

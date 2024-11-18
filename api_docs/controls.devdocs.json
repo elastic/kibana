@@ -19,7 +19,7 @@
             "section": "def-public.ControlGroupRendererProps",
             "text": "ControlGroupRendererProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer_lazy.tsx",
         "deprecated": false,
@@ -510,6 +510,20 @@
             "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupRendererProps.compressed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "compressed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/public/control_group/control_group_renderer/control_group_renderer.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -557,7 +571,7 @@
             "label": "labelPosition",
             "description": [],
             "signature": [
-              "\"twoLine\" | \"oneLine\""
+              "\"oneLine\" | \"twoLine\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
@@ -655,7 +669,7 @@
             "section": "def-common.ControlGroupSerializedState",
             "text": "ControlGroupSerializedState"
           },
-          " extends Pick<",
+          " extends Omit<",
           {
             "pluginId": "controls",
             "scope": "common",
@@ -671,7 +685,7 @@
             "section": "def-common.DefaultControlState",
             "text": "DefaultControlState"
           },
-          ">, \"chainingSystem\" | \"editorConfig\">"
+          ">, \"initialChildControlState\">"
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
@@ -679,49 +693,21 @@
         "children": [
           {
             "parentPluginId": "controls",
-            "id": "def-public.ControlGroupSerializedState.panelsJSON",
-            "type": "string",
+            "id": "def-public.ControlGroupSerializedState.controls",
+            "type": "Array",
             "tags": [],
-            "label": "panelsJSON",
-            "description": [],
-            "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.ControlGroupSerializedState.ignoreParentSettingsJSON",
-            "type": "string",
-            "tags": [],
-            "label": "ignoreParentSettingsJSON",
-            "description": [],
-            "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.ControlGroupSerializedState.controlStyle",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "controlStyle",
+            "label": "controls",
             "description": [],
             "signature": [
-              "\"twoLine\" | \"oneLine\""
-            ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.ControlGroupSerializedState.showApplySelections",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "showApplySelections",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
+              "(",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.DefaultControlState",
+                "text": "DefaultControlState"
+              },
+              " & { type: string; order: number; } & { id?: string | undefined; })[]"
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
@@ -2424,20 +2410,14 @@
     "functions": [
       {
         "parentPluginId": "controls",
-        "id": "def-server.controlGroupSerializedStateToSerializableRuntimeState",
+        "id": "def-server.controlGroupSavedObjectStateToSerializableRuntimeState",
         "type": "Function",
         "tags": [],
-        "label": "controlGroupSerializedStateToSerializableRuntimeState",
+        "label": "controlGroupSavedObjectStateToSerializableRuntimeState",
         "description": [],
         "signature": [
-          "(serializedState: ",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlGroupSerializedState",
-            "text": "ControlGroupSerializedState"
-          },
+          "(savedObjectState: ",
+          "ControlGroupSavedObjectState",
           ") => ",
           "SerializableControlGroupState"
         ],
@@ -2447,19 +2427,13 @@
         "children": [
           {
             "parentPluginId": "controls",
-            "id": "def-server.controlGroupSerializedStateToSerializableRuntimeState.$1",
-            "type": "Object",
+            "id": "def-server.controlGroupSavedObjectStateToSerializableRuntimeState.$1",
+            "type": "CompoundType",
             "tags": [],
-            "label": "serializedState",
+            "label": "savedObjectState",
             "description": [],
             "signature": [
-              {
-                "pluginId": "controls",
-                "scope": "common",
-                "docId": "kibControlsPluginApi",
-                "section": "def-common.ControlGroupSerializedState",
-                "text": "ControlGroupSerializedState"
-              }
+              "ControlGroupSavedObjectState"
             ],
             "path": "src/plugins/controls/server/control_group/control_group_persistence.ts",
             "deprecated": false,
@@ -2512,10 +2486,10 @@
       },
       {
         "parentPluginId": "controls",
-        "id": "def-server.serializableRuntimeStateToControlGroupSerializedState",
+        "id": "def-server.serializableRuntimeStateToControlGroupSavedObjectState",
         "type": "Function",
         "tags": [],
-        "label": "serializableRuntimeStateToControlGroupSerializedState",
+        "label": "serializableRuntimeStateToControlGroupSavedObjectState",
         "description": [],
         "signature": [
           "(serializable: ",
@@ -2527,13 +2501,7 @@
             "text": "SerializableRecord"
           },
           ") => ",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlGroupSerializedState",
-            "text": "ControlGroupSerializedState"
-          }
+          "ControlGroupSavedObjectState"
         ],
         "path": "src/plugins/controls/server/control_group/control_group_persistence.ts",
         "deprecated": false,
@@ -2541,7 +2509,7 @@
         "children": [
           {
             "parentPluginId": "controls",
-            "id": "def-server.serializableRuntimeStateToControlGroupSerializedState.$1",
+            "id": "def-server.serializableRuntimeStateToControlGroupSavedObjectState.$1",
             "type": "Object",
             "tags": [],
             "label": "serializable",
@@ -2573,7 +2541,7 @@
         "tags": [],
         "label": "ControlGroupTelemetry",
         "description": [],
-        "path": "src/plugins/controls/server/control_group/control_group_telemetry.ts",
+        "path": "src/plugins/controls/server/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2584,7 +2552,7 @@
             "tags": [],
             "label": "total",
             "description": [],
-            "path": "src/plugins/controls/server/control_group/control_group_telemetry.ts",
+            "path": "src/plugins/controls/server/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2598,7 +2566,7 @@
             "signature": [
               "{ [key: string]: number; }"
             ],
-            "path": "src/plugins/controls/server/control_group/control_group_telemetry.ts",
+            "path": "src/plugins/controls/server/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2612,7 +2580,7 @@
             "signature": [
               "{ [key: string]: number; }"
             ],
-            "path": "src/plugins/controls/server/control_group/control_group_telemetry.ts",
+            "path": "src/plugins/controls/server/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2626,7 +2594,7 @@
             "signature": [
               "{ [key: string]: number; }"
             ],
-            "path": "src/plugins/controls/server/control_group/control_group_telemetry.ts",
+            "path": "src/plugins/controls/server/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2640,7 +2608,7 @@
             "signature": [
               "{ [key: string]: { total: number; details: { [key: string]: number; }; }; }"
             ],
-            "path": "src/plugins/controls/server/control_group/control_group_telemetry.ts",
+            "path": "src/plugins/controls/server/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2772,7 +2740,7 @@
             "label": "labelPosition",
             "description": [],
             "signature": [
-              "\"twoLine\" | \"oneLine\""
+              "\"oneLine\" | \"twoLine\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
@@ -2870,7 +2838,7 @@
             "section": "def-common.ControlGroupSerializedState",
             "text": "ControlGroupSerializedState"
           },
-          " extends Pick<",
+          " extends Omit<",
           {
             "pluginId": "controls",
             "scope": "common",
@@ -2886,7 +2854,7 @@
             "section": "def-common.DefaultControlState",
             "text": "DefaultControlState"
           },
-          ">, \"chainingSystem\" | \"editorConfig\">"
+          ">, \"initialChildControlState\">"
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
@@ -2894,49 +2862,21 @@
         "children": [
           {
             "parentPluginId": "controls",
-            "id": "def-common.ControlGroupSerializedState.panelsJSON",
-            "type": "string",
+            "id": "def-common.ControlGroupSerializedState.controls",
+            "type": "Array",
             "tags": [],
-            "label": "panelsJSON",
-            "description": [],
-            "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-common.ControlGroupSerializedState.ignoreParentSettingsJSON",
-            "type": "string",
-            "tags": [],
-            "label": "ignoreParentSettingsJSON",
-            "description": [],
-            "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-common.ControlGroupSerializedState.controlStyle",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "controlStyle",
+            "label": "controls",
             "description": [],
             "signature": [
-              "\"twoLine\" | \"oneLine\""
-            ],
-            "path": "src/plugins/controls/common/control_group/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-common.ControlGroupSerializedState.showApplySelections",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "showApplySelections",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
+              "(",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.DefaultControlState",
+                "text": "DefaultControlState"
+              },
+              " & { type: string; order: number; } & { id?: string | undefined; })[]"
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
@@ -3116,6 +3056,23 @@
         "tags": [],
         "label": "ParentIgnoreSettings",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ParentIgnoreSettings",
+            "text": "ParentIgnoreSettings"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3276,7 +3233,7 @@
         "label": "ControlLabelPosition",
         "description": [],
         "signature": [
-          "\"twoLine\" | \"oneLine\""
+          "\"oneLine\" | \"twoLine\""
         ],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
@@ -3315,6 +3272,36 @@
       },
       {
         "parentPluginId": "controls",
+        "id": "def-common.DEFAULT_AUTO_APPLY_SELECTIONS",
+        "type": "boolean",
+        "tags": [],
+        "label": "DEFAULT_AUTO_APPLY_SELECTIONS",
+        "description": [],
+        "signature": [
+          "true"
+        ],
+        "path": "src/plugins/controls/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.DEFAULT_CONTROL_CHAINING",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "DEFAULT_CONTROL_CHAINING",
+        "description": [],
+        "signature": [
+          "\"NONE\" | \"HIERARCHICAL\""
+        ],
+        "path": "src/plugins/controls/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
         "id": "def-common.DEFAULT_CONTROL_GROW",
         "type": "boolean",
         "tags": [],
@@ -3333,7 +3320,7 @@
         "label": "DEFAULT_CONTROL_LABEL_POSITION",
         "description": [],
         "signature": [
-          "\"twoLine\" | \"oneLine\""
+          "\"oneLine\" | \"twoLine\""
         ],
         "path": "src/plugins/controls/common/constants.ts",
         "deprecated": false,
@@ -3401,6 +3388,67 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.CONTROL_CHAINING_OPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "CONTROL_CHAINING_OPTIONS",
+        "description": [],
+        "signature": [
+          "{ readonly NONE: \"NONE\"; readonly HIERARCHICAL: \"HIERARCHICAL\"; }"
+        ],
+        "path": "src/plugins/controls/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.CONTROL_LABEL_POSITION_OPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "CONTROL_LABEL_POSITION_OPTIONS",
+        "description": [],
+        "signature": [
+          "{ readonly ONE_LINE: \"oneLine\"; readonly TWO_LINE: \"twoLine\"; }"
+        ],
+        "path": "src/plugins/controls/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.CONTROL_WIDTH_OPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "CONTROL_WIDTH_OPTIONS",
+        "description": [],
+        "signature": [
+          "{ readonly SMALL: \"small\"; readonly MEDIUM: \"medium\"; readonly LARGE: \"large\"; }"
+        ],
+        "path": "src/plugins/controls/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.DEFAULT_IGNORE_PARENT_SETTINGS",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_IGNORE_PARENT_SETTINGS",
+        "description": [],
+        "signature": [
+          "{ readonly ignoreFilters: false; readonly ignoreQuery: false; readonly ignoreTimerange: false; readonly ignoreValidations: false; }"
+        ],
+        "path": "src/plugins/controls/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

@@ -106,32 +106,6 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     schema: zodStringWithDurationValidation.default('30s'),
   },
   {
-    name: 'agent.monitoring.http',
-    api_field: {
-      name: 'agent_monitoring_http',
-    },
-    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentMonitoringHttpTitle', {
-      defaultMessage: 'HTTP monitoring endpoint',
-    }),
-    description: i18n.translate(
-      'xpack.fleet.settings.agentPolicyAdvanced.agentMonitoringHttpDescription',
-      {
-        defaultMessage:
-          'Enables a liveness HTTP endpoint that returns the overall health of Elastic Agent. This can be used by Kubernetes to restart the container, for example.',
-      }
-    ),
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/agent-policy.html#agent-policy-http-monitoring',
-    schema: z
-      .object({
-        enabled: z.boolean().describe('Enabled').default(false),
-        host: z.string().describe('Host').default('localhost'),
-        port: z.number().describe('Port').min(0).max(65353).default(6791),
-        'buffer.enabled': z.boolean().describe('Buffer Enabled').default(false),
-      })
-      .default({}),
-  },
-  {
     name: 'agent.logging.level',
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelTitle', {
       defaultMessage: 'Agent logging level',

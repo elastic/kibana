@@ -28,7 +28,7 @@ include::alerting/index.asciidoc[]
 
 include::{kibana-root}/docs/observability/index.asciidoc[]
 
-include::{kibana-root}/docs/playground/index.asciidoc[]
+include::{kibana-root}/docs/search/index.asciidoc[]
 
 include::{kibana-root}/docs/siem/index.asciidoc[]
 

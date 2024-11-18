@@ -23,9 +23,8 @@ export const GetFileActionResult = memo<
   const actionCreator = useSendGetFileRequest();
 
   const actionRequestBody = useMemo<undefined | ResponseActionGetFileRequestBody>(() => {
-    const endpointId = command.commandDefinition?.meta?.endpointId;
+    const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
     const { path, comment } = command.args.args;
-    const agentType = command.commandDefinition?.meta?.agentType;
 
     return endpointId
       ? {
@@ -37,11 +36,7 @@ export const GetFileActionResult = memo<
           },
         }
       : undefined;
-  }, [
-    command.args.args,
-    command.commandDefinition?.meta?.agentType,
-    command.commandDefinition?.meta?.endpointId,
-  ]);
+  }, [command.args.args, command.commandDefinition?.meta]);
 
   const { result, actionDetails } = useConsoleActionSubmitter<ResponseActionGetFileRequestBody>({
     ResultComponent,

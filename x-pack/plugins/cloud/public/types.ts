@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { SolutionId } from '@kbn/core-chrome-browser';
 import type { FC, PropsWithChildren } from 'react';
-import type { OnBoardingDefaultSolution } from '../common';
 
 export interface CloudStart {
   /**
@@ -192,7 +192,7 @@ export interface CloudSetup {
     /**
      * The default solution selected during onboarding.
      */
-    defaultSolution?: OnBoardingDefaultSolution;
+    defaultSolution?: SolutionId;
   };
   /**
    * `true` when running on Serverless Elastic Cloud
@@ -228,7 +228,7 @@ export interface CloudSetup {
 
 export interface PublicElasticsearchConfigType {
   /**
-   * The URL to the Elasticsearch cluster, derived from xpack.elasticsearch.publicBaseUrl if populated
+   * The URL to the Elasticsearch cluster, derived from elasticsearch.publicBaseUrl if populated
    * Otherwise this is based on the cloudId
    * If neither is populated, this will be undefined
    */

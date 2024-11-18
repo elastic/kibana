@@ -353,10 +353,6 @@ export class VisualizeEmbeddable
             );
             return true;
           }
-          if (this.vis.type.suppressWarnings?.()) {
-            // if the vis type wishes to supress all warnings, return true so the default logic won't pick it up
-            return true;
-          }
         });
     }
 
@@ -481,7 +477,11 @@ export class VisualizeEmbeddable
               return;
             }
             if (!this.input.disableTriggers) {
-              const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
+              const triggerId: string = get(
+                VIS_EVENT_TO_TRIGGER,
+                event.name,
+                VIS_EVENT_TO_TRIGGER.filter
+              );
               let context;
 
               if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {

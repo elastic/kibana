@@ -7,9 +7,12 @@
 
 import { EuiHealth } from '@elastic/eui';
 import moment from 'moment';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CategorizedApiKey } from '@kbn/security-plugin-types-common';
+import type { CategorizedApiKey } from '@kbn/security-plugin-types-common';
+
 import { TimeToolTip } from './time_tool_tip';
 
 export type ApiKeyStatusProps = Pick<CategorizedApiKey, 'expiration'>;

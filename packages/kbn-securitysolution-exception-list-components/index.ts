@@ -19,3 +19,4 @@ export * from './src/list_header';
 export * from './src/header_menu';
 export * from './src/generate_linked_rules_menu_item';
 export * from './src/wildcard_with_wrong_operator_callout';
+export * from './src/partial_code_signature_callout';

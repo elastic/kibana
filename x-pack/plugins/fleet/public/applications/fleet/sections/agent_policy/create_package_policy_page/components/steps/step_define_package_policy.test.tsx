@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { act, fireEvent, waitFor } from '@testing-library/react';
+import { waitFor, act } from '@testing-library/react';
+
+import { userEvent } from '@testing-library/user-event';
 
 import { getInheritedNamespace } from '../../../../../../../../common/services';
 
@@ -60,18 +62,6 @@ describe('StepDefinePackagePolicy', () => {
       package_policies: [],
       is_protected: false,
     },
-    {
-      id: 'agent-policy-2',
-      namespace: 'default',
-      name: 'Agent policy 2',
-      is_managed: false,
-      status: 'active',
-      updated_at: '',
-      updated_by: '',
-      revision: 1,
-      package_policies: [],
-      is_protected: false,
-    },
   ];
   let packagePolicy: NewPackagePolicy;
   const mockUpdatePackagePolicy = jest.fn().mockImplementation((val: any) => {
@@ -86,20 +76,23 @@ describe('StepDefinePackagePolicy', () => {
     description: null,
     namespace: null,
     inputs: {},
-    vars: {},
+    vars: {
+      'Required var': ['Required var is required'],
+    },
   };
 
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const render = () =>
+
+  const render = (namespacePlaceholder = getInheritedNamespace(agentPolicies)) =>
     (renderResult = testRenderer.render(
       <StepDefinePackagePolicy
-        namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+        namespacePlaceholder={namespacePlaceholder}
         packageInfo={packageInfo}
         packagePolicy={packagePolicy}
         updatePackagePolicy={mockUpdatePackagePolicy}
         validationResults={validationResults}
-        submitAttempted={false}
+        submitAttempted={true}
       />
     ));
 
@@ -107,39 +100,83 @@ describe('StepDefinePackagePolicy', () => {
     packagePolicy = {
       name: '',
       description: 'desc',
-      namespace: 'default',
+      namespace: 'package-policy-ns',
+      enabled: true,
       policy_id: '',
       policy_ids: [''],
-      enabled: true,
+      package: {
+        name: 'apache',
+        title: 'Apache',
+        version: '1.0.0',
+      },
       inputs: [],
+      vars: {
+        'Show user var': {
+          type: 'string',
+          value: 'showUserVarVal',
+        },
+        'Required var': {
+          type: 'bool',
+          value: undefined,
+        },
+        'Advanced var': {
+          type: 'bool',
+          value: true,
+        },
+      },
     };
     testRenderer = createFleetTestRendererMock();
   });
 
   describe('default API response', () => {
-    beforeEach(() => {
-      render();
-    });
-
     it('should display vars coming from package policy', async () => {
-      waitFor(() => {
-        expect(renderResult.getByDisplayValue('showUserVarVal')).toBeInTheDocument();
-        expect(renderResult.getByRole('switch')).toHaveAttribute('aria-label', 'Required var');
-        expect(renderResult.getByText('Required var is required')).toHaveAttribute(
-          'class',
-          'euiFormErrorText'
+      act(() => {
+        render();
+      });
+      expect(renderResult.getByDisplayValue('showUserVarVal')).toBeInTheDocument();
+      expect(renderResult.getByRole('switch', { name: 'Required var' })).toBeInTheDocument();
+      expect(renderResult.queryByRole('switch', { name: 'Advanced var' })).not.toBeInTheDocument();
+
+      expect(renderResult.getByText('Required var is required')).toHaveClass('euiFormErrorText');
+
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+
+      await waitFor(() => {
+        expect(renderResult.getByRole('switch', { name: 'Advanced var' })).toBeInTheDocument();
+        expect(renderResult.getByTestId('packagePolicyNamespaceInput')).toHaveTextContent(
+          'package-policy-ns'
         );
       });
+    });
 
-      await act(async () => {
-        fireEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+    it(`should display namespace from agent policy when there's no package policy namespace`, async () => {
+      packagePolicy.namespace = '';
+      act(() => {
+        render();
       });
 
-      waitFor(() => {
-        expect(renderResult.getByRole('switch')).toHaveAttribute('aria-label', 'Advanced var');
-        expect(renderResult.getByTestId('packagePolicyNamespaceInput')).toHaveAttribute(
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('comboBoxSearchInput')).toHaveAttribute(
           'placeholder',
           'ns'
+        );
+      });
+    });
+
+    it(`should fallback to the default namespace when namespace is not set in package policy and there's no agent policy`, async () => {
+      packagePolicy.namespace = '';
+      act(() => {
+        render(getInheritedNamespace([]));
+      });
+
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('comboBoxSearchInput')).toHaveAttribute(
+          'placeholder',
+          'default'
         );
       });
     });
@@ -147,17 +184,16 @@ describe('StepDefinePackagePolicy', () => {
 
   describe('update', () => {
     describe('when package vars are introduced in a new package version', () => {
-      it('should display new package vars', () => {
-        render();
+      it('should display new package vars', async () => {
+        act(() => {
+          render();
+        });
+        expect(renderResult.getByDisplayValue('showUserVarVal')).toBeInTheDocument();
+        expect(renderResult.getByText('Required var')).toBeInTheDocument();
 
-        waitFor(async () => {
-          expect(renderResult.getByDisplayValue('showUserVarVal')).toBeInTheDocument();
-          expect(renderResult.getByText('Required var')).toBeInTheDocument();
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
 
-          await act(async () => {
-            fireEvent.click(renderResult.getByText('Advanced options').closest('button')!);
-          });
-
+        await waitFor(async () => {
           expect(renderResult.getByText('Advanced var')).toBeInTheDocument();
         });
       });

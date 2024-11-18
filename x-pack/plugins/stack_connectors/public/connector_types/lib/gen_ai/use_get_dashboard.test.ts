@@ -53,6 +53,7 @@ describe('useGetDashboard', () => {
   it.each([
     ['Azure OpenAI', 'openai'],
     ['OpenAI', 'openai'],
+    ['Other', 'openai'],
     ['Bedrock', 'bedrock'],
   ])(
     'fetches the %p dashboard and sets the dashboard URL with %p',

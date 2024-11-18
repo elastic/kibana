@@ -26,14 +26,22 @@ export const isMultiField = isDataViewFieldSubtypeMulti;
 export const getFieldSubtypeMulti = getDataViewFieldSubtypeMulti;
 export const getFieldSubtypeNested = getDataViewFieldSubtypeNested;
 
-const DOT_PREFIX_RE = /(.).+?\./g;
-
 /**
  * Convert a dot.notated.string into a short
  * version (d.n.string)
  */
 export function shortenDottedString(input: string): string {
-  return typeof input !== 'string' ? input : input.replace(DOT_PREFIX_RE, '$1.');
+  if (typeof input === 'string') {
+    const split = input.split('.');
+    return split.reduce((acc, part, i) => {
+      if (i === split.length - 1) {
+        return acc + part;
+      }
+      return acc + part[0] + '.';
+    }, '');
+  }
+
+  return input;
 }
 
 // Note - this code is duplicated from @kbn/es-query

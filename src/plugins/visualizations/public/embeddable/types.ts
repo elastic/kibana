@@ -89,7 +89,7 @@ export const isVisualizeRuntimeState = (state: unknown): state is VisualizeRunti
   );
 };
 
-export type VisualizeApi = HasEditCapabilities &
+export type VisualizeApi = Partial<HasEditCapabilities> &
   PublishesDataViews &
   PublishesDataLoading &
   HasVisualizeConfig &

@@ -27,6 +27,7 @@ import {
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import { parseInterval } from '@kbn/ml-parse-interval';
 
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
@@ -39,7 +40,6 @@ import {
   isModelPlotEnabled,
   isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
-import { parseInterval } from '../../../common/util/parse_interval';
 import type { MlJobService } from '../services/job_service';
 
 import type { SwimlaneType } from './explorer_constants';

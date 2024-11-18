@@ -9,5 +9,8 @@ import { schema } from '@kbn/config-schema';
 import { maintenanceWindowSchema } from '../../../schemas';
 
 export const findMaintenanceWindowsResultSchema = schema.object({
+  page: schema.number(),
+  perPage: schema.number(),
   data: schema.arrayOf(maintenanceWindowSchema),
+  total: schema.number(),
 });

@@ -40,6 +40,7 @@ import {
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import type { EventOptions } from './types/generator';
 import { BaseDataGenerator } from './data_generators/base_data_generator';
+import type { PartialEndpointPolicyData } from './data_generators/fleet_package_policy_generator';
 import { FleetPackagePolicyGenerator } from './data_generators/fleet_package_policy_generator';
 
 export type Event = AlertEvent | SafeEndpointEvent;
@@ -399,10 +400,20 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   /**
    * Updates the current Host common record applied Policy to a different one from the list
    * of random choices and gives it a random policy response status.
+   *
    */
-  public updateHostPolicyData() {
+  public updateHostPolicyData({
+    excludeInitialPolicy = false,
+  }: Partial<{
+    /** Excludes the initial policy id (non-existent) that endpoint reports when it first is installed */
+    excludeInitialPolicy: boolean;
+  }> = {}) {
     const newInfo = this.commonInfo;
-    newInfo.Endpoint.policy.applied = this.randomChoice(APPLIED_POLICIES);
+    newInfo.Endpoint.policy.applied = this.randomChoice(
+      excludeInitialPolicy
+        ? APPLIED_POLICIES.filter(({ id }) => id !== '00000000-0000-0000-0000-000000000000')
+        : APPLIED_POLICIES
+    );
     newInfo.Endpoint.policy.applied.status = this.randomChoice(POLICY_RESPONSE_STATUSES);
     this.commonInfo = newInfo;
   }
@@ -1581,8 +1592,14 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   /**
    * Generates a Fleet `package policy` that includes the Endpoint Policy data
    */
-  public generatePolicyPackagePolicy(seed: string = 'seed'): PolicyData {
-    return new FleetPackagePolicyGenerator(seed).generateEndpointPackagePolicy();
+  public generatePolicyPackagePolicy({
+    seed,
+    overrides,
+  }: {
+    seed?: string;
+    overrides?: PartialEndpointPolicyData;
+  } = {}): PolicyData {
+    return new FleetPackagePolicyGenerator(seed).generateEndpointPackagePolicy(overrides);
   }
 
   /**

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Lifecycle, Request, ResponseToolkit, Util } from '@hapi/hapi';
+import { Lifecycle, Request, ResponseToolkit, Utils } from '@hapi/hapi';
 import { ValidationError } from 'joi';
 import Hoek from '@hapi/hoek';
 
@@ -17,7 +17,7 @@ import Hoek from '@hapi/hoek';
 export interface HapiValidationError extends ValidationError {
   output: {
     statusCode: number;
-    headers: Util.Dictionary<string | string[]>;
+    headers: Utils.Dictionary<string | string[]>;
     payload: {
       statusCode: number;
       error: string;

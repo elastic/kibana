@@ -24,7 +24,6 @@ interface ProcessAlertsOpts<
   autoRecoverAlerts: boolean;
   startedAt?: string | null;
   flappingSettings: RulesSettingsFlappingProperties;
-  maintenanceWindowIds: string[];
 }
 interface ProcessAlertsResult<
   State extends AlertInstanceState,
@@ -52,7 +51,6 @@ export function processAlerts<
   alertLimit,
   autoRecoverAlerts,
   flappingSettings,
-  maintenanceWindowIds,
   startedAt,
 }: ProcessAlertsOpts<State, Context>): ProcessAlertsResult<
   State,
@@ -67,7 +65,6 @@ export function processAlerts<
         previouslyRecoveredAlerts,
         alertLimit,
         flappingSettings,
-        maintenanceWindowIds,
         startedAt
       )
     : processAlertsHelper(
@@ -76,7 +73,6 @@ export function processAlerts<
         previouslyRecoveredAlerts,
         autoRecoverAlerts,
         flappingSettings,
-        maintenanceWindowIds,
         startedAt
       );
 }
@@ -92,7 +88,6 @@ function processAlertsHelper<
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>,
   autoRecoverAlerts: boolean,
   flappingSettings: RulesSettingsFlappingProperties,
-  maintenanceWindowIds: string[],
   startedAt?: string | null
 ): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
@@ -124,7 +119,6 @@ function processAlertsHelper<
             }
             updateAlertFlappingHistory(flappingSettings, newAlerts[id], true);
           }
-          newAlerts[id].setMaintenanceWindowIds(maintenanceWindowIds);
         } else {
           // this alert did exist in previous run
           // calculate duration to date for active alerts
@@ -188,7 +182,6 @@ function processAlertsLimitReached<
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>,
   alertLimit: number,
   flappingSettings: RulesSettingsFlappingProperties,
-  maintenanceWindowIds: string[],
   startedAt?: string | null
 ): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
@@ -257,8 +250,6 @@ function processAlertsLimitReached<
           }
           updateAlertFlappingHistory(flappingSettings, newAlerts[id], true);
         }
-
-        newAlerts[id].setMaintenanceWindowIds(maintenanceWindowIds);
 
         if (!hasCapacityForNewAlerts()) {
           break;

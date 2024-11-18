@@ -20,7 +20,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from './routes_test_utils';
+import { deprecationMock, setupConfig } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -37,6 +37,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
   let loggerWarnSpy: jest.SpyInstance;
+  let registrationSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     const clientResponse = {
@@ -66,10 +67,17 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    registrationSpy = jest.spyOn(router, 'put');
 
     const config = setupConfig();
     const access = 'public';
-    registerUpdateRoute(router, { config, coreUsageData, logger, access });
+    registerUpdateRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });
@@ -92,6 +100,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
 
     const result = await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: {
           title: 'Testing',
@@ -110,6 +119,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   it('calls upon savedObjectClient.update', async () => {
     await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: { title: 'Testing' },
         version: 'foo',
@@ -127,6 +137,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   it('returns with status 400 for types hidden from the HTTP APIs', async () => {
     const result = await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/hidden-from-http/hiddenId')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: { title: 'does not matter' },
       })
@@ -137,8 +148,20 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   it('logs a warning message when called', async () => {
     await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({ attributes: { title: 'Logging test' }, version: 'log' })
       .expect(200);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes deprecation configuration to the router arguments', async () => {
+    await supertest(httpSetup.server.listener)
+      .put('/api/saved_objects/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
+      .send({ attributes: { title: 'Logging test' }, version: 'log' })
+      .expect(200);
+    expect(registrationSpy.mock.calls[0][0]).toMatchObject({
+      options: { deprecated: deprecationMock },
+    });
   });
 });

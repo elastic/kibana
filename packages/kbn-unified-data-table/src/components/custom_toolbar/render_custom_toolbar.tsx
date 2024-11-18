@@ -8,18 +8,13 @@
  */
 
 import React from 'react';
-import {
-  EuiDataGridCustomToolbarProps,
-  EuiDataGridToolBarVisibilityOptions,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiDataGridCustomToolbarProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import './render_custom_toolbar.scss';
 
 export interface UnifiedDataTableRenderCustomToolbarProps {
   toolbarProps: EuiDataGridCustomToolbarProps;
   gridProps: {
-    additionalControls?: EuiDataGridToolBarVisibilityOptions['additionalControls'];
+    additionalControls?: React.ReactNode;
   };
 }
 

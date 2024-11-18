@@ -23,6 +23,7 @@ import { ResultList } from './result_list';
 import { ChatForm, ChatFormFields, Pagination } from '../../types';
 import { useSearchPreview } from '../../hooks/use_search_preview';
 import { getPaginationFromPage } from '../../utils/pagination_helper';
+import { useIndexMappings } from '../../hooks/use_index_mappings';
 
 export const SearchMode: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -40,6 +41,7 @@ export const SearchMode: React.FC = () => {
   }>({ query: searchBarValue, pagination: DEFAULT_PAGINATION });
 
   const { results, pagination } = useSearchPreview(searchQuery);
+  const { data: mappingData } = useIndexMappings();
 
   const queryClient = useQueryClient();
   const handleSearch = async (query = searchBarValue, paginationParam = DEFAULT_PAGINATION) => {
@@ -67,6 +69,7 @@ export const SearchMode: React.FC = () => {
                 name={ChatFormFields.searchQuery}
                 render={({ field }) => (
                   <EuiFieldText
+                    data-test-subj="searchPlaygroundSearchModeFieldText"
                     {...field}
                     value={searchBarValue}
                     icon="search"
@@ -81,15 +84,15 @@ export const SearchMode: React.FC = () => {
               />
             </EuiForm>
           </EuiFlexItem>
-          <EuiFlexItem className="eui-yScroll">
+          <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
                 {searchQuery.query ? (
                   <ResultList
                     searchResults={results}
+                    mappings={mappingData}
                     pagination={pagination}
                     onPaginationChange={onPagination}
-                    searchQuery={searchQuery.query}
                   />
                 ) : (
                   <EuiEmptyPrompt

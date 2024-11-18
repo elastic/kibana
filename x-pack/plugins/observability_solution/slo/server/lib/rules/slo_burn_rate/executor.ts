@@ -21,7 +21,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { upperCase } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
+import { AlertsLocatorParams, getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import { ExecutorType } from '@kbn/alerting-plugin/server';
 import {
@@ -171,7 +171,7 @@ export const getRuleExecutor = ({
             ? SUPPRESSED_PRIORITY_ACTION.id
             : windowDef.actionGroup;
 
-          const { uuid, start } = alertsClient.report({
+          const { uuid } = alertsClient.report({
             id: alertId,
             actionGroup,
             state: {
@@ -189,14 +189,7 @@ export const getRuleExecutor = ({
             },
           });
 
-          const indexedStartedAt = start ?? startedAt.toISOString();
-          const alertDetailsUrl = await getAlertUrl(
-            uuid,
-            spaceId,
-            indexedStartedAt,
-            alertsLocator,
-            basePath.publicBaseUrl
-          );
+          const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
 
           const context = {
             alertDetailsUrl,
@@ -228,15 +221,8 @@ export const getRuleExecutor = ({
     const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
     for (const recoveredAlert of recoveredAlerts) {
       const alertId = recoveredAlert.alert.getId();
-      const indexedStartedAt = recoveredAlert.alert.getStart() ?? startedAt.toISOString();
       const alertUuid = recoveredAlert.alert.getUuid();
-      const alertDetailsUrl = await getAlertUrl(
-        alertUuid,
-        spaceId,
-        indexedStartedAt,
-        alertsLocator,
-        basePath.publicBaseUrl
-      );
+      const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, alertUuid);
 
       const urlQuery = alertId === ALL_VALUE ? '' : `?instanceId=${alertId}`;
       const viewInAppUrl = addSpaceIdToPath(

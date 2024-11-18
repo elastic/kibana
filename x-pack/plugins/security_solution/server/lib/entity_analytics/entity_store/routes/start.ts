@@ -10,8 +10,8 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
-import type { StartEntityStoreResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/start.gen';
-import { StartEntityStoreRequestParams } from '../../../../../common/api/entity_analytics/entity_store/engine/start.gen';
+import type { StartEntityEngineResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/start.gen';
+import { StartEntityEngineRequestParams } from '../../../../../common/api/entity_analytics/entity_store/engine/start.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { ENGINE_STATUS } from '../constants';
@@ -24,8 +24,10 @@ export const startEntityEngineRoute = (
     .post({
       access: 'public',
       path: '/api/entity_store/engines/{entityType}/start',
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(
@@ -33,12 +35,12 @@ export const startEntityEngineRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(StartEntityStoreRequestParams),
+            params: buildRouteValidationWithZod(StartEntityEngineRequestParams),
           },
         },
       },
 
-      async (context, request, response): Promise<IKibanaResponse<StartEntityStoreResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<StartEntityEngineResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -47,7 +49,7 @@ export const startEntityEngineRoute = (
 
           return response.ok({ body: { started: engine.status === ENGINE_STATUS.STARTED } });
         } catch (e) {
-          logger.error('Error in StartEntityStore:', e);
+          logger.error('Error in StartEntityEngine:', e);
           const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,

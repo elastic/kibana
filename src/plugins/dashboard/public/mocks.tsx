@@ -15,12 +15,6 @@ import { BehaviorSubject } from 'rxjs';
 import { DashboardContainerInput, DashboardPanelState } from '../common';
 import { DashboardContainer } from './dashboard_container/embeddable/dashboard_container';
 import { DashboardStart } from './plugin';
-import { pluginServices } from './services/plugin_services';
-export { setStubDashboardServices } from './services/mocks';
-
-export const getMockedDashboardServices = () => {
-  return pluginServices.getServices();
-};
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -99,7 +93,14 @@ export function buildMockDashboard({
     undefined,
     undefined,
     undefined,
-    { lastSavedInput: initialInput, lastSavedId: savedObjectId }
+    {
+      anyMigrationRun: false,
+      isEmbeddedExternally: false,
+      lastSavedInput: initialInput,
+      lastSavedId: savedObjectId,
+      managed: false,
+      fullScreenMode: false,
+    }
   );
   dashboardContainer?.setControlGroupApi(mockControlGroupApi);
   return dashboardContainer;
@@ -119,7 +120,6 @@ export function getSampleDashboardInput(
     id: '123',
     tags: [],
     filters: [],
-    isEmbeddedExternally: false,
     title: 'My Dashboard',
     query: {
       language: 'kuery',

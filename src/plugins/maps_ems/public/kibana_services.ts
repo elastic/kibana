@@ -32,7 +32,7 @@ export function getIsEnterprisePlus() {
 }
 
 export async function setLicensingPluginStart(licensingPlugin: LicensingPluginStart) {
-  const license = await licensingPlugin.refresh();
+  const license = await licensingPlugin.getLicense();
   updateLicenseState(license);
   licensingPlugin.license$.subscribe(updateLicenseState);
 }

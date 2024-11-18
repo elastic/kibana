@@ -13,12 +13,11 @@ export const builtInEntityDefinition = entityDefinitionSchema.parse({
   type: 'service',
   indexPatterns: ['kbn-data-forge-fake_stack.*'],
   managed: true,
-  history: {
+  latest: {
     timestampField: '@timestamp',
-    interval: '1m',
   },
-  identityFields: ['log.logger', { field: 'event.category', optional: true }],
-  displayNameTemplate: '{{log.logger}}{{#event.category}}:{{.}}{{/event.category}}',
+  identityFields: ['log.logger'],
+  displayNameTemplate: '{{log.logger}}',
   metadata: ['tags', 'host.name', 'host.os.name', { source: '_index', destination: 'sourceIndex' }],
   metrics: [],
 });

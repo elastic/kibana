@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineLatest, Observable, Subject } from 'rxjs';
+import { combineLatest, Observable, Subject, BehaviorSubject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -29,7 +29,7 @@ import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
-import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './task_type_dictionary';
+import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
@@ -45,6 +45,10 @@ import { metricsStream, Metrics } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 import { TaskPartitioner } from './lib/task_partitioner';
 import { getDefaultCapacity } from './lib/get_default_capacity';
+import {
+  registerMarkRemovedTasksAsUnrecognizedDefinition,
+  scheduleMarkRemovedTasksAsUnrecognizedDefinition,
+} from './removed_tasks/mark_removed_tasks_as_unrecognized';
 
 export interface TaskManagerSetupContract {
   /**
@@ -106,6 +110,7 @@ export class TaskManagerPlugin
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private kibanaDiscoveryService?: KibanaDiscoveryService;
   private heapSizeLimit: number = 0;
+  private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -169,6 +174,7 @@ export class TaskManagerPlugin
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
       shouldRunTasks: this.shouldRunBackgroundTasks,
       docLinks: core.docLinks,
+      numOfKibanaInstances$: this.numOfKibanaInstances$,
     });
     const monitoredUtilization$ = backgroundTaskUtilizationRoute({
       router,
@@ -219,6 +225,11 @@ export class TaskManagerPlugin
     }
 
     registerDeleteInactiveNodesTaskDefinition(this.logger, core.getStartServices, this.definitions);
+    registerMarkRemovedTasksAsUnrecognizedDefinition(
+      this.logger,
+      core.getStartServices,
+      this.definitions
+    );
 
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
@@ -260,6 +271,7 @@ export class TaskManagerPlugin
       logger: this.logger,
       currentNode: this.taskManagerId!,
       config: this.config.discovery,
+      onNodesCounted: (numOfNodes: number) => this.numOfKibanaInstances$.next(numOfNodes),
     });
 
     if (this.shouldRunBackgroundTasks) {
@@ -283,6 +295,7 @@ export class TaskManagerPlugin
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
 
     const defaultCapacity = getDefaultCapacity({
+      autoCalculateDefaultEchCapacity: this.config.auto_calculate_default_ech_capacity,
       claimStrategy: this.config?.claim_strategy,
       heapSizeLimit: this.heapSizeLimit,
       isCloud: cloud?.isCloudEnabled ?? false,
@@ -297,7 +310,9 @@ export class TaskManagerPlugin
         this.config!.claim_strategy
       } isBackgroundTaskNodeOnly=${this.isNodeBackgroundTasksOnly()} heapSizeLimit=${
         this.heapSizeLimit
-      } defaultCapacity=${defaultCapacity}`
+      } defaultCapacity=${defaultCapacity} autoCalculateDefaultEchCapacity=${
+        this.config.auto_calculate_default_ech_capacity
+      }`
     );
 
     const managedConfiguration = createManagedConfiguration({
@@ -326,7 +341,6 @@ export class TaskManagerPlugin
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
-        unusedTypes: REMOVED_TYPES,
         logger: this.logger,
         executionContext,
         taskStore,
@@ -378,6 +392,7 @@ export class TaskManagerPlugin
     });
 
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
+    scheduleMarkRemovedTasksAsUnrecognizedDefinition(this.logger, taskScheduling).catch(() => {});
 
     return {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
@@ -403,7 +418,13 @@ export class TaskManagerPlugin
   }
 
   public async stop() {
+    // Stop polling for tasks
+    if (this.taskPollingLifecycle) {
+      this.taskPollingLifecycle.stop();
+    }
+
     if (this.kibanaDiscoveryService?.isStarted()) {
+      this.kibanaDiscoveryService.stop();
       try {
         await this.kibanaDiscoveryService.deleteCurrentNode();
       } catch (e) {

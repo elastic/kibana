@@ -30,7 +30,6 @@ describe(
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'automatedProcessActionsEnabled',
-            'automatedResponseActionsForMoreRulesEnabled',
           ])}`,
         ],
       },

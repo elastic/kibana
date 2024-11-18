@@ -12,8 +12,8 @@ import type { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public'
 import { SerializableRecord } from '@kbn/utility-types';
 
 import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
-import type { DashboardContainerInput, DashboardOptions } from '../../common';
-import { SavedDashboardPanel } from '../../common/content_management';
+import type { DashboardContainerInput } from '../../common';
+import type { DashboardOptions, DashboardPanel } from '../../server/content_management';
 
 export interface UnsavedPanelState {
   [key: string]: object | undefined;
@@ -21,8 +21,7 @@ export interface UnsavedPanelState {
 
 export type DashboardReduxState = ReduxEmbeddableState<
   DashboardContainerInput,
-  DashboardContainerOutput,
-  DashboardPublicState
+  DashboardContainerOutput
 >;
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
@@ -33,27 +32,9 @@ export type RedirectToProps =
 export type DashboardStateFromSaveModal = Pick<
   DashboardContainerInput,
   'title' | 'description' | 'tags' | 'timeRestore' | 'timeRange' | 'refreshInterval'
-> &
-  Pick<DashboardPublicState, 'lastSavedId'>;
+>;
 
 export type DashboardStateFromSettingsFlyout = DashboardStateFromSaveModal & DashboardOptions;
-
-export interface DashboardPublicState {
-  lastSavedInput: DashboardContainerInput;
-  hasRunClientsideMigrations?: boolean;
-  animatePanelTransforms?: boolean;
-  isEmbeddedExternally?: boolean;
-  hasUnsavedChanges?: boolean;
-  hasOverlays?: boolean;
-  expandedPanelId?: string;
-  fullScreenMode?: boolean;
-  savedQueryId?: string;
-  lastSavedId?: string;
-  managed?: boolean;
-  scrollToPanelId?: string;
-  highlightPanelId?: string;
-  focusedPanelId?: string;
-}
 
 export type DashboardLoadType =
   | 'sessionFirstLoad'
@@ -89,10 +70,7 @@ export interface DashboardSaveOptions {
 }
 
 export type DashboardLocatorParams = Partial<
-  Omit<
-    DashboardContainerInput,
-    'panels' | 'controlGroupInput' | 'executionContext' | 'isEmbeddedExternally'
-  >
+  Omit<DashboardContainerInput, 'panels' | 'controlGroupInput' | 'executionContext'>
 > & {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,
@@ -123,7 +101,7 @@ export type DashboardLocatorParams = Partial<
   /**
    * List of dashboard panels
    */
-  panels?: Array<SavedDashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
+  panels?: Array<DashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
 
   /**
    * Control group changes

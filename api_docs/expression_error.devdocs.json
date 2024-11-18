@@ -125,7 +125,7 @@
         "label": "getDebugRenderer",
         "description": [],
         "signature": [
-          "(theme$?: ",
+          "(theme$: ",
           "Observable",
           "<",
           {
@@ -185,7 +185,7 @@
         "label": "getErrorRenderer",
         "description": [],
         "signature": [
-          "(theme$?: ",
+          "(theme$: ",
           "Observable",
           "<",
           {
@@ -247,7 +247,7 @@
         "label": "LazyDebugComponent",
         "description": [],
         "signature": [
-          "React.ExoticComponent<{ payload: unknown; }> & { readonly _result: ({ payload }: { payload: unknown; }) => JSX.Element; }"
+          "React.LazyExoticComponent<({ payload }: { payload: unknown; }) => React.JSX.Element>"
         ],
         "path": "src/plugins/expression_error/public/components/index.ts",
         "deprecated": false,
@@ -264,7 +264,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -279,11 +279,9 @@
         "label": "LazyErrorComponent",
         "description": [],
         "signature": [
-          "React.ExoticComponent<",
+          "React.LazyExoticComponent<React.FC<",
           "Props",
-          " & { children?: React.ReactNode; }> & { readonly _result: React.FC<",
-          "Props",
-          ">; }"
+          ">>"
         ],
         "path": "src/plugins/expression_error/public/components/index.ts",
         "deprecated": false,
@@ -300,7 +298,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }

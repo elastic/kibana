@@ -78,6 +78,9 @@ The *Exists* query returns all documents that contain an indexed value for the f
 
 . To display only the options you selected in the dropdown, click image:images/dashboard_showOnlySelectedOptions_8.3.0.png[The icon to display only the options you have selected in the Options list].
 
+[role="screenshot"]
+image::images/dashboard_controlsOptionsList_8.7.0.png[Options list control]
+
 [float]
 [[filter-the-data-with-range-slider-controls]]
 ==== Filter the data with Range slider controls
@@ -90,6 +93,9 @@ Filter the data within a specified range of values.
 The dashboard displays only the data for the range of values you specified.
 
 . To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
+
+[role="screenshot"]
+image::images/dashboard_controlsRangeSlider_8.3.0.png[Range slider control]
 
 [float]
 [[filter-the-data-with-time-slider-controls]]
@@ -106,8 +112,16 @@ Filter the data within a specified range of time.
 
 . To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
 
+[role="screenshot"]
+image::images/dashboard_timeSliderControl_8.7.0.gif[Time slider control]
+
 [float]
 === Use filter pills
+
+Use filter pills to focus in on the specific data you want.
+
+[role="screenshot"]
+image::images/dashboard_filter_pills_8.15.0.png[Filter pills, width=50%]
 
 [float]
 ==== Add pills by interacting with visualizations

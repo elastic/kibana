@@ -19,6 +19,12 @@ export const getSLOPipelineTemplate = (slo: SLODefinition) => ({
   processors: [
     {
       set: {
+        field: '_id',
+        value: `{{{_id}}}-${slo.id}-${slo.revision}`,
+      },
+    },
+    {
+      set: {
         field: 'event.ingested',
         value: '{{{_ingest.timestamp}}}',
       },
@@ -62,6 +68,13 @@ export const getSLOPipelineTemplate = (slo: SLODefinition) => ({
                 .flat()
                 .map((field) => `{{{slo.groupings.${field}}}}`)
                 .join(','),
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        ignore_failure: true,
+        name: `slo-${slo.id}@custom`,
       },
     },
   ],

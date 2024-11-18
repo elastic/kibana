@@ -19,6 +19,7 @@ import {
   overviewPanelTitleResources,
 } from '../../../../../common/translations';
 import { useOverviewSummaryPanel } from '../../../../hooks/use_overview_summary_panel';
+import { DatasetQualityIndicator } from '../../../quality_indicator';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -26,12 +27,12 @@ export default function Summary() {
   const {
     isSummaryPanelLoading,
     totalDocsCount,
-    sizeInBytesAvailable,
     sizeInBytes,
     isUserAllowedToSeeSizeInBytes,
     totalServicesCount,
     totalHostsCount,
     totalDegradedDocsCount,
+    quality,
   } = useOverviewSummaryPanel();
   return (
     <EuiFlexGroup gutterSize="m">
@@ -41,14 +42,12 @@ export default function Summary() {
           value={totalDocsCount}
           isLoading={isSummaryPanelLoading}
         />
-        {sizeInBytesAvailable && (
-          <PanelIndicator
-            label={overviewPanelDocumentsIndicatorSize}
-            value={sizeInBytes}
-            isLoading={isSummaryPanelLoading}
-            userHasPrivilege={isUserAllowedToSeeSizeInBytes}
-          />
-        )}
+        <PanelIndicator
+          label={overviewPanelDocumentsIndicatorSize}
+          value={sizeInBytes}
+          isLoading={isSummaryPanelLoading}
+          userHasPrivilege={isUserAllowedToSeeSizeInBytes}
+        />
       </Panel>
       <Panel title={overviewPanelTitleResources}>
         <PanelIndicator
@@ -62,7 +61,16 @@ export default function Summary() {
           isLoading={isSummaryPanelLoading}
         />
       </Panel>
-      <Panel title={overviewPanelTitleDatasetQuality}>
+      <Panel
+        title={overviewPanelTitleDatasetQuality}
+        secondaryTitle={
+          <DatasetQualityIndicator
+            isLoading={isSummaryPanelLoading}
+            quality={quality}
+            textSize="xs"
+          />
+        }
+      >
         <PanelIndicator
           label={overviewPanelDatasetQualityIndicatorDegradedDocs}
           value={totalDegradedDocsCount}

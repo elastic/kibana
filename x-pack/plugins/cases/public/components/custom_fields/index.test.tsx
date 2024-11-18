@@ -97,13 +97,12 @@ describe('CustomFields', () => {
         required: false,
       });
     }
+
     const customFields = [...customFieldsConfigurationMock, ...generatedMockCustomFields];
 
     appMockRender.render(<CustomFields {...{ ...props, customFields }} />);
 
-    await userEvent.click(await screen.findByTestId('add-custom-field'));
-
     expect(await screen.findByText(i18n.MAX_CUSTOM_FIELD_LIMIT(MAX_CUSTOM_FIELDS_PER_CASE)));
-    expect(await screen.findByTestId('add-custom-field')).toHaveAttribute('disabled');
+    expect(screen.queryByTestId('add-custom-field')).not.toBeInTheDocument();
   });
 });

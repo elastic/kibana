@@ -9,4 +9,10 @@
 
 import { defaultConfig } from '@kbn/storybook';
 
-module.exports = defaultConfig;
+module.exports = {
+  ...defaultConfig,
+  define: {
+    global: 'window',
+  },
+  stories: ['../../**/*.stories.+(tsx|mdx)'],
+};

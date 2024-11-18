@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/search-shared-ui",
+  "owner": "@elastic/search-kibana"
+}

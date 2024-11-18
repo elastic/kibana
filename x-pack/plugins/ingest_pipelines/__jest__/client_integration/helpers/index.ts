@@ -10,8 +10,9 @@ import { setup as pipelinesCreateSetup } from './pipelines_create.helpers';
 import { setup as pipelinesCloneSetup } from './pipelines_clone.helpers';
 import { setup as pipelinesEditSetup } from './pipelines_edit.helpers';
 import { setup as pipelinesCreateFromCsvSetup } from './pipelines_create_from_csv.helpers';
+import { setup as manageProcessorsSetup } from './manage_processors.helpers';
 
-export { nextTick, getRandomString, findTestSubject } from '@kbn/test-jest-helpers';
+export { getRandomString, findTestSubject } from '@kbn/test-jest-helpers';
 
 export { setupEnvironment } from './setup_environment';
 
@@ -21,4 +22,5 @@ export const pageHelpers = {
   pipelinesClone: { setup: pipelinesCloneSetup },
   pipelinesEdit: { setup: pipelinesEditSetup },
   pipelinesCreateFromCsv: { setup: pipelinesCreateFromCsvSetup },
+  manageProcessors: { setup: manageProcessorsSetup },
 };

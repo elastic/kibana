@@ -25,7 +25,7 @@ import { BASE_ALERTING_API_PATH } from '../../common/constants';
 import { RuleFormData } from '../types';
 import {
   CreateRuleBody,
-  UPDATE_FIELDS,
+  UPDATE_FIELDS_WITH_ACTIONS,
   UpdateRuleBody,
   transformCreateRuleBody,
   transformUpdateRuleBody,
@@ -41,7 +41,7 @@ const stringifyBodyRequest = ({
 }): string => {
   try {
     const request = isEdit
-      ? transformUpdateRuleBody(pick(formData, UPDATE_FIELDS) as UpdateRuleBody)
+      ? transformUpdateRuleBody(pick(formData, UPDATE_FIELDS_WITH_ACTIONS) as UpdateRuleBody)
       : transformCreateRuleBody(omit(formData, 'id') as CreateRuleBody);
     return JSON.stringify(request, null, 2);
   } catch {

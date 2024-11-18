@@ -383,7 +383,7 @@ deprecation warning at startup. This setting cannot end in a slash (`/`).
 [[server-publicBaseUrl]] `server.publicBaseUrl`::
 The publicly available URL that end-users access Kibana at. Must include the protocol, hostname, port
 (if different than the defaults for `http` and `https`, 80 and 443 respectively), and the
-<<server-basePath, `server.basePath`>> (if configured). This setting cannot end in a slash (`/`).
+<<server-basePath,`server.basePath`>> (when that setting is configured explicitly). This setting cannot end in a slash (`/`).
 
 [[server-compression]] `server.compression.enabled`::
 Set to `false` to disable HTTP compression for all responses. *Default: `true`*
@@ -450,7 +450,7 @@ responses to the client from the {kib} server, and specifies what value is used.
 Header names and values to send on all responses to the client from the {kib} server. *Default: `{}`*
 
 [[server-shutdownTimeout]] `server.shutdownTimeout`::
-Sets the grace period for {kib} to attempt to resolve any ongoing HTTP requests after receiving a `SIGTERM`/`SIGINT` signal, and before shutting down. Any new HTTP requests received during this period are rejected with a `503` response. *Default: `30s`*
+Sets the grace period for {kib} to attempt to resolve any ongoing HTTP requests after receiving a `SIGTERM`/`SIGINT` signal, and before shutting down. Any new HTTP requests received during this period are rejected, because the incoming socket is closed without further processing. *Default: `30s`*
 
 [[server-host]] `server.host`::
 This setting specifies the host of the
@@ -487,11 +487,8 @@ Sets whether or not the `X-Opaque-Id` header should be trusted from any IP addre
 A list of IPv4 and IPv6 address which the `X-Opaque-Id` header should be trusted from. Normally this would be set to the IP addresses of the load balancers or reverse-proxy that end users use to access Kibana. If any are set, <<server-requestId-allowFromAnyIp, `server.requestId.allowFromAnyIp`>> must also be set to `false.`
 
 [[server-rewriteBasePath]] `server.rewriteBasePath`::
-Specifies whether {kib} should
-rewrite requests that are prefixed with <<server-basePath, `server.basePath`>> or require that they
-are rewritten by your reverse proxy. In {kib} 6.3 and earlier, the default is
-`false`. In {kib} 7.x, the setting is deprecated. In {kib} 8.0 and later, the
-default is `true`. *Default: `deprecated`*
+Specifies whether {kib} should rewrite requests that are prefixed with <<server-basePath,`server.basePath`>> or require that they
+are rewritten by your reverse proxy. *Default: `false`*
 
 [[server-socketTimeout]] `server.socketTimeout`::
 The number of milliseconds to wait before closing an

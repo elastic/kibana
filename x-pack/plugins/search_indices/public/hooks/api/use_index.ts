@@ -14,12 +14,14 @@ const POLLING_INTERVAL = 15 * 1000;
 export const useIndex = (indexName: string) => {
   const { http } = useKibana().services;
   const queryKey = [QueryKeys.FetchIndex, indexName];
-  const result = useQuery({
+  const result = useQuery<Index, { body: { statusCode: number; message: string; error: string } }>({
     queryKey,
     refetchInterval: POLLING_INTERVAL,
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: 'always',
-    retry: 3,
+    retry: (failureCount, error) => {
+      return !(error?.body?.statusCode === 404 || failureCount === 3);
+    },
     queryFn: () =>
       http.fetch<Index>(`/internal/index_management/indices/${encodeURIComponent(indexName)}`),
   });

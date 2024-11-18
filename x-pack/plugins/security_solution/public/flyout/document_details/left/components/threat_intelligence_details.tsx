@@ -9,7 +9,6 @@ import React, { memo } from 'react';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import isEmpty from 'lodash/isEmpty';
 import { groupBy } from 'lodash';
-import { FlyoutLoading } from '@kbn/security-solution-common';
 import { EnrichmentSection } from './threat_details_view_enrichment_section';
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 import { EnrichmentRangePicker } from './threat_intelligence_view_enrichment_range_picker';
@@ -20,6 +19,7 @@ import {
   THREAT_INTELLIGENCE_ENRICHMENTS_TEST_ID,
   THREAT_INTELLIGENCE_MATCHES_TEST_ID,
 } from './test_ids';
+import { FlyoutLoading } from '../../../shared/components/flyout_loading';
 
 export const THREAT_INTELLIGENCE_TAB_ID = 'threatIntelligence';
 

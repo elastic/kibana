@@ -115,6 +115,9 @@ describe('MonitorEditPage', () => {
           locationsLoaded: true,
           loading: false,
         },
+        monitorDetails: {
+          syntheticsMonitorLoading: true,
+        },
       },
     });
 
@@ -172,6 +175,10 @@ describe('MonitorEditPage', () => {
           ],
           locationsLoaded: true,
           loading: false,
+        },
+        monitorDetails: {
+          syntheticsMonitorLoading: false,
+          syntheticsMonitorError: new Error('test error'),
         },
       },
     });

@@ -15,19 +15,29 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
+  OnboardingFlowEventContext,
+} from '../../../../common/telemetry_events';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
 
 export function GetStartedPanel({
+  onboardingFlowType,
+  dataset,
   integration,
   actionLinks,
   previewImage = 'charts_screen.svg',
   newTab,
   isLoading,
+  onboardingId,
+  telemetryEventContext,
 }: {
-  integration: string;
+  onboardingFlowType: string;
+  dataset: string;
+  integration?: string;
   newTab: boolean;
   actionLinks: Array<{
     id: string;
@@ -37,10 +47,28 @@ export function GetStartedPanel({
   }>;
   previewImage?: string;
   isLoading: boolean;
+  onboardingId?: string;
+  telemetryEventContext?: OnboardingFlowEventContext;
 }) {
   const {
-    services: { http },
+    services: { http, analytics },
   } = useKibana<ObservabilityOnboardingContextValue>();
+
+  useEffect(() => {
+    analytics?.reportEvent(
+      OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT.eventType,
+      {
+        onboardingFlowType,
+        onboardingId,
+        dataset,
+        context: telemetryEventContext,
+      }
+    );
+    /**
+     * Firing the event only once when the component mounts
+     */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
@@ -60,7 +88,7 @@ export function GetStartedPanel({
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexGroup direction="column" gutterSize="m">
             {actionLinks.map(({ id, title, label, href }) => (
               <EuiFlexItem key={id}>
                 <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
@@ -69,6 +97,7 @@ export function GetStartedPanel({
                   </EuiText>
                   <EuiLink
                     data-test-subj={`observabilityOnboardingDataIngestStatusActionLink-${id}`}
+                    data-onboarding-id={onboardingId}
                     href={href}
                     target={newTab ? '_blank' : '_self'}
                   >
@@ -81,30 +110,33 @@ export function GetStartedPanel({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer />
-
-      <EuiText color="subdued" size="s">
-        <FormattedMessage
-          id="xpack.observability_onboarding.dataIngestStatus.findAllPremadeAssetsTextLabel"
-          defaultMessage="Find all pre-made assets ready to use {viewAllAssetsLink}"
-          values={{
-            viewAllAssetsLink: (
-              <EuiLink
-                target="_blank"
-                data-test-subj="observabilityOnboardingDataIngestStatusViewAllAssetsLink"
-                href={`${http.basePath.get()}/app/integrations/detail/${integration}/assets`}
-              >
-                {i18n.translate(
-                  'xpack.observability_onboarding.dataIngestStatus.viewAllAssetsLinkText',
-                  {
-                    defaultMessage: 'View all assets',
-                  }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
+      {integration && (
+        <>
+          <EuiSpacer />
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.observability_onboarding.dataIngestStatus.findAllPremadeAssetsTextLabel"
+              defaultMessage="Find all pre-made assets ready to use {viewAllAssetsLink}"
+              values={{
+                viewAllAssetsLink: (
+                  <EuiLink
+                    target="_blank"
+                    data-test-subj="observabilityOnboardingDataIngestStatusViewAllAssetsLink"
+                    href={`${http.basePath.get()}/app/integrations/detail/${integration}/assets`}
+                  >
+                    {i18n.translate(
+                      'xpack.observability_onboarding.dataIngestStatus.viewAllAssetsLinkText',
+                      {
+                        defaultMessage: 'View all assets',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+        </>
+      )}
     </>
   );
 }

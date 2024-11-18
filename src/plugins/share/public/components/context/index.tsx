@@ -13,7 +13,7 @@ import { createContext, useContext } from 'react';
 
 import { AnonymousAccessServiceContract } from '../../../common';
 import type {
-  ShareMenuItem,
+  ShareMenuItemV2,
   UrlParamExtension,
   BrowserUrlService,
   ShareContext,
@@ -24,12 +24,11 @@ export type { ShareMenuItemV2 } from '../../types';
 export interface IShareContext extends ShareContext {
   allowEmbed: boolean;
   allowShortUrl: boolean;
-  shareMenuItems: ShareMenuItem[];
+  shareMenuItems: ShareMenuItemV2[];
   embedUrlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: AnonymousAccessServiceContract;
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
-  isEmbedded: boolean;
   theme: ThemeServiceSetup;
   i18n: I18nStart;
   publicAPIEnabled?: boolean;

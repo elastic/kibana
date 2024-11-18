@@ -28,13 +28,6 @@ export const UPDATES_TAB_LABEL = i18n.translate(
   }
 );
 
-export const DIFF_TAB_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.diffTabLabel',
-  {
-    defaultMessage: 'Diff',
-  }
-);
-
 export const JSON_VIEW_UPDATES_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.jsonViewUpdatesTabLabel',
   {
@@ -357,10 +350,10 @@ export const MAX_SIGNALS_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const CUSTOMIZED_PREBUILT_RULE_LABEL = i18n.translate(
+export const MODIFIED_PREBUILT_RULE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.customizedPrebuiltRuleLabel',
   {
-    defaultMessage: 'Customized Elastic rule',
+    defaultMessage: 'Modified Elastic rule',
   }
 );
 

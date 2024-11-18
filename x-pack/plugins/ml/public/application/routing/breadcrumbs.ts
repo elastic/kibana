@@ -128,6 +128,14 @@ export const CALENDAR_MANAGEMENT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   deepLinkId: 'ml:calendarSettings',
 });
 
+export const CALENDAR_DST_MANAGEMENT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagementLabel', {
+    defaultMessage: 'Calendar DST management',
+  }),
+  href: '/settings/calendars_dst_list',
+  deepLinkId: 'ml:calendarSettings',
+});
+
 export const FILTER_LISTS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsLabel', {
     defaultMessage: 'Filter lists',
@@ -160,6 +168,7 @@ const breadcrumbs = {
   CHANGE_POINT_DETECTION,
   CREATE_JOB_BREADCRUMB,
   CALENDAR_MANAGEMENT_BREADCRUMB,
+  CALENDAR_DST_MANAGEMENT_BREADCRUMB,
   FILTER_LISTS_BREADCRUMB,
   SUPPLIED_CONFIGURATIONS,
 };

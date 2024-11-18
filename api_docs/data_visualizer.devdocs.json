@@ -320,14 +320,14 @@
           {
             "parentPluginId": "dataVisualizer",
             "id": "def-public.DataDriftSpec.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -341,7 +341,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -368,14 +368,14 @@
           {
             "parentPluginId": "dataVisualizer",
             "id": "def-public.FileDataVisualizerSpec.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -389,7 +389,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -447,14 +447,14 @@
           {
             "parentPluginId": "dataVisualizer",
             "id": "def-public.IndexDataVisualizerSpec.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -468,7 +468,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -493,7 +493,7 @@
         "Props",
         ">>; getDataDriftComponent: () => Promise<() => React.FC<",
         "DataDriftDetectionAppStateProps",
-        ">>; getMaxBytesFormatted: () => string; FieldStatisticsTable: React.ForwardRefExoticComponent<",
+        ">>; getMaxBytesFormatted: () => string; FieldStatsUnavailableMessage: React.ForwardRefExoticComponent<{ id?: string | undefined; title?: string | undefined; } & React.RefAttributes<{}>>; FieldStatisticsTable: React.ForwardRefExoticComponent<",
         "FieldStatisticTableEmbeddableProps",
         " & React.RefAttributes<{}>>; }"
       ],

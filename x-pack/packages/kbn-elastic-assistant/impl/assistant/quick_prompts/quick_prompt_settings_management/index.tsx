@@ -148,6 +148,8 @@ const QuickPromptSettingsManagementComponent = () => {
     basePromptContexts,
     onEditActionClicked,
     onDeleteActionClicked,
+    isDeleteEnabled: (prompt: PromptResponse) => prompt.isDefault !== true,
+    isEditEnabled: () => true,
   });
 
   const { onTableChange, pagination, sorting } = useSessionPagination({

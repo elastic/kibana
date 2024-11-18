@@ -23,7 +23,13 @@ import type { CompleteRule, MachineLearningRuleParams } from '../../rule_schema'
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../utils/large_list_filters/filter_events_against_list';
 import { findMlSignals } from './find_ml_signals';
-import type { BulkCreate, RuleRangeTuple, WrapHits, WrapSuppressedHits } from '../types';
+import type {
+  BulkCreate,
+  CreateRuleOptions,
+  RuleRangeTuple,
+  WrapHits,
+  WrapSuppressedHits,
+} from '../types';
 import {
   addToSearchAfterReturn,
   createErrorsFromShard,
@@ -54,6 +60,7 @@ interface MachineLearningRuleExecutorParams {
   alertWithSuppression: SuppressedAlertService;
   isAlertSuppressionActive: boolean;
   experimentalFeatures: ExperimentalFeatures;
+  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
 }
 
 export const mlExecutor = async ({
@@ -72,6 +79,7 @@ export const mlExecutor = async ({
   alertTimestampOverride,
   alertWithSuppression,
   experimentalFeatures,
+  scheduleNotificationResponseActionsService,
 }: MachineLearningRuleExecutorParams) => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -190,6 +198,11 @@ export const mlExecutor = async ({
     const shardFailures = anomalyResults._shards.failures ?? [];
     const searchErrors = createErrorsFromShard({
       errors: shardFailures,
+    });
+    scheduleNotificationResponseActionsService({
+      signals: result.createdSignals,
+      signalsCount: result.createdSignalsCount,
+      responseActions: completeRule.ruleParams.responseActions,
     });
     return mergeReturns([
       result,

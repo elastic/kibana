@@ -18,6 +18,7 @@ import {
   getTotalCountInUse,
   getMWTelemetry,
 } from './lib/get_telemetry_from_kibana';
+import { getTotalAlertsCountAggregations } from './lib/get_telemetry_from_alerts';
 import {
   getExecutionsPerDayCount,
   getExecutionTimeoutsPerDayCount,
@@ -117,6 +118,7 @@ export function telemetryTaskRunner(
           getExecutionTimeoutsPerDayCount({ esClient, eventLogIndex, logger }),
           getFailedAndUnrecognizedTasksPerDay({ esClient, taskManagerIndex, logger }),
           getMWTelemetry({ logger, savedObjectsClient }),
+          getTotalAlertsCountAggregations({ esClient, logger }),
         ])
           .then(
             ([
@@ -126,6 +128,7 @@ export function telemetryTaskRunner(
               dailyExecutionTimeoutCounts,
               dailyFailedAndUnrecognizedTasks,
               MWTelemetry,
+              totalAlertsCountAggregations,
             ]) => {
               const hasErrors =
                 totalCountAggregations.hasErrors ||
@@ -133,7 +136,8 @@ export function telemetryTaskRunner(
                 dailyExecutionCounts.hasErrors ||
                 dailyExecutionTimeoutCounts.hasErrors ||
                 dailyFailedAndUnrecognizedTasks.hasErrors ||
-                MWTelemetry.hasErrors;
+                MWTelemetry.hasErrors ||
+                totalAlertsCountAggregations.hasErrors;
 
               const errorMessages = [
                 totalCountAggregations.errorMessage,
@@ -142,6 +146,7 @@ export function telemetryTaskRunner(
                 dailyExecutionTimeoutCounts.errorMessage,
                 dailyFailedAndUnrecognizedTasks.errorMessage,
                 MWTelemetry.errorMessage,
+                totalAlertsCountAggregations.errorMessage,
               ].filter((message) => message !== undefined);
 
               const updatedState: LatestTaskStateSchema = {
@@ -207,6 +212,8 @@ export function telemetryTaskRunner(
                   dailyExecutionCounts.generatedActionsPercentilesByType,
                 percentile_num_alerts_per_day: dailyExecutionCounts.alertsPercentiles,
                 percentile_num_alerts_by_type_per_day: dailyExecutionCounts.alertsPercentilesByType,
+                count_alerts_total: totalAlertsCountAggregations.count_alerts_total,
+                count_alerts_by_rule_type: totalAlertsCountAggregations.count_alerts_by_rule_type,
               };
 
               return {

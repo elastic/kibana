@@ -16,12 +16,13 @@ import type {
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
-import { EuiCollapsibleNavBeta } from '@elastic/eui';
+import { EuiCollapsibleNavBeta, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   RecentlyAccessed,
   NavigationPanel,
   PanelProvider,
   type PanelContentProvider,
+  FeedbackBtn,
 } from './components';
 import { useNavigation as useNavigationService } from '../services';
 import { NavigationSectionUI } from './components/navigation_section_ui';
@@ -47,10 +48,13 @@ export interface Props {
 }
 
 const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContentProvider }) => {
-  const { activeNodes$ } = useNavigationService();
+  const { activeNodes$, selectedPanelNode, setSelectedPanelNode, isFeedbackBtnVisible$ } =
+    useNavigationService();
 
   const activeNodes = useObservable(activeNodes$, []);
-  const navigationTree = useObservable(navigationTree$, { body: [] });
+  const navigationTree = useObservable(navigationTree$, { id: 'es', body: [] });
+  const { id: solutionId } = navigationTree;
+  const isFeedbackBtnVisible = useObservable(isFeedbackBtnVisible$, false);
 
   const contextValue = useMemo<Context>(
     () => ({
@@ -79,11 +83,23 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContent
   );
 
   return (
-    <PanelProvider activeNodes={activeNodes} contentProvider={panelContentProvider}>
+    <PanelProvider
+      activeNodes={activeNodes}
+      contentProvider={panelContentProvider}
+      selectedNode={selectedPanelNode}
+      setSelectedNode={setSelectedPanelNode}
+    >
       <NavigationContext.Provider value={contextValue}>
         {/* Main navigation content */}
         <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>
-          {renderNodes(navigationTree.body)}
+          <EuiFlexGroup direction="column" justifyContent="spaceBetween" css={{ height: '100%' }}>
+            <EuiFlexItem>{renderNodes(navigationTree.body)}</EuiFlexItem>
+            {isFeedbackBtnVisible && (
+              <EuiFlexItem grow={false}>
+                <FeedbackBtn solutionId={solutionId} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiCollapsibleNavBeta.Body>
 
         {/* Footer */}

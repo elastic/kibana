@@ -52,7 +52,7 @@ export class SyntheticsPrivateLocation {
     const newPolicy = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
       soClient,
       'synthetics',
-      this.server.logger
+      { logger: this.server.logger, installMissingPackage: true }
     );
 
     if (!newPolicy) {
@@ -369,7 +369,10 @@ export class SyntheticsPrivateLocation {
       return await this.server.fleet.packagePolicyService.bulkCreate(
         soClient,
         esClient,
-        newPolicies
+        newPolicies,
+        {
+          asyncDeploy: true,
+        }
       );
     }
   }
@@ -384,6 +387,7 @@ export class SyntheticsPrivateLocation {
         policiesToUpdate,
         {
           force: true,
+          asyncDeploy: true,
         }
       );
       return failedPolicies;
@@ -401,6 +405,7 @@ export class SyntheticsPrivateLocation {
           policyIdsToDelete,
           {
             force: true,
+            asyncDeploy: true,
           }
         );
       } catch (e) {
@@ -430,6 +435,7 @@ export class SyntheticsPrivateLocation {
         policyIdsToDelete,
         {
           force: true,
+          asyncDeploy: true,
         }
       );
       const failedPolicies = result?.filter((policy) => {

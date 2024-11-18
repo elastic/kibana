@@ -129,7 +129,7 @@ describe('Transaction error rate alert', () => {
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
         interval: '5 mins',
         reason:
@@ -242,7 +242,7 @@ describe('Transaction error rate alert', () => {
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
         interval: '5 mins',
         reason:
@@ -355,7 +355,7 @@ describe('Transaction error rate alert', () => {
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
         interval: '5 mins',
         reason:
@@ -468,7 +468,7 @@ describe('Transaction error rate alert', () => {
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'Not defined',
         interval: '5 mins',
         reason:
@@ -569,7 +569,7 @@ describe('Transaction error rate alert', () => {
 
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-bar',
         interval: '5 mins',
         reason:

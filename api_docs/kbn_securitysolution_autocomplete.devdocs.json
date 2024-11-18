@@ -27,7 +27,7 @@
         "label": "AutocompleteFieldExistsComponent",
         "description": [],
         "signature": [
-          "{ ({ placeholder, rowLabel, \"aria-label\": ariaLabel, }: React.PropsWithChildren<AutocompleteFieldExistsProps>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ placeholder, rowLabel, \"aria-label\": ariaLabel, }: AutocompleteFieldExistsProps): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_exists/index.tsx",
         "deprecated": false,
@@ -36,12 +36,12 @@
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
             "id": "def-common.AutocompleteFieldExistsComponent.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  placeholder,\n  rowLabel,\n  'aria-label': ariaLabel,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<AutocompleteFieldExistsProps>"
+              "AutocompleteFieldExistsProps"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_exists/index.tsx",
             "deprecated": false,
@@ -60,7 +60,7 @@
         "label": "AutocompleteFieldListsComponent",
         "description": [],
         "signature": [
-          "{ ({ httpService, isClearable, isDisabled, isLoading, onChange, placeholder, rowLabel, selectedField, selectedValue, allowLargeValueLists, \"aria-label\": ariaLabel, showValueListModal, }: React.PropsWithChildren<AutocompleteFieldListsProps>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ httpService, isClearable, isDisabled, isLoading, onChange, placeholder, rowLabel, selectedField, selectedValue, allowLargeValueLists, \"aria-label\": ariaLabel, showValueListModal, }: AutocompleteFieldListsProps): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
         "deprecated": false,
@@ -69,12 +69,12 @@
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
             "id": "def-common.AutocompleteFieldListsComponent.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  httpService,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  onChange,\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  allowLargeValueLists = false,\n  'aria-label': ariaLabel,\n  showValueListModal,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<AutocompleteFieldListsProps>"
+              "AutocompleteFieldListsProps"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
             "deprecated": false,
@@ -93,7 +93,7 @@
         "label": "AutocompleteFieldMatchAnyComponent",
         "description": [],
         "signature": [
-          "{ ({ placeholder, rowLabel, selectedField, selectedValue, indexPattern, isLoading, isDisabled, isClearable, isRequired, onChange, onError, autocompleteService, \"aria-label\": ariaLabel, }: React.PropsWithChildren<AutocompleteFieldMatchAnyProps>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ placeholder, rowLabel, selectedField, selectedValue, indexPattern, isLoading, isDisabled, isClearable, isRequired, onChange, onError, autocompleteService, \"aria-label\": ariaLabel, }: AutocompleteFieldMatchAnyProps): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match_any/index.tsx",
         "deprecated": false,
@@ -102,12 +102,12 @@
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
             "id": "def-common.AutocompleteFieldMatchAnyComponent.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  onChange,\n  onError,\n  autocompleteService,\n  'aria-label': ariaLabel,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<AutocompleteFieldMatchAnyProps>"
+              "AutocompleteFieldMatchAnyProps"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match_any/index.tsx",
             "deprecated": false,
@@ -126,7 +126,7 @@
         "label": "AutocompleteFieldMatchComponent",
         "description": [],
         "signature": [
-          "{ ({ placeholder, rowLabel, selectedField, selectedValue, indexPattern, isLoading, isDisabled, isClearable, isRequired, fieldInputWidth, autocompleteService, onChange, onError, onWarning, warning, \"aria-label\": ariaLabel, }: React.PropsWithChildren<AutocompleteFieldMatchProps>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ placeholder, rowLabel, selectedField, selectedValue, indexPattern, isLoading, isDisabled, isClearable, isRequired, fieldInputWidth, autocompleteService, onChange, onError, onWarning, warning, \"aria-label\": ariaLabel, }: AutocompleteFieldMatchProps): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match/index.tsx",
         "deprecated": false,
@@ -135,12 +135,12 @@
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
             "id": "def-common.AutocompleteFieldMatchComponent.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  fieldInputWidth,\n  autocompleteService,\n  onChange,\n  onError,\n  onWarning,\n  warning,\n  'aria-label': ariaLabel,\n}",
+            "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading = false,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  fieldInputWidth,\n  autocompleteService,\n  onChange,\n  onError,\n  onWarning,\n  warning,\n  'aria-label': ariaLabel,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<AutocompleteFieldMatchProps>"
+              "AutocompleteFieldMatchProps"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match/index.tsx",
             "deprecated": false,
@@ -169,14 +169,14 @@
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
             "id": "def-common.AutocompleteFieldWildcardComponent.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -190,7 +190,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -294,33 +294,29 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-autocomplete",
-        "id": "def-common.FieldComponent",
+        "id": "def-common.EsFieldSelector",
         "type": "Function",
         "tags": [],
-        "label": "FieldComponent",
+        "label": "EsFieldSelector",
         "description": [],
         "signature": [
-          "{ ({ fieldInputWidth, fieldTypeFilter, indexPattern, isClearable, isDisabled, isLoading, isRequired, onChange, placeholder, selectedField, acceptsCustomOptions, showMappingConflicts, \"aria-label\": ariaLabel, }: React.PropsWithChildren<",
-          "FieldProps",
-          ">): JSX.Element; displayName: string | undefined; }"
+          "({\n  fieldInputWidth,\n  fieldTypeFilter = [],\n  indexPattern,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  isRequired = false,\n  onChange,\n  placeholder,\n  selectedField,\n  acceptsCustomOptions = false,\n  showMappingConflicts = false,\n  'aria-label': ariaLabel,\n}: EsFieldSelectorProps) => JSX.Element"
         ],
-        "path": "packages/kbn-securitysolution-autocomplete/src/field/index.tsx",
+        "path": "packages/kbn-securitysolution-autocomplete/src/es_field_selector/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
-            "id": "def-common.FieldComponent.$1",
-            "type": "CompoundType",
+            "id": "def-common.EsFieldSelector.$1",
+            "type": "Object",
             "tags": [],
             "label": "{\n  fieldInputWidth,\n  fieldTypeFilter = [],\n  indexPattern,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  isRequired = false,\n  onChange,\n  placeholder,\n  selectedField,\n  acceptsCustomOptions = false,\n  showMappingConflicts = false,\n  'aria-label': ariaLabel,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "FieldProps",
-              ">"
+              "EsFieldSelectorProps"
             ],
-            "path": "packages/kbn-securitysolution-autocomplete/src/field/index.tsx",
+            "path": "packages/kbn-securitysolution-autocomplete/src/es_field_selector/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -602,7 +598,7 @@
         "label": "OperatorComponent",
         "description": [],
         "signature": [
-          "{ ({ isClearable, isDisabled, isLoading, onChange, operator, operatorOptions, operatorInputWidth, placeholder, selectedField, \"aria-label\": ariaLabel, }: React.PropsWithChildren<OperatorState>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ isClearable, isDisabled, isLoading, onChange, operator, operatorOptions, operatorInputWidth, placeholder, selectedField, \"aria-label\": ariaLabel, }: OperatorState): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/operator/index.tsx",
         "deprecated": false,
@@ -611,12 +607,12 @@
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
             "id": "def-common.OperatorComponent.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  onChange,\n  operator,\n  operatorOptions,\n  operatorInputWidth = 150,\n  placeholder,\n  selectedField,\n  'aria-label': ariaLabel,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<OperatorState>"
+              "OperatorState"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/operator/index.tsx",
             "deprecated": false,

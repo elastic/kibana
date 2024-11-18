@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonGroup,
   EuiLink,
@@ -14,23 +12,25 @@ import {
   EuiSkeletonRectangle,
   EuiSkeletonText,
   EuiSpacer,
-  EuiSteps,
   EuiStepStatus,
+  EuiSteps,
   EuiText,
 } from '@elastic/eui';
-import useEvent from 'react-use/lib/useEvent';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { OnboardingFlowEventContext } from '../../../../common/telemetry_events';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
-import { CreateStackCommandSnippet } from './create_stack_command_snippet';
-import { VisualizeData } from './visualize_data';
-import { CreateStackInAWSConsole } from './create_stack_in_aws_console';
 import { FeedbackButtons } from '../shared/feedback_buttons';
-
-enum CreateStackOption {
-  AWS_CONSOLE_UI = 'createCloudFormationOptionAWSConsoleUI',
-  AWS_CLI = 'createCloudFormationOptionAWSCLI',
-}
+import { CreateStackCommandSnippet } from './create_stack_command_snippet';
+import { CreateStackInAWSConsole } from './create_stack_in_aws_console';
+import { CreateStackOption } from './types';
+import { useFirehoseFlow } from './use_firehose_flow';
+import { VisualizeData } from './visualize_data';
+import { ObservabilityOnboardingAppServices } from '../../..';
+import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
 
 const OPTIONS = [
   {
@@ -52,30 +52,49 @@ const OPTIONS = [
 ];
 
 export function FirehosePanel() {
-  const [windowLostFocus, setWindowLostFocus] = useState(false);
   const [selectedOptionId, setSelectedOptionId] = useState<CreateStackOption>(
     CreateStackOption.AWS_CONSOLE_UI
   );
-  const { data, status, error, refetch } = useFetcher(
-    (callApi) => {
-      return callApi('POST /internal/observability_onboarding/firehose/flow');
+  const {
+    services: {
+      context: { cloudServiceProvider },
     },
-    [],
-    { showToastOnError: false }
+  } = useKibana<ObservabilityOnboardingAppServices>();
+  const { data, status, error, refetch } = useFirehoseFlow();
+
+  const telemetryEventContext: OnboardingFlowEventContext = useMemo(
+    () => ({
+      firehose: {
+        cloudServiceProvider,
+        selectedCreateStackOption: selectedOptionId,
+      },
+    }),
+    [cloudServiceProvider, selectedOptionId]
   );
 
-  useEvent('blur', () => setWindowLostFocus(true), window);
+  const isMonitoringData = useWindowBlurDataMonitoringTrigger({
+    isActive: status === FETCH_STATUS.SUCCESS,
+    onboardingFlowType: 'firehose',
+    onboardingId: data?.onboardingId,
+    telemetryEventContext,
+  });
 
   const onOptionChange = useCallback((id: string) => {
     setSelectedOptionId(id as CreateStackOption);
   }, []);
 
   if (error !== undefined) {
-    return <EmptyPrompt error={error} onRetryClick={refetch} />;
+    return (
+      <EmptyPrompt
+        onboardingFlowType="firehose"
+        error={error}
+        telemetryEventContext={{
+          firehose: { cloudServiceProvider },
+        }}
+        onRetryClick={refetch}
+      />
+    );
   }
-
-  const isVisualizeStepActive =
-    status === FETCH_STATUS.SUCCESS && data !== undefined && windowLostFocus;
 
   const steps = [
     {
@@ -150,7 +169,7 @@ export function FirehosePanel() {
                   templateUrl={data.templateUrl}
                   encodedApiKey={data.apiKeyEncoded}
                   elasticsearchUrl={data.elasticsearchUrl}
-                  isPrimaryAction={!isVisualizeStepActive}
+                  isPrimaryAction={!isMonitoringData}
                 />
               )}
 
@@ -159,7 +178,7 @@ export function FirehosePanel() {
                   templateUrl={data.templateUrl}
                   encodedApiKey={data.apiKeyEncoded}
                   elasticsearchUrl={data.elasticsearchUrl}
-                  isCopyPrimaryAction={!isVisualizeStepActive}
+                  isCopyPrimaryAction={!isMonitoringData}
                 />
               )}
             </>
@@ -169,8 +188,13 @@ export function FirehosePanel() {
     },
     {
       title: 'Visualize your data',
-      status: (isVisualizeStepActive ? 'current' : 'incomplete') as EuiStepStatus,
-      children: isVisualizeStepActive && <VisualizeData />,
+      status: (isMonitoringData ? 'current' : 'incomplete') as EuiStepStatus,
+      children: isMonitoringData && data !== undefined && (
+        <VisualizeData
+          selectedCreateStackOption={selectedOptionId}
+          onboardingId={data.onboardingId}
+        />
+      ),
     },
   ];
 

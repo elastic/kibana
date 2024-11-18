@@ -14,12 +14,12 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
 import { RulesSettingsLink } from './rules_settings_link';
 import { useKibana } from '../../../common/lib/kibana';
-import { getFlappingSettings } from '../../lib/rule_api/get_flapping_settings';
+import { fetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings';
 import { getQueryDelaySettings } from '../../lib/rule_api/get_query_delay_settings';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../lib/rule_api/get_flapping_settings', () => ({
-  getFlappingSettings: jest.fn(),
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => ({
+  fetchFlappingSettings: jest.fn(),
 }));
 jest.mock('../../lib/rule_api/get_query_delay_settings', () => ({
   getQueryDelaySettings: jest.fn(),
@@ -38,8 +38,8 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const mocks = coreMock.createSetup();
 
-const getFlappingSettingsMock = getFlappingSettings as unknown as jest.MockedFunction<
-  typeof getFlappingSettings
+const fetchFlappingSettingsMock = fetchFlappingSettings as unknown as jest.MockedFunction<
+  typeof fetchFlappingSettings
 >;
 const getQueryDelaySettingsMock = getQueryDelaySettings as unknown as jest.MockedFunction<
   typeof getQueryDelaySettings
@@ -88,7 +88,7 @@ describe('rules_settings_link', () => {
         readQueryDelaySettingsUI: true,
       },
     };
-    getFlappingSettingsMock.mockResolvedValue(mockFlappingSetting);
+    fetchFlappingSettingsMock.mockResolvedValue(mockFlappingSetting);
     getQueryDelaySettingsMock.mockResolvedValue(mockQueryDelaySetting);
   });
 

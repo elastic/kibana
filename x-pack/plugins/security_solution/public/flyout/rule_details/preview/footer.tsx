@@ -5,38 +5,27 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FlyoutFooter } from '@kbn/security-solution-common';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { RULE_PREVIEW_FOOTER_TEST_ID, RULE_PREVIEW_OPEN_RULE_FLYOUT_TEST_ID } from './test_ids';
-import { RulePanelKey } from '../right';
+import { useRuleDetailsLink } from '../../document_details/shared/hooks/use_rule_details_link';
+import { FlyoutFooter } from '../../shared/components/flyout_footer';
 
 /**
  * Footer in rule preview panel
  */
 export const PreviewFooter = memo(({ ruleId }: { ruleId: string }) => {
-  const { openFlyout } = useExpandableFlyoutApi();
+  const href = useRuleDetailsLink({ ruleId });
 
-  const openRuleFlyout = useCallback(() => {
-    openFlyout({
-      right: {
-        id: RulePanelKey,
-        params: {
-          ruleId,
-        },
-      },
-    });
-  }, [openFlyout, ruleId]);
-
-  return (
+  return href ? (
     <FlyoutFooter data-test-subj={RULE_PREVIEW_FOOTER_TEST_ID}>
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiLink
-            onClick={openRuleFlyout}
+            href={href}
             target="_blank"
+            external={false}
             data-test-subj={RULE_PREVIEW_OPEN_RULE_FLYOUT_TEST_ID}
           >
             {i18n.translate('xpack.securitySolution.flyout.preview.rule.viewDetailsLabel', {
@@ -46,7 +35,7 @@ export const PreviewFooter = memo(({ ruleId }: { ruleId: string }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
     </FlyoutFooter>
-  );
+  ) : null;
 });
 
 PreviewFooter.displayName = 'PreviewFooter';

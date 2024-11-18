@@ -5,7 +5,7 @@
  * 2.0.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as yaml from 'js-yaml';
+import { dump } from 'js-yaml';
 import type { CategorizationState, EcsMappingState, RelatedState } from '../types';
 
 interface SampleObj {
@@ -18,9 +18,10 @@ interface NewObj {
   };
 }
 
-interface Field {
+export interface Field {
   name: string;
   type: string;
+  description?: string;
   fields?: Field[];
 }
 
@@ -45,17 +46,6 @@ export function prefixSamples(
   }
 
   return modifiedSamples;
-}
-
-export function formatSamples(samples: string[]): string {
-  const formattedSamples: unknown[] = [];
-
-  for (const sample of samples) {
-    const sampleObj = JSON.parse(sample);
-    formattedSamples.push(sampleObj);
-  }
-
-  return JSON.stringify(formattedSamples, null, 2);
 }
 
 function determineType(value: unknown): string {
@@ -160,7 +150,7 @@ export function generateFields(mergedDocs: string): string {
     .filter((key) => !ecsTopKeysSet.has(key))
     .map((key) => recursiveParse(doc[key], [key]));
 
-  return yaml.dump(fieldsStructure, { sortKeys: false });
+  return dump(fieldsStructure, { sortKeys: false });
 }
 
 export function merge(
@@ -232,4 +222,44 @@ export function mergeSamples(objects: any[]): string {
   }
 
   return JSON.stringify(result, null, 2);
+}
+
+export function flattenObjectsList(
+  obj: Field[]
+): Array<{ name: string; type: string; description?: string }> {
+  const result: Array<{ name: string; type: string; description?: string }> = [];
+  flattenObject(obj, '', '.', result);
+
+  return sortArrayOfObjects(result);
+}
+
+function flattenObject(
+  obj: Field[],
+  parentKey: string = '',
+  separator: string = '.',
+  result: Array<{ name: string; type: string; description?: string }>
+): void {
+  obj.forEach((element) => {
+    if (element.name) {
+      const newKey = parentKey ? `${parentKey}${separator}${element.name}` : element.name;
+
+      if (element.fields && Array.isArray(element.fields)) {
+        flattenObject(element.fields, newKey, separator, result);
+      } else {
+        result.push({
+          name: newKey,
+          type: element.type,
+          description: element.description,
+        });
+      }
+    }
+  });
+}
+
+function sortArrayOfObjects(
+  objectsArray: Array<{ name: string; type: string; description?: string }>
+): Array<{ name: string; type: string; description?: string }> {
+  return objectsArray.sort((a, b) => {
+    return a.name.localeCompare(b.name);
+  });
 }

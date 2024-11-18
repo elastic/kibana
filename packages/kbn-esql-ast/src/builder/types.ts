@@ -29,3 +29,5 @@ export type AstNodeTemplate<Node extends ESQLProperNode> = Omit<
   'type' | 'text' | 'location' | 'incomplete'
 > &
   Partial<Omit<Node, 'type'>>;
+
+export type PartialFields<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
