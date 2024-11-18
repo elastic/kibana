@@ -322,7 +322,7 @@ export function initializeUnifiedSearchManager(
       reset: (lastSavedState: DashboardState) => {
         setUnifiedSearchFilters([
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
-          ...lastSavedState.filters
+          ...lastSavedState.filters,
         ]);
         setQuery(lastSavedState.query);
         setTimeRestore(lastSavedState.timeRestore);

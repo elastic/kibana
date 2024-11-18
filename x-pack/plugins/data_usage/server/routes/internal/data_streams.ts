@@ -7,13 +7,12 @@
 
 import { DataStreamsResponseSchema } from '../../../common/rest_types';
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '../../../common';
-import { DataUsageRouter } from '../../types';
-import { DataUsageService } from '../../services';
+import { DataUsageContext, DataUsageRouter } from '../../types';
 import { getDataStreamsHandler } from './data_streams_handler';
 
 export const registerDataStreamsRoute = (
   router: DataUsageRouter,
-  dataUsageService: DataUsageService
+  dataUsageContext: DataUsageContext
 ) => {
   router.versioned
     .get({
@@ -30,6 +29,6 @@ export const registerDataStreamsRoute = (
           },
         },
       },
-      getDataStreamsHandler(dataUsageService)
+      getDataStreamsHandler(dataUsageContext)
     );
 };

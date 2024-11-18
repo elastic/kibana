@@ -8,8 +8,8 @@
 import type { DedotObject } from '@kbn/utility-types';
 import * as APM_EVENT_FIELDS_MAP from '@kbn/apm-types/es_fields';
 import type { ValuesType } from 'utility-types';
-import { unflattenObject } from '@kbn/observability-utils/object/unflatten_object';
-import { mergePlainObjects } from '@kbn/observability-utils/object/merge_plain_objects';
+import { unflattenObject } from '@kbn/observability-utils-common/object/unflatten_object';
+import { mergePlainObjects } from '@kbn/observability-utils-common/object/merge_plain_objects';
 import { castArray, isArray } from 'lodash';
 import { AgentName } from '@kbn/elastic-agent-utils';
 import { EventOutcome } from '@kbn/apm-types/src/es_schemas/raw/fields';

@@ -72,7 +72,7 @@ export function getDashboardApi({
     panelsManager ? await panelsManager.api.untilEmbeddableLoaded(id) : undefined
   );
   function getPanelReferences(id: string) {
-    const panelReferences =  getReferencesForPanelId(id, references);
+    const panelReferences = getReferencesForPanelId(id, references);
     // references from old installations may not be prefixed with panel id
     // fall back to passing all references in these cases to preserve backwards compatability
     return panelReferences.length > 0 ? panelReferences : references;
@@ -256,7 +256,7 @@ export function getDashboardApi({
                   ignoreFilters: false,
                   ignoreQuery: false,
                   ignoreTimerange: false,
-                  ignoreValidations: false
+                  ignoreValidations: false,
                 },
                 labelPosition: 'oneLine',
                 showApplySelections: false,

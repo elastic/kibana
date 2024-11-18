@@ -4222,8 +4222,7 @@
             "transaction.message.queue.name",
             "fields.*"
           ]
-        },
-        "refresh_interval": "1ms"
+        }
       }
     }
   }

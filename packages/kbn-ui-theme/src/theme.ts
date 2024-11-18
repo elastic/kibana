@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO(tkajtoch): Add support for multiple themes
+
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import { default as v8Light } from '@elastic/eui/dist/eui_theme_light.json';
 /* eslint-disable-next-line @kbn/eslint/module_migration */
