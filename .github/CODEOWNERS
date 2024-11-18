@@ -658,7 +658,7 @@ src/plugins/files @elastic/appex-sharedux
 src/plugins/files_management @elastic/appex-sharedux
 src/plugins/ftr_apis @elastic/kibana-core
 src/plugins/guided_onboarding @elastic/appex-sharedux
-src/plugins/home @elastic/kibana-core
+src/plugins/home @elastic/appex-sharedux
 src/plugins/image_embeddable @elastic/appex-sharedux
 src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
