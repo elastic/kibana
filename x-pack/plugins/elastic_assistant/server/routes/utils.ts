@@ -25,10 +25,6 @@ import {
 } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { CustomHttpRequestError } from './custom_http_request_error';
 
-export interface OutputError {
-  message: string;
-  statusCode: number;
-}
 export interface BulkError {
   // Id can be single id or stringified ids.
   id?: string;

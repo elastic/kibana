@@ -26,7 +26,11 @@ import { pick, throttle } from 'lodash';
 import type { MlDependencies } from '../../application/app';
 import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
 import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
-import type { SingleMetricViewerServices, MlEntity } from '../../embeddables/types';
+import type {
+  SingleMetricViewerServices,
+  MlEntity,
+  SingleMetricViewerEmbeddableApi,
+} from '../../embeddables/types';
 import {
   getTimeseriesExplorerStyles,
   getAnnotationStyles,
@@ -57,6 +61,7 @@ export type SingleMetricViewerSharedComponent = FC<SingleMetricViewerProps>;
  * Only used to initialize internally
  */
 export type SingleMetricViewerPropsWithDeps = SingleMetricViewerProps & {
+  api?: SingleMetricViewerEmbeddableApi;
   coreStart: CoreStart;
   pluginStart: MlDependencies;
   mlServices: SingleMetricViewerServices;
@@ -88,6 +93,7 @@ const annotationStyles = getAnnotationStyles();
 
 const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   // Component dependencies
+  api,
   coreStart,
   pluginStart,
   mlServices,
@@ -275,6 +281,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
                   autoZoomDuration !== undefined &&
                   selectedJobId === selectedJobWrapper?.job.job_id && (
                     <TimeSeriesExplorerEmbeddableChart
+                      api={api}
                       chartWidth={chartDimensions.width - containerPadding}
                       chartHeight={chartDimensions.height - containerPadding}
                       dataViewsService={pluginStart.data.dataViews}
