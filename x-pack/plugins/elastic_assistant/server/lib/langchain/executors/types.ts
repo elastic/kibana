@@ -75,19 +75,6 @@ export type AgentExecutor<T extends boolean> = (
   params: AgentExecutorParams<T>
 ) => Promise<AgentExecutorResponse<T>>;
 
-export type AgentExecutorEvaluator = (
-  langChainMessages: BaseMessage[],
-  exampleId?: string
-) => Promise<ResponseBody>;
-
-export interface AgentExecutorEvaluatorWithMetadata {
-  agentEvaluator: AgentExecutorEvaluator;
-  metadata: {
-    connectorName: string;
-    runName: string;
-  };
-}
-
 export interface TraceOptions {
   evaluationId?: string;
   exampleId?: string;

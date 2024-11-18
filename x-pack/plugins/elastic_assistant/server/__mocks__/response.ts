@@ -15,8 +15,6 @@ import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
 import { getPromptsSearchEsMock } from './prompts_schema.mock';
 import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 import { getAnonymizationFieldsSearchEsMock } from './anonymization_fields_schema.mock';
-import { getAttackDiscoverySearchEsMock } from './attack_discovery_schema.mock';
-import { EsAttackDiscoverySchema } from '../lib/attack_discovery/persistence/types';
 
 export const responseMock = {
   create: httpServerMock.createResponseFactory,
@@ -35,14 +33,6 @@ export const getFindConversationsResultWithSingleHit = (): FindResponse<EsConver
   total: 1,
   data: getConversationSearchEsMock(),
 });
-
-export const getFindAttackDiscoveryResultWithSingleHit =
-  (): FindResponse<EsAttackDiscoverySchema> => ({
-    page: 1,
-    perPage: 1,
-    total: 1,
-    data: getAttackDiscoverySearchEsMock(),
-  });
 
 export const getFindPromptsResultWithSingleHit = (): FindResponse<EsPromptsSchema> => ({
   page: 1,
