@@ -248,7 +248,7 @@ export interface SubPlugins {
 // TODO: find a better way to defined these types
 export interface StartedSubPlugins {
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
-  alerts: ReturnType<Detections['start']>;
+  alerts: Awaited<ReturnType<Detections['start']>>;
   attackDiscovery: ReturnType<AttackDiscovery['start']>;
   cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;

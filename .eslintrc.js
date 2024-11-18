@@ -1995,9 +1995,6 @@ module.exports = {
         // logsShared depends on o11y/private plugins, but platform plugins depend on it
         'x-pack/plugins/observability_solution/logs_shared/**',
 
-        // this plugin depends on visTypeTimeseries plugin (for TSVB viz) which is platform/private ATM
-        'x-pack/plugins/observability_solution/infra/**',
-
         // TODO @kibana/operations
         'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
