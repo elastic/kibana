@@ -607,10 +607,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const hostRowsAfterFilter = await pageObjects.infraHostsView.getHostsTableData();
             expect(hostRowsAfterFilter.length).to.equal(2);
 
-            const deleteFilterButton = await find.byCssSelector(
-              `[title="Delete host.name: host-1
-              OR
-              host.name: host-2"]`
+            const deleteFilterButton = await find.byXpath(
+              `//button[normalize-space(@title) = "Delete host.name: host-1 OR host.name: host-2"]`
             );
             await deleteFilterButton.click();
             await pageObjects.header.waitUntilLoadingHasFinished();

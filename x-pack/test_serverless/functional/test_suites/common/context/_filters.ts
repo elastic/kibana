@@ -252,7 +252,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.clickWhenNotDisabled('saveFilter');
 
       const filterLabelUpdated = await filterBar.getFiltersLabel();
-      expect(filterLabelUpdated[0]).to.be('NOT extension: png AND extension: jpeg');
+      expect(filterLabelUpdated[0]).to.be('NOT extension: png\nAND\nextension: jpeg');
     });
   });
 }
