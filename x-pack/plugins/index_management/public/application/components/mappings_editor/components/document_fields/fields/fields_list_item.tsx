@@ -24,6 +24,7 @@ import { CHILD_FIELD_INDENT_SIZE, LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER } from '.
 import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
 import { DeleteFieldProvider } from './delete_field_provider';
+import { PRECONFIGURED_ENDPOINTS } from '../../../../../constants';
 
 const i18nTexts = {
   addMultiFieldButtonLabel: i18n.translate(
@@ -105,6 +106,7 @@ function FieldListItemComponent(
   const indent = treeDepth * CHILD_FIELD_INDENT_SIZE - substractIndentAmount;
 
   const isSemanticText = source.type === 'semantic_text';
+  const inferenceId: string = (source.inference_id as string) ?? PRECONFIGURED_ENDPOINTS.ELSER;
 
   const indentCreateField =
     (treeDepth + 1) * CHILD_FIELD_INDENT_SIZE +
@@ -293,7 +295,7 @@ function FieldListItemComponent(
 
             {isSemanticText && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{source.inference_id as string}</EuiBadge>
+                <EuiBadge color="hollow">{inferenceId}</EuiBadge>
               </EuiFlexItem>
             )}
 
