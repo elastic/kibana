@@ -10,9 +10,9 @@
 import type { Rule } from 'eslint';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 
-export const noCssColor: Rule.RuleModule = {
+export const NoCssColor: Rule.RuleModule = {
   meta: {
-    type: 'problem',
+    type: 'suggestion',
     docs: {
       description: 'Use color definitions from eui theme as opposed to CSS color values',
       category: 'Best Practices',
@@ -55,7 +55,7 @@ export const noCssColor: Rule.RuleModule = {
           }
 
           /**
-           * @example <EuiCode style={{ color: #dd4040 }}>This is a test</EuiCode>
+           * @example <EuiCode style={{ color: '#dd4040' }}>This is a test</EuiCode>
            */
           if (
             node.value &&
@@ -113,7 +113,7 @@ export const noCssColor: Rule.RuleModule = {
           }
 
           /**
-           * @example <EuiCode css={{ color: #dd4040 }}>This is a test</EuiCode>
+           * @example <EuiCode css={{ color: '#dd4040' }}>This is a test</EuiCode>
            */
           if (
             node.value &&
