@@ -21,6 +21,9 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   rename('audit.appender.policy.kind', 'audit.appender.policy.type', { level: 'warning' }),
   rename('audit.appender.strategy.kind', 'audit.appender.strategy.type', { level: 'warning' }),
   rename('audit.appender.path', 'audit.appender.fileName', { level: 'warning' }),
+  rename('experimental.fipsMode.enabled', 'fipsMode.enabled', {
+    level: 'critical',
+  }),
 
   renameFromRoot(
     'security.showInsecureClusterWarning',
