@@ -16,7 +16,6 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const es = getService('es');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
