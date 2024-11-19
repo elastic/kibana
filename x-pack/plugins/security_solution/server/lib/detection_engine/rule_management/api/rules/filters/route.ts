@@ -56,8 +56,10 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
     .get({
       access: 'internal',
       path: RULE_MANAGEMENT_FILTERS_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

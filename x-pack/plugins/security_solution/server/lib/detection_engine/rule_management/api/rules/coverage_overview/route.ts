@@ -22,8 +22,10 @@ export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) =
     .post({
       access: 'internal',
       path: RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
