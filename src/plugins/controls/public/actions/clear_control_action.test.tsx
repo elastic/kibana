@@ -12,9 +12,13 @@ import { getOptionsListControlFactory } from '../controls/data_controls/options_
 import { getMockedBuildApi, getMockedControlGroupApi } from '../controls/mocks/control_mocks';
 import { ClearControlAction } from './clear_control_action';
 
-import type { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { OptionsListControlApi } from '../controls/data_controls/options_list_control/types';
 
+interface ClearSelectionsType {
+  clearSelections: () => void;
+  hasSelections$: BehaviorSubject<boolean | undefined>;
+}
 const dashboardApi = {
   viewMode: new BehaviorSubject<ViewMode>('view'),
 };
@@ -26,7 +30,7 @@ const controlGroupApi = getMockedControlGroupApi(dashboardApi, {
 });
 
 let clearControlAction: ClearControlAction;
-let embeddable: any;
+let embeddable: Partial<EmbeddableApiContext & ClearSelectionsType>;
 let optionsListApi: OptionsListControlApi;
 let hasSelectionsSubject: BehaviorSubject<boolean | undefined>;
 
