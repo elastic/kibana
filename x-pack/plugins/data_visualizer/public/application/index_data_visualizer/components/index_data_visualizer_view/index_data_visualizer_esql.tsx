@@ -24,12 +24,12 @@ import {
   EuiPanel,
   EuiProgress,
   EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
-import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import type { GetAdditionalLinks } from '../../../common/components/results_links';
@@ -49,6 +49,7 @@ import type {
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { FieldStatsComponentType } from '../../constants/field_stats_component_type';
+import { getReasonIfFieldStatsUnavailableForQuery } from '../../utils/get_reason_fieldstats_unavailable_for_esql_query';
 
 export interface IndexDataVisualizerESQLProps {
   getAdditionalLinks?: GetAdditionalLinks;
@@ -63,6 +64,8 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const [localQuery, setLocalQuery] = useState<ESQLQuery>(DEFAULT_ESQL_QUERY);
   const [query, setQuery] = useState<ESQLQuery>(DEFAULT_ESQL_QUERY);
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>();
+
+  const unsupportedReasonForQuery = getReasonIfFieldStatsUnavailableForQuery(localQuery);
 
   const toggleShowEmptyFields = () => {
     setDataVisualizerListState({
@@ -202,8 +205,11 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const onTextLangQuerySubmit = useCallback(
     async (q: AggregateQuery | undefined) => {
       if (isESQLQuery(q)) {
-        resetData();
-        setQuery(q);
+        const isUnsupported = getReasonIfFieldStatsUnavailableForQuery(q) !== undefined;
+        if (!isUnsupported) {
+          resetData();
+          setQuery(q);
+        }
       }
     },
     [resetData]
@@ -224,8 +230,19 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
             data-test-subj="dataViewTitleHeader"
             direction="row"
             alignItems="center"
-            css={{ padding: `${euiTheme.euiSizeS} 0`, marginRight: `${euiTheme.euiSize}` }}
-          />
+            css={{ padding: 0, marginRight: 0 }}
+          >
+            {unsupportedReasonForQuery ? (
+              <EuiFlexItem grow={true}>
+                <EuiCallOut
+                  size="s"
+                  iconType="warning"
+                  color="warning"
+                  title={unsupportedReasonForQuery}
+                />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
 
           {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
           <EuiFlexGroup
@@ -253,7 +270,8 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                 width="full"
                 needsUpdate={queryNeedsUpdate}
                 onRefresh={handleRefresh}
-                isDisabled={!hasValidTimeField}
+                isDisabled={unsupportedReasonForQuery !== undefined}
+                tooltipMessage={unsupportedReasonForQuery}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -276,6 +294,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
             hideRunQueryText={false}
             isLoading={queryHistoryStatus ?? false}
             displayDocumentationAsFlyout
+            disableSubmitAction={unsupportedReasonForQuery !== undefined}
           />
         </EuiFlexItem>
 
@@ -312,7 +331,8 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
               <EuiSpacer size="s" />
 
               <EuiProgress value={combinedProgress} max={100} size="xs" />
-              <DataVisualizerTable<FieldVisConfig>
+              <DataVisualizerTable
+                isEsql={true}
                 items={configs}
                 pageState={dataVisualizerListState}
                 updatePageState={setDataVisualizerListState}

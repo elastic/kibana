@@ -13,6 +13,7 @@ import { chmodSync, statSync } from 'fs';
 import del from 'del';
 
 import { mkdirp, write, read, getChildPaths, copyAll, getFileHash, untar, gunzip } from '../fs';
+import { getFips } from 'crypto';
 
 const TMP = resolve(__dirname, '../__tmp__');
 const FIXTURES = resolve(__dirname, '../__fixtures__');
@@ -266,9 +267,12 @@ describe('getFileHash()', () => {
       '7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730'
     );
   });
-  it('resolves with the md5 hash of a file', async () => {
-    expect(await getFileHash(BAR_TXT_PATH, 'md5')).toBe('c157a79031e1c40f85931829bc5fc552');
-  });
+
+  if (getFips() !== 1) {
+    it('resolves with the md5 hash of a file', async () => {
+      expect(await getFileHash(BAR_TXT_PATH, 'md5')).toBe('c157a79031e1c40f85931829bc5fc552');
+    });
+  }
 });
 
 describe('untar()', () => {

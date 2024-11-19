@@ -18,7 +18,7 @@ import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-import { APP_BLOCKLIST_PATH } from '../../../../common/constants';
+import { APP_BLOCKLIST_PATH, APP_TRUSTED_APPS_PATH } from '../../../../common/constants';
 import { loadPage, request } from './common';
 
 export const removeAllArtifacts = () => {
@@ -107,6 +107,128 @@ export const yieldFirstPolicyID = (): Cypress.Chainable<string> =>
     expect(body.items.length).to.be.least(1);
     return body.items[0].id;
   });
+
+export const trustedAppsFormSelectors = {
+  selectOs: (os: 'windows' | 'macos' | 'linux') => {
+    cy.getByTestSubj('trustedApps-form-osSelectField').click();
+    cy.get(`button[role="option"][id="${os}"]`).click();
+  },
+
+  openFieldSelector: (group = 1, entry = 0) => {
+    cy.getByTestSubj(
+      `trustedApps-form-conditionsBuilder-group${group}-entry${entry}-field`
+    ).click();
+  },
+
+  selectField: (field: 'Signature' | 'Hash' | 'Path' = 'Signature', group = 1, entry = 0) => {
+    cy.getByTestSubj(
+      `trustedApps-form-conditionsBuilder-group${group}-entry${entry}-field-type-${field}`
+    ).click();
+  },
+
+  fillOutValueField: (value: string, group = 1, entry = 0) => {
+    cy.getByTestSubj(`trustedApps-form-conditionsBuilder-group${group}-entry${entry}-value`).type(
+      value
+    );
+  },
+
+  clickAndConditionButton: () => {
+    cy.getByTestSubj('trustedApps-form-conditionsBuilder-group1-AndButton').click();
+  },
+
+  submitForm: () => {
+    cy.getByTestSubj('trustedAppsListPage-flyout-submitButton').click();
+  },
+
+  fillOutTrustedAppsFlyout: () => {
+    cy.getByTestSubj('trustedApps-form-nameTextField').type('Test TrustedApp');
+    cy.getByTestSubj('trustedApps-form-descriptionField').type('Test Description');
+  },
+
+  expectedFieldOptions: (fields = ['Path', 'Hash', 'Signature']) => {
+    if (fields.length) {
+      fields.forEach((field) => {
+        cy.getByTestSubj(
+          `trustedApps-form-conditionsBuilder-group1-entry0-field-type-${field}`
+        ).contains(field);
+      });
+    } else {
+      const fields2 = ['Path', 'Hash', 'Signature'];
+      fields2.forEach((field) => {
+        cy.getByTestSubj(
+          `trustedApps-form-conditionsBuilder-group1-entry0-field-type-${field}`
+        ).should('not.exist');
+      });
+    }
+  },
+
+  expectAllFieldOptionsRendered: () => {
+    trustedAppsFormSelectors.expectedFieldOptions();
+  },
+
+  expectFieldOptionsNotRendered: () => {
+    trustedAppsFormSelectors.expectedFieldOptions([]);
+  },
+
+  openTrustedApps: ({ create, itemId }: { create?: boolean; itemId?: string } = {}) => {
+    if (!create && !itemId) {
+      loadPage(APP_TRUSTED_APPS_PATH);
+    } else if (create) {
+      loadPage(`${APP_TRUSTED_APPS_PATH}?show=create`);
+    } else if (itemId) {
+      loadPage(`${APP_TRUSTED_APPS_PATH}?itemId=${itemId}&show=edit`);
+    }
+  },
+
+  validateSuccessPopup: (type: 'create' | 'update' | 'delete') => {
+    let expectedTitle = '';
+    switch (type) {
+      case 'create':
+        expectedTitle = '"Test TrustedApp" has been added to your trusted applications.';
+        break;
+      case 'update':
+        expectedTitle = '"Test TrustedApp" has been updated';
+        break;
+      case 'delete':
+        expectedTitle = '"Test TrustedApp" has been removed from trusted applications.';
+        break;
+    }
+    cy.getByTestSubj('euiToastHeader__title').contains(expectedTitle);
+  },
+
+  validateRenderedCondition: (expectedCondition: RegExp) => {
+    cy.getByTestSubj('trustedAppsListPage-card')
+      .first()
+      .within(() => {
+        cy.getByTestSubj('trustedAppsListPage-card-criteriaConditions-os')
+          .invoke('text')
+          .should('match', /OS\s*IS\s*Mac/);
+        cy.getByTestSubj('trustedAppsListPage-card-criteriaConditions-condition')
+          .invoke('text')
+          .should('match', expectedCondition);
+      });
+  },
+  validateRenderedConditions: (expectedConditions: RegExp) => {
+    cy.getByTestSubj('trustedAppsListPage-card-criteriaConditions')
+      .invoke('text')
+      .should('match', expectedConditions);
+  },
+  removeSingleCondition: (group = 1, entry = 0) => {
+    cy.getByTestSubj(
+      `trustedApps-form-conditionsBuilder-group${group}-entry${entry}-remove`
+    ).click();
+  },
+  deleteTrustedAppItem: () => {
+    cy.getByTestSubj('trustedAppsListPage-card')
+      .first()
+      .within(() => {
+        cy.getByTestSubj('trustedAppsListPage-card-header-actions-button').click();
+      });
+
+    cy.getByTestSubj('trustedAppsListPage-card-cardDeleteAction').click();
+    cy.getByTestSubj('trustedAppsListPage-deleteModal-submitButton').click();
+  },
+};
 
 export const blocklistFormSelectors = {
   expectSingleOperator: (field: 'Path' | 'Signature' | 'Hash') => {
