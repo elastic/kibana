@@ -14,7 +14,7 @@ tags:
 servers:
   - url: /
 paths:
-# Paths in the default space
+  # Paths in the default space
   '/api/cases':
     $ref: 'paths/api@cases.yaml'
   '/api/cases/_find':
@@ -49,41 +49,43 @@ paths:
     $ref: 'paths/api@cases@{caseid}@user_actions@_find.yaml'
   '/api/cases/configure/connectors/_find':
     $ref: paths/api@cases@configure@connectors@_find.yaml
+  '/api/cases/{caseId}/files':
+    $ref: 'paths/api@cases@{caseid}@files.yaml'
 # Paths with space identifiers
-  # '/s/{spaceId}/api/cases':
-  #   $ref: 'paths/s@{spaceid}@api@cases.yaml'
-  # '/s/{spaceId}/api/cases/_find':
-  #   $ref: 'paths/s@{spaceid}@api@cases@_find.yaml'
-  # '/s/{spaceId}/api/cases/alerts/{alertId}':
-  #   $ref: 'paths/s@{spaceid}@api@cases@alerts@{alertid}.yaml'
-  # '/s/{spaceId}/api/cases/configure':
-  #   $ref: paths/s@{spaceid}@api@cases@configure.yaml
-  # '/s/{spaceId}/api/cases/configure/{configurationId}':
-  #   $ref: paths/s@{spaceid}@api@cases@configure@{configurationid}.yaml
-  # '/s/{spaceId}/api/cases/configure/connectors/_find':
-  #   $ref: paths/s@{spaceid}@api@cases@configure@connectors@_find.yaml
-  # '/s/{spaceId}/api/cases/reporters':
-  #   $ref: 'paths/s@{spaceid}@api@cases@reporters.yaml'
-  # '/s/{spaceId}/api/cases/status':
-  #   $ref: 'paths/s@{spaceid}@api@cases@status.yaml'
-  # '/s/{spaceId}/api/cases/tags':
-  #   $ref: 'paths/s@{spaceid}@api@cases@tags.yaml'
-  # '/s/{spaceId}/api/cases/{caseId}':
-  #   $ref: 'paths/s@{spaceid}@api@cases@{caseid}.yaml'
-  # '/s/{spaceId}/api/cases/{caseId}/alerts':
-  #   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@alerts.yaml'
-  # '/s/{spaceId}/api/cases/{caseId}/comments':
-  #   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments.yaml'
-  # '/s/{spaceId}/api/cases/{caseId}/comments/_find':
-  #   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments@_find.yaml'
-  # '/s/{spaceId}/api/cases/{caseId}/comments/{commentId}':
-  #   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments@{commentid}.yaml'
-  # '/s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push':
-  #   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@connector@{connectorid}@_push.yaml'
-  # '/s/{spaceId}/api/cases/{caseId}/user_actions':
-  #   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@user_actions.yaml'
-  # '/s/{spaceId}/api/cases/{caseId}/user_actions/_find':
-  #   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@user_actions@_find.yaml'
+# '/s/{spaceId}/api/cases':
+#   $ref: 'paths/s@{spaceid}@api@cases.yaml'
+# '/s/{spaceId}/api/cases/_find':
+#   $ref: 'paths/s@{spaceid}@api@cases@_find.yaml'
+# '/s/{spaceId}/api/cases/alerts/{alertId}':
+#   $ref: 'paths/s@{spaceid}@api@cases@alerts@{alertid}.yaml'
+# '/s/{spaceId}/api/cases/configure':
+#   $ref: paths/s@{spaceid}@api@cases@configure.yaml
+# '/s/{spaceId}/api/cases/configure/{configurationId}':
+#   $ref: paths/s@{spaceid}@api@cases@configure@{configurationid}.yaml
+# '/s/{spaceId}/api/cases/configure/connectors/_find':
+#   $ref: paths/s@{spaceid}@api@cases@configure@connectors@_find.yaml
+# '/s/{spaceId}/api/cases/reporters':
+#   $ref: 'paths/s@{spaceid}@api@cases@reporters.yaml'
+# '/s/{spaceId}/api/cases/status':
+#   $ref: 'paths/s@{spaceid}@api@cases@status.yaml'
+# '/s/{spaceId}/api/cases/tags':
+#   $ref: 'paths/s@{spaceid}@api@cases@tags.yaml'
+# '/s/{spaceId}/api/cases/{caseId}':
+#   $ref: 'paths/s@{spaceid}@api@cases@{caseid}.yaml'
+# '/s/{spaceId}/api/cases/{caseId}/alerts':
+#   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@alerts.yaml'
+# '/s/{spaceId}/api/cases/{caseId}/comments':
+#   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments.yaml'
+# '/s/{spaceId}/api/cases/{caseId}/comments/_find':
+#   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments@_find.yaml'
+# '/s/{spaceId}/api/cases/{caseId}/comments/{commentId}':
+#   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments@{commentid}.yaml'
+# '/s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push':
+#   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@connector@{connectorid}@_push.yaml'
+# '/s/{spaceId}/api/cases/{caseId}/user_actions':
+#   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@user_actions.yaml'
+# '/s/{spaceId}/api/cases/{caseId}/user_actions/_find':
+#   $ref: 'paths/s@{spaceid}@api@cases@{caseid}@user_actions@_find.yaml'
 # components:
 #   securitySchemes:
 #     basicAuth:

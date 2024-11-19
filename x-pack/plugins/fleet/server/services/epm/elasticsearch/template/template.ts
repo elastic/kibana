@@ -15,7 +15,10 @@ import type {
 import pMap from 'p-map';
 import { isResponseError } from '@kbn/es-errors';
 
-import { STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS } from '../../../../constants/fleet_es_assets';
+import {
+  FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+} from '../../../../constants/fleet_es_assets';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -27,6 +30,7 @@ import type {
 } from '../../../../types';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
+import type { FleetConfigType } from '../../../../../common/types';
 import {
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
@@ -115,6 +119,9 @@ export function getTemplate({
 
   const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries);
 
+  const isEventIngestedEnabled = (config?: FleetConfigType): boolean =>
+    Boolean(!config?.agentIdVerificationEnabled && config?.eventIngestedEnabled);
+
   template.composed_of = [
     ...esBaseComponents,
     ...(template.composed_of || []),
@@ -122,6 +129,9 @@ export function getTemplate({
     FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
+      : []),
+    ...(isEventIngestedEnabled(appContextService.getConfig())
+      ? [FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME]
       : []),
   ];
 

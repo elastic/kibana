@@ -14120,16 +14120,16 @@
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.AuthzDisabled",
-                "text": "AuthzDisabled"
+                "section": "def-server.AuthzEnabled",
+                "text": "AuthzEnabled"
               },
               " | ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.AuthzEnabled",
-                "text": "AuthzEnabled"
+                "section": "def-server.AuthzDisabled",
+                "text": "AuthzDisabled"
               }
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
@@ -16014,7 +16014,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/resources/get.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16027,10 +16027,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/policy/index.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16055,10 +16051,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/state.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/audit_log.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16542,6 +16534,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/stop.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/retry.ts"
               },
               {
                 "plugin": "transform",
@@ -17556,7 +17552,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/resources/upsert.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17593,14 +17589,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/suggestions/index.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -20695,16 +20683,16 @@
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.AuthzDisabled",
-            "text": "AuthzDisabled"
+            "section": "def-server.AuthzEnabled",
+            "text": "AuthzEnabled"
           },
           " | ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.AuthzEnabled",
-            "text": "AuthzEnabled"
+            "section": "def-server.AuthzDisabled",
+            "text": "AuthzDisabled"
           }
         ],
         "path": "packages/core/http/core-http-server/src/router/route.ts",
