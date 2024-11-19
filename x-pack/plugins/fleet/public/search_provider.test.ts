@@ -514,7 +514,7 @@ describe('Package search provider', () => {
       test('with integration tag, with policy_templates_behavior field', () => {
         getTestScheduler().run(({ hot, expectObservable }) => {
           mockSendGetPackages.mockReturnValue(
-            hot('--(a|)', { a: { data: { items: testResponseBehaviorField } } })
+            hot('--(a|)', { a: { data: { response: testResponseBehaviorField } } })
           );
           setupMock.getStartServices.mockReturnValue(
             hot('--(a|)', { a: [coreMock.createStart()] }) as any
