@@ -80,7 +80,12 @@ export function TopNavMenuItem(props: TopNavMenuData & { isMobileMenu?: boolean 
       </EuiToolTip>
     ) : props.emphasize ? (
       // fill is not compatible with EuiHeaderLink
-      <EuiButton size="s" {...commonButtonProps} fill={props.fill ?? true}>
+      <EuiButton
+        size={!props.isMobileMenu ? 's' : undefined}
+        fullWidth={props.isMobileMenu}
+        {...commonButtonProps}
+        fill={props.fill ?? true}
+      >
         {getButtonContainer()}
       </EuiButton>
     ) : (
