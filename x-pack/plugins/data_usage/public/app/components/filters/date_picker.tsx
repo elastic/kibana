@@ -67,7 +67,7 @@ export const UsageMetricsDateRangePicker = memo<UsageMetricsDateRangePickerProps
       <EuiSuperDatePicker
         data-test-subj={getTestId('date-range')}
         isLoading={isDataLoading}
-        dateFormat={uiSettings.get('dateFormat')}
+        dateFormat={'MMM D, YYYY @ HH:mm'}
         commonlyUsedRanges={commonlyUsedRanges}
         end={dateRangePickerState.endDate}
         isPaused={!dateRangePickerState.autoRefreshOptions.enabled}
@@ -78,6 +78,7 @@ export const UsageMetricsDateRangePicker = memo<UsageMetricsDateRangePickerProps
         recentlyUsedRanges={dateRangePickerState.recentlyUsedDateRanges}
         start={dateRangePickerState.startDate}
         showUpdateButton={false}
+        timeFormat={'HH:mm'}
         updateButtonProps={{ iconOnly: false, fill: false }}
         utcOffset={moment().utcOffset() / 60}
         maxDate={moment()}
