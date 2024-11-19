@@ -8,8 +8,8 @@
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { AlertsTablePropsWithRef } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { AlertsUserProfilesData } from '../../configurations/security_solution_detections/fetch_page_context';
@@ -98,4 +98,4 @@ export interface SecurityAlertsTableContext {
 export type SecurityAlertsTableProps = AlertsTablePropsWithRef<SecurityAlertsTableContext>;
 export type GetSecurityAlertsTableProp<PropKey extends keyof SecurityAlertsTableProps> =
   NonNullable<SecurityAlertsTableProps[PropKey]>;
-export type { SelectedAlertWithLegacyFormats } from '@kbn/triggers-actions-ui-plugin/public/types';
+export type { AlertWithLegacyFormats } from '@kbn/response-ops-alerts-table/types';

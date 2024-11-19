@@ -25,7 +25,7 @@ jest.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => ({
   ),
 }));
 
-jest.mock('../../alerts_table/alerts_data_grid', () => ({
+jest.mock('@kbn/response-ops-alerts-table/components/alerts_data_grid', () => ({
   AlertsDataGrid: jest.fn(() => <div data-test-subj="alertsTable">{'Alerts table'}</div>),
 }));
 
