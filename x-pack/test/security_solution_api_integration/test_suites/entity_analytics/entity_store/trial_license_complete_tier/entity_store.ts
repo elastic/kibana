@@ -14,7 +14,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
 
   const utils = EntityStoreUtils(getService);
-  describe('@ess @skipInServerlessMKI Entity Store Engine APIs', () => {
+  describe('@ess @skipInServerlessMKI Entity Store APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
 
     before(async () => {
@@ -38,6 +38,18 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should have installed the expected host resources', async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
+        await utils.expectEngineAssetsExist('host');
+      });
+    });
+
+    describe('enablement', () => {
+      afterEach(async () => {
+        await utils.cleanEngines();
+      });
+
+      it('should enable the entity store, creating both user and host engines', async () => {
+        await utils.enableEntityStore();
+        await utils.expectEngineAssetsExist('user');
         await utils.expectEngineAssetsExist('host');
       });
     });
@@ -179,6 +191,42 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         await utils.expectEngineAssetsDoNotExist('user');
+      });
+    });
+
+    describe('status', () => {
+      afterEach(async () => {
+        await utils.cleanEngines();
+      });
+      it('should return "not_installed" when no engines have been initialized', async () => {
+        const { body } = await api.getEntityStoreStatus().expect(200);
+
+        expect(body).to.eql({
+          engines: [],
+          status: 'not_installed',
+        });
+      });
+
+      it('should return "installing" when at least one engine is being initialized', async () => {
+        await utils.enableEntityStore();
+
+        const { body } = await api.getEntityStoreStatus().expect(200);
+
+        expect(body.status).to.eql('installing');
+        expect(body.engines.length).to.eql(2);
+        expect(body.engines[0].status).to.eql('installing');
+        expect(body.engines[1].status).to.eql('installing');
+      });
+
+      it('should return "started" when all engines are started', async () => {
+        await utils.initEntityEngineForEntityTypesAndWait(['host', 'user']);
+
+        const { body } = await api.getEntityStoreStatus().expect(200);
+
+        expect(body.status).to.eql('running');
+        expect(body.engines.length).to.eql(2);
+        expect(body.engines[0].status).to.eql('started');
+        expect(body.engines[1].status).to.eql('started');
       });
     });
 
