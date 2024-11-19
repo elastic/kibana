@@ -505,6 +505,7 @@ export interface DocLinks {
     mappingRoles: string;
     mappingRolesFieldRules: string;
     runAsPrivilege: string;
+    deprecatedV1Endpoints: string;
   }>;
   readonly spaces: Readonly<{
     kibanaLegacyUrlAliases: string;
