@@ -47,6 +47,7 @@ packages/cloud @elastic/kibana-core
 packages/content-management/content_editor @elastic/appex-sharedux
 packages/content-management/content_insights/content_insights_public @elastic/appex-sharedux
 packages/content-management/content_insights/content_insights_server @elastic/appex-sharedux
+packages/content-management/favorites/favorites_common @elastic/appex-sharedux
 packages/content-management/favorites/favorites_public @elastic/appex-sharedux
 packages/content-management/favorites/favorites_server @elastic/appex-sharedux
 packages/content-management/tabbed_table_list_view @elastic/appex-sharedux
@@ -193,6 +194,7 @@ packages/core/plugins/core-plugins-server-mocks @elastic/kibana-core
 packages/core/preboot/core-preboot-server @elastic/kibana-core
 packages/core/preboot/core-preboot-server-internal @elastic/kibana-core
 packages/core/preboot/core-preboot-server-mocks @elastic/kibana-core
+packages/core/rendering/core-rendering-browser @elastic/kibana-core
 packages/core/rendering/core-rendering-browser-internal @elastic/kibana-core
 packages/core/rendering/core-rendering-browser-mocks @elastic/kibana-core
 packages/core/rendering/core-rendering-server-internal @elastic/kibana-core
@@ -1368,7 +1370,23 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 ### END Observability Plugins
 
 # Presentation
-/x-pack/test/disable_ems @elastic/kibana-presentation
+/test/interpreter_functional/snapshots @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/54342
+/test/functional/services/inspector.ts @elastic/kibana-presentation
+/x-pack/test/functional/services/canvas_element.ts @elastic/kibana-presentation
+/x-pack/test/functional/page_objects/canvas_page.ts @elastic/kibana-presentation
+/x-pack/test/accessibility/apps/group3/canvas.ts @elastic/kibana-presentation
+/x-pack/test/upgrade/apps/canvas @elastic/kibana-presentation
+/x-pack/test/upgrade/apps/dashboard @elastic/kibana-presentation
+/test/functional/screenshots/baseline/tsvb_dashboard.png @elastic/kibana-presentation
+/test/functional/screenshots/baseline/dashboard_*.png @elastic/kibana-presentation
+/test/functional/screenshots/baseline/area_chart.png @elastic/kibana-presentation
+/x-pack/test/disable_ems @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/165986
+/x-pack/test/functional/fixtures/kbn_archiver/dashboard* @elastic/kibana-presentation
+/test/functional/page_objects/dashboard_page* @elastic/kibana-presentation
+/test/functional/firefox/dashboard.config.ts @elastic/kibana-presentation # Assigned per: https://github.com/elastic/kibana/issues/15023
+/test/functional/fixtures/es_archiver/dashboard @elastic/kibana-presentation # Assigned per: https://github.com/elastic/kibana/issues/15023
+/test/accessibility/apps/dashboard.ts @elastic/kibana-presentation
+/test/accessibility/apps/filter_panel.ts @elastic/kibana-presentation
 /x-pack/test/functional/apps/dashboard @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group3/maps.ts  @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group1/dashboard_panel_options.ts  @elastic/kibana-presentation
@@ -1436,6 +1454,7 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /test/package @elastic/kibana-operations
 /test/package/roles @elastic/kibana-operations
 /test/common/fixtures/plugins/coverage/kibana.json @elastic/kibana-operations
+/x-pack/test/plugin_functional/screenshots @elastic/kibana-operations # Assigned per https://github.com/elastic/kibana/pull/94370/files
 /src/dev/license_checker/config.ts @elastic/kibana-operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
@@ -2139,6 +2158,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/public/flyout/document_details/isolate_host/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/common/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/common/api/endpoint/ @elastic/security-defend-workflows
+x-pack/plugins/security_solution/server/assistant/tools/defend_insights @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lists_integration/endpoint/ @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lib/license/ @elastic/security-defend-workflows
@@ -2150,6 +2170,10 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
 /x-pack/plugins/security_solution_serverless/public/upselling/pages/endpoint_management @elastic/security-defend-workflows
 /x-pack/plugins/security_solution_serverless/server/endpoint @elastic/security-defend-workflows
+x-pack/packages/kbn-elastic-assistant-common/impl/schemas/defend_insights @elastic/security-defend-workflows
+x-pack/plugins/elastic_assistant/server/__mocks__/defend_insights_schema.mock.ts @elastic/security-defend-workflows
+x-pack/plugins/elastic_assistant/server/ai_assistant_data_clients/defend_insights @elastic/security-defend-workflows
+x-pack/plugins/elastic_assistant/server/routes/defend_insights @elastic/security-defend-workflows
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/plugins/security_solution/server/usage/ @elastic/security-data-analytics
