@@ -40,7 +40,7 @@ export const AgentlessStepConfirmData = ({
 
   // Calculate overall UI state from polling data
   useEffect(() => {
-    if (incomingData.length > 0 || true) {
+    if (incomingData.length > 0) {
       setConfirmDataStatus('complete');
       setOverallState('success');
     } else if (hasReachedTimeout) {
@@ -52,7 +52,7 @@ export const AgentlessStepConfirmData = ({
     }
   }, [incomingData, hasReachedTimeout, setConfirmDataStatus]);
 
-  if (overallState === 'success' || true) {
+  if (overallState === 'success') {
     return (
       <EuiCallOut
         color="success"
