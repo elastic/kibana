@@ -1248,15 +1248,9 @@ components:
     ResponseNote:
       type: object
       properties:
-        code:
-          type: number
-        message:
-          type: string
         note:
           $ref: '#/components/schemas/Note'
       required:
-        - code
-        - message
         - note
     RowRendererId:
       enum:
