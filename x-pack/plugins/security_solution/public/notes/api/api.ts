@@ -26,11 +26,7 @@ export const createNote = async ({ note }: { note: BareNote }) => {
       body: JSON.stringify({ note }),
       version: '2023-10-31',
     });
-    const noteResponse = response;
-    if (noteResponse.code !== 200) {
-      throw new Error(noteResponse.message);
-    }
-    return noteResponse.note;
+    return response.note;
   } catch (err) {
     throw new Error(('message' in err && err.message) || 'Request failed');
   }
