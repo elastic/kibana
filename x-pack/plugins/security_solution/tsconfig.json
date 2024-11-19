@@ -126,7 +126,7 @@
     "@kbn/dev-cli-errors",
     "@kbn/dev-utils",
     "@kbn/tooling-log",
-    "@kbn/core-status-common-internal",
+    "@kbn/core-status-common",
     "@kbn/repo-info",
     "@kbn/storybook",
     "@kbn/controls-plugin",
@@ -229,6 +229,7 @@
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-common",
     "@kbn/langchain",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/index-adapter"
   ]
 }
