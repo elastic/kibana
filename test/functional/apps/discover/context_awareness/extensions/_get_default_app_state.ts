@@ -40,8 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     }
 
-    async function expectBreakdown(breakdown: string) {
-      await retry.try(async () => {
+    function expectBreakdown(breakdown: string) {
+      return retry.try(async () => {
         const breakdownFieldValue = await discover.getBreakdownFieldValue();
         expect(breakdownFieldValue).to.be(breakdown);
       });
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         const rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
-        expectBreakdown('Breakdown by log.level');
+        await expectBreakdown('Breakdown by log.level');
       });
 
       it('should render state when switching index patterns', async () => {
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
-        expectBreakdown('Breakdown by log.level');
+        await expectBreakdown('Breakdown by log.level');
       });
 
       it('should reset default state when clicking "New"', async () => {
@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         const rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
-        expectBreakdown('Breakdown by log.level');
+        await expectBreakdown('Breakdown by log.level');
       });
 
       it('should merge and dedup configured default columns with default profile columns', async () => {
@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         const rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
-        expectBreakdown('Breakdown by log.level');
+        await expectBreakdown('Breakdown by log.level');
       });
 
       it('should render default state when switching data views', async () => {
@@ -177,7 +177,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
-        expectBreakdown('Breakdown by log.level');
+        await expectBreakdown('Breakdown by log.level');
       });
 
       it('should reset default state when clicking "New"', async () => {
@@ -202,7 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         const rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
-        expectBreakdown('Breakdown by log.level');
+        await expectBreakdown('Breakdown by log.level');
       });
 
       it('should merge and dedup configured default columns with default profile columns', async () => {
