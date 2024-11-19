@@ -18,7 +18,6 @@ import * as i18n from '../translations';
 
 export const MAX_ALERTS = 500;
 export const MIN_ALERTS = 50;
-export const ROW_MIN_WITH = 550; // px
 export const STEP = 50;
 
 interface Props {
@@ -51,7 +50,9 @@ const AlertsSettingsComponent: React.FC<Props> = ({ maxAlerts, setMaxAlerts }) =
 
           <EuiFlexItem grow={true}>
             <EuiText color="subdued" size="xs">
-              <span>{i18n.LATEST_AND_RISKIEST_OPEN_ALERTS(Number(maxAlerts))}</span>
+              <span data-test-subj="latestAndRiskiest">
+                {i18n.LATEST_AND_RISKIEST_OPEN_ALERTS(Number(maxAlerts))}
+              </span>
             </EuiText>
           </EuiFlexItem>
 

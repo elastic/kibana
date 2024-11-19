@@ -22,10 +22,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
 
   describe('Gauge', function describeIndexTests() {
-    const isNewChartsLibraryEnabled = true;
-
     before(async () => {
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
     });
 
     beforeEach(async () => {

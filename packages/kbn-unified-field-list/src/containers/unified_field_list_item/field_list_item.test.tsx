@@ -43,10 +43,12 @@ async function getComponent({
   selected = false,
   field,
   canFilter = true,
+  isBreakdownSupported = true,
 }: {
   selected?: boolean;
   field?: DataViewField;
   canFilter?: boolean;
+  isBreakdownSupported?: boolean;
 }) {
   const finalField =
     field ??
@@ -76,6 +78,7 @@ async function getComponent({
     dataView: stubDataView,
     field: finalField,
     ...(canFilter && { onAddFilter: jest.fn() }),
+    ...(isBreakdownSupported && { onAddBreakdownField: jest.fn() }),
     onAddFieldToWorkspace: jest.fn(),
     onRemoveFieldFromWorkspace: jest.fn(),
     onEditField: jest.fn(),
@@ -137,6 +140,34 @@ describe('UnifiedFieldListItem', function () {
 
     expect(comp.find(FieldItemButton).prop('onClick')).toBeUndefined();
   });
+
+  it('should not show addBreakdownField action button if not supported', async function () {
+    const field = new DataViewField({
+      name: 'extension.keyword',
+      type: 'string',
+      esTypes: ['keyword'],
+      aggregatable: true,
+      searchable: true,
+    });
+    const { comp } = await getComponent({
+      field,
+      isBreakdownSupported: false,
+    });
+
+    await act(async () => {
+      const fieldItem = findTestSubject(comp, 'field-extension.keyword-showDetails');
+      await fieldItem.simulate('click');
+      await comp.update();
+    });
+
+    await comp.update();
+
+    expect(
+      comp
+        .find('[data-test-subj="fieldPopoverHeader_addBreakdownField-extension.keyword"]')
+        .exists()
+    ).toBeFalsy();
+  });
   it('should request field stats', async function () {
     const field = new DataViewField({
       name: 'machine.os.raw',
@@ -189,6 +220,11 @@ describe('UnifiedFieldListItem', function () {
     await comp.update();
 
     expect(comp.find(EuiPopover).prop('isOpen')).toBe(true);
+    expect(
+      comp
+        .find('[data-test-subj="fieldPopoverHeader_addBreakdownField-extension.keyword"]')
+        .exists()
+    ).toBeTruthy();
     expect(
       comp.find('[data-test-subj="fieldPopoverHeader_addField-extension.keyword"]').exists()
     ).toBeTruthy();

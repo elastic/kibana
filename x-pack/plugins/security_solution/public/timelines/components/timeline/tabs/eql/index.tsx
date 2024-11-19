@@ -7,9 +7,9 @@
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
@@ -25,7 +25,7 @@ import {
 } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { timelineActions, timelineSelectors } from '../../../../store';
+import { timelineSelectors } from '../../../../store';
 import { useTimelineEvents } from '../../../../containers';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import type { inputsModel, State } from '../../../../../common/store';
@@ -46,6 +46,7 @@ import { useTimelineControlColumn } from '../shared/use_timeline_control_columns
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { NotesFlyout } from '../../properties/notes_flyout';
+import { NotesEventTypes, DocumentEventTypes } from '../../../../../common/lib/telemetry';
 import { TimelineRefetch } from '../../refetch_timeline';
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
@@ -65,7 +66,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   eventIdToNoteIds,
 }) => {
   const { telemetry } = useKibana().services;
-  const dispatch = useDispatch();
   const { query: eqlQuery = '', ...restEqlOption } = eqlOptions;
   const { portalNode: eqlEventsCountPortalNode } = useEqlEventsCountPortal();
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
@@ -161,10 +161,10 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             },
           },
         });
-        telemetry.reportOpenNoteInExpandableFlyoutClicked({
+        telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
           location: timelineId,
         });
-        telemetry.reportDetailsFlyoutOpened({
+        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
           location: timelineId,
           panel: 'left',
         });
@@ -204,15 +204,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       dataLoadingState === DataLoadingState.loadingMore,
     [dataLoadingState]
   );
-
-  useEffect(() => {
-    dispatch(
-      timelineActions.updateIsLoading({
-        id: timelineId,
-        isLoading: isQueryLoading || loadingSourcerer,
-      })
-    );
-  }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
 
   const unifiedHeader = useMemo(
     () => (

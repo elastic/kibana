@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import { kqlQuery, termQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import {
+  kqlQuery,
+  termQuery,
+  rangeQuery,
+  wildcardQuery,
+  termsQuery,
+} from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_PRODUCER,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
+import { observabilityFeatureId } from '@kbn/observability-shared-plugin/common';
 import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { AggregationType } from '../../../common/rules/apm_rule_types';
@@ -59,7 +66,7 @@ export async function getServiceTransactionGroupsAlerts({
     query: {
       bool: {
         filter: [
-          ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
+          ...termsQuery(ALERT_RULE_PRODUCER, 'apm', observabilityFeatureId),
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
           ...rangeQuery(start, end),
           ...kqlQuery(kuery),

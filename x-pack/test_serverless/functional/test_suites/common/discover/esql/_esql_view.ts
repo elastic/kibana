@@ -90,8 +90,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.missingOrFail('showQueryBarMenu');
         await testSubjects.missingOrFail('addFilter');
-        await testSubjects.existOrFail('dscViewModeToggle');
-        await testSubjects.existOrFail('dscViewModeDocumentButton');
+        await testSubjects.missingOrFail('dscViewModeToggle');
+        await testSubjects.missingOrFail('dscViewModeDocumentButton');
         // when Lens suggests a table, we render an ESQL based histogram
         await testSubjects.existOrFail('unifiedHistogramChart');
         await testSubjects.existOrFail('discoverQueryHits');
@@ -195,6 +195,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render correctly if there are empty fields', async function () {
         await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         const testQuery = `from logstash-* | limit 10 | keep machine.ram_range, bytes`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
@@ -203,11 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
         expect(await cell.getVisibleText()).to.be(' - ');
-        expect(await dataGrid.getHeaders()).to.eql([
-          'Select column',
-          'Control column',
-          'Access to degraded docs',
-          'Access to available stacktraces',
+        expect((await dataGrid.getHeaders()).slice(-2)).to.eql([
           'Numberbytes',
           'machine.ram_range',
         ]);
@@ -376,12 +374,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
-        log.debug(historyItems);
-        const queryAdded = historyItems.some((item) => {
-          return item[1] === 'FROM logstash-* | LIMIT 10';
-        });
-
-        expect(queryAdded).to.be(true);
+        await esql.isQueryPresentInTable('FROM logstash-* | LIMIT 10', historyItems);
       });
 
       it('updating the query should add this to the history', async () => {
@@ -398,12 +391,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
-        log.debug(historyItems);
-        const queryAdded = historyItems.some((item) => {
-          return item[1] === 'from logstash-* | limit 100 | drop @timestamp';
-        });
-
-        expect(queryAdded).to.be(true);
+        await esql.isQueryPresentInTable(
+          'from logstash-* | limit 100 | drop @timestamp',
+          historyItems
+        );
       });
 
       it('should select a query from the history and submit it', async () => {
@@ -417,12 +408,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esql.clickHistoryItem(1);
 
         const historyItems = await esql.getHistoryItems();
-        log.debug(historyItems);
-        const queryAdded = historyItems.some((item) => {
-          return item[1] === 'from logstash-* | limit 100 | drop @timestamp';
-        });
-
-        expect(queryAdded).to.be(true);
+        await esql.isQueryPresentInTable(
+          'from logstash-* | limit 100 | drop @timestamp',
+          historyItems
+        );
       });
 
       it('should add a failed query to the history', async () => {
@@ -438,7 +427,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
-        await testSubjects.click('ESQLEditor-queryHistory-runQuery-button');
+        await testSubjects.click('ESQLEditor-history-starred-queries-run-button');
         const historyItem = await esql.getHistoryItem(0);
         await historyItem.findByTestSubject('ESQLEditor-queryHistory-error');
       });

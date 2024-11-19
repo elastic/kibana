@@ -31,6 +31,7 @@ export interface FieldPopoverHeaderProps {
   buttonAddFilterProps?: Partial<EuiButtonIconProps>;
   buttonEditFieldProps?: Partial<EuiButtonIconProps>;
   buttonDeleteFieldProps?: Partial<EuiButtonIconProps>;
+  onAddBreakdownField?: (field: DataViewField | undefined) => void;
   onAddFieldToWorkspace?: (field: DataViewField) => unknown;
   onAddFilter?: AddFieldFilterHandler;
   onEditField?: (fieldName: string) => unknown;
@@ -47,6 +48,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   buttonAddFilterProps,
   buttonEditFieldProps,
   buttonDeleteFieldProps,
+  onAddBreakdownField,
   onAddFieldToWorkspace,
   onAddFilter,
   onEditField,
@@ -82,6 +84,13 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
     defaultMessage: 'Delete data view field',
   });
 
+  const addBreakdownFieldTooltip = i18n.translate(
+    'unifiedFieldList.fieldPopover.addBreakdownFieldLabel',
+    {
+      defaultMessage: 'Add breakdown',
+    }
+  );
+
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -103,6 +112,21 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
                 onClick={() => {
                   closePopover();
                   onAddFieldToWorkspace(field);
+                }}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+        {onAddBreakdownField && (
+          <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_addBreakdownField">
+            <EuiToolTip content={addBreakdownFieldTooltip}>
+              <EuiButtonIcon
+                data-test-subj={`fieldPopoverHeader_addBreakdownField-${field.name}`}
+                aria-label={addBreakdownFieldTooltip}
+                iconType="visBarVerticalStacked"
+                onClick={() => {
+                  closePopover();
+                  onAddBreakdownField(field);
                 }}
               />
             </EuiToolTip>
