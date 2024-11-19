@@ -23,7 +23,8 @@ import { expectedExportedTimeline } from '../../../objects/timeline';
 import { closeToast } from '../../../tasks/common/toast';
 import { getFullname } from '../../../tasks/common';
 
-describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/187550
+describe.skip('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteTimelines();
