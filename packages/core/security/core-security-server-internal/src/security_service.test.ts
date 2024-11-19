@@ -16,17 +16,30 @@ import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import { SecurityService } from './security_service';
+import { configServiceMock } from '@kbn/config-mocks';
+import { getFips } from 'crypto';
 
 const createStubInternalContract = (): CoreSecurityDelegateContract => {
   return Symbol('stubContract') as unknown as CoreSecurityDelegateContract;
 };
 
-describe('SecurityService', () => {
+describe('SecurityService', function () {
   let coreContext: ReturnType<typeof mockCoreContext.create>;
+  let configService: ReturnType<typeof configServiceMock.create>;
   let service: SecurityService;
 
   beforeEach(() => {
-    coreContext = mockCoreContext.create();
+    const mockConfig = {
+      xpack: {
+        security: {
+          fipsMode: {
+            enabled: !!getFips(),
+          },
+        },
+      },
+    };
+    configService = configServiceMock.create({ getConfig$: mockConfig });
+    coreContext = mockCoreContext.create({ configService });
     service = new SecurityService(coreContext);
 
     convertSecurityApiMock.mockReset();
@@ -51,8 +64,11 @@ describe('SecurityService', () => {
       describe('#isEnabled', () => {
         it('should return boolean', () => {
           const { fips } = service.setup();
-
-          expect(fips.isEnabled()).toBe(false);
+          if (getFips() === 0) {
+            expect(fips.isEnabled()).toBe(false);
+          } else {
+            expect(fips.isEnabled()).toBe(true);
+          }
         });
       });
     });

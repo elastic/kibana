@@ -277,6 +277,15 @@ export interface ESQLColumn extends ESQLAstBaseItem {
   type: 'column';
 
   /**
+   * A ES|QL column name can be composed of multiple parts,
+   * e.g: part1.part2.`part``3️⃣`.?param. Where parts can be quoted, or not
+   * quoted, or even be a parameter.
+   *
+   * The args list contains the parts of the column name.
+   */
+  args: Array<ESQLIdentifier | ESQLParam>;
+
+  /**
    * An identifier can be composed of multiple parts, e.g: part1.part2.`part``3️⃣`.
    * This property contains the parsed unquoted parts of the identifier.
    * For example: `['part1', 'part2', 'part`3️⃣']`.

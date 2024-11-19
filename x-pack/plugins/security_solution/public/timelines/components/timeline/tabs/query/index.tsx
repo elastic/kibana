@@ -49,6 +49,7 @@ import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 import { NotesFlyout } from '../../properties/notes_flyout';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
+import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&
@@ -228,10 +229,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             },
           },
         });
-        telemetry.reportOpenNoteInExpandableFlyoutClicked({
+        telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
           location: timelineId,
         });
-        telemetry.reportDetailsFlyoutOpened({
+        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
           location: timelineId,
           panel: 'left',
         });
@@ -278,15 +279,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     () => [DataLoadingState.loading, DataLoadingState.loadingMore].includes(dataLoadingState),
     [dataLoadingState]
   );
-
-  useEffect(() => {
-    dispatch(
-      timelineActions.updateIsLoading({
-        id: timelineId,
-        isLoading: isQueryLoading || loadingSourcerer,
-      })
-    );
-  }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
 
   // NOTE: The timeline is blank after browser FORWARD navigation (after using back button to navigate to
   // the previous page from the timeline), yet we still see total count. This is because the timeline

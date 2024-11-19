@@ -8,19 +8,11 @@
 // NOTE: This is pretty much a copy/paste from packages/kbn-ftr-common-functional-services/services/bsearch.ts
 // but with the ability to provide custom auth
 
-import expect from '@kbn/expect';
-import request from 'superagent';
+import expect from '@kbn/expect/expect';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { FtrService } from '../ftr_provider_context';
-
-const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>> => {
-  return resp.text
-    .trim()
-    .split('\n')
-    .map((item) => JSON.parse(item));
-};
 
 const getSpaceUrlPrefix = (spaceId?: string): string => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
@@ -113,11 +105,10 @@ export class SearchSecureService extends FtrService {
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'Kibana')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send()
+        .send(options)
         .expect(200);
-      const [parsedResponse] = parseBfetchResponse(resp);
-      expect(parsedResponse.result.isRunning).equal(false);
-      return parsedResponse.result;
+      expect(resp.body.isRunning).equal(false);
+      return resp.body;
     });
 
     return result as T;

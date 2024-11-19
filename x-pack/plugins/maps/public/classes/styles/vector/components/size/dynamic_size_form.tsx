@@ -72,7 +72,7 @@ export function DynamicSizeForm({
           showLabels
           compressed
         />
-        <EuiFormRow display="columnCompressedSwitch">
+        <EuiFormRow display="columnCompressed">
           <EuiSwitch
             label={i18n.translate('xpack.maps.style.revereseSizeLabel', {
               defaultMessage: `Reverse size`,

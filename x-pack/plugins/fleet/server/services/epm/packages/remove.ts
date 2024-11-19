@@ -57,14 +57,15 @@ const MAX_ASSETS_TO_DELETE = 1000;
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
-  pkgVersion: string;
+  pkgVersion?: string;
   esClient: ElasticsearchClient;
   force?: boolean;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
+  const { savedObjectsClient, pkgName, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
-  if (!installation) throw new PackageRemovalError(`${pkgName} is not installed`);
-
+  if (!installation) {
+    throw new PackageRemovalError(`${pkgName} is not installed`);
+  }
   const { total, items } = await packagePolicyService.list(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
     {
@@ -115,7 +116,7 @@ export async function removeInstallation(options: {
   // a fresh copy from the registry
   deletePackageCache({
     name: pkgName,
-    version: pkgVersion,
+    version: installation.version,
   });
 
   await removeArchiveEntries({ savedObjectsClient, refs: installation.package_assets });

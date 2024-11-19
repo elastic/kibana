@@ -62,7 +62,6 @@
       "kibanaUtils",
       "observability",
       "spaces",
-      "indexLifecycleManagement",
       "unifiedDocViewer"
     ]
   }

@@ -19,6 +19,7 @@ export default function ipToHostNameTest({ getService }: DeploymentAgnosticFtrPr
     before(async () => {
       supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
         withInternalHeaders: true,
+        useCookieHeader: true,
       });
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });

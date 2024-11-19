@@ -24,6 +24,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
         withInternalHeaders: true,
+        useCookieHeader: true,
       });
       await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
     });
