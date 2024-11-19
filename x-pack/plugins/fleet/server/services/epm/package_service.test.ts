@@ -43,6 +43,7 @@ const testKeys = [
   'getInstallation',
   'ensureInstalledPackage',
   'fetchFindLatestPackage',
+  'getLatestPackageInfo',
   'getPackage',
   'getPackageFieldsMetadata',
   'reinstallEsAssets',
@@ -113,6 +114,23 @@ function getTest(
       break;
     case testKeys[3]:
       test = {
+        method: mocks.packageClient.getLatestPackageInfo.bind(mocks.packageClient),
+        args: ['package name'],
+        spy: jest.spyOn(epmPackagesGet, 'getPackageInfo'),
+        spyArgs: [
+          {
+            pkgName: 'package name',
+            pkgVersion: '',
+            savedObjectsClient: mocks.soClient,
+            prerelease: undefined,
+          },
+        ],
+        spyResponse: { name: 'getLatestPackageInfo test' },
+        expectedReturnValue: { name: 'getLatestPackageInfo test' },
+      };
+      break;
+    case testKeys[4]:
+      test = {
         method: mocks.packageClient.getPackage.bind(mocks.packageClient),
         args: ['package name', '8.0.0'],
         spy: jest.spyOn(epmRegistry, 'getPackage'),
@@ -127,7 +145,7 @@ function getTest(
         },
       };
       break;
-    case testKeys[4]:
+    case testKeys[5]:
       test = {
         method: mocks.packageClient.getPackageFieldsMetadata.bind(mocks.packageClient),
         args: [{ packageName: 'package_name', datasetName: 'dataset_name' }],
@@ -141,7 +159,7 @@ function getTest(
         },
       };
       break;
-    case testKeys[5]:
+    case testKeys[6]:
       const pkg: InstallablePackage = {
         format_version: '1.0.0',
         name: 'package name',
@@ -187,7 +205,7 @@ function getTest(
         ],
       };
       break;
-    case testKeys[6]:
+    case testKeys[7]:
       const bundledPackage = {
         name: 'package name',
         version: '8.0.0',
