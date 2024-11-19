@@ -30,7 +30,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   });
 
   describe('Latency overall distribution', () => {
-    describe('latency overall distribution without data', () => {
+    describe('without data', () => {
       it('handles the empty state', async () => {
         const response = await apmApiClient.readUser({
           endpoint,
@@ -43,7 +43,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('latency overall distribution with data and default args', () => {
+    describe('with data and default args', () => {
       before(async () => {
         await esArchiver.load(ARCHIVER_ROUTES['8.0.0']);
       });

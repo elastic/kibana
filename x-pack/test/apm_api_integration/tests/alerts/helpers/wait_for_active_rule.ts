@@ -8,7 +8,7 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 import type { Agent as SuperTestAgent } from 'supertest';
-import { SupertestWithRoleScope } from '../../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
+import type { SupertestWithRoleScope } from '../../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
 
 const RETRIES_COUNT = 10;
 

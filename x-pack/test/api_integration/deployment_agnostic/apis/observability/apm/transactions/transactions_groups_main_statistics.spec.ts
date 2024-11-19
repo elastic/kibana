@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         query: {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
-          latencyAggregationType: 'avg' as LatencyAggregationType,
+          latencyAggregationType: LatencyAggregationType.avg,
           transactionType: 'request',
           environment: 'ENVIRONMENT_ALL',
           useDurationSummary: false,
@@ -61,7 +61,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   describe('Transaction groups main statistics', () => {
-    describe('Transaction groups main statistics when data is not loaded', () => {
+    describe('when data is not loaded', () => {
       it('handles the empty state', async () => {
         const transactionsGroupsPrimaryStatistics = await callApi();
 
@@ -71,106 +71,104 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('when data is loaded', () => {
-      describe('Transaction groups main statistics', () => {
-        const GO_PROD_RATE = 75;
-        const GO_PROD_ERROR_RATE = 25;
-        const transactions = [
-          {
+      const GO_PROD_RATE = 75;
+      const GO_PROD_ERROR_RATE = 25;
+      const transactions = [
+        {
+          name: 'GET /api/product/list',
+          duration: 10,
+        },
+        {
+          name: 'GET /api/product/list2',
+          duration: 100,
+        },
+        {
+          name: 'GET /api/product/list3',
+          duration: 1000,
+        },
+      ];
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        const serviceGoProdInstance = apm
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
+          .instance('instance-a');
+
+        await apmSynthtraceEsClient.index([
+          timerange(start, end)
+            .interval('1m')
+            .rate(GO_PROD_RATE)
+            .generator((timestamp) => {
+              return transactions.map(({ name, duration }) => {
+                return serviceGoProdInstance
+                  .transaction({ transactionName: name })
+                  .timestamp(timestamp)
+                  .duration(duration)
+                  .success();
+              });
+            }),
+          timerange(start, end)
+            .interval('1m')
+            .rate(GO_PROD_ERROR_RATE)
+            .generator((timestamp) => {
+              return transactions.map(({ name, duration }) => {
+                return serviceGoProdInstance
+                  .transaction({ transactionName: name })
+                  .timestamp(timestamp)
+                  .duration(duration)
+                  .failure();
+              });
+            }),
+        ]);
+      });
+      after(() => apmSynthtraceEsClient.clean());
+
+      it('returns the correct data', async () => {
+        const transactionsGroupsPrimaryStatistics = await callApi();
+        const transactionsGroupsPrimaryStatisticsWithDurationSummaryTrue = await callApi({
+          query: {
+            useDurationSummary: true,
+          },
+        });
+
+        [
+          transactionsGroupsPrimaryStatistics,
+          transactionsGroupsPrimaryStatisticsWithDurationSummaryTrue,
+        ].forEach((statistics) => {
+          expect(statistics.transactionGroups.length).to.be(3);
+          expect(statistics.maxCountExceeded).to.be(false);
+          expect(statistics.transactionGroups.map(({ name }) => name)).to.eql(
+            transactions.map(({ name }) => name)
+          );
+
+          const impacts = statistics.transactionGroups.map((group: any) => group.impact);
+
+          expect(Math.round(sum(impacts))).to.eql(100);
+
+          const firstItem = statistics.transactionGroups[0];
+
+          expect(firstItem).to.eql({
             name: 'GET /api/product/list',
-            duration: 10,
-          },
-          {
-            name: 'GET /api/product/list2',
-            duration: 100,
-          },
-          {
-            name: 'GET /api/product/list3',
-            duration: 1000,
-          },
-        ];
-        let apmSynthtraceEsClient: ApmSynthtraceEsClient;
-
-        before(async () => {
-          apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-          const serviceGoProdInstance = apm
-            .service({ name: serviceName, environment: 'production', agentName: 'go' })
-            .instance('instance-a');
-
-          await apmSynthtraceEsClient.index([
-            timerange(start, end)
-              .interval('1m')
-              .rate(GO_PROD_RATE)
-              .generator((timestamp) => {
-                return transactions.map(({ name, duration }) => {
-                  return serviceGoProdInstance
-                    .transaction({ transactionName: name })
-                    .timestamp(timestamp)
-                    .duration(duration)
-                    .success();
-                });
-              }),
-            timerange(start, end)
-              .interval('1m')
-              .rate(GO_PROD_ERROR_RATE)
-              .generator((timestamp) => {
-                return transactions.map(({ name, duration }) => {
-                  return serviceGoProdInstance
-                    .transaction({ transactionName: name })
-                    .timestamp(timestamp)
-                    .duration(duration)
-                    .failure();
-                });
-              }),
-          ]);
-        });
-        after(() => apmSynthtraceEsClient.clean());
-
-        it('returns the correct data', async () => {
-          const transactionsGroupsPrimaryStatistics = await callApi();
-          const transactionsGroupsPrimaryStatisticsWithDurationSummaryTrue = await callApi({
-            query: {
-              useDurationSummary: true,
-            },
-          });
-
-          [
-            transactionsGroupsPrimaryStatistics,
-            transactionsGroupsPrimaryStatisticsWithDurationSummaryTrue,
-          ].forEach((statistics) => {
-            expect(statistics.transactionGroups.length).to.be(3);
-            expect(statistics.maxCountExceeded).to.be(false);
-            expect(statistics.transactionGroups.map(({ name }) => name)).to.eql(
-              transactions.map(({ name }) => name)
-            );
-
-            const impacts = statistics.transactionGroups.map((group: any) => group.impact);
-
-            expect(Math.round(sum(impacts))).to.eql(100);
-
-            const firstItem = statistics.transactionGroups[0];
-
-            expect(firstItem).to.eql({
-              name: 'GET /api/product/list',
-              latency: 10000,
-              throughput: 100.00002777778549,
-              errorRate: 0.25,
-              impact: 0.9009009009009009,
-              transactionType: 'request',
-              alertsCount: 0,
-            });
+            latency: 10000,
+            throughput: 100.00002777778549,
+            errorRate: 0.25,
+            impact: 0.9009009009009009,
+            transactionType: 'request',
+            alertsCount: 0,
           });
         });
+      });
 
-        it('returns the correct data for latency aggregation 99th percentile', async () => {
-          const transactionsGroupsPrimaryStatistics = await callApi({
-            query: {
-              latencyAggregationType: LatencyAggregationType.p99,
-            },
-          });
-
-          const firstItem = transactionsGroupsPrimaryStatistics.transactionGroups[0];
-          expect(firstItem.latency).to.be(10000);
+      it('returns the correct data for latency aggregation 99th percentile', async () => {
+        const transactionsGroupsPrimaryStatistics = await callApi({
+          query: {
+            latencyAggregationType: LatencyAggregationType.p99,
+          },
         });
+
+        const firstItem = transactionsGroupsPrimaryStatistics.transactionGroups[0];
+        expect(firstItem.latency).to.be(10000);
       });
     });
   });

@@ -17,7 +17,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const transactionType = 'request';
 
   describe('Breakdown', () => {
-    describe('Breakdown when data is not loaded', () => {
+    describe('when data is not loaded', () => {
       it('handles the empty state', async () => {
         const response = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',

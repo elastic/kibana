@@ -147,7 +147,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(() => apmSynthtraceEsClient.clean());
 
-      describe('Transaction groups with avg transaction duration alerts', () => {
+      describe('with avg transaction duration alerts', () => {
         let ruleId: string;
         let alerts: ApmAlertFields[];
 
@@ -222,7 +222,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      describe('Transaction groups with p99 transaction duration alerts', () => {
+      describe('with p99 transaction duration alerts', () => {
         let ruleId: string;
         let alerts: ApmAlertFields[];
 
@@ -301,7 +301,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      describe('Transaction groups with error rate alerts', () => {
+      describe('with error rate alerts', () => {
         let ruleId: string;
         let alerts: ApmAlertFields[];
 
@@ -378,7 +378,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      describe('Transaction groups without alerts', () => {
+      describe('without alerts', () => {
         it('returns the correct number of alert counts', async () => {
           const txGroupsTypeTask = await getTransactionGroups({
             query: { transactionType: 'task' },

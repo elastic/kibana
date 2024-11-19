@@ -72,14 +72,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   describe('Transactions groups detailed statistics', () => {
-    describe('Transaction groups detailed statistics when data is not loaded', () => {
+    describe('when data is not loaded', () => {
       it('handles the empty state', async () => {
         const response = await callApi();
         expect(response).to.be.eql({ currentPeriod: {}, previousPeriod: {} });
       });
     });
 
-    describe('data is loaded', () => {
+    describe('when data is loaded', () => {
       const GO_PROD_RATE = 75;
       const GO_PROD_ERROR_RATE = 25;
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;

@@ -12,7 +12,7 @@ import type { Agent as SuperTestAgent } from 'supertest';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
 import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
-import { SupertestWithRoleScope } from '../../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
+import type { SupertestWithRoleScope } from '../../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
 import {
   APM_ACTION_VARIABLE_INDEX,
   APM_ALERTS_INDEX,

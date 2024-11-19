@@ -58,7 +58,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   describe('Latency', () => {
-    describe('Latency when data is not loaded ', () => {
+    describe('when data is not loaded ', () => {
       it('handles the empty state', async () => {
         const response = await fetchLatencyCharts();
         expect(response.status).to.be(200);
@@ -70,7 +70,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('Latency when data is loaded', () => {
+    describe('when data is loaded', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;
       const GO_PROD_DURATION = 1000;

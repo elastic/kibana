@@ -15,8 +15,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
 
-  describe('trace_samples', () => {
-    describe('Transaction trace samples response structure when data is not loaded', () => {
+  describe('Transaction trace samples', () => {
+    describe('when data is not loaded', () => {
       it('handles empty state', async () => {
         const response = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
