@@ -179,7 +179,9 @@ describe('DataUsageMetrics', () => {
 
   it('should show date filter', () => {
     const { getByTestId } = render(<DataUsageMetrics data-test-subj={testId} />);
-    expect(getByTestId(`${testIdFilter}-date-range`)).toBeTruthy();
+    const dateFilter = getByTestId(`${testIdFilter}-date-range`);
+    expect(dateFilter).toBeTruthy();
+    expect(dateFilter.textContent).toContain('to');
     expect(getByTestId(`${testIdFilter}-super-refresh-button`)).toBeTruthy();
   });
 

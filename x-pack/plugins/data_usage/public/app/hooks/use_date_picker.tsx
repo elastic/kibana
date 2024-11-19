@@ -19,7 +19,7 @@ export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
     enabled: false,
     duration: 10000,
   },
-  startDate: moment().subtract(24, 'hours').toISOString(),
+  startDate: moment().subtract(24, 'hours').startOf('day').toISOString(),
   endDate: moment().toISOString(),
   recentlyUsedDateRanges: [],
 });

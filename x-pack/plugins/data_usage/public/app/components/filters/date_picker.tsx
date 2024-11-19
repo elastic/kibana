@@ -82,7 +82,7 @@ export const UsageMetricsDateRangePicker = memo<UsageMetricsDateRangePickerProps
         updateButtonProps={{ iconOnly: false, fill: false }}
         utcOffset={moment().utcOffset() / 60}
         maxDate={moment()}
-        minDate={moment().subtract(10, 'days')}
+        minDate={moment().subtract(9, 'days').startOf('day')}
         width="auto"
       />
     );
