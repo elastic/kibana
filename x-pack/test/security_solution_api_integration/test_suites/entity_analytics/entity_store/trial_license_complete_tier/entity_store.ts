@@ -194,7 +194,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('status', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/200758
+    describe.skip('status', () => {
       afterEach(async () => {
         await utils.cleanEngines();
       });
