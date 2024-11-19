@@ -14,7 +14,10 @@ import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_clie
 import { RuleMigrationsDataResourcesClient } from './rule_migrations_data_resources_client';
 import type { AdapterId } from './rule_migrations_data_service';
 
-export type CreateRuleMigrationInput = Omit<RuleMigration, '@timestamp' | 'status' | 'created_by'>;
+export type CreateRuleMigrationInput = Omit<
+  RuleMigration,
+  '@timestamp' | 'id' | 'status' | 'created_by'
+>;
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
 export type RuleMigrationAllDataStats = Array<RuleMigrationDataStats & { migration_id: string }>;
 
