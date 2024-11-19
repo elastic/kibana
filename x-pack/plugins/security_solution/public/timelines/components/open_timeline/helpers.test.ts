@@ -618,9 +618,7 @@ describe('helpers', () => {
 
     describe('open a timeline 1', () => {
       const selectedTimeline = {
-        timeline: {
-          ...mockSelectedTimeline,
-        },
+        ...mockSelectedTimeline,
       };
 
       const onOpenTimeline = jest.fn();
@@ -683,8 +681,8 @@ describe('helpers', () => {
     });
 
     describe('update a timeline', () => {
-      const selectedTimeline = { timeline: { ...mockSelectedTimeline } };
-      const untitledTimeline = { ...mockSelectedTimeline, title: '' };
+      const selectedTimeline = { ...mockSelectedTimeline };
+      const untitledTimeline = { timeline: { ...mockSelectedTimeline.timeline, title: '' } };
       const onOpenTimeline = jest.fn();
       const args: QueryTimelineById = {
         duplicate: false,
@@ -701,7 +699,6 @@ describe('helpers', () => {
       afterEach(() => {
         jest.clearAllMocks();
       });
-
       test('should get timeline by Id with correct statuses', async () => {
         renderHook(async () => {
           const queryTimelineById = useQueryTimelineById();
@@ -787,7 +784,7 @@ describe('helpers', () => {
       });
 
       test('should update timeline correctly when timeline is already saved and onOpenTimeline is not provided', async () => {
-        (resolveTimeline as jest.Mock).mockResolvedValue(mockSelectedTimeline);
+        (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
         renderHook(async () => {
           const queryTimelineById = useQueryTimelineById();
           queryTimelineById(args);
@@ -803,7 +800,7 @@ describe('helpers', () => {
             1,
             expect.objectContaining({
               timeline: expect.objectContaining({
-                columns: mockSelectedTimeline.data.timeline.columns.map((col) => ({
+                columns: selectedTimeline.timeline.columns!.map((col) => ({
                   columnHeaderType: col.columnHeaderType,
                   id: col.id,
                   initialWidth: defaultUdtHeaders.find((defaultCol) => col.id === defaultCol.id)
@@ -825,7 +822,7 @@ describe('helpers', () => {
         waitFor(() => {
           expect(onOpenTimeline).toHaveBeenCalledWith(
             expect.objectContaining({
-              columns: mockSelectedTimeline.data.timeline.columns.map((col) => ({
+              columns: mockSelectedTimeline.timeline.columns!.map((col) => ({
                 columnHeaderType: col.columnHeaderType,
                 id: col.id,
                 initialWidth: defaultUdtHeaders.find((defaultCol) => col.id === defaultCol.id)
@@ -838,7 +835,7 @@ describe('helpers', () => {
     });
 
     describe('open an immutable template', () => {
-      const template = { timeline: { ...mockSelectedTemplate } };
+      const template = { ...mockSelectedTemplate };
       const onOpenTimeline = jest.fn();
       const args = {
         duplicate: false,
