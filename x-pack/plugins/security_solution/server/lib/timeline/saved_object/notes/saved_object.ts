@@ -80,7 +80,7 @@ export const getNotesByTimelineId = async (
   return notesByTimelineId.notes;
 };
 
-interface InternalNoteResponse extends ResponseNote {
+export interface InternalNoteResponse extends ResponseNote {
   message: string;
   code: number;
 }
