@@ -24,7 +24,7 @@ export function maybeRedirectToAvailableSpanSample({
   page: number;
   replace: typeof urlHelpersReplace;
   history: History;
-  samples: Array<{ spanId: string; traceId: string; transactionId: string }>;
+  samples: Array<{ spanId: string; traceId: string; transactionId?: string }>;
 }) {
   if (spanFetchStatus !== FETCH_STATUS.SUCCESS) {
     // we're still loading, don't do anything

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BsearchSecureService } from '@kbn/test-suites-serverless/shared/services/bsearch_secure';
+import { SearchSecureService } from '@kbn/test-suites-serverless/shared/services/search_secure';
 import { services as serverlessServices } from '@kbn/test-suites-serverless/api_integration/services';
 import { SpacesServiceProvider } from '../../../common/services/spaces';
 import { SecuritySolutionServerlessUtils } from '../services/security_solution_serverless_utils';
@@ -14,7 +14,7 @@ import { SecuritySolutionServerlessSuperTest } from '../services/security_soluti
 export const services = {
   ...serverlessServices,
   spaces: SpacesServiceProvider,
-  secureBsearch: BsearchSecureService,
+  secureSearch: SearchSecureService,
   securitySolutionUtils: SecuritySolutionServerlessUtils,
   supertest: SecuritySolutionServerlessSuperTest,
 };

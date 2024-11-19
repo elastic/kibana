@@ -7,21 +7,23 @@
 
 import { Observable, map, merge, of, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import { ToolCall, ToolOptions } from '../../../../common/chat_complete/tools';
 import {
-  correctCommonEsqlMistakes,
-  generateFakeToolCallId,
+  ToolCall,
+  ToolOptions,
+  withoutTokenCountEvents,
   isChatCompletionMessageEvent,
   Message,
   MessageRole,
-} from '../../../../common';
-import { InferenceClient, withoutTokenCountEvents } from '../../..';
-import { OutputCompleteEvent, OutputEventType } from '../../../../common/output';
+  OutputCompleteEvent,
+  OutputEventType,
+  FunctionCallingMode,
+} from '@kbn/inference-common';
+import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
+import { InferenceClient } from '../../..';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/constants';
 import { EsqlDocumentBase } from '../doc_base';
 import { requestDocumentationSchema } from './shared';
 import type { NlToEsqlTaskEvent } from '../types';
-import type { FunctionCallingMode } from '../../../../common/chat_complete';
 
 export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   chatCompleteApi,
@@ -69,6 +71,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
       chatCompleteApi({
         connectorId,
         functionCalling,
+        stream: true,
         system: `${systemMessage}
 
           # Current task

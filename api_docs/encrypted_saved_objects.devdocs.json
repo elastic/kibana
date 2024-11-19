@@ -693,6 +693,20 @@
             "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "encryptedSavedObjects",
+            "id": "def-server.EncryptedSavedObjectTypeRegistration.enforceRandomId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enforceRandomId",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

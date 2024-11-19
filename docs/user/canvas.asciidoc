@@ -43,7 +43,8 @@ To create workpads, you must meet the minimum requirements.
 * Make sure you have sufficient privileges to create and save workpads. When the read-only indicator appears, you have insufficient privileges,
 and the options to create and save workpads are unavailable. For more information, refer to <<xpack-security-authorization,Granting access to {kib}>>.
 
-To open *Canvas*, open the main menu, then click *Canvas*.
+You can open *Canvas* using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 [float]
 [[start-with-a-blank-workpad]]
@@ -175,7 +176,7 @@ To share workpads with a larger audience, click *Share* in the toolbar. For deta
 [[export-single-workpad]]
 == Export workpads
 
-Want to export multiple workpads? Go to the *Canvas* home page, select the workpads you want to export, then click *Export*.
+Want to export multiple workpads? Go to the *Canvas* page, select the workpads you want to export, then click *Export*.
 
 --
 
@@ -184,8 +185,6 @@ include::{kibana-root}/docs/canvas/canvas-edit-workpads.asciidoc[]
 include::{kibana-root}/docs/canvas/canvas-present-workpad.asciidoc[]
 
 include::{kibana-root}/docs/canvas/canvas-tutorial.asciidoc[]
-
-include::{kibana-root}/docs/canvas/canvas-expression-lifecycle.asciidoc[]
 
 include::{kibana-root}/docs/canvas/canvas-function-reference.asciidoc[]
 

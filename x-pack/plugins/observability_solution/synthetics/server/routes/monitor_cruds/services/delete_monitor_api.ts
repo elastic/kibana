@@ -7,16 +7,22 @@
 
 import pMap from 'p-map';
 import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { deleteMonitorBulk } from '../bulk_cruds/delete_monitor_bulk';
 import { validatePermissions } from '../edit_monitor';
 import {
+  ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
+  MonitorFields,
   SyntheticsMonitor,
+  SyntheticsMonitorWithId,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../../common/runtime_types';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { normalizeSecrets } from '../../../synthetics_service/utils';
-import { sendErrorTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
+import {
+  formatTelemetryDeleteEvent,
+  sendErrorTelemetryEvents,
+  sendTelemetryEvents,
+} from '../../telemetry/monitor_upgrade_sender';
 import { RouteContext } from '../../types';
 
 export class DeleteMonitorAPI {
@@ -100,9 +106,8 @@ export class DeleteMonitorAPI {
     }
 
     try {
-      const { errors, result } = await deleteMonitorBulk({
+      const { errors, result } = await this.deleteMonitorBulk({
         monitors,
-        routeContext: this.routeContext,
       });
 
       result.statuses?.forEach((res) => {
@@ -112,10 +117,54 @@ export class DeleteMonitorAPI {
         });
       });
 
-      return { errors };
+      return { errors, result: this.result };
     } catch (e) {
       server.logger.error(`Unable to delete Synthetics monitor with error ${e.message}`);
       server.logger.error(e);
+      throw e;
+    }
+  }
+
+  async deleteMonitorBulk({
+    monitors,
+  }: {
+    monitors: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitorAttributes>>;
+  }) {
+    const { savedObjectsClient, server, spaceId, syntheticsMonitorClient } = this.routeContext;
+    const { logger, telemetry, stackVersion } = server;
+
+    try {
+      const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
+        monitors.map((normalizedMonitor) => ({
+          ...normalizedMonitor.attributes,
+          id: normalizedMonitor.attributes[ConfigKey.MONITOR_QUERY_ID],
+        })) as SyntheticsMonitorWithId[],
+        savedObjectsClient,
+        spaceId
+      );
+
+      const deletePromises = savedObjectsClient.bulkDelete(
+        monitors.map((monitor) => ({ type: syntheticsMonitorType, id: monitor.id }))
+      );
+
+      const [errors, result] = await Promise.all([deleteSyncPromise, deletePromises]);
+
+      monitors.forEach((monitor) => {
+        sendTelemetryEvents(
+          logger,
+          telemetry,
+          formatTelemetryDeleteEvent(
+            monitor,
+            stackVersion,
+            new Date().toISOString(),
+            Boolean((monitor.attributes as MonitorFields)[ConfigKey.SOURCE_INLINE]),
+            errors
+          )
+        );
+      });
+
+      return { errors, result };
+    } catch (e) {
       throw e;
     }
   }

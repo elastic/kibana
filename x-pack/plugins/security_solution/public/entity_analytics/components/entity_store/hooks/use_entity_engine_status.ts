@@ -17,6 +17,10 @@ interface Options {
   polling?: UseQueryOptions<ListEntityEnginesResponse>['refetchInterval'];
 }
 
+interface EngineError {
+  message: string;
+}
+
 export const useEntityEngineStatus = (opts: Options = {}) => {
   // QUESTION: Maybe we should have an `EnablementStatus` API route for this?
   const { listEntityEngines } = useEntityStoreRoutes();
@@ -31,6 +35,10 @@ export const useEntityEngineStatus = (opts: Options = {}) => {
   const status = (() => {
     if (data?.count === 0) {
       return 'not_installed';
+    }
+
+    if (data?.engines?.some((engine) => engine.status === 'error')) {
+      return 'error';
     }
 
     if (data?.engines?.every((engine) => engine.status === 'stopped')) {
@@ -52,7 +60,12 @@ export const useEntityEngineStatus = (opts: Options = {}) => {
     return 'enabled';
   })();
 
+  const errors = (data?.engines
+    ?.filter((engine) => engine.status === 'error')
+    .map((engine) => engine.error) ?? []) as EngineError[];
+
   return {
     status,
+    errors,
   };
 };

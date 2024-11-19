@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const esArchiver = getService('esArchiver');
@@ -22,20 +22,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/rollup/config.json'
       );
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/lens/rollup/data');
       await kibanaServer.savedObjects.cleanStandardList();
-      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
     it('should allow creation of lens xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
-
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
@@ -62,8 +58,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('Afancilenstest');
       await lens.clickVisualizeListItemTitle('Afancilenstest');
-      await lens.goToTimeRange();
-
       expect(await lens.getTitle()).to.eql('Afancilenstest');
 
       // .echLegendItem__title is the only viable way of getting the xy chart's
@@ -82,7 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow to switch from regular index to rollup index retaining config', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
       await lens.switchDataPanelIndexPattern('lens_regular_data');
       await lens.switchToVisualization('lnsLegacyMetric');
       await lens.configureDimension({

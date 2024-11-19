@@ -26,14 +26,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     it('Returns a 2xx for enterprise license', async () => {
       await observabilityAIAssistantAPIClient
-        .editorUser({
+        .editor({
           endpoint: 'GET /internal/observability_ai_assistant/connectors',
         })
         .expect(200);
     });
 
     it('returns an empty list of connectors', async () => {
-      const res = await observabilityAIAssistantAPIClient.editorUser({
+      const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/connectors',
       });
 
@@ -43,7 +43,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it("returns the gen ai connector if it's been created", async () => {
       const connectorId = await createProxyActionConnector({ supertest, log, port: 1234 });
 
-      const res = await observabilityAIAssistantAPIClient.editorUser({
+      const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/connectors',
       });
 

@@ -623,7 +623,7 @@ export const getFieldsMatchingFilterFromState = (
 } => {
   return Object.fromEntries(
     Object.entries(state.fields.byId).filter(([_, fieldId]) =>
-      filteredDataTypes.includes(TYPE_DEFINITION[state.fields.byId[fieldId.id].source.type].label)
+      filteredDataTypes.includes(getTypeLabelFromField(state.fields.byId[fieldId.id].source))
     )
   );
 };
@@ -646,9 +646,7 @@ export const getFieldsFromState = (
   const getField = (fieldId: string) => {
     if (filteredDataTypes) {
       if (
-        filteredDataTypes.includes(
-          TYPE_DEFINITION[normalizedFields.byId[fieldId].source.type].label
-        )
+        filteredDataTypes.includes(getTypeLabelFromField(normalizedFields.byId[fieldId].source))
       ) {
         return normalizedFields.byId[fieldId];
       }

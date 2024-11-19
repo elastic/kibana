@@ -5,20 +5,26 @@
  * 2.0.
  */
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import { SloPlugin } from './plugin';
+import { SLOPlugin } from './plugin';
 import type {
-  SloPublicSetup,
-  SloPublicStart,
-  SloPublicPluginsSetup,
-  SloPublicPluginsStart,
+  SLOPublicSetup,
+  SLOPublicStart,
+  SLOPublicPluginsSetup,
+  SLOPublicPluginsStart,
 } from './types';
 
 export const plugin: PluginInitializer<
-  SloPublicSetup,
-  SloPublicStart,
-  SloPublicPluginsSetup,
-  SloPublicPluginsStart
+  SLOPublicSetup,
+  SLOPublicStart,
+  SLOPublicPluginsSetup,
+  SLOPublicPluginsStart
 > = (initializerContext: PluginInitializerContext) => {
-  return new SloPlugin(initializerContext);
+  return new SLOPlugin(initializerContext);
 };
-export type { SloPublicPluginsSetup, SloPublicPluginsStart, SloPublicStart } from './types';
+
+export type {
+  SLOPublicPluginsSetup,
+  SLOPublicPluginsStart,
+  SLOPublicStart,
+  SLOPublicSetup,
+} from './types';

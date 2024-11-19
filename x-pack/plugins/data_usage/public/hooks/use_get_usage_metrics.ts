@@ -21,7 +21,7 @@ export const useGetDataUsageMetrics = (
   body: UsageMetricsRequestBody,
   options: UseQueryOptions<UsageMetricsResponseSchemaBody, IHttpFetchError<ErrorType>> = {}
 ): UseQueryResult<UsageMetricsResponseSchemaBody, IHttpFetchError<ErrorType>> => {
-  const http = useKibanaContextForPlugin().services.http;
+  const { http } = useKibanaContextForPlugin().services;
 
   return useQuery<UsageMetricsResponseSchemaBody, IHttpFetchError<ErrorType>>({
     queryKey: ['get-data-usage-metrics', body],
