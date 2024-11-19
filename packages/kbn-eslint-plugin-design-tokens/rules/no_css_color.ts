@@ -42,7 +42,11 @@ export const noCssColor: Rule.RuleModule = {
           ) {
             const declarationTemplateNode = node.value.expression.quasis[0];
 
-            if (/color\:\s?(\'|\")?(#|rgb|hsl)/.test(declarationTemplateNode.value.raw)) {
+            if (
+              /color\:\s?(\'|\")?(#|rgb|hsl|hwb|lab|lch|oklab)/.test(
+                declarationTemplateNode.value.raw
+              )
+            ) {
               context.report({
                 node: declarationTemplateNode,
                 messageId: 'noCssColor',
@@ -72,7 +76,7 @@ export const noCssColor: Rule.RuleModule = {
                 property.key.name === 'color' &&
                 property.value.type === 'Literal' &&
                 property.value.value &&
-                /(#|rgb|hsl).*/.test(String(property.value.value))
+                /(#|rgb|hsl|hwb|lab|lch|oklab).*/.test(String(property.value.value))
               ) {
                 context.report({
                   node: property.key,
@@ -96,7 +100,11 @@ export const noCssColor: Rule.RuleModule = {
           ) {
             const declarationTemplateNode = node.value.expression.quasis[0];
 
-            if (/color\:\s?(\'|\")(#|rgb|hsl)/.test(declarationTemplateNode.value.raw)) {
+            if (
+              /color\:\s?(\'|\")(#|rgb|hsl|hwb|lab|lch|oklab)/.test(
+                declarationTemplateNode.value.raw
+              )
+            ) {
               context.report({
                 node: declarationTemplateNode,
                 messageId: 'noCssColor',
@@ -127,7 +135,7 @@ export const noCssColor: Rule.RuleModule = {
                 property.key.name === 'color' &&
                 property.value.type === 'Literal' &&
                 property.value.value &&
-                /(#|rgb|hsl).*/.test(String(property.value.value))
+                /(#|rgb|hsl|hwb|lab|lch|oklab).*/.test(String(property.value.value))
               ) {
                 context.report({
                   node: property.key,
@@ -151,7 +159,11 @@ export const noCssColor: Rule.RuleModule = {
           ) {
             const declarationTemplateNode = node.value.expression.quasi.quasis[0];
 
-            if (/color\:\s?(\'|\")(#|rgb|hsl)/.test(declarationTemplateNode.value.raw)) {
+            if (
+              /color\:\s?(\'|\")(#|rgb|hsl|hwb|lab|lch|oklab)/.test(
+                declarationTemplateNode.value.raw
+              )
+            ) {
               context.report({
                 node: declarationTemplateNode,
                 messageId: 'noCssColor',
@@ -201,7 +213,7 @@ export const noCssColor: Rule.RuleModule = {
                 property.key.name === 'color' &&
                 property.value.type === 'Literal' &&
                 property.value.value &&
-                /(#|rgb|hsl).*/.test(String(property.value.value))
+                /(#|rgb|hsl|hwb|lab|lch|oklab).*/.test(String(property.value.value))
               ) {
                 context.report({
                   node: property.key,
