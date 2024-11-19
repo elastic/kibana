@@ -3666,6 +3666,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-favorites-common@link:packages/content-management/favorites/favorites_common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-favorites-public@link:packages/content-management/favorites/favorites_public":
   version "0.0.0"
   uid ""
@@ -4342,6 +4346,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-rendering-browser@link:packages/core/rendering/core-rendering-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-rendering-server-internal@link:packages/core/rendering/core-rendering-server-internal":
   version "0.0.0"
   uid ""
@@ -4455,10 +4463,6 @@
   uid ""
 
 "@kbn/core-security-server@link:packages/core/security/core-security-server":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-status-common-internal@link:packages/core/status/core-status-common-internal":
   version "0.0.0"
   uid ""
 
