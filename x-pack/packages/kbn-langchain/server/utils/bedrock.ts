@@ -222,3 +222,27 @@ function parseContent(content: Array<{ text?: string; type: string }>): string {
   }
   return parsedContent;
 }
+
+/**
+ * Prepare messages for the bedrock API by combining messages from the same role
+ * @param messages
+ */
+export const prepareMessages = (messages: Array<{ role: string; content: string[] }>) =>
+  messages.reduce((acc, { role, content }) => {
+    const lastMessage = acc[acc.length - 1];
+
+    if (!lastMessage || lastMessage.role !== role) {
+      acc.push({ role, content });
+      return acc;
+    }
+
+    if (lastMessage.role === role) {
+      acc[acc.length - 1].content = lastMessage.content.concat(content);
+      return acc;
+    }
+
+    return acc;
+  }, [] as Array<{ role: string; content: string[] }>);
+
+export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-3-5-sonnet-20240620-v1:0';
+export const DEFAULT_BEDROCK_REGION = 'us-east-1';
