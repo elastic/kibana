@@ -20,6 +20,7 @@ import {
   getAttackDiscoveryFeature,
   getCasesFeature,
   getSecurityFeature,
+  getCasesV2Feature,
 } from '@kbn/security-solution-features/product_features';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { ExperimentalFeatures } from '../../../common';
@@ -35,6 +36,7 @@ export const API_ACTION_PREFIX = `${APP_ID}-`;
 export class ProductFeaturesService {
   private securityProductFeatures: ProductFeatures;
   private casesProductFeatures: ProductFeatures;
+  private casesProductV2Features: ProductFeatures;
   private securityAssistantProductFeatures: ProductFeatures;
   private attackDiscoveryProductFeatures: ProductFeatures;
   private productFeatures?: Set<ProductFeatureKeyType>;
@@ -59,11 +61,25 @@ export class ProductFeaturesService {
       apiTags: casesApiTags,
       savedObjects: { files: filesSavedObjectTypes },
     });
+
     this.casesProductFeatures = new ProductFeatures(
       this.logger,
       casesFeature.subFeaturesMap,
       casesFeature.baseKibanaFeature,
       casesFeature.baseKibanaSubFeatureIds
+    );
+
+    const casesV2Feature = getCasesV2Feature({
+      uiCapabilities: casesUiCapabilities,
+      apiTags: casesApiTags,
+      savedObjects: { files: filesSavedObjectTypes },
+    });
+
+    this.casesProductV2Features = new ProductFeatures(
+      this.logger,
+      casesV2Feature.subFeaturesMap,
+      casesV2Feature.baseKibanaFeature,
+      casesV2Feature.baseKibanaSubFeatureIds
     );
 
     const assistantFeature = getAssistantFeature(this.experimentalFeatures);
@@ -86,6 +102,7 @@ export class ProductFeaturesService {
   public init(featuresSetup: FeaturesPluginSetup) {
     this.securityProductFeatures.init(featuresSetup);
     this.casesProductFeatures.init(featuresSetup);
+    this.casesProductV2Features.init(featuresSetup);
     this.securityAssistantProductFeatures.init(featuresSetup);
     this.attackDiscoveryProductFeatures.init(featuresSetup);
   }
@@ -96,6 +113,7 @@ export class ProductFeaturesService {
 
     const casesProductFeaturesConfig = configurator.cases();
     this.casesProductFeatures.setConfig(casesProductFeaturesConfig);
+    this.casesProductV2Features.setConfig(casesProductFeaturesConfig);
 
     const securityAssistantProductFeaturesConfig = configurator.securityAssistant();
     this.securityAssistantProductFeatures.setConfig(securityAssistantProductFeaturesConfig);
@@ -124,6 +142,7 @@ export class ProductFeaturesService {
     return (
       this.securityProductFeatures.isActionRegistered(action) ||
       this.casesProductFeatures.isActionRegistered(action) ||
+      this.casesProductV2Features.isActionRegistered(action) ||
       this.securityAssistantProductFeatures.isActionRegistered(action) ||
       this.attackDiscoveryProductFeatures.isActionRegistered(action)
     );

@@ -109,23 +109,22 @@ export function formatTelemetryEvent({
 
 export function formatTelemetryUpdateEvent(
   currentMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>,
-  previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>,
+  previousMonitorUpdatedAt: string | undefined,
   stackVersion: string,
   isInlineScript: boolean,
   errors?: ServiceLocationErrors | null
 ) {
   let durationSinceLastUpdated: number = 0;
-  if (currentMonitor.updated_at && previousMonitor.updated_at) {
+  if (currentMonitor.updated_at && previousMonitorUpdatedAt) {
     durationSinceLastUpdated =
-      new Date(currentMonitor.updated_at).getTime() -
-      new Date(previousMonitor.updated_at).getTime();
+      new Date(currentMonitor.updated_at).getTime() - new Date(previousMonitorUpdatedAt).getTime();
   }
 
   return formatTelemetryEvent({
     stackVersion,
     monitor: currentMonitor as SavedObject<EncryptedSyntheticsMonitorAttributes>,
     durationSinceLastUpdated,
-    lastUpdatedAt: previousMonitor.updated_at,
+    lastUpdatedAt: previousMonitorUpdatedAt,
     isInlineScript,
     errors,
   });
