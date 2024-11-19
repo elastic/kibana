@@ -39,7 +39,7 @@ interface SerializedSourceField {
   excludes?: string[];
 }
 
-const formSerializer = (formData: GenericObject) => {
+export const formSerializer = (formData: GenericObject) => {
   const { dynamicMapping, sourceField, metaField, _routing, _size, subobjects } = formData;
 
   const dynamic = dynamicMapping?.enabled
@@ -81,7 +81,7 @@ const formSerializer = (formData: GenericObject) => {
   return serialized;
 };
 
-const formDeserializer = (formData: GenericObject) => {
+export const formDeserializer = (formData: GenericObject) => {
   const {
     dynamic,
     /* eslint-disable @typescript-eslint/naming-convention */
