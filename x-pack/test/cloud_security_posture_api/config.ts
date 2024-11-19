@@ -34,6 +34,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
          *   1. release a new package to EPR
          *   2. merge the updated version number change to kibana
          */
+        `--uiSettings.overrides.securitySolution:enableVisualizationsInFlyout=true`, // Enables /graph API
         `--xpack.fleet.packages.0.name=cloud_security_posture`,
         `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PLUGIN_VERSION}`,
         // `--xpack.fleet.registryUrl=https://localhost:8080`,

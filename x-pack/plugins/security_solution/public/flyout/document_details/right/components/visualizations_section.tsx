@@ -8,16 +8,16 @@
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
 import { ExpandableSection } from './expandable_section';
 import { VISUALIZATIONS_TEST_ID } from './test_ids';
 import { GraphPreviewContainer } from './graph_preview_container';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
-import { GRAPH_VISUALIZATION_EXPERIMENTAL_FEATURE } from '../../shared/constants/feature_flags';
+import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 
 const KEY = 'visualizations';
 
@@ -26,11 +26,11 @@ const KEY = 'visualizations';
  */
 export const VisualizationsSection = memo(() => {
   const expanded = useExpandSection({ title: KEY, defaultValue: false });
-  const graphVisualizationInFlyoutEnabled = useIsExperimentalFeatureEnabled(
-    GRAPH_VISUALIZATION_EXPERIMENTAL_FEATURE
-  );
-
   const { dataAsNestedObject, getFieldsData } = useDocumentDetailsContext();
+
+  const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
+    ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
+  );
 
   // Decide whether to show the graph preview or not
   const { isAuditLog: isGraphPreviewEnabled } = useGraphPreview({
@@ -53,7 +53,7 @@ export const VisualizationsSection = memo(() => {
       <SessionPreviewContainer />
       <EuiSpacer />
       <AnalyzerPreviewContainer />
-      {graphVisualizationInFlyoutEnabled && isGraphPreviewEnabled && (
+      {visualizationInFlyoutEnabled && isGraphPreviewEnabled && (
         <>
           <EuiSpacer />
           <GraphPreviewContainer />

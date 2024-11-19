@@ -209,7 +209,7 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutDescription',
         {
           defaultMessage:
-            '<em>[technical preview]</em> Enable visualizations (analyzer and session viewer) in flyout.',
+            '<em>[technical preview]</em> Enable visualizations (analyzer, session viewer, and graph view) in flyout.',
           values: { em: (chunks) => `<em>${chunks}</em>` },
         }
       ),
