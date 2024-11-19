@@ -28,6 +28,7 @@ import {
 } from '../ai_assistant_data_clients/knowledge_base';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
+import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
 import { authenticatedUser } from './user';
 
 export const createMockClients = () => {
@@ -47,6 +48,7 @@ export const createMockClients = () => {
       getAIAssistantKnowledgeBaseDataClient: knowledgeBaseDataClientMock.create(),
       getAIAssistantPromptsDataClient: dataClientMock.create(),
       getAttackDiscoveryDataClient: attackDiscoveryDataClientMock.create(),
+      getDefendInsightsDataClient: dataClientMock.create(),
       getAIAssistantAnonymizationFieldsDataClient: dataClientMock.create(),
       getSpaceId: jest.fn(),
       getCurrentUser: jest.fn(),
@@ -125,6 +127,10 @@ const createElasticAssistantRequestContextMock = (
       () => clients.elasticAssistant.getAttackDiscoveryDataClient
     ) as unknown as jest.MockInstance<Promise<AttackDiscoveryDataClient | null>, [], unknown> &
       (() => Promise<AttackDiscoveryDataClient | null>),
+    getDefendInsightsDataClient: jest.fn(
+      () => clients.elasticAssistant.getDefendInsightsDataClient
+    ) as unknown as jest.MockInstance<Promise<DefendInsightsDataClient | null>, [], unknown> &
+      (() => Promise<DefendInsightsDataClient | null>),
     getAIAssistantKnowledgeBaseDataClient: jest.fn(
       () => clients.elasticAssistant.getAIAssistantKnowledgeBaseDataClient
     ) as unknown as jest.MockInstance<

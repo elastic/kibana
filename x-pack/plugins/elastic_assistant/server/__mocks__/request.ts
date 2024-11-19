@@ -11,10 +11,16 @@ import {
   ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID,
   CAPABILITIES,
 } from '../../common/constants';
+import type {
+  DefendInsightsGetRequestQuery,
+  DefendInsightsPostRequestBody,
+} from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryPostRequestBody,
   ConversationCreateProps,
   ConversationUpdateProps,
+  DEFEND_INSIGHTS,
+  DEFEND_INSIGHTS_BY_ID,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
@@ -233,5 +239,26 @@ export const postAttackDiscoveryRequest = (body: AttackDiscoveryPostRequestBody)
   requestMock.create({
     method: 'post',
     path: ATTACK_DISCOVERY,
+    body,
+  });
+
+export const getDefendInsightRequest = (insightId: string) =>
+  requestMock.create({
+    method: 'get',
+    path: DEFEND_INSIGHTS_BY_ID,
+    params: { id: insightId },
+  });
+
+export const getDefendInsightsRequest = (queryParams: DefendInsightsGetRequestQuery) =>
+  requestMock.create({
+    method: 'get',
+    path: DEFEND_INSIGHTS,
+    query: queryParams,
+  });
+
+export const postDefendInsightsRequest = (body: DefendInsightsPostRequestBody) =>
+  requestMock.create({
+    method: 'post',
+    path: DEFEND_INSIGHTS,
     body,
   });

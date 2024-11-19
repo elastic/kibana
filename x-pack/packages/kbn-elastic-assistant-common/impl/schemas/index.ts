@@ -27,6 +27,9 @@ export * from './attack_discovery/get_attack_discovery_route.gen';
 export * from './attack_discovery/post_attack_discovery_route.gen';
 export * from './attack_discovery/cancel_attack_discovery_route.gen';
 
+// Defend insight Schemas
+export * from './defend_insights';
+
 // Chat Schemas
 export * from './chat/post_chat_complete_route.gen';
 
