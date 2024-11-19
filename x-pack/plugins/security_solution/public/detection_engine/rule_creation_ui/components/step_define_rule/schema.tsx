@@ -31,23 +31,28 @@ import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_
 import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
-import { esqlValidator } from '../../../rule_creation/logic/esql_validator';
 import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
 import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
 import { indexPatternValidatorFactory } from '../../validators/index_pattern_validator_factory';
 import { alertSuppressionFieldsValidatorFactory } from '../../validators/alert_suppression_fields_validator_factory';
 import {
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../rule_creation/components/alert_suppression_edit';
+import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
+import { debounceAsync } from '../../validators/debounce_async';
+import { RULE_TYPE_FIELD_NAME } from '../select_rule_type';
+import { getQueryRequiredMessage } from './utils';
+import {
+  CUSTOM_QUERY_REQUIRED,
+  INVALID_CUSTOM_QUERY,
   INDEX_HELPER_TEXT,
   THREAT_MATCH_INDEX_HELPER_TEXT,
   THREAT_MATCH_REQUIRED,
   THREAT_MATCH_EMPTIES,
   EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
 } from './translations';
-import {
-  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
-  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
-  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
-} from '../../../rule_creation/components/alert_suppression_edit';
 import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
 import { queryRequiredValidatorFactory } from '../../validators/query_required_validator_factory';
 import { kueryValidatorFactory } from '../../validators/kuery_validator_factory';
