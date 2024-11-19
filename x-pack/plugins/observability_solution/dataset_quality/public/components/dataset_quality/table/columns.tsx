@@ -264,7 +264,7 @@ export const getDatasetQualityTableColumns = ({
                     width="60px"
                     height="20px"
                     borderRadius="m"
-                    isLoading={loadingDataStreamStats || loadingDegradedStats || loadingDocStats}
+                    isLoading={loadingDataStreamStats || loadingDocStats}
                   >
                     {formatNumber(
                       DataStreamStat.calculateFilteredSize(dataStreamStat),

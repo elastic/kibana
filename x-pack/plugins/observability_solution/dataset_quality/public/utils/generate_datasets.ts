@@ -13,6 +13,7 @@ import { Integration } from '../../common/data_streams_stats/integration';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { DictionaryType } from '../state_machines/dataset_quality_controller/src/types';
 import { flattenStats } from './flatten_stats';
+import { calculatePercentage } from './calculate_percentage';
 
 export function generateDatasets(
   dataStreamStats: DataStreamStatType[] = [],
@@ -64,7 +65,7 @@ export function generateDatasets(
       Object.assign(degradedMapAcc, {
         [dataset]: {
           count,
-          percentage: DataStreamStat.calculatePercentage({
+          percentage: calculatePercentage({
             totalDocs: totalDocsMap[dataset],
             count,
           }),
@@ -84,7 +85,7 @@ export function generateDatasets(
       Object.assign(failedMapAcc, {
         [dataset]: {
           count,
-          percentage: DataStreamStat.calculatePercentage({
+          percentage: calculatePercentage({
             totalDocs: totalDocsMap[dataset] ? totalDocsMap[dataset] + count : 0,
             count,
           }),

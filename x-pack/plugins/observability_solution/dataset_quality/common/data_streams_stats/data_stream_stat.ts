@@ -118,8 +118,4 @@ export class DataStreamStat {
     const avgDocSize = sizeBytes && totalDocs ? sizeBytes / totalDocs : 0;
     return avgDocSize * (docsInTimeRange ?? 0);
   }
-
-  public static calculatePercentage({ totalDocs, count }: { totalDocs?: number; count?: number }) {
-    return totalDocs && count ? (count / totalDocs) * 100 : 0;
-  }
 }
