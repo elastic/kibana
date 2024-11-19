@@ -22,6 +22,7 @@ import {
   SEARCH_HOMEPAGE,
   SEARCH_INDICES_START,
   SEARCH_INDICES,
+  SEARCH_INDICES_CREATE_INDEX,
   SEARCH_ELASTICSEARCH,
   SEARCH_VECTOR_SEARCH,
   SEARCH_SEMANTIC_SEARCH,
@@ -55,6 +56,8 @@ export type AppsearchLinkId = 'engines';
 
 export type RelevanceLinkId = 'inferenceEndpoints';
 
+export type SearchIndicesLinkId = typeof SEARCH_INDICES_CREATE_INDEX;
+
 export type DeepLinkId =
   | EnterpriseSearchApp
   | EnterpriseSearchContentApp
@@ -77,4 +80,5 @@ export type DeepLinkId =
   | SearchElasticsearch
   | SearchVectorSearch
   | SearchSemanticSearch
-  | SearchAISearch;
+  | SearchAISearch
+  | `${SearchIndices}:${SearchIndicesLinkId}`;
