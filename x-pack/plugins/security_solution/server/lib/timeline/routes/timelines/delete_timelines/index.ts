@@ -20,8 +20,10 @@ export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .delete({
       path: TIMELINE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })

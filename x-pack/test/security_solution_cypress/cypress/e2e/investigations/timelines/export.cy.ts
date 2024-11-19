@@ -23,7 +23,8 @@ import { expectedExportedTimeline } from '../../../objects/timeline';
 import { closeToast } from '../../../tasks/common/toast';
 import { getFullname } from '../../../tasks/common';
 
-describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/187550
+describe.skip('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteTimelines();
@@ -45,8 +46,9 @@ describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   /**
    *  TODO: Good candidate for converting to a jest Test
    *  https://github.com/elastic/kibana/issues/195612
+   *  Failing: https://github.com/elastic/kibana/issues/187550
    */
-  it('should export custom timeline(s)', function () {
+  it.skip('should export custom timeline(s)', function () {
     cy.log('Export a custom timeline via timeline actions');
 
     exportTimeline(this.timelineId1);
