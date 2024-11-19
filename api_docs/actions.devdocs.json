@@ -3804,9 +3804,9 @@
             "section": "def-common.ActionTypeExecutorResult",
             "text": "ActionTypeExecutorResult"
           },
-          "<unknown>>; create: ({ action: { actionTypeId, name, config, secrets }, options, }: ",
-          "CreateOptions",
-          ") => Promise<",
+          "<unknown>>; create: ({ action, options, }: Omit<",
+          "ConnectorCreateParams",
+          ", \"context\">) => Promise<",
           "Connector",
           ">; update: ({ id, action, }: Pick<",
           "ConnectorUpdateParams",
@@ -5006,6 +5006,39 @@
               "string[]"
             ],
             "path": "x-pack/plugins/actions/common/validate_email_addresses.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.validateEmptyStrings",
+        "type": "Function",
+        "tags": [],
+        "label": "validateEmptyStrings",
+        "description": [],
+        "signature": [
+          "(value: unknown) => void"
+        ],
+        "path": "x-pack/plugins/actions/common/validate_empty_strings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.validateEmptyStrings.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/plugins/actions/common/validate_empty_strings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

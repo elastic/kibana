@@ -313,6 +313,58 @@ describe('When the edit exception modal is opened', () => {
           wrapper.find('[data-test-subj="wildcardWithWrongOperatorCallout"]').exists()
         ).toBeTruthy();
       });
+
+      it('should show a warning callout if there is a partial code signature entry with only subject_name', async () => {
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+        await waitFor(() =>
+          callProps.onChange({
+            exceptionItems: [
+              {
+                ...getExceptionListItemSchemaMock(),
+                entries: [
+                  {
+                    field: 'process.code_signature.subject_name',
+                    operator: 'included',
+                    type: 'match',
+                    value: 'asdf',
+                  },
+                ],
+              },
+            ],
+          })
+        );
+
+        wrapper.update();
+        expect(
+          wrapper.find('[data-test-subj="partialCodeSignatureCallout"]').exists()
+        ).toBeTruthy();
+      });
+
+      it('should show a warning callout if there is a partial code signature entry with only trusted field', async () => {
+        const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+        await waitFor(() =>
+          callProps.onChange({
+            exceptionItems: [
+              {
+                ...getExceptionListItemSchemaMock(),
+                entries: [
+                  {
+                    field: 'process.code_signature.trusted',
+                    operator: 'included',
+                    type: 'match',
+                    value: 'true',
+                  },
+                ],
+              },
+            ],
+          })
+        );
+
+        wrapper.update();
+        expect(
+          wrapper.find('[data-test-subj="partialCodeSignatureCallout"]').exists()
+        ).toBeTruthy();
+      });
     });
 
     describe('when exception entry fields and index allow user to bulk close', () => {

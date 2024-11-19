@@ -29,7 +29,6 @@ export const AutoDetectPage = () => (
               'This installation scans your host and auto-detects log and metric files.',
           }
         )}
-        isTechnicalPreview={true}
       />
     }
   >

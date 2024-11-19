@@ -43,9 +43,10 @@ export const useEntityStoreRoutes = () => {
       });
     };
 
-    const deleteEntityEngine = async (entityType: EntityType) => {
+    const deleteEntityEngine = async (entityType: EntityType, deleteData: boolean) => {
       return http.fetch<DeleteEntityEngineResponse>(`/api/entity_store/engines/${entityType}`, {
         method: 'DELETE',
+        query: { data: deleteData },
         version: API_VERSIONS.public.v1,
       });
     };

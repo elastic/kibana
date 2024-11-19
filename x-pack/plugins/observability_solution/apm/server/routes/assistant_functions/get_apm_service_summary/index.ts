@@ -6,13 +6,14 @@
  */
 import datemath from '@elastic/datemath';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { rangeQuery, ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+import { rangeQuery, ScopedAnnotationsClient, termsQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_PRODUCER,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import * as t from 'io-ts';
+import { observabilityFeatureId } from '@kbn/observability-shared-plugin/common';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { Environment } from '../../../../common/environment_rt';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
@@ -139,7 +140,7 @@ export async function getApmServiceSummary({
       query: {
         bool: {
           filter: [
-            ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
+            ...termsQuery(ALERT_RULE_PRODUCER, 'apm', observabilityFeatureId),
             ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
             ...rangeQuery(start, end),
             ...termQuery(SERVICE_NAME, serviceName),

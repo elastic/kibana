@@ -61,7 +61,7 @@ export default function (providerContext: FtrProviderContext) {
       const { body: apiResponse } = await supertest
         .get(`/api/fleet/epm/packages?prerelease=true`)
         .expect(200);
-      const installedPackages = apiResponse.response
+      const installedPackages = apiResponse.items
         .filter((p: any) => p.status === 'installed')
         .map((p: any) => p.name)
         .sort();

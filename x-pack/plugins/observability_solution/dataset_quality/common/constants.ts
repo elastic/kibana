@@ -11,6 +11,7 @@ export const DATASET_QUALITY_APP_ID = 'dataset_quality';
 export const DEFAULT_DATASET_TYPE: DataStreamType = 'logs';
 export const DEFAULT_LOGS_DATA_VIEW = 'logs-*-*';
 
+export const DEFAULT_DATASET_QUALITY: QualityIndicators = 'good';
 export const POOR_QUALITY_MINIMUM_PERCENTAGE = 3;
 export const DEGRADED_QUALITY_MINIMUM_PERCENTAGE = 0;
 
@@ -26,10 +27,8 @@ export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' };
 export const DEFAULT_DATEPICKER_REFRESH = { value: 60000, pause: false };
 
 export const DEFAULT_DEGRADED_DOCS = {
-  percentage: 0,
   count: 0,
-  docsCount: 0,
-  quality: 'good' as QualityIndicators,
+  percentage: 0,
 };
 
 export const NUMBER_FORMAT = '0,0.[000]';

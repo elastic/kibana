@@ -32,6 +32,13 @@ export function registerRoute(routeDependencies: RouteDependencies) {
     .addVersion<undefined, undefined, StartTransformsRequestSchema>(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: {
           request: {
             body: reauthorizeTransformsRequestSchema,

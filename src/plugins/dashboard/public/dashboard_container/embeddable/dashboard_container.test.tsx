@@ -178,6 +178,7 @@ test('searchSessionId propagates to children', async () => {
       lastSavedInput: sampleInput,
       lastSavedId: undefined,
       managed: false,
+      fullScreenMode: false,
     }
   );
   container?.setControlGroupApi(mockControlGroupApi);

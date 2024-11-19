@@ -8,6 +8,7 @@
 import type { SolutionView } from '../../../common';
 
 const CLOUD_TO_KIBANA_SOLUTION_MAP = new Map<string, SolutionView>([
+  ['search', 'es'],
   ['elasticsearch', 'es'],
   ['observability', 'oblt'],
   ['security', 'security'],

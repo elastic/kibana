@@ -341,7 +341,7 @@ paths:
         - $ref: '#/components/parameters/space_id'
         - $ref: '#/components/parameters/slo_id'
       responses:
-        '200':
+        '204':
           description: Successful request
         '400':
           description: Bad request
@@ -380,7 +380,7 @@ paths:
         - $ref: '#/components/parameters/space_id'
         - $ref: '#/components/parameters/slo_id'
       responses:
-        '204':
+        '200':
           description: Successful request
           content:
             application/json:

@@ -35,7 +35,7 @@ export const sharedOas = {
       get: {
         deprecated: true,
         'x-discontinued': 'route discontinued version or date',
-        operationId: '%2Fbar#0',
+        operationId: 'get-bar',
         parameters: [
           {
             description: 'The version of the API to use',
@@ -151,10 +151,10 @@ export const sharedOas = {
         tags: ['versioned'],
       },
     },
-    '/foo/{id}/{path*}': {
+    '/foo/{id}/{path}': {
       get: {
         description: 'route description',
-        operationId: '%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#0',
+        operationId: 'get-foo-id-path',
         parameters: [
           {
             description: 'The version of the API to use',
@@ -278,7 +278,7 @@ export const sharedOas = {
       },
       post: {
         description: 'route description',
-        operationId: '%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#1',
+        operationId: 'post-foo-id-path',
         parameters: [
           {
             description: 'The version of the API to use',

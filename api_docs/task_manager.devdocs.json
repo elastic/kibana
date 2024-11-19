@@ -134,15 +134,7 @@
                 "section": "def-server.TaskManagerStartContract",
                 "text": "TaskManagerStartContract"
               },
-              ", unknown>, plugins: { cloud?: ",
-              {
-                "pluginId": "cloud",
-                "scope": "server",
-                "docId": "kibCloudPluginApi",
-                "section": "def-server.CloudSetup",
-                "text": "CloudSetup"
-              },
-              " | undefined; usageCollection?: ",
+              ", unknown>, plugins: { usageCollection?: ",
               {
                 "pluginId": "usageCollection",
                 "scope": "server",
@@ -204,27 +196,6 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
-                  {
-                    "parentPluginId": "taskManager",
-                    "id": "def-server.TaskManagerPlugin.setup.$2.cloud",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "cloud",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "cloud",
-                        "scope": "server",
-                        "docId": "kibCloudPluginApi",
-                        "section": "def-server.CloudSetup",
-                        "text": "CloudSetup"
-                      },
-                      " | undefined"
-                    ],
-                    "path": "x-pack/plugins/task_manager/server/plugin.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
                   {
                     "parentPluginId": "taskManager",
                     "id": "def-server.TaskManagerPlugin.setup.$2.usageCollection",

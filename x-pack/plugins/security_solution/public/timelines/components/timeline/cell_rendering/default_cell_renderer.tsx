@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { useGetMappedNonEcsValue } from '../body/data_driven_columns';
+import { useGetMappedNonEcsValue } from '../../../../common/utils/get_mapped_non_ecs_value';
 import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
 import type { CellValueElementProps } from '.';

@@ -6,13 +6,15 @@
  */
 
 import { css } from '@emotion/css';
-import { useEuiTheme, useEuiShadow } from '@elastic/eui';
+import { useEuiTheme, useEuiShadow, COLOR_MODES_STANDARD } from '@elastic/eui';
 
 export const useCardContentImagePanelStyles = () => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const shadowStyles = useEuiShadow('m');
+  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
   return css`
     padding-top: 8px;
+    ${isDarkMode ? `background-color: ${euiTheme.colors.lightestShade}` : ''};
     .cardSpacer {
       width: 8%;
     }

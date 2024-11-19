@@ -14,7 +14,6 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     it('should allow to pick legacy color palette in xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -41,7 +40,6 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     it('should allow to pick color mapping palette in xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

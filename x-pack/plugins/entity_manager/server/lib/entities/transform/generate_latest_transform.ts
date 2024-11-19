@@ -69,7 +69,7 @@ const generateTransformPutRequest = ({
   return {
     transform_id: transformId,
     _meta: {
-      definitionVersion: definition.version,
+      definition_version: definition.version,
       managed: definition.managed,
     },
     defer_validation: true,
@@ -113,7 +113,7 @@ const generateTransformPutRequest = ({
       aggs: {
         ...generateLatestMetricAggregations(definition),
         ...generateLatestMetadataAggregations(definition),
-        'entity.lastSeenTimestamp': {
+        'entity.last_seen_timestamp': {
           max: {
             field: definition.latest.timestampField,
           },

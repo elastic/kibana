@@ -15,8 +15,8 @@ class ServiceEntity extends Serializable<EntityFields> {
     super({
       ...fields,
       'entity.type': 'service',
-      'entity.definitionId': 'builtin_services_from_ecs_data',
-      'entity.identityFields': ['service.name'],
+      'entity.definition_id': 'builtin_services_from_ecs_data',
+      'entity.identity_fields': ['service.name'],
     });
   }
 }
@@ -36,7 +36,7 @@ export function serviceEntity({
 }) {
   return new ServiceEntity({
     'service.name': serviceName,
-    'entity.displayName': serviceName,
+    'entity.display_name': serviceName,
     'service.environment': environment,
     'source_data_stream.type': dataStreamType,
     'agent.name': agentName,

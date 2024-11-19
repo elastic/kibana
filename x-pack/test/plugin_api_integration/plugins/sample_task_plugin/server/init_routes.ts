@@ -16,6 +16,7 @@ import {
 } from '@kbn/core/server';
 import { EventEmitter } from 'events';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { BACKGROUND_TASK_NODE_SO_NAME } from '@kbn/task-manager-plugin/server/saved_objects';
 
 const scope = 'testing';
 const taskManagerQuery = {
@@ -109,6 +110,34 @@ export function initRoutes(
         return res.ok({ body: await taskManager.runSoon(id) });
       } catch (err) {
         return res.ok({ body: { id, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/sample_tasks/run_mark_removed_tasks_as_unrecognized`,
+      validate: {
+        body: schema.object({}),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      try {
+        const taskManager = await taskManagerStart;
+        await taskManager.ensureScheduled({
+          id: 'mark_removed_tasks_as_unrecognized',
+          taskType: 'task_manager:mark_removed_tasks_as_unrecognized',
+          schedule: { interval: '1h' },
+          state: {},
+          params: {},
+        });
+        return res.ok({ body: await taskManager.runSoon('mark_removed_tasks_as_unrecognized') });
+      } catch (err) {
+        return res.ok({ body: { id: 'mark_removed_tasks_as_unrecognized', error: `${err}` } });
       }
     }
   );
@@ -396,6 +425,42 @@ export function initRoutes(
       } catch (err) {
         return res.badRequest({ body: err });
       }
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/update_kibana_node`,
+      validate: {
+        body: schema.object({
+          id: schema.string(),
+          lastSeen: schema.string(),
+        }),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const { id, lastSeen } = req.body;
+
+      const client = (await context.core).savedObjects.getClient({
+        includedHiddenTypes: [BACKGROUND_TASK_NODE_SO_NAME],
+      });
+      const node = await client.update(
+        BACKGROUND_TASK_NODE_SO_NAME,
+        id,
+        {
+          id,
+          last_seen: lastSeen,
+        },
+        { upsert: { id, last_seen: lastSeen }, refresh: false, retryOnConflict: 3 }
+      );
+
+      return res.ok({
+        body: node,
+      });
     }
   );
 }
